@@ -17,6 +17,8 @@ OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
 TARGETS = ['JJAS', 'Jun', 'Jul', 'Aug', 'Sep']
 MONTHS = ['Jun', 'Jul', 'Aug']
+# Targets shown in the explorer before their verification exists.
+PENDING_TARGETS = {'May initialization · JJAS 2026': ['Sep', 'JJAS']}
 VIEWS = [('all_ethiopia', 'All Ethiopia'), ('jjas_r12_rainfall_domain', 'JJAS R1+R2 rainfall domain')]
 GALLERY = 'outputs/operational_2026'
 CAT = ['Below normal', 'Near normal', 'Above normal']
@@ -55,7 +57,7 @@ def gallery_entries():
     keep = []
     for e in entries:
         folder = e['folder'].replace('\\', '/')
-        keep.append(dict(kind=e['kind'], target=e['target'], view=e['view'], label=e['label'],
+        keep.append(dict(group='May initialization · JJAS 2026', kind=e['kind'], target=e['target'], view=e['view'], label=e['label'],
                          folder='assets/' + folder.removeprefix('presentation/'), images=e['images'],
                          source=folder, summary=e['summary']))
     return keep
@@ -190,16 +192,28 @@ def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
     v_t = table(['Target', 'View', 'Final RPSS', 'Corrected CRPSS', 'Corrected bias', 'Observed below / near / above',
                  'Observed / forecast anomaly'], v_rows)
 
-    def viewer(kind, targets, first):
-        tchips = ''.join(f'<button class="chip{" active" if t == first else ""}" data-target="{t}">{t}</button>'
-                         for t in targets)
-        vchips = ''.join(f'<button class="chip{" active" if i == 0 else ""}" data-view="{v}">{l}</button>'
-                         for i, (v, l) in enumerate(VIEWS))
-        return (f'<div class="viewer" data-kind="{kind}" data-target="{first}" data-view="{VIEWS[0][0]}">'
-                f'<div class="controls"><div class="chips" role="group" aria-label="Target">{tchips}</div>'
-                f'<div class="chips" role="group" aria-label="View">{vchips}</div></div><div class="view-body"></div></div>')
+    def explorer():
+        groups = {}
+        for e in entries:
+            groups.setdefault(e['group'], [])
+            if e['target'] not in groups[e['group']]:
+                groups[e['group']].append(e['target'])
+        # Targets pending verification still appear (the explorer explains they are pending).
+        for g, extra in PENDING_TARGETS.items():
+            for t in extra:
+                if g in groups and t not in groups[g]:
+                    groups[g].append(t)
+        opts = ''.join(f'<optgroup label="{esc(g)}">' + ''.join(
+            f'<option value="{esc(g)}|{t}"{" selected" if t == "JJAS" else ""}>{t}</option>' for t in ts) + '</optgroup>'
+            for g, ts in groups.items())
+        return ('<div class="explorer"><div class="selects">'
+                f'<label>Target season or month<select id="ex-target">{opts}</select></label>'
+                '<label>Product<select id="ex-product"><option value="forecast">Forecast</option>'
+                '<option value="verification">Verification</option></select></label>'
+                '<label>View (rainfall domain)<select id="ex-view"></select></label>'
+                '</div><div id="ex-body" class="view-body"></div></div>')
 
-    data_json = json.dumps([{k: e[k] for k in ('kind', 'target', 'view', 'label', 'folder', 'images', 'summary')}
+    data_json = json.dumps([{k: e[k] for k in ('group', 'kind', 'target', 'view', 'label', 'folder', 'images', 'summary')}
                             for e in entries]).replace('</', '<\\/')
     domain_text = esc(domain['domain_definition']) + ' ' + esc(domain['domain_note'])
 
@@ -222,7 +236,7 @@ def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top">Ethiopia Seasonal Rainfall</a>
-    <nav><a href="#workflow">Workflow</a><a href="#methods">Methods</a><a href="#skill">Skill</a><a href="#forecast">2026 forecast</a><a href="#verification">Verification</a><a href="{REPO}">GitHub</a></nav>
+    <nav><a href="#workflow">Workflow</a><a href="#methods">Methods</a><a href="#skill">Skill</a><a href="#forecast">2026 forecast</a><a href="#verification">Verification</a><a href="#explorer">Map explorer</a><a href="{REPO}">GitHub</a></nav>
   </div>
 </header>
 <main id="top">
@@ -292,14 +306,18 @@ def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
   <p class="domain"><strong>JJAS R1+R2 rainfall domain.</strong> {domain_text}</p>
   {fc_t}
   <p class="caveat">Probabilities are area means of local grid-cell probabilities, not probabilities of the domain-total rainfall. Monthly and seasonal outlooks are calibrated separately: over all Ethiopia the corrected monthly means sum to {mc["sum_of_monthly_corrected_means_mm"]:.0f} mm against {mc["jjas_corrected_mean_mm"]:.0f} mm for JJAS ({mc["difference_mm"]:+.1f} mm).</p>
-  {viewer('forecast', TARGETS, 'JJAS')}
 </section>
 
 <section id="verification" class="wrap">
   <h2>2026 verification</h2>
   <p>Frozen forecasts scored against official CHIRPS v2.0 observations, for all of Ethiopia and the JJAS R1+R2 rainfall domain. Single-season results, not evidence of multi-year reliability. Positive skill means improvement over climatology on that support.</p>
   {v_t}
-  {viewer('verification', MONTHS + ['Sep', 'JJAS'], 'Jun')}
+</section>
+
+<section id="explorer" class="wrap">
+  <h2>Map explorer</h2>
+  <p>Choose a target season or month, a product and a rainfall domain. Statistics and maps are the operational gallery's presentation layers; the rainfall-domain view is for display and summaries only.</p>
+  {explorer()}
 </section>
 
 <section class="wrap">
@@ -370,7 +388,10 @@ figure{margin:0;background:var(--surface);border:1px solid var(--line);border-ra
 figure img{width:100%;height:auto;display:block;border-radius:6px;background:#fff}figcaption{color:var(--muted);font-size:.85rem;padding-top:6px}
 .gallery{display:grid;gap:16px;margin-top:16px}
 .domain{background:var(--accent-soft);border-left:4px solid var(--accent);padding:12px 16px;border-radius:6px;font-size:.92rem}
-.viewer{margin-top:20px}.controls{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.explorer{margin-top:12px}.selects{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px}
+.selects label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted);font-weight:500}
+.selects select{font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.selects select:focus{outline:2px solid var(--accent);outline-offset:1px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
 .chip.active{background:var(--accent);border-color:var(--accent);color:var(--surface)}
@@ -387,12 +408,26 @@ JS = r'''
   const entries = JSON.parse(document.getElementById('entries').textContent);
   const fmt = (x, d = 1) => (x === null || x === undefined || Number.isNaN(x)) ? '—' : Number(x).toFixed(d);
   const pct = x => fmt(x === null || x === undefined ? null : 100 * x);
-  function render(box) {
-    const {kind, target, view} = box.dataset;
-    const body = box.querySelector('.view-body');
-    const e = entries.find(x => x.kind === kind && x.target === target && x.view === view);
+  const $ = id => document.getElementById(id);
+  const tSel = $('ex-target'), pSel = $('ex-product'), vSel = $('ex-view'), body = $('ex-body');
+  if (!tSel) return;
+  const pick = () => { const [group, target] = tSel.value.split('|'); return {group, target}; };
+  function fillViews() {
+    const {group, target} = pick();
+    const seen = new Map();
+    entries.filter(e => e.group === group && (e.target === target || !entries.some(x => x.group === group && x.target === target)))
+      .forEach(e => seen.set(e.view, e.label));
+    if (!seen.size) entries.filter(e => e.group === group).forEach(e => seen.set(e.view, e.label));
+    const keep = vSel.value;
+    vSel.innerHTML = [...seen].map(([v, l]) => '<option value="' + v + '">' + l + '</option>').join('');
+    if ([...seen.keys()].includes(keep)) vSel.value = keep;
+  }
+  function render() {
+    const {group, target} = pick(), kind = pSel.value, view = vSel.value;
+    const e = entries.find(x => x.group === group && x.kind === kind && x.target === target && x.view === view);
     if (!e) {
-      body.innerHTML = '<p class="pending">' + target + ' ' + kind + ' is pending: complete CHIRPS observations are required (September 2026 not yet published).</p>';
+      body.innerHTML = '<p class="pending">' + target + ' ' + kind + ' is not available yet' +
+        (kind === 'verification' ? ': it needs complete CHIRPS observations for the target period.' : '.') + '</p>';
       return;
     }
     const s = e.summary;
@@ -412,21 +447,17 @@ JS = r'''
     const note = kind === 'forecast'
       ? 'Area means of local probabilities are not probabilities for domain-total rainfall.'
       : 'Positive skill means improvement over climatology on this support. Single-year results do not establish long-term reliability.';
-    body.innerHTML = '<h3>' + target + ' 2026 · ' + e.label + '</h3><div class="table-wrap"><table class="stats">' +
+    body.innerHTML = '<h3>' + target + ' · ' + e.label + ' · ' + (kind === 'forecast' ? 'Forecast' : 'Verification') + '</h3>' +
+      '<p class="caveat">' + group + '</p><div class="table-wrap"><table class="stats">' +
       rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table></div><p class="caveat">' + note + '</p>' +
       '<div class="maps' + (kind === 'verification' ? ' wide' : '') + '">' + e.images.map(([name, cap]) =>
         '<figure><a href="' + e.folder + '/' + name + '.png"><img loading="lazy" src="' + e.folder + '/' + name + '.png" alt="' +
-        target + ' 2026 ' + e.label + ' ' + cap + '"></a><figcaption>' + cap + '</figcaption></figure>').join('') + '</div>';
+        target + ' ' + e.label + ' ' + cap + '"></a><figcaption>' + cap + '</figcaption></figure>').join('') + '</div>';
   }
-  document.querySelectorAll('.viewer').forEach(box => {
-    box.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
-      const key = chip.dataset.target ? 'target' : 'view';
-      box.dataset[key] = chip.dataset[key];
-      chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === chip));
-      render(box);
-    }));
-    render(box);
-  });
+  tSel.addEventListener('change', () => { fillViews(); render(); });
+  pSel.addEventListener('change', render);
+  vSel.addEventListener('change', render);
+  fillViews(); render();
 })();
 '''
 

@@ -2,12 +2,26 @@
   const entries = JSON.parse(document.getElementById('entries').textContent);
   const fmt = (x, d = 1) => (x === null || x === undefined || Number.isNaN(x)) ? '—' : Number(x).toFixed(d);
   const pct = x => fmt(x === null || x === undefined ? null : 100 * x);
-  function render(box) {
-    const {kind, target, view} = box.dataset;
-    const body = box.querySelector('.view-body');
-    const e = entries.find(x => x.kind === kind && x.target === target && x.view === view);
+  const $ = id => document.getElementById(id);
+  const tSel = $('ex-target'), pSel = $('ex-product'), vSel = $('ex-view'), body = $('ex-body');
+  if (!tSel) return;
+  const pick = () => { const [group, target] = tSel.value.split('|'); return {group, target}; };
+  function fillViews() {
+    const {group, target} = pick();
+    const seen = new Map();
+    entries.filter(e => e.group === group && (e.target === target || !entries.some(x => x.group === group && x.target === target)))
+      .forEach(e => seen.set(e.view, e.label));
+    if (!seen.size) entries.filter(e => e.group === group).forEach(e => seen.set(e.view, e.label));
+    const keep = vSel.value;
+    vSel.innerHTML = [...seen].map(([v, l]) => '<option value="' + v + '">' + l + '</option>').join('');
+    if ([...seen.keys()].includes(keep)) vSel.value = keep;
+  }
+  function render() {
+    const {group, target} = pick(), kind = pSel.value, view = vSel.value;
+    const e = entries.find(x => x.group === group && x.kind === kind && x.target === target && x.view === view);
     if (!e) {
-      body.innerHTML = '<p class="pending">' + target + ' ' + kind + ' is pending: complete CHIRPS observations are required (September 2026 not yet published).</p>';
+      body.innerHTML = '<p class="pending">' + target + ' ' + kind + ' is not available yet' +
+        (kind === 'verification' ? ': it needs complete CHIRPS observations for the target period.' : '.') + '</p>';
       return;
     }
     const s = e.summary;
@@ -27,19 +41,15 @@
     const note = kind === 'forecast'
       ? 'Area means of local probabilities are not probabilities for domain-total rainfall.'
       : 'Positive skill means improvement over climatology on this support. Single-year results do not establish long-term reliability.';
-    body.innerHTML = '<h3>' + target + ' 2026 · ' + e.label + '</h3><div class="table-wrap"><table class="stats">' +
+    body.innerHTML = '<h3>' + target + ' · ' + e.label + ' · ' + (kind === 'forecast' ? 'Forecast' : 'Verification') + '</h3>' +
+      '<p class="caveat">' + group + '</p><div class="table-wrap"><table class="stats">' +
       rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table></div><p class="caveat">' + note + '</p>' +
       '<div class="maps' + (kind === 'verification' ? ' wide' : '') + '">' + e.images.map(([name, cap]) =>
         '<figure><a href="' + e.folder + '/' + name + '.png"><img loading="lazy" src="' + e.folder + '/' + name + '.png" alt="' +
-        target + ' 2026 ' + e.label + ' ' + cap + '"></a><figcaption>' + cap + '</figcaption></figure>').join('') + '</div>';
+        target + ' ' + e.label + ' ' + cap + '"></a><figcaption>' + cap + '</figcaption></figure>').join('') + '</div>';
   }
-  document.querySelectorAll('.viewer').forEach(box => {
-    box.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
-      const key = chip.dataset.target ? 'target' : 'view';
-      box.dataset[key] = chip.dataset[key];
-      chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === chip));
-      render(box);
-    }));
-    render(box);
-  });
+  tSel.addEventListener('change', () => { fillViews(); render(); });
+  pSel.addEventListener('change', render);
+  vSel.addEventListener('change', render);
+  fillViews(); render();
 })();
