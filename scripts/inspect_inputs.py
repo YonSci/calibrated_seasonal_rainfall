@@ -74,9 +74,13 @@ def main():
     report = {"created_utc": datetime.now(timezone.utc).isoformat(), "config": cfg,
               "ecmwf": rows, "chirps": obs,
               "provenance": "User reports SEAS5; member counts alone do not verify system version."}
-    save_json(ROOT / "outputs/inspection/inventory.json", report)
+    # May-initialized JJAS keeps the original location; other seasons get their own folder.
+    tag = f"init{cfg['initialization_month']:02d}_{cfg['season']['name']}"
+    folder = ROOT / "outputs/inspection" / ("" if tag == "init05_JJAS" else tag)
+    folder.mkdir(parents=True, exist_ok=True)
+    save_json(folder / "inventory.json", report)
     columns = sorted(set().union(*(r.keys() for r in rows)))
-    with (ROOT / "outputs/inspection/ecmwf_inventory.csv").open("w", newline="", encoding="utf-8") as stream:
+    with (folder / "ecmwf_inventory.csv").open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=columns)
         writer.writeheader()
         writer.writerows(rows)
@@ -85,7 +89,7 @@ def main():
     summary.extend(f"| {r['year']} | {r['status']} | {r.get('members', '')} |" for r in rows)
     summary.extend(["", "See inventory.json for details. No source files were changed.",
                     "This inventory does not independently establish model-system provenance."])
-    (ROOT / "outputs/inspection/inspection_summary.md").write_text("\n".join(summary), encoding="utf-8")
+    (folder / "inspection_summary.md").write_text("\n".join(summary), encoding="utf-8")
     if any(r["status"] != "ok" for r in rows) or obs["status"] != "ok":
         raise SystemExit("Inventory has missing/error entries. Review reports before full processing.")
     print("Inventory passed. Run synthetic tests, then prepare one historical year.")

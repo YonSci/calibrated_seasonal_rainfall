@@ -178,6 +178,9 @@ Each entry gives the symptom, the cause, the fix and how to detect or prevent it
 | I-27 | First Pages deploy raced Pages enablement | The workflow ran in the same minute Pages was enabled | It succeeded; otherwise rerun the workflow | Enable Pages (`gh api -X POST repos/<r>/pages -f build_type=workflow`) before the first push | – |
 | I-28 | Headless screenshots looked clipped or blank | Edge headless has a minimum window width (~500 px), and `#fragment` with a virtual time budget can render blank | Check at ≥ 520 px; verify behaviour with `--dump-dom` | Validate the site with DOM checks, not only images | – |
 | I-29 | A long inline Python script failed in Git Bash ("unexpected EOF") | Shell parsing of quotes inside the here-document | Write patch scripts to files and run them | Never inline long scripts in shell commands | – |
+| I-31 | The ONDJ fit overwrote the JJAS combined report `final_reports_2026.json` | File name keyed on year only | JJAS file rebuilt from per-target `final_report.json` (no refit); other cycles write `final_reports_<tag>_<year>.json` | Key every summary file on the cycle tag | – |
+| I-32 | ONDJ inventory overwrote the JJAS inventory in `outputs/inspection/` | Fixed output names | Non-JJAS seasons write to `outputs/inspection/<tag>/`; JJAS inventory regenerated | Same | – |
+| I-33 | ONDJ map rendering stopped: "Expected May-initialized … file"; map footer said "May-initialized" | Hidden May checks and texts in `plot_forecast_products` and the presentation footer | Use the cycle's initialization month | Grep for month and season literals when adding a cycle; render a backtest cycle | – |
 | I-30 | Commits are public with the author email | `git config user.email` is a personal address | Owner chose to keep the Gmail address | Decide before the first push (noreply option) | 36 Phase 13 |
 
 ---
@@ -193,9 +196,39 @@ Each entry gives the symptom, the cause, the fix and how to detect or prevent it
 
 ---
 
-## 7. Run log of the September 2026 ONDJ cycle
+## 7. Run log of the September 2026 ONDJ cycle (completed 2026-10-05)
 
-To be completed when the run finishes: download completeness, inventory results, preparation QC, skill, λ per target, forecast summary and site update.
+| Step | Result |
+| --- | --- |
+| Download | 34/34 files, three parallel batches, about 1.5 h of CDS queue. Every file: correct members (25 / 51), 153 daily endpoints from 2 Sep to 1 Feb of the next year, minimum increment ≥ −0.2 mm |
+| Inventory | All 34 years `ok` (outputs in `outputs/inspection/init09_ONDJ/`) |
+| Seasonal preparation | 34 years, 123 days each (Oct 31 + Nov 30 + Dec 31 + Jan 31), no missing values, clipping ≤ 0.18 mm; CHIRPS for seasons 1993/94–2024/25 |
+| Regridding | 66 files (34 ECMWF + 32 CHIRPS), conservation error ≤ 1e-14 |
+| Monthly targets | Oct, Nov, Dec, Jan prepared; 66/66 month-sum checks passed (max 0.0004 mm); January dated in the following year (e.g. 2027-01-01 to 2027-01-31) |
+| Rainfall domain | 487 cells, 33 % of Ethiopia (south and south-east); median ONDJ climatology 193 mm, 35 % of annual |
+| Forecast | 51 members; λ: Oct 0.44, Nov 0.23, Dec 0.64, Jan 0.82, ONDJ 0.28. Clipped member values: Dec 29 %, Jan 28 % (dry months, see I-08), ONDJ 0.6 % |
+| Products | 5 targets × 2 views (`outputs/operational_2026_ondj/`), listed in `entries.json`; on the site as the group "September initialization · ONDJ 2026/27" |
+
+Historical skill (RPSS vs climatology, Ethiopia cells):
+
+| Target | Nested 1993–2016 | Fits on 1993–2016, scored 2017–2024 |
+| --- | --- | --- |
+| ONDJ | +0.020 (14/24 years better) | +0.063 (4/8) |
+| Oct | −0.001 | +0.024 |
+| Nov | +0.046 (15/24) | +0.005 |
+| Dec | +0.011 | +0.027 |
+| Jan | +0.002 | +0.004 |
+
+None is significant at p < 0.05 per target. November and the season carry the clearest signal.
+
+ONDJ 2026/27 forecast (area-mean probabilities, below / near / above):
+- All Ethiopia: 28 / 27 / 45 %, +26.5 mm.
+- ONDJ rainfall domain: **20 / 24 / 56 %**, +64.5 mm.
+- November in the domain: 20 / 22 / 58 %.
+
+The forecast leans wetter than normal over the south and south-east short-rains areas. December and January are near climatology.
+
+Regression after all ONDJ changes: JJAS 2026 refit identical to the frozen files; the 46 JJAS presentation PNGs byte-identical; 84 tests pass.
 
 ---
 

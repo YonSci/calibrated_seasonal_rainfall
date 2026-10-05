@@ -55,8 +55,8 @@ def classify(p, valid, minimum=0.40, tie_tolerance=1e-8):
 
 
 def derive(d, minimum=.40, percent_floor=10.):
-    if int(d.attrs.get('initialization_month',-1)) != 5 or int(d.attrs.get('target_year',-1)) != YEAR:
-        raise ValueError(f'Expected May-initialized {YEAR} final_shared_blend file.')
+    if int(d.attrs.get('initialization_month',-1)) != CYCLE.init_month or int(d.attrs.get('target_year',-1)) != YEAR:
+        raise ValueError(f'Expected {CYCLE.init_month_name}-initialized {YEAR} final_shared_blend file.')
     for coordinate in ['lat','lon']:
         a=d[coordinate].values
         if a.ndim!=1 or len(a)<2 or not np.isfinite(a).all() or not np.all(np.diff(a)>0):
@@ -86,7 +86,7 @@ def derive(d, minimum=.40, percent_floor=10.):
     np.divide(100*anomaly,clim,out=percentage,where=pct_valid)
     out=xr.Dataset(coords={'lat':d.lat,'lon':d.lon,'category':CATEGORIES},attrs={
         'target_period':d.attrs.get('target_period',''), 'target_year':YEAR,
-        'initialization_month':5,'reference_period':d.attrs.get('training_years',f'{REF}'),
+        'initialization_month':CYCLE.init_month,'reference_period':d.attrs.get('training_years',f'{REF}'),
         'probability_source':'blend_probability; unchanged',
         'display_minimum_probability':minimum,'tie_tolerance':1e-8,
         'percent_anomaly_minimum_climatology_mm':percent_floor,
@@ -167,7 +167,7 @@ def probability_map(g,target,path,lines):
         cb.set_label(['Below normal (%)','Near normal (%)','Above normal (%)'][k])
     decorate(ax,g,lines)
     fig.suptitle(f'Ethiopia | {target} {YEAR} rainfall tercile outlook',fontsize=16,y=.965)
-    fig.text(.5,.92,f'May initialization | shared probability blend | CHIRPS reference {REF_DASH}',ha='center',fontsize=10)
+    fig.text(.5,.92,f'{CYCLE.init_month_name} initialization | shared probability blend | CHIRPS reference {REF_DASH}',ha='center',fontsize=10)
     threshold=100*g.attrs['display_minimum_probability']
     fig.legend(handles=[Patch(facecolor='white',edgecolor='gray',label=f'Weak (<{threshold:g}%) or tied maximum'),
                         Patch(facecolor='#bdbdbd',label='Inside region, probability ineligible')],loc='lower center',bbox_to_anchor=(.47,.08),ncol=1,frameon=False)
@@ -185,7 +185,7 @@ def anomaly_map(g,target,path,lines,percent=False,limit=300.):
     fig.colorbar(im,ax=ax,extend='both',shrink=.87,label=f'Rainfall anomaly ({unit})',ticks=np.array([-1,-.6,-.2,0,.2,.6,1])*limit)
     decorate(ax,g,lines)
     fig.suptitle(f'Ethiopia | {target} {YEAR} rainfall anomaly',fontsize=16,y=.96)
-    fig.text(.5,.915,f'May initialization | corrected ensemble mean minus CHIRPS {REF_DASH} mean',ha='center',fontsize=10)
+    fig.text(.5,.915,f'{CYCLE.init_month_name} initialization | corrected ensemble mean minus CHIRPS {REF_DASH} mean',ha='center',fontsize=10)
     masknote=(f'Percentages hidden where climatological total < {g.attrs["percent_anomaly_minimum_climatology_mm"]:g} mm.' if percent else 'Gray: amount-ineligible cells within the region.')
     fig.text(.5,.09,'Red/orange: drier mean; green: wetter mean. White is a small interval around zero.\n'+masknote+'\nAmount correction only; separate from probability blending. Not an EMI/ICPAC product.',ha='center',fontsize=9)
     save(fig,path)

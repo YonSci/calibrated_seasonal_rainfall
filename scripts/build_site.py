@@ -56,12 +56,16 @@ def gallery_entries():
     """Entries embedded in the operational gallery (outputs/operational_2026/index.html)."""
     page = (ROOT / GALLERY / 'index.html').read_text(encoding='utf-8')
     entries = json.loads(re.search(r'<script id="data" type="application/json">(.*?)</script>', page, re.S).group(1))
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    from cycle import load_cycle
+    may = load_cycle(ROOT / 'config/operational.json')
     keep = []
     for e in entries:
         folder = e['folder'].replace('\\', '/')
         keep.append(dict(group='May initialization · JJAS 2026', kind=e['kind'], target=e['target'], view=e['view'], label=e['label'],
                          folder='assets/' + folder.removeprefix('presentation/'), images=e['images'],
-                         source=folder, summary=e['summary']))
+                         source=folder, summary=e['summary'], target_label=may.target_label(e['target'])))
     return keep
 
 
@@ -240,7 +244,7 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
                  'Observed / forecast anomaly'], v_rows)
 
     def explorer():
-        groups = {}
+        groups, labels = {}, {(e['group'], e['target']): e['target_label'] for e in entries if 'target_label' in e}
         for e in entries:
             groups.setdefault(e['group'], [])
             if e['target'] not in groups[e['group']]:
@@ -251,7 +255,7 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
                 if g in groups and t not in groups[g]:
                     groups[g].append(t)
         opts = ''.join(f'<optgroup label="{esc(g)}">' + ''.join(
-            f'<option value="{esc(g)}|{t}"{" selected" if t == "JJAS" else ""}>{t}</option>' for t in ts) + '</optgroup>'
+            f'<option value="{esc(g)}|{t}"{" selected" if t == "JJAS" else ""}>{esc(labels.get((g, t), t))}</option>' for t in ts) + '</optgroup>'
             for g, ts in groups.items())
         return ('<div class="explorer"><div class="selects">'
                 f'<label>Target season or month<select id="ex-target">{opts}</select></label>'

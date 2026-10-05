@@ -152,7 +152,7 @@ def main():
         with staged_output(out,args.regenerate) as stage:
             report=write_result(stage,cfg,models,members,lat,lon,pars,clim,lam,region,area,land_info,region_info)
         reports.append(report);print('Saved:',out,flush=True)
-    save_json(out_root/f'final_reports_{YEAR}.json',dict(targets_in_this_run=list(configs),reports=reports,
+    save_json(out_root/(f'final_reports_{YEAR}.json' if CYCLE.tag=='init05' else f'final_reports_{CYCLE.tag}_{YEAR}.json'),dict(targets_in_this_run=list(configs),reports=reports,
         note='Contains only targets processed in this invocation. Monthly and seasonal products fitted separately.'))
 
 

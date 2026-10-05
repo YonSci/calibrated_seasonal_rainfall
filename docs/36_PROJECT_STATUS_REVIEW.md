@@ -317,3 +317,9 @@ Frozen 2026 products (Ethiopia area means):
 
   Images come from `outputs/operational_2026/presentation/`. Rebuild with `python scripts\build_site.py` after rerunning the runner.
 - [x] Runbook, issue log (30 issues with causes, fixes and automated guards) and automation blueprint: docs/38_REPRODUCIBLE_RUNBOOK.md.
+
+### Phase 14 — second season: September-initialized ONDJ (completed 2026-10-05)
+
+- [x] Pipeline generalized to any initialization month and to seasons that cross the year boundary (`common.season_window`), with JJAS outputs unchanged (regression checks in docs/38 §7).
+- [x] ONDJ 2026/27: ECMWF downloaded (34 years), prepared, regridded, monthly targets, skill, rainfall domain, forecast and products. On the site, with the explorer's dropdowns for target, product and rainfall domain.
+- [ ] ONDJ verification needs the cross-year verification calendar (docs/38 §6) before CHIRPS January 2027 arrives.

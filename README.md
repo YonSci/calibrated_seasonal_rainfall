@@ -3,7 +3,7 @@
 Calibrated tercile probabilities and corrected rainfall amounts for Ethiopia from
 the ECMWF SEAS5 May initialization, verified against CHIRPS v2.0 (0.25°).
 
-Targets: **JJAS** season and the months **Jun, Jul, Aug, Sep**.
+Targets: **JJAS** season and the months **Jun, Jul, Aug, Sep** (May initialization), and **ONDJ** with **Oct, Nov, Dec, Jan** (September initialization; `config/ondj/`, `config/cycles/sep_2026_ondj.json`).
 Reference period 1993–2025 (25-member hindcasts 1993–2016, 51-member forecasts 2017 onward).
 Platform: Windows 11, CMD, Python 3.11 x64, project `.venv`.
 
