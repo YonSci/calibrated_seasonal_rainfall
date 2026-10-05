@@ -285,3 +285,20 @@ Frozen 2026 products (Ethiopia area means):
 - [x] `run_operational.py` `PRODUCT_SCRIPTS` now includes `plot_forecast_products.py` and `output_runs.py`, so fingerprints follow the real code. The next runner run rebuilds the views once.
 - [x] New `scripts/prune_backups.py`. It previews by default (`--apply` deletes) and keeps the newest `--keep` backups per output. It never deletes a backup whose live output is missing and never touches `_building_` folders. Current preview: 25 removable backups (87.5 MB); 30 kept.
 - [x] Checks: 79 tests pass. `run_operational.py --plan` and `finalize_forecast_delivery.py --check-only` pass on the real project.
+
+### Phase 12 — generic forecast-cycle adapter (item 11; completed 2026-10-05)
+
+- [x] `scripts/cycle.py`: one cycle file defines forecast year, reference period, member rule, development years, regime-mask baseline, overlap year and folders. Selected with `CALIBRATION_CYCLE` or `run_operational.py --config`. The default `config/operational.json` (2026) is unchanged.
+- [x] Cycle-driven: `final_shared_blend`, `run_monthly`, the member checks in `prepare_seasonal`, `regrid_seasonal`, `inspect_inputs` and `run_calibration`, the whole verification chain, the maps, the delivery package, the presentation layers and the runner.
+- [x] Fixed by design: the historical method study (1993–2016 / 2017–2025) and the descriptive regime-mask baseline (1993–2025).
+- [x] New `scripts/extend_observations.py` adds verified CHIRPS years (for example 2026) to the training archive, with grid, missing-cell and JJAS = Σ months checks. It never overwrites.
+- [x] Cycle files: `config/cycles/may_2027.json` (template) and `config/cycles/backtest_may_2025.json` (regression). Guide: `docs/37_NEW_FORECAST_CYCLE.md`.
+- [x] Regression checks for 2026:
+  - Refitted forecasts are identical to the frozen files (all variables and attributes).
+  - Jun–Aug verification reports are identical.
+  - Presentation PNG and NetCDF files are byte-identical; PDFs differ only in their creation date.
+- [x] 2025 backtest (fit 1993–2024, verify 2025): fit, products, freeze, Jun–Aug verification and report all complete.
+  - Final-blend RPSS: Jun −0.025, Jul −0.077, Aug +0.062.
+  - Smoothed counts without the blend: Jun −0.19, Jul −0.24.
+  - **2025 was a poor year for the model, and the blend limited the damage**, which is consistent with the Phase 5 decision to keep it.
+- [x] Tests: `tests/test_cycle.py` added; 83 tests pass.

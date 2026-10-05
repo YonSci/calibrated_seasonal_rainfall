@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from common import ROOT, make_folders, load_config, model_path, source_path, save_json
+from cycle import CYCLE
 from prepare_seasonal import open_model, season_dates
 
 
@@ -25,7 +26,7 @@ def inspect_model(path, cfg, year):
             sample = da.isel(member=0, lat=da.sizes["lat"] // 2, lon=da.sizes["lon"] // 2).values
             negative = int(np.sum(np.diff(sample) * 1000 < -cfg["negative_increment_tolerance_mm"]))
             members = da.sizes["member"]
-            if members != (25 if year <= 2016 else 51):
+            if members != CYCLE.members(year):
                 raise ValueError(f"Unexpected member count: {members}; inspect provenance")
             if negative:
                 raise ValueError("Sample has negative accumulation increments")

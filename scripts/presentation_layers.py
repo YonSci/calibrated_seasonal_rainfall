@@ -22,10 +22,11 @@ from verify2026_common import check_forecast
 from verify_2026_regimes import inspect_source, make_domains, summarize_domain
 from verify2026_outputs import staged_output
 from operational_core import read, write, sha, now
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 VIEWS = {"all_ethiopia": "All Ethiopia",
          "jjas_r12_rainfall_domain": "JJAS R1+R2 rainfall domain"}
-DEFINITION = ("Fixed 1993-2025 descriptive domain: cleaned GitHub-refined R1/R2; "
+DEFINITION = (f"Fixed {REGIME} descriptive domain: cleaned GitHub-refined R1/R2; "
               "JJAS climatological rainfall >=120 mm and >=20% of annual rainfall. "
               "The same domain is used for Jun, Jul, Aug, Sep and JJAS. No onset gate.")
 NOTE = ("A presentation and summary domain, not a separate calibration, physical land mask, "
@@ -202,8 +203,8 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
             cb = fig.colorbar(ScalarMappable(norm=norm,cmap=cmap),cax=cax,ticks=[40,50,60,70,80,90,100])
             cb.set_label(["Below normal (%)","Near normal (%)","Above normal (%)"][k])
         finish_axis(ax,grid,lines,focus if view != "all_ethiopia" else None)
-        fig.suptitle(f"{target} 2026 | rainfall tercile outlook",fontsize=18,y=.965)
-        fig.text(.5,.918,"May initialization · shared probability blend · CHIRPS reference 1993–2025",ha="center",fontsize=10)
+        fig.suptitle(f"{target} {YEAR} | rainfall tercile outlook",fontsize=18,y=.965)
+        fig.text(.5,.918,f"May initialization · shared probability blend · CHIRPS reference {REF_DASH}",ha="center",fontsize=10)
         fig.text(.5,.883,VIEWS[view]+" · presentation layer",ha="center",fontsize=11,color="#176d62")
         fig.legend(handles=[Patch(facecolor="white",edgecolor="gray",label=f"Weak (<{100*settings['minimum_leading_probability']:g}%) or tied"),
                             Patch(facecolor="#c3c9cf",label="Ineligible in view"),Patch(facecolor="#edf0f3",label="Outside focus")],
@@ -228,8 +229,8 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
             ticks = np.linspace(0,vmax,5) if amount else np.array([-1,-.6,-.2,0,.2,.6,1])*vmax
             fig.colorbar(im,ax=ax,shrink=.9,ticks=ticks,label=f"Rainfall {'total' if amount else 'anomaly'} ({units})")
             finish_axis(ax,grid,lines,focus if view != "all_ethiopia" else None)
-            fig.suptitle(f"{target} 2026 | {'corrected mean rainfall' if amount else 'rainfall anomaly'} ({units})",fontsize=17,y=.965)
-            fig.text(.5,.918,"May initialization · corrected ensemble mean · CHIRPS reference 1993–2025",ha="center",fontsize=10)
+            fig.suptitle(f"{target} {YEAR} | {'corrected mean rainfall' if amount else 'rainfall anomaly'} ({units})",fontsize=17,y=.965)
+            fig.text(.5,.918,f"May initialization · corrected ensemble mean · CHIRPS reference {REF_DASH}",ha="center",fontsize=10)
             fig.text(.5,.883,VIEWS[view]+" · presentation layer",ha="center",fontsize=11,color="#176d62")
             message = (f"Percent anomalies hidden where reference rainfall <{settings['percent_anomaly_minimum_climatology_mm']:g} mm."
                        if percent else "Rainfall amount correction; separate from probability calibration.")
@@ -280,8 +281,8 @@ def verification_maps(fields, domains, lines, target, out, settings):
             ax.set_title(title,fontsize=10,pad=8)
             ax.tick_params(labelsize=8)
             ax.xaxis.label.set_size(9);ax.yaxis.label.set_size(9)
-        fig.suptitle(f"{target} 2026 | forecast verification",fontsize=20,y=.97)
-        fig.text(.5,.932,"Frozen May-initialized shared blend · CHIRPS v2 observations · reference 1993–2025",ha="center",fontsize=11)
+        fig.suptitle(f"{target} {YEAR} | forecast verification",fontsize=20,y=.97)
+        fig.text(.5,.932,f"Frozen May-initialized shared blend · CHIRPS v2 observations · reference {REF_DASH}",ha="center",fontsize=11)
         fig.text(.5,.896,VIEWS[view]+" · presentation layer",ha="center",fontsize=12,color="#176d62")
         fig.text(.5,.079,"Negative RPS difference favors the forecast. Lower CRPS is better. National and domain panels share color scales.\nLight gray: outside focus. Dark gray: no eligible verification data. No observed category is inferred from neighboring cells.",ha="center",fontsize=9)
         footer(fig,settings,verification=True)
@@ -296,7 +297,7 @@ def build_forecast(source, mask_path, boundary, target, destination, settings):
     _,domains = load_mask(mask_path,f)
     g = base.derive(f,settings["minimum_leading_probability"],settings["percent_anomaly_minimum_climatology_mm"])
     lines = base.boundary_lines(boundary)
-    result = {"kind":"forecast","target":target,"year":2026,"created_utc":now(),
+    result = {"kind":"forecast","target":target,"year":YEAR,"created_utc":now(),
               "domain_definition":DEFINITION,"domain_note":NOTE,"source_sha256":hashes,
               "display":settings,"forecast_sha256":sha(source),
               "summaries":{view:forecast_summary(f,g,domain) for view,domain in domains.items()}}
@@ -326,7 +327,7 @@ def build_verification(root, mask_path, boundary, target, destination, settings)
     mask_digest = sha(mask_path)
     boundary_digests = {str(p):sha(p) for p in boundary_files(boundary)}
     summaries = {view:summarize_domain(fields,domain) for view,domain in domains.items()}
-    result = {"kind":"verification","target":target,"year":2026,"created_utc":now(),
+    result = {"kind":"verification","target":target,"year":YEAR,"created_utc":now(),
               "domain_definition":DEFINITION,"domain_note":NOTE,"display":settings,
               "provenance":provenance,"mask_sha256":mask_digest,"boundary_sha256":boundary_digests,
               "frozen_forecasts":snapshot,"summaries":summaries,
@@ -370,12 +371,12 @@ def build_gallery(output, forecast_targets, verified_targets, pending, details):
     pending_text = html.escape(', '.join(pending) or 'None among requested targets')
     report_link = (' · <a href="'+html.escape(details['verification_report'],quote=True)+'">Consolidated verification report</a>'
                    if details.get('verification_report') else '')
-    page = '''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethiopia rainfall — forecast and verification views</title><style>
-body{margin:0;background:#edf2f4;color:#20313b;font:16px/1.5 system-ui,sans-serif}main{max-width:1280px;margin:auto;padding:28px}
-header,section{background:white;border:1px solid #d7e2e7;border-radius:12px;padding:24px;margin-bottom:20px}h1{font-size:30px;line-height:1.2}h2{font-size:22px}.tag{color:#16685f;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
-.note{background:#f5f8f9;padding:14px;border-left:4px solid #27877a}.pending{color:#765321}label{display:inline-block;margin:0 20px 15px 0}select{display:block;padding:9px;font:inherit;border:1px solid #8aa1ad;border-radius:5px}a{color:#06628a}img{max-width:100%;height:auto}figure{margin:10px 0 28px}figcaption{font-weight:600}table{border-collapse:collapse;width:100%;margin:15px 0}td,th{padding:8px;text-align:left;border-bottom:1px solid #dbe4e9}.subtle{font-size:14px;color:#526772}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.wide{grid-template-columns:1fr}@media(max-width:750px){main{padding:10px}.grid{grid-template-columns:1fr}header,section{padding:16px}}
-</style><main><header><div class="tag">May initialization · 2026 · research reconstruction</div>
+body{{margin:0;background:#edf2f4;color:#20313b;font:16px/1.5 system-ui,sans-serif}}main{{max-width:1280px;margin:auto;padding:28px}}
+header,section{{background:white;border:1px solid #d7e2e7;border-radius:12px;padding:24px;margin-bottom:20px}}h1{{font-size:30px;line-height:1.2}}h2{{font-size:22px}}.tag{{color:#16685f;font-size:13px;letter-spacing:.08em;text-transform:uppercase}}
+.note{{background:#f5f8f9;padding:14px;border-left:4px solid #27877a}}.pending{{color:#765321}}label{{display:inline-block;margin:0 20px 15px 0}}select{{display:block;padding:9px;font:inherit;border:1px solid #8aa1ad;border-radius:5px}}a{{color:#06628a}}img{{max-width:100%;height:auto}}figure{{margin:10px 0 28px}}figcaption{{font-weight:600}}table{{border-collapse:collapse;width:100%;margin:15px 0}}td,th{{padding:8px;text-align:left;border-bottom:1px solid #dbe4e9}}.subtle{{font-size:14px;color:#526772}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:20px}}.wide{{grid-template-columns:1fr}}@media(max-width:750px){{main{{padding:10px}}.grid{{grid-template-columns:1fr}}header,section{{padding:16px}}}}
+</style><main><header><div class="tag">May initialization · {YEAR} · research reconstruction</div>
 <h1>Ethiopia rainfall forecast and verification</h1><p>National and fixed JJAS R1+R2 rainfall-domain views for each month and the season.</p>
 <p class="note">''' + html.escape(DEFINITION + ' ' + NOTE) + '''</p><p class="pending">Pending verification: '''+pending_text+'''. Pending does not mean zero rainfall or zero skill.</p>
 <p class="subtle">The forecasts remain frozen. The domain changes only presentation and the area summarized. Continuous map colors are interpolated for display; statistics and NetCDF fields retain the original grid. Not an official EMI/ICPAC product.</p>
@@ -384,15 +385,15 @@ header,section{background:white;border:1px solid #d7e2e7;border-radius:12px;padd
 <label>Product<select id="kind"><option value="forecast">Forecast</option><option value="verification">Verification</option></select></label>
 <label>View<select id="view"><option value="all_ethiopia">All Ethiopia</option><option value="jjas_r12_rainfall_domain">JJAS R1+R2 rainfall domain</option></select></label>
 <div id="content"></div></section><noscript>Enable JavaScript to select views, or open the PNG/PDF files in presentation/ directly.</noscript></main>
-<script id="data" type="application/json">'''+data+'''</script><script>
+<script id="data" type="application/json">'''+data+f'''</script><script>
 const entries=JSON.parse(document.getElementById('data').textContent);const fmt=(v,n=1)=>v==null?'Unavailable':Number(v).toFixed(n);
-function render(){const t=document.getElementById('target').value,k=document.getElementById('kind').value,v=document.getElementById('view').value;
+function render(){{const t=document.getElementById('target').value,k=document.getElementById('kind').value,v=document.getElementById('view').value;
 const e=entries.find(x=>x.target===t&&x.kind===k&&x.view===v),c=document.getElementById('content');
-if(!e){c.innerHTML='<p class="pending">'+t+' '+k+' is not available in this run. Complete observations and verification inputs are required.</p>';return;}
+if(!e){{c.innerHTML='<p class="pending">'+t+' '+k+' is not available in this run. Complete observations and verification inputs are required.</p>';return;}}
 const s=e.summary;let rows=[['Domain cells',s.domain_cells],['Domain share of country area (%)',fmt(s.domain_country_area_percent)],['Amount coverage within domain (%)',fmt(s.amount_domain_area_percent)],['Probability coverage within domain (%)',fmt(s.probability_domain_area_percent)]];
-if(k==='forecast'){rows.push(['Mean rainfall / reference (mm)',fmt(s.mean_rainfall_mm)+' / '+fmt(s.mean_reference_mm)],['Mean anomaly (mm)',fmt(s.mean_anomaly_mm)],['Area-mean local Below / Near / Above probabilities (%)',s.mean_local_probabilities.map(x=>fmt(x==null?null:100*x)).join(' / ')]);}
-else {const p=s.probability.shared_blend||{},a=s.amount.corrected||{};rows.push(['Shared RPS',fmt(p.rps,4)],['Shared RPSS (%)',fmt(p.rpss==null?null:100*p.rpss)],['Corrected CRPS (mm)',fmt(a.crps_mm)],['Corrected CRPSS (%)',fmt(a.crpss==null?null:100*a.crpss)],['Corrected rainfall bias (mm)',fmt(a.bias_mm)]);}
-c.innerHTML='<h2>'+t+' 2026 · '+e.label+'</h2><table>'+rows.map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>').join('')+'</table><p class="subtle">'+(k==='forecast'?'Area means of local probabilities are not probabilities for domain-total rainfall.':'Positive skill means improvement over climatology on this support. Single-year results do not establish long-term reliability.')+'</p><p><a href="presentation/'+k+'/'+t+'/presentation_fields.nc">Native fields and domain mask</a> · <a href="presentation/'+k+'/'+t+'/presentation_summary.json">Summary and provenance</a></p><div class="grid '+(k==='verification'?'wide':'')+'">'+e.images.map(x=>'<figure><a href="'+e.folder+'/'+x[0]+'.png"><img loading="lazy" src="'+e.folder+'/'+x[0]+'.png" alt="'+t+' '+e.label+' '+x[1]+'"></a><figcaption>'+x[1]+(e.pdf?' · <a href="'+e.folder+'/'+x[0]+'.pdf">PDF</a>':'')+'</figcaption></figure>').join('')+'</div>';}
+if(k==='forecast'){{rows.push(['Mean rainfall / reference (mm)',fmt(s.mean_rainfall_mm)+' / '+fmt(s.mean_reference_mm)],['Mean anomaly (mm)',fmt(s.mean_anomaly_mm)],['Area-mean local Below / Near / Above probabilities (%)',s.mean_local_probabilities.map(x=>fmt(x==null?null:100*x)).join(' / ')]);}}
+else {{const p=s.probability.shared_blend||{{}},a=s.amount.corrected||{{}};rows.push(['Shared RPS',fmt(p.rps,4)],['Shared RPSS (%)',fmt(p.rpss==null?null:100*p.rpss)],['Corrected CRPS (mm)',fmt(a.crps_mm)],['Corrected CRPSS (%)',fmt(a.crpss==null?null:100*a.crpss)],['Corrected rainfall bias (mm)',fmt(a.bias_mm)]);}}
+c.innerHTML='<h2>'+t+' {YEAR} · '+e.label+'</h2><table>'+rows.map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>').join('')+'</table><p class="subtle">'+(k==='forecast'?'Area means of local probabilities are not probabilities for domain-total rainfall.':'Positive skill means improvement over climatology on this support. Single-year results do not establish long-term reliability.')+'</p><p><a href="presentation/'+k+'/'+t+'/presentation_fields.nc">Native fields and domain mask</a> · <a href="presentation/'+k+'/'+t+'/presentation_summary.json">Summary and provenance</a></p><div class="grid '+(k==='verification'?'wide':'')+'">'+e.images.map(x=>'<figure><a href="'+e.folder+'/'+x[0]+'.png"><img loading="lazy" src="'+e.folder+'/'+x[0]+'.png" alt="'+t+' '+e.label+' '+x[1]+'"></a><figcaption>'+x[1]+(e.pdf?' · <a href="'+e.folder+'/'+x[0]+'.pdf">PDF</a>':'')+'</figcaption></figure>').join('')+'</div>';}}
 for(const id of ['target','kind','view'])document.getElementById(id).addEventListener('change',render);render();</script></html>'''
     (output/"index.html").write_text(page,encoding="utf-8")
     write(output/"presentation_summary.json",summary)

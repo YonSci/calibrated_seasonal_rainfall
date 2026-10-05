@@ -1,4 +1,4 @@
-"""Validate and package the selected May-initialized 2026 shared-blend forecasts.
+"""Validate and package the selected May-initialized shared-blend forecasts for the cycle year (cycle.py).
 
 No fitting, regridding or forecast changes. Run from the existing project on Windows CMD.
 Relative paths resolve against the project root (the parent of scripts).
@@ -17,11 +17,12 @@ import numpy as np
 import xarray as xr
 import delivery_map_base as base
 from delivery_output_runs import staged_output,check_destination
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 ROOT=Path(__file__).resolve().parents[1]
 TARGETS=['JJAS','Jun','Jul','Aug','Sep']
 PERIODS={'JJAS':('06-01','09-30'),'Jun':('06-01','06-30'),'Jul':('07-01','07-31'),'Aug':('08-01','08-31'),'Sep':('09-01','09-30')}
 METHODS={'current_peak_refinement','github_refined_corrected_calendar_v1'}
-STATUS='Retrospective reconstruction of May-initialized 2026 forecasts; no verification against 2026 observations in this package.'
+STATUS=f'Retrospective reconstruction of May-initialized {YEAR} forecasts; no verification against {YEAR} observations in this package.'
 
 def path(s):
     p=Path(s);return p if p.is_absolute() else ROOT/p
@@ -42,12 +43,12 @@ def forecast_check(p,target):
     period=json.loads(d.attrs['target_period'])
     if period!={'name':target,'start':PERIODS[target][0],'end':PERIODS[target][1]}:raise ValueError('Wrong target period')
     years=d.attrs.get('training_years')
-    if years!='1993-2025':raise ValueError('Expected training_years=1993-2025')
+    if years!=f'{REF}':raise ValueError(f'Expected training_years={REF}')
     if 'shared climatology blend' not in d.attrs.get('method',''):raise ValueError('Source is not the selected shared blend')
     lam=float(d.attrs['climatology_weight'])
     if not np.isfinite(lam) or not 0<=lam<=1:raise ValueError('Invalid climatology weight')
     n=d.sizes['member']
-    if n!=51 or len(np.unique(d.member))!=n:raise ValueError('Expected 51 unique members for 2026')
+    if n!=MEMBERS or len(np.unique(d.member))!=n:raise ValueError(f'Expected {MEMBERS} unique members for {YEAR}')
     for c in ['lat','lon']:
         if not np.allclose(np.diff(d[c]),.25,atol=1e-6,rtol=0):raise ValueError('Expected common 0.25 degree grid')
     av=np.asarray(d.amount_eligible)==1;pv=np.asarray(d.probability_eligible)==1
@@ -78,7 +79,7 @@ def evidence_check(e,targets):
         keys=[(r['method'],r['mode']) for r in subset]
         if len(keys)!=4 or set(keys)!={(m,s) for m in METHODS for s in ['training','operational']}:raise ValueError(f'{t}: expected four unique experiment records')
         for r in subset:
-            mode=r['mode'];p=r['report'];years=list(range(1993,2017)) if mode=='training' else list(range(2017,2026))
+            mode=r['mode'];p=r['report'];years=list(range(1993,2017)) if mode=='training' else EVALUATION_STUDY
             if [z['year'] for z in p['years']]!=years:raise ValueError(f'{t}: unexpected verification years')
             if r['method']=='github_refined_corrected_calendar_v1':
                 if not p.get('baseline_reproduction',{}).get('passed'):raise ValueError(f'{t}: baseline reproduction did not pass')
@@ -86,7 +87,7 @@ def evidence_check(e,targets):
     return lookup
 
 def preflight(a):
-    targets=list(dict.fromkeys(a.targets));sources={t:path(a.forecast) if a.forecast else path(a.input_root)/f'init05_{t}/2026/forecast_2026.nc' for t in targets}
+    targets=list(dict.fromkeys(a.targets));sources={t:path(a.forecast) if a.forecast else path(a.input_root)/f'init05_{t}/{YEAR}/forecast_{YEAR}.nc' for t in targets}
     ep=path(a.evidence);bp=path(a.boundary);mp=path(a.mask)
     required=[ep,bp,bp.with_suffix('.shx'),bp.with_suffix('.dbf'),bp.with_suffix('.prj'),*sources.values()]
     if 'JJAS' in targets:required.append(mp)
@@ -101,7 +102,7 @@ def preflight(a):
     if 'JJAS' in targets:
         with xr.open_dataset(mp) as f:mask=f.load()
         if mask.attrs.get('method')!='github_refined_corrected_calendar_v1':errors.append('Wrong descriptive-mask method')
-        if json.loads(mask.attrs.get('training_years','[]'))!=list(range(1993,2026)):errors.append('Wrong descriptive-mask years')
+        if json.loads(mask.attrs.get('training_years','[]'))!=REGIME_YEARS:errors.append('Wrong descriptive-mask years')
         v=mask.github_jjas_r12_rainfall.values
         if not np.isin(v,[0,1]).all() or not (v==1).any() or ((v==1)&(mask.region_mask.values!=1)).any():errors.append('Invalid JJAS rainfall domain')
     for t,p in sources.items():
@@ -131,30 +132,30 @@ def documents(stage,targets,stats,verification,created):
     decision={'selected_probability_method':'shared climatology blend','targets':targets,'experimental':'August GitHub-refined regularized regime blend; no adoption','decision_basis':'Small and spatially uneven August improvement; operational interval includes zero. Shared retained for every target. Repeated operational inspection limits independence.','scope':scope,'created_utc':created,'product_status':STATUS}
     write_json(stage/'method_decision.json',decision)
     write_json(stage/'forecast_summary.json',{'status':STATUS,'scope':scope,'summaries':stats,'probability_note':'Area mean of grid-cell probabilities, not probability of country-total rainfall','amount_note':'Area means over amount-eligible country cells; support may differ between targets'})
-    write_json(stage/'historical_verification.json',{'scope':'All-country common-support historical evaluation; not 2026 verification or R1+R2-domain verification','records':verification})
-    text=['# Ethiopia rainfall forecast package — May initialization, 2026','',STATUS,'',scope+'. Generated '+created+'.','','## Selected methods','','Rainfall amounts: existing equal-year mean–variance bias correction at each grid cell. Probabilities: alpha=0.5 additive count smoothing followed by the existing shared climatology blend. No Dirichlet mapping, grid-cell blend or regime blend is applied in these selected final products. All 51 members are retained.','','## Forecast summary','','Probabilities below are area averages of local probabilities, not probabilities for country-total rainfall. Rainfall means use amount-eligible cells; probability summaries use probability-eligible cells. Their support can differ.','','| Target | Below % | Near % | Above % | Corrected mean mm | Reference mean mm | Anomaly mm | Probability coverage % |','|---|---:|---:|---:|---:|---:|---:|---:|']
+    write_json(stage/'historical_verification.json',{'scope':f'All-country common-support historical evaluation; not {YEAR} verification or R1+R2-domain verification','records':verification})
+    text=[f'# Ethiopia rainfall forecast package — May initialization, {YEAR}','',STATUS,'',scope+'. Generated '+created+'.','','## Selected methods','','Rainfall amounts: existing equal-year mean–variance bias correction at each grid cell. Probabilities: alpha=0.5 additive count smoothing followed by the existing shared climatology blend. No Dirichlet mapping, grid-cell blend or regime blend is applied in these selected final products. All 51 members are retained.','','## Forecast summary','','Probabilities below are area averages of local probabilities, not probabilities for country-total rainfall. Rainfall means use amount-eligible cells; probability summaries use probability-eligible cells. Their support can differ.','','| Target | Below % | Near % | Above % | Corrected mean mm | Reference mean mm | Anomaly mm | Probability coverage % |','|---|---:|---:|---:|---:|---:|---:|---:|']
     for s in stats:
         p=s['area_mean_local_probabilities'];text.append(f'| {s["target"]} | {100*p[0]:.1f} | {100*p[1]:.1f} | {100*p[2]:.1f} | {s["area_mean_corrected_rainfall_mm"]:.1f} | {s["area_mean_reference_rainfall_mm"]:.1f} | {s["area_mean_anomaly_mm"]:+.1f} | {s["probability_country_area_percent"]:.1f} |')
-    text+=['','Reference period: CHIRPS 1993–2025. Monthly and JJAS products were corrected separately; corrected monthly totals need not sum to corrected JJAS totals. Percent-anomaly maps hide reference rainfall below 10 mm.','','## Historical probability verification','','Lower RPS and log loss are better. RPSS uses the fold-specific climatology benchmark. Historical scores do not establish the skill of the final 1993–2025 refit on 2026.','','| Target | Evaluation | Shared RPS | Shared RPSS | Shared log loss |','|---|---|---:|---:|---:|']
+    text+=['',f'Reference period: CHIRPS {REF_DASH}. Monthly and JJAS products were corrected separately; corrected monthly totals need not sum to corrected JJAS totals. Percent-anomaly maps hide reference rainfall below 10 mm.','','## Historical probability verification','',f'Lower RPS and log loss are better. RPSS uses the fold-specific climatology benchmark. Historical scores do not establish the skill of the final {REF_DASH} refit on {YEAR}.','','| Target | Evaluation | Shared RPS | Shared RPSS | Shared log loss |','|---|---|---:|---:|---:|']
     for v in verification:text.append(f'| {v["target"]} | {v["mode"]} | {v["shared_rps"]:.6f} | {v["shared_rpss"]:.4f} | {v["shared_log_loss"]:.6f} |')
-    text+=['','Training evaluation: nested cross-validation over 1993–2016. Operational evaluation: 2017–2025 with fits based on 1993–2016; these years have been inspected repeatedly and are exploratory evidence. Detailed Brier/BSS category scores are in historical_verification.json. These figures come from the supplied regime-comparison common support, which can differ from other earlier verification stages.','','## Maps and domains','','Nationwide maps preserve the country mask and variable-specific eligibility. JJAS also includes a separately labeled R1+R2 rainfall-domain view: cleaned GitHub-derived refinement, climatological JJAS >=120 mm and >=20% of annual rainfall. This is a descriptive display domain, not an onset mask or a separately calibrated forecast. No official EMI endorsement is implied.','','Smooth contours are for display only; native NetCDF values and statistics remain unchanged. The 0.25-degree common grid is not evidence of new forecast resolution. Country clipping is distinct from a physical land–ocean/lake mask. Source mask metadata is preserved in each forecast NetCDF.','','## Decision and next use','','Retain the shared blend. The August regime candidate remains experimental; do not select winning cells using these same operational years. Use this package for review and communication of the retrospective reconstruction. It is not an official EMI/ICPAC product, an observation of 2026 rainfall, or a validation of rainfall-driven impact forecasts.','','## Files','','Open index.html locally for maps and download links. forecasts/ contains unchanged copies of the source NetCDFs. maps/ contains PNG/PDF products, native map fields and product metadata. evidence/ contains the experiment summary and any available August review evidence. manifest.json records input, script and output hashes. bundle.zip contains the delivery files except itself and the completion receipt. completion_report.json records the final archive hash.']
+    text+=['','Training evaluation: nested cross-validation over 1993–2016. Operational evaluation: 2017–2025 with fits based on 1993–2016; these years have been inspected repeatedly and are exploratory evidence. Detailed Brier/BSS category scores are in historical_verification.json. These figures come from the supplied regime-comparison common support, which can differ from other earlier verification stages.','','## Maps and domains','','Nationwide maps preserve the country mask and variable-specific eligibility. JJAS also includes a separately labeled R1+R2 rainfall-domain view: cleaned GitHub-derived refinement, climatological JJAS >=120 mm and >=20% of annual rainfall. This is a descriptive display domain, not an onset mask or a separately calibrated forecast. No official EMI endorsement is implied.','','Smooth contours are for display only; native NetCDF values and statistics remain unchanged. The 0.25-degree common grid is not evidence of new forecast resolution. Country clipping is distinct from a physical land–ocean/lake mask. Source mask metadata is preserved in each forecast NetCDF.','','## Decision and next use','',f'Retain the shared blend. The August regime candidate remains experimental; do not select winning cells using these same operational years. Use this package for review and communication of the retrospective reconstruction. It is not an official EMI/ICPAC product, an observation of {YEAR} rainfall, or a validation of rainfall-driven impact forecasts.','','## Files','','Open index.html locally for maps and download links. forecasts/ contains unchanged copies of the source NetCDFs. maps/ contains PNG/PDF products, native map fields and product metadata. evidence/ contains the experiment summary and any available August review evidence. manifest.json records input, script and output hashes. bundle.zip contains the delivery files except itself and the completion receipt. completion_report.json records the final archive hash.']
     (stage/'BULLETIN.md').write_text('\n'.join(text)+'\n',encoding='utf-8')
     esc=html.escape
     cards=[]
     for s in stats:
         t=s['target'];views=['all_ethiopia']+(['jjas_r12_rainfall_domain'] if t=='JJAS' else [])
         p=s['area_mean_local_probabilities']
-        pieces=[f'<section id="{t}"><h2>{t} 2026</h2><p class="numbers">Below {p[0]:.1%} · Near {p[1]:.1%} · Above {p[2]:.1%}</p><p>Area averages of local probabilities. Corrected mean rainfall: {s["area_mean_corrected_rainfall_mm"]:.1f} mm; mean anomaly: {s["area_mean_anomaly_mm"]:+.1f} mm.</p><p><a href="forecasts/init05_{t}/forecast_2026.nc">Forecast NetCDF</a></p>']
+        pieces=[f'<section id="{t}"><h2>{t} {YEAR}</h2><p class="numbers">Below {p[0]:.1%} · Near {p[1]:.1%} · Above {p[2]:.1%}</p><p>Area averages of local probabilities. Corrected mean rainfall: {s["area_mean_corrected_rainfall_mm"]:.1f} mm; mean anomaly: {s["area_mean_anomaly_mm"]:+.1f} mm.</p><p><a href="forecasts/init05_{t}/forecast_{YEAR}.nc">Forecast NetCDF</a></p>']
         for view in views:
             label='All Ethiopia' if view=='all_ethiopia' else 'Separate JJAS R1+R2 rainfall domain'
-            folder=f'maps/init05_{t}/2026/{view}'
+            folder=f'maps/init05_{t}/{YEAR}/{view}'
             pieces.append(f'<h3>{label}</h3><div class="maps">')
-            for name,caption in [('dominant_tercile_2026','Leading tercile probability'),('rainfall_anomaly_mm_2026','Rainfall anomaly (mm)'),('rainfall_anomaly_percent_2026','Rainfall anomaly (%)')]:
+            for name,caption in [(f'dominant_tercile_{YEAR}','Leading tercile probability'),(f'rainfall_anomaly_mm_{YEAR}','Rainfall anomaly (mm)'),(f'rainfall_anomaly_percent_{YEAR}','Rainfall anomaly (%)')]:
                 pieces.append(f'<figure><a href="{folder}/{name}.png"><img loading="lazy" src="{folder}/{name}.png" alt="{esc(t+" "+label+" "+caption)}"></a><figcaption>{caption} · <a href="{folder}/{name}.pdf">PDF</a></figcaption></figure>')
-            pieces.append(f'</div><p><a href="{folder}/map_fields_2026.nc">Native map fields</a> · <a href="{folder}/product_metadata.json">Method and verification metadata</a></p>')
+            pieces.append(f'</div><p><a href="{folder}/map_fields_{YEAR}.nc">Native map fields</a> · <a href="{folder}/product_metadata.json">Method and verification metadata</a></p>')
         pieces.append('</section>');cards.append(''.join(pieces))
-    page='''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ethiopia rainfall forecast review — 2026</title><style>body{margin:0;background:#f1f5f7;color:#162c36;font:16px/1.55 system-ui,sans-serif}main{max-width:1280px;margin:auto;padding:30px}header,section{background:white;border:1px solid #dbe5e8;border-radius:12px;padding:24px;margin-bottom:24px}h1{font-size:32px;line-height:1.2}h2{border-bottom:2px solid #daece8;padding-bottom:8px}h3{color:#176d62}a{color:#075f88}.tag{color:#176d62;text-transform:uppercase;letter-spacing:.09em;font-size:13px}.notice{background:#fff6df;padding:12px;border-left:4px solid #b77c1d}.maps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}figure{margin:0}img{width:100%;height:auto}figcaption{font-size:14px}.numbers{font-size:20px;font-weight:600}nav a{margin-right:16px}@media(max-width:850px){.maps{grid-template-columns:1fr}main{padding:12px}}@media print{section{break-before:page}.maps{grid-template-columns:1fr 1fr}nav{display:none}}</style><main><header><p class="tag">Research forecast review</p><h1>Ethiopia rainfall outlook · May initialization 2026</h1>'''
-    page+=f'<p>{esc(scope)}</p><p class="notice">{esc(STATUS)} Not an official EMI/ICPAC product.</p><p>Selected shared probability blend · CHIRPS reference 1993–2025 · 51 ensemble members</p><p>Click any map to enlarge. Contours are display interpolation; use NetCDF fields for analysis.</p><nav>'+''.join(f'<a href="#{t}">{t}</a>' for t in targets)+'</nav><p><a href="BULLETIN.md">Bulletin and interpretation</a> · <a href="historical_verification.json">Historical verification</a> · <a href="method_decision.json">Method decision</a> · <a href="bundle.zip">Download complete package</a></p></header>'+''.join(cards)+'</main></html>'
+    page=f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ethiopia rainfall forecast review — {YEAR}</title><style>body{{margin:0;background:#f1f5f7;color:#162c36;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1280px;margin:auto;padding:30px}}header,section{{background:white;border:1px solid #dbe5e8;border-radius:12px;padding:24px;margin-bottom:24px}}h1{{font-size:32px;line-height:1.2}}h2{{border-bottom:2px solid #daece8;padding-bottom:8px}}h3{{color:#176d62}}a{{color:#075f88}}.tag{{color:#176d62;text-transform:uppercase;letter-spacing:.09em;font-size:13px}}.notice{{background:#fff6df;padding:12px;border-left:4px solid #b77c1d}}.maps{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}figure{{margin:0}}img{{width:100%;height:auto}}figcaption{{font-size:14px}}.numbers{{font-size:20px;font-weight:600}}nav a{{margin-right:16px}}@media(max-width:850px){{.maps{{grid-template-columns:1fr}}main{{padding:12px}}}}@media print{{section{{break-before:page}}.maps{{grid-template-columns:1fr 1fr}}nav{{display:none}}}}</style><main><header><p class="tag">Research forecast review</p><h1>Ethiopia rainfall outlook · May initialization {YEAR}</h1>'''
+    page+=f'<p>{esc(scope)}</p><p class="notice">{esc(STATUS)} Not an official EMI/ICPAC product.</p><p>Selected shared probability blend · CHIRPS reference {REF_DASH} · {MEMBERS} ensemble members</p><p>Click any map to enlarge. Contours are display interpolation; use NetCDF fields for analysis.</p><nav>'+''.join(f'<a href="#{t}">{t}</a>' for t in targets)+'</nav><p><a href="BULLETIN.md">Bulletin and interpretation</a> · <a href="historical_verification.json">Historical verification</a> · <a href="method_decision.json">Method decision</a> · <a href="bundle.zip">Download complete package</a></p></header>'+''.join(cards)+'</main></html>'
     (stage/'index.html').write_text(page,encoding='utf-8')
 
 def main():
@@ -165,7 +166,7 @@ def main():
     ap.add_argument('--mask',default='outputs/regime_reconciliation/descriptive_1993_2025/regime_comparison_and_masks.nc')
     ap.add_argument('--boundary',default='data/boundaries/ethiopia/eth_admin0.shp')
     ap.add_argument('--evidence',default='evidence/all_regime_experiments.json')
-    ap.add_argument('--output',default='outputs/forecast_delivery/init05_2026')
+    ap.add_argument('--output',default=f'outputs/forecast_delivery/init05_{YEAR}')
     ap.add_argument('--check-only',action='store_true')
     ap.add_argument('--regenerate',action='store_true');a=ap.parse_args()
     if a.forecast and len(a.targets)!=1:ap.error('--forecast requires exactly one target')
@@ -184,8 +185,8 @@ def main():
             supplemental=ROOT/'evidence/august_review'
             if supplemental.is_dir():shutil.copytree(supplemental,stage/'evidence/august_review')
             for t,p in sources.items():
-                dest=stage/'forecasts'/f'init05_{t}';dest.mkdir(parents=True);shutil.copy2(p,dest/'forecast_2026.nc')
-                if sha(dest/'forecast_2026.nc')!=inputs[str(p)]:raise ValueError('Source changed during packaging: '+str(p))
+                dest=stage/'forecasts'/f'init05_{t}';dest.mkdir(parents=True);shutil.copy2(p,dest/f'forecast_{YEAR}.nc')
+                if sha(dest/f'forecast_{YEAR}.nc')!=inputs[str(p)]:raise ValueError('Source changed during packaging: '+str(p))
             for p,digest in inputs.items():
                 if sha(Path(p))!=digest:raise ValueError('Input changed during packaging: '+p)
             docs_source=ROOT/'docs/29_FORECAST_DELIVERY.md'

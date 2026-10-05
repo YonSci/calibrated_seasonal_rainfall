@@ -55,7 +55,7 @@ class CalibrationTests(unittest.TestCase):
         root=Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as tmp:
             folder=Path(tmp);(folder/'scripts').mkdir();(folder/'config').mkdir()
-            for name in ('calibration_core.py','run_calibration.py','common.py'):
+            for name in ('calibration_core.py','run_calibration.py','common.py','cycle.py'):
                 shutil.copy(root/'scripts'/name,folder/'scripts'/name)
             cfg=dict(initialization_month=5,season=dict(name='JJAS',start='06-01',end='09-30'),archive_years=[1993,2026],observation_years=[1993,2025])
             (folder/'config/project.json').write_text(json.dumps(cfg))

@@ -1,4 +1,4 @@
-"""Generate an evidence-based 2026 verification report. No prediction or fitting code."""
+"""Generate an evidence-based cycle-year verification report. No prediction or fitting code."""
 import base64
 import hashlib
 import html
@@ -6,6 +6,7 @@ import json
 import math
 from pathlib import Path
 import shutil
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 ORDER = ['Jun', 'Jul', 'Aug', 'Sep', 'JJAS']
 LABELS = {'all_country': 'All Ethiopia', 'regime_0': 'R0: arid / marginal',
@@ -41,8 +42,8 @@ def ratio_skill(score, ref):
 
 
 def validate(country, regimes, targets):
-    if country.get('year') != 2026 or regimes.get('year') != 2026:
-        raise ValueError('Expected 2026 assessment')
+    if country.get('year') != YEAR or regimes.get('year') != YEAR:
+        raise ValueError(f'Expected {YEAR} assessment')
     if len(set(targets)) != len(targets) or not set(targets) <= set(ORDER):
         raise ValueError('Invalid or duplicate targets')
     for source in [country, regimes]:
@@ -55,7 +56,7 @@ def validate(country, regimes, targets):
     for target in targets:
         c = next(r for r in country['results'] if r['target'] == target)
         r = next(r for r in regimes['results'] if r['target'] == target)
-        if c['year'] != 2026 or not r['provenance']['country_reproduction_passed']:
+        if c['year'] != YEAR or not r['provenance']['country_reproduction_passed']:
             raise ValueError('Country reproduction or evaluation year not verified')
         if c['forecast_sha256'] != frozen[target] or c['forecast_sha256'] != r['provenance']['forecast_sha256'] or c['observations_sha256'] != r['provenance']['observations_sha256']:
             raise ValueError('Mismatched forecast/observation generations')
@@ -116,7 +117,7 @@ def performance_notes(regimes, targets):
                           'blend_minus_smoothed_rps': effect, 'corrected_bias_mm': am['bias_mm'],
                           'amount_coverage_percent': d['amount_domain_area_percent'], 'probability_coverage_percent': d['probability_domain_area_percent'],
                           'negative_bss_categories': [cat for cat, value in zip(['below', 'near', 'above'], p['bss_by_category']) if value is not None and value < 0],
-                          'interpretation': 'Descriptive result for this 2026 target only. Does not change forecast values, masks, weights or issuance-time confidence.'})
+                          'interpretation': f'Descriptive result for this {YEAR} target only. Does not change forecast values, masks, weights or issuance-time confidence.'})
     return notes
 
 
@@ -158,7 +159,7 @@ class Report:
     def save(self, out):
         (out / 'VERIFICATION_REPORT.md').write_text('\n'.join(self.md), encoding='utf-8')
         css = '''body{margin:0;background:#edf2f5;color:#172b3a;font:16px/1.6 system-ui,Arial,sans-serif}main{max-width:1120px;margin:28px auto;padding:36px 42px;background:white;border-radius:14px}h1{font-size:32px;line-height:1.2;color:#123c55}h2{margin-top:36px;color:#155672;border-top:1px solid #dce5eb;padding-top:22px}h3{color:#315b6d}p{max-width:100ch}.status{background:#fff4d8;border-left:5px solid #b67716;padding:14px 18px}.note{background:#edf5f7;padding:14px 18px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}th{background:#163f58;color:white;text-align:left}th,td{padding:10px 12px;border-bottom:1px solid #dce5eb}tbody tr:nth-child(even){background:#f2f6f8}td:not(:first-child){font-variant-numeric:tabular-nums}figure{margin:24px 0}img{max-width:100%;height:auto}figcaption{font-size:13px;color:#49616d}.footer{font-size:12px;color:#607582}@media(max-width:650px){main{margin:0;padding:20px;border-radius:0}h1{font-size:26px}}@media print{body{background:white}main{margin:0;padding:0;max-width:none}table{font-size:10px}h2,h3{break-after:avoid}tr,figure{break-inside:avoid}.table-wrap{overflow:visible}}'''
-        page = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ethiopia 2026 rainfall forecast verification</title><style>' + css + '</style></head><body><main>' + '\n'.join(self.web) + '</main></body></html>'
+        page = f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ethiopia {YEAR} rainfall forecast verification</title><style>' + css + '</style></head><body><main>' + '\n'.join(self.web) + '</main></body></html>'
         (out / 'VERIFICATION_REPORT.html').write_text(page, encoding='utf-8')
 
 
@@ -175,18 +176,18 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     missing = [t for t in ORDER if t not in targets]
     rows = {r['target']: r for r in regimes['results'] if r['target'] in targets}
     notes = performance_notes(regimes, targets)
-    payload = {'year': 2026, 'targets_verified': targets, 'targets_pending_in_report': missing,
+    payload = {'year': YEAR, 'targets_verified': targets, 'targets_pending_in_report': missing,
                'full_JJAS_verified': 'JJAS' in targets, 'all_five_targets_verified': not missing,
                'forecast_changed': False, 'new_calibration_fitted': False,
-               'assessment_type': 'Retrospective reconstruction; descriptive 2026 verification',
+               'assessment_type': f'Retrospective reconstruction; descriptive {YEAR} verification',
                'provenance': provenance, 'performance_notes': notes,
                'decision': 'Retain frozen shared-blend forecasts. Regional annotations are post-event verification findings, not forecast-time confidence labels or new masks. No automatic model switch.'}
     (out / 'report_summary.json').write_text(json.dumps(payload, indent=2, allow_nan=False), encoding='utf-8')
     r = Report()
-    r.heading('Ethiopia rainfall forecast verification — 2026', 1)
-    r.paragraph('May initialization | ECMWF seasonal forecasts | CHIRPS v2 verification | Reference period 1993–2025')
+    r.heading(f'Ethiopia rainfall forecast verification — {YEAR}', 1)
+    r.paragraph(f'May initialization | ECMWF seasonal forecasts | CHIRPS v2 verification | Reference period {REF_DASH}')
     r.paragraph('Verified targets: ' + ', '.join(targets) + '. ' + ('Pending in this report: ' + ', '.join(missing) + '. No full-JJAS conclusion is inferred from monthly results.' if 'JJAS' in missing else 'JJAS is assessed directly against its complete seasonal observations; overlapping monthly and seasonal scores are not pooled.'), 'status')
-    r.paragraph('This is a retrospective assessment of the reconstructed forecasts. It does not establish an actual May 2026 issuance, independent prospective validation, or an official EMI/ICPAC forecast. All results below concern the submitted verification evidence.', 'note')
+    r.paragraph(f'This is a retrospective assessment of the reconstructed forecasts. It does not establish an actual May {YEAR} issuance, independent prospective validation, or an official EMI/ICPAC forecast. All results below concern the submitted verification evidence.', 'note')
     r.heading('Decision and principal findings')
     r.paragraph(payload['decision'])
     for target in targets:
@@ -197,11 +198,11 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     r.table(['Target', 'Raw CRPS mm', 'Corrected CRPS mm', 'Climatology CRPS mm', 'Corrected CRPSS', 'Final RPSS'], [[t, *[number(rows[t]['domains']['all_country']['amount'][m]['crps_mm']) for m in ['raw', 'corrected', 'climatology']], percent(rows[t]['domains']['all_country']['amount']['corrected']['crpss']), percent(rows[t]['domains']['all_country']['probability']['shared_blend']['rpss'])] for t in targets])
     r.heading('Main JJAS rainfall domain')
     d0 = rows[targets[0]]['domains']['jjas_r12_rainfall_domain']
-    r.paragraph(f"This fixed pre-2026 domain contains {d0['domain_cells']} cells and {d0['domain_country_area_percent']:.1f}% of country grid area. It combines cleaned R1/R2 classes with the previously defined rainfall criteria. Monthly rows evaluate each month inside that domain; they are not a complete-JJAS assessment.")
+    r.paragraph(f"This fixed pre-{YEAR} domain contains {d0['domain_cells']} cells and {d0['domain_country_area_percent']:.1f}% of country grid area. It combines cleaned R1/R2 classes with the previously defined rainfall criteria. Monthly rows evaluate each month inside that domain; they are not a complete-JJAS assessment.")
     r.table(['Target', 'Amount CRPSS', 'Smoothed RPSS', 'Final RPSS', 'Mean error mm', 'Probability coverage'], [[t, percent(rows[t]['domains']['jjas_r12_rainfall_domain']['amount']['corrected']['crpss']), percent(rows[t]['domains']['jjas_r12_rainfall_domain']['probability']['corrected_smoothed']['rpss']), percent(rows[t]['domains']['jjas_r12_rainfall_domain']['probability']['shared_blend']['rpss']), number(rows[t]['domains']['jjas_r12_rainfall_domain']['amount']['corrected']['bias_mm']), number(rows[t]['domains']['jjas_r12_rainfall_domain']['probability_domain_area_percent'], 1) + '%'] for t in targets])
     r.heading('Regional performance notes')
     for target in targets:
-        r.heading(target + ' 2026', 3)
+        r.heading(target + f' {YEAR}', 3)
         table = []
         for domain in ['regime_0', 'regime_1', 'regime_2', 'regime_3']:
             d = rows[target]['domains'][domain]
@@ -234,14 +235,14 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
             g = h['domains']['all_country']['groups']['all']; p = g['probability']; delta = g['blend_minus_smooth']
             hrows.append([h['target'], h['mode'], len(g['years']), number(p['smooth']['rps'], 5), number(p['shared_blend']['rps'], 5), number(delta['mean'], 5)])
         r.table(['Target', 'Period', 'Years', 'Smoothed RPS', 'Shared RPS', 'Shared minus smoothed'], hrows)
-        r.paragraph('Negative shared-minus-smoothed RPS favors blending. Historical training-period scores use nested year exclusion; operational-period scores use fits fixed on 1993–2016 and have already been inspected repeatedly. The final 2026 models were fitted on 1993–2025. These periods therefore do not test an identical fitted weight. Historical regime boundaries can also differ between folds.')
+        r.paragraph(f'Negative shared-minus-smoothed RPS favors blending. Historical training-period scores use nested year exclusion; operational-period scores use fits fixed on 1993–2016 and have already been inspected repeatedly. The final {YEAR} models were fitted on {REF_DASH}. These periods therefore do not test an identical fitted weight. Historical regime boundaries can also differ between folds.')
     r.heading('Methods and interpretation')
     for text in [
-        'Rainfall amounts: equal-year, cell-specific mean–variance bias correction. All 51 operational members are retained. The ensemble and climatological reference are evaluated using empirical CRPS; their finite ensemble sizes are 51 and 33, respectively, without an iid/fair-ensemble adjustment.',
+        f'Rainfall amounts: equal-year, cell-specific mean–variance bias correction. All {MEMBERS} operational members are retained. The ensemble and climatological reference are evaluated using empirical CRPS; their finite ensemble sizes are 51 and 33, respectively, without an iid/fair-ensemble adjustment.',
         'Probabilities: observed training-period terciles, member counts, alpha = 0.5 additive smoothing, then the selected shared climatology blend. The final product does not use the experimental Dirichlet, local or regime-specific probability mappings. Probability blending does not change the corrected rainfall members or amount CRPS.',
         'RPS is the sum of the first two cumulative-category squared errors. Brier scores are category-specific; log loss uses natural logarithms and the existing probability floor. Country and domain scores use grid-cell area weights on identical support across methods within each metric family.',
         'Amount and probability masks differ; unscored cells are not near-normal conditions. R0–R3 are the reconciled GitHub-derived climatological rules, not administrative boundaries or independently validated official EMI zones. No onset-detection gate is used.',
-        'One verification year cannot establish multi-year reliability or statistical significance. Spatial cells and overlapping months/JJAS are not independent evaluation samples. No pooled overall score is produced. The 2026 outcomes are now inspected evidence and must not be reused as an untouched test set.'
+        f'One verification year cannot establish multi-year reliability or statistical significance. Spatial cells and overlapping months/JJAS are not independent evaluation samples. No pooled overall score is produced. The {YEAR} outcomes are now inspected evidence and must not be reused as an untouched test set.'
     ]:
         r.paragraph(text)
     r.heading('Verification maps')
@@ -252,7 +253,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
             dest = out / 'maps' / f'{target}_verification.png'; dest.parent.mkdir(exist_ok=True)
             shutil.copy2(source, dest)
             copied.append({'target': target, 'sha256': digest(dest)})
-            r.picture(dest, target + ' 2026: original native-grid verification map. Colour scales differ between months; use each legend. Gray excluded cells are not a near-normal forecast.', out)
+            r.picture(dest, target + f' {YEAR}: original native-grid verification map. Colour scales differ between months; use each legend. Gray excluded cells are not a near-normal forecast.', out)
     if not copied:
         r.paragraph('Map files were not supplied to this build. All numerical tables derive from the supplied verification reports.')
     r.heading('Completion and future work')
@@ -267,7 +268,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     r.save(out)
     payload['maps'] = copied
     (out / 'report_summary.json').write_text(json.dumps(payload, indent=2, allow_nan=False), encoding='utf-8')
-    addendum = ['# Verification addendum — 2026', '', 'Post-event verification notes. Attach to the existing forecast package without revising its archived predictions.', '', 'Targets: ' + ', '.join(targets) + '.', 'Pending in this report: ' + (', '.join(missing) or 'none') + '.', '', payload['decision'], '']
+    addendum = [f'# Verification addendum — {YEAR}', '', 'Post-event verification notes. Attach to the existing forecast package without revising its archived predictions.', '', 'Targets: ' + ', '.join(targets) + '.', 'Pending in this report: ' + (', '.join(missing) or 'none') + '.', '', payload['decision'], '']
     for n in notes:
         addendum.append(f"- {n['target']} / {LABELS[n['domain']]}: corrected CRPSS {percent(n['corrected_crpss'])}; final RPSS {percent(n['shared_rpss'])}; blend {n['blend_effect']}; probability coverage {n['probability_coverage_percent']:.1f}%.")
     addendum += ['', 'These are single-year descriptive findings; they are not forecast-time confidence grades. See VERIFICATION_REPORT.html for context, exceptions and historical comparisons.']

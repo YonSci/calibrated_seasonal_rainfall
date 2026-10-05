@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "adapter": "may_shared_blend",
+  "forecast_year": 2027,
+  "initialization_month": 5,
+  "reference_years": [
+    1993,
+    2026
+  ],
+  "targets": [
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "JJAS"
+  ],
+  "project_config": "config/project.json",
+  "forecast_root": "outputs/final_shared_blend",
+  "verification_root": "outputs/verification_2027",
+  "processed_root": "data/processed",
+  "download_cache": "data/raw/chirps/verification_p25",
+  "regime_mask": "evidence/followup_regime_comparison_and_masks.nc",
+  "boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "historical_review": "outputs/verification_followup/historical/historical_blend_review.json",
+  "output_root": "outputs/operational_2027",
+  "display": {
+    "interpolation_factor": 12,
+    "gaussian_sigma_cells": 0.6,
+    "minimum_leading_probability": 0.4,
+    "percent_anomaly_minimum_climatology_mm": 10.0,
+    "monthly_anomaly_limit_mm": 100.0,
+    "jjas_anomaly_limit_mm": 300.0,
+    "dpi": 180,
+    "pdf": true
+  },
+  "expected_members": [
+    {
+      "last_year": 2016,
+      "members": 25
+    },
+    {
+      "members": 51
+    }
+  ],
+  "development_years": [
+    1993,
+    2016
+  ],
+  "regime_mask_years": [
+    1993,
+    2025
+  ],
+  "overlap_year": 2025,
+  "notes": "Template for the May 2027 cycle. Prerequisites: 2026 CHIRPS added with extend_observations.py; ECMWF May 2027 downloaded and prepared. See docs/37_NEW_FORECAST_CYCLE.md."
+}

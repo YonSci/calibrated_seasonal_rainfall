@@ -1,4 +1,4 @@
-"""Stratify existing 2026 verification by pre-2026 Ethiopian climate regimes."""
+"""Stratify cycle-year verification by the fixed descriptive Ethiopian climate regimes (cycle.py)."""
 import argparse
 import csv
 import sys
@@ -10,14 +10,15 @@ import matplotlib.pyplot as plt
 from followup_common import *
 from verify2026_outputs import staged_output
 from verify2026_common import check_forecast
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 PROB_METHODS = ['raw_observed_thresholds', 'corrected_member_counts', 'corrected_smoothed', 'shared_blend', 'climatology']
 
 
 def make_domains(mask, reference):
     same_grid(mask, reference)
-    if mask.attrs.get('method') != METHOD or read_years(mask.attrs.get('training_years', '[]')) != list(range(1993, 2026)):
-        raise ValueError('Use the corrected GitHub reconciliation mask fitted on 1993-2025, not a different classification or baseline.')
+    if mask.attrs.get('method') != METHOD or read_years(mask.attrs.get('training_years', '[]')) != REGIME_YEARS:
+        raise ValueError(f'Use the corrected GitHub reconciliation mask fitted on {REGIME}, not a different classification or baseline.')
     if not np.array_equal(mask.region_mask.values, reference.country_mask.values):
         raise ValueError('Regime and verification country masks differ')
     country = reference.country_mask.values == 1
@@ -107,10 +108,10 @@ def reproduce_country(actual, expected):
 def inspect_source(root, target, snapshot):
     folder = root / 'results' / target
     rp, dp = folder / 'verification_report.json', folder / 'verification_fields.nc'
-    fp = root / f'frozen_forecasts/init05_{target}/forecast_2026.nc'
-    op = root / f'observations/{target}/chirps_2026_common.nc'
+    fp = root / f'frozen_forecasts/init05_{target}/forecast_{YEAR}.nc'
+    op = root / f'observations/{target}/chirps_{YEAR}_common.nc'
     report = read(rp)
-    if report['target'] != target or report['year'] != 2026 or report['forecast_sha256'] != snapshot['forecast_sha256'][target] or report['observations_sha256'] != sha(op):
+    if report['target'] != target or report['year'] != YEAR or report['forecast_sha256'] != snapshot['forecast_sha256'][target] or report['observations_sha256'] != sha(op):
         raise ValueError('Verification report belongs to different inputs')
     with xr.open_dataset(dp) as ds:
         d = ds.load()
@@ -121,7 +122,7 @@ def inspect_source(root, target, snapshot):
     same_grid(d, f)
     same_grid(d, obs)
     check_forecast(f, target)
-    if d.attrs.get('target') != target or int(d.attrs.get('evaluation_year', -1)) != 2026 or d.attrs.get('reference_years') != '1993-2025':
+    if d.attrs.get('target') != target or int(d.attrs.get('evaluation_year', -1)) != YEAR or d.attrs.get('reference_years') != f'{REF}':
         raise ValueError('Unexpected verification field metadata')
     if list(map(str, d.category.values)) != CATS or not np.array_equal(d.country_mask, f.region_mask):
         raise ValueError('Verification country mask/category order changed')
@@ -150,7 +151,7 @@ def inspect_source(root, target, snapshot):
 
 def write_outputs(result, out):
     write(out / 'regime_verification_summary.json', result)
-    lines = ['# 2026 verification by climatological regime', '',
+    lines = [f'# {YEAR} verification by climatological regime', '',
              'Single-year descriptive assessment. Positive RPSS/CRPSS means improvement over climatology on the same domain and support. Empty domains have no score.', '',
              '| Target | Domain | Probability cells | Probability coverage within domain | Shared RPSS | Smooth RPSS | Corrected CRPSS |',
              '|---|---|---:|---:|---:|---:|---:|']
@@ -185,7 +186,7 @@ def write_outputs(result, out):
             vals = [v['probability'][method]['rpss'] for _, v in domains]
             ax.bar(x + offset, [np.nan if v is None else v for v in vals], .36, label=method, color=color)
         ax.axhline(0, color='black', lw=.8)
-        ax.set(xticks=x, xticklabels=[k.replace('regime_', 'R').replace('jjas_r12_rainfall_domain', 'JJAS R1+R2 domain') for k, _ in domains], ylabel='RPSS', title=r['target'] + ' 2026 | positive values beat climatology')
+        ax.set(xticks=x, xticklabels=[k.replace('regime_', 'R').replace('jjas_r12_rainfall_domain', 'JJAS R1+R2 domain') for k, _ in domains], ylabel='RPSS', title=r['target'] + f' {YEAR} | positive values beat climatology')
         ax.legend(fontsize=8)
     fig.savefig(out / 'regime_probability_skill.png', dpi=150)
     plt.close(fig)
@@ -194,7 +195,7 @@ def write_outputs(result, out):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--targets', nargs='+', choices=TARGETS, default=['Jun', 'Jul', 'Aug'])
-    ap.add_argument('--verification-root', default='outputs/verification_2026')
+    ap.add_argument('--verification-root', default=f'outputs/verification_{YEAR}')
     ap.add_argument('--mask', default='evidence/followup_regime_comparison_and_masks.nc')
     ap.add_argument('--output-root', default='outputs/verification_followup/regimes')
     ap.add_argument('--regenerate', action='store_true')
@@ -215,9 +216,9 @@ def main():
             domains = make_domains(mask, d)
             rows.append({'target': target, 'provenance': provenance, 'domains': {key: summarize_domain(d, v) for key, v in domains.items()}})
             print('Verified regime summaries:', target, flush=True)
-        result = {'year': 2026, 'created_utc': now(), 'targets': targets, 'regime_labels': LABELS, 'mask_path': str(mp),
+        result = {'year': YEAR, 'created_utc': now(), 'targets': targets, 'regime_labels': LABELS, 'mask_path': str(mp),
                   'mask_sha256': sha(mp), 'classification_method': METHOD, 'frozen_forecasts': snapshot, 'results': rows,
-                  'mask_note': 'Regime classification uses only CHIRPS 1993-2025 and the previously defined GitHub refinement. All-country scores are retained. JJAS R1+R2 rainfall domain uses the cleaned classes and rainfall criteria; no onset gate. This mask is valid for 2026 stratification, not retrospective historical fitting. R1/R2/R3 are rules, not official administrative or independently validated EMI zones.',
+                  'mask_note': f'Regime classification uses only CHIRPS {REGIME} and the previously defined GitHub refinement. All-country scores are retained. JJAS R1+R2 rainfall domain uses the cleaned classes and rainfall criteria; no onset gate. This mask is valid for {YEAR} stratification, not retrospective historical fitting. R1/R2/R3 are rules, not official administrative or independently validated EMI zones.',
                   'limitations': 'One year only; no reliability or significance claim. Amount/probability supports differ. Low CRPS in dry regions need not mean greater predictability. Domains overlap and are not independent. No method selection, coefficient change or forecast overwrite.'}
         unchanged(root, snapshot)
         with staged_output(out, a.regenerate) as stage:

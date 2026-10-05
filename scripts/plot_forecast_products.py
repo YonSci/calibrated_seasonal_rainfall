@@ -12,6 +12,7 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.cm import ScalarMappable
 from matplotlib.patches import Patch
 from output_runs import staged_output, check_destination
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = ['JJAS', 'Jun', 'Jul', 'Aug', 'Sep']
@@ -54,8 +55,8 @@ def classify(p, valid, minimum=0.40, tie_tolerance=1e-8):
 
 
 def derive(d, minimum=.40, percent_floor=10.):
-    if int(d.attrs.get('initialization_month',-1)) != 5 or int(d.attrs.get('target_year',-1)) != 2026:
-        raise ValueError('Expected May-initialized 2026 final_shared_blend file.')
+    if int(d.attrs.get('initialization_month',-1)) != 5 or int(d.attrs.get('target_year',-1)) != YEAR:
+        raise ValueError(f'Expected May-initialized {YEAR} final_shared_blend file.')
     for coordinate in ['lat','lon']:
         a=d[coordinate].values
         if a.ndim!=1 or len(a)<2 or not np.isfinite(a).all() or not np.all(np.diff(a)>0):
@@ -84,8 +85,8 @@ def derive(d, minimum=.40, percent_floor=10.):
     pct_valid=av & (clim>=percent_floor) & (clim>0)
     np.divide(100*anomaly,clim,out=percentage,where=pct_valid)
     out=xr.Dataset(coords={'lat':d.lat,'lon':d.lon,'category':CATEGORIES},attrs={
-        'target_period':d.attrs.get('target_period',''), 'target_year':2026,
-        'initialization_month':5,'reference_period':d.attrs.get('training_years','1993-2025'),
+        'target_period':d.attrs.get('target_period',''), 'target_year':YEAR,
+        'initialization_month':5,'reference_period':d.attrs.get('training_years',f'{REF}'),
         'probability_source':'blend_probability; unchanged',
         'display_minimum_probability':minimum,'tie_tolerance':1e-8,
         'percent_anomaly_minimum_climatology_mm':percent_floor,
@@ -165,8 +166,8 @@ def probability_map(g,target,path,lines):
         cax=fig.add_subplot(grid[row,1]);cb=fig.colorbar(ScalarMappable(norm=norm,cmap=cmap),cax=cax,ticks=[40,50,60,70,80,90,100])
         cb.set_label(['Below normal (%)','Near normal (%)','Above normal (%)'][k])
     decorate(ax,g,lines)
-    fig.suptitle(f'Ethiopia | {target} 2026 rainfall tercile outlook',fontsize=16,y=.965)
-    fig.text(.5,.92,'May initialization | shared probability blend | CHIRPS reference 1993–2025',ha='center',fontsize=10)
+    fig.suptitle(f'Ethiopia | {target} {YEAR} rainfall tercile outlook',fontsize=16,y=.965)
+    fig.text(.5,.92,f'May initialization | shared probability blend | CHIRPS reference {REF_DASH}',ha='center',fontsize=10)
     threshold=100*g.attrs['display_minimum_probability']
     fig.legend(handles=[Patch(facecolor='white',edgecolor='gray',label=f'Weak (<{threshold:g}%) or tied maximum'),
                         Patch(facecolor='#bdbdbd',label='Inside region, probability ineligible')],loc='lower center',bbox_to_anchor=(.47,.08),ncol=1,frameon=False)
@@ -183,8 +184,8 @@ def anomaly_map(g,target,path,lines,percent=False,limit=300.):
     im=ax.pcolormesh(g.lon,g.lat,g[name],cmap=cmap,norm=norm,shading='auto')
     fig.colorbar(im,ax=ax,extend='both',shrink=.87,label=f'Rainfall anomaly ({unit})',ticks=np.array([-1,-.6,-.2,0,.2,.6,1])*limit)
     decorate(ax,g,lines)
-    fig.suptitle(f'Ethiopia | {target} 2026 rainfall anomaly',fontsize=16,y=.96)
-    fig.text(.5,.915,'May initialization | corrected ensemble mean minus CHIRPS 1993–2025 mean',ha='center',fontsize=10)
+    fig.suptitle(f'Ethiopia | {target} {YEAR} rainfall anomaly',fontsize=16,y=.96)
+    fig.text(.5,.915,f'May initialization | corrected ensemble mean minus CHIRPS {REF_DASH} mean',ha='center',fontsize=10)
     masknote=(f'Percentages hidden where climatological total < {g.attrs["percent_anomaly_minimum_climatology_mm"]:g} mm.' if percent else 'Gray: amount-ineligible cells within the region.')
     fig.text(.5,.09,'Red/orange: drier mean; green: wetter mean. White is a small interval around zero.\n'+masknote+'\nAmount correction only; separate from probability blending. Not an EMI/ICPAC product.',ha='center',fontsize=9)
     save(fig,path)
@@ -204,10 +205,10 @@ def process(source,out,target,args,lines):
     g.attrs['anomaly_color_limit_mm']=limit
     g.attrs['anomaly_color_limit_percent']=args.percent_anomaly_limit
     with staged_output(out,args.regenerate) as stage:
-        g.to_netcdf(stage/'map_fields_2026.nc',engine='netcdf4',encoding={n:{'zlib':True,'complevel':4} for n in g.data_vars})
-        probability_map(g,target,stage/'dominant_tercile_2026',lines)
-        anomaly_map(g,target,stage/'rainfall_anomaly_mm_2026',lines,limit=limit)
-        anomaly_map(g,target,stage/'rainfall_anomaly_percent_2026',lines,percent=True,limit=args.percent_anomaly_limit)
+        g.to_netcdf(stage/f'map_fields_{YEAR}.nc',engine='netcdf4',encoding={n:{'zlib':True,'complevel':4} for n in g.data_vars})
+        probability_map(g,target,stage/f'dominant_tercile_{YEAR}',lines)
+        anomaly_map(g,target,stage/f'rainfall_anomaly_mm_{YEAR}',lines,limit=limit)
+        anomaly_map(g,target,stage/f'rainfall_anomaly_percent_{YEAR}',lines,percent=True,limit=args.percent_anomaly_limit)
         valid=g.probability_valid.values.astype(bool)
         # Exact relative area weights for this regular latitude-longitude grid.
         area=np.broadcast_to(np.cos(np.deg2rad(g.lat.values))[:,None],valid.shape)
@@ -247,8 +248,8 @@ def main():
         if not np.isfinite(getattr(args,name)) or getattr(args,name)<=0:p.error(f'{name} must be finite and positive.')
     jobs=[]
     for target in dict.fromkeys(args.targets):
-        source=resolve(args.input_root)/f'init05_{target}/2026/forecast_2026.nc'
-        out=resolve(args.output_root)/f'init05_{target}/2026'
+        source=resolve(args.input_root)/f'init05_{target}/{YEAR}/forecast_{YEAR}.nc'
+        out=resolve(args.output_root)/f'init05_{target}/{YEAR}'
         if not source.is_file():raise FileNotFoundError(f'Missing final forecast: {source}')
         if out.resolve()==source.parent.resolve() or source.resolve().is_relative_to(out.resolve()):
             raise ValueError('Plot output must be separate from input forecasts.')

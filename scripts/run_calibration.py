@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 import xarray as xr
 from common import ROOT,load_config,save_json,save_netcdf,source_path
+from cycle import CYCLE
 from calibration_core import (fit_amount,correct_amount,probabilities,labels,
     fit_dirichlet,apply_dirichlet,EPS)
 
@@ -37,7 +38,7 @@ def load_inputs(cfg,years,observation_years):
                     if not str(d.attrs.get('season_start','')).startswith(f'{year}-'):
                         raise ValueError(f'Model year mismatch: {path}')
                     a = d.precip_season.transpose('member','lat','lon').values.astype(float)
-                    if a.shape[0] != (25 if year<2017 else 51):
+                    if a.shape[0] != CYCLE.members(year):
                         raise ValueError(f'Unexpected member count: {path}')
                     if not np.isfinite(a).all() or (a<0).any():
                         raise ValueError(f'Invalid model values: {path}')

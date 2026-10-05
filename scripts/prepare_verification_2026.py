@@ -1,13 +1,14 @@
-"""Freeze all five forecasts, verify historical CHIRPS overlap, prepare 2026 totals."""
+"""Freeze all five cycle forecasts, verify historical CHIRPS overlap, prepare cycle-year totals (cycle.py)."""
 import argparse,shutil,sys,urllib.request,urllib.error,uuid
 import numpy as np
 import xarray as xr
 from verify2026_common import *
 from verify2026_outputs import staged_output
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 TARGETS=['JJAS','Jun','Jul','Aug','Sep']
 
 def freeze(input_root,output):
-    sources={t:input_root/f'init05_{t}/2026/forecast_2026.nc' for t in TARGETS}
+    sources={t:input_root/f'init05_{t}/{YEAR}/forecast_{YEAR}.nc' for t in TARGETS}
     missing=[str(p) for p in sources.values() if not p.is_file()]
     if missing:raise ValueError('Missing final forecasts:\n'+'\n'.join(missing))
     reference=None
@@ -21,18 +22,18 @@ def freeze(input_root,output):
     if output.exists():
         manifest=read(output/'freeze_manifest.json')
         for t,p in sources.items():
-            dest=output/f'init05_{t}/forecast_2026.nc'
+            dest=output/f'init05_{t}/forecast_{YEAR}.nc'
             if sha(p)!=manifest['targets'][t]['sha256'] or sha(dest)!=manifest['targets'][t]['sha256']:raise ValueError('Frozen forecast differs: '+t+'. Keep the existing assessment archive; do not overwrite it.')
         print('Existing frozen forecasts verified.',flush=True)
     else:
         with staged_output(output,False) as stage:
             records={}
             for t,p in sources.items():
-                out=stage/f'init05_{t}';out.mkdir();shutil.copy2(p,out/'forecast_2026.nc')
-                digest=sha(out/'forecast_2026.nc')
+                out=stage/f'init05_{t}';out.mkdir();shutil.copy2(p,out/f'forecast_{YEAR}.nc')
+                digest=sha(out/f'forecast_{YEAR}.nc')
                 if digest!=sha(p):raise ValueError('Source changed during freeze')
                 records[t]={'source':str(p),'sha256':digest}
-            write(stage/'freeze_manifest.json',{'created_utc':now(),'targets':records,'training_years':'1993-2025','evaluation_year':2026,'selected_probability_method':'shared climatology blend','note':'Snapshot precedes this script downloading 2026 observations. This does not establish that nobody previously inspected 2026 outcomes.'})
+            write(stage/'freeze_manifest.json',{'created_utc':now(),'targets':records,'training_years':f'{REF}','evaluation_year':YEAR,'selected_probability_method':'shared climatology blend','note':f'Snapshot precedes this script downloading {YEAR} observations. This does not establish that nobody previously inspected {YEAR} outcomes.'})
         print('Saved frozen forecasts:',output,flush=True)
     return reference
 
@@ -67,7 +68,7 @@ def main():
     ap.add_argument('--config',default='config/project.json')
     ap.add_argument('--months',nargs='+',choices=list(MONTHS),default=['Jun','Jul','Aug'])
     ap.add_argument('--input-root',default='outputs/final_shared_blend')
-    ap.add_argument('--root',default='outputs/verification_2026')
+    ap.add_argument('--root',default=f'outputs/verification_{YEAR}')
     ap.add_argument('--cache',default='data/raw/chirps/verification_p25')
     ap.add_argument('--regenerate',action='store_true');a=ap.parse_args()
     try:
@@ -81,32 +82,32 @@ def main():
         overlaps={}
         with xr.open_dataset(historical) as old:
             for name in names:
-                month=MONTHS[name];p=fetch(2025,month,cache)
-                with xr.open_dataset(p) as new:b=daily_block(new,2025,month,grid.lat,grid.lon)
-                h=daily_block(old,2025,month,grid.lat,grid.lon,variable)
+                month=MONTHS[name];p=fetch(OVERLAP_YEAR,month,cache)
+                with xr.open_dataset(p) as new:b=daily_block(new,OVERLAP_YEAR,month,grid.lat,grid.lon)
+                h=daily_block(old,OVERLAP_YEAR,month,grid.lat,grid.lon,variable)
                 overlaps[name]={**overlap_check(b.values,h.values),'overlap_file_sha256':sha(p),'historical_source':str(historical),'historical_file_bytes':historical.stat().st_size,'historical_file_mtime_ns':historical.stat().st_mtime_ns}
-                print('Overlap passed:',name,'2025',flush=True)
+                print('Overlap passed:',name,OVERLAP_YEAR,flush=True)
         for name in names:
-            month=MONTHS[name];p=fetch(2026,month,cache)
-            with xr.open_dataset(p) as new:b=daily_block(new,2026,month,grid.lat,grid.lon)
+            month=MONTHS[name];p=fetch(YEAR,month,cache)
+            with xr.open_dataset(p) as new:b=daily_block(new,YEAR,month,grid.lat,grid.lon)
             z,count=total(b);expected=b.sizes['time']
-            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count.astype('int16'))},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':2026,'target':name,'season_start':str(b.time.values[0])[:10],'season_end':str(b.time.values[-1])[:10],'expected_days':expected,'product':'CHIRPS Version 2.0 daily p25','source_url':BASE+p.name,'source_sha256':sha(p),'processing_utc':now(),'grid_method':'native coordinate match; no interpolation','forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
+            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count.astype('int16'))},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':name,'season_start':str(b.time.values[0])[:10],'season_end':str(b.time.values[-1])[:10],'expected_days':expected,'product':'CHIRPS Version 2.0 daily p25','source_url':BASE+p.name,'source_sha256':sha(p),'processing_utc':now(),'grid_method':'native coordinate match; no interpolation','forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
             ds.precip_season.attrs['units']='mm'
             with staged_output(root/'observations'/name,a.regenerate) as stage:
-                ds.to_netcdf(stage/'chirps_2026_common.nc',encoding={k:{'zlib':True,'complevel':4} for k in ds.data_vars})
-                write(stage/'preparation_report.json',{'target':name,'overlap':overlaps[name],'expected_days':expected,'complete_cells':int((count==expected).sum()),'missing_cells':int((count!=expected).sum()),'source_sha256':sha(p),'forecast_freeze_sha256':ds.attrs['forecast_freeze_sha256'],'prepared_total_sha256':sha(stage/'chirps_2026_common.nc')})
+                ds.to_netcdf(stage/f'chirps_{YEAR}_common.nc',encoding={k:{'zlib':True,'complevel':4} for k in ds.data_vars})
+                write(stage/'preparation_report.json',{'target':name,'overlap':overlaps[name],'expected_days':expected,'complete_cells':int((count==expected).sum()),'missing_cells':int((count!=expected).sum()),'source_sha256':sha(p),'forecast_freeze_sha256':ds.attrs['forecast_freeze_sha256'],'prepared_total_sha256':sha(stage/f'chirps_{YEAR}_common.nc')})
             print('Prepared',name,expected,'days',flush=True)
         # Build JJAS only when all four months are explicitly requested and complete in this run.
         if set(names)==set(MONTHS):
             datasets=[]
             for name in MONTHS:
-                with xr.open_dataset(root/'observations'/name/'chirps_2026_common.nc') as f:datasets.append(f.load())
+                with xr.open_dataset(root/'observations'/name/f'chirps_{YEAR}_common.nc') as f:datasets.append(f.load())
             z=sum(d.precip_season.values.astype(float) for d in datasets);count=sum(d.valid_day_count.values.astype('int16') for d in datasets)
-            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count)},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':2026,'target':'JJAS','season_start':'2026-06-01','season_end':'2026-09-30','expected_days':122,'product':'CHIRPS Version 2.0 daily p25','processing_utc':now(),'forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
+            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count)},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':'JJAS','season_start':f'{YEAR}-06-01','season_end':f'{YEAR}-09-30','expected_days':122,'product':'CHIRPS Version 2.0 daily p25','processing_utc':now(),'forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
             ds.precip_season.attrs['units']='mm'
             with staged_output(root/'observations/JJAS',a.regenerate) as stage:
-                ds.to_netcdf(stage/'chirps_2026_common.nc')
-                write(stage/'preparation_report.json',{'target':'JJAS','month_sha256':{n:sha(root/'observations'/n/'chirps_2026_common.nc') for n in MONTHS},'prepared_total_sha256':sha(stage/'chirps_2026_common.nc'),'expected_days':122,'reconstruction':'Sum of four complete calendar-month totals; missing cells remain NaN'})
+                ds.to_netcdf(stage/f'chirps_{YEAR}_common.nc')
+                write(stage/'preparation_report.json',{'target':'JJAS','month_sha256':{n:sha(root/'observations'/n/f'chirps_{YEAR}_common.nc') for n in MONTHS},'prepared_total_sha256':sha(stage/f'chirps_{YEAR}_common.nc'),'expected_days':122,'reconstruction':'Sum of four complete calendar-month totals; missing cells remain NaN'})
             print('Prepared JJAS: 122 days; monthly reconstruction exact.',flush=True)
         print('Prepared targets:',', '.join(names)+(', JJAS' if len(names)==4 else '')+'. Forecasts unchanged.')
     except (ValueError,KeyError,OSError,urllib.error.URLError) as exc:print('ERROR:',exc,file=sys.stderr);sys.exit(2)

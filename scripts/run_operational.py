@@ -1,4 +1,4 @@
-r"""Run the established May-2026 shared-blend production/review stages.
+r"""Run the May-initialized shared-blend production/review stages for one forecast cycle.
 
 Examples (Windows CMD):
   python scripts\run_operational.py --plan
@@ -6,9 +6,12 @@ Examples (Windows CMD):
   python scripts\run_operational.py --workflow all
 
 No fitting or regridding is triggered. Existing scientific stages remain authoritative.
-The engine can support other adapters later; this adapter explicitly requires 2026.
+The cycle (forecast year, reference period, folders) comes from --config, default
+config/operational.json (May 2026). Child stages receive it via CALIBRATION_CYCLE.
+See docs/37_NEW_FORECAST_CYCLE.md for a new cycle such as 2027.
 """
 import argparse
+import os
 import importlib.metadata
 import json
 from pathlib import Path
@@ -23,11 +26,17 @@ ROOT = Path(__file__).resolve().parents[1]
 ORDER = ["Jun", "Jul", "Aug", "Sep", "JJAS"]
 MONTHS = {"Jun":6,"Jul":7,"Aug":8,"Sep":9}
 BASE = "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/"
+# Cycle values; configuration() replaces them with the selected cycle file's values.
+YEAR, REF_YEARS, OVERLAP_YEAR = 2026, list(range(1993,2026)), 2025
+
+
+def forecast_file(root, target):
+    return Path(root)/f"init05_{target}/{YEAR}/forecast_{YEAR}.nc"
 PATH_KEYS = ["project_config","forecast_root","verification_root","processed_root","download_cache",
              "regime_mask","boundary","historical_review","output_root"]
 PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operational.py",
                    "delivery_map_base.py","delivery_output_runs.py","plot_forecast_products.py",
-                   "output_runs.py","followup_common.py",
+                   "output_runs.py","cycle.py","followup_common.py",
                    "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py"]
 VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
                   "verification_report_core.py","build_verification_report.py"]
@@ -46,10 +55,14 @@ def require(paths):
 
 
 def configuration(filename, targets=None):
+    global YEAR, REF_YEARS, OVERLAP_YEAR
+    from cycle import load_cycle
+    cycle = load_cycle(filename)          # validates adapter, years and targets
     cfg = read(filename)
-    if (cfg.get("schema_version")!=1 or cfg.get("adapter")!="may_2026_shared_blend" or
-        cfg.get("forecast_year")!=2026 or cfg.get("initialization_month")!=5 or cfg.get("reference_years")!=[1993,2025]):
-        raise ValueError("This adapter requires May 2026, historical reference 1993-2025. Changing the year alone is not supported; the existing scientific scripts also require an updated adapter.")
+    if cfg.get("schema_version")!=1:
+        raise ValueError("Unsupported operational configuration schema")
+    YEAR, REF_YEARS = cycle.year, cycle.reference_years
+    OVERLAP_YEAR = int(cfg.get("overlap_year", 2025))
     wanted = targets or cfg["targets"]
     if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
         raise ValueError("Targets must be unique Jun, Jul, Aug, Sep, JJAS names")
@@ -68,7 +81,7 @@ def configuration(filename, targets=None):
     if not output.is_relative_to(ROOT/"outputs") or output==ROOT/"outputs":
         raise ValueError("output_root must be its own subfolder of this project's outputs folder")
     protected = [ROOT/"data",ROOT/"config",ROOT/"scripts",ROOT/"evidence",ROOT/"outputs/forecast_delivery",
-                 ROOT/"outputs/verification_report_2026",ROOT/"outputs/final_shared_blend"]
+                 ROOT/f"outputs/verification_report_{YEAR}",ROOT/"outputs/final_shared_blend"]
     protected += [path(cfg[key]) for key in PATH_KEYS if key!="output_root"]
     for item in protected:
         if item==output or item.is_relative_to(output) or output.is_relative_to(item):
@@ -79,7 +92,7 @@ def configuration(filename, targets=None):
 def verification_files(root, target):
     return [root/f"results/{target}/verification_report.json",
             root/f"results/{target}/verification_fields.nc",
-            root/f"observations/{target}/chirps_2026_common.nc"]
+            root/f"observations/{target}/chirps_{YEAR}_common.nc"]
 
 
 def existing_verification(root, targets):
@@ -117,7 +130,7 @@ def choose_verification(requested, target_scope, checker=probe):
     if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
         raise ValueError("--verification-targets must be 'auto' alone or target names")
     needed = [m for m in MONTHS if m in wanted or "JJAS" in wanted]
-    records = {m:checker(BASE+f"chirps-v2.0.2026.{MONTHS[m]:02d}.days_p25.nc") for m in needed}
+    records = {m:checker(BASE+f"chirps-v2.0.{YEAR}.{MONTHS[m]:02d}.days_p25.nc") for m in needed}
     for m,r in records.items():
         print("CHIRPS availability:",m,r["status"],flush=True)
     unknown = [m for m,r in records.items() if r["status"]=="unknown"]
@@ -159,8 +172,8 @@ def preflight(cfg, workflow, verification_request):
     sources = {}
     reference = None
     for target in cfg["targets"]:
-        p = (vr/f"frozen_forecasts/init05_{target}/forecast_2026.nc" if snapshot else
-             path(cfg["forecast_root"])/f"init05_{target}/2026/forecast_2026.nc")
+        p = (vr/f"frozen_forecasts/init05_{target}/forecast_{YEAR}.nc" if snapshot else
+             forecast_file(path(cfg["forecast_root"]),target))
         require([p])
         with xr.open_dataset(p) as ds:
             d = ds.load()
@@ -187,14 +200,14 @@ def preflight(cfg, workflow, verification_request):
         months,ready,availability = choose_verification(verification_request,cfg["targets"])
         require([path(cfg["project_config"])])
         project = read(cfg["project_config"])
-        if project.get("initialization_month")!=5 or project.get("season")!={"name":"JJAS","start":"06-01","end":"09-30"} or project.get("observation_years")!=[1993,2025]:
-            raise ValueError("Project configuration does not match the May-2026 verification adapter")
+        if project.get("initialization_month")!=5 or project.get("season")!={"name":"JJAS","start":"06-01","end":"09-30"} or project.get("observation_years")!=[REF_YEARS[0],OVERLAP_YEAR]:
+            raise ValueError("Project configuration does not match the May-initialized verification adapter (observation_years must end with the CHIRPS archive year, overlap_year)")
         require([path(project["chirps_file"])])
         # Existing preparation validates all five originals against the freeze.
-        require([path(cfg["forecast_root"])/f"init05_{t}/2026/forecast_2026.nc" for t in ORDER])
+        require([forecast_file(path(cfg["forecast_root"]),t) for t in ORDER])
         for t in ready:
             folder = path(cfg["processed_root"])/f"init05_{t}"
-            require([folder/"ecmwf_2026_common.nc",*[folder/f"chirps_{y}_common.nc" for y in range(1993,2026)]])
+            require([folder/f"ecmwf_{YEAR}_common.nc",*[folder/f"chirps_{y}_common.nc" for y in REF_YEARS]])
     return {"packages":packages,"sources":sources,"snapshot":snapshot,"existing":existing,
             "months":months,"ready":ready,"availability":availability,"scripts":scripts}
 
@@ -210,11 +223,11 @@ def verify_stages(runner,cfg,info,code_inputs):
     config = path(cfg["project_config"])
     historical = path(read(config)["chirps_file"])
     freeze = vr/"frozen_forecasts"
-    originals = [path(cfg["forecast_root"])/f"init05_{t}/2026/forecast_2026.nc" for t in ORDER]
+    originals = [forecast_file(path(cfg["forecast_root"]),t) for t in ORDER]
     prepared = [*months, *(["JJAS"] if set(months)==set(MONTHS) else [])]
     cache_outputs = []
     for m in months:
-        for year in [2025,2026]:
+        for year in [OVERLAP_YEAR,YEAR]:
             f = path(cfg["download_cache"])/f"chirps-v2.0.{year}.{MONTHS[m]:02d}.days_p25.nc"
             cache_outputs.extend([f,f.with_suffix(".download.json")])
     runner.stage("prepare_observations_"+"_".join(months),
@@ -224,8 +237,8 @@ def verify_stages(runner,cfg,info,code_inputs):
                                  "--input-root",cfg["forecast_root"],"--root",vr,"--cache",cfg["download_cache"],"--regenerate"))
     for target in ready:
         folder = path(cfg["processed_root"])/f"init05_{target}"
-        inputs = [*code_inputs,freeze,vr/f"observations/{target}",folder/"ecmwf_2026_common.nc",
-                  *[folder/f"chirps_{y}_common.nc" for y in range(1993,2026)]]
+        inputs = [*code_inputs,freeze,vr/f"observations/{target}",folder/f"ecmwf_{YEAR}_common.nc",
+                  *[folder/f"chirps_{y}_common.nc" for y in REF_YEARS]]
         runner.stage("score_"+target,inputs,[vr/f"results/{target}",vr/f"reports/{target}"],
                      command=command("verify_frozen_2026.py","--root",vr,"--processed-root",cfg["processed_root"],"--targets",target,"--regenerate"))
     return ready
@@ -269,6 +282,8 @@ def main():
     a = ap.parse_args()
     runner = None
     try:
+        # Set before anything imports cycle.py: in-process imports and child stages read this file.
+        os.environ["CALIBRATION_CYCLE"] = str(path(a.config))
         cfg = configuration(path(a.config),a.targets)
         # Import after config validation for a more useful error on unsupported cycles.
         from presentation_layers import build_forecast,build_verification,build_gallery,boundary_files

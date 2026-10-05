@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "adapter": "may_shared_blend",
+  "forecast_year": 2025,
+  "initialization_month": 5,
+  "reference_years": [
+    1993,
+    2024
+  ],
+  "targets": [
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "JJAS"
+  ],
+  "project_config": "config/project.json",
+  "forecast_root": "outputs/_backtest_2025/final_shared_blend",
+  "verification_root": "outputs/_backtest_2025/verification",
+  "processed_root": "data/processed",
+  "download_cache": "data/raw/chirps/verification_p25",
+  "regime_mask": "evidence/followup_regime_comparison_and_masks.nc",
+  "boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "historical_review": "outputs/verification_followup/historical/historical_blend_review.json",
+  "output_root": "outputs/_backtest_2025/operational",
+  "display": {
+    "interpolation_factor": 12,
+    "gaussian_sigma_cells": 0.6,
+    "minimum_leading_probability": 0.4,
+    "percent_anomaly_minimum_climatology_mm": 10.0,
+    "monthly_anomaly_limit_mm": 100.0,
+    "jjas_anomaly_limit_mm": 300.0,
+    "dpi": 180,
+    "pdf": true
+  },
+  "notes": "Backtest/regression cycle: forecast 2025 from a 1993-2024 reference. Writes only under outputs/_backtest_2025."
+}

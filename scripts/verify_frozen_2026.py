@@ -1,4 +1,4 @@
-"""Score frozen 2026 forecasts against complete CHIRPS v2 observations; no fitting."""
+"""Score frozen cycle-year forecasts against complete CHIRPS v2 observations; no fitting (cycle.py)."""
 import argparse,sys
 import numpy as np
 import xarray as xr
@@ -9,13 +9,14 @@ from matplotlib.colors import ListedColormap,BoundaryNorm
 from verify2026_common import *
 from verify2026_outputs import staged_output
 from verify2026_math import crps,probability_losses
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 
 def category(x,q1,q2):return np.where(x<q1,0,np.where(x>q2,2,1))
 
 def load_reference(folder,f,target):
     arrays=[];hashes={}
-    for year in range(1993,2026):
+    for year in REF_YEARS:
         p=folder/f'chirps_{year}_common.nc'
         with xr.open_dataset(p) as d:
             same_grid(d,f)
@@ -71,7 +72,7 @@ def calculate(f,raw,history,obs):
     for name,(bs,rps,ll) in losses.items():
         fields[name+'_rps']=(('lat','lon'),rps);fields[name+'_brier']=(('lat','lon','category'),bs);fields[name+'_log_loss']=(('lat','lon'),ll)
     fields['shared_minus_climatology_rps']=fields.shared_blend_rps-fields.climatology_rps
-    fields.attrs.update(evaluation_year=2026,initialization_month=5,reference_years='1993-2025',note='Single-year scores; native-grid fields. Negative shared-minus-climatology RPS favors the shared forecast. No cell-level significance test.')
+    fields.attrs.update(evaluation_year=YEAR,initialization_month=5,reference_years=f'{REF}',note='Single-year scores; native-grid fields. Negative shared-minus-climatology RPS favors the shared forecast. No cell-level significance test.')
     report={'amount_cells':int(av.sum()),'probability_cells':int(pv.sum()),'amount_country_area_percent':float(100*w[av].sum()/w[region].sum()),'probability_country_area_percent':float(100*w[pv].sum()/w[region].sum()),'observed_category_area_fractions':[avg((y==k).astype(float),pv) for k in range(3)],'amount':amount,'probability':probability,'interpretation':'Single-year area-weighted performance, not multi-year reliability. June-September and JJAS are overlapping/dependent evaluation targets, not five independent seasons.','log_loss_note':'Natural log; probabilities floored at 1e-12 for scoring; zero-probability observed-event counts reported.','raw_probability_note':'Raw member counts against frozen observed thresholds; not a model-climatology tercile forecast.','crps_note':'Empirical ensemble CRPS: raw/corrected 51 members, climatology 33 historical observed years. This scores these finite predictive distributions; no fair/iid ensemble correction.'}
     return report,fields
 
@@ -92,11 +93,11 @@ def plots(d,out,target):
         cb=fig.colorbar(im,ax=ax,shrink=.8,extend='neither' if key=='observed_category' else 'both')
         if key=='observed_category':cb.set_ticks([0,1,2]);cb.set_ticklabels(['Below','Near','Above'])
         ax.set(title=title,aspect='equal',xlabel='Longitude',ylabel='Latitude')
-    fig.suptitle(f'{target} 2026 | frozen shared-blend forecast verification\nCHIRPS v2 observations; native grid; descriptive single-year assessment',fontsize=15)
+    fig.suptitle(f'{target} {YEAR} | frozen shared-blend forecast verification\nCHIRPS v2 observations; native grid; descriptive single-year assessment',fontsize=15)
     fig.savefig(out/'verification_maps.png',dpi=180);plt.close(fig)
 
 def assess(root,processed,target,regenerate):
-    fp=root/'frozen_forecasts'/f'init05_{target}/forecast_2026.nc';op=root/'observations'/target/'chirps_2026_common.nc';rawp=processed/f'init05_{target}/ecmwf_2026_common.nc'
+    fp=root/'frozen_forecasts'/f'init05_{target}/forecast_{YEAR}.nc';op=root/'observations'/target/f'chirps_{YEAR}_common.nc';rawp=processed/f'init05_{target}/ecmwf_{YEAR}_common.nc'
     frozen=read(root/'frozen_forecasts/freeze_manifest.json')
     if sha(fp)!=frozen['targets'][target]['sha256']:raise ValueError('Frozen forecast was modified')
     with xr.open_dataset(fp) as ds:f=ds.load()
@@ -105,20 +106,20 @@ def assess(root,processed,target,regenerate):
     if preparation.get('prepared_total_sha256')!=sha(op):raise ValueError('Prepared observations differ from their preparation report')
     with xr.open_dataset(op) as ds:o=ds.load()
     same_grid(o,f)
-    expected=len(dates(2026,*PERIODS[target]))
-    if int(o.attrs['year'])!=2026 or o.attrs['target']!=target or o.attrs['season_start']!='2026-'+PERIODS[target][0] or o.attrs['season_end']!='2026-'+PERIODS[target][1] or int(o.attrs['expected_days'])!=expected:raise ValueError('Wrong observation dates/target')
+    expected=len(dates(YEAR,*PERIODS[target]))
+    if int(o.attrs['year'])!=YEAR or o.attrs['target']!=target or o.attrs['season_start']!=f'{YEAR}-'+PERIODS[target][0] or o.attrs['season_end']!=f'{YEAR}-'+PERIODS[target][1] or int(o.attrs['expected_days'])!=expected:raise ValueError('Wrong observation dates/target')
     if o.attrs.get('product')!='CHIRPS Version 2.0 daily p25' or o.precip_season.attrs.get('units')!='mm':raise ValueError('Wrong observation product or units')
     if o.attrs.get('forecast_freeze_sha256')!=sha(root/'frozen_forecasts/freeze_manifest.json'):raise ValueError('Observations prepared against a different freeze')
     obs=o.precip_season.values
     if np.isinf(obs).any() or (obs[np.isfinite(obs)]<0).any() or not np.array_equal(np.isfinite(obs),o.valid_day_count.values==expected):raise ValueError('Incomplete/invalid totals')
     with xr.open_dataset(rawp) as ds:r=ds.load()
     same_grid(r,f)
-    if r.attrs.get('season_start')!='2026-'+PERIODS[target][0] or r.attrs.get('season_end')!='2026-'+PERIODS[target][1] or r.precip_season.attrs.get('units')!='mm' or not np.array_equal(r.member,f.member):raise ValueError('Raw forecast period, units or members differ')
+    if r.attrs.get('season_start')!=f'{YEAR}-'+PERIODS[target][0] or r.attrs.get('season_end')!=f'{YEAR}-'+PERIODS[target][1] or r.precip_season.attrs.get('units')!='mm' or not np.array_equal(r.member,f.member):raise ValueError('Raw forecast period, units or members differ')
     raw=r.precip_season.transpose('member','lat','lon').values.astype(float)
     if not np.isfinite(raw).all() or (raw<0).any():raise ValueError('Invalid raw forecast')
     history,hashes=load_reference(processed/f'init05_{target}',f,target)
     report,fields=calculate(f,raw,history,obs)
-    report.update(target=target,year=2026,processing_utc=now(),forecast_sha256=sha(fp),observations_sha256=sha(op),raw_forecast_sha256=sha(rawp),history_sha256=hashes)
+    report.update(target=target,year=YEAR,processing_utc=now(),forecast_sha256=sha(fp),observations_sha256=sha(op),raw_forecast_sha256=sha(rawp),history_sha256=hashes)
     fields.attrs['target']=target
     with staged_output(root/'results'/target,regenerate) as stage:
         write(stage/'verification_report.json',report);fields.to_netcdf(stage/'verification_fields.nc');plots(fields,stage,target)
@@ -127,19 +128,19 @@ def assess(root,processed,target,regenerate):
 
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--root',default='outputs/verification_2026');ap.add_argument('--processed-root',default='data/processed')
+    ap.add_argument('--root',default=f'outputs/verification_{YEAR}');ap.add_argument('--processed-root',default='data/processed')
     ap.add_argument('--targets',nargs='+',choices=list(PERIODS),default=['Jun','Jul','Aug']);ap.add_argument('--regenerate',action='store_true');a=ap.parse_args()
     try:
         root=path(a.root);processed=path(a.processed_root);targets=list(dict.fromkeys(a.targets));required=[root/'frozen_forecasts/freeze_manifest.json']
         for t in targets:
-            required.extend([root/'frozen_forecasts'/f'init05_{t}/forecast_2026.nc',root/'observations'/t/'chirps_2026_common.nc',processed/f'init05_{t}/ecmwf_2026_common.nc'])
-            required.extend(processed/f'init05_{t}/chirps_{y}_common.nc' for y in range(1993,2026))
+            required.extend([root/'frozen_forecasts'/f'init05_{t}/forecast_{YEAR}.nc',root/'observations'/t/f'chirps_{YEAR}_common.nc',processed/f'init05_{t}/ecmwf_{YEAR}_common.nc'])
+            required.extend(processed/f'init05_{t}/chirps_{y}_common.nc' for y in REF_YEARS)
         missing=[str(p) for p in required if not p.is_file()]
         if missing:raise ValueError('Required inputs missing; run preparation for complete available targets:\n'+'\n'.join(missing))
         rows=[assess(root,processed,t,a.regenerate) for t in targets]
         with staged_output(root/'reports'/'_'.join(targets),a.regenerate) as stage:
-            write(stage/'verification_summary.json',{'year':2026,'targets':targets,'results':rows,'note':'No aggregate score across monthly and JJAS targets because they overlap. Forecasts and calibration remain frozen.'})
-            lines=['# Frozen 2026 forecast verification','','Single-year descriptive assessment against CHIRPS v2. Lower CRPS/RPS is better; positive skill means improvement over the specified historical climatology.','','| Target | Raw CRPS mm | Corrected CRPS mm | Climatology CRPS mm | Shared RPS | Climatology RPS | Shared RPSS |','|---|---:|---:|---:|---:|---:|---:|']
+            write(stage/'verification_summary.json',{'year':YEAR,'targets':targets,'results':rows,'note':'No aggregate score across monthly and JJAS targets because they overlap. Forecasts and calibration remain frozen.'})
+            lines=[f'# Frozen {YEAR} forecast verification','','Single-year descriptive assessment against CHIRPS v2. Lower CRPS/RPS is better; positive skill means improvement over the specified historical climatology.','','| Target | Raw CRPS mm | Corrected CRPS mm | Climatology CRPS mm | Shared RPS | Climatology RPS | Shared RPSS |','|---|---:|---:|---:|---:|---:|---:|']
             for r in rows:
                 am=r['amount'];pr=r['probability'];ss=pr['shared_blend']['rpss'];lines.append(f'| {r["target"]} | {am["raw"]["crps_mm"]:.3f} | {am["corrected"]["crps_mm"]:.3f} | {am["climatology"]["crps_mm"]:.3f} | {pr["shared_blend"]["rps"]:.6f} | {pr["climatology"]["rps"]:.6f} | {ss:.4f} |' if ss is not None else f'| {r["target"]} | undefined reference score |')
             lines+=['','See target verification_report.json files for category Brier/BSS, log loss, bias, MAE, RMSE, coverage and source hashes. Probability blending does not change the amount-corrected ensemble CRPS. Spatial cells are not independent cases; no single-year bootstrap or long-term reliability claim is made.']

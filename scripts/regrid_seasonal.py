@@ -11,6 +11,7 @@ from datetime import date, datetime, timezone
 import numpy as np
 import xarray as xr
 from common import ROOT, load_config, save_json, save_netcdf
+from cycle import CYCLE
 
 
 def edges(values):
@@ -86,7 +87,7 @@ def check_season(ds, cfg, year, is_model):
     if is_model:
         if ds.attrs.get('season_start') != start.isoformat() or ds.attrs.get('season_end') != end.isoformat():
             raise ValueError('Model season dates do not match requested year.')
-        expected = 25 if year < 2017 else 51
+        expected = CYCLE.members(year)
         if ds.sizes['member'] != expected or len(np.unique(ds.member)) != expected:
             raise ValueError('Unexpected or duplicate ensemble members.')
         if not (ds.valid_day_count.values == days).all():

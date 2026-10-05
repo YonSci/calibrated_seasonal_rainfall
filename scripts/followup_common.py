@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = ['JJAS', 'Jun', 'Jul', 'Aug', 'Sep']
@@ -59,11 +60,11 @@ def freeze_snapshot(root):
     if not manifest.is_file():
         raise ValueError('Step 30 freeze is missing. Run prepare_verification_2026.py first: ' + str(manifest))
     m = read(manifest)
-    if m.get('evaluation_year') != 2026 or m.get('training_years') != '1993-2025':
+    if m.get('evaluation_year') != YEAR or m.get('training_years') != f'{REF}':
         raise ValueError('Unexpected frozen forecast baseline or evaluation year')
     result = {'manifest_sha256': sha(manifest), 'forecast_sha256': {}, 'original_sources_checked': {}}
     for target in TARGETS:
-        p = root / f'frozen_forecasts/init05_{target}/forecast_2026.nc'
+        p = root / f'frozen_forecasts/init05_{target}/forecast_{YEAR}.nc'
         if sha(p) != m['targets'][target]['sha256']:
             raise ValueError('Frozen forecast has changed: ' + target)
         result['forecast_sha256'][target] = sha(p)

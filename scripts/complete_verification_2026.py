@@ -5,6 +5,7 @@ import sys
 import urllib.error
 import urllib.request
 from followup_common import *
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 BASE = 'https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/'
 MONTHS = {'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9}
@@ -32,7 +33,7 @@ def probe(url, opener=None):
 def availability():
     records = []
     for name, month in MONTHS.items():
-        url = BASE + f'chirps-v2.0.2026.{month:02d}.days_p25.nc'
+        url = BASE + f'chirps-v2.0.{YEAR}.{month:02d}.days_p25.nc'
         r = {'month': name, 'url': url, **probe(url)}
         records.append(r)
         print(name, r['status'], flush=True)
@@ -76,7 +77,7 @@ def main():
     group.add_argument('--check', action='store_true', help='Availability check only (default).')
     group.add_argument('--run', action='store_true', help='Run preparation, scoring and regime review only if all months are available.')
     ap.add_argument('--config', default='config/project.json')
-    ap.add_argument('--verification-root', default='outputs/verification_2026')
+    ap.add_argument('--verification-root', default=f'outputs/verification_{YEAR}')
     ap.add_argument('--mask', default='evidence/followup_regime_comparison_and_masks.nc')
     ap.add_argument('--regenerate', action='store_true')
     a = ap.parse_args()

@@ -8,6 +8,7 @@ import sys
 import numpy as np
 import xarray as xr
 from common import ROOT, load_config, save_json
+from cycle import CYCLE
 
 MONTHS={6:'Jun',7:'Jul',8:'Aug',9:'Sep'}
 
@@ -43,8 +44,9 @@ def compare_totals(total, reference):
 
 def reconstruction_check():
     report=[]
-    for year in range(1993,2027):
-        for kind in (['ecmwf','chirps'] if year<=2025 else ['ecmwf']):
+    # Model years through the cycle's forecast year; observations through its reference end.
+    for year in range(CYCLE.ref_first,CYCLE.year+1):
+        for kind in (['ecmwf','chirps'] if year<=CYCLE.ref_last else ['ecmwf']):
             seasonal=ROOT/f'data/processed/init05_JJAS/{kind}_{year}_common.nc'
             if not seasonal.exists():raise FileNotFoundError(f'Seasonal reference required: {seasonal}')
             with xr.open_dataset(seasonal) as d:
@@ -90,12 +92,12 @@ def main():
         else:save_json(config,mc)
         print(f'Month: {MONTHS[month]}, config: {config}',flush=True)
         if args.stage=='prepare':
-            if cfg['archive_years']!=[1993,2026] or cfg['observation_years']!=[1993,2025]:
-                raise ValueError('Expected the established 1993-2026 model / 1993-2025 observation archive.')
+            if cfg['archive_years'][0]!=cfg['observation_years'][0] or cfg['archive_years'][1]<cfg['observation_years'][1]:
+                raise ValueError('archive_years must start with observation_years and cover them.')
             for folder in ['data/interim','data/processed']:
                 path=ROOT/f'{folder}/init05_{MONTHS[month]}'
                 if path.exists():raise FileExistsError(f'{path} exists. Rename partial/old monthly folder before preparation.')
-            subprocess.run([sys.executable,str(ROOT/'scripts/prepare_seasonal.py'),'--config',str(config),'--years',*[str(y) for y in range(1993,2027)]],cwd=ROOT,check=True)
+            subprocess.run([sys.executable,str(ROOT/'scripts/prepare_seasonal.py'),'--config',str(config),'--years',*[str(y) for y in range(cfg['archive_years'][0],cfg['archive_years'][1]+1)]],cwd=ROOT,check=True)
             subprocess.run([sys.executable,str(ROOT/'scripts/regrid_seasonal.py'),'--config',str(config)],cwd=ROOT,check=True)
         elif args.stage in ['training','operational']:
             command=[sys.executable,str(ROOT/'scripts/local_blend.py'),'--config',str(config),'--mode',args.stage,'--region-mask',args.region_mask]

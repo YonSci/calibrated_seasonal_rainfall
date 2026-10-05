@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from common import ROOT, load_config, make_folders, model_path, source_path, save_json, save_netcdf
+from cycle import CYCLE
 
 
 def season_dates(cfg, year):
@@ -160,7 +161,7 @@ def main():
                 raise FileNotFoundError(path)
             with xr.open_dataset(path) as ds:
                 model, report = model_season(ds, cfg, year)
-            expected_members = 25 if year <= 2016 else 51
+            expected_members = CYCLE.members(year)
             if report["members"] != expected_members:
                 raise ValueError(f"{year}: expected {expected_members} members per project inventory, found {report['members']}")
             model.attrs.update(source_file=str(path), processing_utc=datetime.now(timezone.utc).isoformat(),

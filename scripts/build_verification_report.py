@@ -4,15 +4,16 @@ import sys
 from followup_common import ROOT, path, read, sha, freeze_snapshot, unchanged, protect_output
 from verify2026_outputs import staged_output
 from verification_report_core import ORDER, export_report
+from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--targets', nargs='+', choices=ORDER, default=['Jun', 'Jul', 'Aug'])
-    ap.add_argument('--verification-root', default='outputs/verification_2026')
+    ap.add_argument('--verification-root', default=f'outputs/verification_{YEAR}')
     ap.add_argument('--regime-summary', help='Default: matching Step 31 target-combination folder.')
     ap.add_argument('--historical-review', default='outputs/verification_followup/historical/historical_blend_review.json')
-    ap.add_argument('--output-root', default='outputs/verification_report_2026')
+    ap.add_argument('--output-root', default=f'outputs/verification_report_{YEAR}')
     ap.add_argument('--regenerate', action='store_true')
     args = ap.parse_args()
     try:
@@ -27,14 +28,14 @@ def main():
         regimes = read(regpath)
         if regimes['frozen_forecasts']['forecast_sha256'] != snapshot['forecast_sha256'] or regimes['frozen_forecasts']['manifest_sha256'] != snapshot['manifest_sha256']:
             raise ValueError('Regime report belongs to a different frozen assessment')
-        country = {'year': 2026, 'targets': targets, 'results': []}
+        country = {'year': YEAR, 'targets': targets, 'results': []}
         inputs = {'regime_verification_summary.json': sha(regpath)}
         maps = {}
         for target in targets:
             folder = root / 'results' / target
             rp = folder / 'verification_report.json'
             fp = folder / 'verification_fields.nc'
-            op = root / f'observations/{target}/chirps_2026_common.nc'
+            op = root / f'observations/{target}/chirps_{YEAR}_common.nc'
             report = read(rp)
             record = next((r for r in regimes['results'] if r['target'] == target), None)
             if record is None:

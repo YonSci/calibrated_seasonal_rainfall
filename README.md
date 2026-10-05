@@ -8,6 +8,7 @@ Reference period 1993–2025 (25-member hindcasts 1993–2016, 51-member forecas
 Platform: Windows 11, CMD, Python 3.11 x64, project `.venv`.
 
 **Current status and open items:** [docs/36_PROJECT_STATUS_REVIEW.md](docs/36_PROJECT_STATUS_REVIEW.md).
+**Next forecast cycle (2027):** [docs/37_NEW_FORECAST_CYCLE.md](docs/37_NEW_FORECAST_CYCLE.md). Cycle files live in `config/cycles/`; select one with `set CALIBRATION_CYCLE=...`.
 
 ## Final method (frozen for 2026)
 
@@ -55,7 +56,7 @@ The 2026 forecasts are frozen with SHA-256 hashes in
 
 | Path | Purpose |
 | --- | --- |
-| `config/` | `project.json` (JJAS), `monthly_*.json`, `operational.json` |
+| `config/` | `project.json` (JJAS), `monthly_*.json`, `operational.json` (2026 cycle), `cycles/` (2027 template, 2025 backtest) |
 | `scripts/` | Pipeline, verification, delivery and runner scripts |
 | `tests/` | Unit and smoke tests |
 | `docs/` | Numbered step documents 01–36 (read in order; 36 is the current status) |
@@ -74,4 +75,4 @@ The 2026 forecasts are frozen with SHA-256 hashes in
 01–08 setup, data, inspection and design · 09–17 regridding, calibration and method
 comparison · 18–20 monthly fixes and final blend · 21–24 maps · 25–28 regimes and the
 August review · 29–32 delivery, freeze and verification · 33–35 operational runner ·
-36 status review.
+36 status review · 37 new forecast cycle.
