@@ -7,6 +7,7 @@ delivery and verification packages. Rerun after results change:
 """
 import html
 import json
+import re
 import shutil
 from datetime import date
 from pathlib import Path
@@ -16,6 +17,8 @@ OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
 TARGETS = ['JJAS', 'Jun', 'Jul', 'Aug', 'Sep']
 MONTHS = ['Jun', 'Jul', 'Aug']
+VIEWS = [('all_ethiopia', 'All Ethiopia'), ('jjas_r12_rainfall_domain', 'JJAS R1+R2 rainfall domain')]
+GALLERY = 'outputs/operational_2026'
 CAT = ['Below normal', 'Near normal', 'Above normal']
 esc = html.escape
 
@@ -45,19 +48,28 @@ def skill_cell(v, p=None):
     return f'<span class="{cls}{" strong" if strong else ""}">{signed(v)}</span>{sig}'
 
 
-def copy_assets():
+def gallery_entries():
+    """Entries embedded in the operational gallery (outputs/operational_2026/index.html)."""
+    page = (ROOT / GALLERY / 'index.html').read_text(encoding='utf-8')
+    entries = json.loads(re.search(r'<script id="data" type="application/json">(.*?)</script>', page, re.S).group(1))
+    keep = []
+    for e in entries:
+        folder = e['folder'].replace('\\', '/')
+        keep.append(dict(kind=e['kind'], target=e['target'], view=e['view'], label=e['label'],
+                         folder='assets/' + folder.removeprefix('presentation/'), images=e['images'],
+                         source=folder, summary=e['summary']))
+    return keep
+
+
+def copy_assets(entries):
     assets = OUT / 'assets'
     if assets.exists():
         shutil.rmtree(assets)
-    (assets / 'forecast').mkdir(parents=True)
-    (assets / 'verification').mkdir(parents=True)
-    for t in TARGETS:
-        src = ROOT / f'outputs/forecast_delivery/init05_2026/maps/init05_{t}/2026/all_ethiopia'
-        for name in ('dominant_tercile_2026.png', 'rainfall_anomaly_mm_2026.png'):
-            shutil.copy2(src / name, assets / 'forecast' / f'{t}_{name}')
-    for m in MONTHS:
-        shutil.copy2(ROOT / f'outputs/verification_report_2026/Jun_Jul_Aug/maps/{m}_verification.png',
-                     assets / 'verification' / f'{m}_verification.png')
+    for e in entries:
+        dest = OUT / e['folder']
+        dest.mkdir(parents=True, exist_ok=True)
+        for name, _ in e['images']:
+            shutil.copy2(ROOT / GALLERY / e['source'] / f'{name}.png', dest / f'{name}.png')
 
 
 def gather():
@@ -70,11 +82,13 @@ def gather():
     clip = load('outputs/clipping_analysis/amount_correction_alternatives.json')['targets']
     raw = load('outputs/verification/init05_JJAS/Ethiopia/verification_summary.json')['summary']
     status = load('outputs/verification_followup/season_status.json')
-    return fc, ver, reg, gates, ens, mono, clip, raw, status
+    domain = load(f'{GALLERY}/presentation/forecast/JJAS/presentation_summary.json')
+    return fc, ver, reg, gates, ens, mono, clip, raw, status, domain
 
 
-def page(fc, ver, reg, gates, ens, mono, clip, raw, status):
+def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
     j = fc['JJAS']
+    r12 = next(e['summary'] for e in entries if (e['kind'], e['target'], e['view']) == ('forecast', 'JJAS', 'jjas_r12_rainfall_domain'))
     vs = {m: ver[m]['probability']['shared_blend']['rpss'] for m in MONTHS}
     eth = {t: reg[t] for t in TARGETS}
     raw_rpss = 1 - raw['raw_rps'] / raw['climatology_rps'] if 'raw_rps' in raw and 'climatology_rps' in raw else None
@@ -83,7 +97,7 @@ def page(fc, ver, reg, gates, ens, mono, clip, raw, status):
     # ---------- key numbers
     cards = [
         ('2026 JJAS outlook', f'{pct(j["area_mean_local_probabilities"][0])} below normal',
-         f'Area-mean probability; anomaly {j["area_mean_anomaly_mm"]:+.0f} mm'),
+         f'All Ethiopia, anomaly {j["area_mean_anomaly_mm"]:+.0f} mm · JJAS R1+R2 domain {pct(r12["mean_local_probabilities"][0])} below, {r12["mean_anomaly_mm"]:+.0f} mm'),
         ('Skill 2017–2025 (JJAS)', f'RPSS {signed(eth["JJAS"]["operational"]["ethiopia"]["rpss_blend"], 3)}',
          'Ranked probability skill vs climatology'),
         ('2026 verified so far', ' / '.join(f'{m} {signed(vs[m], 2)}' for m in MONTHS),
@@ -150,35 +164,44 @@ def page(fc, ver, reg, gates, ens, mono, clip, raw, status):
                 for t in TARGETS]
     ens_t = table(['Target', 'RPS, 51 members', 'RPS, 25-member subsets', 'Spread / error (hindcast → operational)'], ens_rows, 'compact')
 
-    # ---------- forecast
+    # ---------- forecast and verification: same entries, views and statistics as the operational gallery
+    by = {(e['kind'], e['target'], e['view']): e['summary'] for e in entries}
     fc_rows = []
     for t in TARGETS:
-        s = fc[t]
-        p = s['area_mean_local_probabilities']
-        lead = s['area_fraction_leading_display_category']
-        fc_rows.append([t, *(pct(x) for x in p), f'{s["area_mean_anomaly_mm"]:+.1f} mm',
-                        f'{s["climatology_weight"]:.2f}', pct(lead['below'])])
-    fc_t = table(['Target', CAT[0], CAT[1], CAT[2], 'Mean anomaly', 'Climatology weight', 'Area led by below normal'], fc_rows)
-    tabs = ''.join(f'<button class="tab{" active" if t == "JJAS" else ""}" data-t="{t}">{t}</button>' for t in TARGETS)
-    panels = ''.join(
-        f'<div class="panel{" active" if t == "JJAS" else ""}" data-t="{t}"><figure><img loading="lazy" src="assets/forecast/{t}_dominant_tercile_2026.png" '
-        f'alt="{t} 2026 leading tercile probability map for Ethiopia"><figcaption>Leading tercile and its probability</figcaption></figure>'
-        f'<figure><img loading="lazy" src="assets/forecast/{t}_rainfall_anomaly_mm_2026.png" alt="{t} 2026 rainfall anomaly map for Ethiopia">'
-        f'<figcaption>Corrected ensemble-mean anomaly vs 1993–2025</figcaption></figure></div>' for t in TARGETS)
+        for i, (view, label) in enumerate(VIEWS):
+            v = by[('forecast', t, view)]
+            fc_rows.append([f'<strong>{t}</strong>' if i == 0 else '', label,
+                            ' / '.join(pct(x) for x in v['mean_local_probabilities']),
+                            f'{v["mean_rainfall_mm"]:.0f} / {v["mean_reference_mm"]:.0f} mm',
+                            f'{v["mean_anomaly_mm"]:+.1f} mm', pct(v['domain_country_area_percent'] / 100)])
+    fc_t = table(['Target', 'View', 'Below / near / above', 'Mean rainfall / reference', 'Mean anomaly',
+                  'Share of country area'], fc_rows)
 
-    # ---------- verification
     v_rows = []
-    for m in MONTHS:
-        r = ver[m]
-        pr, am = r['probability'], r['amount']
-        obs = r['observed_category_area_fractions']
-        v_rows.append([m, skill_cell(pr['shared_blend']['rpss']), signed(pr['raw_observed_thresholds']['rpss'], 2),
-                       skill_cell(am['corrected']['crpss']), f'{am["corrected"]["bias_mm"]:+.1f} mm',
-                       ' / '.join(pct(x) for x in obs)])
-    v_rows += [[t, '<span class="pending">pending</span>', '—', '—', '—', '—'] for t in ('Sep', 'JJAS')]
-    v_t = table(['Target', 'Final RPSS', 'Raw RPSS', 'Corrected CRPSS', 'Corrected bias', 'Observed below / near / above (area)'], v_rows)
-    v_maps = ''.join(f'<figure><img loading="lazy" src="assets/verification/{m}_verification.png" alt="{m} 2026 forecast verification maps">'
-                     f'<figcaption>{m} 2026: forecast, observation and score maps</figcaption></figure>' for m in MONTHS)
+    for t in MONTHS:
+        for i, (view, label) in enumerate(VIEWS):
+            v = by[('verification', t, view)]
+            pb, ac = v['probability']['shared_blend'], v['amount']['corrected']
+            v_rows.append([f'<strong>{t}</strong>' if i == 0 else '', label, skill_cell(pb['rpss']), skill_cell(ac['crpss']),
+                           f'{ac["bias_mm"]:+.1f} mm', ' / '.join(pct(x) for x in v['observed_category_area_fractions']),
+                           f'{v["observed_mean_anomaly_mm"]:+.1f} / {v["forecast_mean_anomaly_mm"]:+.1f} mm'])
+    v_rows += [[f'<strong>{t}</strong>', 'both views', '<span class="pending">pending</span>', '—', '—', '—', '—']
+               for t in ('Sep', 'JJAS')]
+    v_t = table(['Target', 'View', 'Final RPSS', 'Corrected CRPSS', 'Corrected bias', 'Observed below / near / above',
+                 'Observed / forecast anomaly'], v_rows)
+
+    def viewer(kind, targets, first):
+        tchips = ''.join(f'<button class="chip{" active" if t == first else ""}" data-target="{t}">{t}</button>'
+                         for t in targets)
+        vchips = ''.join(f'<button class="chip{" active" if i == 0 else ""}" data-view="{v}">{l}</button>'
+                         for i, (v, l) in enumerate(VIEWS))
+        return (f'<div class="viewer" data-kind="{kind}" data-target="{first}" data-view="{VIEWS[0][0]}">'
+                f'<div class="controls"><div class="chips" role="group" aria-label="Target">{tchips}</div>'
+                f'<div class="chips" role="group" aria-label="View">{vchips}</div></div><div class="view-body"></div></div>')
+
+    data_json = json.dumps([{k: e[k] for k in ('kind', 'target', 'view', 'label', 'folder', 'images', 'summary')}
+                            for e in entries]).replace('</', '<\\/')
+    domain_text = esc(domain['domain_definition']) + ' ' + esc(domain['domain_note'])
 
     mc = mono['frozen_2026']
     built = date.today().isoformat()
@@ -265,18 +288,18 @@ def page(fc, ver, reg, gates, ens, mono, clip, raw, status):
 
 <section id="forecast" class="wrap">
   <h2>2026 forecast</h2>
-  <p>May-initialized, 51 members, fitted on 1993–2025 and frozen before any 2026 observation was used. Probabilities are area means of grid-cell probabilities.</p>
+  <p>May-initialized, 51 members, fitted on 1993–2025 and frozen before any 2026 observation was used. Results are shown for all of Ethiopia and for the <strong>JJAS R1+R2 rainfall domain</strong>, the same two views as the operational gallery.</p>
+  <p class="domain"><strong>JJAS R1+R2 rainfall domain.</strong> {domain_text}</p>
   {fc_t}
-  <p class="caveat">Monthly and seasonal outlooks are calibrated separately: the corrected monthly means sum to {mc["sum_of_monthly_corrected_means_mm"]:.0f} mm against {mc["jjas_corrected_mean_mm"]:.0f} mm for JJAS ({mc["difference_mm"]:+.1f} mm).</p>
-  <div class="tabs" role="tablist">{tabs}</div>
-  <div class="panels">{panels}</div>
+  <p class="caveat">Probabilities are area means of local grid-cell probabilities, not probabilities of the domain-total rainfall. Monthly and seasonal outlooks are calibrated separately: over all Ethiopia the corrected monthly means sum to {mc["sum_of_monthly_corrected_means_mm"]:.0f} mm against {mc["jjas_corrected_mean_mm"]:.0f} mm for JJAS ({mc["difference_mm"]:+.1f} mm).</p>
+  {viewer('forecast', TARGETS, 'JJAS')}
 </section>
 
 <section id="verification" class="wrap">
   <h2>2026 verification</h2>
-  <p>Frozen forecasts scored against official CHIRPS v2.0 observations. Single-season results, not evidence of multi-year reliability.</p>
+  <p>Frozen forecasts scored against official CHIRPS v2.0 observations, for all of Ethiopia and the JJAS R1+R2 rainfall domain. Single-season results, not evidence of multi-year reliability. Positive skill means improvement over climatology on that support.</p>
   {v_t}
-  <div class="gallery">{v_maps}</div>
+  {viewer('verification', MONTHS + ['Sep', 'JJAS'], 'Jun')}
 </section>
 
 <section class="wrap">
@@ -297,11 +320,8 @@ python scripts\\run_operational.py --workflow all</code></pre>
 </section>
 </main>
 <footer class="wrap foot">Built {built} by <code>scripts/build_site.py</code> from the project's result files.</footer>
-<script>
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{{
-  document.querySelectorAll('.tab,.panel').forEach(e=>e.classList.toggle('active',e.dataset.t===b.dataset.t));
-}}));
-</script>
+<script id="entries" type="application/json">{data_json}</script>
+<script src="assets/site.js"></script>
 </body>
 </html>
 '''
@@ -349,15 +369,75 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
 figure img{width:100%;height:auto;display:block;border-radius:6px;background:#fff}figcaption{color:var(--muted);font-size:.85rem;padding-top:6px}
 .gallery{display:grid;gap:16px;margin-top:16px}
+.domain{background:var(--accent-soft);border-left:4px solid var(--accent);padding:12px 16px;border-radius:6px;font-size:.92rem}
+.viewer{margin-top:20px}.controls{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
+.chip.active{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.view-body h3{margin-top:0}.stats td:first-child{color:var(--muted);width:55%}
+.maps{display:grid;grid-template-columns:1fr 1fr;gap:16px}.maps.wide{grid-template-columns:1fr}
+@media (max-width:860px){.maps{grid-template-columns:1fr}}.maps>*{min-width:0}
 .foot{color:var(--muted);font-size:.85rem;padding:32px 16px 48px;border-top:1px solid var(--line);margin-top:40px}
+'''
+
+
+# Viewer script (same rows and captions as the operational gallery).
+JS = r'''
+(() => {
+  const entries = JSON.parse(document.getElementById('entries').textContent);
+  const fmt = (x, d = 1) => (x === null || x === undefined || Number.isNaN(x)) ? '—' : Number(x).toFixed(d);
+  const pct = x => fmt(x === null || x === undefined ? null : 100 * x);
+  function render(box) {
+    const {kind, target, view} = box.dataset;
+    const body = box.querySelector('.view-body');
+    const e = entries.find(x => x.kind === kind && x.target === target && x.view === view);
+    if (!e) {
+      body.innerHTML = '<p class="pending">' + target + ' ' + kind + ' is pending: complete CHIRPS observations are required (September 2026 not yet published).</p>';
+      return;
+    }
+    const s = e.summary;
+    const rows = [['Domain cells', s.domain_cells], ['Domain share of country area (%)', fmt(s.domain_country_area_percent)],
+      ['Amount coverage within domain (%)', fmt(s.amount_domain_area_percent)],
+      ['Probability coverage within domain (%)', fmt(s.probability_domain_area_percent)]];
+    if (kind === 'forecast') {
+      rows.push(['Mean rainfall / reference (mm)', fmt(s.mean_rainfall_mm) + ' / ' + fmt(s.mean_reference_mm)],
+        ['Mean anomaly (mm)', fmt(s.mean_anomaly_mm)],
+        ['Area-mean local Below / Near / Above probabilities (%)', s.mean_local_probabilities.map(pct).join(' / ')]);
+    } else {
+      const p = s.probability.shared_blend || {}, a = s.amount.corrected || {};
+      rows.push(['Shared RPS', fmt(p.rps, 4)], ['Shared RPSS (%)', pct(p.rpss)], ['Corrected CRPS (mm)', fmt(a.crps_mm)],
+        ['Corrected CRPSS (%)', pct(a.crpss)], ['Corrected rainfall bias (mm)', fmt(a.bias_mm)],
+        ['Observed Below / Near / Above area (%)', s.observed_category_area_fractions.map(pct).join(' / ')]);
+    }
+    const note = kind === 'forecast'
+      ? 'Area means of local probabilities are not probabilities for domain-total rainfall.'
+      : 'Positive skill means improvement over climatology on this support. Single-year results do not establish long-term reliability.';
+    body.innerHTML = '<h3>' + target + ' 2026 · ' + e.label + '</h3><div class="table-wrap"><table class="stats">' +
+      rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table></div><p class="caveat">' + note + '</p>' +
+      '<div class="maps' + (kind === 'verification' ? ' wide' : '') + '">' + e.images.map(([name, cap]) =>
+        '<figure><a href="' + e.folder + '/' + name + '.png"><img loading="lazy" src="' + e.folder + '/' + name + '.png" alt="' +
+        target + ' 2026 ' + e.label + ' ' + cap + '"></a><figcaption>' + cap + '</figcaption></figure>').join('') + '</div>';
+  }
+  document.querySelectorAll('.viewer').forEach(box => {
+    box.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
+      const key = chip.dataset.target ? 'target' : 'view';
+      box.dataset[key] = chip.dataset[key];
+      chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === chip));
+      render(box);
+    }));
+    render(box);
+  });
+})();
 '''
 
 
 def main():
     OUT.mkdir(exist_ok=True)
-    copy_assets()
+    entries = gallery_entries()
+    copy_assets(entries)
+    (OUT / 'assets/site.js').write_text(JS.strip() + '\n', encoding='utf-8')
     (OUT / 'assets/style.css').write_text(CSS.strip() + '\n', encoding='utf-8')
-    (OUT / 'index.html').write_text(page(*gather()), encoding='utf-8')
+    (OUT / 'index.html').write_text(page(entries, *gather()), encoding='utf-8')
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())
     print(f'Site written to {OUT} ({size / 1e6:.1f} MB)')

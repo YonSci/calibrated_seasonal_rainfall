@@ -310,3 +310,9 @@ Frozen 2026 products (Ethiopia area means):
 - [x] `evidence/*all_regime_experiments.json` is now tracked (identical content, stored once, about 1.6 MB compressed), so a clean clone passes the tests.
 - [x] Pushed to https://github.com/YonSci/calibrated_seasonal_rainfall (public). Pages is enabled with GitHub Actions as the source; the site is live at https://yonsci.github.io/calibrated_seasonal_rainfall/. The Deploy and Tests workflows pass. Two tests were fixed to resolve temp paths, because GitHub's runner uses 8.3 short names.
 - After September and JJAS verification: rerun `build_verification_report.py` for all targets, then `python scripts\build_site.py`, and push.
+- [x] Site update: the forecast and verification sections now follow the operational gallery (`outputs/operational_2026/index.html`):
+  - the same entries, images and statistics rows;
+  - both views, **All Ethiopia** and the **JJAS R1+R2 rainfall domain** (833 cells, 56 % of the country area, fixed 1993–2025 descriptive domain);
+  - side-by-side comparison tables and target/view selectors.
+
+  Images come from `outputs/operational_2026/presentation/`. Rebuild with `python scripts\build_site.py` after rerunning the runner.
