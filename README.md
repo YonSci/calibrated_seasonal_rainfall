@@ -39,6 +39,10 @@ python scripts\run_operational.py --workflow products
 python scripts\run_operational.py --workflow all
 start "" outputs\operational_2026\index.html
 
+:: Housekeeping: preview, then delete old --regenerate backups (keeps newest per output)
+python scripts\prune_backups.py
+python scripts\prune_backups.py --apply
+
 :: Tests
 python -m unittest discover -s tests
 ```

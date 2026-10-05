@@ -3,9 +3,9 @@ import argparse, hashlib, json
 from pathlib import Path
 import numpy as np
 import xarray as xr
-import delivery_map_base as base
-import delivery_contours as smooth
-from delivery_output_runs import staged_output
+import plot_forecast_products as base
+import plot_smooth_forecasts as smooth
+from output_runs import staged_output
 ROOT=Path(__file__).resolve().parents[1]
 def path(p):
     p=Path(p);return p if p.is_absolute() else ROOT/p

@@ -268,3 +268,20 @@ Frozen 2026 products (Ethiopia area means):
 | 8 Ensemble size and system | Done: 51-member transfer safe; under-dispersion found (spread/error 0.64–0.80) |
 | 9 Regional skill | Done: R3 and Jun/Sep lack clean skill |
 | 10 Monthly–seasonal consistency | Done: amounts consistent; ~20 % cell-level category disagreement |
+
+## 6. Lower-priority work
+
+### Phase 10 — version control (item 14; completed 2026-10-05)
+
+- [x] Git repository on `main`. Initial commit `a2d8040`: code, configs (including `config/project.json`), docs, tests, `data/masks/*.nc`, `evidence/` summaries and the regime mask, and `PROVENANCE.md`.
+- [x] Ignored: raw and derived data, `outputs/`, large shapefiles, the two 11 MB experiment dumps, `_backup_` and `_building_` folders, and zips outside `archive/`.
+- [x] `.gitattributes` sets `* -text`, so git never rewrites line endings. Scripts are SHA-256 fingerprinted by the runner and reports.
+- [ ] Optional: add a remote (for example a private GitHub repository) and push.
+
+### Phase 11 — duplicate modules and backup pruning (item 12; completed 2026-10-05)
+
+- [x] Single implementations: `plot_forecast_products.py` (maps), `plot_smooth_forecasts.py` (contours), `delivery_render.py` (review/delivery package), and `verify2026_outputs.py` (publication, from Phase 1).
+- [x] `review_map_base.py`, `delivery_map_base.py`, `review_contours.py`, `delivery_contours.py` and `build_forecast_review.py` are now aliases. Imports resolve to the same module object, and the documented commands still run the canonical `main()`.
+- [x] `run_operational.py` `PRODUCT_SCRIPTS` now includes `plot_forecast_products.py` and `output_runs.py`, so fingerprints follow the real code. The next runner run rebuilds the views once.
+- [x] New `scripts/prune_backups.py`. It previews by default (`--apply` deletes) and keeps the newest `--keep` backups per output. It never deletes a backup whose live output is missing and never touches `_building_` folders. Current preview: 25 removable backups (87.5 MB); 30 kept.
+- [x] Checks: 79 tests pass. `run_operational.py --plan` and `finalize_forecast_delivery.py --check-only` pass on the real project.
