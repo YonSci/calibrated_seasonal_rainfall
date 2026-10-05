@@ -7,6 +7,7 @@ Targets: **JJAS** season and the months **Jun, Jul, Aug, Sep**.
 Reference period 1993–2025 (25-member hindcasts 1993–2016, 51-member forecasts 2017 onward).
 Platform: Windows 11, CMD, Python 3.11 x64, project `.venv`.
 
+**Results site:** https://yonsci.github.io/calibrated_seasonal_rainfall/ (built by `scripts/build_site.py`; rebuild after results change).
 **Current status and open items:** [docs/36_PROJECT_STATUS_REVIEW.md](docs/36_PROJECT_STATUS_REVIEW.md).
 **Next forecast cycle (2027):** [docs/37_NEW_FORECAST_CYCLE.md](docs/37_NEW_FORECAST_CYCLE.md). Cycle files live in `config/cycles/`; select one with `set CALIBRATION_CYCLE=...`.
 

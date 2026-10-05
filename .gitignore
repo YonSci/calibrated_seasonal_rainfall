@@ -17,7 +17,6 @@ data/raw/**
 !data/raw/**/
 !data/raw/**/PROVENANCE.md
 data/shapefiles/
-evidence/*all_regime_experiments.json
 *_building_*/
 *_backup_*/
 *.zip

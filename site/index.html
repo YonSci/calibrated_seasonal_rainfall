@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ethiopia Seasonal Rainfall</title>
+<meta name="description" content="Calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia, verified against CHIRPS: workflow, methods, skill, 2026 forecast and verification.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap nav">
+    <a class="brand" href="#top">Ethiopia Seasonal Rainfall</a>
+    <nav><a href="#workflow">Workflow</a><a href="#methods">Methods</a><a href="#skill">Skill</a><a href="#forecast">2026 forecast</a><a href="#verification">Verification</a><a href="https://github.com/YonSci/calibrated_seasonal_rainfall">GitHub</a></nav>
+  </div>
+</header>
+<main id="top">
+<section class="hero wrap">
+  <p class="eyebrow">ECMWF SEAS5 · May initialization · CHIRPS v2.0 · 0.25°</p>
+  <h1>Calibrated seasonal rainfall outlooks for Ethiopia</h1>
+  <p class="lead">Bias-corrected, probability-calibrated June–September rainfall outlooks for Ethiopia, built from the ECMWF SEAS5 ensemble and evaluated against CHIRPS observations over 1993–2025, with a frozen 2026 forecast verified as observations arrive.</p>
+  <p class="notice"><strong>Research reconstruction.</strong> These are retrospective research products, not official forecasts of the Ethiopian Meteorology Institute (EMI) or ICPAC.</p>
+  <div class="cards"><div class="card"><div class="card-label">2026 JJAS outlook</div><div class="card-value">50% below normal</div><div class="card-note">Area-mean probability; anomaly -66 mm</div></div><div class="card"><div class="card-label">Skill 2017–2025 (JJAS)</div><div class="card-value">RPSS +0.050</div><div class="card-note">Ranked probability skill vs climatology</div></div><div class="card"><div class="card-label">2026 verified so far</div><div class="card-value">Jun +0.19 / Jul +0.25 / Aug +0.28</div><div class="card-note">RPSS against CHIRPS; Sep & JJAS pending (Sep CHIRPS: unavailable)</div></div></div>
+</section>
+
+<section id="workflow" class="wrap">
+  <h2>Workflow</h2>
+  <p>Every stage is a script in <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/tree/main/scripts"><code>scripts/</code></a> with its own checks; documents 01–37 in <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/tree/main/docs"><code>docs/</code></a> record each step and decision.</p>
+  <ol class="flow"><li class="step"><div class="step-n">1</div><div><h3>Download</h3><p>ECMWF SEAS5 (system 51) daily accumulated precipitation, May initialization, 183 days, 25 hindcast / 51 forecast members, via the Copernicus CDS.</p><code>download_seasonal_forecasts_daily_c3s.py</code></div></li><li class="step"><div class="step-n">2</div><div><h3>Inspect</h3><p>Inventory every year: initialization, lead times, member counts, accumulation increments (GRIB packing tolerance 0.2 mm).</p><code>inspect_inputs.py</code></div></li><li class="step"><div class="step-n">3</div><div><h3>Prepare</h3><p>De-accumulate to daily totals, label days by interval start, sum JJAS (122 days) and each month; CHIRPS on the same dates.</p><code>prepare_seasonal.py · run_monthly.py</code></div></li><li class="step"><div class="step-n">4</div><div><h3>Regrid</h3><p>Each 1° model cell copied into its 4×4 block of 0.25° CHIRPS cells; edges and area conservation verified.</p><code>regrid_seasonal.py</code></div></li><li class="step"><div class="step-n">5</div><div><h3>Calibrate</h3><p>Per-cell mean–variance amount correction, smoothed tercile counts, one climatology-blend weight per target (leave-one-year-out).</p><code>final_shared_blend.py</code></div></li><li class="step"><div class="step-n">6</div><div><h3>Evaluate</h3><p>Nested cross-validation 1993–2016, fixed-fit evaluation 2017–2025, whole-year significance gates.</p><code>local_blend.py · decision_gates.py</code></div></li><li class="step"><div class="step-n">7</div><div><h3>Deliver</h3><p>Maps, bulletin and offline gallery; forecasts frozen with SHA-256 hashes before observations are used.</p><code>finalize_forecast_delivery.py · run_operational.py</code></div></li><li class="step"><div class="step-n">8</div><div><h3>Verify</h3><p>Official CHIRPS v2.0 p25 monthly files, overlap-checked against the archive, scored per month and season.</p><code>prepare_verification_2026.py · verify_frozen_2026.py</code></div></li></ol>
+</section>
+
+<section id="methods" class="wrap">
+  <h2>Data and methods</h2>
+  <div class="grid2">
+    <div>
+      <h3>Data</h3>
+      <div class="table-wrap"><table class="compact"><thead><tr><th>Source</th><th>Details</th></tr></thead><tbody><tr><td>ECMWF SEAS5</td><td>CDS <code>seasonal-original-single-levels</code>, system 51, total precipitation, 1 May initialization, 1993–2026; 25 members (1993–2016), 51 (2017–2026); 1° grid, 3–15°N, 33–48°E</td></tr><tr><td>CHIRPS v2.0</td><td>0.25° daily; archive 1993–2025; 2026 from official p25 monthly files, overlap-checked against the archive</td></tr><tr><td>Targets</td><td>JJAS (122 days) and the months Jun, Jul, Aug, Sep</td></tr><tr><td>Masks</td><td>Ethiopia (1,484 cells, cell-centre rule); descriptive rainfall regimes R0–R3 fixed on 1993–2025</td></tr></tbody></table></div>
+      <h3>Quality control</h3>
+      <ul>
+        <li>All 34 forecast files inventoried; re-downloaded years were bit-identical, confirming SEAS5 system 51.</li>
+        <li>Small negative daily increments (≤0.15 mm) are GRIB packing rounding (2<sup>−13</sup> m); tolerated up to 0.2 mm, clipped, and the seasonal sum is checked to telescope.</li>
+        <li>CHIRPS sea cells (223) are permanently missing; no partial seasons enter any fit.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Calibration (final method)</h3>
+      <ol>
+        <li><strong>Amount correction</strong> per cell, equal weight per year:<br><code>x̂ = max(0, μ<sub>obs</sub> + r·(x − μ<sub>model</sub>)), r = clip(σ<sub>obs</sub>/σ<sub>model</sub>, 0.5, 2)</code></li>
+        <li><strong>Tercile probabilities</strong> from corrected members against CHIRPS terciles, smoothed: <code>(n + 0.5)/(M + 1.5)</code></li>
+        <li><strong>Climatology blend</strong>: <code>p = (1 − λ)·p<sub>model</sub> + λ·p<sub>clim</sub></code>, one λ per target fitted on leave-one-year-out RPS (λ = JJAS 0.50, Jun 0.74, Jul 0.60, Aug 0.48, Sep 0.79)</li>
+      </ol>
+      <p>Evaluated and not adopted: regularized Dirichlet recalibration, per-cell and regime-specific blend weights, an Ethiopia-only blend domain and removing the blend. Uncalibrated ECMWF probabilities score RPSS -0.41 for JJAS over 2017–2025.</p>
+    </div>
+  </div>
+</section>
+
+<section id="skill" class="wrap">
+  <h2>Historical skill</h2>
+  <p>Ranked probability skill score (RPSS) of the final method against climatology, Ethiopia cells, one score per year. 1993–2016 uses nested leave-one-year-out fits; 2017–2025 uses fits on 1993–2016 (exploratory, years seen during method selection). <span class="strong pos">Bold</span>: one-sided whole-year permutation p &lt; 0.05.</p>
+  <div class="table-wrap"><table class=""><thead><tr><th>Target</th><th>RPSS 1993–2016 (nested CV)</th><th>Years better</th><th>RPSS 2017–2025</th><th>Years better</th><th>Probability coverage</th></tr></thead><tbody><tr><td>JJAS</td><td><span class="pos strong">+0.046</span> <span class="sig">p=0.03</span></td><td>19/24</td><td><span class="pos">+0.050</span> <span class="sig">p=0.06</span></td><td>6/9</td><td>98%</td></tr><tr><td>Jun</td><td><span class="pos">+0.010</span> <span class="sig">p=0.29</span></td><td>14/24</td><td><span class="pos">+0.024</span> <span class="sig">p=0.10</span></td><td>6/9</td><td>79%</td></tr><tr><td>Jul</td><td><span class="pos">+0.017</span> <span class="sig">p=0.09</span></td><td>17/24</td><td><span class="pos">+0.036</span> <span class="sig">p=0.16</span></td><td>5/9</td><td>79%</td></tr><tr><td>Aug</td><td><span class="pos">+0.021</span> <span class="sig">p=0.09</span></td><td>15/24</td><td><span class="pos strong">+0.066</span> <span class="sig">p=0.01</span></td><td>7/9</td><td>81%</td></tr><tr><td>Sep</td><td><span class="pos">+0.004</span> <span class="sig">p=0.32</span></td><td>12/24</td><td><span class="pos">+0.010</span> <span class="sig">p=0.25</span></td><td>4/9</td><td>96%</td></tr></tbody></table></div>
+  <p class="caveat">After adjusting for five targets, no gain over climatology is statistically significant; JJAS is significant on its own (p = 0.03). Monthly skill is small.</p>
+  <h3>Where the forecast is skilful</h3>
+  <div class="table-wrap"><table class="compact"><thead><tr><th>Region (nested 1993–2016)</th><th>JJAS</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th></tr></thead><tbody><tr><td>R0 arid / marginal</td><td><span class="pos strong">+0.108</span> <span class="sig">p=0.03</span></td><td><span class="neg">-0.007</span> <span class="sig">p=0.56</span></td><td><span class="pos">+0.006</span> <span class="sig">p=0.44</span></td><td><span class="pos strong">+0.073</span> <span class="sig">p=0.01</span></td><td><span class="pos">+0.008</span> <span class="sig">p=0.37</span></td></tr><tr><td>R1 western unimodal</td><td><span class="pos strong">+0.055</span> <span class="sig">p=0.04</span></td><td><span class="pos">+0.008</span> <span class="sig">p=0.33</span></td><td><span class="pos strong">+0.031</span> <span class="sig">p=0.01</span></td><td><span class="pos">+0.004</span> <span class="sig">p=0.38</span></td><td><span class="pos">+0.005</span> <span class="sig">p=0.35</span></td></tr><tr><td>R2 Belg–Kiremt</td><td><span class="pos strong">+0.101</span> <span class="sig">p=0.01</span></td><td><span class="pos">+0.028</span> <span class="sig">p=0.21</span></td><td><span class="pos strong">+0.036</span> <span class="sig">p=0.04</span></td><td><span class="pos strong">+0.050</span> <span class="sig">p=0.01</span></td><td><span class="pos">+0.007</span> <span class="sig">p=0.30</span></td></tr><tr><td>R3 Gu–Deyr</td><td><span class="neg">-0.008</span> <span class="sig">p=0.64</span></td><td><span class="neg">-0.007</span> <span class="sig">p=0.62</span></td><td><span class="neg">-0.030</span> <span class="sig">p=0.81</span></td><td><span class="neg">-0.004</span> <span class="sig">p=0.57</span></td><td><span class="neg">-0.000</span> <span class="sig">p=0.51</span></td></tr><tr><td>R1+R2 JJAS domain</td><td><span class="pos strong">+0.078</span> <span class="sig">p=0.01</span></td><td><span class="pos">+0.018</span> <span class="sig">p=0.23</span></td><td><span class="pos strong">+0.034</span> <span class="sig">p=0.01</span></td><td><span class="pos strong">+0.027</span> <span class="sig">p=0.04</span></td><td><span class="pos">+0.006</span> <span class="sig">p=0.29</span></td></tr></tbody></table></div>
+  <p class="caveat">R3 (Gu–Deyr, south and south-east) shows no clean-period skill for any target; June and September show none in any region.</p>
+  <h3>Decisions tested with significance gates</h3>
+  <p>A change is adopted only if it improves nested 1993–2016 scores (Holm-adjusted p &lt; 0.05) and does not worsen 2017–2025.</p>
+  <div class="table-wrap"><table class=""><thead><tr><th>Candidate change</th><th>Δ score 1993–2016</th><th>Δ score 2017–2025</th><th>Decision</th></tr></thead><tbody><tr><td>Fit blend weight on Ethiopia only</td><td>+0.0003 to +0.0013</td><td>-0.0038 to -0.0001</td><td><span class="neg">Not adopted</span></td></tr><tr><td>Square-root amount correction (probabilities)</td><td>-0.0007 to +0.0003</td><td>-0.0033 to -0.0006</td><td><span class="neg">Not adopted</span></td></tr><tr><td>Remove the climatology blend</td><td>+0.0106 to +0.0316</td><td>-0.0137 to +0.0211</td><td><span class="neg">Not adopted</span></td></tr><tr><td>Plain climatology</td><td>+0.0017 to +0.0210</td><td>+0.0044 to +0.0303</td><td><span class="neg">Not adopted</span></td></tr><tr><td>Square-root amount correction (rainfall amounts, CRPS)</td><td>-0.13 to -0.10 mm</td><td>better in all targets</td><td><span class="pos">Passes for all targets (next cycle)</span></td></tr></tbody></table></div>
+  <h3>Ensemble diagnostics</h3>
+  <div class="table-wrap"><table class="compact"><thead><tr><th>Target</th><th>RPS, 51 members</th><th>RPS, 25-member subsets</th><th>Spread / error (hindcast → operational)</th></tr></thead><tbody><tr><td>JJAS</td><td>0.4284</td><td>0.4307</td><td>0.72 → 0.80</td></tr><tr><td>Jun</td><td>0.4590</td><td>0.4600</td><td>0.68 → 0.64</td></tr><tr><td>Jul</td><td>0.4506</td><td>0.4522</td><td>0.74 → 0.74</td></tr><tr><td>Aug</td><td>0.4264</td><td>0.4284</td><td>0.78 → 0.76</td></tr><tr><td>Sep</td><td>0.4548</td><td>0.4557</td><td>0.78 → 0.73</td></tr></tbody></table></div>
+  <p class="caveat">51-member forecasts score at least as well as 25-member hindcast-sized ensembles, so the transfer is safe. The corrected ensemble is under-dispersive (spread/error below 1), which the climatology blend partly compensates.</p>
+</section>
+
+<section id="forecast" class="wrap">
+  <h2>2026 forecast</h2>
+  <p>May-initialized, 51 members, fitted on 1993–2025 and frozen before any 2026 observation was used. Probabilities are area means of grid-cell probabilities.</p>
+  <div class="table-wrap"><table class=""><thead><tr><th>Target</th><th>Below normal</th><th>Near normal</th><th>Above normal</th><th>Mean anomaly</th><th>Climatology weight</th><th>Area led by below normal</th></tr></thead><tbody><tr><td>JJAS</td><td>50%</td><td>25%</td><td>24%</td><td>-66.0 mm</td><td>0.50</td><td>78%</td></tr><tr><td>Jun</td><td>43%</td><td>30%</td><td>27%</td><td>-15.1 mm</td><td>0.74</td><td>80%</td></tr><tr><td>Jul</td><td>45%</td><td>29%</td><td>26%</td><td>-16.9 mm</td><td>0.60</td><td>77%</td></tr><tr><td>Aug</td><td>51%</td><td>26%</td><td>23%</td><td>-18.9 mm</td><td>0.48</td><td>85%</td></tr><tr><td>Sep</td><td>36%</td><td>31%</td><td>33%</td><td>-11.7 mm</td><td>0.79</td><td>30%</td></tr></tbody></table></div>
+  <p class="caveat">Monthly and seasonal outlooks are calibrated separately: the corrected monthly means sum to 378 mm against 375 mm for JJAS (+3.3 mm).</p>
+  <div class="tabs" role="tablist"><button class="tab active" data-t="JJAS">JJAS</button><button class="tab" data-t="Jun">Jun</button><button class="tab" data-t="Jul">Jul</button><button class="tab" data-t="Aug">Aug</button><button class="tab" data-t="Sep">Sep</button></div>
+  <div class="panels"><div class="panel active" data-t="JJAS"><figure><img loading="lazy" src="assets/forecast/JJAS_dominant_tercile_2026.png" alt="JJAS 2026 leading tercile probability map for Ethiopia"><figcaption>Leading tercile and its probability</figcaption></figure><figure><img loading="lazy" src="assets/forecast/JJAS_rainfall_anomaly_mm_2026.png" alt="JJAS 2026 rainfall anomaly map for Ethiopia"><figcaption>Corrected ensemble-mean anomaly vs 1993–2025</figcaption></figure></div><div class="panel" data-t="Jun"><figure><img loading="lazy" src="assets/forecast/Jun_dominant_tercile_2026.png" alt="Jun 2026 leading tercile probability map for Ethiopia"><figcaption>Leading tercile and its probability</figcaption></figure><figure><img loading="lazy" src="assets/forecast/Jun_rainfall_anomaly_mm_2026.png" alt="Jun 2026 rainfall anomaly map for Ethiopia"><figcaption>Corrected ensemble-mean anomaly vs 1993–2025</figcaption></figure></div><div class="panel" data-t="Jul"><figure><img loading="lazy" src="assets/forecast/Jul_dominant_tercile_2026.png" alt="Jul 2026 leading tercile probability map for Ethiopia"><figcaption>Leading tercile and its probability</figcaption></figure><figure><img loading="lazy" src="assets/forecast/Jul_rainfall_anomaly_mm_2026.png" alt="Jul 2026 rainfall anomaly map for Ethiopia"><figcaption>Corrected ensemble-mean anomaly vs 1993–2025</figcaption></figure></div><div class="panel" data-t="Aug"><figure><img loading="lazy" src="assets/forecast/Aug_dominant_tercile_2026.png" alt="Aug 2026 leading tercile probability map for Ethiopia"><figcaption>Leading tercile and its probability</figcaption></figure><figure><img loading="lazy" src="assets/forecast/Aug_rainfall_anomaly_mm_2026.png" alt="Aug 2026 rainfall anomaly map for Ethiopia"><figcaption>Corrected ensemble-mean anomaly vs 1993–2025</figcaption></figure></div><div class="panel" data-t="Sep"><figure><img loading="lazy" src="assets/forecast/Sep_dominant_tercile_2026.png" alt="Sep 2026 leading tercile probability map for Ethiopia"><figcaption>Leading tercile and its probability</figcaption></figure><figure><img loading="lazy" src="assets/forecast/Sep_rainfall_anomaly_mm_2026.png" alt="Sep 2026 rainfall anomaly map for Ethiopia"><figcaption>Corrected ensemble-mean anomaly vs 1993–2025</figcaption></figure></div></div>
+</section>
+
+<section id="verification" class="wrap">
+  <h2>2026 verification</h2>
+  <p>Frozen forecasts scored against official CHIRPS v2.0 observations. Single-season results, not evidence of multi-year reliability.</p>
+  <div class="table-wrap"><table class=""><thead><tr><th>Target</th><th>Final RPSS</th><th>Raw RPSS</th><th>Corrected CRPSS</th><th>Corrected bias</th><th>Observed below / near / above (area)</th></tr></thead><tbody><tr><td>Jun</td><td><span class="pos">+0.193</span></td><td>-0.31</td><td><span class="pos">+0.388</span></td><td>+5.4 mm</td><td>71% / 19% / 10%</td></tr><tr><td>Jul</td><td><span class="pos">+0.254</span></td><td>-0.36</td><td><span class="pos">+0.279</span></td><td>+19.1 mm</td><td>84% / 11% / 5%</td></tr><tr><td>Aug</td><td><span class="pos">+0.279</span></td><td>-0.15</td><td><span class="pos">+0.441</span></td><td>+12.9 mm</td><td>79% / 11% / 10%</td></tr><tr><td>Sep</td><td><span class="pending">pending</span></td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>JJAS</td><td><span class="pending">pending</span></td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>
+  <div class="gallery"><figure><img loading="lazy" src="assets/verification/Jun_verification.png" alt="Jun 2026 forecast verification maps"><figcaption>Jun 2026: forecast, observation and score maps</figcaption></figure><figure><img loading="lazy" src="assets/verification/Jul_verification.png" alt="Jul 2026 forecast verification maps"><figcaption>Jul 2026: forecast, observation and score maps</figcaption></figure><figure><img loading="lazy" src="assets/verification/Aug_verification.png" alt="Aug 2026 forecast verification maps"><figcaption>Aug 2026: forecast, observation and score maps</figcaption></figure></div>
+</section>
+
+<section class="wrap">
+  <h2>Limitations</h2>
+  <ul>
+    <li>Nine fixed-fit evaluation years and one verification season give wide uncertainty; regional and monthly results are noisy.</li>
+    <li>The 2017–2025 period was inspected during method development; clean evidence comes from nested 1993–2016 scores.</li>
+    <li>The 0.25° maps repeat 1° model information; they do not add dynamical detail.</li>
+    <li>Not an official EMI or ICPAC product.</li>
+  </ul>
+  <h2>Reproduce</h2>
+  <pre><code>git clone https://github.com/YonSci/calibrated_seasonal_rainfall.git
+python -m venv .venv &amp;&amp; .venv\Scripts\activate &amp;&amp; pip install -r requirements.txt
+python scripts\prepare_seasonal.py --config config\project.json --all-years
+python scripts\final_shared_blend.py --config config\project.json --region-mask data\masks\ethiopia_common.nc
+python scripts\run_operational.py --workflow all</code></pre>
+  <p>Raw ECMWF and CHIRPS data are not stored in the repository; download instructions are in <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/blob/main/docs/37_NEW_FORECAST_CYCLE.md">docs/37</a>. Status and decisions: <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/blob/main/docs/36_PROJECT_STATUS_REVIEW.md">docs/36</a>.</p>
+</section>
+</main>
+<footer class="wrap foot">Built 2026-10-05 by <code>scripts/build_site.py</code> from the project's result files.</footer>
+<script>
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab,.panel').forEach(e=>e.classList.toggle('active',e.dataset.t===b.dataset.t));
+}));
+</script>
+</body>
+</html>

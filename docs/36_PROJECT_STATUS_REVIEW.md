@@ -302,3 +302,11 @@ Frozen 2026 products (Ethiopia area means):
   - Smoothed counts without the blend: Jun −0.19, Jul −0.24.
   - **2025 was a poor year for the model, and the blend limited the damage**, which is consistent with the Phase 5 decision to keep it.
 - [x] Tests: `tests/test_cycle.py` added; 83 tests pass.
+
+### Phase 13 — GitHub repository and results site (2026-10-05)
+
+- [x] `scripts/build_site.py` generates `site/` (a single page, 3 MB) entirely from result files: workflow, data and methods, historical and regional skill, significance gates, ensemble diagnostics, the 2026 forecast (maps per target) and the Jun–Aug 2026 verification. It is labelled a research reconstruction and not an official EMI/ICPAC forecast. Responsive layout with light and dark themes.
+- [x] `.github/workflows/pages.yml` deploys `site/` to GitHub Pages. `.github/workflows/tests.yml` runs the test suite on Windows, Python 3.11.
+- [x] `evidence/*all_regime_experiments.json` is now tracked (identical content, stored once, about 1.6 MB compressed), so a clean clone passes the tests.
+- [ ] Push to `YonSci/calibrated_seasonal_rainfall` (public) and enable Pages (source: GitHub Actions). This needs the account owner to log in with `gh auth login`.
+- After September and JJAS verification: rerun `build_verification_report.py` for all targets, then `python scripts\build_site.py`, and push.
