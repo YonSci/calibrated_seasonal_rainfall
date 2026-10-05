@@ -316,3 +316,4 @@ Frozen 2026 products (Ethiopia area means):
   - side-by-side comparison tables and target/view selectors.
 
   Images come from `outputs/operational_2026/presentation/`. Rebuild with `python scripts\build_site.py` after rerunning the runner.
+- [x] Runbook, issue log (30 issues with causes, fixes and automated guards) and automation blueprint: docs/38_REPRODUCIBLE_RUNBOOK.md.

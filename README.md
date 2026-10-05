@@ -9,6 +9,7 @@ Platform: Windows 11, CMD, Python 3.11 x64, project `.venv`.
 
 **Results site:** https://yonsci.github.io/calibrated_seasonal_rainfall/ (built by `scripts/build_site.py`; rebuild after results change).
 **Current status and open items:** [docs/36_PROJECT_STATUS_REVIEW.md](docs/36_PROJECT_STATUS_REVIEW.md).
+**Reproducible runbook, issue log and automation blueprint:** [docs/38_REPRODUCIBLE_RUNBOOK.md](docs/38_REPRODUCIBLE_RUNBOOK.md).
 **Next forecast cycle (2027):** [docs/37_NEW_FORECAST_CYCLE.md](docs/37_NEW_FORECAST_CYCLE.md). Cycle files live in `config/cycles/`; select one with `set CALIBRATION_CYCLE=...`.
 
 ## Final method (frozen for 2026)
@@ -76,4 +77,4 @@ The 2026 forecasts are frozen with SHA-256 hashes in
 01–08 setup, data, inspection and design · 09–17 regridding, calibration and method
 comparison · 18–20 monthly fixes and final blend · 21–24 maps · 25–28 regimes and the
 August review · 29–32 delivery, freeze and verification · 33–35 operational runner ·
-36 status review · 37 new forecast cycle.
+36 status review · 37 new forecast cycle · 38 runbook and issue log.

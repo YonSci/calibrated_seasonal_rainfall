@@ -21,6 +21,8 @@ MONTHS = ['Jun', 'Jul', 'Aug']
 PENDING_TARGETS = {'May initialization · JJAS 2026': ['Sep', 'JJAS']}
 VIEWS = [('all_ethiopia', 'All Ethiopia'), ('jjas_r12_rainfall_domain', 'JJAS R1+R2 rainfall domain')]
 GALLERY = 'outputs/operational_2026'
+# Further cycles rendered by scripts/build_season_products.py (skipped until their entries exist).
+EXTRA_CYCLES = [('config/cycles/sep_2026_ondj.json', 'ondj')]
 CAT = ['Below normal', 'Near normal', 'Above normal']
 esc = html.escape
 
@@ -63,6 +65,50 @@ def gallery_entries():
     return keep
 
 
+def extra_cycles():
+    """Entries and skill for further cycles; [] when a cycle has not been rendered yet."""
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    from cycle import load_cycle
+    from significance import paired_summary
+    out = []
+    for cfg_path, key in EXTRA_CYCLES:
+        c = load_cycle(ROOT / cfg_path)
+        listing = c.root('output_root') / 'entries.json'
+        if not listing.is_file():
+            continue
+        data = json.loads(listing.read_text(encoding='utf-8'))
+        group = f'{c.init_month_name} initialization · {c.target_label(c.season_name)}'
+        entries = []
+        for e in data['entries']:
+            entries.append(dict(group=group, kind=e['kind'], target=e['target'], view=e['view'], label=e['label'],
+                                folder=f'assets/{key}/' + e['folder'].removeprefix('presentation/'), images=e['images'],
+                                source_root=str(c.root('output_root')), source=e['folder'], summary=e['summary'],
+                                target_label=e['target_label']))
+        skill = {}
+        for t in c.targets:
+            row = {}
+            for mode in ('training', 'operational'):
+                f = ROOT / f'outputs/local_calibration/{c.tag}_{t}/{mode}/local_comparison_summary.json'
+                if f.is_file():
+                    r = json.loads(f.read_text(encoding='utf-8'))
+                    blend = [y['metrics']['shared_blend']['rps'] for y in r['years']]
+                    clim = [y['metrics']['climatology']['rps'] for y in r['years']]
+                    ps = paired_summary(blend, clim)
+                    row[mode] = dict(rpss=1 - sum(blend) / sum(clim), p=ps['p_improvement'],
+                                     better=ps['years_better'], years=ps['years'],
+                                     first=r['target_years'][0], last=r['target_years'][-1])
+            skill[t] = row
+        lam = {}
+        for t in c.targets:
+            f = c.forecast_dir(c.root('forecast_root'), t) / 'blend_parameters.json'
+            if f.is_file():
+                lam[t] = json.loads(f.read_text(encoding='utf-8'))['climatology_weight']
+        out.append(dict(key=key, cycle=c, group=group, entries=entries, skill=skill, weights=lam,
+                        definition=data['domain_definition'], note=data['domain_note']))
+    return out
+
+
 def copy_assets(entries):
     assets = OUT / 'assets'
     if assets.exists():
@@ -70,8 +116,9 @@ def copy_assets(entries):
     for e in entries:
         dest = OUT / e['folder']
         dest.mkdir(parents=True, exist_ok=True)
+        src = Path(e['source_root']) if 'source_root' in e else ROOT / GALLERY
         for name, _ in e['images']:
-            shutil.copy2(ROOT / GALLERY / e['source'] / f'{name}.png', dest / f'{name}.png')
+            shutil.copy2(src / e['source'] / f'{name}.png', dest / f'{name}.png')
 
 
 def gather():
@@ -88,7 +135,7 @@ def gather():
     return fc, ver, reg, gates, ens, mono, clip, raw, status, domain
 
 
-def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
+def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
     j = fc['JJAS']
     r12 = next(e['summary'] for e in entries if (e['kind'], e['target'], e['view']) == ('forecast', 'JJAS', 'jjas_r12_rainfall_domain'))
     vs = {m: ver[m]['probability']['shared_blend']['rpss'] for m in MONTHS}
@@ -213,6 +260,46 @@ def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
                 '<label>View (rainfall domain)<select id="ex-view"></select></label>'
                 '</div><div id="ex-body" class="view-body"></div></div>')
 
+    extra_html = ''
+    for x in extras:
+        c = x['cycle']
+        rows = []
+        for t in c.targets:
+            for i, view in enumerate(dict.fromkeys(e['view'] for e in x['entries'] if e['target'] == t)):
+                e = next(e for e in x['entries'] if e['target'] == t and e['view'] == view)
+                v = e['summary']
+                rows.append([f'<strong>{esc(e["target_label"])}</strong>' if i == 0 else '', esc(e['label']),
+                             ' / '.join(pct(z) if z is not None else '—' for z in v['mean_local_probabilities']),
+                             f'{v["mean_rainfall_mm"]:.0f} / {v["mean_reference_mm"]:.0f} mm',
+                             f'{v["mean_anomaly_mm"]:+.1f} mm', pct(v['domain_country_area_percent'] / 100),
+                             pct(v['probability_domain_area_percent'] / 100)])
+        ftab = table(['Target', 'View', 'Below / near / above', 'Mean rainfall / reference', 'Mean anomaly',
+                      'Share of country area', 'Probability coverage'], rows)
+        srows = []
+        for t in c.targets:
+            r = x['skill'].get(t, {})
+            cell = lambda m: (skill_cell(r[m]['rpss'], r[m]['p']) + f' <span class="sig">{r[m]["better"]}/{r[m]["years"]} yrs</span>'
+                              if m in r else '—')
+            srows.append([t, cell('training'), cell('operational'), f'{x["weights"].get(t, float("nan")):.2f}'])
+        tr = next((r['training'] for r in x['skill'].values() if 'training' in r), None)
+        op = next((r['operational'] for r in x['skill'].values() if 'operational' in r), None)
+        stab = table(['Target', f'RPSS {tr["first"]}–{tr["last"]} (nested CV)' if tr else 'RPSS (nested CV)',
+                      f'RPSS {op["first"]}–{op["last"]}' if op else 'RPSS (fixed fit)', 'Climatology weight λ'], srows)
+        extra_html += f"""
+<section id="{x['key']}" class="wrap">
+  <h2>{esc(x['group'])} forecast</h2>
+  <p>The same pipeline applied to a second season: ECMWF SEAS5 initialized on 1 {c.init_month_name}, {c.members(c.year)} members,
+  calibrated against CHIRPS for {c.season_name} seasons {c.ref_first}/{str(c.ref_first + 1)[-2:]}–{c.ref_last}/{str(c.ref_last + 1)[-2:]}
+  ({len(c.reference_years)} seasons; 25-member hindcasts to 2016, 51 members after). The season crosses the year boundary, so January
+  belongs to {c.year + 1}. Verification follows once CHIRPS for January {c.year + 1} is published.</p>
+  <p class="domain"><strong>{esc(c.season_name)} rainfall domain.</strong> {esc(x['definition'])} {esc(x['note'])}</p>
+  {ftab}
+  <p class="caveat">Outside the rainfall domain most of Ethiopia is in its dry season (Bega); cells with negligible climatological rainfall have no tercile probabilities, which lowers national probability coverage.</p>
+  <h3>Historical skill for this season</h3>
+  {stab}
+  <p class="caveat">RPSS of the final method against climatology, Ethiopia cells; nested leave-one-year-out fits for the development years and fits on those years for the later evaluation years. <span class="strong pos">Bold</span>: one-sided whole-year permutation p &lt; 0.05. Maps for every target and both views are in the <a href="#explorer">map explorer</a>.</p>
+</section>
+"""
     data_json = json.dumps([{k: e[k] for k in ('group', 'kind', 'target', 'view', 'label', 'folder', 'images', 'summary')}
                             for e in entries]).replace('</', '<\\/')
     domain_text = esc(domain['domain_definition']) + ' ' + esc(domain['domain_note'])
@@ -236,7 +323,7 @@ def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top">Ethiopia Seasonal Rainfall</a>
-    <nav><a href="#workflow">Workflow</a><a href="#methods">Methods</a><a href="#skill">Skill</a><a href="#forecast">2026 forecast</a><a href="#verification">Verification</a><a href="#explorer">Map explorer</a><a href="{REPO}">GitHub</a></nav>
+    <nav><a href="#workflow">Workflow</a><a href="#methods">Methods</a><a href="#skill">Skill</a><a href="#forecast">2026 forecast</a><a href="#verification">Verification</a><a href="#ondj">ONDJ</a><a href="#explorer">Map explorer</a><a href="{REPO}">GitHub</a></nav>
   </div>
 </header>
 <main id="top">
@@ -314,6 +401,7 @@ def page(entries, fc, ver, reg, gates, ens, mono, clip, raw, status, domain):
   {v_t}
 </section>
 
+{extra_html}
 <section id="explorer" class="wrap">
   <h2>Map explorer</h2>
   <p>Choose a target season or month, a product and a rainfall domain. Statistics and maps are the operational gallery's presentation layers; the rainfall-domain view is for display and summaries only.</p>
@@ -464,11 +552,12 @@ JS = r'''
 
 def main():
     OUT.mkdir(exist_ok=True)
-    entries = gallery_entries()
+    extras = extra_cycles()
+    entries = gallery_entries() + [e for x in extras for e in x['entries']]
     copy_assets(entries)
     (OUT / 'assets/site.js').write_text(JS.strip() + '\n', encoding='utf-8')
     (OUT / 'assets/style.css').write_text(CSS.strip() + '\n', encoding='utf-8')
-    (OUT / 'index.html').write_text(page(entries, *gather()), encoding='utf-8')
+    (OUT / 'index.html').write_text(page(entries, extras, *gather()), encoding='utf-8')
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())
     print(f'Site written to {OUT} ({size / 1e6:.1f} MB)')
