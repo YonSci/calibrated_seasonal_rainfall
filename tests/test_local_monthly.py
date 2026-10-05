@@ -69,7 +69,7 @@ class LocalTests(unittest.TestCase):
                     for name,value in [('JJAS',10.),('Jun',1.),('Jul',2.),('Aug',3.),('Sep',4.)]:
                         path=root/f'data/processed/init05_{name}/{kind}_{year}_common.nc';path.parent.mkdir(parents=True,exist_ok=True)
                         xr.Dataset({'precip_season':(('lat','lon'),[[value,np.nan],[value,value]])},coords=dict(lat=[3.,4.],lon=[33.,34.])).to_netcdf(path)
-            monthly.reconstruction_check()
+            monthly.reconstruction_check(dict(cfg,archive_years=[1993,2026]))
             self.assertTrue((root/'outputs/qc/monthly_reconstruction.json').exists())
 
     def test_monthly_accumulation_intervals(self):

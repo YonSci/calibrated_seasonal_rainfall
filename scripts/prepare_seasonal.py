@@ -10,12 +10,13 @@ import json
 import numpy as np
 import pandas as pd
 import xarray as xr
-from common import ROOT, load_config, make_folders, model_path, source_path, save_json, save_netcdf
+from common import ROOT, load_config, make_folders, model_path, source_path, save_json, save_netcdf, season_window
 from cycle import CYCLE
 
 
 def season_dates(cfg, year):
-    return pd.date_range(f"{year}-{cfg['season']['start']}", f"{year}-{cfg['season']['end']}", freq="D")
+    start, end = season_window(cfg, year)
+    return pd.date_range(start, end, freq="D")
 
 
 def open_model(ds, cfg):

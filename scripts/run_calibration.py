@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
 import xarray as xr
-from common import ROOT,load_config,save_json,save_netcdf,source_path
+from common import ROOT,load_config,save_json,save_netcdf,source_path,season_window
 from cycle import CYCLE
 from calibration_core import (fit_amount,correct_amount,probabilities,labels,
     fit_dirichlet,apply_dirichlet,EPS)
@@ -35,7 +35,7 @@ def load_inputs(cfg,years,observation_years):
                 if not np.array_equal(lat,d.lat) or not np.array_equal(lon,d.lon):
                     raise ValueError(f'Grid mismatch: {path}')
                 if kind == 'ecmwf':
-                    if not str(d.attrs.get('season_start','')).startswith(f'{year}-'):
+                    if d.attrs.get('season_start','') != season_window(cfg,year)[0].isoformat():
                         raise ValueError(f'Model year mismatch: {path}')
                     a = d.precip_season.transpose('member','lat','lon').values.astype(float)
                     if a.shape[0] != CYCLE.members(year):

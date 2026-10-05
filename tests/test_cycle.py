@@ -28,6 +28,17 @@ class CycleTests(unittest.TestCase):
         self.assertEqual(c.evaluation_years[-1], 2026)
         self.assertEqual(c.root('verification_root').name, 'verification_2027')
 
+    def test_ondj_cycle_and_season_window(self):
+        from common import season_window, season_months
+        c = load_cycle(ROOT / 'config/cycles/sep_2026_ondj.json')
+        self.assertEqual((c.tag, c.season_name, c.reference_label), ('init09', 'ONDJ', '1993-2024'))
+        self.assertEqual([c.target_label(t) for t in ('Dec', 'Jan', 'ONDJ')], ['Dec 2026', 'Jan 2027', 'ONDJ 2026/27'])
+        ondj = {'initialization_month': 9, 'season': {'name': 'ONDJ', 'start': '10-01', 'end': '01-31'}}
+        jjas = {'initialization_month': 5, 'season': {'name': 'JJAS', 'start': '06-01', 'end': '09-30'}}
+        self.assertEqual([d.isoformat() for d in season_window(ondj, 2026)], ['2026-10-01', '2027-01-31'])
+        self.assertEqual([d.isoformat() for d in season_window(jjas, 2026)], ['2026-06-01', '2026-09-30'])
+        self.assertEqual(season_months(ondj), [10, 11, 12, 1])
+
     def test_member_rule(self):
         self.assertEqual([expected_members(y) for y in (1993, 2016, 2017, 2030)], [25, 25, 51, 51])
         rule = [{'last_year': 2020, 'members': 25}, {'members': 101}]
@@ -37,7 +48,7 @@ class CycleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             for changes, message in [
                 (dict(adapter='other'), 'adapter'),
-                (dict(initialization_month=4), 'May'),
+                (dict(initialization_month=4), 'initialization_month'),
                 (dict(reference_years=[1993, 2026]), 'end before'),
                 (dict(targets=['MAM']), 'Targets'),
                 (dict(development_years=[1993, 2025]), 'development'),

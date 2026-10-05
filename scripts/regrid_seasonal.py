@@ -10,7 +10,7 @@ import json
 from datetime import date, datetime, timezone
 import numpy as np
 import xarray as xr
-from common import ROOT, load_config, save_json, save_netcdf
+from common import ROOT, load_config, save_json, save_netcdf, season_window
 from cycle import CYCLE
 
 
@@ -76,8 +76,7 @@ def remap(model, target):
 
 
 def check_season(ds, cfg, year, is_model):
-    start = date.fromisoformat(f'{year}-'+cfg['season']['start'])
-    end = date.fromisoformat(f'{year}-'+cfg['season']['end'])
+    start, end = season_window(cfg, year)
     days = (end-start).days+1
     if ds.precip_season.attrs.get('units') != 'mm' or ds.attrs.get('expected_days') != days:
         raise ValueError('Incorrect rainfall units or season length.')

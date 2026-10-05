@@ -1,4 +1,5 @@
-"""National and fixed JJAS R1+R2 presentation layers for every target.
+"""National and fixed rainfall-domain presentation layers for every target
+(JJAS R1+R2 for the May cycle; a season rainfall domain for other cycles).
 
 Smooth only continuous display fields. Summaries use the original grid and the
 original forecast/verification eligibility. No model fitting or score selection.
@@ -31,12 +32,27 @@ DEFINITION = (f"Fixed {REGIME} descriptive domain: cleaned GitHub-refined R1/R2;
               "The same domain is used for Jun, Jul, Aug, Sep and JJAS. No onset gate.")
 NOTE = ("A presentation and summary domain, not a separate calibration, physical land mask, "
         "monthly rainfall-regime classification, or independently validated EMI zone.")
+# Other seasons use their own rainfall domain (scripts/build_season_domain.py), same rule as R1+R2.
+SEASON = CYCLE.season_name
+SEASON_VIEW = None if SEASON == "JJAS" else f"{SEASON.lower()}_rainfall_domain"
+if SEASON_VIEW:
+    VIEWS = {"all_ethiopia": "All Ethiopia", SEASON_VIEW: f"{SEASON} rainfall domain"}
+
+
+def definition_for(mask):
+    return mask.attrs["domain_definition"] if SEASON_VIEW else DEFINITION
 
 
 def load_mask(path, reference):
     with xr.open_dataset(path) as ds:
         mask = ds.load()
     same_grid(mask, reference)
+    if SEASON_VIEW:
+        country = reference.region_mask.values == 1
+        focused = (mask.season_domain.values == 1) & country
+        if mask.attrs.get("season") != SEASON or not focused.any():
+            raise ValueError(f"Expected a non-empty {SEASON} rainfall-domain mask: {path}")
+        return mask, {"all_ethiopia": country, SEASON_VIEW: focused}
     country_name = "country_mask" if "country_mask" in reference else "region_mask"
     ref = xr.Dataset({"country_mask": reference[country_name]})
     domains = make_domains(mask, ref)
@@ -179,7 +195,7 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
     p = np.divide(p, sums, out=np.full_like(p, np.nan), where=sums>0)
     pvalid = np.isfinite(p).all(-1) & country
     _, shown, peak, _ = base.classify(p, pvalid, settings["minimum_leading_probability"])
-    limit = settings["jjas_anomaly_limit_mm"] if target == "JJAS" else settings["monthly_anomaly_limit_mm"]
+    limit = settings["jjas_anomaly_limit_mm"] if target == SEASON else settings["monthly_anomaly_limit_mm"]
     continuous = {
         "rainfall_anomaly_mm": grid.continuous(fields.rainfall_anomaly_mm.values, av),
         "rainfall_anomaly_percent": grid.continuous(fields.rainfall_anomaly_percent.values, av),
@@ -203,8 +219,8 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
             cb = fig.colorbar(ScalarMappable(norm=norm,cmap=cmap),cax=cax,ticks=[40,50,60,70,80,90,100])
             cb.set_label(["Below normal (%)","Near normal (%)","Above normal (%)"][k])
         finish_axis(ax,grid,lines,focus if view != "all_ethiopia" else None)
-        fig.suptitle(f"{target} {YEAR} | rainfall tercile outlook",fontsize=18,y=.965)
-        fig.text(.5,.918,f"May initialization · shared probability blend · CHIRPS reference {REF_DASH}",ha="center",fontsize=10)
+        fig.suptitle(f"{CYCLE.target_label(target)} | rainfall tercile outlook",fontsize=18,y=.965)
+        fig.text(.5,.918,f"{CYCLE.init_month_name} initialization · shared probability blend · CHIRPS reference {REF_DASH}",ha="center",fontsize=10)
         fig.text(.5,.883,VIEWS[view]+" · presentation layer",ha="center",fontsize=11,color="#176d62")
         fig.legend(handles=[Patch(facecolor="white",edgecolor="gray",label=f"Weak (<{100*settings['minimum_leading_probability']:g}%) or tied"),
                             Patch(facecolor="#c3c9cf",label="Ineligible in view"),Patch(facecolor="#edf0f3",label="Outside focus")],
@@ -229,8 +245,8 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
             ticks = np.linspace(0,vmax,5) if amount else np.array([-1,-.6,-.2,0,.2,.6,1])*vmax
             fig.colorbar(im,ax=ax,shrink=.9,ticks=ticks,label=f"Rainfall {'total' if amount else 'anomaly'} ({units})")
             finish_axis(ax,grid,lines,focus if view != "all_ethiopia" else None)
-            fig.suptitle(f"{target} {YEAR} | {'corrected mean rainfall' if amount else 'rainfall anomaly'} ({units})",fontsize=17,y=.965)
-            fig.text(.5,.918,f"May initialization · corrected ensemble mean · CHIRPS reference {REF_DASH}",ha="center",fontsize=10)
+            fig.suptitle(f"{CYCLE.target_label(target)} | {'corrected mean rainfall' if amount else 'rainfall anomaly'} ({units})",fontsize=17,y=.965)
+            fig.text(.5,.918,f"{CYCLE.init_month_name} initialization · corrected ensemble mean · CHIRPS reference {REF_DASH}",ha="center",fontsize=10)
             fig.text(.5,.883,VIEWS[view]+" · presentation layer",ha="center",fontsize=11,color="#176d62")
             message = (f"Percent anomalies hidden where reference rainfall <{settings['percent_anomaly_minimum_climatology_mm']:g} mm."
                        if percent else "Rainfall amount correction; separate from probability calibration.")
@@ -281,8 +297,8 @@ def verification_maps(fields, domains, lines, target, out, settings):
             ax.set_title(title,fontsize=10,pad=8)
             ax.tick_params(labelsize=8)
             ax.xaxis.label.set_size(9);ax.yaxis.label.set_size(9)
-        fig.suptitle(f"{target} {YEAR} | forecast verification",fontsize=20,y=.97)
-        fig.text(.5,.932,f"Frozen May-initialized shared blend · CHIRPS v2 observations · reference {REF_DASH}",ha="center",fontsize=11)
+        fig.suptitle(f"{CYCLE.target_label(target)} | forecast verification",fontsize=20,y=.97)
+        fig.text(.5,.932,f"Frozen {CYCLE.init_month_name}-initialized shared blend · CHIRPS v2 observations · reference {REF_DASH}",ha="center",fontsize=11)
         fig.text(.5,.896,VIEWS[view]+" · presentation layer",ha="center",fontsize=12,color="#176d62")
         fig.text(.5,.079,"Negative RPS difference favors the forecast. Lower CRPS is better. National and domain panels share color scales.\nLight gray: outside focus. Dark gray: no eligible verification data. No observed category is inferred from neighboring cells.",ha="center",fontsize=9)
         footer(fig,settings,verification=True)
@@ -294,19 +310,22 @@ def build_forecast(source, mask_path, boundary, target, destination, settings):
     with xr.open_dataset(source) as ds:
         f = ds.load()
     check_forecast(f,target)
-    _,domains = load_mask(mask_path,f)
+    mask,domains = load_mask(mask_path,f)
+    definition = definition_for(mask)
     g = base.derive(f,settings["minimum_leading_probability"],settings["percent_anomaly_minimum_climatology_mm"])
     lines = base.boundary_lines(boundary)
     result = {"kind":"forecast","target":target,"year":YEAR,"created_utc":now(),
-              "domain_definition":DEFINITION,"domain_note":NOTE,"source_sha256":hashes,
+              "domain_definition":definition,"domain_note":NOTE,"source_sha256":hashes,
               "display":settings,"forecast_sha256":sha(source),
               "summaries":{view:forecast_summary(f,g,domain) for view,domain in domains.items()}}
     with staged_output(destination,True) as stage:
         forecast_maps(f,g,domains,lines,target,stage,settings)
-        g["jjas_r12_rainfall_domain"] = (("lat","lon"),domains["jjas_r12_rainfall_domain"].astype("int8"))
+        for view in domains:
+            if view != "all_ethiopia":
+                g[view] = (("lat","lon"),domains[view].astype("int8"))
         g["corrected_ensemble_mean"] = f.corrected_ensemble_mean
         g["observed_training_mean"] = f.observed_training_mean
-        g.attrs.update(presentation_domain_definition=DEFINITION,presentation_domain_note=NOTE,
+        g.attrs.update(presentation_domain_definition=definition,presentation_domain_note=NOTE,
                        forecast_sha256=result["forecast_sha256"],mask_sha256=sha(mask_path),
                        statistics_grid="original 0.25 degree grid; no smoothing",mask_note=NOTE)
         g.to_netcdf(stage/"presentation_fields.nc")
@@ -334,7 +353,9 @@ def build_verification(root, mask_path, boundary, target, destination, settings)
               "score_note":"Existing native-grid score fields aggregated on each domain; country scores reproduced. Single year, overlapping targets, no significance or reliability claim."}
     with staged_output(destination,True) as stage:
         verification_maps(fields,domains,base.boundary_lines(boundary),target,stage,settings)
-        fields["jjas_r12_rainfall_domain"] = (("lat","lon"),domains["jjas_r12_rainfall_domain"].astype("int8"))
+        for view in domains:
+            if view != "all_ethiopia":
+                fields[view] = (("lat","lon"),domains[view].astype("int8"))
         fields.attrs.update(presentation_domain_definition=DEFINITION,presentation_domain_note=NOTE,
                             mask_sha256=mask_digest,statistics_grid="unchanged native verification fields")
         fields.to_netcdf(stage/"presentation_fields.nc")

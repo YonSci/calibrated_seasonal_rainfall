@@ -71,7 +71,7 @@ def write_result(out,cfg,models,members,lat,lon,pars,clim,lam,region,area,land_i
         target_period=json.dumps(cfg['season']),initialization_month=cfg['initialization_month'],
         method='equal-year mean-variance rainfall correction; alpha=0.5 count smoothing; shared climatology blend',
         climatology_weight=float(lam),processing_utc=datetime.now(timezone.utc).isoformat(),
-        status=f'Retrospective reconstruction of May-initialized {YEAR} forecast; no {YEAR} observations used',
+        status=f'Retrospective reconstruction of {CYCLE.init_month_name}-initialized {YEAR} forecast; no {YEAR} observations used',
         mask_json=json.dumps(dict(land=land_info,region=region_info)))
     d=xr.Dataset(coords=dict(member=members[YEAR],lat=lat,lon=lon,category=['below','near','above']),attrs=attrs)
     d['precip_corrected']=(('member','lat','lon'),corrected.reshape(len(members[YEAR]),*shape))
@@ -111,7 +111,7 @@ def write_result(out,cfg,models,members,lat,lon,pars,clim,lam,region,area,land_i
         im=ax.pcolormesh(lon,lat,field,vmin=0,vmax=100,cmap='viridis',shading='auto')
         ax.set(title=['Below normal','Near normal','Above normal'][k],xlabel='Longitude',ylabel='Latitude',aspect='equal')
         fig.colorbar(im,ax=ax,shrink=.7,label='Probability (%)')
-    fig.suptitle(f"{cfg['season']['name']} {YEAR} | May initialization | shared blend reconstruction")
+    fig.suptitle(f"{CYCLE.target_label(cfg['season']['name'])} | {CYCLE.init_month_name} initialization | shared blend reconstruction")
     fig.tight_layout();fig.savefig(out/f'probabilities_{YEAR}.png',dpi=180);plt.close(fig)
     fig,axes=plt.subplots(1,2,figsize=(11,5))
     valid=region&pars['amount_eligible'];mean=corrected.mean(axis=0);anomaly=mean-pars['mu_obs']
@@ -122,21 +122,25 @@ def write_result(out,cfg,models,members,lat,lon,pars,clim,lam,region,area,land_i
             limit=max(float(np.nanmax(np.abs(field))),1.);options=dict(vmin=-limit,vmax=limit)
         im=ax.pcolormesh(lon,lat,field,cmap=cmap,shading='auto',**options)
         ax.set(title=title,xlabel='Longitude',ylabel='Latitude',aspect='equal');fig.colorbar(im,ax=ax,shrink=.7)
-    fig.suptitle(f"{cfg['season']['name']} {YEAR} | rainfall correction only; separate from probability blending")
+    fig.suptitle(f"{CYCLE.target_label(cfg['season']['name'])} | rainfall correction only; separate from probability blending")
     fig.tight_layout();fig.savefig(out/f'rainfall_{YEAR}.png',dpi=180);plt.close(fig)
     return report
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--config',default='config/project.json');p.add_argument('--targets',nargs='+',choices=TARGETS,default=TARGETS)
+    p.add_argument('--config',default=CYCLE.raw.get('project_config','config/project.json'))
+    p.add_argument('--targets',nargs='+',choices=list(CYCLE.targets),default=list(CYCLE.targets))
     p.add_argument('--region-mask',default='data/masks/ethiopia_common.nc');p.add_argument('--land-mask');p.add_argument('--regenerate',action='store_true')
     p.add_argument('--output-root',default=None,help='Default: forecast_root of the cycle (outputs/final_shared_blend)')
     args=p.parse_args();base=load_config(args.config)
     out_root=source_path(args.output_root) if args.output_root else CYCLE.root('forecast_root','outputs/final_shared_blend')
-    if base['initialization_month']!=5 or base['season']!={'name':'JJAS','start':'06-01','end':'09-30'}:raise ValueError('Expected established May-initialized JJAS configuration.')
+    if base['initialization_month']!=CYCLE.init_month or base['season']!=CYCLE.project['season']:
+        raise ValueError('Project configuration does not match the selected cycle (initialization month or season).')
     from run_monthly import monthly_config
-    configs={target:base if target=='JJAS' else monthly_config(base,{'Jun':6,'Jul':7,'Aug':8,'Sep':9}[target]) for target in args.targets}
+    import calendar
+    season=base['season']['name']
+    configs={target:base if target==season else monthly_config(base,list(calendar.month_abbr).index(target)) for target in args.targets}
     for target in configs:check_destination(CYCLE.forecast_dir(out_root,target),args.regenerate)
     reports=[]
     for target,cfg in configs.items():

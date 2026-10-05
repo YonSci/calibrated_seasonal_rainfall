@@ -12,12 +12,14 @@ from output_runs import check_destination, staged_output
 from common import ROOT, load_config, source_path, save_json, save_netcdf
 from compare_calibration import make_record, score
 from run_calibration import load_inputs, load_land, cell_area
+from cycle import CYCLE
 from verification_core import probability_losses, mean_valid
 
 NAMES = ['climatology','smooth','shared_blend','local_blend','regularized_local_blend']
 GAMMA = .05  # Fixed experimental setting, not fitted or selected on evaluation data.
 MIN_PAIRS = 20
-TRAIN = list(range(1993,2017))
+TRAIN = CYCLE.development_years          # 1993-2016
+EVALUATION = CYCLE.evaluation_years      # 2017 to the cycle's reference end
 
 
 def fit_weights(records, area):
@@ -56,7 +58,7 @@ def apply_weights(record, weights):
 
 
 def run(models, obs, land, area, region, mode, progress=print):
-    targets=TRAIN if mode=='training' else list(range(2017,2026))
+    targets=TRAIN if mode=='training' else EVALUATION
     rows,records,weights=[],[],[]
     shared_fit=None
     if mode=='operational':
@@ -153,7 +155,7 @@ def main():
     p.add_argument('--region-mask',required=True);p.add_argument('--land-mask');p.add_argument('--mode',choices=['training','operational'],default='training')
     p.add_argument('--regenerate',action='store_true',help='Rebuild outputs, preserving existing results in a dated backup.')
     args=p.parse_args();cfg=load_config(args.config)
-    years=TRAIN if args.mode=='training' else TRAIN+list(range(2017,2026))
+    years=TRAIN if args.mode=='training' else TRAIN+EVALUATION
     tag,models,obs,members,lat,lon=load_inputs(cfg,years,years)
     land,land_info=load_land(args.land_mask,lat,lon);path=source_path(args.region_mask)
     with xr.open_dataset(path) as d:

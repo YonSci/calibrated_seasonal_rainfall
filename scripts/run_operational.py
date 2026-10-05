@@ -36,7 +36,7 @@ PATH_KEYS = ["project_config","forecast_root","verification_root","processed_roo
              "regime_mask","boundary","historical_review","output_root"]
 PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operational.py",
                    "delivery_map_base.py","delivery_output_runs.py","plot_forecast_products.py",
-                   "output_runs.py","cycle.py","followup_common.py",
+                   "output_runs.py","cycle.py","common.py","run_monthly.py","followup_common.py",
                    "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py"]
 VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
                   "verification_report_core.py","build_verification_report.py"]

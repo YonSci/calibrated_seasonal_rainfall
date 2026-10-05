@@ -22,11 +22,37 @@ def load_config(path):
         cfg = json.load(stream)
     if not 1 <= cfg["initialization_month"] <= 12:
         raise ValueError("initialization_month must be 1..12")
-    start, end = cfg["season"]["start"], cfg["season"]["end"]
-    from datetime import date
-    if date.fromisoformat("2000-" + end) < date.fromisoformat("2000-" + start):
-        raise ValueError("This starter supports same-calendar-year seasons only.")
+    season_window(cfg, 2000)   # validates the season definition
     return cfg
+
+
+def season_window(cfg, year):
+    """First and last day of the target period for the forecast initialized in `year`.
+
+    The period starts in the initialization year when its start month is on or after
+    the initialization month, otherwise in the next year (e.g. January after a
+    September start). It ends in the following year when its end month precedes
+    its start month (e.g. ONDJ). May-initialized JJAS keeps both dates in `year`.
+    """
+    from datetime import date
+    start_m, start_d = map(int, cfg["season"]["start"].split("-"))
+    end_m, end_d = map(int, cfg["season"]["end"].split("-"))
+    first_year = year if start_m >= cfg["initialization_month"] else year + 1
+    last_year = first_year if (end_m, end_d) >= (start_m, start_d) else first_year + 1
+    start, end = date(first_year, start_m, start_d), date(last_year, end_m, end_d)
+    if (end - start).days >= 366:
+        raise ValueError("Target periods longer than one year are not supported.")
+    return start, end
+
+
+def season_months(cfg):
+    """Calendar months covered by the season, in order, e.g. [10, 11, 12, 1] for ONDJ."""
+    start, end = season_window(cfg, 2001)
+    months, y, m = [], start.year, start.month
+    while (y, m) <= (end.year, end.month):
+        months.append(m)
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return months
 
 
 def source_path(value):

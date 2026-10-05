@@ -18,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ENV = 'CALIBRATION_CYCLE'
 DEFAULT = 'config/operational.json'
-ADAPTERS = {'may_2026_shared_blend', 'may_shared_blend'}
+ADAPTERS = {'may_2026_shared_blend', 'may_shared_blend', 'sep_shared_blend', 'shared_blend'}
 ORDER = ['Jun', 'Jul', 'Aug', 'Sep', 'JJAS']
 # Members per year: first rule whose last_year is >= year (no last_year = open-ended).
 DEFAULT_MEMBER_RULE = [{'last_year': 2016, 'members': 25}, {'members': 51}]
@@ -93,6 +93,35 @@ class Cycle:
             raise KeyError(f'Cycle file {self.path} has no "{key}"')
         return resolve(value)
 
+    @property
+    def project(self):
+        """The project configuration (season, archive) this cycle forecasts."""
+        p = resolve(self.raw.get('project_config', 'config/project.json'))
+        if not p.is_file():   # minimal test projects: the established JJAS season
+            return {'initialization_month': 5, 'season': {'name': 'JJAS', 'start': '06-01', 'end': '09-30'}}
+        return json.loads(p.read_text(encoding='utf-8-sig'))
+
+    @property
+    def season_name(self):
+        return self.project['season']['name']
+
+    def target_label(self, target):
+        """Display label with the calendar year(s) of the target, e.g. 'JJAS 2026', 'ONDJ 2026/27', 'Jan 2027'."""
+        from common import season_window
+        from run_monthly import monthly_config
+        import calendar
+        cfg = self.project
+        if target != self.season_name:
+            cfg = monthly_config(cfg, list(calendar.month_abbr).index(target))
+        start, end = season_window(cfg, self.year)
+        years = str(start.year) if start.year == end.year else f'{start.year}/{str(end.year)[-2:]}'
+        return f'{target} {years}'
+
+    @property
+    def init_month_name(self):
+        import calendar
+        return calendar.month_name[self.init_month]
+
     def forecast_dir(self, root, target):
         return Path(root) / f'{self.tag}_{target}/{self.year}'
 
@@ -108,6 +137,13 @@ BUILTIN = {'adapter': 'may_2026_shared_blend', 'forecast_year': 2026, 'initializ
            'output_root': 'outputs/operational_2026'}
 
 
+def season_targets(project):
+    """Month abbreviations of the season followed by the season name, e.g. Jun..Sep, JJAS."""
+    import calendar
+    from common import season_months
+    return [calendar.month_abbr[m] for m in season_months(project)] + [project['season']['name']]
+
+
 def load_cycle(path=None):
     chosen = path or os.environ.get(ENV)
     p = resolve(chosen or DEFAULT)
@@ -120,14 +156,15 @@ def load_cycle(path=None):
     first, last = raw['reference_years']
     c = Cycle(p, int(raw['forecast_year']), int(raw['initialization_month']), int(first), int(last),
               tuple(raw.get('targets', ORDER)), raw)
-    if c.init_month != 5:
-        raise ValueError('Only the May initialization (JJAS and Jun-Sep targets) is implemented.')
+    if c.init_month != int(c.project.get('initialization_month', c.init_month)):
+        raise ValueError("initialization_month differs from the cycle's project configuration")
     if not first < last < c.year:
         raise ValueError('reference_years must end before forecast_year')
     if c.development_years[-1] >= last:
         raise ValueError('development_years must end before the reference period ends')
-    if not set(c.targets) <= set(ORDER):
-        raise ValueError(f'Targets must be among {ORDER}')
+    allowed = season_targets(c.project)
+    if not set(c.targets) <= set(allowed):
+        raise ValueError(f'Targets must be among {allowed}')
     return c
 
 
