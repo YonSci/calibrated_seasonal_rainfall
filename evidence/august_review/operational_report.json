@@ -1,0 +1,607 @@
+{
+  "mode": "operational",
+  "years": [
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source_sha256": "cbf5dfbe29372131687e11bff57eba1c07cc9c8251831d3add6c718c6d9475d6",
+  "rps_difference": -0.0011193173895912506,
+  "whole_year_bootstrap_95_interval": [
+    -0.004193371057053209,
+    0.002350420706563704
+  ],
+  "years_better": 6,
+  "methods": {
+    "shared_blend": {
+      "annual_rps": [
+        0.48366533804073264,
+        0.38695261631983,
+        0.4015410325791248,
+        0.39611825641439163,
+        0.4261487577495359,
+        0.409775998024689,
+        0.42907062791677875,
+        0.4503753459038195,
+        0.4536599219663656
+      ],
+      "reliability": {
+        "below": [
+          {
+            "lower": 0.0,
+            "upper": 0.1,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.30000000000000004,
+            "weight_fraction": 0.37810593843460083,
+            "mean_probability": 0.2636092552809976,
+            "observed_frequency": 0.16086356341838837,
+            "cell_year_count": 4104,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.30000000000000004,
+            "upper": 0.4,
+            "weight_fraction": 0.5002641081809998,
+            "mean_probability": 0.3413323649738159,
+            "observed_frequency": 0.26919955015182495,
+            "cell_year_count": 5449,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "weight_fraction": 0.11569348722696304,
+            "mean_probability": 0.42944319396511615,
+            "observed_frequency": 0.5042159557342529,
+            "cell_year_count": 1255,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6000000000000001,
+            "weight_fraction": 0.005936458706855774,
+            "mean_probability": 0.5221218145860225,
+            "observed_frequency": 0.6718872785568237,
+            "cell_year_count": 64,
+            "years_contributing": 7
+          },
+          {
+            "lower": 0.6000000000000001,
+            "upper": 0.7000000000000001,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.7000000000000001,
+            "upper": 0.8,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.9,
+            "upper": 1.0,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          }
+        ],
+        "near": [
+          {
+            "lower": 0.0,
+            "upper": 0.1,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.30000000000000004,
+            "weight_fraction": 0.3447003662586212,
+            "mean_probability": 0.26758451589681814,
+            "observed_frequency": 0.22017624974250793,
+            "cell_year_count": 3741,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.30000000000000004,
+            "upper": 0.4,
+            "weight_fraction": 0.6022428870201111,
+            "mean_probability": 0.33966145179216667,
+            "observed_frequency": 0.3257419466972351,
+            "cell_year_count": 6553,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "weight_fraction": 0.052777763456106186,
+            "mean_probability": 0.418278431012426,
+            "observed_frequency": 0.4608868658542633,
+            "cell_year_count": 575,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6000000000000001,
+            "weight_fraction": 0.00027897802647203207,
+            "mean_probability": 0.5085462726201174,
+            "observed_frequency": 1.0,
+            "cell_year_count": 3,
+            "years_contributing": 2
+          },
+          {
+            "lower": 0.6000000000000001,
+            "upper": 0.7000000000000001,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.7000000000000001,
+            "upper": 0.8,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.9,
+            "upper": 1.0,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          }
+        ],
+        "above": [
+          {
+            "lower": 0.0,
+            "upper": 0.1,
+            "weight_fraction": 9.284490079153329e-05,
+            "mean_probability": 0.0995213275095746,
+            "observed_frequency": 1.0,
+            "cell_year_count": 1,
+            "years_contributing": 1
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "weight_fraction": 0.0010208047460764647,
+            "mean_probability": 0.1683413855636886,
+            "observed_frequency": 0.09083285182714462,
+            "cell_year_count": 11,
+            "years_contributing": 8
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.30000000000000004,
+            "weight_fraction": 0.18567973375320435,
+            "mean_probability": 0.2733523953529789,
+            "observed_frequency": 0.2489430457353592,
+            "cell_year_count": 2017,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.30000000000000004,
+            "upper": 0.4,
+            "weight_fraction": 0.5517979264259338,
+            "mean_probability": 0.3463471096783018,
+            "observed_frequency": 0.4306936264038086,
+            "cell_year_count": 6010,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "weight_fraction": 0.23686011135578156,
+            "mean_probability": 0.43504786555089936,
+            "observed_frequency": 0.5837860107421875,
+            "cell_year_count": 2568,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6000000000000001,
+            "weight_fraction": 0.024548564106225967,
+            "mean_probability": 0.516489891612264,
+            "observed_frequency": 0.9437493085861206,
+            "cell_year_count": 265,
+            "years_contributing": 5
+          },
+          {
+            "lower": 0.6000000000000001,
+            "upper": 0.7000000000000001,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.7000000000000001,
+            "upper": 0.8,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.9,
+            "upper": 1.0,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          }
+        ]
+      }
+    },
+    "regularized_regime_blend": {
+      "annual_rps": [
+        0.48652923362544476,
+        0.38552124703859736,
+        0.3928035891974828,
+        0.4057545643864811,
+        0.4253869157290639,
+        0.4044925832901719,
+        0.4253305997160005,
+        0.4512525839355148,
+        0.4501627214901895
+      ],
+      "reliability": {
+        "below": [
+          {
+            "lower": 0.0,
+            "upper": 0.1,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "weight_fraction": 0.02732638269662857,
+            "mean_probability": 0.17058129226558644,
+            "observed_frequency": 0.14510278403759003,
+            "cell_year_count": 297,
+            "years_contributing": 7
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.30000000000000004,
+            "weight_fraction": 0.35785967111587524,
+            "mean_probability": 0.2681813825311592,
+            "observed_frequency": 0.14855198562145233,
+            "cell_year_count": 3887,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.30000000000000004,
+            "upper": 0.4,
+            "weight_fraction": 0.4767179489135742,
+            "mean_probability": 0.3415616224277062,
+            "observed_frequency": 0.2746874988079071,
+            "cell_year_count": 5187,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "weight_fraction": 0.12670065462589264,
+            "mean_probability": 0.43470738464407754,
+            "observed_frequency": 0.489523321390152,
+            "cell_year_count": 1377,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6000000000000001,
+            "weight_fraction": 0.010667268186807632,
+            "mean_probability": 0.5366996076423222,
+            "observed_frequency": 0.6641233563423157,
+            "cell_year_count": 116,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.6000000000000001,
+            "upper": 0.7000000000000001,
+            "weight_fraction": 0.000728068349417299,
+            "mean_probability": 0.6027293097360716,
+            "observed_frequency": 0.8732804656028748,
+            "cell_year_count": 8,
+            "years_contributing": 2
+          },
+          {
+            "lower": 0.7000000000000001,
+            "upper": 0.8,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.9,
+            "upper": 1.0,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          }
+        ],
+        "near": [
+          {
+            "lower": 0.0,
+            "upper": 0.1,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "weight_fraction": 0.022704072296619415,
+            "mean_probability": 0.1713221927303075,
+            "observed_frequency": 0.18456782400608063,
+            "cell_year_count": 249,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.30000000000000004,
+            "weight_fraction": 0.32905828952789307,
+            "mean_probability": 0.2715782044984193,
+            "observed_frequency": 0.2184293121099472,
+            "cell_year_count": 3572,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.30000000000000004,
+            "upper": 0.4,
+            "weight_fraction": 0.5705600380897522,
+            "mean_probability": 0.3390563626847005,
+            "observed_frequency": 0.33004820346832275,
+            "cell_year_count": 6204,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "weight_fraction": 0.07492393255233765,
+            "mean_probability": 0.43174032295976866,
+            "observed_frequency": 0.40775081515312195,
+            "cell_year_count": 817,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6000000000000001,
+            "weight_fraction": 0.002753629582002759,
+            "mean_probability": 0.5218758838540162,
+            "observed_frequency": 0.6337511539459229,
+            "cell_year_count": 30,
+            "years_contributing": 6
+          },
+          {
+            "lower": 0.6000000000000001,
+            "upper": 0.7000000000000001,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.7000000000000001,
+            "upper": 0.8,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.9,
+            "upper": 1.0,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          }
+        ],
+        "above": [
+          {
+            "lower": 0.0,
+            "upper": 0.1,
+            "weight_fraction": 9.284490079153329e-05,
+            "mean_probability": 0.09523310424431752,
+            "observed_frequency": 1.0,
+            "cell_year_count": 1,
+            "years_contributing": 1
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "weight_fraction": 0.0095838513225317,
+            "mean_probability": 0.17769010235790594,
+            "observed_frequency": 0.08672425895929337,
+            "cell_year_count": 104,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.30000000000000004,
+            "weight_fraction": 0.20724406838417053,
+            "mean_probability": 0.2687703887647415,
+            "observed_frequency": 0.28442856669425964,
+            "cell_year_count": 2254,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.30000000000000004,
+            "upper": 0.4,
+            "weight_fraction": 0.5409122705459595,
+            "mean_probability": 0.3502762781336908,
+            "observed_frequency": 0.4265459179878235,
+            "cell_year_count": 5885,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "weight_fraction": 0.21983131766319275,
+            "mean_probability": 0.4358576814353381,
+            "observed_frequency": 0.6286337375640869,
+            "cell_year_count": 2385,
+            "years_contributing": 9
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6000000000000001,
+            "weight_fraction": 0.02150813490152359,
+            "mean_probability": 0.5391763952548431,
+            "observed_frequency": 0.743237316608429,
+            "cell_year_count": 234,
+            "years_contributing": 6
+          },
+          {
+            "lower": 0.6000000000000001,
+            "upper": 0.7000000000000001,
+            "weight_fraction": 0.00082744425162673,
+            "mean_probability": 0.6189639736042789,
+            "observed_frequency": 0.8886469602584839,
+            "cell_year_count": 9,
+            "years_contributing": 2
+          },
+          {
+            "lower": 0.7000000000000001,
+            "upper": 0.8,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          },
+          {
+            "lower": 0.9,
+            "upper": 1.0,
+            "weight_fraction": 0.0,
+            "mean_probability": null,
+            "observed_frequency": null,
+            "cell_year_count": 0,
+            "years_contributing": 0
+          }
+        ]
+      }
+    }
+  },
+  "weighting": "Equal years; area weights normalized on each year common support",
+  "limitations": "Exploratory comparison, repeated inspection of operational years. No independent-cell confidence intervals. No automatic method selection or refit."
+}

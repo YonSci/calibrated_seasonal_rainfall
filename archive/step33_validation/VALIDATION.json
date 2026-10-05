@@ -1,0 +1,15 @@
+{
+  "source_commit": "07879e42290dd5efd1d75f137961378ca7e39ea2",
+  "source_sha256": "2b3da9ffbc98120651f6e79639ba29a18556596edd5363fa76b2d02319879d09",
+  "classification_difference_cells": 0,
+  "comparison": "Pinned source arithmetic on identical corrected daily cycle and country mask, with missing cells excluded before residual assignment. This is not a replay of the original leap-year bug or different source boundary.",
+  "unit_tests_passed": 6,
+  "actual_data_comparison": true,
+  "real_historical_calibration_re_evaluation": "Pending local run; daily year cache and historical model inputs not uploaded.",
+  "synthetic_pipeline": "PASS: both definitions, nested 24-year training, 9-year operational evaluation, exact shared-baseline reproduction, separate masks and regeneration backup",
+  "figures_visually_inspected": [
+    "classification_comparison.png",
+    "representative_rainfall_cycles.png",
+    "JJAS_separate_domains.png"
+  ]
+}

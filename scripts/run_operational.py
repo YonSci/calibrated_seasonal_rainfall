@@ -1,0 +1,343 @@
+r"""Run the established May-2026 shared-blend production/review stages.
+
+Examples (Windows CMD):
+  python scripts\run_operational.py --plan
+  python scripts\run_operational.py --workflow products
+  python scripts\run_operational.py --workflow all
+
+No fitting or regridding is triggered. Existing scientific stages remain authoritative.
+The engine can support other adapters later; this adapter explicitly requires 2026.
+"""
+import argparse
+import importlib.metadata
+import json
+from pathlib import Path
+import platform
+import subprocess
+import sys
+import urllib.request
+import urllib.error
+from operational_core import StageRunner, exclusive_run, read, write, sha, now
+
+ROOT = Path(__file__).resolve().parents[1]
+ORDER = ["Jun", "Jul", "Aug", "Sep", "JJAS"]
+MONTHS = {"Jun":6,"Jul":7,"Aug":8,"Sep":9}
+BASE = "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/"
+PATH_KEYS = ["project_config","forecast_root","verification_root","processed_root","download_cache",
+             "regime_mask","boundary","historical_review","output_root"]
+PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operational.py",
+                   "delivery_map_base.py","delivery_output_runs.py","followup_common.py",
+                   "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py"]
+VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
+                  "verification_report_core.py","build_verification_report.py"]
+
+
+def path(value):
+    p = Path(value)
+    return (p if p.is_absolute() else ROOT/p).resolve()
+
+
+def require(paths):
+    missing = [str(p) for p in paths if not Path(p).is_file()]
+    if missing:
+        raise ValueError("Missing required files:\n  " + "\n  ".join(missing) +
+                         "\nKeep Steps 29-32 installed; see docs/33_OPERATIONAL_RUNNER.md. No file was substituted.")
+
+
+def configuration(filename, targets=None):
+    cfg = read(filename)
+    if (cfg.get("schema_version")!=1 or cfg.get("adapter")!="may_2026_shared_blend" or
+        cfg.get("forecast_year")!=2026 or cfg.get("initialization_month")!=5 or cfg.get("reference_years")!=[1993,2025]):
+        raise ValueError("This adapter requires May 2026, historical reference 1993-2025. Changing the year alone is not supported; the existing scientific scripts also require an updated adapter.")
+    wanted = targets or cfg["targets"]
+    if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
+        raise ValueError("Targets must be unique Jun, Jul, Aug, Sep, JJAS names")
+    cfg["targets"] = [t for t in ORDER if t in wanted]
+    for key in PATH_KEYS:
+        cfg[key] = str(path(cfg[key]))
+    settings = cfg["display"]
+    if (not isinstance(settings["interpolation_factor"],int) or not 1<=settings["interpolation_factor"]<=20 or
+        not 0<=settings["gaussian_sigma_cells"]<=1 or not 1/3<=settings["minimum_leading_probability"]<=1 or
+        not 0<=settings["percent_anomaly_minimum_climatology_mm"]<1000 or
+        not 1<=settings["monthly_anomaly_limit_mm"]<=5000 or not 1<=settings["jjas_anomaly_limit_mm"]<=10000 or
+        not 72<=settings["dpi"]<=300 or type(settings["pdf"]) is not bool):
+        raise ValueError("Invalid display configuration")
+    output = path(cfg["output_root"])
+    # All operational writes are isolated from input data, prior delivery and science outputs.
+    if not output.is_relative_to(ROOT/"outputs") or output==ROOT/"outputs":
+        raise ValueError("output_root must be its own subfolder of this project's outputs folder")
+    protected = [ROOT/"data",ROOT/"config",ROOT/"scripts",ROOT/"evidence",ROOT/"outputs/forecast_delivery",
+                 ROOT/"outputs/verification_report_2026",ROOT/"outputs/final_shared_blend"]
+    protected += [path(cfg[key]) for key in PATH_KEYS if key!="output_root"]
+    for item in protected:
+        if item==output or item.is_relative_to(output) or output.is_relative_to(item):
+            raise ValueError("Operational output overlaps a protected input/output: " + str(item))
+    return cfg
+
+
+def verification_files(root, target):
+    return [root/f"results/{target}/verification_report.json",
+            root/f"results/{target}/verification_fields.nc",
+            root/f"observations/{target}/chirps_2026_common.nc"]
+
+
+def existing_verification(root, targets):
+    available = []
+    for target in targets:
+        files = verification_files(root,target)
+        # Observations can exist before scoring. An incomplete result is an error,
+        # while observations without any result are simply awaiting verification.
+        if any(p.exists() for p in files[:2]):
+            require(files)
+            available.append(target)
+    return available
+
+
+def probe(url):
+    try:
+        try:
+            response = urllib.request.urlopen(urllib.request.Request(url,method="HEAD"),timeout=20)
+        except urllib.error.HTTPError as exc:
+            if exc.code!=405:
+                raise
+            response = urllib.request.urlopen(urllib.request.Request(url,headers={"Range":"bytes=0-0"}),timeout=20)
+        with response:
+            code = response.status
+        return {"status":"available" if code in [200,206] else "unknown","http_status":code,"url":url}
+    except urllib.error.HTTPError as exc:
+        return {"status":"unavailable" if exc.code==404 else "unknown","http_status":exc.code,"url":url}
+    except (OSError,urllib.error.URLError) as exc:
+        return {"status":"unknown","detail":str(exc),"url":url}
+
+
+def choose_verification(requested, target_scope, checker=probe):
+    explicit = requested != ["auto"]
+    wanted = requested if explicit else target_scope
+    if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
+        raise ValueError("--verification-targets must be 'auto' alone or target names")
+    needed = [m for m in MONTHS if m in wanted or "JJAS" in wanted]
+    records = {m:checker(BASE+f"chirps-v2.0.2026.{MONTHS[m]:02d}.days_p25.nc") for m in needed}
+    for m,r in records.items():
+        print("CHIRPS availability:",m,r["status"],flush=True)
+    unknown = [m for m,r in records.items() if r["status"]=="unknown"]
+    if unknown:
+        raise ValueError("Observation availability is unknown for "+", ".join(unknown)+". Check connectivity and retry; network failures are not treated as absent observations. Use --workflow products for an offline presentation run.")
+    months = [m for m in needed if records[m]["status"]=="available"]
+    ready = [t for t in ORDER if t in wanted and (t in months or (t=="JJAS" and set(months)==set(MONTHS)))]
+    missing = [t for t in wanted if t not in ready]
+    if explicit and missing:
+        raise ValueError("Requested verification is not ready: "+", ".join(missing)+". Use --verification-targets auto to process the available months.")
+    # When JJAS is ready all four component months are prepared and scored too.
+    if "JJAS" in ready:
+        ready = ORDER.copy()
+    return months,ready,{"checked_utc":now(),"files":records,"pending":missing,
+                         "note":"Availability is not completeness; preparation validates every calendar day, units and reference overlap."}
+
+
+def preflight(cfg, workflow, verification_request):
+    import xarray as xr
+    import numpy as np
+    from presentation_layers import boundary_files, load_mask
+    from followup_common import freeze_snapshot
+    from verify2026_common import check_forecast
+    from verify_2026_regimes import inspect_source
+    import delivery_map_base as base
+    packages = {name:importlib.metadata.version(name) for name in
+                ["numpy","pandas","xarray","netCDF4","scipy","matplotlib","pyshp","pyproj"]}
+    scripts = PRODUCT_SCRIPTS + (VERIFY_SCRIPTS if workflow in ["verify","all"] else [])
+    require([ROOT/"scripts"/s for s in scripts])
+    mp,bp,vr = path(cfg["regime_mask"]),path(cfg["boundary"]),path(cfg["verification_root"])
+    require([mp,*boundary_files(bp)])
+    lines = base.boundary_lines(bp)
+    if not lines:
+        raise ValueError("Empty Ethiopia boundary")
+    manifest = vr/"frozen_forecasts/freeze_manifest.json"
+    snapshot = freeze_snapshot(vr) if manifest.exists() else None
+    if workflow in ["verify","all"] and snapshot is None:
+        raise ValueError("The existing Step 30 freeze is required before this runner verifies observations. Run prepare_verification_2026.py first; this adapter never replaces or invents a freeze.")
+    sources = {}
+    reference = None
+    for target in cfg["targets"]:
+        p = (vr/f"frozen_forecasts/init05_{target}/forecast_2026.nc" if snapshot else
+             path(cfg["forecast_root"])/f"init05_{target}/2026/forecast_2026.nc")
+        require([p])
+        with xr.open_dataset(p) as ds:
+            d = ds.load()
+        check_forecast(d,target)
+        load_mask(mp,d)
+        if reference is not None:
+            for key in ["lat","lon","region_mask"]:
+                if not np.array_equal(d[key],reference[key]):
+                    raise ValueError("Forecast grids or country masks differ between targets")
+        reference = d
+        sources[target] = p
+    existing = existing_verification(vr,cfg["targets"])
+    if existing and snapshot is None:
+        raise ValueError("Verification results exist without a freeze manifest")
+    if workflow == "products":
+        if verification_request != ["auto"]:
+            if not set(verification_request)<=set(existing):
+                raise ValueError("Explicit verification views require complete existing results; use --workflow verify to create them")
+            existing = [t for t in ORDER if t in verification_request]
+        for t in existing:
+            inspect_source(vr,t,snapshot)
+        months, ready, availability = [], existing, {"mode":"offline existing verified outputs"}
+    else:
+        months,ready,availability = choose_verification(verification_request,cfg["targets"])
+        require([path(cfg["project_config"])])
+        project = read(cfg["project_config"])
+        if project.get("initialization_month")!=5 or project.get("season")!={"name":"JJAS","start":"06-01","end":"09-30"} or project.get("observation_years")!=[1993,2025]:
+            raise ValueError("Project configuration does not match the May-2026 verification adapter")
+        require([path(project["chirps_file"])])
+        # Existing preparation validates all five originals against the freeze.
+        require([path(cfg["forecast_root"])/f"init05_{t}/2026/forecast_2026.nc" for t in ORDER])
+        for t in ready:
+            folder = path(cfg["processed_root"])/f"init05_{t}"
+            require([folder/"ecmwf_2026_common.nc",*[folder/f"chirps_{y}_common.nc" for y in range(1993,2026)]])
+    return {"packages":packages,"sources":sources,"snapshot":snapshot,"existing":existing,
+            "months":months,"ready":ready,"availability":availability,"scripts":scripts}
+
+
+def verify_stages(runner,cfg,info,code_inputs):
+    vr = path(cfg["verification_root"])
+    ready,months = info["ready"],info["months"]
+    if not ready:
+        print("WAITING: no requested observation target is available for verification.",flush=True)
+        return []
+    def command(script,*args):
+        return [sys.executable,str(ROOT/"scripts"/script),*map(str,args)]
+    config = path(cfg["project_config"])
+    historical = path(read(config)["chirps_file"])
+    freeze = vr/"frozen_forecasts"
+    originals = [path(cfg["forecast_root"])/f"init05_{t}/2026/forecast_2026.nc" for t in ORDER]
+    prepared = [*months, *(["JJAS"] if set(months)==set(MONTHS) else [])]
+    cache_outputs = []
+    for m in months:
+        for year in [2025,2026]:
+            f = path(cfg["download_cache"])/f"chirps-v2.0.{year}.{MONTHS[m]:02d}.days_p25.nc"
+            cache_outputs.extend([f,f.with_suffix(".download.json")])
+    runner.stage("prepare_observations_"+"_".join(months),
+                 [*code_inputs,config,historical,freeze,*originals],
+                 [*[vr/f"observations/{t}" for t in prepared],*cache_outputs],
+                 command=command("prepare_verification_2026.py","--config",config,"--months",*months,
+                                 "--input-root",cfg["forecast_root"],"--root",vr,"--cache",cfg["download_cache"],"--regenerate"))
+    for target in ready:
+        folder = path(cfg["processed_root"])/f"init05_{target}"
+        inputs = [*code_inputs,freeze,vr/f"observations/{target}",folder/"ecmwf_2026_common.nc",
+                  *[folder/f"chirps_{y}_common.nc" for y in range(1993,2026)]]
+        runner.stage("score_"+target,inputs,[vr/f"results/{target}",vr/f"reports/{target}"],
+                     command=command("verify_frozen_2026.py","--root",vr,"--processed-root",cfg["processed_root"],"--targets",target,"--regenerate"))
+    return ready
+
+
+def report_stages(runner,cfg,targets,code_inputs):
+    if not targets:
+        return None
+    vr,out = path(cfg["verification_root"]),path(cfg["output_root"])
+    tag = "_".join(targets)
+    regime = out/f"regimes/{tag}/regime_verification_summary.json"
+    inputs = [*code_inputs,path(cfg["regime_mask"]),vr/"frozen_forecasts"]
+    for t in targets:
+        inputs += verification_files(vr,t)
+    runner.stage("regime_summary_"+tag,inputs,[regime.parent],command=[sys.executable,str(ROOT/"scripts/verify_2026_regimes.py"),
+                 "--targets",*targets,"--verification-root",str(vr),"--mask",cfg["regime_mask"],"--output-root",str(out/"regimes"),"--regenerate"])
+    historical = path(cfg["historical_review"])
+    report_inputs = [*inputs,regime]
+    for t in targets:
+        mp = vr/f"results/{t}/verification_maps.png"
+        if mp.is_file():
+            report_inputs.append(mp)
+    if historical.is_file():
+        report_inputs.append(historical)
+    runner.stage("verification_report_"+tag,report_inputs,[out/f"reports/{tag}"],command=[sys.executable,str(ROOT/"scripts/build_verification_report.py"),
+                 "--targets",*targets,"--verification-root",str(vr),"--regime-summary",str(regime),
+                 "--historical-review",str(historical),"--output-root",str(out/"reports"),"--regenerate"])
+    return f"reports/{tag}/VERIFICATION_REPORT.html"
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--config",default="config/operational.json")
+    ap.add_argument("--workflow",choices=["products","verify","all"],default="products",
+                    help="products: offline views; verify: prepare/score available observations, reports and views; all: verification plus every forecast view")
+    ap.add_argument("--targets",nargs="+",choices=ORDER,help="Override configured target scope")
+    ap.add_argument("--verification-targets",nargs="+",default=["auto"],choices=["auto",*ORDER])
+    ap.add_argument("--plan",action="store_true",help="Preflight and show planned stages without writing project outputs; verify/all checks remote availability")
+    ap.add_argument("--force",action="store_true",help="Rebuild derived stages with backups; never refit or replace frozen forecasts")
+    ap.add_argument("--resume",action="store_true",help="Content-checked resume is already the default")
+    a = ap.parse_args()
+    runner = None
+    try:
+        cfg = configuration(path(a.config),a.targets)
+        # Import after config validation for a more useful error on unsupported cycles.
+        from presentation_layers import build_forecast,build_verification,build_gallery,boundary_files
+        from followup_common import unchanged
+        info = preflight(cfg,a.workflow,a.verification_targets)
+        print("Preflight passed. Adapter:",cfg["adapter"],flush=True)
+        print("Forecast targets:",", ".join(cfg["targets"]),flush=True)
+        print("Verification targets ready:",", ".join(info["ready"]) or "none",flush=True)
+        if a.plan:
+            stages = (["prepare complete observations","score each available target","regime summary","verification report"] if a.workflow!="products" else [])
+            if a.workflow!="verify":
+                stages.append("forecast views: national and R1+R2 for each requested target")
+            stages += ["verification views: national and R1+R2 for each ready target","offline gallery and run manifest"]
+            for i,item in enumerate(stages,1):
+                print(str(i)+".",item)
+            print("Output:",cfg["output_root"],"| Read-only plan complete.")
+            return
+        output = path(cfg["output_root"])
+        code_inputs = [ROOT/"scripts"/s for s in info["scripts"]]
+        context = {"adapter":cfg["adapter"],"configuration":cfg,"python_version":platform.python_version(),
+                   "packages":info["packages"]}
+        with exclusive_run(output/"state"):
+            runner = StageRunner(ROOT,output/"state",context,a.force)
+            write(runner.log_folder/"preflight.json",{"created_utc":now(),"configuration":cfg,
+                 "environment":context,"frozen_forecasts":info["snapshot"],"availability":info["availability"]})
+            verified = info["ready"] if a.workflow=="products" else verify_stages(runner,cfg,info,code_inputs)
+            report = report_stages(runner,cfg,verified,code_inputs) if a.workflow!="products" else None
+            vr = path(cfg["verification_root"])
+            common = [*code_inputs,path(cfg["regime_mask"]),*boundary_files(path(cfg["boundary"]))]
+            if info["snapshot"]:
+                common.append(vr/"frozen_forecasts")
+            forecasts = []
+            if a.workflow!="verify":
+                for target,source in info["sources"].items():
+                    dest = output/f"presentation/forecast/{target}"
+                    runner.stage("forecast_view_"+target,[*common,source],[dest],
+                                 action=lambda s=source,t=target,o=dest:build_forecast(s,path(cfg["regime_mask"]),path(cfg["boundary"]),t,o,cfg["display"]))
+                    forecasts.append(target)
+            for target in verified:
+                dest = output/f"presentation/verification/{target}"
+                runner.stage("verification_view_"+target,[*common,*verification_files(vr,target)],[dest],
+                             action=lambda t=target,o=dest:build_verification(vr,path(cfg["regime_mask"]),path(cfg["boundary"]),t,o,cfg["display"]))
+            pending = [t for t in cfg["targets"] if t not in verified]
+            gallery_inputs = [*common]
+            for kind,targets in [("forecast",forecasts),("verification",verified)]:
+                gallery_inputs += [output/f"presentation/{kind}/{t}" for t in targets]
+            details = {"workflow":a.workflow,"forecast_status":"retrospective reconstruction", "verification_report":report,
+                       "complete_requested_verification":not pending,"full_jjas_verified":"JJAS" in verified}
+            runner.stage("gallery",gallery_inputs,[output/"index.html",output/"presentation_summary.json"],
+                         settings={"forecast_targets":forecasts,"verified_targets":verified,"pending":pending,"details":details},
+                         action=lambda:build_gallery(output,forecasts,verified,pending,details))
+            if info["snapshot"]:
+                unchanged(vr,info["snapshot"])
+            runner.finish("completed_with_pending_verification" if pending else "completed",pending_verification=pending,
+                          verified_targets=verified,forecast_targets=forecasts,gallery=str(output/"index.html"))
+            print("Ready:",output/"index.html",flush=True)
+            if pending:
+                print("Pending verification:",", ".join(pending),"| Forecasts remain unchanged.",flush=True)
+    except (ValueError,KeyError,OSError,ImportError,subprocess.CalledProcessError) as exc:
+        if runner and runner.record["status"] not in ["failed","completed","completed_with_pending_verification"]:
+            runner.finish("failed",error=str(exc))
+        print("ERROR:",exc,file=sys.stderr)
+        return 2
+    except KeyboardInterrupt:
+        if runner:
+            runner.finish("interrupted")
+        print("Interrupted. Rerun the same command to resume completed stages.",file=sys.stderr)
+        return 130
+    return 0
+
+
+if __name__=="__main__":
+    sys.exit(main())

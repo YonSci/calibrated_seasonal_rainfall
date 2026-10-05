@@ -1,0 +1,24 @@
+{
+  "project": "Ethiopia ECMWF CHIRPS seasonal calibration",
+  "ecmwf_directory": "data/raw/ecmwf",
+  "ecmwf_pattern": "ecmwf_{year}{month:02d}_d01.nc",
+  "ecmwf_variable": "tp",
+  "chirps_file": "data/raw/chirps/et_chirps_pr_r25_1993_2025.nc",
+  "chirps_variable": "precip",
+  "initialization_month": 5,
+  "season": {
+    "name": "JJAS",
+    "start": "06-01",
+    "end": "09-30"
+  },
+  "archive_years": [
+    1993,
+    2026
+  ],
+  "observation_years": [
+    1993,
+    2025
+  ],
+  "negative_increment_tolerance_mm": 0.2,
+  "provenance_note": "User reports 1993-2016 SEAS5 hindcasts with 25 members; 2017 onward operational SEAS5 with 51. Confirm actual system/download provenance separately."
+}

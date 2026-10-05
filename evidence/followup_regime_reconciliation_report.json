@@ -1,0 +1,451 @@
+{
+  "method": "github_refined_corrected_calendar_v1",
+  "source_url": "https://github.com/YonSci/-Operational-Multi-Model-Seasonal-Forecasting-System/blob/07879e42290dd5efd1d75f137961378ca7e39ea2/scripts/compute_seasonal_masks.py",
+  "source_commit": "07879e42290dd5efd1d75f137961378ca7e39ea2",
+  "input_sha256": "72251a475e31edce11448775932ef0ccb6cb608f98b0cd3c5d266d039603d85c",
+  "training_years": [
+    1993,
+    1994,
+    1995,
+    1996,
+    1997,
+    1998,
+    1999,
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "comparison": "Same corrected daily cycle, grid, baseline and country mask. GitHub thresholds use corrected noleap totals; contribution statistics use actual-calendar monthly totals.",
+  "country_cells": 1484,
+  "changed_cells": 304,
+  "changed_country_area_percent": 20.400025744187708,
+  "cleanup_changed_cells": 3,
+  "onset": {
+    "available": false
+  },
+  "code_sha256": {
+    "github_regime_core.py": "41ede5e6f13a21f0e37ea180f519bb76de1e3bb8077c709136eba3a765dee1f6",
+    "compare_regime_definitions.py": "e136ec94e3a851ab32e7baabec8bc56077e80dfd77898fdac74e3182470f2b62"
+  },
+  "attribution": "GitHub-derived Ethiopia refinement; official EMI endorsement and station validation not independently established.",
+  "deviations": [
+    "Correct month-day alignment excludes Feb29; noleap totals retained for classification thresholds.",
+    "Missing observations coded -1 and never assigned to residual R1.",
+    "Undefined C1 ratio stays NaN; numerical ratio clauses fail, peak clauses remain eligible.",
+    "Use existing 1484-cell project country mask rather than rebuilding the GitHub boundary.",
+    "Rainfall masks exclude onset-detection gates; onset evidence remains separate and unknown when absent."
+  ],
+  "rainfall_contributions": {
+    "current_peak_refinement": {
+      "rows": [
+        {
+          "code": -1,
+          "cells": 6,
+          "country_area_percent": 0.39744485599355,
+          "observed_cells": 0,
+          "mean_JJAS_mm": null,
+          "mean_annual_mm": null,
+          "JJAS_fraction_of_regime_annual_volume": null,
+          "JJAS_volume_km3": 0.0,
+          "JJAS_volume_percent": 0.0
+        },
+        {
+          "code": 0,
+          "cells": 29,
+          "country_area_percent": 1.9347243707298603,
+          "observed_cells": 29,
+          "mean_JJAS_mm": 99.6215839846292,
+          "mean_annual_mm": 175.58343183545583,
+          "JJAS_fraction_of_regime_annual_volume": 0.567374626086517,
+          "JJAS_volume_km3": 2.1828811867247047,
+          "JJAS_volume_percent": 0.43868096518735633
+        },
+        {
+          "code": 1,
+          "cells": 523,
+          "country_area_percent": 35.06305846011782,
+          "observed_cells": 523,
+          "mean_JJAS_mm": 882.4389244328075,
+          "mean_annual_mm": 1235.7859453120036,
+          "JJAS_fraction_of_regime_annual_volume": 0.7140710151142031,
+          "JJAS_volume_km3": 350.42251744669534,
+          "JJAS_volume_percent": 70.42237988571132
+        },
+        {
+          "code": 2,
+          "cells": 331,
+          "country_area_percent": 22.250361581047326,
+          "observed_cells": 331,
+          "mean_JJAS_mm": 368.239904176092,
+          "mean_annual_mm": 712.4338800662728,
+          "JJAS_fraction_of_regime_annual_volume": 0.5168759017213461,
+          "JJAS_volume_km3": 92.79519199304602,
+          "JJAS_volume_percent": 18.648511259256782
+        },
+        {
+          "code": 3,
+          "cells": 565,
+          "country_area_percent": 38.32231175245087,
+          "observed_cells": 565,
+          "mean_JJAS_mm": 85.85740677633261,
+          "mean_annual_mm": 524.961727044681,
+          "JJAS_fraction_of_regime_annual_volume": 0.1635498405944269,
+          "JJAS_volume_km3": 37.26378962847656,
+          "JJAS_volume_percent": 7.488687565852523
+        },
+        {
+          "code": 4,
+          "cells": 30,
+          "country_area_percent": 2.032098979660569,
+          "observed_cells": 30,
+          "mean_JJAS_mm": 649.0109381497496,
+          "mean_annual_mm": 1511.9226022639068,
+          "JJAS_fraction_of_regime_annual_volume": 0.4292620119429,
+          "JJAS_volume_km3": 14.936692039684553,
+          "JJAS_volume_percent": 3.0017403239920295
+        }
+      ],
+      "observed_country_area_percent": 99.60255514400644,
+      "total_observed_JJAS_km3": 497.6010722946271
+    },
+    "github_raw": {
+      "rows": [
+        {
+          "code": -1,
+          "cells": 6,
+          "country_area_percent": 0.39744485599355,
+          "observed_cells": 0,
+          "mean_JJAS_mm": null,
+          "mean_annual_mm": null,
+          "JJAS_fraction_of_regime_annual_volume": null,
+          "JJAS_volume_km3": 0.0,
+          "JJAS_volume_percent": 0.0
+        },
+        {
+          "code": 0,
+          "cells": 66,
+          "country_area_percent": 4.406526510011561,
+          "observed_cells": 66,
+          "mean_JJAS_mm": 116.82047914005071,
+          "mean_annual_mm": 219.2927840798445,
+          "JJAS_fraction_of_regime_annual_volume": 0.5327146519217723,
+          "JJAS_volume_km3": 5.83005864338431,
+          "JJAS_volume_percent": 1.1716330546676075
+        },
+        {
+          "code": 1,
+          "cells": 418,
+          "country_area_percent": 28.095612166494604,
+          "observed_cells": 418,
+          "mean_JJAS_mm": 896.9749784035629,
+          "mean_annual_mm": 1359.5408361743332,
+          "JJAS_fraction_of_regime_annual_volume": 0.6597631748433516,
+          "JJAS_volume_km3": 285.4147283864627,
+          "JJAS_volume_percent": 57.35814174802864
+        },
+        {
+          "code": 2,
+          "cells": 419,
+          "country_area_percent": 28.102413695155384,
+          "observed_cells": 419,
+          "mean_JJAS_mm": 526.6552829136676,
+          "mean_annual_mm": 819.5852541780531,
+          "JJAS_fraction_of_regime_annual_volume": 0.6425875529469359,
+          "JJAS_volume_km3": 167.620688656784,
+          "JJAS_volume_percent": 33.68575712343655
+        },
+        {
+          "code": 3,
+          "cells": 575,
+          "country_area_percent": 38.998002772344904,
+          "observed_cells": 575,
+          "mean_JJAS_mm": 87.70216828679462,
+          "mean_annual_mm": 526.0884739901647,
+          "JJAS_fraction_of_regime_annual_volume": 0.1667061200212385,
+          "JJAS_volume_km3": 38.735596607996115,
+          "JJAS_volume_percent": 7.784468073867205
+        },
+        {
+          "code": 4,
+          "cells": 0,
+          "country_area_percent": 0.0,
+          "observed_cells": 0,
+          "mean_JJAS_mm": null,
+          "mean_annual_mm": null,
+          "JJAS_fraction_of_regime_annual_volume": null,
+          "JJAS_volume_km3": 0.0,
+          "JJAS_volume_percent": 0.0
+        }
+      ],
+      "observed_country_area_percent": 99.60255514400644,
+      "total_observed_JJAS_km3": 497.6010722946271
+    },
+    "github_cleaned": {
+      "rows": [
+        {
+          "code": -1,
+          "cells": 6,
+          "country_area_percent": 0.39744485599355,
+          "observed_cells": 0,
+          "mean_JJAS_mm": null,
+          "mean_annual_mm": null,
+          "JJAS_fraction_of_regime_annual_volume": null,
+          "JJAS_volume_km3": 0.0,
+          "JJAS_volume_percent": 0.0
+        },
+        {
+          "code": 0,
+          "cells": 64,
+          "country_area_percent": 4.272441346621657,
+          "observed_cells": 64,
+          "mean_JJAS_mm": 118.81951002103678,
+          "mean_annual_mm": 219.04654876095265,
+          "JJAS_fraction_of_regime_annual_volume": 0.5424395439834367,
+          "JJAS_volume_km3": 5.749385367210542,
+          "JJAS_volume_percent": 1.1554206144890218
+        },
+        {
+          "code": 1,
+          "cells": 421,
+          "country_area_percent": 28.295719336133256,
+          "observed_cells": 421,
+          "mean_JJAS_mm": 892.2935997407889,
+          "mean_annual_mm": 1352.6883815777587,
+          "JJAS_fraction_of_regime_annual_volume": 0.6596446098694431,
+          "JJAS_volume_km3": 285.9473458766396,
+          "JJAS_volume_percent": 57.46517879433579
+        },
+        {
+          "code": 2,
+          "cells": 418,
+          "country_area_percent": 28.036391688906637,
+          "observed_cells": 418,
+          "mean_JJAS_mm": 526.4721581288937,
+          "mean_annual_mm": 819.8138092959185,
+          "JJAS_fraction_of_regime_annual_volume": 0.642185032941863,
+          "JJAS_volume_km3": 167.16874444278088,
+          "JJAS_volume_percent": 33.59493251730798
+        },
+        {
+          "code": 3,
+          "cells": 575,
+          "country_area_percent": 38.998002772344904,
+          "observed_cells": 575,
+          "mean_JJAS_mm": 87.70216828679462,
+          "mean_annual_mm": 526.0884739901647,
+          "JJAS_fraction_of_regime_annual_volume": 0.1667061200212385,
+          "JJAS_volume_km3": 38.735596607996115,
+          "JJAS_volume_percent": 7.784468073867205
+        },
+        {
+          "code": 4,
+          "cells": 0,
+          "country_area_percent": 0.0,
+          "observed_cells": 0,
+          "mean_JJAS_mm": null,
+          "mean_annual_mm": null,
+          "JJAS_fraction_of_regime_annual_volume": null,
+          "JJAS_volume_km3": 0.0,
+          "JJAS_volume_percent": 0.0
+        }
+      ],
+      "observed_country_area_percent": 99.60255514400644,
+      "total_observed_JJAS_km3": 497.6010722946271
+    }
+  },
+  "mask_coverage": {
+    "current_JJAS_relevant": {
+      "cells": 963,
+      "country_area_percent": 64.72054040139415
+    },
+    "github_R1_R2_rainfall": {
+      "cells": 833,
+      "country_area_percent": 55.9321737633272
+    },
+    "github_R1_R2_rainfall_cleaned": {
+      "cells": 833,
+      "country_area_percent": 55.9321737633272
+    },
+    "github_onset_candidate_R2": {
+      "cells": 418,
+      "country_area_percent": 28.036391688906637
+    },
+    "onset_eligibility_unknown": {
+      "cells": 424,
+      "country_area_percent": 28.43383654490018
+    },
+    "onset_eligibility_pass": {
+      "cells": 0,
+      "country_area_percent": 0.0
+    }
+  },
+  "transitions": [
+    {
+      "old_code": -1,
+      "new_code": -1,
+      "cells": 6,
+      "country_area_percent": 0.39744485599355
+    },
+    {
+      "old_code": 0,
+      "new_code": 0,
+      "cells": 29,
+      "country_area_percent": 1.9347243707298603
+    },
+    {
+      "old_code": 1,
+      "new_code": 1,
+      "cells": 350,
+      "country_area_percent": 23.494326695309017
+    },
+    {
+      "old_code": 1,
+      "new_code": 2,
+      "cells": 173,
+      "country_area_percent": 11.568731764808808
+    },
+    {
+      "old_code": 2,
+      "new_code": 0,
+      "cells": 35,
+      "country_area_percent": 2.3377169758917975
+    },
+    {
+      "old_code": 2,
+      "new_code": 1,
+      "cells": 46,
+      "country_area_percent": 3.108043499516587
+    },
+    {
+      "old_code": 2,
+      "new_code": 2,
+      "cells": 235,
+      "country_area_percent": 15.79003833353695
+    },
+    {
+      "old_code": 2,
+      "new_code": 3,
+      "cells": 15,
+      "country_area_percent": 1.0145627721019865
+    },
+    {
+      "old_code": 3,
+      "new_code": 1,
+      "cells": 2,
+      "country_area_percent": 0.1356541941907845
+    },
+    {
+      "old_code": 3,
+      "new_code": 2,
+      "cells": 3,
+      "country_area_percent": 0.20321755801717334
+    },
+    {
+      "old_code": 3,
+      "new_code": 3,
+      "cells": 560,
+      "country_area_percent": 37.983440000242915
+    },
+    {
+      "old_code": 4,
+      "new_code": 1,
+      "cells": 23,
+      "country_area_percent": 1.5576949471168684
+    },
+    {
+      "old_code": 4,
+      "new_code": 2,
+      "cells": 7,
+      "country_area_percent": 0.4744040325437011
+    }
+  ],
+  "representative_cycles": [
+    {
+      "label": "Typical R0",
+      "lat": 10.375,
+      "lon": 41.875,
+      "current_code": 2,
+      "github_code": 0,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    },
+    {
+      "label": "Typical R1",
+      "lat": 9.625,
+      "lon": 37.125,
+      "current_code": 1,
+      "github_code": 1,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    },
+    {
+      "label": "Typical R2",
+      "lat": 10.375,
+      "lon": 39.875,
+      "current_code": 2,
+      "github_code": 2,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    },
+    {
+      "label": "Typical R3",
+      "lat": 6.125,
+      "lon": 40.625,
+      "current_code": 3,
+      "github_code": 3,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    },
+    {
+      "label": "Changed 1 \u2192 2",
+      "lat": 9.625,
+      "lon": 38.875,
+      "current_code": 1,
+      "github_code": 2,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    },
+    {
+      "label": "Changed 2 \u2192 1",
+      "lat": 7.125,
+      "lon": 37.375,
+      "current_code": 2,
+      "github_code": 1,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    },
+    {
+      "label": "Changed 2 \u2192 0",
+      "lat": 10.625,
+      "lon": 41.875,
+      "current_code": 2,
+      "github_code": 0,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    },
+    {
+      "label": "Changed 4 \u2192 1",
+      "lat": 7.125,
+      "lon": 36.375,
+      "current_code": 4,
+      "github_code": 1,
+      "selection": "Closest normalized monthly profile to within-group median; illustrative grid cell, not station validation."
+    }
+  ]
+}

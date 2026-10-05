@@ -1,0 +1,73 @@
+{
+  "input_sha256": "aeee87b5aeb972da0ba13038f5e7eef248f2a6ce0d066829676269c7ad656392",
+  "country_grid_cells": 1484,
+  "evaluated_cells": 1208,
+  "years_per_evaluated_cell": 9,
+  "evaluated_country_grid_area_percent": 81.29781324159417,
+  "RPS": {
+    "cells": 1208,
+    "mean": -0.0011193173600010234,
+    "improved_area_percent": 50.82855988624385,
+    "worsened_area_percent": 49.17144011375615
+  },
+  "quadrants": {
+    "Northwest: >=10N, <39E": {
+      "cells": 251,
+      "mean": -0.0024744122349492008,
+      "improved_area_percent": 67.33887823017393,
+      "worsened_area_percent": 32.66112176982607
+    },
+    "Northeast: >=10N, >=39E": {
+      "cells": 202,
+      "mean": -0.017177742009922045,
+      "improved_area_percent": 89.10180850454479,
+      "worsened_area_percent": 10.898191495455176
+    },
+    "Southwest: <10N, <39E": {
+      "cells": 422,
+      "mean": 0.00748244349200755,
+      "improved_area_percent": 21.754886845673283,
+      "worsened_area_percent": 78.24511315432672
+    },
+    "Southeast: <10N, >=39E": {
+      "cells": 333,
+      "mean": -0.0014020212278520478,
+      "improved_area_percent": 52.49185681113515,
+      "worsened_area_percent": 47.50814318886484
+    }
+  },
+  "categories": {
+    "below": {
+      "brier": {
+        "cells": 1208,
+        "mean": -0.00040796332523836815,
+        "improved_area_percent": 50.799162490001436,
+        "worsened_area_percent": 49.20083750999854
+      },
+      "mean_probability_change_percentage_points": 0.14909927527716127
+    },
+    "near": {
+      "brier": {
+        "cells": 1208,
+        "mean": 0.0003133603913556292,
+        "improved_area_percent": 47.07586098535463,
+        "worsened_area_percent": 52.924139014645355
+      },
+      "mean_probability_change_percentage_points": 0.14786705221261084
+    },
+    "above": {
+      "brier": {
+        "cells": 1208,
+        "mean": -0.0007113540347626426,
+        "improved_area_percent": 46.009192787456385,
+        "worsened_area_percent": 53.990807212543615
+      },
+      "mean_probability_change_percentage_points": -0.2969663274897757
+    }
+  },
+  "checks": {
+    "national_RPS_matches_operational_report": true,
+    "RPS_equals_Brier_below_plus_above": true,
+    "probability_changes_sum_to_zero": true
+  }
+}

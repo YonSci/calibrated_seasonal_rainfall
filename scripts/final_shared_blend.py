@@ -1,0 +1,148 @@
+"""Final 1993-2025 shared-blend refit; May-initialized 2026 reconstruction."""
+import argparse
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+import numpy as np
+import xarray as xr
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from common import ROOT, load_config, source_path, save_json, save_netcdf
+from calibration_core import fit_amount, correct_amount, probabilities, labels
+from compare_calibration import make_record, smooth
+from local_blend import fit_weights
+from run_calibration import load_inputs, load_land, cell_area, params_dataset
+from output_runs import check_destination, staged_output
+
+TRAIN=list(range(1993,2026))
+TARGETS=['JJAS','Jun','Jul','Aug','Sep']
+
+
+def fit_final(models, observations, land, area, progress=print):
+    """Target forecasts and observations never enter any parameter estimation."""
+    records=[]
+    for y in TRAIN:
+        records.append(make_record([z for z in TRAIN if z!=y],y,models,observations,land))
+        progress(f'OOF training {y}: {len(models[y])} members')
+    lam=fit_weights(records,area)['shared_lambda']
+    pars=fit_amount([models[y] for y in TRAIN],np.stack([observations[y] for y in TRAIN]),land)
+    categories=np.stack([labels(observations[y],pars) for y in TRAIN])
+    clim=np.stack([(categories==k).mean(axis=0) for k in range(3)],axis=-1)
+    clim[~pars['probability_eligible']]=np.nan
+    return pars,clim,lam
+
+
+def forecast(model,pars,clim,lam):
+    corrected=correct_amount(model,pars)
+    base=probabilities(corrected,pars)
+    smoothed=smooth(base,len(model))
+    blended=(1-lam)*smoothed+lam*clim
+    for p in [base,smoothed,clim,blended]:
+        valid=np.isfinite(p).all(axis=1)
+        if not valid.any() or (p[valid]<0).any() or not np.allclose(p[valid].sum(axis=1),1,atol=1e-12):
+            raise ValueError('Invalid or empty probability output.')
+    return corrected,dict(base_probability=base,smoothed_probability=smoothed,
+                          climatology_probability=clim,blend_probability=blended)
+
+
+def load_region(path,lat,lon):
+    path=source_path(path)
+    with xr.open_dataset(path) as d:
+        a=d.region_mask.transpose('lat','lon')
+        if not np.array_equal(a.lat,lat) or not np.array_equal(a.lon,lon):raise ValueError('Region grid mismatch.')
+        if not np.isin(a.values,[0,1]).all() or not (a.values==1).any():raise ValueError('Expected nonempty binary region mask.')
+        region=a.values.reshape(-1)==1
+    return region,dict(path=str(path),sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                       use='display and regional summaries only; calibration fit uses common domain')
+
+
+def write_result(out,cfg,models,members,lat,lon,pars,clim,lam,region,area,land_info,region_info):
+    corrected,prob=forecast(models[2026],pars,clim,lam)
+    shape=(len(lat),len(lon));eligible=pars['probability_eligible']&region
+    if not eligible.any():raise ValueError('No eligible probability cells in region.')
+    attrs=dict(config_json=json.dumps(cfg),training_years='1993-2025',target_year=2026,
+        target_period=json.dumps(cfg['season']),initialization_month=cfg['initialization_month'],
+        method='equal-year mean-variance rainfall correction; alpha=0.5 count smoothing; shared climatology blend',
+        climatology_weight=float(lam),processing_utc=datetime.now(timezone.utc).isoformat(),
+        status='Retrospective reconstruction of May-initialized 2026 forecast; no 2026 observations used',
+        mask_json=json.dumps(dict(land=land_info,region=region_info)))
+    d=xr.Dataset(coords=dict(member=members[2026],lat=lat,lon=lon,category=['below','near','above']),attrs=attrs)
+    d['precip_corrected']=(('member','lat','lon'),corrected.reshape(len(members[2026]),*shape))
+    d.precip_corrected.attrs.update(units='mm',note='Amount correction only; probability blending does not modify these members.')
+    d['corrected_ensemble_mean']=(('lat','lon'),corrected.mean(axis=0).reshape(shape))
+    d['observed_training_mean']=(('lat','lon'),pars['mu_obs'].reshape(shape))
+    d['corrected_mean_anomaly']=(('lat','lon'),(corrected.mean(axis=0)-pars['mu_obs']).reshape(shape))
+    for n in ['corrected_ensemble_mean','observed_training_mean','corrected_mean_anomaly']:d[n].attrs['units']='mm'
+    for name,p in prob.items():
+        d[name]=(('lat','lon','category'),p.reshape(*shape,3));d[name].attrs['units']='1'
+    for key in ['q1','q2']:
+        d[key]=(('lat','lon'),pars[key].reshape(shape));d[key].attrs['units']='mm'
+    d['region_mask']=(('lat','lon'),region.reshape(shape).astype('int8'))
+    for key in ['amount_eligible','probability_eligible']:d[key]=(('lat','lon'),pars[key].reshape(shape).astype('int8'))
+    save_netcdf(d,out/'forecast_2026.nc')
+    save_netcdf(params_dataset(pars,lat,lon,attrs),out/'amount_parameters.nc')
+    save_json(out/'blend_parameters.json',dict(training_years=TRAIN,climatology_weight=lam,forecast_weight=1-lam,
+        alpha_per_category=.5,category_order=['below','near','above'],target_period=cfg['season'],
+        weighting='Each year equal; spherical area within each year; actual member count for smoothing',
+        note='Shared blend only. No local weight or Dirichlet mapping used in final product.'))
+    w=area[eligible]/area[eligible].sum()
+    before=pars['mu_obs']+pars['scale']*(models[2026]-pars['mu_model'])
+    report=dict(target_period=cfg['season'],training_years=TRAIN,target_year=2026,
+        target_members=len(members[2026]),training_members={str(y):len(members[y]) for y in TRAIN},
+        climatology_weight=lam,forecast_weight=1-lam,land_mask=land_info,region_mask=region_info,
+        region_probability_cells=int(eligible.sum()),region_amount_cells=int((region&pars['amount_eligible']).sum()),
+        area_mean_gridcell_probabilities=(w@prob['blend_probability'][eligible]).tolist(),
+        probability_summary_note='Spatial average of grid-cell probabilities, not probabilities for country-mean rainfall.',
+        maximum_probability_sum_error=float(np.max(np.abs(prob['blend_probability'][eligible].sum(axis=1)-1))),
+        fraction_corrected_member_cell_values_clipped=float((before[:,pars['amount_eligible']]<0).mean()),
+        verification='No 2026 observations available in supplied archive; no final-fit skill estimated.',
+        code_sha256={n:hashlib.sha256((Path(__file__).parent/n).read_bytes()).hexdigest() for n in ['final_shared_blend.py','calibration_core.py','compare_calibration.py','local_blend.py']})
+    save_json(out/'final_report.json',report)
+    fig,axes=plt.subplots(1,3,figsize=(13,5))
+    for k,ax in enumerate(axes):
+        field=np.where(eligible,prob['blend_probability'][:,k]*100,np.nan).reshape(shape)
+        im=ax.pcolormesh(lon,lat,field,vmin=0,vmax=100,cmap='viridis',shading='auto')
+        ax.set(title=['Below normal','Near normal','Above normal'][k],xlabel='Longitude',ylabel='Latitude',aspect='equal')
+        fig.colorbar(im,ax=ax,shrink=.7,label='Probability (%)')
+    fig.suptitle(f"{cfg['season']['name']} 2026 | May initialization | shared blend reconstruction")
+    fig.tight_layout();fig.savefig(out/'probabilities_2026.png',dpi=180);plt.close(fig)
+    fig,axes=plt.subplots(1,2,figsize=(11,5))
+    valid=region&pars['amount_eligible'];mean=corrected.mean(axis=0);anomaly=mean-pars['mu_obs']
+    for ax,value,title,cmap in zip(axes,[mean,anomaly],['Amount-corrected ensemble mean (mm)','Mean anomaly vs 1993-2025 (mm)'],['YlGnBu','BrBG']):
+        field=np.where(valid,value,np.nan).reshape(shape)
+        options={}
+        if cmap=='BrBG':
+            limit=max(float(np.nanmax(np.abs(field))),1.);options=dict(vmin=-limit,vmax=limit)
+        im=ax.pcolormesh(lon,lat,field,cmap=cmap,shading='auto',**options)
+        ax.set(title=title,xlabel='Longitude',ylabel='Latitude',aspect='equal');fig.colorbar(im,ax=ax,shrink=.7)
+    fig.suptitle(f"{cfg['season']['name']} 2026 | rainfall correction only; separate from probability blending")
+    fig.tight_layout();fig.savefig(out/'rainfall_2026.png',dpi=180);plt.close(fig)
+    return report
+
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--config',default='config/project.json');p.add_argument('--targets',nargs='+',choices=TARGETS,default=TARGETS)
+    p.add_argument('--region-mask',default='data/masks/ethiopia_common.nc');p.add_argument('--land-mask');p.add_argument('--regenerate',action='store_true')
+    args=p.parse_args();base=load_config(args.config)
+    if base['initialization_month']!=5 or base['season']!={'name':'JJAS','start':'06-01','end':'09-30'}:raise ValueError('Expected established May-initialized JJAS configuration.')
+    from run_monthly import monthly_config
+    configs={target:base if target=='JJAS' else monthly_config(base,{'Jun':6,'Jul':7,'Aug':8,'Sep':9}[target]) for target in args.targets}
+    for target in configs:check_destination(ROOT/f'outputs/final_shared_blend/init05_{target}/2026',args.regenerate)
+    reports=[]
+    for target,cfg in configs.items():
+        tag,models,obs,members,lat,lon=load_inputs(cfg,TRAIN+[2026],TRAIN)
+        land,land_info=load_land(args.land_mask,lat,lon);region,region_info=load_region(args.region_mask,lat,lon);area=cell_area(lat,lon)
+        print('Final target:',target,flush=True)
+        pars,clim,lam=fit_final(models,obs,land,area,lambda s:print(s,flush=True))
+        out=ROOT/f'outputs/final_shared_blend/{tag}/2026'
+        with staged_output(out,args.regenerate) as stage:
+            report=write_result(stage,cfg,models,members,lat,lon,pars,clim,lam,region,area,land_info,region_info)
+        reports.append(report);print('Saved:',out,flush=True)
+    save_json(ROOT/'outputs/final_shared_blend/final_reports_2026.json',dict(targets_in_this_run=list(configs),reports=reports,
+        note='Contains only targets processed in this invocation. Monthly and seasonal products fitted separately.'))
+
+
+if __name__=='__main__':main()

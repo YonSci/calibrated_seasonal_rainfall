@@ -1,0 +1,14 @@
+# Fixed baseline for CPython 3.11/3.12 on 64-bit Windows.
+# Deliberately pinned; not a claim that these are the newest releases.
+numpy==1.26.4
+pandas==2.2.3
+xarray==2024.11.0
+scipy==1.14.1
+netCDF4==1.7.2
+dask[array]==2024.11.2
+matplotlib==3.9.2
+cdsapi==0.7.7
+# Runtime additions used by the mask builder and operational runner (installed versions)
+pyshp==3.1.6
+pyproj==3.7.2
+# shapely is needed only to rebuild the Ethiopia mask (build_region_mask.py)

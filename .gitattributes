@@ -1,0 +1,2 @@
+# Keep files byte-identical: scripts are SHA-256 fingerprinted by the runner and reports.
+* -text

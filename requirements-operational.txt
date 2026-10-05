@@ -1,0 +1,9 @@
+# Additive runtime dependencies; use the existing project .venv.
+numpy
+pandas
+xarray
+netCDF4
+scipy
+matplotlib
+pyshp
+pyproj

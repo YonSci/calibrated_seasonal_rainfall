@@ -1,0 +1,578 @@
+{
+  "year": 2026,
+  "targets": [
+    "Jun",
+    "Jul",
+    "Aug"
+  ],
+  "results": [
+    {
+      "amount_cells": 1478,
+      "probability_cells": 1201,
+      "amount_country_area_percent": 99.60255514400644,
+      "probability_country_area_percent": 80.85120447387543,
+      "observed_category_area_fractions": [
+        0.7140746434662096,
+        0.18993683180764118,
+        0.09598852472614906
+      ],
+      "amount": {
+        "raw": {
+          "bias_mm": 12.729023628920743,
+          "mae_mm": 33.06261238380183,
+          "rmse_mm": 54.20918906710815,
+          "crps_mm": 24.915491943722547,
+          "ensemble_size": 51,
+          "crpss": -0.5847366648181052
+        },
+        "corrected": {
+          "bias_mm": 5.449504522534809,
+          "mae_mm": 13.865298636913412,
+          "rmse_mm": 22.45270338829692,
+          "crps_mm": 9.622761568173644,
+          "ensemble_size": 51,
+          "crpss": 0.3879493486088096
+        },
+        "climatology": {
+          "bias_mm": 20.556640333728186,
+          "mae_mm": 23.6160037575495,
+          "rmse_mm": 34.899888445196886,
+          "crps_mm": 15.722165389908692,
+          "ensemble_size": 33,
+          "crpss": 0.0
+        }
+      },
+      "probability": {
+        "raw_observed_thresholds": {
+          "rps": 0.6439416101404967,
+          "brier_by_category": [
+            0.3835983742583654,
+            0.15776756871083136,
+            0.26034323588213126
+          ],
+          "log_loss": 3.9372569285500387,
+          "zero_probability_observed_event_cells": 125,
+          "area_mean_probabilities": [
+            0.5393250482050653,
+            0.14538970999964818,
+            0.3152852417952865
+          ],
+          "rpss": -0.30817755883283104,
+          "bss_by_category": [
+            -0.09870761753358259,
+            0.09549074710769845,
+            -0.8192171979703451
+          ]
+        },
+        "corrected_member_counts": {
+          "rps": 0.2883704064942202,
+          "brier_by_category": [
+            0.20064953107437325,
+            0.15760805640531897,
+            0.08772087541984692
+          ],
+          "log_loss": 0.9280121830703338,
+          "zero_probability_observed_event_cells": 7,
+          "area_mean_probabilities": [
+            0.7041010950358565,
+            0.2086204273230703,
+            0.08727847764107323
+          ],
+          "rpss": 0.4141709613625789,
+          "bss_by_category": [
+            0.4252969171932105,
+            0.09640525924390686,
+            0.3870271887645663
+          ]
+        },
+        "corrected_smoothed": {
+          "rps": 0.28790591265319737,
+          "brier_by_category": [
+            0.20041963445460786,
+            0.15721533604924673,
+            0.08748627819858948
+          ],
+          "log_loss": 0.7894673818230155,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.6935077304157845,
+            0.21218365320907778,
+            0.09430861637513781
+          ],
+          "rpss": 0.4151145879421838,
+          "bss_by_category": [
+            0.4259553901804066,
+            0.0986567941998494,
+            0.38866649887785387
+          ]
+        },
+        "shared_blend": {
+          "rps": 0.3972720378217327,
+          "brier_by_category": [
+            0.2807073307935311,
+            0.16416569108938864,
+            0.11656470702820164
+          ],
+          "log_loss": 0.9477090364506442,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.4278019521237362,
+            0.3015574962917637,
+            0.27064055158450007
+          ],
+          "rpss": 0.19293557607375522,
+          "bss_by_category": [
+            0.19599429159038984,
+            0.05880918485868192,
+            0.18547328881597525
+          ]
+        },
+        "climatology": {
+          "rps": 0.4922432782863419,
+          "brier_by_category": [
+            0.3491359922665144,
+            0.17442338838032484,
+            0.14310728601982747
+          ],
+          "log_loss": 1.0986122886681098,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.3333333333333333,
+            0.3333333333333333,
+            0.3333333333333333
+          ],
+          "rpss": 0.0,
+          "bss_by_category": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "interpretation": "Single-year area-weighted performance, not multi-year reliability. June-September and JJAS are overlapping/dependent evaluation targets, not five independent seasons.",
+      "log_loss_note": "Natural log; probabilities floored at 1e-12 for scoring; zero-probability observed-event counts reported.",
+      "raw_probability_note": "Raw member counts against frozen observed thresholds; not a model-climatology tercile forecast.",
+      "crps_note": "Empirical ensemble CRPS: raw/corrected 51 members, climatology 33 historical observed years. This scores these finite predictive distributions; no fair/iid ensemble correction.",
+      "target": "Jun",
+      "year": 2026,
+      "processing_utc": "2026-10-04T18:38:35.275799+00:00",
+      "forecast_sha256": "142af851d38dfd1e9698eb68bffce1784ec83b4e3992e3fcc41c9fbd644d7d89",
+      "observations_sha256": "a70636c20815ec59c82658751faa9add2cffc88f905ee35bd4c68696dd52ab5f",
+      "raw_forecast_sha256": "be9165a3aab76eb46244cd18c8a71e31ae56b90b2dc05d70027f17516caa0526",
+      "history_sha256": {
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_1993_common.nc": "ef64b898087ab2043b747273270247319824531dd557a0b6a752dc00a9968e51",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_1994_common.nc": "3bcd1a87a78fa88e7002950f6ecef9f4385aa32e62222785bcbef92ee386ab58",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_1995_common.nc": "c2620c604126880b4c35c1935342a6625689f5cf6e004889697817c7424b2d58",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_1996_common.nc": "9c2db063562471cff5e6e0605fcd998cf18dcb71eb007dceb2b71563e39fd182",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_1997_common.nc": "99e1c00b05b58f8ea1ff4a6a79583944833f516be64037f09095a10b215d415b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_1998_common.nc": "de4a1b934f9d180e8300b90761263aa905b2726b1d46c6e528dac94878265846",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_1999_common.nc": "bcb7e5a3737c608cf150aa46169aa667a098891731350f4ef4db58a0e2706aca",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2000_common.nc": "e0f43ec4597f07e2e60ab2e69bb6e1384dac9379dad2210059de03cd68665d5a",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2001_common.nc": "9135fbae7b12f8ad0b59c9141463d5ca5a38f4bbf0fd2e051e2a1b30c251861a",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2002_common.nc": "f5698486ab1917396b347af7a5f1588a8735364fdb11ff9fd9323763acfb1b04",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2003_common.nc": "5da66f43d1f2ebce14f7cccd78146d4c0f8c8aff300d6f11ec3c2ba348fa99ad",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2004_common.nc": "ea057530741c7ee15e4cb56fe646c0e2497d603680d7310ccb5a2ddd6fb17daa",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2005_common.nc": "6fdbe526950a4b7584e40e01f7499dce7f5ee49a3a61838030699ad4f112b925",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2006_common.nc": "a777d2040edd11b6c45a00a0ad6b35062d8ea5a88fbcebb597a66dcefe0fbe3f",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2007_common.nc": "694d2d39690d9d72a52f6207b9ad65cfe719c5930383124c643dcc8ad8627050",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2008_common.nc": "1d4ffb8163bf66aa88754e2d76b4bc7537bbfe0053b87c191496980d603ad4b5",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2009_common.nc": "4ccd913fd342d4f066e80db6f4079ccc4cf98e8f59313f91225bf35e626aaae8",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2010_common.nc": "3244147df4ea86f02da308a08c36aa01e0221439fee783c447c95da01855428d",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2011_common.nc": "836473a667412877619a5830eefc3c457cd7b0a894321f287720facd62c6cef0",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2012_common.nc": "1407574b269f5c4c4d84ec9c0c230e26fc472088d0bea82601d54844cf3d0a41",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2013_common.nc": "9b1e2b447644b80424d59801223001d309602a192d05eaeab38b5ab4f870e8da",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2014_common.nc": "3d51b5b81cd6859bb8d8a71b159737566136b952111f793af999d50f76e06dbe",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2015_common.nc": "a0339b72ceabc340297a7568d110fbc53ba355487f0290565aec4b200161f12b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2016_common.nc": "7594718f869446cc38e8f71746a555acee78f617c7f8a05d21b48b5f1b0cd843",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2017_common.nc": "f92c2cad2c20309bd684b910bcf967a0c99a7c43f7a8eb824d91d1cda894220b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2018_common.nc": "b444c43aa8475e59a1b2ed22c8fa3870910c72f2a7aeaf17fec1e4f13fc8d7e6",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2019_common.nc": "0a868d52abe55b50b65bd3c6888787e161e6091f058e1aca77f90edbc0d70da4",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2020_common.nc": "824bcd496568a1e9efb8f8443b167b0400d8fcc1afbe6ed5f3d56575101f9cbd",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2021_common.nc": "d5c2c052fa99726e177bb9acf7c02e91dcdb0603ebd376e839a24be23399e591",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2022_common.nc": "b48ff78072b849ccde067dbebf30ef0dcce2a2dc3bd4c4c4a9938a2a2658e261",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2023_common.nc": "a1fa30a5a0cb47aa43f71593f9efd9b01bb087c27c07e8223eef0eafb950d032",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2024_common.nc": "973b098bb4388c254c28397c902dedea48ea051cf5ad64ec977502e1afe93a36",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jun\\chirps_2025_common.nc": "abc32cae01bad90504715877f25a253837413cd3be2beaac3c19f37edeb67fc2"
+      }
+    },
+    {
+      "amount_cells": 1478,
+      "probability_cells": 1193,
+      "amount_country_area_percent": 99.60255514400644,
+      "probability_country_area_percent": 80.2858411259929,
+      "observed_category_area_fractions": [
+        0.8410431512624397,
+        0.11350930261745847,
+        0.04544754612010177
+      ],
+      "amount": {
+        "raw": {
+          "bias_mm": 34.91573375684392,
+          "mae_mm": 50.47291375407557,
+          "rmse_mm": 78.77648423451174,
+          "crps_mm": 39.38868679505869,
+          "ensemble_size": 51,
+          "crpss": -0.4889655202933503
+        },
+        "corrected": {
+          "bias_mm": 19.11689301418784,
+          "mae_mm": 27.03277820844918,
+          "rmse_mm": 42.74988539078142,
+          "crps_mm": 19.077596580999643,
+          "ensemble_size": 51,
+          "crpss": 0.27883141504635556
+        },
+        "climatology": {
+          "bias_mm": 36.02333221498409,
+          "mae_mm": 38.08863590598037,
+          "rmse_mm": 54.46941711604814,
+          "crps_mm": 26.453726602949462,
+          "ensemble_size": 33,
+          "crpss": 0.0
+        }
+      },
+      "probability": {
+        "raw_observed_thresholds": {
+          "rps": 0.7051806187129528,
+          "brier_by_category": [
+            0.4259839031601096,
+            0.11436955920387323,
+            0.27919671555284303
+          ],
+          "log_loss": 4.635599277044986,
+          "zero_probability_observed_event_cells": 156,
+          "area_mean_probabilities": [
+            0.45226824410090294,
+            0.1677120102122473,
+            0.38001974568684965
+          ],
+          "rpss": -0.36209112167711566,
+          "bss_by_category": [
+            -0.08819592885513772,
+            0.23214874766470506,
+            -1.2112788477262546
+          ]
+        },
+        "corrected_member_counts": {
+          "rps": 0.2954667813081858,
+          "brier_by_category": [
+            0.22338182496209386,
+            0.12091639972311033,
+            0.07208495634609198
+          ],
+          "log_loss": 0.7584445114627736,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.6426113306359851,
+            0.21094666244126664,
+            0.1464420069227482
+          ],
+          "rpss": 0.42929134906611177,
+          "bss_by_category": [
+            0.4293606150356891,
+            0.1881947469102333,
+            0.4290765960775985
+          ]
+        },
+        "corrected_smoothed": {
+          "rps": 0.29651339489300316,
+          "brier_by_category": [
+            0.22433022601854105,
+            0.12094536009457449,
+            0.0721831688744621
+          ],
+          "log_loss": 0.7552467552192715,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.6337748164273378,
+            0.21444342446675427,
+            0.15178175910590777
+          ],
+          "rpss": 0.42726976334200584,
+          "bss_by_category": [
+            0.4269378799020569,
+            0.1880003135518148,
+            0.42829873847946554
+          ]
+        },
+        "shared_blend": {
+          "rps": 0.3861903586854355,
+          "brier_by_category": [
+            0.29333300514743754,
+            0.13147741774913135,
+            0.09285735353799794
+          ],
+          "log_loss": 0.8892409989550208,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.45324184059827793,
+            0.28588345605857524,
+            0.26087470334314666
+          ],
+          "rpss": 0.25405428781806305,
+          "bss_by_category": [
+            0.2506670331148422,
+            0.1172904698135595,
+            0.264556170269308
+          ]
+        },
+        "climatology": {
+          "rps": 0.5177191213497361,
+          "brier_by_category": [
+            0.39145882819859107,
+            0.14894754531693058,
+            0.126260293151145
+          ],
+          "log_loss": 1.0986122886681098,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.3333333333333333,
+            0.3333333333333333,
+            0.3333333333333333
+          ],
+          "rpss": 0.0,
+          "bss_by_category": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "interpretation": "Single-year area-weighted performance, not multi-year reliability. June-September and JJAS are overlapping/dependent evaluation targets, not five independent seasons.",
+      "log_loss_note": "Natural log; probabilities floored at 1e-12 for scoring; zero-probability observed-event counts reported.",
+      "raw_probability_note": "Raw member counts against frozen observed thresholds; not a model-climatology tercile forecast.",
+      "crps_note": "Empirical ensemble CRPS: raw/corrected 51 members, climatology 33 historical observed years. This scores these finite predictive distributions; no fair/iid ensemble correction.",
+      "target": "Jul",
+      "year": 2026,
+      "processing_utc": "2026-10-04T18:38:36.522933+00:00",
+      "forecast_sha256": "3457f169773cd06c7575bcf181894d42849657e865f62cb2af971ddf7a298caf",
+      "observations_sha256": "17ed3324c3c8969103e1bb692f9a4f0d6ebb53c9d3aa664883d4efbb49989509",
+      "raw_forecast_sha256": "2579f8979121796b5a692590f5833330e06fd7c0dad996642bcff59a006fca69",
+      "history_sha256": {
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_1993_common.nc": "b7b26f6d0e5af66294a330ec05ee8edb59e98f77456407d8462c7243f489512a",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_1994_common.nc": "365543dc4173b1f23dcef082c5b854f20154ea40daf23329c9bcd36fff743e0b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_1995_common.nc": "45f2241e6d4effa6084721edecb4b74c4bb040bfe8c386622833e010de594006",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_1996_common.nc": "4f2c9a0aa2fc68bf25dc69434086f93781d4fe97b6e26e90f78e7ab738c53165",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_1997_common.nc": "164ccc9f09bd4463f7910e30bb8c2d471ada54225924ef0c9c1d9f18509d89e4",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_1998_common.nc": "7fc0bb19e3fb130c2bca9e654a4450184163b23012bf23bdf70edd000209be26",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_1999_common.nc": "0b031256043bd1776d86cffb19b0a515a4eff69ad0c187371f25017286205a0d",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2000_common.nc": "835c79c558e1b82bb7d2523283968ffeb1dc1b62ec2805767210897652710cee",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2001_common.nc": "c49617ebd4d569f4dd3f4703e8c8839d6b3347fbc0b20e2fed796cf1ccf4b03d",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2002_common.nc": "3464053de535e00cf843c99e71a96d9ce8e57a4eb16b8be04ca4f3055d3927fa",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2003_common.nc": "7f2e0b3ce33de6df97b4b3bb3a9d349840cc6c1da435440b912ec545626a355b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2004_common.nc": "bb2adc88e2ee86004a33534528b3e28abf66aca01e1f998cabcf56ad7a9e0b11",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2005_common.nc": "519608680ee7dd46688089e0dde0f215e1b3aa3abcaa8c0f8455764420a4584e",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2006_common.nc": "08a8d6a5020123703ca5147f9675d81430646b14dd42aab1fcc8159d923ccc42",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2007_common.nc": "ace1a51324c813b860fa55a98304edb40893e9f64f76dc2aaec67dd415af8f3c",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2008_common.nc": "494e4158f0c114b5d89f52667586c59f298a4b9ccddab3448b8bcf67b1325f5d",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2009_common.nc": "241017180b78fb729d6309a6568618351be13d193368d2f0f59105f80354b3b7",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2010_common.nc": "226a902d9cbdc5c796f78505fab232542140253bf1335e5de38bbf77e19d9999",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2011_common.nc": "7480d0ea6534fedd6d8fa5f04e7fef74f4faef52275435b6b897afbbd6276d1e",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2012_common.nc": "82d4b4f5f1cea8d8a11b4431736a7a84d22376be9d98127a2c6531378eb19d8f",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2013_common.nc": "a1e06522cc6b0147ee80dd589139a038403faa770a0137fe722082be347c8c28",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2014_common.nc": "1a46e03a7f3db4093a91289fa1d3f076beb3abd1d7536c98e74539c553715636",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2015_common.nc": "1671b72a2c38c1dfe6793852edb5747e3194ec22d89ed05f82bd76c4d538f179",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2016_common.nc": "a03afeae91ff604373b709c53d2f0e916d85284cd9fe2e7fda5ae38ed6b81328",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2017_common.nc": "ca6433a35c686ea6c145afe0c312bcd60f8771b2efe4e39c142a5e68e634c8ac",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2018_common.nc": "3bcaa1310ea10a2e8c6655e8e15b9af3383183fc2656dec56db44e5a26f53f1a",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2019_common.nc": "6c68e62748010dee0d28f3081493d1ae85098dcd984429dc777b095b39d0bc77",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2020_common.nc": "53090b3391eb4ccfbe7d225324dd4e626de1bbd20062f3d8efe90d95fdc767b7",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2021_common.nc": "904476584abd591d4fd4a7ab20204bdaa871afbfa97bd6b334f0c558d292f536",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2022_common.nc": "4e87531c5a8e97c84abab3c8958c20ebff2e4e1ec10818ab057fd78a1de2044e",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2023_common.nc": "114265e92471911349dfb56ef25b854bae37b3a4e5530115064cb23d8444ab8b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2024_common.nc": "76b7b6684122bde90409267d240be3e135ae2cde9153655cb5612c375e19ecf5",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Jul\\chirps_2025_common.nc": "80c09b0ca8c6333409e89edeb867a70314282a04edb50b9c5e8ebf97dea93401"
+      }
+    },
+    {
+      "amount_cells": 1478,
+      "probability_cells": 1264,
+      "amount_country_area_percent": 99.60255514400644,
+      "probability_country_area_percent": 85.10026974137688,
+      "observed_category_area_fractions": [
+        0.7872969668609676,
+        0.10826710500323312,
+        0.10443592813579927
+      ],
+      "amount": {
+        "raw": {
+          "bias_mm": 29.260781993387866,
+          "mae_mm": 40.778283562031184,
+          "rmse_mm": 63.04680988942279,
+          "crps_mm": 30.977218547771336,
+          "ensemble_size": 51,
+          "crpss": -0.4104014753998051
+        },
+        "corrected": {
+          "bias_mm": 12.938897824835069,
+          "mae_mm": 17.499674710071464,
+          "rmse_mm": 25.572589269711486,
+          "crps_mm": 12.26903769833573,
+          "ensemble_size": 51,
+          "crpss": 0.44138726190723465
+        },
+        "climatology": {
+          "bias_mm": 31.858339785581425,
+          "mae_mm": 33.03301483120068,
+          "rmse_mm": 44.63400217471872,
+          "crps_mm": 21.96340480925139,
+          "ensemble_size": 33,
+          "crpss": 0.0
+        }
+      },
+      "probability": {
+        "raw_observed_thresholds": {
+          "rps": 0.5977109127167363,
+          "brier_by_category": [
+            0.34065851840134037,
+            0.1166696612612131,
+            0.25705239431539584
+          ],
+          "log_loss": 3.366894181911412,
+          "zero_probability_observed_event_cells": 109,
+          "area_mean_probabilities": [
+            0.4915044551981683,
+            0.13714474687935846,
+            0.3713507979224732
+          ],
+          "rpss": -0.14972259068946037,
+          "bss_by_category": [
+            0.08803505042936521,
+            0.20769275709707002,
+            -0.7566551782311117
+          ]
+        },
+        "corrected_member_counts": {
+          "rps": 0.3345690310736562,
+          "brier_by_category": [
+            0.222922710853956,
+            0.11722543174222899,
+            0.11164632021970018
+          ],
+          "log_loss": 0.9663054043744056,
+          "zero_probability_observed_event_cells": 8,
+          "area_mean_probabilities": [
+            0.6777015944138786,
+            0.18336804960537909,
+            0.13893035598074224
+          ],
+          "rpss": 0.3564421110832835,
+          "bss_by_category": [
+            0.40322144381968494,
+            0.20391850273873557,
+            0.23702680511216467
+          ]
+        },
+        "corrected_smoothed": {
+          "rps": 0.334138937443739,
+          "brier_by_category": [
+            0.22298063190550302,
+            0.11709985913624858,
+            0.11115830553823591
+          ],
+          "log_loss": 0.8148418813581446,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.6678625012401488,
+            0.18765277199760635,
+            0.14448472676224483
+          ],
+          "rpss": 0.35726941463740447,
+          "bss_by_category": [
+            0.40306638540781536,
+            0.20477127015189978,
+            0.24036181982591664
+          ]
+        },
+        "shared_blend": {
+          "rps": 0.3749770742989728,
+          "brier_by_category": [
+            0.2593136315559029,
+            0.12318646596934128,
+            0.1156634427430699
+          ],
+          "log_loss": 0.8622600367375705,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.5070758300255935,
+            0.25792770390939584,
+            0.23499646606501068
+          ],
+          "rpss": 0.2787155058745213,
+          "bss_by_category": [
+            0.30580058871081295,
+            0.16343693673196513,
+            0.2095744287160597
+          ]
+        },
+        "climatology": {
+          "rps": 0.5198740266191549,
+          "brier_by_category": [
+            0.37354343339810037,
+            0.1472530540472504,
+            0.14633059322105452
+          ],
+          "log_loss": 1.099374739478737,
+          "zero_probability_observed_event_cells": 0,
+          "area_mean_probabilities": [
+            0.3333333333333333,
+            0.33386523052775646,
+            0.33280143613891017
+          ],
+          "rpss": 0.0,
+          "bss_by_category": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "interpretation": "Single-year area-weighted performance, not multi-year reliability. June-September and JJAS are overlapping/dependent evaluation targets, not five independent seasons.",
+      "log_loss_note": "Natural log; probabilities floored at 1e-12 for scoring; zero-probability observed-event counts reported.",
+      "raw_probability_note": "Raw member counts against frozen observed thresholds; not a model-climatology tercile forecast.",
+      "crps_note": "Empirical ensemble CRPS: raw/corrected 51 members, climatology 33 historical observed years. This scores these finite predictive distributions; no fair/iid ensemble correction.",
+      "target": "Aug",
+      "year": 2026,
+      "processing_utc": "2026-10-04T18:38:38.005925+00:00",
+      "forecast_sha256": "7c0b1d6686d9aafa2b4d8e3137fdb0bada05b4afee5c26cba7fc4a4cb29b5fce",
+      "observations_sha256": "30001d57f21f1022ae903353ac7694f7a79d40d6102f7026dd9b31f184e0a1a2",
+      "raw_forecast_sha256": "9504d2ca1eb2c0f785b3df2f086858fa719e495cc9a4d2abb45d4ab04978dc93",
+      "history_sha256": {
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_1993_common.nc": "56542488213d2a03473f8e8b1bf5af4d70666ae3828abe099f49fdb191166423",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_1994_common.nc": "314db70501d3460bdd87e144b74b2a7ba63f8251290123cf5355fd57904cfa19",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_1995_common.nc": "9683194117f0b20ba3acf0df6f5787a8a29390d23159188460a1f8e1df9d05f7",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_1996_common.nc": "b44d58698d724bf765761eaf47976952a1783605c188ca7a6414f322ea576468",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_1997_common.nc": "19cf06aa79ed13ac0f30b092b81187ccb085b5d19eef627628768920ce555f36",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_1998_common.nc": "e76219d4f69cb20ef4d27f1ee4c57612a070dab50f8dd65b52a1b2f74ed3106d",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_1999_common.nc": "fb635a5b74811ed3f33650e304d3880a85245aff9fb247b4e5efbb2cfec0d069",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2000_common.nc": "1c70efc9e2ab12a9ae54f7c0471a4ce9b06c7e289cc70ae2f8ce190df8573beb",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2001_common.nc": "456a1ad8e5bd6b1b51d0b8ce141a628ed411e1ea0bcc888c737596c3f0dfb1b2",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2002_common.nc": "105818c5c3bbd421f9e9ce408a9b861c91f47cb633a771bd9137f6810dc0d66a",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2003_common.nc": "9069c802423b9d9e4c8aefade09a1cf786b22220d0e02d85b5e8fb87fb744c73",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2004_common.nc": "046e43ff051ce98a9c3ef424365dd96b9551b0277b3255fef5db77d269ec3c9f",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2005_common.nc": "46c5bef702bc36780bb22cfbe17237ce90e466fcbabba671d0fdf2f84af39a51",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2006_common.nc": "87dfdff567c3d7d22d77ac10e7fa20d0c60f0483c1ca617aa3d51cb59574d0f2",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2007_common.nc": "a3b4f3fb7c5f02eceffe0cf012e9c51063a443856f2bb8b442cef4b7fc3559a0",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2008_common.nc": "621340c81ac81a8c20271d52c22ce140f591897d97c70f6d51af923c63e0f927",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2009_common.nc": "684d77f9199fc77e88cccae77a85436933a77e6a3159c3a38ab5d2859f9eed6e",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2010_common.nc": "be090de614109e84a8573edd7c994100dd775baa6b11828284ffe14c900af062",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2011_common.nc": "6dbf6c8c19200f02f66908a2dadbdc79788e2c3fe936b2d896ae71e134ec62bb",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2012_common.nc": "2af408f5625b547f780dcaee3add085d640562004daa9bd4b0abd55b416d7c2d",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2013_common.nc": "d5b58f84306a41f7b9695310a650b6032d8e18b7776ef6e961b0f45a6aa4c429",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2014_common.nc": "6509ed1d9890912bcb6b597c6bf227a09c4c861ed9c715c42181f88a56f63f94",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2015_common.nc": "5555c09b9ab8325e33ebf07a98aa33d25201d42cc82e456270ba05b88b241017",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2016_common.nc": "c6c526f4c80033847dd18e3d7d9fc8508a6d1f2b7f0405d9f2da1477cae3bd91",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2017_common.nc": "c1bbdcf3d79953c067439f90e6c05f4832ba62c5c31989467ad70903ab3acf91",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2018_common.nc": "d3f6172dfcfb420295bd180e22894f2ede8b705396ff37c3dc4db793459feb09",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2019_common.nc": "a2dd8e1a926678f7aa61d3aeaeb938131b475d967945ad57a7305a770cc5a20f",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2020_common.nc": "8c79905bb41ae2e6507b5905dd64eb9789f2e87eea2491d60e2e4ed6be1bf94b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2021_common.nc": "de5dc4e298a043161d5935907048ead648203ed50c45c9b27f6170a8b6221a84",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2022_common.nc": "1358b070f13ca3e15736b9a89a8c18f98beb99ce5b141d3b322b81f70812775b",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2023_common.nc": "ac1f5a713aec261d7c1d9d7167cddfc868127aa9b0d72efbbcd866e0fbd645b6",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2024_common.nc": "e1e0913f5b08f0366e083073916627f3e8ceae86604d8da4f67c412e166a078a",
+        "D:\\calibrated_seasonal_rainfall\\data\\processed\\init05_Aug\\chirps_2025_common.nc": "560a81124c727d25bcc946ab82fde22c8e5cf1e098e90bce2fcdca11dd25681f"
+      }
+    }
+  ],
+  "note": "No aggregate score across monthly and JJAS targets because they overlap. Forecasts and calibration remain frozen."
+}

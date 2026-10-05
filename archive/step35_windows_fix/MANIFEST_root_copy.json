@@ -1,0 +1,26 @@
+{
+  "package": "operational_windows_fix",
+  "revision": "windows_publication_fix_20261005",
+  "files": {
+    "README.md": {
+      "sha256": "f1ea6dcfcfdefa7ebee057bf49dfa344c84735a768b418b24b51c52915fdcdd3",
+      "bytes": 692
+    },
+    "docs/35_WINDOWS_PUBLICATION_FIX.md": {
+      "sha256": "efa3bf70ee56478030c41898c00382ca484a8834cf851ec609e24887d2f52d7b",
+      "bytes": 4767
+    },
+    "scripts/operational_core.py": {
+      "sha256": "8c5eda775ecbe1712b3eb6cc912fc310a60068e9a3c8cbfc91ec9a0158ee30eb",
+      "bytes": 10882
+    },
+    "scripts/verify2026_outputs.py": {
+      "sha256": "a6cb5ab5534a310fbef7fc3b7b355d9e6af9ee369ba807cebd0c8c9faf9f31b9",
+      "bytes": 5545
+    },
+    "tests/test_windows_publication.py": {
+      "sha256": "d39290fdc76b71baf40e5c04a35813f9c00809147affde8c15c1244b87239de9",
+      "bytes": 6365
+    }
+  }
+}
