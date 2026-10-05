@@ -21,7 +21,7 @@ def denied():
 class PublicationTests(unittest.TestCase):
     def test_transient_lock_retried(self):
         with tempfile.TemporaryDirectory() as temp:
-            dest = Path(temp)/'Sep'
+            dest = Path(temp).resolve()/'Sep'
             original = Path.rename
             attempts = []
             def rename(p, target):
@@ -39,7 +39,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_persistent_lock_retains_new_and_restores_old(self):
         with tempfile.TemporaryDirectory() as temp:
-            dest = Path(temp)/'Sep';dest.mkdir();(dest/'old.txt').write_text('old')
+            dest = Path(temp).resolve()/'Sep';dest.mkdir();(dest/'old.txt').write_text('old')
             original = Path.rename
             def rename(p, target):
                 if p.name.startswith('Sep_building_'):
@@ -54,13 +54,13 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual((ready/'map.png').read_bytes(), b'complete')
             publication.publish_stage(ready, dest, True)
             self.assertEqual((dest/'map.png').read_bytes(), b'complete')
-            backups = list(Path(temp).glob('Sep_backup_*'))
+            backups = list(Path(temp).resolve().glob('Sep_backup_*'))
             self.assertEqual(len(backups), 1)
             self.assertEqual((backups[0]/'old.txt').read_text(), 'old')
 
     def test_blocked_backup_keeps_both(self):
         with tempfile.TemporaryDirectory() as temp:
-            dest=Path(temp)/'Sep';dest.mkdir();(dest/'old').write_text('old')
+            dest=Path(temp).resolve()/'Sep';dest.mkdir();(dest/'old').write_text('old')
             original=Path.rename
             def rename(p,target):
                 if p == dest:raise denied()
@@ -74,7 +74,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_render_error_is_not_recoverable(self):
         with tempfile.TemporaryDirectory() as temp:
-            dest=Path(temp)/'Sep'
+            dest=Path(temp).resolve()/'Sep'
             with self.assertRaisesRegex(ValueError,'rendering failed'):
                 with publication.staged_output(dest,True) as stage:
                     (stage/'incomplete').write_text('partial')
@@ -84,7 +84,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_runner_recovers_without_rendering_again(self):
         with tempfile.TemporaryDirectory() as temp:
-            root=Path(temp);source=root/'input';source.write_text('same')
+            root=Path(temp).resolve();source=root/'input';source.write_text('same')
             dest=root/'Sep';calls=[]
             def action():
                 calls.append(1)
@@ -110,7 +110,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_recovery_rejects_changed_staging_files(self):
         with tempfile.TemporaryDirectory() as temp:
-            root=Path(temp);source=root/'input';source.write_text('same');dest=root/'Sep'
+            root=Path(temp).resolve();source=root/'input';source.write_text('same');dest=root/'Sep'
             def action():
                 with publication.staged_output(dest,True) as stage:
                     (stage/'map.png').write_bytes(b'complete')

@@ -214,7 +214,7 @@ class OperationalTests(unittest.TestCase):
     def test_complete_verification_adapter_with_cached_synthetic_days(self):
         """Real preparation/scoring/report commands; no network. Rendering already tested above."""
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);vr=project_fixture(root)
+            root=Path(tmp).resolve();vr=project_fixture(root)  # resolve: CI temp paths use 8.3 short names
             before=freeze_snapshot(vr)
             # Running these functions in process lets availability be an explicit mock;
             # every scientific stage still runs the real CLI in the temporary project.
