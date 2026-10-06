@@ -10,6 +10,7 @@ Platform: Windows 11, CMD, Python 3.11 x64, project `.venv`.
 **Results site:** https://yonsci.github.io/calibrated_seasonal_rainfall/ (built by `scripts/build_site.py`; rebuild after results change).
 **Current status and open items:** [docs/36_PROJECT_STATUS_REVIEW.md](docs/36_PROJECT_STATUS_REVIEW.md).
 **Reproducible runbook, issue log and automation blueprint:** [docs/38_REPRODUCIBLE_RUNBOOK.md](docs/38_REPRODUCIBLE_RUNBOOK.md).
+**Training notebook (ONDJ walkthrough):** [notebooks/ONDJ_training_walkthrough.ipynb](notebooks/ONDJ_training_walkthrough.ipynb) — regenerate with `python notebooksuild_ondj_training_notebook.py` (needs `pip install -r requirements-notebook.txt`).
 **Next forecast cycle (2027):** [docs/37_NEW_FORECAST_CYCLE.md](docs/37_NEW_FORECAST_CYCLE.md). Cycle files live in `config/cycles/`; select one with `set CALIBRATION_CYCLE=...`.
 
 ## Final method (frozen for 2026)
