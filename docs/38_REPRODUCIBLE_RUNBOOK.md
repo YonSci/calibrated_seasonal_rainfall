@@ -109,7 +109,7 @@ python scripts\run_monthly.py --config config\ondj\project.json --stage training
 python scripts\run_monthly.py --config config\ondj\project.json --stage operational
 
 :: 5. Season rainfall domain (same rule as JJAS R1+R2), forecast, products, site
-python scripts\build_season_domain.py --config config\ondj\project.json
+python scripts\build_season_domain.py --config config\ondj\project.json --method regime
 python scripts\final_shared_blend.py --config config\ondj\project.json --region-mask data\masks\ethiopia_common.nc
 python scripts\build_season_products.py
 python scripts\build_site.py
@@ -205,7 +205,7 @@ Each entry gives the symptom, the cause, the fix and how to detect or prevent it
 | Seasonal preparation | 34 years, 123 days each (Oct 31 + Nov 30 + Dec 31 + Jan 31), no missing values, clipping ≤ 0.18 mm; CHIRPS for seasons 1993/94–2024/25 |
 | Regridding | 66 files (34 ECMWF + 32 CHIRPS), conservation error ≤ 1e-14 |
 | Monthly targets | Oct, Nov, Dec, Jan prepared; 66/66 month-sum checks passed (max 0.0004 mm); January dated in the following year (e.g. 2027-01-01 to 2027-01-31) |
-| Rainfall domain | 487 cells, 33 % of Ethiopia (south and south-east); median ONDJ climatology 193 mm, 35 % of annual |
+| Rainfall domain | First built with the ≥ 120 mm / 20 % rule (487 cells). **Replaced 2026-10-08** by the walkthrough ONDJ R3 (Deyr) domain, `build_season_domain.py --method regime` (575 cells, 39 % of Ethiopia) |
 | Forecast | 51 members; λ: Oct 0.44, Nov 0.23, Dec 0.64, Jan 0.82, ONDJ 0.28. Clipped member values: Dec 29 %, Jan 28 % (dry months, see I-08), ONDJ 0.6 % |
 | Products | 5 targets × 2 views (`outputs/operational_2026_ondj/`), listed in `entries.json`; on the site as the group "September initialization · ONDJ 2026/27" |
 
@@ -241,7 +241,7 @@ A tool that runs these cycles unattended should treat the stages above as a dire
 | New initialization available on CDS | About the 5th–13th of the initialization month. Poll CDS for the forecast year | 1 (forecast year only) → 2 → 3–5 for that year → 8 → 9 → 10 → 11 → 13 → 14 |
 | New CHIRPS month published | About 3 weeks after month end. Poll the `by_month` listing (HTTP 200 vs 404) | 12 → 13 → 14 |
 | Season fully verified | All target months available | `extend_observations.py` → next cycle's reference grows by one year |
-| New season or initialization | Manual: write project config and cycle file | Full history: 1–8, `build_season_domain.py`, products, site |
+| New season or initialization | Manual: write project config and cycle file | Full history: 1–8, `build_season_domain.py --method regime` (add the season to `REGIME_RULES`), products, site |
 | Method change proposed | Manual | 7 (gate) → only if adopted: 8 for the next cycle, never for a frozen one |
 
 Guards the tool must enforce:
