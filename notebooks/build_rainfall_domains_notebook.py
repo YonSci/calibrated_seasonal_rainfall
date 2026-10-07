@@ -69,9 +69,10 @@ md(r"""
 10. [ONDJ — Deyr / short-rains domain](#s10)
 11. [The three domains together](#s11)
 12. [Saving the masks](#s12)
-13. [Caveats](#s13)
-14. [Exercises](#s14)
-15. [References](#s15)
+13. [Exporting shapefiles and GeoJSON](#s13)
+14. [Caveats](#s14)
+15. [Exercises](#s15)
+16. [References](#s16)
 """)
 
 # ---------------------------------------------------------------- 1
@@ -498,7 +499,151 @@ print('Saved', path, '|', ', '.join(f'domain_{s}' for s in SEASONS))
 # ---------------------------------------------------------------- 13-15
 md(r"""
 <a id="s13"></a>
-## 13. Caveats
+## 13. Exporting shapefiles and GeoJSON
+
+The masks are grids of 0.25° cells. For GIS use (QGIS, ArcGIS, GeoPandas, R `sf`) each mask is turned into polygons:
+every selected cell becomes a 0.25° × 0.25° square, adjacent squares are merged (dissolved) into one outline, and the
+result is written as an **ESRI shapefile** (`.shp`, `.shx`, `.dbf`, `.prj`) and as **GeoJSON**, in **WGS 84
+(EPSG:4326)**.
+
+| Layer | Features |
+| --- | --- |
+| `ethiopia_four_climate_regimes` | one (multi)polygon per regime R0–R3 |
+| `mask_kiremt_jjas` | JJAS domain (R1 + R2) |
+| `mask_belg_fmam` | FMAM domain (R2) |
+| `mask_deyr_ondj` | ONDJ domain (R3) |
+
+Attribute fields follow the walkthrough's schema: `regime_id`, `regime_nam`, `season_typ`, `pixel_cnt`, `area_pct`,
+`desc`. The domain layers carry one feature per contributing regime, so the JJAS layer can still be coloured R1 / R2.
+""")
+code(r"""
+import shapefile, zipfile
+from shapely.geometry import box, mapping, shape as to_shape
+from shapely.geometry.polygon import orient
+from shapely.ops import unary_union
+
+HALF = 0.125   # half a 0.25° cell
+WGS84 = ('GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],'
+         'PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]')
+
+def cells_to_polygon(mask):
+    # Dissolve the selected grid cells into (multi)polygons with exact cell edges.
+    squares = [box(lon[j] - HALF, lat[i] - HALF, lon[j] + HALF, lat[i] + HALF) for i, j in zip(*np.nonzero(mask))]
+    geom = unary_union(squares)
+    parts = list(geom.geoms) if geom.geom_type == 'MultiPolygon' else [geom]
+    return [orient(g, sign=-1.0) for g in parts]          # ESRI: clockwise outer rings, counter-clockwise holes
+
+DESC = {0: 'Non-seasonal arid climate (annual < 200 mm); seasonal metrics masked',
+        1: 'Single long wet season Mar-Oct peaking Jul-Aug; Atlantic/Congo westerlies',
+        2: 'Belg (FMAM) and Kiremt (JJAS) separated by a June dry break',
+        3: 'Gu (MAM) and Deyr/Hagaya (OND) separated by a dry summer; Indian Ocean'}
+
+def write_layer(name, features):
+    # features: list of (attributes dict, mask). Writes .shp/.shx/.dbf/.prj and .geojson.
+    shp_dir.mkdir(parents=True, exist_ok=True)
+    w = shapefile.Writer(str(shp_dir / name), shapeType=shapefile.POLYGON)
+    for field, kind, size, dec in [('regime_id', 'N', 10, 0), ('regime_nam', 'C', 100, 0), ('season_typ', 'C', 100, 0),
+                                   ('pixel_cnt', 'N', 10, 0), ('area_pct', 'N', 12, 3), ('desc', 'C', 254, 0)]:
+        w.field(field, kind, size=size, decimal=dec)
+    geo = {'type': 'FeatureCollection', 'name': name, 'features': []}
+    for attrs, mask in features:
+        parts = cells_to_polygon(mask)
+        rings = []
+        for poly in parts:
+            rings.append([list(c) for c in poly.exterior.coords])
+            rings.extend([list(c) for c in hole.coords] for hole in poly.interiors)
+        w.poly(rings)
+        pct, n = area_share(mask)
+        row = dict(attrs, pixel_cnt=n, area_pct=round(pct, 3))
+        w.record(row['regime_id'], row['regime_nam'], row['season_typ'], n, row['area_pct'], row['desc'])
+        geo['features'].append({'type': 'Feature', 'properties': row,
+                                'geometry': mapping(unary_union(parts))})
+    w.close()
+    (shp_dir / f'{name}.prj').write_text(WGS84)
+    (shp_dir / f'{name}.geojson').write_text(json.dumps(geo))
+    return name
+
+shp_dir = Path('outputs/regime_domains/shapefiles')
+layers = []
+layers.append(write_layer('ethiopia_four_climate_regimes',
+    [(dict(regime_id=g, regime_nam=REGIME_NAMES[g], season_typ='annual regime', desc=DESC[g]), regime == g) for g in range(4)]))
+DOMAIN_LAYERS = {'JJAS': ('mask_kiremt_jjas', 'JJAS'), 'FMAM': ('mask_belg_fmam', 'FMAM'), 'ONDJ': ('mask_deyr_ondj', 'ONDJ')}
+for S, (layer, season_type) in DOMAIN_LAYERS.items():
+    rule = SEASONS[S]
+    layers.append(write_layer(layer, [
+        (dict(regime_id=g, regime_nam=f'{rule["name"]} domain: {REGIME_NAMES[g]}', season_typ=season_type,
+              desc=f'{S} domain cells in R{g}; rule ' + summary.loc[S, 'rule']), domains[S] & (regime == g))
+        for g in rule['regimes']]))
+
+archive = shp_dir.parent / 'ethiopia_rainfall_regimes_and_domains_shp.zip'
+with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
+    for f in sorted(shp_dir.iterdir()):
+        z.write(f, f.name)
+files = pd.DataFrame([dict(file=f.name, kB=round(f.stat().st_size / 1e3, 1)) for f in sorted(shp_dir.iterdir())])
+display(files.set_index('file'))
+import shutil
+tracked = Path('data/masks') / archive.name           # tracked in git, so the shapefiles are also on GitHub
+shutil.copy2(archive, tracked)
+print('Zip archive:', archive, f'({archive.stat().st_size / 1e3:.1f} kB); copy for the repository:', tracked)
+""")
+md(r"""
+**Check.** The files are read back from disk with `pyshp`. Each 0.25° cell covers 0.0625 square degrees, so a
+polygon's area divided by 0.0625 must equal its `pixel_cnt` exactly — this confirms that no cell was lost or added when
+the cells were dissolved into outlines.
+""")
+code(r"""
+rows = []
+for name in layers:
+    with shapefile.Reader(str(shp_dir / name)) as r:
+        fields = [f[0] for f in r.fields[1:]]
+        for sr in r.iterShapeRecords():
+            rec = dict(zip(fields, sr.record)); geom = to_shape(sr.shape.__geo_interface__)
+            rows.append(dict(layer=name, regime_id=rec['regime_id'], pixel_cnt=rec['pixel_cnt'], area_pct=rec['area_pct'],
+                             polygons=len(geom.geoms) if geom.geom_type == 'MultiPolygon' else 1,
+                             cells_from_area=round(geom.area / 0.0625, 6)))
+check_shp = pd.DataFrame(rows)
+check_shp['matches'] = check_shp.cells_from_area == check_shp.pixel_cnt
+display(check_shp)
+print('All polygon areas equal their cell counts:', check_shp.matches.all())
+valid = []
+for name in layers:
+    with shapefile.Reader(str(shp_dir / name)) as r:
+        valid += [to_shape(sh.__geo_interface__).is_valid for sh in r.shapes()]
+    json.loads((shp_dir / f'{name}.geojson').read_text())
+print('All geometries valid (no self-intersections):', all(valid), '| GeoJSON files parse:', True)
+""")
+code(r"""
+from matplotlib.patches import PathPatch
+from matplotlib.path import Path as MPath
+
+def draw(ax, layer, colour_of):
+    with shapefile.Reader(str(shp_dir / layer)) as r:
+        for sr in r.iterShapeRecords():
+            geom = to_shape(sr.shape.__geo_interface__)
+            for poly in (geom.geoms if geom.geom_type == 'MultiPolygon' else [geom]):
+                verts, codes = [], []
+                for ring in [poly.exterior, *poly.interiors]:
+                    xy = list(ring.coords); verts += xy; codes += [MPath.MOVETO] + [MPath.LINETO] * (len(xy) - 2) + [MPath.CLOSEPOLY]
+                ax.add_patch(PathPatch(MPath(verts, codes), facecolor=colour_of(sr.record), edgecolor=SURFACE, linewidth=.8))
+
+fig, axes = plt.subplots(1, 4, figsize=(20, 5), layout='constrained')
+titles = ['Four climate regimes'] + [f'{S} domain' for S in DOMAIN_LAYERS]
+for ax, layer, title in zip(axes, layers, titles):
+    ax.pcolormesh(lon, lat, np.where(country, 0, np.nan), cmap=ListedColormap([LAND]), shading='auto')
+    draw(ax, layer, lambda rec: REGIME_COLORS[int(rec[0])])
+    map_axes(ax, f'{title}\n{layer}.shp'); ax.set_xlim(33, 48); ax.set_ylim(3, 15)
+fig.legend(handles=[Patch(color=REGIME_COLORS[g], label=REGIME_NAMES[g]) for g in [1, 2, 3, 0]], loc='lower center', ncol=4,
+           frameon=False, bbox_to_anchor=(.5, -.07))
+fig.suptitle('Shapefiles read back from disk', x=.01, ha='left', fontweight='bold'); plt.show()
+""")
+md(r"""
+**Using the files.** In QGIS: *Layer → Add Vector Layer* and pick a `.shp` or `.geojson`. In Python:
+`geopandas.read_file('outputs/regime_domains/shapefiles/mask_kiremt_jjas.shp')`. In R:
+`sf::st_read(...)`. The outlines follow the 0.25° CHIRPS grid cells exactly; they are not smoothed.
+""")
+md(r"""
+<a id="s14"></a>
+## 14. Caveats
 
 * **Not an official EMI zoning.** The regimes are an objective, reproducible classification following the walkthrough;
   they are not certified EMI climate zones.
@@ -509,8 +654,8 @@ md(r"""
 * **0.25° cells near borders** (for example around Moyale) can be affected by the country mask and cleanup.
 """)
 md(r"""
-<a id="s14"></a>
-## 14. Exercises
+<a id="s15"></a>
+## 15. Exercises
 
 1. Change the JJAS share threshold from 20 % to 25 %. Which cells leave the domain, and in which regime?
 2. Define a **MAM Gu** domain for regime R3 (the walkthrough's `mask_gu_spring_rains`). How large is it?
@@ -520,8 +665,8 @@ md(r"""
    recommend for the September outlook, and why?
 """)
 md(rf"""
-<a id="s15"></a>
-## 15. References
+<a id="s16"></a>
+## 16. References
 
 * Dunning, C. M., Black, E. C. L. and Allan, R. P. (2016). The onset and cessation of seasonal rainfall over Africa.
   *J. Geophys. Res. Atmos.* 121, 11405–11424.
