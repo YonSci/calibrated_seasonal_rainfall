@@ -22,7 +22,8 @@ PENDING_TARGETS = {'May initialization · JJAS 2026': ['Sep', 'JJAS']}
 VIEWS = [('all_ethiopia', 'All Ethiopia'), ('jjas_r12_rainfall_domain', 'JJAS R1+R2 rainfall domain')]
 GALLERY = 'outputs/operational_2026'
 # Further cycles rendered by scripts/build_season_products.py (skipped until their entries exist).
-EXTRA_CYCLES = [('config/cycles/sep_2026_ondj.json', 'ondj')]
+# Every cycle file in config/cycles whose products were rendered (entries.json exists) is shown, by initialization month.
+EXTRA_CYCLES_DIR = 'config/cycles'
 CAT = ['Below normal', 'Near normal', 'Above normal']
 esc = html.escape
 
@@ -76,11 +77,19 @@ def extra_cycles():
     from cycle import load_cycle
     from significance import paired_summary
     out = []
-    for cfg_path, key in EXTRA_CYCLES:
-        c = load_cycle(ROOT / cfg_path)
-        listing = c.root('output_root') / 'entries.json'
-        if not listing.is_file():
+    found = []
+    for cfg_path in sorted((ROOT / EXTRA_CYCLES_DIR).glob('*.json')):
+        try:
+            c = load_cycle(cfg_path)
+        except Exception:
             continue
+        listing = c.root('output_root') / 'entries.json'
+        if c.init_month == 5 or not listing.is_file() or 'backtest' in cfg_path.name:
+            continue
+        found.append((c.init_month, cfg_path, c))
+    for _, cfg_path, c in sorted(found, key=lambda t: t[0]):
+        key = c.season_name.lower()
+        listing = c.root('output_root') / 'entries.json'
         data = json.loads(listing.read_text(encoding='utf-8'))
         group = f'{c.init_month_name} initialization · {c.target_label(c.season_name)}'
         entries = []
@@ -111,6 +120,17 @@ def extra_cycles():
         out.append(dict(key=key, cycle=c, group=group, entries=entries, skill=skill, weights=lam,
                         definition=data['domain_definition'], note=data['domain_note']))
     return out
+
+
+def season_note(c):
+    """One sentence on the calendar of the target period and when verification becomes possible."""
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    from common import season_window
+    start, end = season_window(c.project, c.year)
+    span = (f'The season crosses the year boundary ({start:%B %Y} to {end:%B %Y}). ' if start.year != end.year
+            else f'The season runs from {start:%B} to {end:%B %Y}. ')
+    return span + f'Verification needs CHIRPS through {end:%B %Y}.'
 
 
 def copy_assets(entries):
@@ -292,13 +312,12 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
         extra_html += f"""
 <section id="{x['key']}" class="wrap">
   <h2>{esc(x['group'])} forecast</h2>
-  <p>The same pipeline applied to a second season: ECMWF SEAS5 initialized on 1 {c.init_month_name}, {c.members(c.year)} members,
-  calibrated against CHIRPS for {c.season_name} seasons {c.ref_first}/{str(c.ref_first + 1)[-2:]}–{c.ref_last}/{str(c.ref_last + 1)[-2:]}
-  ({len(c.reference_years)} seasons; 25-member hindcasts to 2016, 51 members after). The season crosses the year boundary, so January
-  belongs to {c.year + 1}. Verification follows once CHIRPS for January {c.year + 1} is published.</p>
+  <p>The same pipeline applied to another season: ECMWF SEAS5 initialized on 1 {c.init_month_name} {c.year}, {c.members(c.year)} members,
+  calibrated against CHIRPS for {c.season_name} seasons {c.ref_first}–{c.ref_last}
+  ({len(c.reference_years)} seasons; 25-member hindcasts to 2016, 51 members after). {season_note(c)}</p>
   <p class="domain"><strong>{esc(next(e['label'] for e in x['entries'] if e['view'] != 'all_ethiopia'))}.</strong> {esc(x['definition'])} {esc(x['note'])}</p>
   {ftab}
-  <p class="caveat">Outside the rainfall domain most of Ethiopia is in its dry season (Bega); cells with negligible climatological rainfall have no tercile probabilities, which lowers national probability coverage.</p>
+  <p class="caveat">Outside the rainfall domain much of Ethiopia is outside its main rainy season; cells with negligible climatological rainfall have no tercile probabilities, which lowers national probability coverage.</p>
   <h3>Historical skill for this season</h3>
   {stab}
   <p class="caveat">RPSS of the final method against climatology, Ethiopia cells; nested leave-one-year-out fits for the development years and fits on those years for the later evaluation years. <span class="strong pos">Bold</span>: one-sided whole-year permutation p &lt; 0.05. Maps for every target and both views are in the <a href="#explorer">map explorer</a>.</p>
@@ -327,7 +346,7 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top">Ethiopia Seasonal Rainfall</a>
-    <nav><a href="#workflow">Workflow</a><a href="#methods">Methods</a><a href="#skill">Skill</a><a href="#forecast">2026 forecast</a><a href="#verification">Verification</a><a href="#ondj">ONDJ</a><a href="#explorer">Map explorer</a><a href="{REPO}">GitHub</a></nav>
+    <nav><a href="#workflow">Workflow</a><a href="#methods">Methods</a><a href="#skill">Skill</a><a href="#forecast">2026 forecast</a><a href="#verification">Verification</a>{''.join(f'<a href="#{x["key"]}">{esc(x["cycle"].season_name)}</a>' for x in extras)}<a href="#explorer">Map explorer</a><a href="{REPO}">GitHub</a></nav>
   </div>
 </header>
 <main id="top">

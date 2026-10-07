@@ -1,0 +1,24 @@
+{
+  "project": "Ethiopia ECMWF CHIRPS seasonal calibration - FMAM (February initialization)",
+  "ecmwf_directory": "data/raw/ecmwf/et_feb_init",
+  "ecmwf_pattern": "ecmwf_{year}{month:02d}_d01.nc",
+  "ecmwf_variable": "tp",
+  "chirps_file": "data/raw/chirps/et/et_chirps_pr_r25_1993_2025.nc",
+  "chirps_variable": "precip",
+  "initialization_month": 2,
+  "season": {
+    "name": "FMAM",
+    "start": "02-01",
+    "end": "05-31"
+  },
+  "archive_years": [
+    1993,
+    2026
+  ],
+  "observation_years": [
+    1993,
+    2025
+  ],
+  "negative_increment_tolerance_mm": 0.2,
+  "provenance_note": "CDS SEAS5 system 51, total_precipitation, 1 February initialization, lead 24-2904 h (121 days, covers leap years), area N15 W33 S3 E48; 25 members 1993-2016, 51 from 2017. CHIRPS archive 1993-2025 covers every FMAM season to 2025."
+}

@@ -34,12 +34,15 @@ def season_window(cfg, year):
     September start). It ends in the following year when its end month precedes
     its start month (e.g. ONDJ). May-initialized JJAS keeps both dates in `year`.
     """
+    import calendar
     from datetime import date
     start_m, start_d = map(int, cfg["season"]["start"].split("-"))
     end_m, end_d = map(int, cfg["season"]["end"].split("-"))
     first_year = year if start_m >= cfg["initialization_month"] else year + 1
     last_year = first_year if (end_m, end_d) >= (start_m, start_d) else first_year + 1
-    start, end = date(first_year, start_m, start_d), date(last_year, end_m, end_d)
+    # Month configs are year-agnostic ("02-29" = last day of February): clamp to the real month length.
+    start = date(first_year, start_m, min(start_d, calendar.monthrange(first_year, start_m)[1]))
+    end = date(last_year, end_m, min(end_d, calendar.monthrange(last_year, end_m)[1]))
     if (end - start).days >= 366:
         raise ValueError("Target periods longer than one year are not supported.")
     return start, end

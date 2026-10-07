@@ -11,7 +11,7 @@ from common import season_months
 # Months and periods of the cycle's season (Jun-Sep + JJAS for the May cycle).
 _SEASON=CYCLE.project['season']
 MONTHS={calendar.month_abbr[m]:m for m in season_months(CYCLE.project)}
-PERIODS={k:(f'{m:02d}-01',f'{m:02d}-{calendar.monthrange(YEAR,m)[1]:02d}') for k,m in MONTHS.items()}
+PERIODS={k:(f'{m:02d}-01',f'{m:02d}-{calendar.monthrange(2000,m)[1]:02d}') for k,m in MONTHS.items()}  # same convention as monthly_config
 PERIODS[_SEASON['name']]=(_SEASON['start'],_SEASON['end'])
 BASE='https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/'
 
@@ -27,7 +27,9 @@ def sha(p):
 def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
 def write(p,d):Path(p).write_text(json.dumps(d,indent=2,allow_nan=False),encoding='utf-8')
 def now():return datetime.now(timezone.utc).isoformat()
-def dates(year,start,end):return pd.date_range(f'{year}-{start}',f'{year}-{end}',freq='D')
+def dates(year,start,end):
+    m,d=map(int,end.split('-'));end=f'{m:02d}-{min(d,calendar.monthrange(year,m)[1]):02d}'
+    return pd.date_range(f'{year}-{start}',f'{year}-{end}',freq='D')
 
 def check_forecast(d,target):
     if int(d.attrs.get('target_year',-1))!=YEAR or int(d.attrs.get('initialization_month',-1))!=CYCLE.init_month:raise ValueError(f'Expected {CYCLE.init_month_name}-initialized {YEAR} forecast')

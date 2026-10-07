@@ -333,3 +333,4 @@ Frozen 2026 products (Ethiopia area means):
 - [x] **JJAS (May initialization): no change needed.** The regime-based JJAS domain is identical cell for cell (833) to the R1+R2 domain the JJAS products already use.
 - [x] **ONDJ (September initialization): switched** from the earlier ≥ 120 mm / 20 % rule (487 cells) to the ONDJ R3 (Deyr) domain (575 cells, 39 % of Ethiopia). The cycle file points to the new mask; products, site and both notebooks were rebuilt. Over the domain, ONDJ 2026/27 is 19 / 24 / 57 % (below / near / above), +64 mm (previously 20 / 24 / 56 %, +65 mm). November is 21 / 22 / 57 %.
 - Calibration and forecast values are unchanged; only the presentation and summary domain changed.
+- [ ] FMAM 2026 (February initialization): configs `config/fmam/project.json`, `config/cycles/feb_2026_fmam.json` and run guide `docs/39_FMAM_RUN_GUIDE.md` ready (leap-safe February, automatic site cycles). To be run by the project team as an end-to-end test.
