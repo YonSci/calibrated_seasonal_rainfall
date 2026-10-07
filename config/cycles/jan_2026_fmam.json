@@ -2,7 +2,7 @@
   "schema_version": 1,
   "adapter": "shared_blend",
   "forecast_year": 2026,
-  "initialization_month": 2,
+  "initialization_month": 1,
   "reference_years": [
     1993,
     2025
@@ -33,6 +33,6 @@
     "dpi": 180,
     "pdf": true
   },
-  "season_domain_mask": "data/masks/init02_FMAM_regime_domain.nc",
-  "notes": "February-initialized FMAM 2026 cycle (Belg). Reference FMAM 1993-2025. Presentation domain: FMAM R2 (Belg) regime domain. Guide: docs/39_FMAM_RUN_GUIDE.md."
+  "season_domain_mask": "data/masks/init01_FMAM_regime_domain.nc",
+  "notes": "January-initialized FMAM 2026 cycle (Belg). Reference FMAM 1993-2025. Presentation domain: FMAM R2 (Belg) regime domain. Guide: docs/39_FMAM_RUN_GUIDE.md."
 }

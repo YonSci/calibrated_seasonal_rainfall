@@ -42,8 +42,8 @@ class CycleTests(unittest.TestCase):
     def test_fmam_cycle_and_february(self):
         from common import season_window, load_config
         from run_monthly import monthly_config
-        c = load_cycle(ROOT / 'config/cycles/feb_2026_fmam.json')
-        self.assertEqual((c.tag, c.season_name, c.reference_label), ('init02', 'FMAM', '1993-2025'))
+        c = load_cycle(ROOT / 'config/cycles/jan_2026_fmam.json')
+        self.assertEqual((c.tag, c.season_name, c.reference_label), ('init01', 'FMAM', '1993-2025'))
         self.assertEqual(c.target_label('Feb'), 'Feb 2026')
         feb = monthly_config(load_config('config/fmam/project.json'), 2)
         self.assertEqual(season_window(feb, 2026)[1].isoformat(), '2026-02-28')   # non-leap year
