@@ -52,6 +52,8 @@ def load_mask(path, reference):
         focused = (mask.season_domain.values == 1) & country
         if mask.attrs.get("season") != SEASON or not focused.any():
             raise ValueError(f"Expected a non-empty {SEASON} rainfall-domain mask: {path}")
+        if mask.attrs.get("view_label"):          # e.g. "ONDJ R3 (Deyr) rainfall domain"
+            VIEWS[SEASON_VIEW] = mask.attrs["view_label"]
         return mask, {"all_ethiopia": country, SEASON_VIEW: focused}
     country_name = "country_mask" if "country_mask" in reference else "region_mask"
     ref = xr.Dataset({"country_mask": reference[country_name]})

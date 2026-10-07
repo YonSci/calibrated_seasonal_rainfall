@@ -62,7 +62,7 @@ md(r"""
 6. [Step 4 — Seasonal totals](#s6)
 7. [Step 5 — Regridding 1° → 0.25°](#s7)
 8. [Step 6 — Monthly targets and the reconstruction check](#s8)
-9. [Step 7 — The ONDJ rainfall domain](#s9)
+9. [Step 7 — The ONDJ R3 (Deyr) rainfall domain](#s9)
 10. [Step 8 — Calibration explained on one grid cell](#s10)
 11. [Step 9 — Historical skill](#s11)
 12. [Step 10 — Final fit and the 2026/27 forecast](#s12)
@@ -231,7 +231,7 @@ the 51 members at one grid cell in southern Ethiopia: accumulations (top) and th
 """)
 code(r"""
 raw = xr.open_dataset('data/raw/ecmwf/et_sep_init/ecmwf_202609_d01.nc')
-LAT, LON = 5.375, 39.375                 # example 0.25° cell (southern Ethiopia, inside the ONDJ rainfall domain)
+LAT, LON = 5.375, 39.375                 # example 0.25° cell (southern Ethiopia, inside the ONDJ R3 rainfall domain)
 cell = raw.tp.isel(forecast_reference_time=0).sel(latitude=LAT, longitude=LON, method='nearest') * 1000
 dates = pd.DatetimeIndex(raw.valid_time.values) - pd.Timedelta(days=1)   # interval start labels
 daily = cell.diff('forecast_period', label='upper')
@@ -357,30 +357,43 @@ print('January target of the 2026 initialization covers', jan.attrs['season_star
 # ---------------------------------------------------------------- 9 domain
 md(r"""
 <a id="s9"></a>
-## 9. Step 7 — The ONDJ rainfall domain
+## 9. Step 7 — The ONDJ R3 (Deyr) rainfall domain
 
-For display and summaries, the project shows each forecast for all of Ethiopia and for the season's main
-rainfall area. The ONDJ domain uses **the same rule as the JJAS R1+R2 domain**: cells whose climatological
-seasonal rainfall is at least 120 mm *and* at least 20 % of the annual total. It is never used in calibration.
+For display and summaries, the project shows each forecast for all of Ethiopia and for the season's main rainfall
+area. Following the scientific masking walkthrough (see `notebooks/Rainfall_domains_JJAS_FMAM_ONDJ.ipynb`), the
+**ONDJ R3 (Deyr) rainfall domain** keeps the cells of **regime R3** — the bimodal type-2 lowlands where the
+October–November Deyr / Hagaya rains are a true second rainy season — with at least **30 mm** of climatological ONDJ
+rainfall. This is the ONDJ counterpart of the JJAS R1+R2 domain. It is a presentation layer only, never used in
+calibration.
+
+An earlier version used a pure rainfall rule (≥ 120 mm and ≥ 20 % of annual, any regime). The map compares both:
+the regime-based domain adds the drier eastern lowlands where Deyr is still the second season, and leaves out wet
+highland cells whose October rain is the tail of the Kiremt season.
 """)
 code(r"""
-run('python scripts/build_season_domain.py --config config/ondj/project.json', RUN_PIPELINE)
-m = xr.open_dataset('data/masks/init09_ONDJ_rainfall_domain.nc')
+run('python scripts/build_season_domain.py --config config/ondj/project.json --method regime', RUN_PIPELINE)
+m = xr.open_dataset('data/masks/init09_ONDJ_regime_domain.nc')            # used by the forecast products
+old = xr.open_dataset('data/masks/init09_ONDJ_rainfall_domain.nc')         # earlier >=120 mm / 20 % rule
 country = xr.open_dataset('data/masks/ethiopia_common.nc').region_mask
-fig, axes = plt.subplots(1, 2, figsize=(12, 4.6))
+fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.8), layout='constrained')
 clim = m.season_climatology_mm.where(country == 1)
 im = axes[0].pcolormesh(m.lon, m.lat, clim, cmap=SEQ, vmin=0, vmax=float(np.nanpercentile(clim, 98)), shading='auto')
 fig.colorbar(im, ax=axes[0], shrink=.8, label='ONDJ rainfall (mm)')
-share = m.season_share_of_annual.where(country == 1) * 100
-im2 = axes[1].pcolormesh(m.lon, m.lat, share, cmap=SEQ, vmin=0, vmax=60, shading='auto')
-fig.colorbar(im2, ax=axes[1], shrink=.8, label='Share of annual rainfall (%)')
-for ax, title in zip(axes, ['ONDJ climatology', 'ONDJ share of annual rainfall']):
-    ax.contour(m.lon, m.lat, m.season_domain, levels=[.5], colors=[ORANGE], linewidths=2)
-    map_axes(ax, title)
-axes[0].text(33.3, 14.3, 'Orange outline: ONDJ rainfall domain', color=INK2, fontsize=9)
+axes[0].contour(m.lon, m.lat, m.season_domain, levels=[.5], colors=[ORANGE], linewidths=2)
+map_axes(axes[0], 'ONDJ climatology and the R3 (Deyr) domain (orange)')
+new, prev = m.season_domain.values == 1, old.season_domain.values == 1
+cat = np.full(new.shape, np.nan); cat[(country.values == 1)] = 0; cat[new & prev] = 1; cat[new & ~prev] = 2; cat[prev & ~new] = 3
+axes[1].pcolormesh(m.lon, m.lat, cat, cmap=ListedColormap(['#ecebe7', ORANGE, '#f6c3a6', BLUE]), vmin=-.5, vmax=3.5, shading='auto')
+map_axes(axes[1], 'Regime-based domain compared with the earlier rule')
+from matplotlib.patches import Patch
+axes[1].legend(handles=[Patch(color=ORANGE, label=f'in both ({int((new & prev).sum())} cells)'),
+                        Patch(color='#f6c3a6', label=f'regime-based only ({int((new & ~prev).sum())})'),
+                        Patch(color=BLUE, label=f'earlier rule only ({int((prev & ~new).sum())})')],
+               loc='lower left', fontsize=8, facecolor=SURFACE, edgecolor=GRID)
 plt.show()
-print(m.attrs['domain_definition'])
-print(f"{m.attrs['domain_cells']} cells, {m.attrs['domain_country_area_percent']:.1f}% of Ethiopia")
+print(m.attrs['view_label'], '|', m.attrs['domain_definition'])
+print(f"{m.attrs['domain_cells']} cells, {m.attrs['domain_country_area_percent']:.1f}% of Ethiopia "
+      f"(earlier rule: {old.attrs['domain_cells']} cells)")
 """)
 
 # ---------------------------------------------------------------- 10 calibration
@@ -522,8 +535,8 @@ summary = pd.DataFrame([dict(target=e['target_label'], view=e['label'],
 display(summary.style.format({'below': '{:.0%}', 'near': '{:.0%}', 'above': '{:.0%}', 'anomaly_mm': '{:+.1f}', 'coverage': '{:.0%}'}).hide(axis='index'))
 """)
 md(r"""
-**Reading the result.** Over the ONDJ rainfall domain (south and south-east) the outlook leans towards
-**above-normal** rainfall (about 56 % on average), strongest in November; December and January stay close to
+**Reading the result.** Over the ONDJ R3 (Deyr) rainfall domain (south and south-east) the outlook leans towards
+**above-normal** rainfall (about 57 % on average), strongest in November; December and January stay close to
 climatology. Probabilities are area means of local probabilities, not the probability of the domain total.
 Dry-season cells with negligible rainfall have no tercile probabilities, which lowers national coverage in December
 and January.
@@ -534,7 +547,7 @@ md(r"""
 <a id="s13"></a>
 ## 13. Step 11 — Forecast maps
 
-`build_season_products.py` renders, for each target and both views (All Ethiopia, ONDJ rainfall domain), the
+`build_season_products.py` renders, for each target and both views (All Ethiopia, ONDJ R3 (Deyr) rainfall domain), the
 leading-tercile map, corrected mean rainfall and the anomaly in mm and %. The display is smoothed for readability;
 statistics use the original 0.25° grid.
 """)
@@ -597,8 +610,8 @@ md(r"""
    the scale factor `r`, the terciles and λ's effect differ? Why does the cell receive few or no probabilities in January?
 3. **Skill.** Which target has the largest gap between the two evaluation periods? Why should the 1993–2016 number be
    trusted more?
-4. **Domain.** Rebuild the rainfall domain with a 100 mm threshold (edit `MIN_MM` in a copy of
-   `build_season_domain.py`). How many cells are added, and where?
+4. **Domain.** Change the ONDJ rainfall floor of the R3 domain from 30 mm to 100 mm (`REGIME_RULES` in a copy of
+   `build_season_domain.py`). How many cells leave the domain, and where?
 5. **New season.** Following `docs/37`, write a project config and cycle file for a February-initialized MAM season.
    Which steps of this notebook change, and which stay the same?
 """)

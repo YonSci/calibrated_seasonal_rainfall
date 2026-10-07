@@ -296,7 +296,7 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
   calibrated against CHIRPS for {c.season_name} seasons {c.ref_first}/{str(c.ref_first + 1)[-2:]}–{c.ref_last}/{str(c.ref_last + 1)[-2:]}
   ({len(c.reference_years)} seasons; 25-member hindcasts to 2016, 51 members after). The season crosses the year boundary, so January
   belongs to {c.year + 1}. Verification follows once CHIRPS for January {c.year + 1} is published.</p>
-  <p class="domain"><strong>{esc(c.season_name)} rainfall domain.</strong> {esc(x['definition'])} {esc(x['note'])}</p>
+  <p class="domain"><strong>{esc(next(e['label'] for e in x['entries'] if e['view'] != 'all_ethiopia'))}.</strong> {esc(x['definition'])} {esc(x['note'])}</p>
   {ftab}
   <p class="caveat">Outside the rainfall domain most of Ethiopia is in its dry season (Bega); cells with negligible climatological rainfall have no tercile probabilities, which lowers national probability coverage.</p>
   <h3>Historical skill for this season</h3>

@@ -433,7 +433,7 @@ ond = remove_small(np.isin(regime, [3]) & (season_total([10, 11, 12]) >= 30) & c
 comp = pd.DataFrame([
     dict(definition='Walkthrough logic, ONDJ (R3, ≥ 30 mm)', cells=int(domains['ONDJ'].sum()), area_pct=area_share(domains['ONDJ'])[0]),
     dict(definition='Walkthrough logic, OND only (R3, ≥ 30 mm)', cells=int(ond.sum()), area_pct=area_share(ond)[0]),
-    dict(definition='Earlier ONDJ domain (≥ 120 mm and ≥ 20 % of annual, any regime)', cells=int(prev.sum()), area_pct=area_share(prev)[0]),
+    dict(definition='Earlier ONDJ domain, replaced (≥ 120 mm and ≥ 20 % of annual, any regime)', cells=int(prev.sum()), area_pct=area_share(prev)[0]),
 ]).set_index('definition')
 display(comp)
 both = domains['ONDJ'] & prev
@@ -441,11 +441,12 @@ print(f'Overlap with the earlier ONDJ domain: {int(both.sum())} cells; only in t
       f'{int((domains["ONDJ"] & ~prev).sum())}; only in the earlier domain: {int((prev & ~domains["ONDJ"]).sum())}')
 """)
         md(r"""
-**Two ways to define an ONDJ domain.** The earlier domain used for the ONDJ forecast maps (`build_season_domain.py`)
-applies the JJAS *rainfall* criteria (≥ 120 mm and ≥ 20 % of annual) to ONDJ in every regime. The walkthrough logic used
+**Two ways to define an ONDJ domain.** The ONDJ forecast products now use the regime-based domain built here
+(`build_season_domain.py --method regime`, view "ONDJ R3 (Deyr) rainfall domain", since 8 Oct 2026). The earlier
+domain (`build_season_domain.py`, default method) applies the JJAS *rainfall* criteria (≥ 120 mm and ≥ 20 % of annual) to ONDJ in every regime. The walkthrough logic used
 here instead starts from the **regime** (R3, the true Gu–Deyr bimodal lowlands) with a low rainfall floor (30 mm), so it
 also includes the drier eastern lowlands where Deyr is still the second rainy season, and it leaves out wet highland
-cells whose October rain is the tail of Kiremt. Which one to use for products is a choice to make explicitly.
+cells whose October rain is the tail of Kiremt, which is why the regime-based domain was adopted.
 """)
 
 # ---------------------------------------------------------------- 11
