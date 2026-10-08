@@ -357,4 +357,14 @@ An external review asked for a forecast-first page that a new visitor can unders
 - [x] Six-item navigation (Outlooks · Maps · Verification · Historical performance · Methods & data · Downloads); technical material (workflow, equations, method selection, ensemble diagnostics, QC, limitations, reproduce) in expandable sections; bounded wording for the 25→51 member transfer; raw benchmark defined.
 - [x] Downloads: per-cycle summary CSV, verification reports and the JJAS bulletin.
 - [x] Accessibility: skip link, `aria-live` updates, `noscript` summary table, table captions, image error messages, phone layout checked at 520 px.
-- [ ] Deferred: split the six-panel verification image into separate web panels (needs `presentation_layers.py` changes and rebuilt galleries).
+- [x] Split the six-panel verification image into separate web panels (done in Phase 18, at site build).
+
+### Phase 18 — second site review: scope, wording and interaction (2026-10-08)
+
+- [x] Historical skill per area: `regional_skill.py --cycle <cycle>` scores each cycle's rainfall domain and the R0–R3 regimes from the stored cross-validated probabilities (no refitting), writing `outputs/regional_skill/<tag>_regional_skill.json`. JJAS R1+R2 reproduces the existing table (+0.078). New: FMAM R2 domain, FMAM +0.057 (95% +0.006 to +0.109); ONDJ R3 domain, ONDJ +0.093 (+0.012 to +0.182). The skill card and the historical table follow the selected area and name it; a domain without scores falls back to "All Ethiopia" with a note that the domain has not been evaluated.
+- [x] Verbal skill labels reflect the interval: "improvement (interval above zero)", "small estimated improvement; skill uncertain", "no demonstrated improvement". One-target and Holm-adjusted p-values (over the cycle's five targets) are shown; no target of any cycle stays significant after adjustment.
+- [x] The verification narrative always states the signed rainfall error and how much of the observed anomaly the forecast captured (August 2026, R1+R2: forecast 20.6 mm too wet, deficit underestimated by about 44%); larger discrepancies are emphasised. "Nothing notable" is gone.
+- [x] Climatology described as implemented: per-cell observed tercile frequencies of the training years (about one-third), with `p_final = (1 − λ)·p_model + λ·p_climatology`. Signal labels state that they use a one-third reference.
+- [x] The map viewer keeps a requested verification view when it is unavailable and explains why, with a button to the forecast. Verification maps are offered as separate panels (cut from the six-panel figure at site build; layout checked by image size) plus the composite.
+- [x] Status wording: "file not found in the checked CHIRPS listing (last checked …)" instead of "not yet published". Probability coverage column in the targets table.
+- [x] Accessibility: anchor offset follows the measured header height, research label visible on phones, `site/downloads/index.html` for the no-JavaScript fallback, pressed-state buttons instead of incomplete tab roles, focus kept on the equivalent control after re-rendering.

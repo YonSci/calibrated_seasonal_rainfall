@@ -56,7 +56,8 @@ Replace the placeholders with the season's values from the table: `<INIT>` initi
 | 9. Final fit and forecast | `python scripts\final_shared_blend.py --region-mask data\masks\ethiopia_common.nc` | `Saved: …\final_shared_blend\<TAG>_<target>\<YEAR>` |
 | 10. **Freeze** (immediately after issuing) | `python scripts\prepare_verification_2026.py --config <PROJECT> --input-root outputs\final_shared_blend --root <verification_root> --freeze-only` | `Freeze ready: …\freeze_manifest.json` |
 | 11. Maps and gallery | `python scripts\run_operational.py --config <CYCLE> --workflow products` | `Ready: …\index.html` |
-| 12. Site | `set CALIBRATION_CYCLE=` then `python scripts\build_site.py` | new or updated season section |
+| 11b. Domain and regional skill | `python scripts\regional_skill.py --cycle <CYCLE>` | `Saved: …\regional_skill\<TAG>_regional_skill.json` (historical skill of the rainfall domain and the regimes, shown on the site) |
+| 12. Site | `set CALIBRATION_CYCLE=` then `python scripts\build_site.py` (add `--offline` without internet) | cycle appears in the cycle selector; statuses checked against the CHIRPS listing |
 | 13. Tests | `python -m unittest discover -s tests` | `OK` |
 | 14. Publish | `git add -A`, `git commit -m "<message>"`, `git push`, then `"C:\Program Files\GitHub CLI\gh.exe" run watch` | green Deploy site and Tests; page updated (Ctrl + F5) |
 
