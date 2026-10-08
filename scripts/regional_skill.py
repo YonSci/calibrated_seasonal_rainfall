@@ -8,6 +8,13 @@ Per target, mode and region: RPS of the shared blend, smoothed counts and
 climatology; RPSS of the blend with a whole-year bootstrap interval and the
 one-sided sign-flip p-value for "blend better than climatology". Per-cell blend
 RPSS fields are saved for mapping.
+
+With --cycle (any season), the same scores are computed for that cycle's
+targets, the regimes R0-R3 and the cycle's own rainfall domain (region
+"season_domain", from season_domain_mask; JJAS uses R1+R2), written to
+outputs/regional_skill/<tag>_regional_skill.json:
+
+    python scripts/regional_skill.py --cycle config/cycles/sep_2026_ondj.json
 """
 import argparse
 import warnings
@@ -29,14 +36,23 @@ def rps(p, y):
     return np.sum((np.cumsum(p, -1)[..., :2] - np.cumsum(t, -1)[..., :2]) ** 2, -1)
 
 
-def region_masks(path):
+def region_masks(path, domain_path=None):
     with xr.open_dataset(path) as m:
         country = m.region_mask.values == 1
         regime = m.github_regime_cleaned.values
         r12 = m.github_jjas_r12_rainfall_cleaned.values == 1
+        lat, lon = m.lat.values, m.lon.values
     out = {}
     for name, code in REGIONS.items():
         out[name] = country if code is None else (country & r12 if code == 'r12' else country & (regime == code))
+    if domain_path is not None:                     # the cycle's own rainfall domain
+        with xr.open_dataset(domain_path) as d:
+            if not (np.array_equal(d.lat.values, lat) and np.array_equal(d.lon.values, lon)):
+                raise ValueError(f'{domain_path}: grid differs from the regime mask')
+            out['season_domain'] = country & (d.season_domain.values == 1)
+            label = d.attrs.get('view_label', 'season rainfall domain')
+        del out['R1_R2_jjas_domain']
+        return out, label
     return out
 
 
@@ -83,12 +99,18 @@ def score_mode(path, masks):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--targets', nargs='+', choices=TARGETS, default=TARGETS)
+    p.add_argument('--targets', nargs='+', help='Default: all targets (of the cycle)')
     p.add_argument('--regime-mask', default='evidence/followup_regime_comparison_and_masks.nc')
+    p.add_argument('--cycle', help='Cycle file: score its targets and its own rainfall domain')
     args = p.parse_args()
+    if args.cycle:
+        return cycle_main(args)
+    targets = args.targets or TARGETS
+    if not set(targets) <= set(TARGETS):
+        p.error('targets must be among ' + ', '.join(TARGETS))
     masks = region_masks(ROOT / args.regime_mask)
     results, fields = {}, {}
-    for t in args.targets:
+    for t in targets:
         results[t] = {}
         for mode in ('training', 'operational'):
             path = ROOT / f'outputs/local_calibration/init05_{t}/{mode}/local_probabilities_and_weights.nc'
@@ -111,6 +133,35 @@ def main():
                     attrs=dict(note='Per-cell RPSS of the shared blend vs climatology; descriptive, single-cell values are noisy.'))
     save_netcdf(ds, out / 'regional_skill_fields.nc')
     print('\nSaved:', out)
+
+
+def cycle_main(args):
+    from cycle import load_cycle
+    c = load_cycle(ROOT / args.cycle)
+    season = c.season_name
+    if season == 'JJAS':
+        masks, label = region_masks(ROOT / args.regime_mask), 'JJAS R1+R2 rainfall domain'
+        masks['season_domain'] = masks.pop('R1_R2_jjas_domain')
+    else:
+        masks, label = region_masks(ROOT / args.regime_mask, c.root('season_domain_mask'))
+    targets = args.targets or list(c.targets)
+    results = {}
+    for t in targets:
+        results[t] = {}
+        for mode in ('training', 'operational'):
+            path = ROOT / f'outputs/local_calibration/{c.tag}_{t}/{mode}/local_probabilities_and_weights.nc'
+            results[t][mode] = score_mode(path, masks)[0]
+        tr, op = results[t]['training'].get('season_domain', {}), results[t]['operational'].get('season_domain', {})
+        if 'rpss_blend' in tr and 'rpss_blend' in op:
+            print(f"{t:5s} {label}: {tr['rpss_blend']:+.3f} [{tr['rpss_blend_95'][0]:+.3f}, {tr['rpss_blend_95'][1]:+.3f}] "
+                  f"{tr['years_blend_better']}/{tr['years']} | exploratory {op['rpss_blend']:+.3f} "
+                  f"({op['years_blend_better']}/{op['years']}), coverage {tr['probability_coverage']:.0%}")
+        else:
+            print(f'{t:5s} {label}: insufficient coverage')
+    out = ROOT / f'outputs/regional_skill/{c.tag}_regional_skill.json'
+    save_json(out, dict(created_utc=datetime.now(timezone.utc).isoformat(), protocol=__doc__.strip(), cycle=str(args.cycle),
+                        season=season, domain_label=label, regions=list(masks), targets=results))
+    print('Saved:', out)
 
 
 if __name__ == '__main__':

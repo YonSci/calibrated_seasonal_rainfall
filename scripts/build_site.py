@@ -130,6 +130,59 @@ def year_skill(path, draws=5000, seed=20261005):
                 first=r['target_years'][0], last=r['target_years'][-1])
 
 
+def area_skill(r, national):
+    """Regional-skill record (regional_skill.py) in the year_skill format; None if not scored."""
+    if not r or 'rpss_blend' not in r or national is None:
+        return None
+    return dict(rpss=r['rpss_blend'], ci=r['rpss_blend_95'], better=r['years_blend_better'], years=r['years'],
+                p=r['p_blend_better_than_climatology'], first=national['first'], last=national['last'],
+                coverage=r.get('probability_coverage'))
+
+
+def add_holm(targets):
+    """Holm-adjusted p (over the cycle's targets) for each area's cross-validated score."""
+    from significance import holm
+    for area in {a for t in targets for a in t['history']}:
+        ps = {t['id']: t['history'][area]['training']['p'] for t in targets
+              if area in t['history'] and t['history'][area]['training']}
+        for k, v in holm(ps).items():
+            next(t for t in targets if t['id'] == k)['history'][area]['training']['holm_p'] = v
+
+
+# Panels of the six-panel verification figure (presentation_layers.verification_maps: 15.6 x 10.6 in at
+# 180 dpi, subplots_adjust left=.055 right=.97 top=.84 bottom=.14 wspace=.24 hspace=.29), row-major.
+PANELS = [('verification_observed_anomaly', 'Observed anomaly'), ('verification_forecast_anomaly', 'Forecast anomaly'),
+          ('verification_error', 'Forecast minus observed'), ('verification_observed_tercile', 'Observed tercile'),
+          ('verification_rps_difference', 'Probability score vs climatology'),
+          ('verification_crps', 'Rainfall amount score (CRPS)')]
+PANEL_SIZE = (2808, 1908)
+
+
+def panel_layout_ok(src):
+    from PIL import Image
+    with Image.open(src) as im:
+        return im.size == PANEL_SIZE
+
+
+def crop_panels(src, folder):
+    """Cut the six panels out of the composite verification figure; [] if its layout is not the expected one."""
+    from PIL import Image
+    with Image.open(src) as im:
+        if im.size != PANEL_SIZE:
+            print(f'{src}: unexpected size {im.size}; panels not split')
+            return []
+        W, H = im.size
+        left, right, top, bottom, ws, hs = .055, .97, .84, .14, .24, .29
+        w, h = (right - left) / (3 + 2 * ws), (top - bottom) / (2 + hs)
+        folder.mkdir(parents=True, exist_ok=True)
+        for i, (name, _) in enumerate(PANELS):
+            r, c = divmod(i, 3)
+            x0, y1 = left + c * w * (1 + ws), top - r * h * (1 + hs)
+            box = (x0 - .045, 1 - (y1 + .04), x0 + w + .02, 1 - (y1 - h - .04))
+            im.crop(tuple(int(v * s) for v, s in zip(box, (W, H, W, H)))).save(folder / f'{name}.png', optimize=True)
+    return [list(p) for p in PANELS]
+
+
 def domain_text(c, entries_json):
     if 'domain_definition' in entries_json:
         return entries_json['domain_definition'], entries_json.get('domain_note', '')
@@ -161,7 +214,8 @@ def target_status(window, verified, processed, published, today):
     missing = [ym for ym in months if ym not in published]
     if missing:
         names = ', '.join(f'{calendar.month_abbr[m]} {y}' for y, m in missing)
-        return dict(code='awaiting', text=f'Awaiting CHIRPS observations ({names} not yet published)')
+        return dict(code='awaiting', text=f'Awaiting CHIRPS observations: {names} file not found in the checked '
+                                          f'CHIRPS listing (last checked {day(today)})')
     if not processed:
         return dict(code='processing', text='CHIRPS observations published; awaiting processing')
     return dict(code='ready', text='Observations processed; verification not yet run')
@@ -185,6 +239,8 @@ def build_cycle(cfg_path, published, today, sha):
     vroot = c.root('verification_root')
     processed = {m for m in c.targets if m != season and any((vroot / 'observations' / m).glob('chirps_*_common.nc'))}
     copies, targets = [], []
+    reg_file = ROOT / f'outputs/regional_skill/{c.tag}_regional_skill.json'
+    regional = json.loads(reg_file.read_text(encoding='utf-8')) if reg_file.is_file() else {}
     for t in [season, *[x for x in c.targets if x != season]]:
         window = target_window(t, c)
         item = dict(id=t, label=c.target_label(t), kind='season' if t == season else 'month',
@@ -193,15 +249,33 @@ def build_cycle(cfg_path, published, today, sha):
             if e['target'] != t:
                 continue
             folder = f'assets/maps/{cid}/' + e['folder'].removeprefix('presentation/')
-            item[e['kind']][e['view']] = dict(summary=e['summary'], folder=folder, images=e['images'])
-            copies += [(out_root / e['folder'] / f'{name}.png', OUT / folder / f'{name}.png') for name, _ in e['images']]
+            images = [list(i) for i in e['images']]
+            copies += [(out_root / e['folder'] / f'{name}.png', OUT / folder / f'{name}.png') for name, _ in images]
+            composite = out_root / e['folder'] / 'verification_maps.png'
+            if e['kind'] == 'verification' and composite.is_file() and panel_layout_ok(composite):
+                images = [list(x) for x in PANELS] + [['verification_maps', 'All six panels']]
+                copies.append((composite, OUT / folder))          # a folder destination: split into panels
+            item[e['kind']][e['view']] = dict(summary=e['summary'], folder=folder, images=images)
         months_ok = processed >= ({t} if t != season else set(c.targets) - {season})
         item['status'] = target_status(window, bool(item['verification']), months_ok, published, today)
-        item['history'] = {mode: year_skill(ROOT / f'outputs/local_calibration/{c.tag}_{t}/{mode}/local_comparison_summary.json')
-                           for mode in ('training', 'operational')}
+        # Historical skill per area: all Ethiopia and the cycle's rainfall domain (regional_skill.py --cycle).
+        national = {mode: year_skill(ROOT / f'outputs/local_calibration/{c.tag}_{t}/{mode}/local_comparison_summary.json')
+                    for mode in ('training', 'operational')}
+        item['history'] = {'all_ethiopia': national}
+        if t in regional.get('targets', {}):
+            item['history'][domain_view] = {mode: area_skill(regional['targets'][t][mode].get('season_domain'), national[mode])
+                                            for mode in ('training', 'operational')}
         blend = c.forecast_dir(c.root('forecast_root'), t) / 'blend_parameters.json'
         item['lambda'] = json.loads(blend.read_text(encoding='utf-8'))['climatology_weight'] if blend.is_file() else None
         targets.append(item)
+    add_holm(targets)
+    regions = {}
+    if regional:
+        names = dict(ethiopia='All Ethiopia', R0_arid_marginal='R0 arid / marginal', R1_western_unimodal='R1 western unimodal',
+                     R2_belg_kiremt='R2 Belg–Kiremt', R3_gu_deyr='R3 Gu–Deyr', season_domain=regional.get('domain_label'))
+        regions = dict(label=regional.get('domain_label'), rows=[
+            [names.get(r, r), {t['id']: area_skill(regional['targets'][t['id']]['training'].get(r), t['history']['all_ethiopia']['training'])
+                               for t in targets if t['id'] in regional['targets']}] for r in regional['regions']])
 
     # ---------- status panel (cycle metadata)
     freeze = vroot / 'frozen_forecasts/freeze_manifest.json'
@@ -230,8 +304,9 @@ def build_cycle(cfg_path, published, today, sha):
         latest = max(published)
         gaps = [f'{calendar.month_abbr[m]} {y}' for y, m in months_between(date(latest[0] - 1, 1, 1), date(*latest, 1))
                 if (y, m) not in published]
-        archive = (f'Checked {day(today)}: published through {calendar.month_abbr[latest[1]]} {latest[0]}'
-                   + (f'; missing {", ".join(gaps)}' if gaps else ''))
+        archive = (f'Official CHIRPS v2.0 p25 by_month listing checked {day(today)}: monthly files through '
+                   f'{calendar.month_abbr[latest[1]]} {latest[0]}'
+                   + (f'; {", ".join(gaps)} file not found' if gaps else ''))
     lam = next((x['lambda'] for x in targets if x['kind'] == 'season'), None)
     meta = [
         ['Model initialization', f'1 {c.init_month_name} {c.year} · ECMWF SEAS5 (system 51), {c.members(c.year)} members'],
@@ -265,7 +340,7 @@ def build_cycle(cfg_path, published, today, sha):
     data = dict(id=cid, season=season, label=c.target_label(season), init=c.init_month_name,
                 option=f'{c.target_label(season)} — {c.init_month_name} initialization',
                 init_date=date(c.year, c.init_month, 1).isoformat(), views=views, domain_view=domain_view,
-                definition=definition, note=note, reference=ref_label(c, crosses), targets=targets, meta=meta,
+                definition=definition, note=note, reference=ref_label(c, crosses), targets=targets, meta=meta, regions=regions,
                 downloads=downloads)
     return data, copies
 
@@ -304,8 +379,7 @@ def write_csv(cyc):
 
 def jjas_evidence():
     """May-initialized JJAS diagnostics shown in the methods section (computed only for that cycle)."""
-    return dict(reg=load('outputs/regional_skill/regional_skill.json')['targets'],
-                gates=load('outputs/decision_gates/decision_gates.json')['gates'],
+    return dict(gates=load('outputs/decision_gates/decision_gates.json')['gates'],
                 ens=load('outputs/ensemble_checks/ensemble_checks.json')['targets'],
                 mono=load('outputs/monthly_consistency/monthly_consistency.json'),
                 clip=load('outputs/clipping_analysis/amount_correction_alternatives.json')['targets'],
@@ -313,21 +387,8 @@ def jjas_evidence():
 
 
 def page(cycles, default, ev, built, sha):
-    reg, gates, ens, mono, clip, raw = (ev[k] for k in ('reg', 'gates', 'ens', 'mono', 'clip', 'raw'))
+    gates, ens, mono, clip, raw = (ev[k] for k in ('gates', 'ens', 'mono', 'clip', 'raw'))
     raw_rpss = raw.get('raw_rps_skill')
-
-    regions = [('ethiopia', 'All Ethiopia'), ('R0_arid_marginal', 'R0 arid / marginal'), ('R1_western_unimodal', 'R1 western unimodal'),
-               ('R2_belg_kiremt', 'R2 Belg–Kiremt'), ('R3_gu_deyr', 'R3 Gu–Deyr'), ('R1_R2_jjas_domain', 'R1+R2 JJAS domain')]
-    reg_rows = []
-    for key, label in regions:
-        row = [label]
-        for t in JJAS_TARGETS:
-            r = reg[t]['training'].get(key, {})
-            row.append(skill_cell(r['rpss_blend'], r.get('rpss_blend_95')) + f' <span class="ci">{r["years_blend_better"]}/{r["years"]} yrs</span>'
-                       if 'rpss_blend' in r else '—')
-        reg_rows.append(row)
-    regional = table(['Region'] + JJAS_TARGETS, reg_rows, 'Probability skill (RPSS) of the May-initialized forecasts by rainfall '
-                     'region, cross-validated 1993–2016, with whole-year 95% intervals and years better than climatology', 'compact')
 
     gate_names = [('ethiopia_lambda_vs_current', 'Fit the blend weight on Ethiopia only'),
                   ('sqrt_vs_current', 'Square-root amount correction (probabilities)'),
@@ -409,11 +470,12 @@ def page(cycles, default, ev, built, sha):
   </div>
 </header>
 <main id="top">
-<noscript><section class="wrap"><p class="notice">This page needs JavaScript for the cycle selector and maps. The summary below lists each cycle's season outlook; maps and reports are in <a href="downloads/">downloads</a> and the <a href="{REPO}">repository</a>.</p>{fallback}</section></noscript>
+<noscript><section class="wrap"><p class="notice">This page needs JavaScript for the cycle selector and maps. The summary below lists each cycle's season outlook; reports and tables are listed on the <a href="downloads/index.html">downloads page</a> and the <a href="{REPO}">repository</a>.</p>{fallback}</section></noscript>
 
 <section id="outlooks" class="wrap">
   <p class="eyebrow" id="ol-eyebrow"></p>
   <h1 id="ol-title">Seasonal rainfall outlook</h1>
+  <p class="research-inline">Research reconstruction · not an official forecast</p>
   <div id="ol-live" aria-live="polite" class="sr-only"></div>
   <div class="targets" role="group" aria-label="Target period" id="ol-targets"></div>
   <div class="glance">
@@ -430,7 +492,7 @@ def page(cycles, default, ev, built, sha):
       </div>
       <div class="pair">
         <div class="box"><h3>Forecast signal</h3><div id="ol-signal"></div></div>
-        <div class="box"><h3>Historical skill</h3><div id="ol-skill"></div></div>
+        <div class="box"><h3 id="ol-skill-title">Historical skill</h3><div id="ol-skill"></div></div>
       </div>
       <p class="caveat">Signal strength describes how far this forecast's probabilities depart from climatology. Historical skill describes how forecasts made the same way scored in past years. A strong signal is not a confidence rating.</p>
     </div>
@@ -450,8 +512,8 @@ def page(cycles, default, ev, built, sha):
     <label>Target <select id="mp-target"></select></label>
     <div class="seg" role="group" aria-label="Product" id="mp-kind"></div>
   </div>
-  <div class="tabs" role="tablist" aria-label="Map type" id="mp-tabs"></div>
-  <div class="map-actions">
+  <div class="tabs" role="group" aria-label="Map type" id="mp-tabs"></div>
+  <div class="map-actions" id="mp-actions">
     <button type="button" id="mp-copy">Copy link to this view</button>
     <a id="mp-open" target="_blank" rel="noopener">Open full-size</a>
     <a id="mp-download" download>Download PNG</a>
@@ -475,12 +537,10 @@ def page(cycles, default, ev, built, sha):
 
 <section id="history" class="wrap">
   <h2>Historical performance</h2>
-  <p>How forecasts made with the same method scored in past years against climatology (always forecasting 33% for each tercile). The main number is the <strong>cross-validated 1993–2016</strong> score: each year is forecast with parameters fitted without that year. Later years are <strong>exploratory</strong>: they were seen while the method was chosen.</p>
+  <p>How forecasts made with the same method scored in past years against climatology (the observed frequency of each tercile in the training years, about one-third each). The main number is the <strong>cross-validated 1993–2016</strong> score: each year is forecast with parameters fitted without that year. Later years are <strong>exploratory</strong>: they were seen while the method was chosen.</p>
   <div id="hs-body"></div>
   <h3>Historical performance by rainfall region</h3>
-  <p class="caveat">This regional analysis applies to the <strong>May-initialized JJAS</strong> forecasts only; it has not been computed for the January (FMAM) or September (ONDJ) cycles.</p>
-  {regional}
-  <p class="caveat">Positive values mean lower RPS than climatology. Intervals resample whole years. R3 (Gu–Deyr, south and south-east) shows no cross-validated skill in any JJAS target; June and September show little anywhere.</p>
+  <div id="hs-regions"></div>
 </section>
 
 <section id="methods" class="wrap">
@@ -488,7 +548,7 @@ def page(cycles, default, ev, built, sha):
   <div class="grid2">
     <div>
       <h3>In brief</h3>
-      <p>Each cycle starts from the ECMWF SEAS5 seasonal ensemble issued on the 1st of the initialization month. For every 0.25° grid cell in Ethiopia the forecast rainfall is corrected toward the CHIRPS observed mean and variability, then turned into tercile probabilities (below, near or above normal relative to the cycle's CHIRPS reference period). The probabilities are finally blended with climatology using one weight per target, chosen to give the best past scores.</p>
+      <p>Each cycle starts from the ECMWF SEAS5 seasonal ensemble issued on the 1st of the initialization month. For every 0.25° grid cell in Ethiopia the forecast rainfall is corrected toward the CHIRPS observed mean and variability, then turned into tercile probabilities (below, near or above normal relative to the cycle's CHIRPS reference period). The probabilities are finally blended with climatology using one weight per target, chosen to give the best past scores. Climatology assigns approximately one-third probability to each tercile; the calculations use the observed category frequencies of the training reference period.</p>
       <p>Probabilities and amounts are produced separately: the <strong>probability skill (RPSS)</strong> on this site refers to the blended probabilities, and the <strong>rainfall amount skill (CRPSS)</strong> to the amount-corrected ensemble.</p>
       <p>The <strong>raw benchmark</strong> is the uncorrected model: raw ECMWF members counted against each cell's CHIRPS tercile limits, with no correction, smoothing or blend.{f" For May-initialized JJAS over 2017–2025 it scores RPSS {signed(raw_rpss, 2)}, far below climatology, which is why calibration is needed." if raw_rpss is not None else ""}</p>
     </div>
@@ -507,7 +567,8 @@ def page(cycles, default, ev, built, sha):
     <ol>
       <li><strong>Amount correction</strong> per cell, equal weight per year: <code>x̂ = max(0, μ<sub>obs</sub> + r·(x − μ<sub>model</sub>))</code>, <code>r = clip(σ<sub>obs</sub>/σ<sub>model</sub>, 0.5, 2)</code></li>
       <li><strong>Tercile probabilities</strong> from the corrected members against CHIRPS tercile limits, smoothed: <code>(n + 0.5)/(M + 1.5)</code></li>
-      <li><strong>Climatology blend</strong>: <code>p = (1 − λ)·p<sub>model</sub> + λ·⅓</code>, with one λ per target fitted on leave-one-year-out RPS</li>
+      <li><strong>Climatology blend</strong>: <code>p<sub>final</sub> = (1 − λ)·p<sub>model</sub> + λ·p<sub>climatology</sub></code>, with one λ per target fitted on leave-one-year-out RPS.<br>
+        <code>p<sub>climatology</sub></code> is, for each grid cell, the observed frequency of each tercile in the training reference years (about one-third each; it differs slightly because of sample size, category limits and ties).</li>
       <li><strong>Skill score</strong>: <code>RPSS = 1 − RPS<sub>forecast</sub> / RPS<sub>climatology</sub></code>; RPSS +0.05 means a 5% lower ranked probability score than climatology. CRPSS is the same for rainfall amounts.</li>
     </ol></details>
   <details><summary>How the method was chosen</summary>
@@ -563,7 +624,7 @@ CSS = r'''
 :root[data-theme="dark"]{--bg:#121211;--surface:#1b1b1a;--ink:#f1f0ec;--ink2:#c3c1bb;--muted:#a3a19b;--line:#33322f;
 --accent:#6fc7ad;--accent-soft:#1d2b27;--fc:#5b9be6;--obs:#d9d7d0;--below:#f07d4f;--near:#8a8882;--above:#2cc58d;--pos:#7fd3b8;--neg:#f0907c;
 --good:#7fd3a0;--good-bg:#1c2c22;--warn:#f0c46b;--warn-bg:#2d2414;--info:#8fb8f0;--info-bg:#18243a;--plain-bg:#262624;--code:#262624}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:120px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:140px}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif}
 a{color:var(--accent)}code,pre{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85em}
 code{background:var(--code);padding:.1em .35em;border-radius:4px;overflow-wrap:anywhere}
@@ -594,7 +655,7 @@ h2,.h3{font-size:1.5rem;margin:0 0 .5em}.h3{font-size:1.15rem;margin-top:1.6em}h
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.pair .box{margin-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 @media (max-width:900px){.glance,.grid2{grid-template-columns:1fr}}
-@media (max-width:560px){.pair{grid-template-columns:1fr}.top{position:static}html{scroll-padding-top:8px}.research{display:none}}
+@media (max-width:560px){.pair{grid-template-columns:1fr}.top{position:static}html{scroll-padding-top:8px}.research{display:none}.research-inline{display:inline-block}}
 .probbar{display:flex;gap:2px;height:26px;border-radius:6px;overflow:hidden;margin:4px 0 8px}
 .probbar span{display:block;height:100%}.probbar span:first-child{border-radius:6px 0 0 6px}.probbar span:last-child{border-radius:0 6px 6px 0}
 .problegend{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.92rem}.problegend b{font-variant-numeric:tabular-nums}
@@ -606,6 +667,9 @@ h2,.h3{font-size:1.5rem;margin:0 0 .5em}.h3{font-size:1.15rem;margin-top:1.6em}h
 figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
 figure img{width:100%;height:auto;display:block;border-radius:6px;background:#fff}figcaption{color:var(--ink2);font-size:.85rem;padding-top:6px}
 .img-error{padding:40px 16px;text-align:center;color:var(--muted)}
+.unavailable{padding:32px 16px;text-align:center;background:var(--warn-bg);border-radius:8px}.unavailable button{cursor:pointer;margin-top:4px}
+.research-inline{display:none;font-size:.8rem;color:var(--warn);background:var(--warn-bg);padding:2px 10px;border-radius:999px;margin:0 0 6px}
+[hidden]{display:none!important}
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:10px 0}
 table{border-collapse:collapse;width:100%;font-size:.9rem}caption{text-align:left;padding:10px 12px 4px;color:var(--ink2);font-size:.85rem;caption-side:top}
 th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
@@ -626,7 +690,7 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:8px}
 .map-controls{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;margin-bottom:10px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .seg button{border:none;border-radius:0;border-right:1px solid var(--line)}.seg button:last-child{border-right:none}
-.seg button[aria-pressed="true"],.tab[aria-selected="true"]{background:var(--accent);color:var(--surface)}
+.seg button[aria-pressed="true"],.tab[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
 .seg button:disabled{color:var(--muted);cursor:not-allowed}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.tab{border-radius:999px;padding:5px 14px;cursor:pointer;font-size:.9rem}
 .map-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
@@ -663,11 +727,17 @@ JS = r'''
   const pc = (x, d = 0) => ok(x) ? (100 * x).toFixed(d) + '%' : '—';
   const PRODUCTS = D.products;
   const HELP = {
-    tercile_outlook: '<p>Colour shows the <strong>most likely tercile</strong> at each place, shaded by its probability: yellow–red for below normal, cyan for near normal, green for above normal. Terciles split the reference-period rainfall into three equally likely parts, so climatology is 33% each. Places where no category reaches 40% are left white.</p>',
+    tercile_outlook: '<p>Colour shows the <strong>most likely tercile</strong> at each place, shaded by its probability: yellow–red for below normal, cyan for near normal, green for above normal. Terciles split the reference-period rainfall into three equally likely parts, so climatology is about 33% each. Places where no category reaches 40% are left white.</p>',
     rainfall_total_mm: '<p>The <strong>corrected ensemble-mean rainfall</strong> for the target period in mm. It is the average of the bias-corrected members, not a probability.</p>',
     rainfall_anomaly_mm: '<p>The <strong>difference in mm</strong> between the corrected ensemble mean and the reference-period CHIRPS average. Red–orange: drier than average; green: wetter.</p>',
     rainfall_anomaly_percent: '<p>The same anomaly as a <strong>percentage of the reference average</strong>. Hidden where the reference rainfall is below 10 mm, where percentages exaggerate small amounts.</p>',
-    verification_maps: '<p>Six panels: observed anomaly, forecast anomaly, forecast minus observed, the observed tercile at each cell, the probability score difference against climatology (blue favours the forecast) and the rainfall amount score (lower is better).</p>'
+    verification_maps: '<p>All six panels in one figure (also available separately): observed anomaly, forecast anomaly, forecast minus observed, the observed tercile at each cell, the probability score difference against climatology and the rainfall amount score.</p>',
+    verification_observed_anomaly: '<p><strong>Observed rainfall anomaly</strong> (CHIRPS minus the reference average, mm). Brown: drier than average; green: wetter. Same colour scale as the forecast anomaly panel.</p>',
+    verification_forecast_anomaly: '<p><strong>Forecast anomaly</strong> of the frozen corrected ensemble mean (mm), on the same colour scale as the observed anomaly so the two can be compared directly.</p>',
+    verification_error: '<p><strong>Forecast minus observed</strong> rainfall (mm). Red: the forecast was too wet; blue: too dry.</p>',
+    verification_observed_tercile: '<p>The <strong>observed tercile</strong> at each grid cell (below, near or above normal) relative to the reference period. Cells are not smoothed or filled from neighbours.</p>',
+    verification_rps_difference: '<p><strong>Probability score difference</strong>: RPS of the forecast minus RPS of climatology at each cell. Blue (negative) favours the forecast; red favours climatology.</p>',
+    verification_crps: '<p><strong>Rainfall amount score</strong> (CRPS of the corrected ensemble, mm). Lower is better; it grows with the size of the error and with rainfall amounts.</p>'
   };
   let S = {};
   const cyc = () => D.cycles.find(c => c.id === S.cycle);
@@ -695,7 +765,23 @@ JS = r'''
     const word = shift < 0.04 ? null : shift < 0.10 ? 'Weak' : shift < 0.20 ? 'Moderate' : 'Strong';
     return {cat: word ? k : -1, shift, text: word ? word + ' tilt toward ' + CAT[k] : 'No clear tilt (close to climatology)'};
   }
-  function skillWord(r) { return r <= 0 ? 'No skill over climatology' : r < 0.03 ? 'Slight' : r < 0.10 ? 'Modest' : 'Moderate'; }
+  // Verbal skill labels carry the uncertainty: an interval that includes zero is not an established gain.
+  function skillWord(h) {
+    if (!h) return '—';
+    if (h.ci[0] > 0) return (h.rpss < 0.03 ? 'Small' : h.rpss < 0.10 ? 'Modest' : 'Moderate') + ' improvement over climatology (interval above zero)';
+    if (h.rpss > 0) return 'Small estimated improvement; skill uncertain';
+    return 'No demonstrated improvement over climatology';
+  }
+  function holmText(h, n) {
+    if (!h || !ok(h.holm_p)) return '';
+    return 'One-target p = ' + h.p.toFixed(3) + '; adjusted for testing ' + n + ' targets (Holm), p = ' + h.holm_p.toFixed(3) + (h.holm_p < 0.05 ? ' (still significant).' : ' (not significant after adjustment).');
+  }
+  // Historical skill for the selected area; falls back to all Ethiopia with an explicit label.
+  function areaHistory(t) {
+    const own = t.history[S.view];
+    if (own && own.training) return {h: own, area: viewLabel(S.view), fallback: false};
+    return {h: t.history.all_ethiopia, area: 'All Ethiopia', fallback: S.view !== 'all_ethiopia'};
+  }
   function rpssText(r) { return sg(r, 3) + ' (' + Math.abs(100 * r).toFixed(1) + '% ' + (r >= 0 ? 'lower' : 'higher') + ' score than climatology)'; }
   function img(e, name, cap, alt) {
     const src = e.folder + '/' + name + '.png';
@@ -716,7 +802,7 @@ JS = r'''
     const ref = s.mean_reference_mm, anomPct = ref ? 100 * s.mean_anomaly_mm / ref : null;
     const where = S.view === 'all_ethiopia' ? 'across Ethiopia' : 'in the ' + viewLabel(S.view);
     let lead = sig.cat >= 0
-      ? 'The forecast leans toward <strong>' + CAT[sig.cat] + '</strong> rainfall ' + esc(where) + ': averaged over the area, the local probability of ' + CAT[sig.cat] + ' is <strong>' + pc(p[sig.cat]) + '</strong>, against 33% for climatology.'
+      ? 'The forecast leans toward <strong>' + CAT[sig.cat] + '</strong> rainfall ' + esc(where) + ': averaged over the area, the local probability of ' + CAT[sig.cat] + ' is <strong>' + pc(p[sig.cat]) + '</strong>, against about 33% for climatology.'
       : 'The forecast is <strong>close to climatology</strong> ' + esc(where) + ': no tercile stands out on average.';
     lead += ' Mean forecast rainfall is ' + fx(s.mean_rainfall_mm) + ' mm against a ' + c.reference + ' average of ' + fx(ref) + ' mm (' + sg(s.mean_anomaly_mm) + ' mm' + (ok(anomPct) ? ', ' + sg(anomPct) + '%' : '') + ').';
     $('ol-lead').innerHTML = lead;
@@ -731,19 +817,24 @@ JS = r'''
       '<div><span>' + c.reference + ' average</span><b>' + fx(ref) + ' mm</b></div><div><span>Anomaly</span><b>' + sg(s.mean_anomaly_mm) + ' mm' +
       (ok(anomPct) ? ' (' + sg(anomPct) + '%)' : '') + '</b></div></div><p class="caveat">Amounts cover ' + fx(s.amount_domain_area_percent) +
       '% of the area. They come from the amount-corrected ensemble, calibrated separately from the probabilities, so the two can differ slightly.</p>';
-    $('ol-signal').innerHTML = '<p class="big">' + sig.text + '</p><p class="caveat">Largest area-average probability ' + (p.every(ok) ? pc(Math.max(...p)) : '—') + ' vs 33% climatology. Based on probabilities only.</p>';
-    const h = t.history.training, o = t.history.operational;
-    $('ol-skill').innerHTML = h ? '<p class="big">' + skillWord(h.rpss) + '</p><p class="caveat">Probability skill (RPSS) ' + sg(h.rpss, 3) +
-      ' for ' + esc(t.id) + ', cross-validated ' + h.first + '–' + h.last + ' (95% interval ' + sg(h.ci[0], 3) + ' to ' + sg(h.ci[1], 3) + '); better than climatology in ' + h.better + ' of ' + h.years + ' years. <a href="#history">Details</a></p>'
+    $('ol-signal').innerHTML = '<p class="big">' + sig.text + '</p><p class="caveat">Largest area-average probability ' + (p.every(ok) ? pc(Math.max(...p)) : '—') +
+      ', compared with a one-third reference. The local climatological probabilities (observed tercile frequencies in the training years) are close to, but not exactly, one-third. Based on probabilities only.</p>';
+    const A = areaHistory(t), h = A.h.training;
+    $('ol-skill-title').textContent = 'Historical skill — ' + A.area;
+    $('ol-skill').innerHTML = h ? '<p class="big">' + skillWord(h) + '</p><p class="caveat">Probability skill (RPSS) ' + sg(h.rpss, 3) +
+      ' for ' + esc(t.id) + ', cross-validated ' + h.first + '–' + h.last + ' (95% interval ' + sg(h.ci[0], 3) + ' to ' + sg(h.ci[1], 3) + '); better than climatology in ' + h.better + ' of ' + h.years + ' years. ' +
+      holmText(h, c.targets.length) + ' <a href="#history">Details</a></p>' +
+      (A.fallback ? '<p class="caveat">Historical skill for the selected rainfall domain has not yet been evaluated.</p>' : '')
       : '<p>Not computed for this target.</p>';
     const e = t.forecast[S.view];
     $('ol-map').innerHTML = img(e, 'tercile_outlook', 'Tercile probabilities, ' + t.label + ', ' + viewLabel(S.view) + '. Open the map viewer below for other products.',
       'Map of ' + t.label + ' tercile probabilities for ' + viewLabel(S.view));
     // targets table
     $('ol-table').innerHTML = '<div class="table-wrap"><table><caption>' + esc(c.label) + ' targets, ' + esc(viewLabel(S.view)) +
-      '. Probabilities are average local probabilities.</caption><thead><tr><th scope="col">Target</th><th scope="col">Period</th><th scope="col">Below / near / above</th><th scope="col">Anomaly</th><th scope="col">Verification status</th></tr></thead><tbody>' +
+      '. Probabilities are average local probabilities.</caption><thead><tr><th scope="col">Target</th><th scope="col">Period</th><th scope="col">Below / near / above</th><th scope="col">Probability coverage</th><th scope="col">Anomaly</th><th scope="col">Verification status</th></tr></thead><tbody>' +
       c.targets.map(x => { const v = (x.forecast[S.view] || {}).summary; return '<tr' + (x.id === S.target ? ' class="current"' : '') + '><td><button type="button" class="linkbtn" data-t="' + x.id + '">' + esc(x.label) + '</button></td><td>' + dt(x.start) + ' – ' + dt(x.end) + '</td><td>' +
-        (v ? v.mean_local_probabilities.map(z => pc(z)).join(' / ') : '—') + '</td><td>' + (v ? sg(v.mean_anomaly_mm) + ' mm' : '—') + '</td><td>' + status(x.status) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+        (v ? v.mean_local_probabilities.map(z => pc(z)).join(' / ') : '—') + '</td><td>' + (v ? fx(v.probability_domain_area_percent) + '% of area' : '—') + '</td><td>' + (v ? sg(v.mean_anomaly_mm) + ' mm' : '—') + '</td><td>' + status(x.status) + '</td></tr>'; }).join('') +
+      '</tbody></table></div><p class="caveat">Probability coverage is the share of the area with tercile probabilities; averages are over that share only. Cells with very little reference-period rainfall have no terciles.</p>';
     $('ol-meta').innerHTML = '<dl class="meta">' + c.meta.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') +
       '<dt>Rainfall domain</dt><dd>' + esc(c.definition) + (c.note ? ' ' + esc(c.note) : '') + '</dd></dl>';
   }
@@ -753,25 +844,30 @@ JS = r'''
     const c = cyc(), t = tgt();
     $('mp-target').innerHTML = c.targets.map(x => '<option value="' + x.id + '"' + (x.id === S.target ? ' selected' : '') + '>' + esc(x.label) + '</option>').join('');
     const hasV = !!t.verification[S.view];
-    if (S.kind === 'verification' && !hasV) S.kind = 'forecast';
     $('mp-kind').innerHTML = '<button type="button" data-k="forecast" aria-pressed="' + (S.kind === 'forecast') + '">Forecast</button>' +
-      '<button type="button" data-k="verification" aria-pressed="' + (S.kind === 'verification') + '"' + (hasV ? '' : ' disabled title="' + esc(t.status.text) + '"') + '>Verification</button>';
+      '<button type="button" data-k="verification" aria-pressed="' + (S.kind === 'verification') + '">Verification' + (hasV ? '' : ' (not available)') + '</button>';
     const e = S.kind === 'forecast' ? t.forecast[S.view] : t.verification[S.view];
-    const prods = S.kind === 'forecast' ? PRODUCTS : [['verification_maps', 'Verification (6 panels)']];
-    if (!prods.some(p => p[0] === S.product)) S.product = prods[0][0];
-    $('mp-tabs').innerHTML = prods.map(p => '<button type="button" role="tab" class="tab" data-p="' + p[0] + '" aria-selected="' + (p[0] === S.product) + '">' + p[1] + '</button>').join('');
+    const prods = S.kind === 'forecast' ? PRODUCTS : (e ? e.images : []);
+    if (prods.length && !prods.some(p => p[0] === S.product)) S.product = prods[0][0];
+    $('mp-tabs').innerHTML = prods.map(p => '<button type="button" class="tab" data-p="' + p[0] + '" aria-pressed="' + (p[0] === S.product) + '">' + esc(p[1]) + '</button>').join('');
     const fig = $('mp-figure');
-    fig.classList.toggle('wide', S.kind === 'verification');
-    if (!e) { fig.innerHTML = '<p class="img-error">' + esc(t.status.text) + '</p>'; return; }
+    fig.classList.toggle('wide', S.kind === 'verification' && S.product === 'verification_maps');
+    $('mp-actions').hidden = !e;
+    if (!e) {
+      fig.innerHTML = '<div class="unavailable" role="status"><p><strong>' + esc(t.label) + ' ' + (S.kind === 'verification' ? 'verification' : 'forecast') + ' is unavailable.</strong> ' + esc(t.status.text) + '.</p>' +
+        (S.kind === 'verification' ? '<button type="button" data-k="forecast">View the ' + esc(t.label) + ' forecast</button>' : '') + '</div>';
+      $('mp-help').innerHTML = '<p>Verification maps appear once the target period is complete and its CHIRPS observations have been processed.</p>';
+      return;
+    }
     const pname = prods.find(p => p[0] === S.product)[1];
     const cap = t.label + ' · ' + viewLabel(S.view) + ' · ' + pname + ' · ' + c.init + ' initialization';
-    fig.innerHTML = img(e, S.product, cap, (S.kind === 'forecast' ? 'Forecast map: ' : 'Verification maps: ') + cap);
+    fig.innerHTML = img(e, S.product, cap, (S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + cap);
     const src = e.folder + '/' + S.product + '.png';
     const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     $('mp-open').href = src;
     $('mp-download').href = src;
     $('mp-download').setAttribute('download', ['ethiopia-rainfall', slug(t.label), slug(c.init) + '-init', slug(viewLabel(S.view)), slug(pname)].join('_') + '.png');
-    $('mp-help').innerHTML = HELP[S.product] + (S.kind === 'forecast' ? '<p class="caveat">Reference period: CHIRPS ' + c.reference + '.</p>' : '');
+    $('mp-help').innerHTML = (HELP[S.product] || '') + '<p class="caveat">Reference period: CHIRPS ' + c.reference + '.</p>';
   }
 
   // ---------- verification
@@ -808,20 +904,34 @@ JS = r'''
     const happened = ['Rainfall was <strong>' + (o >= 0 ? 'wetter' : 'drier') + '</strong> than the reference average by ' + fx(Math.abs(o)) + ' mm' + (ref > 0 ? ' (' + sg(100 * o / ref) + '%)' : '') + ', averaged over the assessed area.',
       pc(obsCat[k]) + ' of the assessed area fell in the <strong>' + CAT[k] + '</strong> tercile.'];
     const got = [], miss = [];
-    const small = Math.max(2, 0.03 * Math.abs(ref));
-    if (Math.abs(f) < small) miss.push('The forecast mean was close to average (' + sg(f) + ' mm), so it gave little indication of the observed ' + (o >= 0 ? 'wet' : 'dry') + ' anomaly.');
-    else if (Math.sign(f) === Math.sign(o)) {
-      got.push('The forecast anomaly had the right sign (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).');
-      if (Math.abs(f) < 0.5 * Math.abs(o)) miss.push('It underestimated the size of the anomaly: ' + sg(f) + ' mm forecast against ' + sg(o) + ' mm observed.');
-      else if (Math.abs(f) > 2 * Math.abs(o)) miss.push('It overestimated the size of the anomaly: ' + sg(f) + ' mm forecast against ' + sg(o) + ' mm observed.');
-    } else miss.push('The forecast anomaly had the wrong sign (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).');
+    const small = Math.max(2, 0.03 * Math.abs(ref));            // anomalies below this are "near average"
+    const word = o >= 0 ? 'surplus' : 'deficit', cond = o >= 0 ? 'wet' : 'dry';
+    const bias = ac.bias_mm, big = x => '<strong>' + x + '</strong>';
+    // The signed rainfall error is always reported; larger discrepancies are emphasised.
+    const err = 'Forecast rainfall was ' + fx(Math.abs(bias), 1) + ' mm ' + (bias >= 0 ? 'higher' : 'lower') + ' than observed, averaged over the assessed area.';
+    const errBig = Math.abs(bias) >= Math.max(5, 0.1 * Math.abs(ref));
+    if (Math.abs(o) < small) {
+      got.push('Observed rainfall was close to average (' + sg(o) + ' mm); the forecast anomaly was ' + sg(f) + ' mm.');
+      miss.push(errBig ? big(err) : err);
+    } else if (Math.abs(f) < small) {
+      miss.push('The forecast mean was close to average (' + sg(f) + ' mm), so it gave little indication of the observed ' + cond + ' anomaly (' + sg(o) + ' mm).');
+      miss.push(errBig ? big(err) : err);
+    } else if (Math.sign(f) === Math.sign(o)) {
+      got.push('The forecast captured the ' + cond + ' conditions (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).');
+      const r = Math.abs(f) / Math.abs(o), off = Math.round(100 * Math.abs(1 - r));
+      const size = r < 1 ? 'It underestimated the rainfall ' + word + ' by about ' + off + '%.' : 'It overestimated the rainfall ' + word + ' by about ' + off + '%.';
+      const line = err + ' ' + (off >= 10 ? size : 'The size of the anomaly was close to the observed one.');
+      miss.push(off >= 30 || errBig ? big(line) : line);
+    } else {
+      miss.push(big('The forecast anomaly had the wrong sign (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).'));
+      miss.push(err);
+    }
     if (fk === k && fp[fk] - 1 / 3 >= 0.02) got.push('The highest average probability (' + pc(fp[fk]) + ') was on the observed ' + CAT[k] + ' category.');
     else if (fp[fk] - 1 / 3 >= 0.02) miss.push('Probabilities favoured ' + CAT[fk] + ' (' + pc(fp[fk]) + ') while most of the area was ' + CAT[k] + '.');
     else miss.push('Probabilities stayed close to climatology (largest ' + pc(fp[fk]) + ').');
     (pb.rpss > 0 ? got : miss).push('Probabilities scored ' + (pb.rpss > 0 ? 'better' : 'worse') + ' than climatology (RPSS ' + sg(pb.rpss, 3) + ').');
-    if (Math.abs(ac.bias_mm) >= Math.max(5, 0.1 * Math.abs(ref))) miss.push('Forecast amounts were too ' + (ac.bias_mm > 0 ? 'wet' : 'dry') + ' on average (bias ' + sg(ac.bias_mm, 1) + ' mm).');
     (ac.crpss > 0 ? got : miss).push('Rainfall amounts scored ' + (ac.crpss > 0 ? 'better' : 'worse') + ' than climatology (CRPSS ' + sg(ac.crpss, 3) + ').');
-    const li = a => a.length ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="caveat">Nothing notable.</p>';
+    const li = a => a.length ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="caveat">None of the checked aspects (sign of the anomaly, leading category, scores against climatology).</p>';
     const raw = (s.probability.raw_observed_thresholds || {}).rpss;
     return '<div class="box vcard"><h3>' + esc(t.label) + '</h3><div class="qa"><div><h4>What happened?</h4>' + li(happened) + '</div><div><h4>What did the forecast capture?</h4>' + li(got) +
       '</div><div><h4>What did it miss?</h4>' + li(miss) + '</div></div><div class="metrics">' +
@@ -854,13 +964,24 @@ JS = r'''
     const c = cyc();
     const cell = (r, main = true) => r ? '<' + (main ? 'strong' : 'span') + ' class="' + (r.rpss > 0 ? 'pos' : 'neg') + '">' + sg(r.rpss, 3) + '</' + (main ? 'strong' : 'span') + '> <span class="ci">(' + sg(r.ci[0], 3) + ' to ' + sg(r.ci[1], 3) + ')</span>' : '—';
     const yrs = r => r ? r.better + ' of ' + r.years : '—';
-    const tr = c.targets.find(t => t.history.training).history.training, op = (c.targets.find(t => t.history.operational) || {history: {}}).history.operational;
-    $('hs-body').innerHTML = '<div class="table-wrap"><table><caption>' + esc(c.label) + ' (' + esc(c.init) + ' initialization): probability skill (RPSS) of the final method against climatology, all Ethiopia, with whole-year 95% intervals</caption><thead><tr>' +
-      '<th scope="col">Target</th><th scope="col">Cross-validated ' + tr.first + '–' + tr.last + ' (main)</th><th scope="col">Years better</th><th scope="col">In words</th>' +
+    const H = t => areaHistory(t), area = H(c.targets[0]).area;
+    const tr = H(c.targets[0]).h.training, op = H(c.targets[0]).h.operational;
+    const sig = c.targets.filter(t => (H(t).h.training || {}).holm_p < 0.05).map(t => t.id);
+    $('hs-body').innerHTML = '<div class="table-wrap"><table><caption>' + esc(c.label) + ' (' + esc(c.init) + ' initialization), ' + esc(area) + ': probability skill (RPSS) of the final method against climatology, with whole-year 95% intervals' +
+      (H(c.targets[0]).fallback ? '. Historical skill for the selected rainfall domain has not yet been evaluated.' : '') + '</caption><thead><tr>' +
+      '<th scope="col">Target</th><th scope="col">Cross-validated ' + tr.first + '–' + tr.last + ' (main)</th><th scope="col">Years better</th><th scope="col">p (one target / Holm)</th><th scope="col">In words</th>' +
       '<th scope="col">Exploratory ' + (op ? op.first + '–' + op.last : '') + '</th><th scope="col">Years better</th><th scope="col">Blend weight λ</th></tr></thead><tbody>' +
-      c.targets.map(t => '<tr' + (t.id === S.target ? ' class="current"' : '') + '><td>' + esc(t.id) + '</td><td>' + cell(t.history.training) + '</td><td>' + yrs(t.history.training) + '</td><td>' +
-        (t.history.training ? skillWord(t.history.training.rpss) : '—') + '</td><td>' + cell(t.history.operational, false) + '</td><td>' + yrs(t.history.operational) + '</td><td>' + (ok(t.lambda) ? t.lambda.toFixed(2) : '—') + '</td></tr>').join('') +
-      '</tbody></table></div><p class="caveat">RPSS +0.05 means a 5% lower ranked probability score than climatology. Gains are <strong>modest</strong> and the intervals are wide; an interval that includes zero means the gain is not established. λ is the weight given to climatology in the blend (higher = closer to 33/33/33).</p>';
+      c.targets.map(t => { const h = H(t).h; return '<tr' + (t.id === S.target ? ' class="current"' : '') + '><td>' + esc(t.id) + '</td><td>' + cell(h.training) + '</td><td>' + yrs(h.training) + '</td><td>' +
+        (h.training ? h.training.p.toFixed(3) + ' / ' + (ok(h.training.holm_p) ? h.training.holm_p.toFixed(3) : '—') : '—') + '</td><td>' + skillWord(h.training) + '</td><td>' + cell(h.operational, false) + '</td><td>' + yrs(h.operational) + '</td><td>' + (ok(t.lambda) ? t.lambda.toFixed(2) : '—') + '</td></tr>'; }).join('') +
+      '</tbody></table></div><p class="caveat">RPSS +0.05 means a 5% lower ranked probability score than climatology. Each interval and one-target p-value describes that target alone. Because ' + c.targets.length +
+      ' targets are examined, the Holm-adjusted p is the stricter test: ' + (sig.length ? sig.join(', ') + ' remain' + (sig.length === 1 ? 's' : '') + ' significant after adjustment.' : 'no target remains significant after adjustment.') +
+      ' Gains are modest and the intervals are wide; an interval that includes zero means the gain is not established. λ is the weight given to climatology in the blend (higher = closer to climatology).</p>';
+    const R = c.regions;
+    $('hs-regions').innerHTML = !R || !R.rows ? '<p class="caveat">Regional skill has not been computed for this cycle.</p>' :
+      '<div class="table-wrap"><table class="compact"><caption>' + esc(c.label) + ': probability skill (RPSS) by rainfall region, cross-validated ' + tr.first + '–' + tr.last + ', with whole-year 95% intervals and years better than climatology</caption><thead><tr><th scope="col">Region</th>' +
+      c.targets.map(t => '<th scope="col">' + esc(t.id) + '</th>').join('') + '</tr></thead><tbody>' +
+      R.rows.map(([name, v]) => '<tr><td>' + esc(name) + '</td>' + c.targets.map(t => { const r = v[t.id]; return '<td>' + (r ? cell(r, false) + ' <span class="ci">' + r.better + '/' + r.years + ' yrs</span>' : '<span class="ci">too little coverage</span>') + '</td>'; }).join('') + '</tr>').join('') +
+      '</tbody></table></div><p class="caveat">Positive values mean lower RPS than climatology. Intervals resample whole years; regions are the fixed 1993–2025 rainfall regimes, and the last row is this cycle\'s rainfall domain. Regional results are noisier than national ones.</p>';
   }
 
   function renderDownloads() {
@@ -869,12 +990,33 @@ JS = r'''
       '<details><summary>Other cycles</summary><ul class="dl">' + D.cycles.filter(x => x.id !== c.id).flatMap(x => x.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(x.option) + '</span></li>')).join('') + '</ul></details>';
   }
 
+  // Re-rendering replaces controls; keep keyboard focus on the equivalent control.
+  function focusKey() {
+    const a = document.activeElement;
+    if (!a || a === document.body) return null;
+    if (a.id) return '#' + a.id;
+    for (const k of ['t', 'k', 'p']) if (a.dataset && a.dataset[k]) { const box = a.closest('[id]'); return (box ? '#' + box.id + ' ' : '') + '[data-' + k + '="' + a.dataset[k] + '"]'; }
+    return null;
+  }
   function renderAll() {
+    const key = focusKey();
+    renderParts();
+    if (key) { const el = document.querySelector(key); if (el && el !== document.activeElement) el.focus({preventScroll: true}); }
+  }
+  function renderParts() {
     const c = cyc();
     $('cycle').value = c.id;
     $('view').innerHTML = c.views.map(v => '<option value="' + v[0] + '"' + (v[0] === S.view ? ' selected' : '') + '>' + esc(v[1]) + '</option>').join('');
     renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDownloads(); sync();
   }
+
+  // Anchor offset follows the real height of the sticky header (wrapped controls included).
+  const header = document.querySelector('.top');
+  const offset = () => { const sticky = getComputedStyle(header).position === 'sticky';
+    document.documentElement.style.scrollPaddingTop = (sticky ? header.offsetHeight + 12 : 8) + 'px'; };
+  if (window.ResizeObserver) new ResizeObserver(offset).observe(header);
+  window.addEventListener('resize', offset);
+  offset();
 
   init();
   $('cycle').addEventListener('change', e => { const c = D.cycles.find(x => x.id === e.target.value); S.cycle = c.id; S.target = c.targets[0].id; S.view = c.domain_view; renderAll(); });
@@ -930,10 +1072,23 @@ def main():
         if (OUT / sub).exists():
             shutil.rmtree(OUT / sub)
     for src, dest in copies:
+        if src.suffix == '.png' and dest.suffix == '':
+            crop_panels(src, dest)
+            continue
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dest)
     for c in cycles:
         write_csv(c)
+    # Plain listing of every download (the no-JavaScript fallback links here).
+    items = ''.join(f'<h2>{esc(c["option"])}</h2><ul>' + ''.join(
+        f'<li><a href="{esc(d["href"].removeprefix("downloads/"))}">{esc(d["label"])}</a> — {esc(d["note"])}</li>' for d in c['downloads'])
+        + '</ul>' for c in cycles)
+    (OUT / 'downloads/index.html').write_text(
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+        '<title>Ethiopia Seasonal Rainfall downloads</title><link rel="stylesheet" href="../assets/style.css"></head>'
+        f'<body><main class="wrap"><h1>Downloads</h1><p><a href="../index.html">Back to the outlooks</a></p>{items}'
+        '<p class="caveat">Research reconstructions; not official EMI or ICPAC forecasts.</p></main></body></html>\n',
+        encoding='utf-8', newline='')
     (OUT / 'assets/site.js').write_text(JS.strip() + '\n', encoding='utf-8', newline='')
     (OUT / 'assets/style.css').write_text(CSS.strip() + '\n', encoding='utf-8', newline='')
     built = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')

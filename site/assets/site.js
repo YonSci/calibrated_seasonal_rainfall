@@ -12,11 +12,17 @@
   const pc = (x, d = 0) => ok(x) ? (100 * x).toFixed(d) + '%' : '—';
   const PRODUCTS = D.products;
   const HELP = {
-    tercile_outlook: '<p>Colour shows the <strong>most likely tercile</strong> at each place, shaded by its probability: yellow–red for below normal, cyan for near normal, green for above normal. Terciles split the reference-period rainfall into three equally likely parts, so climatology is 33% each. Places where no category reaches 40% are left white.</p>',
+    tercile_outlook: '<p>Colour shows the <strong>most likely tercile</strong> at each place, shaded by its probability: yellow–red for below normal, cyan for near normal, green for above normal. Terciles split the reference-period rainfall into three equally likely parts, so climatology is about 33% each. Places where no category reaches 40% are left white.</p>',
     rainfall_total_mm: '<p>The <strong>corrected ensemble-mean rainfall</strong> for the target period in mm. It is the average of the bias-corrected members, not a probability.</p>',
     rainfall_anomaly_mm: '<p>The <strong>difference in mm</strong> between the corrected ensemble mean and the reference-period CHIRPS average. Red–orange: drier than average; green: wetter.</p>',
     rainfall_anomaly_percent: '<p>The same anomaly as a <strong>percentage of the reference average</strong>. Hidden where the reference rainfall is below 10 mm, where percentages exaggerate small amounts.</p>',
-    verification_maps: '<p>Six panels: observed anomaly, forecast anomaly, forecast minus observed, the observed tercile at each cell, the probability score difference against climatology (blue favours the forecast) and the rainfall amount score (lower is better).</p>'
+    verification_maps: '<p>All six panels in one figure (also available separately): observed anomaly, forecast anomaly, forecast minus observed, the observed tercile at each cell, the probability score difference against climatology and the rainfall amount score.</p>',
+    verification_observed_anomaly: '<p><strong>Observed rainfall anomaly</strong> (CHIRPS minus the reference average, mm). Brown: drier than average; green: wetter. Same colour scale as the forecast anomaly panel.</p>',
+    verification_forecast_anomaly: '<p><strong>Forecast anomaly</strong> of the frozen corrected ensemble mean (mm), on the same colour scale as the observed anomaly so the two can be compared directly.</p>',
+    verification_error: '<p><strong>Forecast minus observed</strong> rainfall (mm). Red: the forecast was too wet; blue: too dry.</p>',
+    verification_observed_tercile: '<p>The <strong>observed tercile</strong> at each grid cell (below, near or above normal) relative to the reference period. Cells are not smoothed or filled from neighbours.</p>',
+    verification_rps_difference: '<p><strong>Probability score difference</strong>: RPS of the forecast minus RPS of climatology at each cell. Blue (negative) favours the forecast; red favours climatology.</p>',
+    verification_crps: '<p><strong>Rainfall amount score</strong> (CRPS of the corrected ensemble, mm). Lower is better; it grows with the size of the error and with rainfall amounts.</p>'
   };
   let S = {};
   const cyc = () => D.cycles.find(c => c.id === S.cycle);
@@ -44,7 +50,23 @@
     const word = shift < 0.04 ? null : shift < 0.10 ? 'Weak' : shift < 0.20 ? 'Moderate' : 'Strong';
     return {cat: word ? k : -1, shift, text: word ? word + ' tilt toward ' + CAT[k] : 'No clear tilt (close to climatology)'};
   }
-  function skillWord(r) { return r <= 0 ? 'No skill over climatology' : r < 0.03 ? 'Slight' : r < 0.10 ? 'Modest' : 'Moderate'; }
+  // Verbal skill labels carry the uncertainty: an interval that includes zero is not an established gain.
+  function skillWord(h) {
+    if (!h) return '—';
+    if (h.ci[0] > 0) return (h.rpss < 0.03 ? 'Small' : h.rpss < 0.10 ? 'Modest' : 'Moderate') + ' improvement over climatology (interval above zero)';
+    if (h.rpss > 0) return 'Small estimated improvement; skill uncertain';
+    return 'No demonstrated improvement over climatology';
+  }
+  function holmText(h, n) {
+    if (!h || !ok(h.holm_p)) return '';
+    return 'One-target p = ' + h.p.toFixed(3) + '; adjusted for testing ' + n + ' targets (Holm), p = ' + h.holm_p.toFixed(3) + (h.holm_p < 0.05 ? ' (still significant).' : ' (not significant after adjustment).');
+  }
+  // Historical skill for the selected area; falls back to all Ethiopia with an explicit label.
+  function areaHistory(t) {
+    const own = t.history[S.view];
+    if (own && own.training) return {h: own, area: viewLabel(S.view), fallback: false};
+    return {h: t.history.all_ethiopia, area: 'All Ethiopia', fallback: S.view !== 'all_ethiopia'};
+  }
   function rpssText(r) { return sg(r, 3) + ' (' + Math.abs(100 * r).toFixed(1) + '% ' + (r >= 0 ? 'lower' : 'higher') + ' score than climatology)'; }
   function img(e, name, cap, alt) {
     const src = e.folder + '/' + name + '.png';
@@ -65,7 +87,7 @@
     const ref = s.mean_reference_mm, anomPct = ref ? 100 * s.mean_anomaly_mm / ref : null;
     const where = S.view === 'all_ethiopia' ? 'across Ethiopia' : 'in the ' + viewLabel(S.view);
     let lead = sig.cat >= 0
-      ? 'The forecast leans toward <strong>' + CAT[sig.cat] + '</strong> rainfall ' + esc(where) + ': averaged over the area, the local probability of ' + CAT[sig.cat] + ' is <strong>' + pc(p[sig.cat]) + '</strong>, against 33% for climatology.'
+      ? 'The forecast leans toward <strong>' + CAT[sig.cat] + '</strong> rainfall ' + esc(where) + ': averaged over the area, the local probability of ' + CAT[sig.cat] + ' is <strong>' + pc(p[sig.cat]) + '</strong>, against about 33% for climatology.'
       : 'The forecast is <strong>close to climatology</strong> ' + esc(where) + ': no tercile stands out on average.';
     lead += ' Mean forecast rainfall is ' + fx(s.mean_rainfall_mm) + ' mm against a ' + c.reference + ' average of ' + fx(ref) + ' mm (' + sg(s.mean_anomaly_mm) + ' mm' + (ok(anomPct) ? ', ' + sg(anomPct) + '%' : '') + ').';
     $('ol-lead').innerHTML = lead;
@@ -80,19 +102,24 @@
       '<div><span>' + c.reference + ' average</span><b>' + fx(ref) + ' mm</b></div><div><span>Anomaly</span><b>' + sg(s.mean_anomaly_mm) + ' mm' +
       (ok(anomPct) ? ' (' + sg(anomPct) + '%)' : '') + '</b></div></div><p class="caveat">Amounts cover ' + fx(s.amount_domain_area_percent) +
       '% of the area. They come from the amount-corrected ensemble, calibrated separately from the probabilities, so the two can differ slightly.</p>';
-    $('ol-signal').innerHTML = '<p class="big">' + sig.text + '</p><p class="caveat">Largest area-average probability ' + (p.every(ok) ? pc(Math.max(...p)) : '—') + ' vs 33% climatology. Based on probabilities only.</p>';
-    const h = t.history.training, o = t.history.operational;
-    $('ol-skill').innerHTML = h ? '<p class="big">' + skillWord(h.rpss) + '</p><p class="caveat">Probability skill (RPSS) ' + sg(h.rpss, 3) +
-      ' for ' + esc(t.id) + ', cross-validated ' + h.first + '–' + h.last + ' (95% interval ' + sg(h.ci[0], 3) + ' to ' + sg(h.ci[1], 3) + '); better than climatology in ' + h.better + ' of ' + h.years + ' years. <a href="#history">Details</a></p>'
+    $('ol-signal').innerHTML = '<p class="big">' + sig.text + '</p><p class="caveat">Largest area-average probability ' + (p.every(ok) ? pc(Math.max(...p)) : '—') +
+      ', compared with a one-third reference. The local climatological probabilities (observed tercile frequencies in the training years) are close to, but not exactly, one-third. Based on probabilities only.</p>';
+    const A = areaHistory(t), h = A.h.training;
+    $('ol-skill-title').textContent = 'Historical skill — ' + A.area;
+    $('ol-skill').innerHTML = h ? '<p class="big">' + skillWord(h) + '</p><p class="caveat">Probability skill (RPSS) ' + sg(h.rpss, 3) +
+      ' for ' + esc(t.id) + ', cross-validated ' + h.first + '–' + h.last + ' (95% interval ' + sg(h.ci[0], 3) + ' to ' + sg(h.ci[1], 3) + '); better than climatology in ' + h.better + ' of ' + h.years + ' years. ' +
+      holmText(h, c.targets.length) + ' <a href="#history">Details</a></p>' +
+      (A.fallback ? '<p class="caveat">Historical skill for the selected rainfall domain has not yet been evaluated.</p>' : '')
       : '<p>Not computed for this target.</p>';
     const e = t.forecast[S.view];
     $('ol-map').innerHTML = img(e, 'tercile_outlook', 'Tercile probabilities, ' + t.label + ', ' + viewLabel(S.view) + '. Open the map viewer below for other products.',
       'Map of ' + t.label + ' tercile probabilities for ' + viewLabel(S.view));
     // targets table
     $('ol-table').innerHTML = '<div class="table-wrap"><table><caption>' + esc(c.label) + ' targets, ' + esc(viewLabel(S.view)) +
-      '. Probabilities are average local probabilities.</caption><thead><tr><th scope="col">Target</th><th scope="col">Period</th><th scope="col">Below / near / above</th><th scope="col">Anomaly</th><th scope="col">Verification status</th></tr></thead><tbody>' +
+      '. Probabilities are average local probabilities.</caption><thead><tr><th scope="col">Target</th><th scope="col">Period</th><th scope="col">Below / near / above</th><th scope="col">Probability coverage</th><th scope="col">Anomaly</th><th scope="col">Verification status</th></tr></thead><tbody>' +
       c.targets.map(x => { const v = (x.forecast[S.view] || {}).summary; return '<tr' + (x.id === S.target ? ' class="current"' : '') + '><td><button type="button" class="linkbtn" data-t="' + x.id + '">' + esc(x.label) + '</button></td><td>' + dt(x.start) + ' – ' + dt(x.end) + '</td><td>' +
-        (v ? v.mean_local_probabilities.map(z => pc(z)).join(' / ') : '—') + '</td><td>' + (v ? sg(v.mean_anomaly_mm) + ' mm' : '—') + '</td><td>' + status(x.status) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+        (v ? v.mean_local_probabilities.map(z => pc(z)).join(' / ') : '—') + '</td><td>' + (v ? fx(v.probability_domain_area_percent) + '% of area' : '—') + '</td><td>' + (v ? sg(v.mean_anomaly_mm) + ' mm' : '—') + '</td><td>' + status(x.status) + '</td></tr>'; }).join('') +
+      '</tbody></table></div><p class="caveat">Probability coverage is the share of the area with tercile probabilities; averages are over that share only. Cells with very little reference-period rainfall have no terciles.</p>';
     $('ol-meta').innerHTML = '<dl class="meta">' + c.meta.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') +
       '<dt>Rainfall domain</dt><dd>' + esc(c.definition) + (c.note ? ' ' + esc(c.note) : '') + '</dd></dl>';
   }
@@ -102,25 +129,30 @@
     const c = cyc(), t = tgt();
     $('mp-target').innerHTML = c.targets.map(x => '<option value="' + x.id + '"' + (x.id === S.target ? ' selected' : '') + '>' + esc(x.label) + '</option>').join('');
     const hasV = !!t.verification[S.view];
-    if (S.kind === 'verification' && !hasV) S.kind = 'forecast';
     $('mp-kind').innerHTML = '<button type="button" data-k="forecast" aria-pressed="' + (S.kind === 'forecast') + '">Forecast</button>' +
-      '<button type="button" data-k="verification" aria-pressed="' + (S.kind === 'verification') + '"' + (hasV ? '' : ' disabled title="' + esc(t.status.text) + '"') + '>Verification</button>';
+      '<button type="button" data-k="verification" aria-pressed="' + (S.kind === 'verification') + '">Verification' + (hasV ? '' : ' (not available)') + '</button>';
     const e = S.kind === 'forecast' ? t.forecast[S.view] : t.verification[S.view];
-    const prods = S.kind === 'forecast' ? PRODUCTS : [['verification_maps', 'Verification (6 panels)']];
-    if (!prods.some(p => p[0] === S.product)) S.product = prods[0][0];
-    $('mp-tabs').innerHTML = prods.map(p => '<button type="button" role="tab" class="tab" data-p="' + p[0] + '" aria-selected="' + (p[0] === S.product) + '">' + p[1] + '</button>').join('');
+    const prods = S.kind === 'forecast' ? PRODUCTS : (e ? e.images : []);
+    if (prods.length && !prods.some(p => p[0] === S.product)) S.product = prods[0][0];
+    $('mp-tabs').innerHTML = prods.map(p => '<button type="button" class="tab" data-p="' + p[0] + '" aria-pressed="' + (p[0] === S.product) + '">' + esc(p[1]) + '</button>').join('');
     const fig = $('mp-figure');
-    fig.classList.toggle('wide', S.kind === 'verification');
-    if (!e) { fig.innerHTML = '<p class="img-error">' + esc(t.status.text) + '</p>'; return; }
+    fig.classList.toggle('wide', S.kind === 'verification' && S.product === 'verification_maps');
+    $('mp-actions').hidden = !e;
+    if (!e) {
+      fig.innerHTML = '<div class="unavailable" role="status"><p><strong>' + esc(t.label) + ' ' + (S.kind === 'verification' ? 'verification' : 'forecast') + ' is unavailable.</strong> ' + esc(t.status.text) + '.</p>' +
+        (S.kind === 'verification' ? '<button type="button" data-k="forecast">View the ' + esc(t.label) + ' forecast</button>' : '') + '</div>';
+      $('mp-help').innerHTML = '<p>Verification maps appear once the target period is complete and its CHIRPS observations have been processed.</p>';
+      return;
+    }
     const pname = prods.find(p => p[0] === S.product)[1];
     const cap = t.label + ' · ' + viewLabel(S.view) + ' · ' + pname + ' · ' + c.init + ' initialization';
-    fig.innerHTML = img(e, S.product, cap, (S.kind === 'forecast' ? 'Forecast map: ' : 'Verification maps: ') + cap);
+    fig.innerHTML = img(e, S.product, cap, (S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + cap);
     const src = e.folder + '/' + S.product + '.png';
     const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     $('mp-open').href = src;
     $('mp-download').href = src;
     $('mp-download').setAttribute('download', ['ethiopia-rainfall', slug(t.label), slug(c.init) + '-init', slug(viewLabel(S.view)), slug(pname)].join('_') + '.png');
-    $('mp-help').innerHTML = HELP[S.product] + (S.kind === 'forecast' ? '<p class="caveat">Reference period: CHIRPS ' + c.reference + '.</p>' : '');
+    $('mp-help').innerHTML = (HELP[S.product] || '') + '<p class="caveat">Reference period: CHIRPS ' + c.reference + '.</p>';
   }
 
   // ---------- verification
@@ -157,20 +189,34 @@
     const happened = ['Rainfall was <strong>' + (o >= 0 ? 'wetter' : 'drier') + '</strong> than the reference average by ' + fx(Math.abs(o)) + ' mm' + (ref > 0 ? ' (' + sg(100 * o / ref) + '%)' : '') + ', averaged over the assessed area.',
       pc(obsCat[k]) + ' of the assessed area fell in the <strong>' + CAT[k] + '</strong> tercile.'];
     const got = [], miss = [];
-    const small = Math.max(2, 0.03 * Math.abs(ref));
-    if (Math.abs(f) < small) miss.push('The forecast mean was close to average (' + sg(f) + ' mm), so it gave little indication of the observed ' + (o >= 0 ? 'wet' : 'dry') + ' anomaly.');
-    else if (Math.sign(f) === Math.sign(o)) {
-      got.push('The forecast anomaly had the right sign (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).');
-      if (Math.abs(f) < 0.5 * Math.abs(o)) miss.push('It underestimated the size of the anomaly: ' + sg(f) + ' mm forecast against ' + sg(o) + ' mm observed.');
-      else if (Math.abs(f) > 2 * Math.abs(o)) miss.push('It overestimated the size of the anomaly: ' + sg(f) + ' mm forecast against ' + sg(o) + ' mm observed.');
-    } else miss.push('The forecast anomaly had the wrong sign (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).');
+    const small = Math.max(2, 0.03 * Math.abs(ref));            // anomalies below this are "near average"
+    const word = o >= 0 ? 'surplus' : 'deficit', cond = o >= 0 ? 'wet' : 'dry';
+    const bias = ac.bias_mm, big = x => '<strong>' + x + '</strong>';
+    // The signed rainfall error is always reported; larger discrepancies are emphasised.
+    const err = 'Forecast rainfall was ' + fx(Math.abs(bias), 1) + ' mm ' + (bias >= 0 ? 'higher' : 'lower') + ' than observed, averaged over the assessed area.';
+    const errBig = Math.abs(bias) >= Math.max(5, 0.1 * Math.abs(ref));
+    if (Math.abs(o) < small) {
+      got.push('Observed rainfall was close to average (' + sg(o) + ' mm); the forecast anomaly was ' + sg(f) + ' mm.');
+      miss.push(errBig ? big(err) : err);
+    } else if (Math.abs(f) < small) {
+      miss.push('The forecast mean was close to average (' + sg(f) + ' mm), so it gave little indication of the observed ' + cond + ' anomaly (' + sg(o) + ' mm).');
+      miss.push(errBig ? big(err) : err);
+    } else if (Math.sign(f) === Math.sign(o)) {
+      got.push('The forecast captured the ' + cond + ' conditions (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).');
+      const r = Math.abs(f) / Math.abs(o), off = Math.round(100 * Math.abs(1 - r));
+      const size = r < 1 ? 'It underestimated the rainfall ' + word + ' by about ' + off + '%.' : 'It overestimated the rainfall ' + word + ' by about ' + off + '%.';
+      const line = err + ' ' + (off >= 10 ? size : 'The size of the anomaly was close to the observed one.');
+      miss.push(off >= 30 || errBig ? big(line) : line);
+    } else {
+      miss.push(big('The forecast anomaly had the wrong sign (' + sg(f) + ' mm forecast, ' + sg(o) + ' mm observed).'));
+      miss.push(err);
+    }
     if (fk === k && fp[fk] - 1 / 3 >= 0.02) got.push('The highest average probability (' + pc(fp[fk]) + ') was on the observed ' + CAT[k] + ' category.');
     else if (fp[fk] - 1 / 3 >= 0.02) miss.push('Probabilities favoured ' + CAT[fk] + ' (' + pc(fp[fk]) + ') while most of the area was ' + CAT[k] + '.');
     else miss.push('Probabilities stayed close to climatology (largest ' + pc(fp[fk]) + ').');
     (pb.rpss > 0 ? got : miss).push('Probabilities scored ' + (pb.rpss > 0 ? 'better' : 'worse') + ' than climatology (RPSS ' + sg(pb.rpss, 3) + ').');
-    if (Math.abs(ac.bias_mm) >= Math.max(5, 0.1 * Math.abs(ref))) miss.push('Forecast amounts were too ' + (ac.bias_mm > 0 ? 'wet' : 'dry') + ' on average (bias ' + sg(ac.bias_mm, 1) + ' mm).');
     (ac.crpss > 0 ? got : miss).push('Rainfall amounts scored ' + (ac.crpss > 0 ? 'better' : 'worse') + ' than climatology (CRPSS ' + sg(ac.crpss, 3) + ').');
-    const li = a => a.length ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="caveat">Nothing notable.</p>';
+    const li = a => a.length ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="caveat">None of the checked aspects (sign of the anomaly, leading category, scores against climatology).</p>';
     const raw = (s.probability.raw_observed_thresholds || {}).rpss;
     return '<div class="box vcard"><h3>' + esc(t.label) + '</h3><div class="qa"><div><h4>What happened?</h4>' + li(happened) + '</div><div><h4>What did the forecast capture?</h4>' + li(got) +
       '</div><div><h4>What did it miss?</h4>' + li(miss) + '</div></div><div class="metrics">' +
@@ -203,13 +249,24 @@
     const c = cyc();
     const cell = (r, main = true) => r ? '<' + (main ? 'strong' : 'span') + ' class="' + (r.rpss > 0 ? 'pos' : 'neg') + '">' + sg(r.rpss, 3) + '</' + (main ? 'strong' : 'span') + '> <span class="ci">(' + sg(r.ci[0], 3) + ' to ' + sg(r.ci[1], 3) + ')</span>' : '—';
     const yrs = r => r ? r.better + ' of ' + r.years : '—';
-    const tr = c.targets.find(t => t.history.training).history.training, op = (c.targets.find(t => t.history.operational) || {history: {}}).history.operational;
-    $('hs-body').innerHTML = '<div class="table-wrap"><table><caption>' + esc(c.label) + ' (' + esc(c.init) + ' initialization): probability skill (RPSS) of the final method against climatology, all Ethiopia, with whole-year 95% intervals</caption><thead><tr>' +
-      '<th scope="col">Target</th><th scope="col">Cross-validated ' + tr.first + '–' + tr.last + ' (main)</th><th scope="col">Years better</th><th scope="col">In words</th>' +
+    const H = t => areaHistory(t), area = H(c.targets[0]).area;
+    const tr = H(c.targets[0]).h.training, op = H(c.targets[0]).h.operational;
+    const sig = c.targets.filter(t => (H(t).h.training || {}).holm_p < 0.05).map(t => t.id);
+    $('hs-body').innerHTML = '<div class="table-wrap"><table><caption>' + esc(c.label) + ' (' + esc(c.init) + ' initialization), ' + esc(area) + ': probability skill (RPSS) of the final method against climatology, with whole-year 95% intervals' +
+      (H(c.targets[0]).fallback ? '. Historical skill for the selected rainfall domain has not yet been evaluated.' : '') + '</caption><thead><tr>' +
+      '<th scope="col">Target</th><th scope="col">Cross-validated ' + tr.first + '–' + tr.last + ' (main)</th><th scope="col">Years better</th><th scope="col">p (one target / Holm)</th><th scope="col">In words</th>' +
       '<th scope="col">Exploratory ' + (op ? op.first + '–' + op.last : '') + '</th><th scope="col">Years better</th><th scope="col">Blend weight λ</th></tr></thead><tbody>' +
-      c.targets.map(t => '<tr' + (t.id === S.target ? ' class="current"' : '') + '><td>' + esc(t.id) + '</td><td>' + cell(t.history.training) + '</td><td>' + yrs(t.history.training) + '</td><td>' +
-        (t.history.training ? skillWord(t.history.training.rpss) : '—') + '</td><td>' + cell(t.history.operational, false) + '</td><td>' + yrs(t.history.operational) + '</td><td>' + (ok(t.lambda) ? t.lambda.toFixed(2) : '—') + '</td></tr>').join('') +
-      '</tbody></table></div><p class="caveat">RPSS +0.05 means a 5% lower ranked probability score than climatology. Gains are <strong>modest</strong> and the intervals are wide; an interval that includes zero means the gain is not established. λ is the weight given to climatology in the blend (higher = closer to 33/33/33).</p>';
+      c.targets.map(t => { const h = H(t).h; return '<tr' + (t.id === S.target ? ' class="current"' : '') + '><td>' + esc(t.id) + '</td><td>' + cell(h.training) + '</td><td>' + yrs(h.training) + '</td><td>' +
+        (h.training ? h.training.p.toFixed(3) + ' / ' + (ok(h.training.holm_p) ? h.training.holm_p.toFixed(3) : '—') : '—') + '</td><td>' + skillWord(h.training) + '</td><td>' + cell(h.operational, false) + '</td><td>' + yrs(h.operational) + '</td><td>' + (ok(t.lambda) ? t.lambda.toFixed(2) : '—') + '</td></tr>'; }).join('') +
+      '</tbody></table></div><p class="caveat">RPSS +0.05 means a 5% lower ranked probability score than climatology. Each interval and one-target p-value describes that target alone. Because ' + c.targets.length +
+      ' targets are examined, the Holm-adjusted p is the stricter test: ' + (sig.length ? sig.join(', ') + ' remain' + (sig.length === 1 ? 's' : '') + ' significant after adjustment.' : 'no target remains significant after adjustment.') +
+      ' Gains are modest and the intervals are wide; an interval that includes zero means the gain is not established. λ is the weight given to climatology in the blend (higher = closer to climatology).</p>';
+    const R = c.regions;
+    $('hs-regions').innerHTML = !R || !R.rows ? '<p class="caveat">Regional skill has not been computed for this cycle.</p>' :
+      '<div class="table-wrap"><table class="compact"><caption>' + esc(c.label) + ': probability skill (RPSS) by rainfall region, cross-validated ' + tr.first + '–' + tr.last + ', with whole-year 95% intervals and years better than climatology</caption><thead><tr><th scope="col">Region</th>' +
+      c.targets.map(t => '<th scope="col">' + esc(t.id) + '</th>').join('') + '</tr></thead><tbody>' +
+      R.rows.map(([name, v]) => '<tr><td>' + esc(name) + '</td>' + c.targets.map(t => { const r = v[t.id]; return '<td>' + (r ? cell(r, false) + ' <span class="ci">' + r.better + '/' + r.years + ' yrs</span>' : '<span class="ci">too little coverage</span>') + '</td>'; }).join('') + '</tr>').join('') +
+      '</tbody></table></div><p class="caveat">Positive values mean lower RPS than climatology. Intervals resample whole years; regions are the fixed 1993–2025 rainfall regimes, and the last row is this cycle\'s rainfall domain. Regional results are noisier than national ones.</p>';
   }
 
   function renderDownloads() {
@@ -218,12 +275,33 @@
       '<details><summary>Other cycles</summary><ul class="dl">' + D.cycles.filter(x => x.id !== c.id).flatMap(x => x.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(x.option) + '</span></li>')).join('') + '</ul></details>';
   }
 
+  // Re-rendering replaces controls; keep keyboard focus on the equivalent control.
+  function focusKey() {
+    const a = document.activeElement;
+    if (!a || a === document.body) return null;
+    if (a.id) return '#' + a.id;
+    for (const k of ['t', 'k', 'p']) if (a.dataset && a.dataset[k]) { const box = a.closest('[id]'); return (box ? '#' + box.id + ' ' : '') + '[data-' + k + '="' + a.dataset[k] + '"]'; }
+    return null;
+  }
   function renderAll() {
+    const key = focusKey();
+    renderParts();
+    if (key) { const el = document.querySelector(key); if (el && el !== document.activeElement) el.focus({preventScroll: true}); }
+  }
+  function renderParts() {
     const c = cyc();
     $('cycle').value = c.id;
     $('view').innerHTML = c.views.map(v => '<option value="' + v[0] + '"' + (v[0] === S.view ? ' selected' : '') + '>' + esc(v[1]) + '</option>').join('');
     renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDownloads(); sync();
   }
+
+  // Anchor offset follows the real height of the sticky header (wrapped controls included).
+  const header = document.querySelector('.top');
+  const offset = () => { const sticky = getComputedStyle(header).position === 'sticky';
+    document.documentElement.style.scrollPaddingTop = (sticky ? header.offsetHeight + 12 : 8) + 'px'; };
+  if (window.ResizeObserver) new ResizeObserver(offset).observe(header);
+  window.addEventListener('resize', offset);
+  offset();
 
   init();
   $('cycle').addEventListener('change', e => { const c = D.cycles.find(x => x.id === e.target.value); S.cycle = c.id; S.target = c.targets[0].id; S.view = c.domain_view; renderAll(); });
