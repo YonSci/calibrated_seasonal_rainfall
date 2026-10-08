@@ -18,9 +18,10 @@ from datetime import datetime, timezone
 import numpy as np
 import xarray as xr
 from common import ROOT, source_path, save_netcdf
-from cycle import ORDER
+from cycle import SEASON, SEASON_MONTHS, TARGET_ORDER, CYCLE
 
-MONTHS = ['Jun', 'Jul', 'Aug', 'Sep']
+MONTHS = list(SEASON_MONTHS)                 # months of the cycle season
+ORDER = TARGET_ORDER
 
 
 def sha(p):
@@ -29,8 +30,8 @@ def sha(p):
 
 def build(year, target, source_root):
     src = source_root / target / f'chirps_{year}_common.nc'
-    dest = ROOT / f'data/processed/init05_{target}/chirps_{year}_common.nc'
-    template = ROOT / f'data/processed/init05_{target}/chirps_{year - 1}_common.nc'
+    dest = ROOT / f'data/processed/{CYCLE.tag}_{target}/chirps_{year}_common.nc'
+    template = ROOT / f'data/processed/{CYCLE.tag}_{target}/chirps_{year - 1}_common.nc'
     if dest.exists():
         raise FileExistsError(f'{dest} exists; archive files are never overwritten.')
     for p in (src, template):
@@ -76,12 +77,12 @@ def main():
     source = source_path(a.source)
     built = {t: build(a.year, t, source) for t in ORDER}
     months = sum(built[m][1].precip_season.values for m in MONTHS)
-    jjas = built['JJAS'][1].precip_season.values
+    jjas = built[SEASON][1].precip_season.values
     ok = np.isfinite(jjas)
     err = float(np.max(np.abs(months[ok] - jjas[ok]))) if ok.any() else 0.
     if err > 0.001 + 1e-6 * float(np.nanmax(jjas)):
-        raise ValueError(f'JJAS differs from the sum of months by up to {err:.4g} mm')
-    print(f'Checks passed for {a.year}: 5 targets, grid and missing-cell pattern match, JJAS-month max difference {err:.2e} mm.')
+        raise ValueError(f'{SEASON} differs from the sum of months by up to {err:.4g} mm')
+    print(f'Checks passed for {a.year}: {len(ORDER)} targets, grid and missing-cell pattern match, {SEASON}-month max difference {err:.2e} mm.')
     if a.check_only:
         print('Check only; nothing written.')
         return

@@ -9,7 +9,7 @@ from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--targets', nargs='+', choices=ORDER, default=['Jun', 'Jul', 'Aug'])
+    ap.add_argument('--targets', nargs='+', choices=ORDER, default=ORDER[:-1])
     ap.add_argument('--verification-root', default=f'outputs/verification_{YEAR}')
     ap.add_argument('--regime-summary', help='Default: matching Step 31 target-combination folder.')
     ap.add_argument('--historical-review', default='outputs/verification_followup/historical/historical_blend_review.json')

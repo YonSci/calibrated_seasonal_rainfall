@@ -1,4 +1,4 @@
-"""Check official CHIRPS availability; explicitly run complete September/JJAS verification."""
+"""Check official CHIRPS availability; explicitly run the complete verification of the cycle season (all months + season)."""
 import argparse
 import subprocess
 import sys
@@ -8,7 +8,9 @@ from followup_common import *
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 BASE = 'https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/'
-MONTHS = {'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9}
+from cycle import SEASON, SEASON_MONTHS
+from verify2026_common import month_year
+MONTHS = SEASON_MONTHS
 
 
 def probe(url, opener=None):
@@ -33,7 +35,7 @@ def probe(url, opener=None):
 def availability():
     records = []
     for name, month in MONTHS.items():
-        url = BASE + f'chirps-v2.0.{YEAR}.{month:02d}.days_p25.nc'
+        url = BASE + f'chirps-v2.0.{month_year(name)}.{month:02d}.days_p25.nc'
         r = {'month': name, 'url': url, **probe(url)}
         records.append(r)
         print(name, r['status'], flush=True)
@@ -43,7 +45,7 @@ def availability():
 
 
 def commands(args):
-    """The established preparation script creates JJAS only when all four months run."""
+    """The preparation script creates the season total only when all its months run."""
     python = sys.executable
     scripts = ROOT / 'scripts'
     common = ['--root', str(path(args.verification_root))]
@@ -51,8 +53,8 @@ def commands(args):
     return [
         [python, str(scripts / 'prepare_verification_2026.py'), '--config', str(path(args.config)),
          '--months', *MONTHS, *common, *regen],
-        [python, str(scripts / 'verify_frozen_2026.py'), '--targets', *MONTHS, 'JJAS', *common, *regen],
-        [python, str(scripts / 'verify_2026_regimes.py'), '--targets', *MONTHS, 'JJAS',
+        [python, str(scripts / 'verify_frozen_2026.py'), '--targets', *MONTHS, SEASON, *common, *regen],
+        [python, str(scripts / 'verify_2026_regimes.py'), '--targets', *MONTHS, SEASON,
          '--verification-root', str(path(args.verification_root)), '--mask', str(path(args.mask)), *regen]
     ]
 
@@ -60,7 +62,7 @@ def commands(args):
 def execute_if_ready(status, args, runner=None):
     runner = subprocess.run if runner is None else runner
     if not status['ready_to_attempt_preparation']:
-        print('WAITING: all four official monthly files are not yet confirmed available. Existing verification remains unchanged.', flush=True)
+        print('WAITING: not all official monthly files of the season are confirmed available. Existing verification remains unchanged.', flush=True)
         return False
     if not args.run:
         print('Available. Add --run --regenerate to prepare and verify the complete season.', flush=True)

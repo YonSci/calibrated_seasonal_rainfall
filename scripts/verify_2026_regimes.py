@@ -12,6 +12,7 @@ from verify2026_outputs import staged_output
 from verify2026_common import check_forecast
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
+from cycle import SEASON, DOMAIN_VIEW, resolve
 PROB_METHODS = ['raw_observed_thresholds', 'corrected_member_counts', 'corrected_smoothed', 'shared_blend', 'climatology']
 
 
@@ -25,16 +26,37 @@ def make_domains(mask, reference):
     codes = mask.github_regime_cleaned.transpose('lat', 'lon').values
     if not np.isin(codes[country], [-1, 0, 1, 2, 3, 4]).all():
         raise ValueError('Unexpected regime code inside country')
-    rainfall = mask.github_jjas_r12_rainfall_cleaned.transpose('lat', 'lon').values
-    if not np.isin(rainfall, [0, 1]).all():
-        raise ValueError('JJAS rainfall mask must be binary')
-    if np.any((rainfall == 1) & (~country | ~np.isin(codes, [1, 2]))):
-        raise ValueError('Cleaned JJAS R1/R2 mask is inconsistent with cleaned regime codes')
+    if SEASON == 'JJAS':
+        rainfall = mask.github_jjas_r12_rainfall_cleaned.transpose('lat', 'lon').values
+        if not np.isin(rainfall, [0, 1]).all():
+            raise ValueError('JJAS rainfall mask must be binary')
+        if np.any((rainfall == 1) & (~country | ~np.isin(codes, [1, 2]))):
+            raise ValueError('Cleaned JJAS R1/R2 mask is inconsistent with cleaned regime codes')
+    else:
+        rainfall = season_domain(reference)
     domains = {'all_country': country}
     domains.update({'regime_' + str(k): country & (codes == k) for k in [-1, 0, 1, 2, 3, 4]})
-    domains['jjas_r12_rainfall_domain'] = country & (rainfall == 1)
-    domains['outside_jjas_r12_rainfall_domain'] = country & (rainfall == 0)
+    domains[DOMAIN_VIEW] = country & (rainfall == 1)
+    domains['outside_' + DOMAIN_VIEW] = country & (rainfall == 0)
     return domains
+
+
+def season_domain(reference):
+    """Season rainfall domain of a non-JJAS cycle (build_season_domain.py --method regime)."""
+    p = resolve(CYCLE.raw['season_domain_mask'])
+    with xr.open_dataset(p) as ds:
+        m = ds.load()
+    same_grid(m, reference)
+    if m.attrs.get('season') != SEASON:
+        raise ValueError(f'Season domain mask {p} is not for {SEASON}')
+    return (m.season_domain.transpose('lat', 'lon').values == 1).astype(int)
+
+
+def domain_label():
+    if SEASON == 'JJAS':
+        return 'JJAS R1+R2 domain'
+    with xr.open_dataset(resolve(CYCLE.raw['season_domain_mask'])) as ds:
+        return ds.attrs.get('view_label', f'{SEASON} rainfall domain')
 
 
 def read_years(value):
@@ -108,7 +130,7 @@ def reproduce_country(actual, expected):
 def inspect_source(root, target, snapshot):
     folder = root / 'results' / target
     rp, dp = folder / 'verification_report.json', folder / 'verification_fields.nc'
-    fp = root / f'frozen_forecasts/init05_{target}/forecast_{YEAR}.nc'
+    fp = root / f'frozen_forecasts/{CYCLE.tag}_{target}/forecast_{YEAR}.nc'
     op = root / f'observations/{target}/chirps_{YEAR}_common.nc'
     report = read(rp)
     if report['target'] != target or report['year'] != YEAR or report['forecast_sha256'] != snapshot['forecast_sha256'][target] or report['observations_sha256'] != sha(op):
@@ -180,13 +202,13 @@ def write_outputs(result, out):
                                 writer.writerow([r['target'], domain, family, method, key, value])
     fig, axes = plt.subplots(len(result['results']), 1, figsize=(11, 3.3 * len(result['results'])), squeeze=False, layout='constrained')
     for ax, r in zip(axes.flat, result['results']):
-        domains = [(key, r['domains'][key]) for key in ['all_country', 'regime_0', 'regime_1', 'regime_2', 'regime_3', 'jjas_r12_rainfall_domain'] if r['domains'][key]['probability']]
+        domains = [(key, r['domains'][key]) for key in ['all_country', 'regime_0', 'regime_1', 'regime_2', 'regime_3', DOMAIN_VIEW] if r['domains'][key]['probability']]
         x = np.arange(len(domains))
         for offset, method, color in [(-.18, 'corrected_smoothed', '#d18a24'), (.18, 'shared_blend', '#24629b')]:
             vals = [v['probability'][method]['rpss'] for _, v in domains]
             ax.bar(x + offset, [np.nan if v is None else v for v in vals], .36, label=method, color=color)
         ax.axhline(0, color='black', lw=.8)
-        ax.set(xticks=x, xticklabels=[k.replace('regime_', 'R').replace('jjas_r12_rainfall_domain', 'JJAS R1+R2 domain') for k, _ in domains], ylabel='RPSS', title=r['target'] + f' {YEAR} | positive values beat climatology')
+        ax.set(xticks=x, xticklabels=[k.replace('regime_', 'R').replace(DOMAIN_VIEW, domain_label()) for k, _ in domains], ylabel='RPSS', title=CYCLE.target_label(r['target']) + ' | positive values beat climatology')
         ax.legend(fontsize=8)
     fig.savefig(out / 'regime_probability_skill.png', dpi=150)
     plt.close(fig)
@@ -194,7 +216,7 @@ def write_outputs(result, out):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--targets', nargs='+', choices=TARGETS, default=['Jun', 'Jul', 'Aug'])
+    ap.add_argument('--targets', nargs='+', choices=TARGETS, default=list(SEASON_MONTHS))
     ap.add_argument('--verification-root', default=f'outputs/verification_{YEAR}')
     ap.add_argument('--mask', default='evidence/followup_regime_comparison_and_masks.nc')
     ap.add_argument('--output-root', default='outputs/verification_followup/regimes')
@@ -218,7 +240,7 @@ def main():
             print('Verified regime summaries:', target, flush=True)
         result = {'year': YEAR, 'created_utc': now(), 'targets': targets, 'regime_labels': LABELS, 'mask_path': str(mp),
                   'mask_sha256': sha(mp), 'classification_method': METHOD, 'frozen_forecasts': snapshot, 'results': rows,
-                  'mask_note': f'Regime classification uses only CHIRPS {REGIME} and the previously defined GitHub refinement. All-country scores are retained. JJAS R1+R2 rainfall domain uses the cleaned classes and rainfall criteria; no onset gate. This mask is valid for {YEAR} stratification, not retrospective historical fitting. R1/R2/R3 are rules, not official administrative or independently validated EMI zones.',
+                  'mask_note': f'Regime classification uses only CHIRPS {REGIME} and the previously defined GitHub refinement. All-country scores are retained. ' + ("JJAS R1+R2 rainfall domain" if SEASON == "JJAS" else domain_label()) + f' uses the cleaned classes and rainfall criteria; no onset gate. This mask is valid for {YEAR} stratification, not retrospective historical fitting. R1/R2/R3 are rules, not official administrative or independently validated EMI zones.',
                   'limitations': 'One year only; no reliability or significance claim. Amount/probability supports differ. Low CRPS in dry regions need not mean greater predictability. Domains overlap and are not independent. No method selection, coefficient change or forecast overwrite.'}
         unchanged(root, snapshot)
         with staged_output(out, a.regenerate) as stage:

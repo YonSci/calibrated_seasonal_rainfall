@@ -182,3 +182,26 @@ REGIME_YEARS = CYCLE.regime_mask_years
 OVERLAP_YEAR = int(CYCLE.raw.get('overlap_year', 2025))
 # Historical method-evaluation study (docs 15-17); fixed evidence, not the cycle.
 EVALUATION_STUDY = list(range(2017, 2026))
+
+
+# Season profile of the selected cycle: target names, calendar windows and presentation domain.
+def _season_profile(cycle):
+    import calendar
+    from common import season_months
+    project = cycle.project
+    return project['season']['name'], {calendar.month_abbr[m]: m for m in season_months(project)}
+
+
+SEASON, SEASON_MONTHS = _season_profile(CYCLE)          # e.g. 'JJAS', {'Jun': 6, ...}
+TARGET_ORDER = list(SEASON_MONTHS) + [SEASON]            # months in season order, then the season
+DOMAIN_VIEW = 'jjas_r12_rainfall_domain' if SEASON == 'JJAS' else f'{SEASON.lower()}_rainfall_domain'
+
+
+def target_window(target, cycle=None):
+    """First and last calendar day of a target for the cycle's forecast year (January of ONDJ -> next year)."""
+    import calendar
+    from common import season_window
+    from run_monthly import monthly_config
+    c = cycle or CYCLE
+    cfg = c.project if target == c.season_name else monthly_config(c.project, list(calendar.month_abbr).index(target))
+    return season_window(cfg, c.year)

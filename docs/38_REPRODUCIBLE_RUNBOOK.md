@@ -187,8 +187,8 @@ Each entry gives the symptom, the cause, the fix and how to detect or prevent it
 
 ## 6. Known limitations (to handle before full automation)
 
-1. **Verification of cross-year seasons.** `prepare_verification_2026.py` and `verify_frozen_2026.py` build dates as `YEAR-<start>` to `YEAR-<end>`. ONDJ verification needs `season_window()` there too, plus downloads of January in `YEAR+1`. This is required by February 2027.
-2. **Operational runner and gallery** still use the JJAS R1+R2 view and the May verification chain. For other seasons use `build_season_products.py` until the runner adopts season domains.
+1. **[Resolved 2026-10-08, docs/40]** ~~Verification of cross-year seasons.~~ The verification chain and runner now follow the cycle season (FMAM, ONDJ with January in the next year); tested on an ONDJ 2024/25 backtest and FMAM Mar–May 2026. Original note: `prepare_verification_2026.py` and `verify_frozen_2026.py` build dates as `YEAR-<start>` to `YEAR-<end>`. ONDJ verification needs `season_window()` there too, plus downloads of January in `YEAR+1`. This is required by February 2027.
+2. **[Resolved 2026-10-08]** ~~Operational runner and gallery~~ still use the JJAS R1+R2 view and the May verification chain. For other seasons use `build_season_products.py` until the runner adopts season domains.
 3. **Script names carry `_2026`** (`prepare_verification_2026.py`, …), although they follow the cycle. Rename with compatibility aliases when building the automation.
 4. **Observation extension** (`extend_observations.py`) promotes verified totals per year. ONDJ needs the cross-year version (October–December from year Y, January from Y+1).
 5. **Method changes** must pass `decision_gates.py` first. The research scripts (`compare_calibration`, `evaluate_candidates`, …) keep the fixed 1993–2016 / 2017–2025 study design on purpose.

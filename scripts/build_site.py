@@ -9,6 +9,7 @@ import html
 import json
 import re
 import shutil
+import xarray as xr
 from datetime import date
 from pathlib import Path
 
@@ -70,6 +71,23 @@ def gallery_entries():
     return keep
 
 
+INCLUDE_BACKTESTS = False      # --include-backtests (scratch builds only)
+
+
+def cycle_entries(c):
+    """Forecast (and, after run_operational.py, verification) entries of a cycle's output folder."""
+    out = c.root('output_root')
+    gallery = out / 'index.html'
+    if gallery.is_file():          # runner gallery: forecast and verification views
+        page = gallery.read_text(encoding='utf-8')
+        found = re.search(r'<script id="data" type="application/json">(.*?)</script>', page, re.S)
+        if found:
+            return [dict(e, folder=e['folder'].replace('\\', '/'), target_label=c.target_label(e['target']))
+                    for e in json.loads(found.group(1))]
+    listing = out / 'entries.json'
+    return json.loads(listing.read_text(encoding='utf-8'))['entries'] if listing.is_file() else []
+
+
 def extra_cycles():
     """Entries and skill for further cycles; [] when a cycle has not been rendered yet."""
     import sys
@@ -84,16 +102,17 @@ def extra_cycles():
         except Exception:
             continue
         listing = c.root('output_root') / 'entries.json'
-        if c.init_month == 5 or not listing.is_file() or 'backtest' in cfg_path.name:
+        rendered = listing.is_file() or (c.root('output_root') / 'index.html').is_file()
+        if c.init_month == 5 or not rendered or ('backtest' in cfg_path.name and not INCLUDE_BACKTESTS):
             continue
         found.append((c.init_month, cfg_path, c))
     for _, cfg_path, c in sorted(found, key=lambda t: t[0]):
-        key = c.season_name.lower()
+        key = c.season_name.lower() + ('' if c.year == 2026 else str(c.year))
         listing = c.root('output_root') / 'entries.json'
-        data = json.loads(listing.read_text(encoding='utf-8'))
+        data = json.loads(listing.read_text(encoding='utf-8')) if listing.is_file() else {}
         group = f'{c.init_month_name} initialization · {c.target_label(c.season_name)}'
         entries = []
-        for e in data['entries']:
+        for e in cycle_entries(c):
             entries.append(dict(group=group, kind=e['kind'], target=e['target'], view=e['view'], label=e['label'],
                                 folder=f'assets/{key}/' + e['folder'].removeprefix('presentation/'), images=e['images'],
                                 source_root=str(c.root('output_root')), source=e['folder'], summary=e['summary'],
@@ -117,8 +136,12 @@ def extra_cycles():
             f = c.forecast_dir(c.root('forecast_root'), t) / 'blend_parameters.json'
             if f.is_file():
                 lam[t] = json.loads(f.read_text(encoding='utf-8'))['climatology_weight']
-        out.append(dict(key=key, cycle=c, group=group, entries=entries, skill=skill, weights=lam,
-                        definition=data['domain_definition'], note=data['domain_note']))
+        definition = data.get('domain_definition')
+        if definition is None:
+            with xr.open_dataset(c.root('season_domain_mask')) as m:
+                definition = m.attrs['domain_definition']
+        out.append(dict(key=key, cycle=c, group=group, entries=entries, skill=skill, weights=lam, definition=definition,
+                        note=data.get('domain_note', 'A presentation and summary domain, not a separate calibration.')))
     return out
 
 
@@ -288,9 +311,10 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
     for x in extras:
         c = x['cycle']
         rows = []
+        fx = [e for e in x['entries'] if e['kind'] == 'forecast']
         for t in c.targets:
-            for i, view in enumerate(dict.fromkeys(e['view'] for e in x['entries'] if e['target'] == t)):
-                e = next(e for e in x['entries'] if e['target'] == t and e['view'] == view)
+            for i, view in enumerate(dict.fromkeys(e['view'] for e in fx if e['target'] == t)):
+                e = next(e for e in fx if e['target'] == t and e['view'] == view)
                 v = e['summary']
                 rows.append([f'<strong>{esc(e["target_label"])}</strong>' if i == 0 else '', esc(e['label']),
                              ' / '.join(pct(z) if z is not None else '—' for z in v['mean_local_probabilities']),
@@ -305,6 +329,21 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
             cell = lambda m: (skill_cell(r[m]['rpss'], r[m]['p']) + f' <span class="sig">{r[m]["better"]}/{r[m]["years"]} yrs</span>'
                               if m in r else '—')
             srows.append([t, cell('training'), cell('operational'), f'{x["weights"].get(t, float("nan")):.2f}'])
+        vx = [e for e in x['entries'] if e['kind'] == 'verification']
+        vtab = ''
+        if vx:
+            vrows = []
+            for t in c.targets:
+                for i, e in enumerate(e for e in vx if e['target'] == t):
+                    v = e['summary']; pb, ac = v['probability']['shared_blend'], v['amount']['corrected']
+                    vrows.append([f'<strong>{esc(e["target_label"])}</strong>' if i == 0 else '', esc(e['label']),
+                                  skill_cell(pb['rpss']), skill_cell(ac['crpss']), f'{ac["bias_mm"]:+.1f} mm',
+                                  ' / '.join(pct(z) for z in v['observed_category_area_fractions'])])
+                if not any(e['target'] == t for e in vx):
+                    vrows.append([f'<strong>{esc(c.target_label(t))}</strong>', 'both views', '<span class="pending">pending</span>', '—', '—', '—'])
+            vtab = ('<h3>Verification against CHIRPS</h3>' + table(['Target', 'View', 'Final RPSS', 'Corrected CRPSS', 'Corrected bias',
+                    'Observed below / near / above'], vrows) + '<p class="caveat">Single-season scores against official CHIRPS v2.0 '
+                    'observations; positive skill beats climatology on that support. Maps are in the map explorer (product: Verification).</p>')
         tr = next((r['training'] for r in x['skill'].values() if 'training' in r), None)
         op = next((r['operational'] for r in x['skill'].values() if 'operational' in r), None)
         stab = table(['Target', f'RPSS {tr["first"]}–{tr["last"]} (nested CV)' if tr else 'RPSS (nested CV)',
@@ -318,6 +357,7 @@ def page(entries, extras, fc, ver, reg, gates, ens, mono, clip, raw, status, dom
   <p class="domain"><strong>{esc(next(e['label'] for e in x['entries'] if e['view'] != 'all_ethiopia'))}.</strong> {esc(x['definition'])} {esc(x['note'])}</p>
   {ftab}
   <p class="caveat">Outside the rainfall domain much of Ethiopia is outside its main rainy season; cells with negligible climatological rainfall have no tercile probabilities, which lowers national probability coverage.</p>
+  {vtab}
   <h3>Historical skill for this season</h3>
   {stab}
   <p class="caveat">RPSS of the final method against climatology, Ethiopia cells; nested leave-one-year-out fits for the development years and fits on those years for the later evaluation years. <span class="strong pos">Bold</span>: one-sided whole-year permutation p &lt; 0.05. Maps for every target and both views are in the <a href="#explorer">map explorer</a>.</p>
@@ -574,7 +614,16 @@ JS = r'''
 
 
 def main():
-    OUT.mkdir(exist_ok=True)
+    import argparse
+    global OUT, INCLUDE_BACKTESTS
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--out', help='Write the site elsewhere (default: site/)')
+    ap.add_argument('--include-backtests', action='store_true', help='Also show backtest cycles (scratch builds only)')
+    a = ap.parse_args()
+    if a.out:
+        OUT = Path(a.out).resolve()
+    INCLUDE_BACKTESTS = a.include_backtests
+    OUT.mkdir(parents=True, exist_ok=True)
     extras = extra_cycles()
     entries = gallery_entries() + [e for x in extras for e in x['entries']]
     copy_assets(entries)

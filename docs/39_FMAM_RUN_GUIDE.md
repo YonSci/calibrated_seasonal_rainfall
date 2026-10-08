@@ -187,11 +187,28 @@ green tick (about 1 and 3 minutes). Then open <https://yonsci.github.io/calibrat
 | `Unexpected member count` | Incomplete download for that year | Delete that year's file and re-download it |
 | Page unchanged after push | Deployment running or browser cache | Wait for the green tick, then Ctrl + F5 |
 
+## Step 14 — Verification (added 2026-10-08)
+
+Verification now works for FMAM (see `docs/40_SEASON_RUN_GUIDES.md`, sections 3 and 4). Freeze the forecasts, then verify the
+months already published. **February 2026 is missing from the official CHIRPS v2.0 archive**, so verify March–May now;
+February and FMAM follow automatically once the file is published:
+
+```bat
+set CALIBRATION_CYCLE=config\cycles\jan_2026_fmam.json
+python scripts\prepare_verification_2026.py --config configmam\project.json --input-root outputsinal_shared_blend --root outputserification_2026_fmam --freeze-only
+python scriptsun_operational.py --config config\cycles\jan_2026_fmam.json --workflow all --verification-targets Mar Apr May
+set CALIBRATION_CYCLE=
+python scriptsuild_site.py
+git add -A
+git commit -m "Verify FMAM 2026 March-May"
+git push
+```
+
+The site's FMAM section then shows a *Verification against CHIRPS* table, and the map explorer a *Verification* product.
+
 ## What this test does not cover
 
-* **Verification of FMAM 2026.** CHIRPS for February–May 2026 is already published, so the forecast could be verified,
-  but the verification runner (`run_operational.py`) is still wired to the May-initialized JJAS cycle. Generalizing it
-  is the next step (see `docs/38_REPRODUCIBLE_RUNBOOK.md`, section 6).
+* **February 2026 verification** waits for the official CHIRPS file (see Step 14).
 * **Method changes.** The FMAM run uses the frozen final method; any change must pass `scripts/decision_gates.py` first.
 
 When the run is finished, record its key numbers (λ per target, skill, the FMAM 2026 probabilities over the R2 domain)

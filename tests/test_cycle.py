@@ -49,6 +49,17 @@ class CycleTests(unittest.TestCase):
         self.assertEqual(season_window(feb, 2026)[1].isoformat(), '2026-02-28')   # non-leap year
         self.assertEqual(season_window(feb, 1996)[1].isoformat(), '1996-02-29')   # leap year
 
+    def test_target_windows_for_verification(self):
+        from cycle import target_window
+        ondj = load_cycle(ROOT / 'config/cycles/sep_2026_ondj.json')
+        self.assertEqual([d.isoformat() for d in target_window('Jan', ondj)], ['2027-01-01', '2027-01-31'])
+        self.assertEqual([d.isoformat() for d in target_window('Oct', ondj)], ['2026-10-01', '2026-10-31'])
+        self.assertEqual([d.isoformat() for d in target_window('ONDJ', ondj)], ['2026-10-01', '2027-01-31'])
+        fmam = load_cycle(ROOT / 'config/cycles/jan_2026_fmam.json')
+        self.assertEqual([d.isoformat() for d in target_window('Feb', fmam)], ['2026-02-01', '2026-02-28'])
+        backtest = load_cycle(ROOT / 'config/cycles/backtest_sep_2024_ondj.json')
+        self.assertEqual(target_window('Jan', backtest)[0].year, 2025)
+
     def test_member_rule(self):
         self.assertEqual([expected_members(y) for y in (1993, 2016, 2017, 2030)], [25, 25, 51, 51])
         rule = [{'last_year': 2020, 'members': 25}, {'members': 101}]

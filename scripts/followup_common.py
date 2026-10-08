@@ -7,7 +7,8 @@ import numpy as np
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 ROOT = Path(__file__).resolve().parents[1]
-TARGETS = ['JJAS', 'Jun', 'Jul', 'Aug', 'Sep']
+from cycle import SEASON, SEASON_MONTHS
+TARGETS = [SEASON, *SEASON_MONTHS]          # e.g. JJAS, Jun, Jul, Aug, Sep
 METHOD = 'github_refined_corrected_calendar_v1'
 METHODS = ['climatology', 'smooth', 'shared_blend']
 CATS = ['below', 'near', 'above']
@@ -64,7 +65,7 @@ def freeze_snapshot(root):
         raise ValueError('Unexpected frozen forecast baseline or evaluation year')
     result = {'manifest_sha256': sha(manifest), 'forecast_sha256': {}, 'original_sources_checked': {}}
     for target in TARGETS:
-        p = root / f'frozen_forecasts/init05_{target}/forecast_{YEAR}.nc'
+        p = root / f'frozen_forecasts/{CYCLE.tag}_{target}/forecast_{YEAR}.nc'
         if sha(p) != m['targets'][target]['sha256']:
             raise ValueError('Frozen forecast has changed: ' + target)
         result['forecast_sha256'][target] = sha(p)

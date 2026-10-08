@@ -334,3 +334,11 @@ Frozen 2026 products (Ethiopia area means):
 - [x] **ONDJ (September initialization): switched** from the earlier ≥ 120 mm / 20 % rule (487 cells) to the ONDJ R3 (Deyr) domain (575 cells, 39 % of Ethiopia). The cycle file points to the new mask; products, site and both notebooks were rebuilt. Over the domain, ONDJ 2026/27 is 19 / 24 / 57 % (below / near / above), +64 mm (previously 20 / 24 / 56 %, +65 mm). November is 21 / 22 / 57 %.
 - Calibration and forecast values are unchanged; only the presentation and summary domain changed.
 - [ ] FMAM 2026 (January initialization; corrected from February on 2026-10-08): configs `config/fmam/project.json`, `config/cycles/jan_2026_fmam.json` and run guide `docs/39_FMAM_RUN_GUIDE.md` ready (leap-safe February, automatic site cycles). To be run by the project team as an end-to-end test.
+
+### Phase 16 — verification for every season (2026-10-08)
+
+- [x] Verification chain and runner generalized from May/JJAS to any cycle season: season profile in `cycle.py` (targets, calendar window per target, domain view), cross-year months (January of ONDJ downloaded and checked in the next year), season mask for the regime/domain breakdown, report and gallery wording, `--freeze-only`, and site sections that show a cycle's verification.
+- [x] JJAS regression: Jun–Aug 2026 verification reports and regime summaries identical; 46 presentation PNGs byte-identical.
+- [x] ONDJ backtest 2024/25 (`config/cycles/backtest_sep_2024_ondj.json`): full `run_operational.py --workflow all` on official CHIRPS Oct 2024–Jan 2025. Observations match the archive within 1e-4 mm. Domain RPSS −0.17 (forecast leaned dry, observed mixed to wet), December +0.15.
+- [x] FMAM 2026: March–May verify end to end (scratch test). **February 2026 is missing from the official CHIRPS v2.0 archive**, so February and FMAM stay pending.
+- [x] Guide for all seasons: `docs/40_SEASON_RUN_GUIDES.md`. 86 tests pass.

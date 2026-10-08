@@ -93,11 +93,11 @@ def plots(d,out,target):
         cb=fig.colorbar(im,ax=ax,shrink=.8,extend='neither' if key=='observed_category' else 'both')
         if key=='observed_category':cb.set_ticks([0,1,2]);cb.set_ticklabels(['Below','Near','Above'])
         ax.set(title=title,aspect='equal',xlabel='Longitude',ylabel='Latitude')
-    fig.suptitle(f'{target} {YEAR} | frozen shared-blend forecast verification\nCHIRPS v2 observations; native grid; descriptive single-year assessment',fontsize=15)
+    fig.suptitle(f'{CYCLE.target_label(target)} | frozen shared-blend forecast verification\nCHIRPS v2 observations; native grid; descriptive single-year assessment',fontsize=15)
     fig.savefig(out/'verification_maps.png',dpi=180);plt.close(fig)
 
 def assess(root,processed,target,regenerate):
-    fp=root/'frozen_forecasts'/f'init05_{target}/forecast_{YEAR}.nc';op=root/'observations'/target/f'chirps_{YEAR}_common.nc';rawp=processed/f'init05_{target}/ecmwf_{YEAR}_common.nc'
+    fp=root/'frozen_forecasts'/f'{TAG}_{target}/forecast_{YEAR}.nc';op=root/'observations'/target/f'chirps_{YEAR}_common.nc';rawp=processed/f'{TAG}_{target}/ecmwf_{YEAR}_common.nc'
     frozen=read(root/'frozen_forecasts/freeze_manifest.json')
     if sha(fp)!=frozen['targets'][target]['sha256']:raise ValueError('Frozen forecast was modified')
     with xr.open_dataset(fp) as ds:f=ds.load()
@@ -106,18 +106,18 @@ def assess(root,processed,target,regenerate):
     if preparation.get('prepared_total_sha256')!=sha(op):raise ValueError('Prepared observations differ from their preparation report')
     with xr.open_dataset(op) as ds:o=ds.load()
     same_grid(o,f)
-    expected=len(dates(YEAR,*PERIODS[target]))
-    if int(o.attrs['year'])!=YEAR or o.attrs['target']!=target or o.attrs['season_start']!=f'{YEAR}-'+PERIODS[target][0] or o.attrs['season_end']!=f'{YEAR}-'+PERIODS[target][1] or int(o.attrs['expected_days'])!=expected:raise ValueError('Wrong observation dates/target')
+    expected=window_days(target);start,end=window_iso(target)
+    if int(o.attrs['year'])!=YEAR or o.attrs['target']!=target or o.attrs['season_start']!=start or o.attrs['season_end']!=end or int(o.attrs['expected_days'])!=expected:raise ValueError('Wrong observation dates/target')
     if o.attrs.get('product')!='CHIRPS Version 2.0 daily p25' or o.precip_season.attrs.get('units')!='mm':raise ValueError('Wrong observation product or units')
     if o.attrs.get('forecast_freeze_sha256')!=sha(root/'frozen_forecasts/freeze_manifest.json'):raise ValueError('Observations prepared against a different freeze')
     obs=o.precip_season.values
     if np.isinf(obs).any() or (obs[np.isfinite(obs)]<0).any() or not np.array_equal(np.isfinite(obs),o.valid_day_count.values==expected):raise ValueError('Incomplete/invalid totals')
     with xr.open_dataset(rawp) as ds:r=ds.load()
     same_grid(r,f)
-    if r.attrs.get('season_start')!=f'{YEAR}-'+PERIODS[target][0] or r.attrs.get('season_end')!=f'{YEAR}-'+PERIODS[target][1] or r.precip_season.attrs.get('units')!='mm' or not np.array_equal(r.member,f.member):raise ValueError('Raw forecast period, units or members differ')
+    if r.attrs.get('season_start')!=start or r.attrs.get('season_end')!=end or r.precip_season.attrs.get('units')!='mm' or not np.array_equal(r.member,f.member):raise ValueError('Raw forecast period, units or members differ')
     raw=r.precip_season.transpose('member','lat','lon').values.astype(float)
     if not np.isfinite(raw).all() or (raw<0).any():raise ValueError('Invalid raw forecast')
-    history,hashes=load_reference(processed/f'init05_{target}',f,target)
+    history,hashes=load_reference(processed/f'{TAG}_{target}',f,target)
     report,fields=calculate(f,raw,history,obs)
     report.update(target=target,year=YEAR,processing_utc=now(),forecast_sha256=sha(fp),observations_sha256=sha(op),raw_forecast_sha256=sha(rawp),history_sha256=hashes)
     fields.attrs['target']=target
@@ -129,12 +129,12 @@ def assess(root,processed,target,regenerate):
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--root',default=f'outputs/verification_{YEAR}');ap.add_argument('--processed-root',default='data/processed')
-    ap.add_argument('--targets',nargs='+',choices=list(PERIODS),default=['Jun','Jul','Aug']);ap.add_argument('--regenerate',action='store_true');a=ap.parse_args()
+    ap.add_argument('--targets',nargs='+',choices=list(PERIODS),default=list(MONTHS));ap.add_argument('--regenerate',action='store_true');a=ap.parse_args()
     try:
         root=path(a.root);processed=path(a.processed_root);targets=list(dict.fromkeys(a.targets));required=[root/'frozen_forecasts/freeze_manifest.json']
         for t in targets:
-            required.extend([root/'frozen_forecasts'/f'init05_{t}/forecast_{YEAR}.nc',root/'observations'/t/f'chirps_{YEAR}_common.nc',processed/f'init05_{t}/ecmwf_{YEAR}_common.nc'])
-            required.extend(processed/f'init05_{t}/chirps_{y}_common.nc' for y in REF_YEARS)
+            required.extend([root/'frozen_forecasts'/f'{TAG}_{t}/forecast_{YEAR}.nc',root/'observations'/t/f'chirps_{YEAR}_common.nc',processed/f'{TAG}_{t}/ecmwf_{YEAR}_common.nc'])
+            required.extend(processed/f'{TAG}_{t}/chirps_{y}_common.nc' for y in REF_YEARS)
         missing=[str(p) for p in required if not p.is_file()]
         if missing:raise ValueError('Required inputs missing; run preparation for complete available targets:\n'+'\n'.join(missing))
         rows=[assess(root,processed,t,a.regenerate) for t in targets]

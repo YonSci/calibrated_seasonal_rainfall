@@ -14,6 +14,19 @@ MONTHS={calendar.month_abbr[m]:m for m in season_months(CYCLE.project)}
 PERIODS={k:(f'{m:02d}-01',f'{m:02d}-{calendar.monthrange(2000,m)[1]:02d}') for k,m in MONTHS.items()}  # same convention as monthly_config
 PERIODS[_SEASON['name']]=(_SEASON['start'],_SEASON['end'])
 BASE='https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/'
+from cycle import SEASON, TARGET_ORDER, DOMAIN_VIEW, target_window
+TAG=CYCLE.tag                                    # e.g. init05, init09
+TARGETS=[SEASON,*MONTHS]                         # freeze/verification order: season, then months
+
+def window_iso(target):
+    s,e=target_window(target);return s.isoformat(),e.isoformat()
+
+def window_days(target):
+    s,e=target_window(target);return (e-s).days+1
+
+def month_year(name):
+    # Calendar year of a month target (January of an ONDJ season falls in the next year).
+    return target_window(name)[0].year
 
 def path(p):
     p=Path(p);return p if p.is_absolute() else ROOT/p

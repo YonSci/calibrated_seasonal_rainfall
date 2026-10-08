@@ -48,7 +48,7 @@ def load_mask(path, reference):
         mask = ds.load()
     same_grid(mask, reference)
     if SEASON_VIEW:
-        country = reference.region_mask.values == 1
+        country = reference[("country_mask" if "country_mask" in reference else "region_mask")].values == 1
         focused = (mask.season_domain.values == 1) & country
         if mask.attrs.get("season") != SEASON or not focused.any():
             raise ValueError(f"Expected a non-empty {SEASON} rainfall-domain mask: {path}")
@@ -344,12 +344,13 @@ def boundary_files(path):
 def build_verification(root, mask_path, boundary, target, destination, settings):
     snapshot = freeze_snapshot(root)
     fields,provenance = inspect_source(root,target,snapshot)
-    _,domains = load_mask(mask_path,fields)
+    mask,domains = load_mask(mask_path,fields)
+    definition = definition_for(mask)
     mask_digest = sha(mask_path)
     boundary_digests = {str(p):sha(p) for p in boundary_files(boundary)}
     summaries = {view:summarize_domain(fields,domain) for view,domain in domains.items()}
     result = {"kind":"verification","target":target,"year":YEAR,"created_utc":now(),
-              "domain_definition":DEFINITION,"domain_note":NOTE,"display":settings,
+              "domain_definition":definition,"domain_note":NOTE,"display":settings,
               "provenance":provenance,"mask_sha256":mask_digest,"boundary_sha256":boundary_digests,
               "frozen_forecasts":snapshot,"summaries":summaries,
               "score_note":"Existing native-grid score fields aggregated on each domain; country scores reproduced. Single year, overlapping targets, no significance or reliability claim."}
@@ -358,7 +359,7 @@ def build_verification(root, mask_path, boundary, target, destination, settings)
         for view in domains:
             if view != "all_ethiopia":
                 fields[view] = (("lat","lon"),domains[view].astype("int8"))
-        fields.attrs.update(presentation_domain_definition=DEFINITION,presentation_domain_note=NOTE,
+        fields.attrs.update(presentation_domain_definition=definition,presentation_domain_note=NOTE,
                             mask_sha256=mask_digest,statistics_grid="unchanged native verification fields")
         fields.to_netcdf(stage/"presentation_fields.nc")
         write(stage/"presentation_summary.json",result)
@@ -400,13 +401,13 @@ body{{margin:0;background:#edf2f4;color:#20313b;font:16px/1.5 system-ui,sans-ser
 header,section{{background:white;border:1px solid #d7e2e7;border-radius:12px;padding:24px;margin-bottom:20px}}h1{{font-size:30px;line-height:1.2}}h2{{font-size:22px}}.tag{{color:#16685f;font-size:13px;letter-spacing:.08em;text-transform:uppercase}}
 .note{{background:#f5f8f9;padding:14px;border-left:4px solid #27877a}}.pending{{color:#765321}}label{{display:inline-block;margin:0 20px 15px 0}}select{{display:block;padding:9px;font:inherit;border:1px solid #8aa1ad;border-radius:5px}}a{{color:#06628a}}img{{max-width:100%;height:auto}}figure{{margin:10px 0 28px}}figcaption{{font-weight:600}}table{{border-collapse:collapse;width:100%;margin:15px 0}}td,th{{padding:8px;text-align:left;border-bottom:1px solid #dbe4e9}}.subtle{{font-size:14px;color:#526772}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:20px}}.wide{{grid-template-columns:1fr}}@media(max-width:750px){{main{{padding:10px}}.grid{{grid-template-columns:1fr}}header,section{{padding:16px}}}}
 </style><main><header><div class="tag">{CYCLE.init_month_name} initialization · {YEAR} · research reconstruction</div>
-<h1>Ethiopia rainfall forecast and verification</h1><p>National and fixed JJAS R1+R2 rainfall-domain views for each month and the season.</p>
+<h1>Ethiopia rainfall forecast and verification</h1><p>National and fixed '''+html.escape(list(VIEWS.values())[1])+''' views for each month and the season.</p>
 <p class="note">''' + html.escape(DEFINITION + ' ' + NOTE) + '''</p><p class="pending">Pending verification: '''+pending_text+'''. Pending does not mean zero rainfall or zero skill.</p>
 <p class="subtle">The forecasts remain frozen. The domain changes only presentation and the area summarized. Continuous map colors are interpolated for display; statistics and NetCDF fields retain the original grid. Not an official EMI/ICPAC product.</p>
 <p><a href="presentation_summary.json">Combined summaries and provenance</a> · <a href="state/latest_run.json">Latest run record</a>'''+report_link+'''</p></header>
 <section><label>Target<select id="target">'''+buttons+'''</select></label>
 <label>Product<select id="kind"><option value="forecast">Forecast</option><option value="verification">Verification</option></select></label>
-<label>View<select id="view"><option value="all_ethiopia">All Ethiopia</option><option value="jjas_r12_rainfall_domain">JJAS R1+R2 rainfall domain</option></select></label>
+<label>View<select id="view">'''+''.join('<option value="'+k+'">'+html.escape(v)+'</option>' for k,v in VIEWS.items())+'''</select></label>
 <div id="content"></div></section><noscript>Enable JavaScript to select views, or open the PNG/PDF files in presentation/ directly.</noscript></main>
 <script id="data" type="application/json">'''+data+f'''</script><script>
 const entries=JSON.parse(document.getElementById('data').textContent);const fmt=(v,n=1)=>v==null?'Unavailable':Number(v).toFixed(n);

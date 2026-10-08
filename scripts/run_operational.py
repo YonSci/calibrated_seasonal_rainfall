@@ -28,10 +28,16 @@ MONTHS = {"Jun":6,"Jul":7,"Aug":8,"Sep":9}
 BASE = "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/"
 # Cycle values; configuration() replaces them with the selected cycle file's values.
 YEAR, REF_YEARS, OVERLAP_YEAR = 2026, list(range(1993,2026)), 2025
+TAG, SEASON, MONTH_YEAR = "init05", "JJAS", {}
 
 
 def forecast_file(root, target):
-    return Path(root)/f"init05_{target}/{YEAR}/forecast_{YEAR}.nc"
+    return Path(root)/f"{TAG}_{target}/{YEAR}/forecast_{YEAR}.nc"
+
+
+def presentation_mask(cfg):
+    """JJAS uses the regime reconciliation mask (R1+R2); other seasons their own rainfall-domain mask."""
+    return path(cfg["regime_mask"] if SEASON == "JJAS" else cfg["season_domain_mask"])
 PATH_KEYS = ["project_config","forecast_root","verification_root","processed_root","download_cache",
              "regime_mask","boundary","historical_review","output_root"]
 PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operational.py",
@@ -55,19 +61,27 @@ def require(paths):
 
 
 def configuration(filename, targets=None):
-    global YEAR, REF_YEARS, OVERLAP_YEAR
-    from cycle import load_cycle
+    global YEAR, REF_YEARS, OVERLAP_YEAR, ORDER, MONTHS, TAG, SEASON, MONTH_YEAR
+    from cycle import load_cycle, target_window, season_targets
     cycle = load_cycle(filename)          # validates adapter, years and targets
     cfg = read(filename)
     if cfg.get("schema_version")!=1:
         raise ValueError("Unsupported operational configuration schema")
     YEAR, REF_YEARS = cycle.year, cycle.reference_years
     OVERLAP_YEAR = int(cfg.get("overlap_year", 2025))
+    # Season profile: months in season order, then the season (e.g. Oct, Nov, Dec, Jan, ONDJ).
+    import calendar
+    ORDER = season_targets(cycle.project)
+    MONTHS = {m: list(calendar.month_abbr).index(m) for m in ORDER[:-1]}
+    TAG, SEASON = cycle.tag, cycle.season_name
+    MONTH_YEAR = {m: target_window(m, cycle)[0].year for m in MONTHS}
+    if SEASON != "JJAS" and "season_domain_mask" not in cfg:
+        raise ValueError("Cycles other than JJAS need season_domain_mask (build_season_domain.py --method regime)")
     wanted = targets or cfg["targets"]
     if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
-        raise ValueError("Targets must be unique Jun, Jul, Aug, Sep, JJAS names")
+        raise ValueError("Targets must be unique names among " + ", ".join(ORDER))
     cfg["targets"] = [t for t in ORDER if t in wanted]
-    for key in PATH_KEYS:
+    for key in PATH_KEYS + (["season_domain_mask"] if "season_domain_mask" in cfg else []):
         cfg[key] = str(path(cfg[key]))
     settings = cfg["display"]
     if (not isinstance(settings["interpolation_factor"],int) or not 1<=settings["interpolation_factor"]<=20 or
@@ -129,20 +143,20 @@ def choose_verification(requested, target_scope, checker=probe):
     wanted = requested if explicit else target_scope
     if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
         raise ValueError("--verification-targets must be 'auto' alone or target names")
-    needed = [m for m in MONTHS if m in wanted or "JJAS" in wanted]
-    records = {m:checker(BASE+f"chirps-v2.0.{YEAR}.{MONTHS[m]:02d}.days_p25.nc") for m in needed}
+    needed = [m for m in MONTHS if m in wanted or SEASON in wanted]
+    records = {m:checker(BASE+f"chirps-v2.0.{MONTH_YEAR.get(m,YEAR)}.{MONTHS[m]:02d}.days_p25.nc") for m in needed}
     for m,r in records.items():
         print("CHIRPS availability:",m,r["status"],flush=True)
     unknown = [m for m,r in records.items() if r["status"]=="unknown"]
     if unknown:
         raise ValueError("Observation availability is unknown for "+", ".join(unknown)+". Check connectivity and retry; network failures are not treated as absent observations. Use --workflow products for an offline presentation run.")
     months = [m for m in needed if records[m]["status"]=="available"]
-    ready = [t for t in ORDER if t in wanted and (t in months or (t=="JJAS" and set(months)==set(MONTHS)))]
+    ready = [t for t in ORDER if t in wanted and (t in months or (t==SEASON and set(months)==set(MONTHS)))]
     missing = [t for t in wanted if t not in ready]
     if explicit and missing:
         raise ValueError("Requested verification is not ready: "+", ".join(missing)+". Use --verification-targets auto to process the available months.")
-    # When JJAS is ready all four component months are prepared and scored too.
-    if "JJAS" in ready:
+    # When the season is ready all its component months are prepared and scored too.
+    if SEASON in ready:
         ready = ORDER.copy()
     return months,ready,{"checked_utc":now(),"files":records,"pending":missing,
                          "note":"Availability is not completeness; preparation validates every calendar day, units and reference overlap."}
@@ -161,7 +175,7 @@ def preflight(cfg, workflow, verification_request):
     scripts = PRODUCT_SCRIPTS + (VERIFY_SCRIPTS if workflow in ["verify","all"] else [])
     require([ROOT/"scripts"/s for s in scripts])
     mp,bp,vr = path(cfg["regime_mask"]),path(cfg["boundary"]),path(cfg["verification_root"])
-    require([mp,*boundary_files(bp)])
+    require([mp,presentation_mask(cfg),*boundary_files(bp)])
     lines = base.boundary_lines(bp)
     if not lines:
         raise ValueError("Empty Ethiopia boundary")
@@ -172,13 +186,13 @@ def preflight(cfg, workflow, verification_request):
     sources = {}
     reference = None
     for target in cfg["targets"]:
-        p = (vr/f"frozen_forecasts/init05_{target}/forecast_{YEAR}.nc" if snapshot else
+        p = (vr/f"frozen_forecasts/{TAG}_{target}/forecast_{YEAR}.nc" if snapshot else
              forecast_file(path(cfg["forecast_root"]),target))
         require([p])
         with xr.open_dataset(p) as ds:
             d = ds.load()
         check_forecast(d,target)
-        load_mask(mp,d)
+        load_mask(presentation_mask(cfg),d)
         if reference is not None:
             for key in ["lat","lon","region_mask"]:
                 if not np.array_equal(d[key],reference[key]):
@@ -200,13 +214,15 @@ def preflight(cfg, workflow, verification_request):
         months,ready,availability = choose_verification(verification_request,cfg["targets"])
         require([path(cfg["project_config"])])
         project = read(cfg["project_config"])
-        if project.get("initialization_month")!=5 or project.get("season")!={"name":"JJAS","start":"06-01","end":"09-30"} or project.get("observation_years")!=[REF_YEARS[0],OVERLAP_YEAR]:
-            raise ValueError("Project configuration does not match the May-initialized verification adapter (observation_years must end with the CHIRPS archive year, overlap_year)")
+        from cycle import load_cycle
+        expected = load_cycle(os.environ["CALIBRATION_CYCLE"]).project
+        if project.get("initialization_month")!=expected["initialization_month"] or project.get("season")!=expected["season"] or project.get("observation_years")[1]>OVERLAP_YEAR:
+            raise ValueError("Project configuration does not match the cycle (initialization month, season, or observation_years ending after the CHIRPS archive year, overlap_year)")
         require([path(project["chirps_file"])])
         # Existing preparation validates all five originals against the freeze.
         require([forecast_file(path(cfg["forecast_root"]),t) for t in ORDER])
         for t in ready:
-            folder = path(cfg["processed_root"])/f"init05_{t}"
+            folder = path(cfg["processed_root"])/f"{TAG}_{t}"
             require([folder/f"ecmwf_{YEAR}_common.nc",*[folder/f"chirps_{y}_common.nc" for y in REF_YEARS]])
     return {"packages":packages,"sources":sources,"snapshot":snapshot,"existing":existing,
             "months":months,"ready":ready,"availability":availability,"scripts":scripts}
@@ -224,10 +240,10 @@ def verify_stages(runner,cfg,info,code_inputs):
     historical = path(read(config)["chirps_file"])
     freeze = vr/"frozen_forecasts"
     originals = [forecast_file(path(cfg["forecast_root"]),t) for t in ORDER]
-    prepared = [*months, *(["JJAS"] if set(months)==set(MONTHS) else [])]
+    prepared = [*months, *([SEASON] if set(months)==set(MONTHS) else [])]
     cache_outputs = []
     for m in months:
-        for year in [OVERLAP_YEAR,YEAR]:
+        for year in [OVERLAP_YEAR,MONTH_YEAR.get(m,YEAR)]:
             f = path(cfg["download_cache"])/f"chirps-v2.0.{year}.{MONTHS[m]:02d}.days_p25.nc"
             cache_outputs.extend([f,f.with_suffix(".download.json")])
     runner.stage("prepare_observations_"+"_".join(months),
@@ -236,7 +252,7 @@ def verify_stages(runner,cfg,info,code_inputs):
                  command=command("prepare_verification_2026.py","--config",config,"--months",*months,
                                  "--input-root",cfg["forecast_root"],"--root",vr,"--cache",cfg["download_cache"],"--regenerate"))
     for target in ready:
-        folder = path(cfg["processed_root"])/f"init05_{target}"
+        folder = path(cfg["processed_root"])/f"{TAG}_{target}"
         inputs = [*code_inputs,freeze,vr/f"observations/{target}",folder/f"ecmwf_{YEAR}_common.nc",
                   *[folder/f"chirps_{y}_common.nc" for y in REF_YEARS]]
         runner.stage("score_"+target,inputs,[vr/f"results/{target}",vr/f"reports/{target}"],
@@ -250,7 +266,7 @@ def report_stages(runner,cfg,targets,code_inputs):
     vr,out = path(cfg["verification_root"]),path(cfg["output_root"])
     tag = "_".join(targets)
     regime = out/f"regimes/{tag}/regime_verification_summary.json"
-    inputs = [*code_inputs,path(cfg["regime_mask"]),vr/"frozen_forecasts"]
+    inputs = [*code_inputs,path(cfg["regime_mask"]),presentation_mask(cfg),vr/"frozen_forecasts"]
     for t in targets:
         inputs += verification_files(vr,t)
     runner.stage("regime_summary_"+tag,inputs,[regime.parent],command=[sys.executable,str(ROOT/"scripts/verify_2026_regimes.py"),
@@ -274,8 +290,8 @@ def main():
     ap.add_argument("--config",default="config/operational.json")
     ap.add_argument("--workflow",choices=["products","verify","all"],default="products",
                     help="products: offline views; verify: prepare/score available observations, reports and views; all: verification plus every forecast view")
-    ap.add_argument("--targets",nargs="+",choices=ORDER,help="Override configured target scope")
-    ap.add_argument("--verification-targets",nargs="+",default=["auto"],choices=["auto",*ORDER])
+    ap.add_argument("--targets",nargs="+",help="Override configured target scope (names of the cycle's months and season)")
+    ap.add_argument("--verification-targets",nargs="+",default=["auto"],help="'auto' or target names of the cycle")
     ap.add_argument("--plan",action="store_true",help="Preflight and show planned stages without writing project outputs; verify/all checks remote availability")
     ap.add_argument("--force",action="store_true",help="Rebuild derived stages with backups; never refit or replace frozen forecasts")
     ap.add_argument("--resume",action="store_true",help="Content-checked resume is already the default")
@@ -295,8 +311,8 @@ def main():
         if a.plan:
             stages = (["prepare complete observations","score each available target","regime summary","verification report"] if a.workflow!="products" else [])
             if a.workflow!="verify":
-                stages.append("forecast views: national and R1+R2 for each requested target")
-            stages += ["verification views: national and R1+R2 for each ready target","offline gallery and run manifest"]
+                stages.append("forecast views: national and season rainfall domain for each requested target")
+            stages += ["verification views: national and season rainfall domain for each ready target","offline gallery and run manifest"]
             for i,item in enumerate(stages,1):
                 print(str(i)+".",item)
             print("Output:",cfg["output_root"],"| Read-only plan complete.")
@@ -312,7 +328,7 @@ def main():
             verified = info["ready"] if a.workflow=="products" else verify_stages(runner,cfg,info,code_inputs)
             report = report_stages(runner,cfg,verified,code_inputs) if a.workflow!="products" else None
             vr = path(cfg["verification_root"])
-            common = [*code_inputs,path(cfg["regime_mask"]),*boundary_files(path(cfg["boundary"]))]
+            common = [*code_inputs,presentation_mask(cfg),*boundary_files(path(cfg["boundary"]))]
             if info["snapshot"]:
                 common.append(vr/"frozen_forecasts")
             forecasts = []
@@ -320,18 +336,19 @@ def main():
                 for target,source in info["sources"].items():
                     dest = output/f"presentation/forecast/{target}"
                     runner.stage("forecast_view_"+target,[*common,source],[dest],
-                                 action=lambda s=source,t=target,o=dest:build_forecast(s,path(cfg["regime_mask"]),path(cfg["boundary"]),t,o,cfg["display"]))
+                                 action=lambda s=source,t=target,o=dest:build_forecast(s,presentation_mask(cfg),path(cfg["boundary"]),t,o,cfg["display"]))
                     forecasts.append(target)
             for target in verified:
                 dest = output/f"presentation/verification/{target}"
                 runner.stage("verification_view_"+target,[*common,*verification_files(vr,target)],[dest],
-                             action=lambda t=target,o=dest:build_verification(vr,path(cfg["regime_mask"]),path(cfg["boundary"]),t,o,cfg["display"]))
+                             action=lambda t=target,o=dest:build_verification(vr,presentation_mask(cfg),path(cfg["boundary"]),t,o,cfg["display"]))
             pending = [t for t in cfg["targets"] if t not in verified]
             gallery_inputs = [*common]
             for kind,targets in [("forecast",forecasts),("verification",verified)]:
                 gallery_inputs += [output/f"presentation/{kind}/{t}" for t in targets]
             details = {"workflow":a.workflow,"forecast_status":"retrospective reconstruction", "verification_report":report,
-                       "complete_requested_verification":not pending,"full_jjas_verified":"JJAS" in verified}
+                       "complete_requested_verification":not pending,
+                       **({"full_jjas_verified":"JJAS" in verified} if SEASON=="JJAS" else {"full_season_verified":SEASON in verified})}
             runner.stage("gallery",gallery_inputs,[output/"index.html",output/"presentation_summary.json"],
                          settings={"forecast_targets":forecasts,"verified_targets":verified,"pending":pending,"details":details},
                          action=lambda:build_gallery(output,forecasts,verified,pending,details))

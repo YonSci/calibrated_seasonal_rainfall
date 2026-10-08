@@ -8,10 +8,19 @@ from pathlib import Path
 import shutil
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
-ORDER = ['Jun', 'Jul', 'Aug', 'Sep', 'JJAS']
+from cycle import SEASON, TARGET_ORDER, DOMAIN_VIEW
+ORDER = TARGET_ORDER                       # months in season order, then the season
 LABELS = {'all_country': 'All Ethiopia', 'regime_0': 'R0: arid / marginal',
           'regime_1': 'R1: western unimodal', 'regime_2': 'R2: Belg–Kiremt rule',
           'regime_3': 'R3: Gu–Deyr rule', 'jjas_r12_rainfall_domain': 'JJAS R1+R2 rainfall domain'}
+DOMAIN_DEFINITION = ('cleaned R1/R2 classes with the previously defined rainfall criteria')
+if DOMAIN_VIEW not in LABELS:
+    LABELS.pop('jjas_r12_rainfall_domain')          # only the cycle's own season domain is reported
+    import xarray as _xr
+    from cycle import resolve as _resolve
+    with _xr.open_dataset(_resolve(CYCLE.raw['season_domain_mask'])) as _m:
+        LABELS[DOMAIN_VIEW] = _m.attrs.get('view_label', f'{SEASON} rainfall domain')
+        DOMAIN_DEFINITION = _m.attrs.get('domain_definition', DOMAIN_DEFINITION)
 PROBS = ['raw_observed_thresholds', 'corrected_member_counts', 'corrected_smoothed', 'shared_blend', 'climatology']
 
 
@@ -177,7 +186,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     rows = {r['target']: r for r in regimes['results'] if r['target'] in targets}
     notes = performance_notes(regimes, targets)
     payload = {'year': YEAR, 'targets_verified': targets, 'targets_pending_in_report': missing,
-               'full_JJAS_verified': 'JJAS' in targets, 'all_five_targets_verified': not missing,
+               'full_JJAS_verified': SEASON == 'JJAS' and SEASON in targets, 'full_season_verified': SEASON in targets, 'all_five_targets_verified': not missing,
                'forecast_changed': False, 'new_calibration_fitted': False,
                'assessment_type': f'Retrospective reconstruction; descriptive {YEAR} verification',
                'provenance': provenance, 'performance_notes': notes,
@@ -186,7 +195,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     r = Report()
     r.heading(f'Ethiopia rainfall forecast verification — {YEAR}', 1)
     r.paragraph(f'May initialization | ECMWF seasonal forecasts | CHIRPS v2 verification | Reference period {REF_DASH}')
-    r.paragraph('Verified targets: ' + ', '.join(targets) + '. ' + ('Pending in this report: ' + ', '.join(missing) + '. No full-JJAS conclusion is inferred from monthly results.' if 'JJAS' in missing else 'JJAS is assessed directly against its complete seasonal observations; overlapping monthly and seasonal scores are not pooled.'), 'status')
+    r.paragraph('Verified targets: ' + ', '.join(targets) + '. ' + ('Pending in this report: ' + ', '.join(missing) + '. No full-' + SEASON + ' conclusion is inferred from monthly results.' if SEASON in missing else 'JJAS is assessed directly against its complete seasonal observations; overlapping monthly and seasonal scores are not pooled.'), 'status')
     r.paragraph(f'This is a retrospective assessment of the reconstructed forecasts. It does not establish an actual May {YEAR} issuance, independent prospective validation, or an official EMI/ICPAC forecast. All results below concern the submitted verification evidence.', 'note')
     r.heading('Decision and principal findings')
     r.paragraph(payload['decision'])
@@ -196,10 +205,10 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     r.paragraph('Positive skill means a lower score than the stated climatological reference on the same support. It is not percentage forecast accuracy. Positive mean error means the forecast was wetter than observed, which can occur even when the forecast anomaly is below normal.')
     r.heading('Country results')
     r.table(['Target', 'Raw CRPS mm', 'Corrected CRPS mm', 'Climatology CRPS mm', 'Corrected CRPSS', 'Final RPSS'], [[t, *[number(rows[t]['domains']['all_country']['amount'][m]['crps_mm']) for m in ['raw', 'corrected', 'climatology']], percent(rows[t]['domains']['all_country']['amount']['corrected']['crpss']), percent(rows[t]['domains']['all_country']['probability']['shared_blend']['rpss'])] for t in targets])
-    r.heading('Main JJAS rainfall domain')
-    d0 = rows[targets[0]]['domains']['jjas_r12_rainfall_domain']
-    r.paragraph(f"This fixed pre-{YEAR} domain contains {d0['domain_cells']} cells and {d0['domain_country_area_percent']:.1f}% of country grid area. It combines cleaned R1/R2 classes with the previously defined rainfall criteria. Monthly rows evaluate each month inside that domain; they are not a complete-JJAS assessment.")
-    r.table(['Target', 'Amount CRPSS', 'Smoothed RPSS', 'Final RPSS', 'Mean error mm', 'Probability coverage'], [[t, percent(rows[t]['domains']['jjas_r12_rainfall_domain']['amount']['corrected']['crpss']), percent(rows[t]['domains']['jjas_r12_rainfall_domain']['probability']['corrected_smoothed']['rpss']), percent(rows[t]['domains']['jjas_r12_rainfall_domain']['probability']['shared_blend']['rpss']), number(rows[t]['domains']['jjas_r12_rainfall_domain']['amount']['corrected']['bias_mm']), number(rows[t]['domains']['jjas_r12_rainfall_domain']['probability_domain_area_percent'], 1) + '%'] for t in targets])
+    r.heading(f'Main {SEASON} rainfall domain: {LABELS[DOMAIN_VIEW]}')
+    d0 = rows[targets[0]]['domains'][DOMAIN_VIEW]
+    r.paragraph(f"This fixed pre-{YEAR} domain contains {d0['domain_cells']} cells and {d0['domain_country_area_percent']:.1f}% of country grid area. Definition: {DOMAIN_DEFINITION}. Monthly rows evaluate each month inside that domain; they are not a complete-JJAS assessment.")
+    r.table(['Target', 'Amount CRPSS', 'Smoothed RPSS', 'Final RPSS', 'Mean error mm', 'Probability coverage'], [[t, percent(rows[t]['domains'][DOMAIN_VIEW]['amount']['corrected']['crpss']), percent(rows[t]['domains'][DOMAIN_VIEW]['probability']['corrected_smoothed']['rpss']), percent(rows[t]['domains'][DOMAIN_VIEW]['probability']['shared_blend']['rpss']), number(rows[t]['domains'][DOMAIN_VIEW]['amount']['corrected']['bias_mm']), number(rows[t]['domains'][DOMAIN_VIEW]['probability_domain_area_percent'], 1) + '%'] for t in targets])
     r.heading('Regional performance notes')
     for target in targets:
         r.heading(target + f' {YEAR}', 3)
@@ -212,13 +221,13 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
             effect = d['blend_minus_smoothed_rps']
             table.append([LABELS[domain], percent(d['amount']['corrected']['crpss']), percent(d['probability']['corrected_smoothed']['rpss']), percent(d['probability']['shared_blend']['rpss']), number(d['probability_domain_area_percent'], 1) + '%', 'Helped' if effect < 0 else ('Weakened' if effect > 0 else 'Unchanged')])
         r.table(['Regime', 'Amount CRPSS', 'Smoothed RPSS', 'Final RPSS', 'Probability coverage', 'Blend effect'], table)
-    if 'Jun' in rows:
+    if SEASON == 'JJAS' and 'Jun' in rows:      # findings specific to the 2026 JJAS verification
         d = rows['Jun']['domains']['regime_0']; a = d['amount']; p = d['probability']
         r.paragraph(f"June R0: raw, corrected and climatological CRPS are {a['raw']['crps_mm']:.2f}, {a['corrected']['crps_mm']:.2f} and {a['climatology']['crps_mm']:.2f} mm. Corrected mean rainfall is {d['corrected_mean_mm']:.2f} mm versus {d['observed_mean_mm']:.2f} mm observed. Final RPSS is {percent(p['shared_blend']['rpss'])}. Small climatological rainfall/error scales make percentage skill particularly sensitive here; report absolute scores alongside skill.")
-    if 'Jul' in rows:
+    if SEASON == 'JJAS' and 'Jul' in rows:
         d = rows['Jul']['domains']['regime_2']
         r.paragraph(f"July R2: corrected mean error is {d['amount']['corrected']['bias_mm']:+.2f} mm. Observed and forecast mean anomalies are {d['observed_mean_anomaly_mm']:.2f} and {d['forecast_mean_anomaly_mm']:.2f} mm. This documents a remaining error in the magnitude of the rainfall anomaly.")
-    if 'Aug' in rows:
+    if SEASON == 'JJAS' and 'Aug' in rows:
         d = rows['Aug']['domains']['regime_3']; p = d['probability']
         r.paragraph(f"August R3: smoothed RPSS is {percent(p['corrected_smoothed']['rpss'])}, versus {percent(p['shared_blend']['rpss'])} after blending. The final above-normal-category Brier Skill Score is {percent(p['shared_blend']['bss_by_category'][2])}. Overall RPS improvement therefore does not mean every category improved over climatology. Probability coverage is {d['probability_domain_area_percent']:.1f}% of R3 area.")
     r.paragraph('These labels describe the observed performance of these targets. They do not justify hiding weak regions, declaring confidence at issuance, applying a new mask, or replacing forecast values after observing outcomes.')
@@ -242,7 +251,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
         'Probabilities: observed training-period terciles, member counts, alpha = 0.5 additive smoothing, then the selected shared climatology blend. The final product does not use the experimental Dirichlet, local or regime-specific probability mappings. Probability blending does not change the corrected rainfall members or amount CRPS.',
         'RPS is the sum of the first two cumulative-category squared errors. Brier scores are category-specific; log loss uses natural logarithms and the existing probability floor. Country and domain scores use grid-cell area weights on identical support across methods within each metric family.',
         'Amount and probability masks differ; unscored cells are not near-normal conditions. R0–R3 are the reconciled GitHub-derived climatological rules, not administrative boundaries or independently validated official EMI zones. No onset-detection gate is used.',
-        f'One verification year cannot establish multi-year reliability or statistical significance. Spatial cells and overlapping months/JJAS are not independent evaluation samples. No pooled overall score is produced. The {YEAR} outcomes are now inspected evidence and must not be reused as an untouched test set.'
+        f'One verification year cannot establish multi-year reliability or statistical significance. Spatial cells and overlapping months/' + SEASON + f' are not independent evaluation samples. No pooled overall score is produced. The {YEAR} outcomes are now inspected evidence and must not be reused as an untouched test set.'
     ]:
         r.paragraph(text)
     r.heading('Verification maps')
@@ -258,8 +267,8 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
         r.paragraph('Map files were not supplied to this build. All numerical tables derive from the supplied verification reports.')
     r.heading('Completion and future work')
     r.paragraph('Retain the frozen forecasts and archive this report as a verification addendum. A future calibration revision needs a separate historical evaluation with all preprocessing and model selection inside year-based validation. This report does not fit or adopt a revised model.')
-    if 'JJAS' in missing:
-        r.paragraph('Complete September and JJAS only after the official CHIRPS v2 daily monthly observations pass the existing completeness and overlap checks. Then regenerate this report with all five targets. Until then, no full-JJAS verification result is available in this report.', 'status')
+    if SEASON in missing:
+        r.paragraph('Complete the remaining months and ' + SEASON + ' only after the official CHIRPS v2 daily monthly observations pass the existing completeness and overlap checks. Then regenerate this report with all targets. Until then, no full-' + SEASON + ' verification result is available in this report.', 'status')
     r.heading('Evidence and reproducibility')
     r.paragraph(provenance['audit_scope'])
     for name, value in provenance.get('source_sha256', {}).items():

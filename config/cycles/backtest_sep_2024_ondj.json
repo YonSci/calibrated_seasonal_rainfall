@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "adapter": "shared_blend",
+  "forecast_year": 2024,
+  "initialization_month": 9,
+  "reference_years": [
+    1993,
+    2023
+  ],
+  "targets": [
+    "Oct",
+    "Nov",
+    "Dec",
+    "Jan",
+    "ONDJ"
+  ],
+  "project_config": "config/ondj/project.json",
+  "forecast_root": "outputs/_backtest_ondj_2024/final_shared_blend",
+  "verification_root": "outputs/_backtest_ondj_2024/verification",
+  "processed_root": "data/processed",
+  "download_cache": "data/raw/chirps/verification_p25",
+  "regime_mask": "evidence/followup_regime_comparison_and_masks.nc",
+  "boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "historical_review": "outputs/verification_followup/historical/historical_blend_review.json",
+  "output_root": "outputs/_backtest_ondj_2024/operational",
+  "display": {
+    "interpolation_factor": 12,
+    "gaussian_sigma_cells": 0.6,
+    "minimum_leading_probability": 0.4,
+    "percent_anomaly_minimum_climatology_mm": 10.0,
+    "monthly_anomaly_limit_mm": 100.0,
+    "jjas_anomaly_limit_mm": 300.0,
+    "dpi": 180,
+    "pdf": true
+  },
+  "season_domain_mask": "data/masks/init09_ONDJ_regime_domain.nc",
+  "notes": "Backtest/regression cycle: ONDJ 2024/25 from the 1 Sep 2024 initialization, reference 1993-2023, verified against official CHIRPS Oct 2024-Jan 2025. Writes only under outputs/_backtest_ondj_2024."
+}

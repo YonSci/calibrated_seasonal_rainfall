@@ -5,10 +5,9 @@ import xarray as xr
 from verify2026_common import *
 from verify2026_outputs import staged_output
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
-TARGETS=['JJAS','Jun','Jul','Aug','Sep']
 
 def freeze(input_root,output):
-    sources={t:input_root/f'init05_{t}/{YEAR}/forecast_{YEAR}.nc' for t in TARGETS}
+    sources={t:input_root/f'{TAG}_{t}/{YEAR}/forecast_{YEAR}.nc' for t in TARGETS}
     missing=[str(p) for p in sources.values() if not p.is_file()]
     if missing:raise ValueError('Missing final forecasts:\n'+'\n'.join(missing))
     reference=None
@@ -22,14 +21,14 @@ def freeze(input_root,output):
     if output.exists():
         manifest=read(output/'freeze_manifest.json')
         for t,p in sources.items():
-            dest=output/f'init05_{t}/forecast_{YEAR}.nc'
+            dest=output/f'{TAG}_{t}/forecast_{YEAR}.nc'
             if sha(p)!=manifest['targets'][t]['sha256'] or sha(dest)!=manifest['targets'][t]['sha256']:raise ValueError('Frozen forecast differs: '+t+'. Keep the existing assessment archive; do not overwrite it.')
         print('Existing frozen forecasts verified.',flush=True)
     else:
         with staged_output(output,False) as stage:
             records={}
             for t,p in sources.items():
-                out=stage/f'init05_{t}';out.mkdir();shutil.copy2(p,out/f'forecast_{YEAR}.nc')
+                out=stage/f'{TAG}_{t}';out.mkdir();shutil.copy2(p,out/f'forecast_{YEAR}.nc')
                 digest=sha(out/f'forecast_{YEAR}.nc')
                 if digest!=sha(p):raise ValueError('Source changed during freeze')
                 records[t]={'source':str(p),'sha256':digest}
@@ -66,17 +65,21 @@ def fetch(year,month,cache):
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--config',default='config/project.json')
-    ap.add_argument('--months',nargs='+',choices=list(MONTHS),default=['Jun','Jul','Aug'])
+    ap.add_argument('--months',nargs='+',choices=list(MONTHS),default=list(MONTHS))
     ap.add_argument('--input-root',default='outputs/final_shared_blend')
     ap.add_argument('--root',default=f'outputs/verification_{YEAR}')
     ap.add_argument('--cache',default='data/raw/chirps/verification_p25')
-    ap.add_argument('--regenerate',action='store_true');a=ap.parse_args()
+    ap.add_argument('--regenerate',action='store_true')
+    ap.add_argument('--freeze-only',action='store_true',help='Only create (or check) the SHA-256 freeze of the cycle forecasts; no observations')
+    a=ap.parse_args()
     try:
         cfg=read(path(a.config));historical=path(cfg['chirps_file']);variable=cfg.get('chirps_variable','precip')
         if not historical.is_file():raise ValueError('Historical archive missing: '+str(historical))
         root=path(a.root);cache=path(a.cache)
         if historical.resolve().is_relative_to(root.resolve()):raise ValueError('Assessment output must not contain historical input')
         grid=freeze(path(a.input_root),root/'frozen_forecasts')
+        if a.freeze_only:
+            print('Freeze ready:',root/'frozen_forecasts'/'freeze_manifest.json');return
         names=[n for n in MONTHS if n in a.months]
         # Complete all overlap checks before downloading target-year observations.
         overlaps={}
@@ -88,8 +91,8 @@ def main():
                 overlaps[name]={**overlap_check(b.values,h.values),'overlap_file_sha256':sha(p),'historical_source':str(historical),'historical_file_bytes':historical.stat().st_size,'historical_file_mtime_ns':historical.stat().st_mtime_ns}
                 print('Overlap passed:',name,OVERLAP_YEAR,flush=True)
         for name in names:
-            month=MONTHS[name];p=fetch(YEAR,month,cache)
-            with xr.open_dataset(p) as new:b=daily_block(new,YEAR,month,grid.lat,grid.lon)
+            month=MONTHS[name];my=month_year(name);p=fetch(my,month,cache)
+            with xr.open_dataset(p) as new:b=daily_block(new,my,month,grid.lat,grid.lon)
             z,count=total(b);expected=b.sizes['time']
             ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count.astype('int16'))},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':name,'season_start':str(b.time.values[0])[:10],'season_end':str(b.time.values[-1])[:10],'expected_days':expected,'product':'CHIRPS Version 2.0 daily p25','source_url':BASE+p.name,'source_sha256':sha(p),'processing_utc':now(),'grid_method':'native coordinate match; no interpolation','forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
             ds.precip_season.attrs['units']='mm'
@@ -97,18 +100,18 @@ def main():
                 ds.to_netcdf(stage/f'chirps_{YEAR}_common.nc',encoding={k:{'zlib':True,'complevel':4} for k in ds.data_vars})
                 write(stage/'preparation_report.json',{'target':name,'overlap':overlaps[name],'expected_days':expected,'complete_cells':int((count==expected).sum()),'missing_cells':int((count!=expected).sum()),'source_sha256':sha(p),'forecast_freeze_sha256':ds.attrs['forecast_freeze_sha256'],'prepared_total_sha256':sha(stage/f'chirps_{YEAR}_common.nc')})
             print('Prepared',name,expected,'days',flush=True)
-        # Build JJAS only when all four months are explicitly requested and complete in this run.
+        # Build the season only when all its months are requested and complete in this run.
         if set(names)==set(MONTHS):
             datasets=[]
             for name in MONTHS:
                 with xr.open_dataset(root/'observations'/name/f'chirps_{YEAR}_common.nc') as f:datasets.append(f.load())
             z=sum(d.precip_season.values.astype(float) for d in datasets);count=sum(d.valid_day_count.values.astype('int16') for d in datasets)
-            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count)},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':'JJAS','season_start':f'{YEAR}-06-01','season_end':f'{YEAR}-09-30','expected_days':122,'product':'CHIRPS Version 2.0 daily p25','processing_utc':now(),'forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
+            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count)},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':SEASON,'season_start':window_iso(SEASON)[0],'season_end':window_iso(SEASON)[1],'expected_days':window_days(SEASON),'product':'CHIRPS Version 2.0 daily p25','processing_utc':now(),'forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
             ds.precip_season.attrs['units']='mm'
-            with staged_output(root/'observations/JJAS',a.regenerate) as stage:
+            with staged_output(root/'observations'/SEASON,a.regenerate) as stage:
                 ds.to_netcdf(stage/f'chirps_{YEAR}_common.nc')
-                write(stage/'preparation_report.json',{'target':'JJAS','month_sha256':{n:sha(root/'observations'/n/f'chirps_{YEAR}_common.nc') for n in MONTHS},'prepared_total_sha256':sha(stage/f'chirps_{YEAR}_common.nc'),'expected_days':122,'reconstruction':'Sum of four complete calendar-month totals; missing cells remain NaN'})
-            print('Prepared JJAS: 122 days; monthly reconstruction exact.',flush=True)
-        print('Prepared targets:',', '.join(names)+(', JJAS' if len(names)==4 else '')+'. Forecasts unchanged.')
+                write(stage/'preparation_report.json',{'target':SEASON,'month_sha256':{n:sha(root/'observations'/n/f'chirps_{YEAR}_common.nc') for n in MONTHS},'prepared_total_sha256':sha(stage/f'chirps_{YEAR}_common.nc'),'expected_days':window_days(SEASON),'reconstruction':f'Sum of {len(MONTHS)} complete calendar-month totals; missing cells remain NaN'})
+            print(f'Prepared {SEASON}: {window_days(SEASON)} days; monthly reconstruction exact.',flush=True)
+        print('Prepared targets:',', '.join(names)+(', '+SEASON if set(names)==set(MONTHS) else '')+'. Forecasts unchanged.')
     except (ValueError,KeyError,OSError,urllib.error.URLError) as exc:print('ERROR:',exc,file=sys.stderr);sys.exit(2)
 if __name__=='__main__':main()
