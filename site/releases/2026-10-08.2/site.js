@@ -17,8 +17,6 @@
     rainfall_anomaly_mm: '<p>The <strong>difference in mm</strong> between the corrected ensemble mean and the reference-period CHIRPS average. Red–orange: drier than average; green: wetter.</p>',
     rainfall_anomaly_percent: '<p>The same anomaly as a <strong>percentage of the reference average</strong>. Hidden where the reference rainfall is below 10 mm, where percentages exaggerate small amounts.</p>',
     verification_maps: '<p>All six panels in one figure (also available separately): observed anomaly, forecast anomaly, forecast minus observed, the observed tercile at each cell, the probability score difference against climatology and the rainfall amount score.</p>',
-    verification_comparison: '<p><strong>Forecast anomaly (left) and observed anomaly (right)</strong> for the same target and area, cut from one figure: same map extent, units (mm), reference period and colour scale. Brown: drier than average; green: wetter.</p>',
-    verification_comparison_error: '<p><strong>Forecast anomaly, observed anomaly and forecast minus observed</strong>. The first two share one colour scale; in the error map red means the forecast was too wet and blue too dry.</p>',
     verification_observed_anomaly: '<p><strong>Observed rainfall anomaly</strong> (CHIRPS minus the reference average, mm). Brown: drier than average; green: wetter. Same colour scale as the forecast anomaly panel.</p>',
     verification_forecast_anomaly: '<p><strong>Forecast anomaly</strong> of the frozen corrected ensemble mean (mm), on the same colour scale as the observed anomaly so the two can be compared directly.</p>',
     verification_error: '<p><strong>Forecast minus observed</strong> rainfall (mm). Red: the forecast was too wet; blue: too dry.</p>',
@@ -39,10 +37,9 @@
     S.view = c.views.some(v => v[0] === q.get('view')) ? q.get('view') : c.domain_view;
     S.kind = q.get('kind') === 'verification' ? 'verification' : 'forecast';
     S.product = q.get('product') || 'tercile_outlook';
-    S.period = q.get('period') === 'operational' ? 'operational' : 'training';
   }
   function sync() {
-    const q = new URLSearchParams({cycle: S.cycle, target: S.target, view: S.view, kind: S.kind, product: S.product, period: S.period});
+    const q = new URLSearchParams({cycle: S.cycle, target: S.target, view: S.view, kind: S.kind, product: S.product});
     history.replaceState(null, '', location.pathname + '?' + q + location.hash);
   }
 
@@ -137,13 +134,9 @@
     const e = S.kind === 'forecast' ? t.forecast[S.view] : t.verification[S.view];
     const prods = S.kind === 'forecast' ? PRODUCTS : (e ? e.images : []);
     if (prods.length && !prods.some(p => p[0] === S.product)) S.product = prods[0][0];
-    const cmp = S.product === 'verification_comparison' || S.product === 'verification_comparison_error';
-    $('mp-tabs').innerHTML = prods.filter(p => p[0] !== 'verification_comparison_error').map(p => '<button type="button" class="tab" data-p="' + p[0] + '" aria-pressed="' +
-      (p[0] === S.product || (cmp && p[0] === 'verification_comparison')) + '">' + esc(p[1]) + '</button>').join('');
-    $('mp-toggle').innerHTML = cmp && prods.some(p => p[0] === 'verification_comparison_error')
-      ? '<label class="check"><input type="checkbox" id="mp-error"' + (S.product === 'verification_comparison_error' ? ' checked' : '') + '> Show error map (forecast minus observed)</label>' : '';
+    $('mp-tabs').innerHTML = prods.map(p => '<button type="button" class="tab" data-p="' + p[0] + '" aria-pressed="' + (p[0] === S.product) + '">' + esc(p[1]) + '</button>').join('');
     const fig = $('mp-figure');
-    fig.classList.toggle('wide', S.kind === 'verification' && (S.product === 'verification_maps' || cmp));
+    fig.classList.toggle('wide', S.kind === 'verification' && S.product === 'verification_maps');
     $('mp-actions').hidden = !e;
     if (!e) {
       fig.innerHTML = '<div class="unavailable" role="status"><p><strong>' + esc(t.label) + ' ' + (S.kind === 'verification' ? 'verification' : 'forecast') + ' is unavailable.</strong> ' + esc(t.status.text) + '.</p>' +
@@ -158,8 +151,6 @@
     const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     $('mp-open').href = src;
     $('mp-download').href = src;
-    $('mp-open').textContent = cmp ? 'Open full-size comparison' : 'Open full-size';
-    $('mp-download').textContent = cmp ? 'Download comparison figure' : 'Download PNG';
     $('mp-download').setAttribute('download', ['ethiopia-rainfall', slug(t.label), slug(c.init) + '-init', slug(viewLabel(S.view)), slug(pname)].join('_') + '.png');
     $('mp-help').innerHTML = (HELP[S.product] || '') + '<p class="caveat">Reference period: CHIRPS ' + c.reference + '.</p>';
   }
@@ -278,125 +269,9 @@
       '</tbody></table></div><p class="caveat">Positive values mean lower RPS than climatology. Intervals resample whole years; regions are the fixed 1993–2025 rainfall regimes, and the last row is this cycle\'s rainfall domain. Regional results are noisier than national ones.</p>';
   }
 
-  // ---------- historical verification explorer (data/<cycle>_diagnostics.json, loaded on demand)
-  const BASE = window.SITE_BASE || '';
-  const DIAG = {};
-  function loadDiag(c) {
-    if (!c.diagnostics) return Promise.resolve(null);
-    if (!DIAG[c.id]) DIAG[c.id] = fetch(BASE + c.diagnostics).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-    return DIAG[c.id];
-  }
-  function yearChart(rows) {
-    const W = 640, H = 220, L = 46, R = 8, T = 16, B = 30, ys = rows.filter(r => ok(r.rpss));
-    const vals = ys.map(r => r.rpss), mx = Math.max(0.05, ...vals.map(Math.abs));
-    const step = [0.02, 0.05, 0.1, 0.2, 0.5].find(s => mx / s <= 3) || 1, top = Math.ceil(Math.max(0, ...vals) / step) * step, bot = Math.floor(Math.min(0, ...vals) / step) * step;
-    const y = v => T + (top - v) / (top - bot || 1) * (H - T - B), gw = (W - L - R) / rows.length, bw = Math.max(3, gw - 3);
-    const hi = vals.indexOf(Math.max(...vals)), lo = vals.indexOf(Math.min(...vals));
-    let g = '';
-    for (let v = bot; v <= top + 1e-9; v += step) g += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + sg(v, 2) + '</text>';
-    g += '<line class="zero" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0) + '" y2="' + y(0) + '"/>';
-    ys.forEach((r, i) => {
-      const x = L + gw * rows.indexOf(r) + 1.5, v = r.rpss, up = v >= 0, top0 = y(Math.max(v, 0)), h = Math.max(1, Math.abs(y(v) - y(0)));
-      g += '<rect x="' + x + '" y="' + top0 + '" width="' + bw + '" height="' + h + '" rx="2" fill="var(' + (up ? '--fc' : '--neg') + ')"><title>' + r.year + ': RPSS ' + sg(v, 3) +
-        ' (forecast RPS ' + r.rps_blend.toFixed(3) + ', climatology ' + r.rps_climatology.toFixed(3) + '; ' + r.cells + ' cells)</title></rect>';
-      if (i === hi || i === lo) g += '<text class="val" x="' + (x + bw / 2) + '" y="' + (up ? y(v) - 4 : y(v) + 13) + '" text-anchor="middle">' + r.year + '</text>';
-      if (r.year % 4 === 1) g += '<text x="' + (x + bw / 2) + '" y="' + (H - 10) + '" text-anchor="middle">' + r.year + '</text>';
-    });
-    return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Probability skill by year: ' + esc(ys.map(r => r.year + ' ' + sg(r.rpss, 3)).join(', ')) + '">' + g + '</svg>';
-  }
-  function reliabilityChart(rel, minCount) {
-    const S0 = 300, M = 40, P = S0 - M - 10, x = v => M + v * P, y = v => 10 + (1 - v) * P;
-    let g = '<rect x="' + M + '" y="10" width="' + P + '" height="' + P + '" fill="none" class="axis" stroke="var(--line)"/>';
-    for (let v = 0; v <= 1.0001; v += 0.2) g += '<text x="' + x(v) + '" y="' + (S0 - 14) + '" text-anchor="middle">' + v.toFixed(1) + '</text><text x="' + (M - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v.toFixed(1) + '</text>';
-    g += '<line x1="' + x(0) + '" y1="' + y(0) + '" x2="' + x(1) + '" y2="' + y(1) + '" stroke="var(--ink2)" stroke-dasharray="4 4"/>';
-    // Bins with few cell-years are shown as open points and not joined: their observed frequency is unstable.
-    rel.forEach((rows, k) => {
-      const pts = rows.filter(r => r.count >= minCount).map(r => x(r.forecast).toFixed(1) + ',' + y(r.observed).toFixed(1)).join(' ');
-      g += '<polyline points="' + pts + '" fill="none" stroke="var(' + CATV[k] + ')" stroke-width="2"/>';
-      rows.forEach(r => { const full = r.count >= minCount;
-        g += '<circle cx="' + x(r.forecast) + '" cy="' + y(r.observed) + '" r="' + (full ? 4.5 : 3.5) + '" fill="' + (full ? 'var(' + CATV[k] + ')' : 'var(--surface)') +
-          '" stroke="' + (full ? 'var(--surface)' : 'var(' + CATV[k] + ')') + '" stroke-width="' + (full ? 2 : 1.5) + '"><title>' + CAT[k] + ': forecast ' + pc(r.forecast) + ', observed ' + pc(r.observed) + ' (' + r.count + ' cell-years' + (full ? '' : ', too few to judge') + ')</title></circle>'; });
-    });
-    g += '<text x="' + (M + P / 2) + '" y="' + (S0) + '" text-anchor="middle">Forecast probability</text>';
-    return '<svg class="chart rel" viewBox="0 0 ' + S0 + ' ' + (S0 + 6) + '" role="img" aria-label="Reliability diagram: observed frequency against forecast probability for each tercile">' + g + '</svg>';
-  }
-  function renderDiag() {
-    const c = cyc(), t = tgt();
-    $('dg-target').innerHTML = c.targets.map(x => '<option value="' + x.id + '"' + (x.id === S.target ? ' selected' : '') + '>' + esc(x.label) + '</option>').join('');
-    $('dg-period').innerHTML = [['training', 'Cross-validated'], ['operational', 'Exploratory']].map(([k, l]) => '<button type="button" data-period="' + k + '" aria-pressed="' + (S.period === k) + '">' + l + '</button>').join('');
-    const body = $('dg-body');
-    if (!c.diagnostics) { body.innerHTML = '<p class="notice">Historical diagnostics have not been generated for this cycle (run scripts/historical_diagnostics.py).</p>'; return; }
-    body.innerHTML = '<p class="caveat">Loading diagnostics…</p>';
-    const want = [c.id, S.target, S.view, S.period].join('|');
-    loadDiag(c).then(D2 => {
-      if ([cyc().id, S.target, S.view, S.period].join('|') !== want) return;     // selection changed meanwhile
-      const area = D2.areas.includes(S.view) ? S.view : 'all_ethiopia';
-      const d = ((D2.targets[t.id] || {})[S.period] || {})[area];
-      if (!d) { body.innerHTML = '<p class="notice">No ' + (S.period === 'training' ? 'cross-validated' : 'exploratory') + ' diagnostics for ' + esc(t.label) + ' in this area.</p>'; return; }
-      const better = d.per_year.filter(r => r.rpss > 0).length;
-      const worst = d.per_year.filter(r => ok(r.rpss)).sort((a, b) => a.rpss - b.rpss).slice(0, 3);
-      const head = '<dl class="meta"><dt>Evaluation</dt><dd>' + (S.period === 'training' ? 'Cross-validated (nested leave-one-year-out), ' : 'Exploratory: parameters fitted on 1993–2016 applied to later years, which were seen during method selection, ') + d.first + '–' + d.last + '</dd>' +
-        '<dt>Benchmark</dt><dd>Climatology: observed tercile frequencies of the training years (about one-third each)</dd>' +
-        '<dt>Area</dt><dd>' + esc(area === S.view ? viewLabel(S.view) : 'All Ethiopia (the selected domain has no diagnostics)') + '; probabilities on ' + pc(d.coverage) + ' of it on average</dd>' +
-        '<dt>Sample</dt><dd>' + d.years + ' years, ' + d.cell_years.toLocaleString('en') + ' cell-years. Cells within a year are spatially correlated, so the independent sample is closer to one value per year.</dd></dl>';
-      const bs = d.brier, cats = [0, 1, 2];
-      const brier = '<div class="table-wrap"><table class="compact"><caption>Category Brier scores (lower is better) and Brier skill against climatology</caption><thead><tr><th scope="col">Category</th><th scope="col">Forecast</th><th scope="col">Climatology</th><th scope="col">Brier skill</th></tr></thead><tbody>' +
-        cats.map(k => '<tr><td><i class="sw" style="background:var(' + CATV[k] + ')"></i>' + CAT[k] + '</td><td>' + bs.blend[k].toFixed(4) + '</td><td>' + bs.climatology[k].toFixed(4) + '</td><td class="' + (bs.bss[k] > 0 ? 'pos' : 'neg') + '">' + sg(bs.bss[k], 3) + '</td></tr>').join('') + '</tbody></table></div>';
-      const hist = '<div class="hbars">' + d.histogram.map(h => '<div class="hbar"><span>' + esc(h.label) + '</span><div><i style="width:' + (100 * h.share).toFixed(1) + '%"></i></div><b>' + pc(h.share) + '</b></div>').join('') + '</div>';
-      const relTable = '<details><summary>Reliability table (forecast bins, observed frequency, counts)</summary><div class="table-wrap"><table class="compact"><thead><tr><th scope="col">Category</th><th scope="col">Bin</th><th scope="col">Mean forecast</th><th scope="col">Observed frequency</th><th scope="col">Cell-years</th></tr></thead><tbody>' +
-        d.reliability.flatMap((rows, k) => rows.map(r => '<tr><td>' + CAT[k] + '</td><td>' + pc(r.bin[0]) + '–' + pc(r.bin[1]) + '</td><td>' + pc(r.forecast) + '</td><td>' + pc(r.observed) + '</td><td>' + r.count.toLocaleString('en') + '</td></tr>')).join('') + '</tbody></table></div></details>';
-      const am = ((D2.amount || {})[t.id] || {})[area];
-      const amount = am ? '<div class="table-wrap"><table class="compact"><caption>Rainfall amounts, ' + esc(am.period) + '</caption><tbody>' +
-          '<tr><td>Rainfall amount skill (CRPSS)</td><td>' + sg(am.crpss, 3) + '</td></tr><tr><td>CRPS, corrected / climatology</td><td>' + am.corrected_crps_mm.toFixed(1) + ' / ' + am.climatology_crps_mm.toFixed(1) + ' mm</td></tr>' +
-          '<tr><td>Average rainfall error, corrected (raw model)</td><td>' + sg(am.corrected_bias_mm, 1) + ' mm (' + sg(am.raw_bias_mm, 1) + ' mm)</td></tr><tr><td>RMSE, corrected / climatology</td><td>' + am.corrected_rmse_mm.toFixed(1) + ' / ' + am.climatology_rmse_mm.toFixed(1) + ' mm</td></tr></tbody></table></div>'
-        : '<p class="caveat">Historical rainfall-amount diagnostics (CRPS, CRPSS and amount errors) have not been generated for ' + esc(t.label) + ' in this area and period; this needs a separate cross-validated amount evaluation. Single-season amount scores are in the Verification section.</p>';
-      body.innerHTML = head +
-        '<div class="box"><h4>Performance by year</h4><p class="caveat">Probability skill (RPSS) of each year; better than climatology in ' + better + ' of ' + d.years + ' years. Weakest years: ' + worst.map(r => r.year + ' (' + sg(r.rpss, 3) + ')').join(', ') + '.</p>' +
-        '<div class="legend"><span><i class="sw" style="background:var(--fc)"></i>Better than climatology</span><span><i class="sw" style="background:var(--neg)"></i>Worse</span></div>' + yearChart(d.per_year) + '</div>' +
-        '<div class="grid2"><div class="box"><h4>Reliability</h4><div class="legend">' + cats.map(k => '<span><i class="sw" style="background:var(' + CATV[k] + ')"></i>' + CAT[k] + '</span>').join('') + '</div>' + reliabilityChart(d.reliability, Math.max(50, Math.round(0.005 * d.cell_years))) +
-        '<p class="caveat">Points on the dashed diagonal are reliable: events forecast with probability p happen p of the time. Points flatter than the diagonal mean over-confident probabilities. Open points have fewer than ' + Math.max(50, Math.round(0.005 * d.cell_years)) + ' cell-years (0.5% of the sample, at least 50) and are not joined. Hover a point for its count.</p>' + relTable + '</div>' +
-        '<div class="box"><h4>How strong are the signals?</h4><p class="caveat">Share of cell-years by the leading tercile probability.</p>' + hist + brier + '</div></div>' +
-        '<div class="box"><h4>Rainfall amounts</h4>' + amount + '</div>';
-    }).catch(() => { body.innerHTML = '<p class="notice">The diagnostics file could not be loaded. Try reloading the page.</p>'; });
-  }
-
-  // ---------- one-click package (files are zipped in the browser)
-  function loadZip() {
-    if (window.JSZip) return Promise.resolve(window.JSZip);
-    const urls = ['https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'];
-    const tryLoad = i => new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = urls[i];
-      sc.onload = () => res(window.JSZip); sc.onerror = () => (i + 1 < urls.length ? tryLoad(i + 1).then(res, rej) : rej(new Error('ZIP library could not be loaded')));
-      document.head.appendChild(sc); });
-    return tryLoad(0);
-  }
-  async function downloadPackage() {
-    const c = cyc(), btn = $('dl-package'), prog = $('dl-progress');
-    btn.disabled = true;
-    try {
-      const Z = await loadZip(), zip = new Z(), root = 'ethiopia-rainfall_' + c.id + '_package/';
-      let n = 0;
-      for (const [src, dest] of c.package) {
-        prog.textContent = 'Adding file ' + (++n) + ' of ' + c.package.length + '…';
-        const r = await fetch(BASE + src);
-        if (!r.ok) throw new Error(src + ' (' + r.status + ')');
-        zip.file(root + dest, await r.arrayBuffer());
-      }
-      prog.textContent = 'Compressing…';
-      const blob = await zip.generateAsync({type: 'blob'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob); a.download = 'ethiopia-rainfall_' + c.id + '_package.zip';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
-      prog.textContent = 'Package ready (' + (blob.size / 1e6).toFixed(1) + ' MB, ' + c.package.length + ' files).';
-    } catch (err) {
-      prog.textContent = 'The package could not be built: ' + err.message + '. The individual files below are still available.';
-    } finally { btn.disabled = false; }
-  }
-
   function renderDownloads() {
     const c = cyc();
-    $('dl-package').textContent = 'Download package (ZIP): ' + c.label + ', ' + c.package.length + ' files';
-    $('dl-body').innerHTML = '<div class="box"><h3>' + esc(c.option) + ' — individual files</h3><ul class="dl">' + c.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(d.note) + '</span></li>').join('') + '</ul></div>' +
+    $('dl-body').innerHTML = '<div class="box"><h3>' + esc(c.option) + '</h3><ul class="dl">' + c.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(d.note) + '</span></li>').join('') + '</ul></div>' +
       '<details><summary>Other cycles</summary><ul class="dl">' + D.cycles.filter(x => x.id !== c.id).flatMap(x => x.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(x.option) + '</span></li>')).join('') + '</ul></details>';
   }
 
@@ -405,24 +280,19 @@
     const a = document.activeElement;
     if (!a || a === document.body) return null;
     if (a.id) return '#' + a.id;
-    for (const k of ['t', 'k', 'p', 'period']) if (a.dataset && a.dataset[k]) { const box = a.closest('[id]'); return (box ? '#' + box.id + ' ' : '') + '[data-' + k + '="' + a.dataset[k] + '"]'; }
+    for (const k of ['t', 'k', 'p']) if (a.dataset && a.dataset[k]) { const box = a.closest('[id]'); return (box ? '#' + box.id + ' ' : '') + '[data-' + k + '="' + a.dataset[k] + '"]'; }
     return null;
   }
   function renderAll() {
     const key = focusKey();
     renderParts();
-    if (key) {
-      // A control that disappears (e.g. the forecast button in an unavailable-verification message) hands focus to
-      // the persistent control with the same action (#mp-kind).
-      const el = document.querySelector(key) || document.querySelector('#mp-kind ' + key.replace(/^#[^ ]+ /, ''));
-      if (el && el !== document.activeElement) el.focus({preventScroll: true});
-    }
+    if (key) { const el = document.querySelector(key); if (el && el !== document.activeElement) el.focus({preventScroll: true}); }
   }
   function renderParts() {
     const c = cyc();
     $('cycle').value = c.id;
     $('view').innerHTML = c.views.map(v => '<option value="' + v[0] + '"' + (v[0] === S.view ? ' selected' : '') + '>' + esc(v[1]) + '</option>').join('');
-    renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDiag(); renderDownloads(); sync();
+    renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDownloads(); sync();
   }
 
   // Anchor offset follows the real height of the sticky header (wrapped controls included).
@@ -437,13 +307,9 @@
   $('cycle').addEventListener('change', e => { const c = D.cycles.find(x => x.id === e.target.value); S.cycle = c.id; S.target = c.targets[0].id; S.view = c.domain_view; renderAll(); });
   $('view').addEventListener('change', e => { S.view = e.target.value; renderAll(); });
   $('mp-target').addEventListener('change', e => { S.target = e.target.value; renderAll(); });
-  $('dg-target').addEventListener('change', e => { S.target = e.target.value; renderAll(); });
-  document.addEventListener('change', e => { if (e.target.id === 'mp-error') { S.product = e.target.checked ? 'verification_comparison_error' : 'verification_comparison'; renderAll(); } });
-  $('dl-package').addEventListener('click', downloadPackage);
   document.addEventListener('click', e => {
-    const b = e.target.closest('[data-t],[data-k],[data-p],[data-period]');
+    const b = e.target.closest('[data-t],[data-k],[data-p]');
     if (!b) return;
-    if (b.dataset.period) S.period = b.dataset.period;
     if (b.dataset.t) S.target = b.dataset.t;
     if (b.dataset.k) S.kind = b.dataset.k;
     if (b.dataset.p) S.product = b.dataset.p;

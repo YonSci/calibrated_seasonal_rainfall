@@ -24,3 +24,6 @@ data/shapefiles/
 !data/masks/*.nc
 !evidence/*.nc
 !data/masks/*.zip
+
+# Forecast NetCDF files published with the site (download package)
+!site/downloads/data/**/*.nc

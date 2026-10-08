@@ -57,6 +57,8 @@ Replace the placeholders with the season's values from the table: `<INIT>` initi
 | 10. **Freeze** (immediately after issuing) | `python scripts\prepare_verification_2026.py --config <PROJECT> --input-root outputs\final_shared_blend --root <verification_root> --freeze-only` | `Freeze ready: …\freeze_manifest.json` |
 | 11. Maps and gallery | `python scripts\run_operational.py --config <CYCLE> --workflow products` | `Ready: …\index.html` |
 | 11b. Domain and regional skill | `python scripts\regional_skill.py --cycle <CYCLE>` | `Saved: …\regional_skill\<TAG>_regional_skill.json` (historical skill of the rainfall domain and the regimes, shown on the site) |
+| 11c. Historical diagnostics | `python scripts\historical_diagnostics.py --cycle <CYCLE>` | `Saved: …\historical_diagnostics\<TAG>_diagnostics.json` (performance by year, reliability, signal histogram, category Brier skill for the explorer) |
+| 11d. Release entry | add an entry to `config\site_releases.json` (id, date, title, change types, `"commit": null`) and set the previous entry's `commit` to the commit that published it | the change log and the archived page of the previous release appear under `site/releases/` |
 | 12. Site | `set CALIBRATION_CYCLE=` then `python scripts\build_site.py` (add `--offline` without internet) | cycle appears in the cycle selector; statuses checked against the CHIRPS listing |
 | 13. Tests | `python -m unittest discover -s tests` | `OK` |
 | 14. Publish | `git add -A`, `git commit -m "<message>"`, `git push`, then `"C:\Program Files\GitHub CLI\gh.exe" run watch` | green Deploy site and Tests; page updated (Ctrl + F5) |

@@ -1,0 +1,129 @@
+{
+ "cycle": "ONDJ 2026/27",
+ "initialization": "2026-09-01",
+ "initialization_month": "September",
+ "built_utc": "2026-10-08 15:46 UTC",
+ "release": "2026-10-08.3",
+ "code_version": "f10eff3",
+ "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
+ "record": {
+  "Model initialization": "1 September 2026 · ECMWF SEAS5 (system 51), 51 members",
+  "Target period": "1 Oct 2026 – 31 Jan 2027",
+  "Forecast record": "Generated 7 Oct 2026; not yet frozen for verification (freeze before observations are used)",
+  "Publication status": "Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast",
+  "Reference period": "CHIRPS v2.0 ONDJ 1993/94–2024/25 (32 seasons)",
+  "Observations processed through": "None yet",
+  "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 8 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
+  "Verification last run": "Not run",
+  "Method / version": "Shared climatology blend (λ = 0.28 for ONDJ) · code f10eff3"
+ },
+ "rainfall_domain": {
+  "view": "ondj_rainfall_domain",
+  "definition": "Fixed 1993-2025 descriptive domain (Deyr / Hagaya): rainfall regime R3 (GitHub-refined classification of the CHIRPS daily climatology) with ONDJ climatological CHIRPS rainfall >=30 mm; patches smaller than 3 cells removed. Scientific masking walkthrough logic; no onset gate. The same domain is used for the season and each of its months."
+ },
+ "reference_period": "1993/94–2024/25",
+ "targets": [
+  {
+   "target": "ONDJ 2026/27",
+   "start": "2026-10-01",
+   "end": "2027-01-31",
+   "status": {
+    "code": "ongoing",
+    "text": "Target period ongoing (ends 31 Jan 2027)"
+   },
+   "verified_areas": []
+  },
+  {
+   "target": "Oct 2026",
+   "start": "2026-10-01",
+   "end": "2026-10-31",
+   "status": {
+    "code": "ongoing",
+    "text": "Target period ongoing (ends 31 Oct 2026)"
+   },
+   "verified_areas": []
+  },
+  {
+   "target": "Nov 2026",
+   "start": "2026-11-01",
+   "end": "2026-11-30",
+   "status": {
+    "code": "not_started",
+    "text": "Target period starts 1 Nov 2026"
+   },
+   "verified_areas": []
+  },
+  {
+   "target": "Dec 2026",
+   "start": "2026-12-01",
+   "end": "2026-12-31",
+   "status": {
+    "code": "not_started",
+    "text": "Target period starts 1 Dec 2026"
+   },
+   "verified_areas": []
+  },
+  {
+   "target": "Jan 2027",
+   "start": "2027-01-01",
+   "end": "2027-01-31",
+   "status": {
+    "code": "not_started",
+    "text": "Target period starts 1 Jan 2027"
+   },
+   "verified_areas": []
+  }
+ ],
+ "files": [
+  "README.txt",
+  "metadata.json",
+  "summary.csv",
+  "bulletin.pdf",
+  "maps/forecast/ONDJ/all_ethiopia/tercile_outlook.png",
+  "maps/forecast/ONDJ/all_ethiopia/rainfall_total_mm.png",
+  "maps/forecast/ONDJ/all_ethiopia/rainfall_anomaly_mm.png",
+  "maps/forecast/ONDJ/all_ethiopia/rainfall_anomaly_percent.png",
+  "maps/forecast/ONDJ/ondj_rainfall_domain/tercile_outlook.png",
+  "maps/forecast/ONDJ/ondj_rainfall_domain/rainfall_total_mm.png",
+  "maps/forecast/ONDJ/ondj_rainfall_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/ONDJ/ondj_rainfall_domain/rainfall_anomaly_percent.png",
+  "data/ONDJ_forecast_2026.nc",
+  "maps/forecast/Oct/all_ethiopia/tercile_outlook.png",
+  "maps/forecast/Oct/all_ethiopia/rainfall_total_mm.png",
+  "maps/forecast/Oct/all_ethiopia/rainfall_anomaly_mm.png",
+  "maps/forecast/Oct/all_ethiopia/rainfall_anomaly_percent.png",
+  "maps/forecast/Oct/ondj_rainfall_domain/tercile_outlook.png",
+  "maps/forecast/Oct/ondj_rainfall_domain/rainfall_total_mm.png",
+  "maps/forecast/Oct/ondj_rainfall_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/Oct/ondj_rainfall_domain/rainfall_anomaly_percent.png",
+  "data/Oct_forecast_2026.nc",
+  "maps/forecast/Nov/all_ethiopia/tercile_outlook.png",
+  "maps/forecast/Nov/all_ethiopia/rainfall_total_mm.png",
+  "maps/forecast/Nov/all_ethiopia/rainfall_anomaly_mm.png",
+  "maps/forecast/Nov/all_ethiopia/rainfall_anomaly_percent.png",
+  "maps/forecast/Nov/ondj_rainfall_domain/tercile_outlook.png",
+  "maps/forecast/Nov/ondj_rainfall_domain/rainfall_total_mm.png",
+  "maps/forecast/Nov/ondj_rainfall_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/Nov/ondj_rainfall_domain/rainfall_anomaly_percent.png",
+  "data/Nov_forecast_2026.nc",
+  "maps/forecast/Dec/all_ethiopia/tercile_outlook.png",
+  "maps/forecast/Dec/all_ethiopia/rainfall_total_mm.png",
+  "maps/forecast/Dec/all_ethiopia/rainfall_anomaly_mm.png",
+  "maps/forecast/Dec/all_ethiopia/rainfall_anomaly_percent.png",
+  "maps/forecast/Dec/ondj_rainfall_domain/tercile_outlook.png",
+  "maps/forecast/Dec/ondj_rainfall_domain/rainfall_total_mm.png",
+  "maps/forecast/Dec/ondj_rainfall_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/Dec/ondj_rainfall_domain/rainfall_anomaly_percent.png",
+  "data/Dec_forecast_2026.nc",
+  "maps/forecast/Jan/all_ethiopia/tercile_outlook.png",
+  "maps/forecast/Jan/all_ethiopia/rainfall_total_mm.png",
+  "maps/forecast/Jan/all_ethiopia/rainfall_anomaly_mm.png",
+  "maps/forecast/Jan/all_ethiopia/rainfall_anomaly_percent.png",
+  "maps/forecast/Jan/ondj_rainfall_domain/tercile_outlook.png",
+  "maps/forecast/Jan/ondj_rainfall_domain/rainfall_total_mm.png",
+  "maps/forecast/Jan/ondj_rainfall_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/Jan/ondj_rainfall_domain/rainfall_anomaly_percent.png",
+  "data/Jan_forecast_2026.nc"
+ ],
+ "status": "research reconstruction; not an official EMI or ICPAC forecast"
+}
