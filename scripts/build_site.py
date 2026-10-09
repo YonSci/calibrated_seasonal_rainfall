@@ -1159,15 +1159,21 @@ JS = r'''
       const ev = X.evidence || {};
       const areaKey = S.view === 'all_ethiopia' ? 'all_ethiopia' : 'season_domain';
       const areaName = viewLabel(S.view), otherName = areaKey === 'all_ethiopia' ? 'Rainfall-domain context' : 'National context';
-      const href = p => esc(siteURL(String(p).replace('{view}', S.view)));
-      const links = (ids, sid) => {
+      const href = p => esc(siteURL(p));
+      // Evidence maps follow the finding's own scope (a national-context finding links the national map).
+      const scopeView = key => key === 'season_domain' ? c.domain_view : key === 'all_ethiopia' ? 'all_ethiopia' : S.view;
+      const links = (ids, sid, view = S.view) => {
         const seen = new Set(), out = [];
         [...ids, ...(sid ? [sid + '_record'] : [])].forEach(i => ((ev[i] || {}).links || []).forEach(l => {
-          if (!seen.has(l.href)) { seen.add(l.href); out.push('<a href="' + href(l.href) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>'); }
+          const map = l.href.includes('{view}'), url = l.href.replace('{view}', view);
+          const label = map ? l.label + ' (' + (view === 'all_ethiopia' ? 'All Ethiopia' : 'domain') + ')' : l.label;
+          if (!seen.has(url)) { seen.add(url); out.push('<a href="' + href(url) + '" target="_blank" rel="noopener">' + esc(label) + '</a>'); }
         }));
         return out.length ? '<span class="evlinks">Evidence: ' + out.join(' · ') + '</span>' : '';
       };
-      const item = i => '<li><strong>' + esc(i.title) + '.</strong> ' + esc(i.text) + links(i.evidence_ids, i.source_id) + '</li>';
+      const overlap = x => !ok(x) ? '' : x <= 0 ? 'Outside the domain (national context)' : x >= 1 ? 'Entire sample in the domain' :
+        'Partly overlaps the domain — ' + (100 * x).toFixed(0) + '% of sample cells';
+      const item = i => '<li><strong>' + esc(i.title) + '.</strong> ' + esc(i.text) + links(i.evidence_ids, i.source_id, scopeView(i.area_key)) + '</li>';
       let h = '<p class="scope"><strong>Season:</strong> ' + esc(season.label) + ' (' + dt(season.start) + ' – ' + dt(season.end) + ') · <strong>Area:</strong> ' + esc(areaName) + '</p>';
       if (S.target !== season.id) h += '<p class="notice">This comparison covers the full ' + esc(season.id) + ' season. A separate ' + esc(tgt().label) + ' comparison is not available.</p>';
       if (X.stale.length) h += '<p class="notice"><strong>Comparison withheld.</strong> The saved comparison no longer matches the current ' + esc(X.stale.join(', ')) +
@@ -1189,20 +1195,20 @@ JS = r'''
           return '<tr' + (here ? ' class="current"' : '') + '><td>' + esc(m.where) + (here ? '' : ' <span class="caveat">(' + otherName.toLowerCase() + ')</span>') + '</td><td>' + share(v.area_share_both_favoured) + '</td><td>' +
             share1(v.agreement_share_where_both_favoured) + '</td><td>' + share1(v.opposing_share_where_both_favoured) + '</td></tr>'; }).join('') + '</tbody></table></div>';
       if (X.emi_table.length) {
-        const rows = [...X.emi_table].sort((a, b) => (b.domain_share >= .5) - (a.domain_share >= .5));
+        const rows = areaKey === 'all_ethiopia' ? X.emi_table : [...X.emi_table].sort((a, b) => b.domain_share - a.domain_share);
         h += '<div class="table-wrap"><table class="compact"><caption>EMI zones: printed values and the platform\'s sampled neighbourhood (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">Official</th><th scope="col">Platform neighbourhood</th><th scope="col">Relationship</th><th scope="col">Evidence</th></tr></thead><tbody>' +
-          rows.map(r => { const inside = areaKey === 'all_ethiopia' || r.domain_share >= .5;
+          rows.map(r => { const mapView = areaKey === 'season_domain' && r.domain_share >= 1 ? c.domain_view : 'all_ethiopia';
             return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>Near zone ' + esc(r.zone) + ' arrow' +
-              (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + (inside ? 'in the domain' : 'outside the domain (national context)') + '</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td><td class="nowrap">' + esc(r.platform) +
-              '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td><td>' + links(r.evidence_ids).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
-          '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities within ±0.5° of each arrow tip, not complete EMI zones (the figure publishes no zone boundaries). Percentages are rounded to add up to 100%.</p>';
+              (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + overlap(r.domain_share) + '</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td><td class="nowrap">' + esc(r.platform) +
+              '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
+          '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities over the whole ±0.5° sample around each arrow tip (also where a sample only partly overlaps the domain), not complete EMI zones: the figure publishes no zone boundaries. Percentages are rounded to add up to 100%.</p>';
       }
       if (ctx.length) h += '<details><summary>' + otherName + '</summary><ul class="findings">' + ctx.map(item).join('') + '</ul></details>';
       // 4. detailed interpretation
       if (X.paragraphs.length) {
         const order = p => (p.area_key === areaKey ? 0 : p.area_key === 'zone' ? 1 : p.area_key === 'any' ? 3 : 2);
         h += '<details><summary>Detailed interpretation</summary>' + [...X.paragraphs].sort((a, b) => order(a) - order(b)).map(p =>
-          '<p>' + (p.area_key !== 'zone' && p.area_key !== 'any' && p.area_key !== areaKey ? '<span class="caveat">' + otherName + ':</span> ' : '') + esc(p.text) + links(p.evidence_ids) + '</p>').join('') + '</details>';
+          '<p>' + (p.area_key !== 'zone' && p.area_key !== 'any' && p.area_key !== areaKey ? '<span class="caveat">' + otherName + ':</span> ' : '') + esc(p.text) + links(p.evidence_ids, null, scopeView(p.area_key === 'zone' ? 'all_ethiopia' : p.area_key)) + '</p>').join('') + '</details>';
       }
       // 5. sources, extraction review and methods
       const st = s => s === 'validated' ? '<span class="status published">Extraction reviewed</span>' : '<span class="status awaiting">Extraction awaiting review</span>';

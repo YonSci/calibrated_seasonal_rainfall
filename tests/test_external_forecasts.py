@@ -221,3 +221,56 @@ class Pipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+ONDJ_OUT = ROOT / 'outputs/operational_2026_ondj/comparisons'
+
+
+class Publication(unittest.TestCase):
+    def test_overlap_labels(self):
+        from site_extras import overlap_label
+        self.assertEqual(overlap_label(0.0), 'Outside the domain')
+        self.assertEqual(overlap_label(1.0), 'Entire sample in the domain')
+        self.assertEqual(overlap_label(0.4375), 'Partly overlaps the domain — 44% of sample cells')
+
+    def test_threshold_and_manifest_staleness(self):
+        from site_extras import _stale_reasons, saved_output_consistency
+        saved = dict(native_sha256='n', domain_mask_sha256='m', registry_sha256='r', minimum_leading_probability=0.4, sources={})
+        self.assertEqual(_stale_reasons(saved, dict(saved, minimum_leading_probability=0.5)), ['the favoured-category threshold'])
+        manifest = dict(sources=[dict(source_id='s1', sha256='x', extraction=dict(status='validated', content_sha256='c'))])
+        comparison = dict(inputs=dict(saved, sources=dict(s1=dict(sha256='x', extraction_status='validated', content_sha256='c'))))
+        self.assertEqual(saved_output_consistency(manifest, comparison, dict(inputs=comparison['inputs'])), [])
+        manifest['sources'][0]['sha256'] = 'y'                      # e.g. a restored older manifest
+        self.assertIn('the saved source manifest', saved_output_consistency(manifest, comparison, dict(inputs=comparison['inputs']))[0])
+
+    @unittest.skipUnless((ONDJ_OUT / 'interpretation/interpretation.json').is_file(), 'ONDJ comparison outputs not present')
+    def test_public_reports_use_published_data_only(self):
+        import dataclasses
+        from cycle import load_cycle
+        from site_extras import export_comparison, local_images
+        tmp = Path(tempfile.mkdtemp()).resolve()
+        try:
+            shutil.copytree(ONDJ_OUT, tmp / 'comparisons')
+            p = tmp / 'comparisons/interpretation/interpretation.json'
+            interp = json.loads(p.read_text(encoding='utf-8'))
+            marker = 'UNREVIEWED-DRAFT-MARKER 12.3%'
+            interp['paragraphs'].append(dict(id='x', finding='x', source_id='s', area='A', area_key='all_ethiopia', status='draft',
+                                             relationship=None, text=marker, evidence_ids=[]))
+            interp['summary'].append(dict(id='y', area_key='all_ethiopia', source_id='s', status='draft', title='Draft', text=marker,
+                                          evidence_ids=[], scope={}))
+            p.write_text(json.dumps(interp), encoding='utf-8')
+            c = load_cycle(ROOT / 'config/cycles/sep_2026_ondj.json')
+            raw = dict(c.raw, external_comparison=dict(c.raw['external_comparison'], output_root=str(tmp / 'comparisons')))
+            site = tmp / 'site'
+            res = export_comparison(dataclasses.replace(c, raw=raw), 'ondj2026', site)
+            for f in ['downloads/ondj2026_comparison_report.html', 'downloads/ondj2026_comparison_report_package.html',
+                      'downloads/ondj2026_comparison.json', 'data/ondj2026_comparison.json']:
+                self.assertNotIn('UNREVIEWED-DRAFT-MARKER', (site / f).read_text(encoding='utf-8'), f)
+            packaged = (site / 'downloads/ondj2026_comparison_report_package.html').read_text(encoding='utf-8')
+            in_zip = {z for _, z in res['package']}
+            self.assertTrue(local_images(packaged))
+            self.assertTrue(all('comparison/' + s in in_zip for s in local_images(packaged)))
+            web = (site / 'downloads/ondj2026_comparison_report.html').read_text(encoding='utf-8')
+            self.assertTrue(all((site / 'downloads' / s).resolve().is_file() for s in local_images(web)))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)

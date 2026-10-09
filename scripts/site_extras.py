@@ -479,11 +479,13 @@ def _current_inputs(cycle, registry_path):
         rec, _ = ef.extraction_record(registry, sid)
         status, _ = ef.extraction_check(rec, cur['sha256'])
         sources[sid] = dict(sha256=cur['sha256'], extraction_status=status, content_sha256=rec and ef.content_sha256(rec))
-    return input_fingerprint(native, mask, registry, sources, None), registry, ef.cache_dir(registry, ext['cache_root'])
+    minimum = cycle.raw['display']['minimum_leading_probability']      # the favoured-category rule
+    return input_fingerprint(native, mask, registry, sources, minimum), registry, ef.cache_dir(registry, ext['cache_root'])
 
 
 def _stale_reasons(saved, now):
-    names = dict(native_sha256='the platform forecast', domain_mask_sha256='the rainfall-domain mask', registry_sha256='the source registry')
+    names = dict(native_sha256='the platform forecast', domain_mask_sha256='the rainfall-domain mask', registry_sha256='the source registry',
+                 minimum_leading_probability='the favoured-category threshold')
     out = [names[k] for k in names if (saved or {}).get(k) != now.get(k)]
     old, new = (saved or {}).get('sources', {}), now.get('sources', {})
     for sid in sorted(set(old) | set(new)):
@@ -492,6 +494,17 @@ def _stale_reasons(saved, now):
             out.append(f'the official product {sid}')
         elif (a.get('extraction_status'), a.get('content_sha256')) != (b.get('extraction_status'), b.get('content_sha256')):
             out.append(f'the extraction record of {sid}')
+    return out
+
+
+def saved_output_consistency(manifest, comparison, interp):
+    """The three saved stage outputs must describe the same inputs (matters when outputs are restored or copied)."""
+    from compare_external_forecasts import manifest_states
+    out = []
+    if manifest_states(manifest) != (comparison.get('inputs') or {}).get('sources'):
+        out.append('the saved source manifest (it differs from the sources the comparison used)')
+    if interp.get('inputs') != comparison.get('inputs'):
+        out.append('the interpretation (made from a different comparison)')
     return out
 
 
@@ -522,10 +535,7 @@ def export_comparison(cycle, cid, out):
         return None
     manifest, comparison, interp = (json.loads(f.read_text(encoding='utf-8')) for f in files)
     now_inputs, registry, cache = _current_inputs(cycle, ROOT / ext['registry'])
-    saved = dict(comparison.get('inputs') or {}, minimum_leading_probability=None)
-    stale = _stale_reasons(saved, now_inputs)
-    if interp.get('inputs') != comparison.get('inputs'):
-        stale.append('the interpretation (older than the comparison)')
+    stale = _stale_reasons(comparison.get('inputs'), now_inputs) + saved_output_consistency(manifest, comparison, interp)
     status_path = cache / 'refresh_status.json'
     refresh = json.loads(status_path.read_text(encoding='utf-8')) if status_path.is_file() else {}
     assets = out / 'assets/external' / cid
@@ -606,15 +616,115 @@ def export_comparison(cycle, cid, out):
                       note='Source pages, download links, file hashes, retrieval times and the reviewed extraction records')]
     package = [[f'downloads/{cid}_comparison.json', 'comparison/comparison.json'],
                [f'downloads/{cid}_comparison_sources.json', 'comparison/sources_and_reviews.json']]
-    report = base / 'interpretation/report.html'
-    if report.is_file() and not stale:
-        page = report.read_text(encoding='utf-8').replace('src="../sources/previews/', f'src="../assets/external/{cid}/')
-        for m in maps:
-            page = page.replace(f'src="{m["name"]}"', f'src="../{m["file"]}"')
-        (dl / f'{cid}_comparison_report.html').write_text(page, encoding='utf-8', newline='')
-        downloads.insert(0, dict(label='Comparison with official outlooks (report, HTML)', href=f'downloads/{cid}_comparison_report.html',
-                                 note='Key findings, maps, the EMI table, detailed interpretation, sources and review status'))
-        package.append([f'downloads/{cid}_comparison_report.html', 'comparison/report.html'])
+    # Public reports are rendered from the same filtered data as the page (the full operational report
+    # with draft values stays internal): one with site paths, one with the ZIP package's paths.
     package += [[f['file'], 'comparison/figures/' + Path(f['file']).name] for s in sources for f in s['figures']]
     package += [[m['file'], 'comparison/figures/' + m['name']] for m in maps]
+    (dl / f'{cid}_comparison_report.html').write_text(public_report(data, f'../assets/external/{cid}/'), encoding='utf-8', newline='')
+    packaged = public_report(data, 'figures/')
+    in_zip = {z for _, z in package}
+    missing = [s for s in local_images(packaged) if 'comparison/' + s not in in_zip]
+    if missing:
+        raise ValueError(f'Packaged comparison report refers to files missing from the package: {missing}')
+    (dl / f'{cid}_comparison_report_package.html').write_text(packaged, encoding='utf-8', newline='')
+    downloads.insert(0, dict(label='Comparison with official outlooks (report, HTML)', href=f'downloads/{cid}_comparison_report.html',
+                             note='Key findings, maps, tables, interpretation, sources and review status (reviewed content only)'))
+    package.append([f'downloads/{cid}_comparison_report_package.html', 'comparison/report.html'])
     return dict(rel=rel, downloads=downloads, package=package, stale=stale)
+
+
+# ---------------------------------------------------------------- public comparison report
+def overlap_label(share, domain='the domain'):
+    """How an EMI sample (±0.5° box) relates to the rainfall domain; the probabilities describe the whole box."""
+    if share is None:
+        return ''
+    if share <= 0:
+        return f'Outside {domain}'
+    if share >= 1:
+        return f'Entire sample in {domain}'
+    return f'Partly overlaps {domain} — {100 * share:.0f}% of sample cells'
+
+
+def _pct(x, one=False):
+    if x is None:
+        return '—'
+    if one:
+        return '100%' if x >= 0.99995 else f'{100 * x:.1f}%'
+    return '>99%' if 0.995 <= x < 1 else '<1%' if 0 < x < 0.005 else f'{100 * x:.0f}%'
+
+
+def public_report(data, prefix):
+    """Readable comparison report from the published (reviewed, current) data only.
+
+    prefix: where the figures are relative to the report ('../assets/external/<cid>/' on the
+    site, 'figures/' inside the ZIP package).
+    """
+    import html as _html
+    esc = _html.escape
+    plat = data['platform']
+    areas = plat.get('areas', {})
+    dom = areas.get('season_domain', 'rainfall domain')
+    name = lambda f: f.rsplit('/', 1)[-1]
+    parts = [f'<h1>Official outlook comparison — {esc(plat["label"])}</h1>',
+             f'<p class="muted">Season {esc(plat["target_start"])} to {esc(plat["target_end"])} · areas: All Ethiopia and the {esc(dom)} · '
+             f'built from reviewed extractions only ({esc(data["engine"])}, {esc(data["created_utc"][:10])}). Research reconstruction; not an '
+             'official EMI or ICPAC forecast. The comparison describes agreement between outlooks, not which is more accurate.</p>']
+    if data['stale']:
+        parts.append(f'<p class="warn"><strong>Comparison withheld.</strong> The saved comparison no longer matches the current '
+                     f'{esc(", ".join(data["stale"]))}. Regenerate with <code>{esc(data["rerun"])}</code>.</p>')
+    groups = [('all_ethiopia', 'All Ethiopia'), ('season_domain', dom), ('any', 'Robustness of the extraction')]
+    for key, title in groups:
+        items = [i for i in data['summary'] if i['area_key'] == key]
+        if items:
+            parts.append(f'<h2>Key findings — {esc(title)}</h2><ul>' +
+                         ''.join(f'<li><strong>{esc(i["title"])}.</strong> {esc(i["text"])}</li>' for i in items) + '</ul>')
+    if data['maps']:
+        parts.append('<h2>Comparison maps</h2>' + ''.join(
+            f'<figure><img src="{esc(prefix + name(m["file"]))}" alt="Comparison map"><figcaption>{esc(name(m["file"]))}</figcaption></figure>'
+            for m in data['maps']))
+    agree = [m for m in data['metrics'] if m['metric'] == 'mapped_category_agreement' and m['value']]
+    if agree:
+        parts.append('<h2>ICPAC category agreement</h2><p class="muted">Only where both outlooks show a favoured category.</p><table>'
+                     '<tr><th>Area</th><th>Compared area (share of the analysed area)</th><th>Agreement within it</th><th>Opposite within it</th></tr>' +
+                     ''.join(f'<tr><td>{esc(m["where"])}</td><td>{_pct(m["value"]["area_share_both_favoured"])}</td>'
+                             f'<td>{_pct(m["value"]["agreement_share_where_both_favoured"], True)}</td>'
+                             f'<td>{_pct(m["value"]["opposing_share_where_both_favoured"], True)}</td></tr>' for m in agree) + '</table>')
+    if data['emi_table']:
+        parts.append('<h2>EMI zones: printed values and the platform\'s sampled neighbourhood</h2><table><tr><th>Location</th>'
+                     f'<th>Official below / near / above</th><th>Platform neighbourhood below / near / above</th><th>Relationship</th><th>Relation to the {esc(dom)}</th></tr>' +
+                     ''.join(f'<tr><td>Near zone {esc(r["zone"])} arrow</td><td>{esc(r["official"])}</td><td>{esc(r["platform"])}</td>'
+                             f'<td>{esc(r["relationship"])}</td><td>{esc(overlap_label(r.get("domain_share")))}</td></tr>' for r in data['emi_table']) +
+                     '</table><p class="muted">Platform values are area means of local probabilities over the whole ±0.5° sample around each arrow '
+                     'tip, not complete EMI zones and not restricted to the domain. Percentages are rounded to add up to 100%.</p>')
+    if data['paragraphs']:
+        parts.append('<h2>Detailed interpretation</h2>' + ''.join(f'<p>{esc(p["text"])}</p>' for p in data['paragraphs']))
+    for s in data['sources']:
+        rv = s['extraction'].get('review') or {}
+        rows = [('Product', s['label']), ('Target period', f'{s["target_start"]} to {s["target_end"]}'),
+                ('Issue date', s.get('issue_date') or 'not stated by the provider'), ('Reference period', s.get('reference_period') or 'not stated'),
+                ('Retrieved', (s.get('retrieved_utc') or '')[:10]), ('Latest check', s['refresh']['text']),
+                ('Content hash (SHA-256)', s.get('sha256')), ('Extraction', s['extraction'].get('status')),
+                ('Review', f'{rv.get("decision")} by {rv.get("reviewer")}, {(rv.get("reviewed_utc") or "")[:10]}' if rv else 'not reviewed'),
+                ('Source page', s.get('page')), ('Original file', s.get('download'))]
+        parts.append(f'<h2>Source: {esc(s["provider"])} — {esc(s.get("season_label") or s["label"])}</h2><table>' +
+                     ''.join(f'<tr><th>{esc(k)}</th><td>{esc(str(v))}</td></tr>' for k, v in rows) + '</table>' +
+                     (('<blockquote>' + '<br>'.join(esc(n['text']) for n in s['narrative']) + f'<br><span class="muted">— {esc(s["provider"])}</span></blockquote>')
+                      if s['narrative'] else '') +
+                     ''.join(f'<figure><img src="{esc(prefix + name(f["file"]))}" alt="{esc(f["caption"])}"><figcaption>{esc(f["caption"])} '
+                             '(original figure)</figcaption></figure>' for f in s['figures']))
+    parts.append('<h2>What is compared, and what is not</h2><table><tr><th>Comparison</th><th>Where</th><th>Status</th><th>Reason</th></tr>' +
+                 ''.join(f'<tr><td>{esc(m["metric"].replace("_", " "))}</td><td>{esc(str(m.get("where") or "—"))}</td>'
+                         f'<td>{esc(m["status"].replace("_", " "))}</td><td>{esc((m.get("reason") or m.get("basis") or "").replace("_", " "))}</td></tr>'
+                         for m in data['metrics']) + '</table>')
+    parts.append('<h2>Notes</h2><ul>' + ''.join(f'<li>{esc(n)}</li>' for n in data['notes']) + '</ul>')
+    return ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+            f'<title>Official outlook comparison — {esc(plat["label"])}</title><style>body{{font:15px/1.55 system-ui,sans-serif;max-width:1100px;'
+            'margin:24px auto;padding:0 16px;color:#111}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border-bottom:1px solid #ddd;'
+            'padding:6px 8px;text-align:left;vertical-align:top}img{max-width:100%}figure{margin:12px 0}.muted{color:#555;font-size:.92em}'
+            '.warn{background:#fdf1d8;padding:10px}blockquote{border-left:3px solid #ccc;margin:8px 0;padding:4px 12px;color:#333}</style></head><body>'
+            + ''.join(parts) + '</body></html>\n')
+
+
+def local_images(page):
+    """Relative image references of an HTML page."""
+    return [s for s in re.findall(r'<img[^>]+src="([^"]+)"', page) if not re.match(r'^(?:[a-z]+:)?//', s) and not s.startswith('data:')]

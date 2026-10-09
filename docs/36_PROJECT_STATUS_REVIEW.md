@@ -417,3 +417,10 @@ Third site review: two remaining interface fixes, then four optional features.
   - EMI relationships tested under 100 variants per zone (half-widths 0.25–1.0°, arrow shifts up to ±0.5°): all four are stable;
   - ICPAC national agreement stays between 94.5% and 95.0% under one-pixel registration shifts, and R3 stays at 100%.
 - [x] Tied leading probabilities give "no unique favoured category". 14 comparison tests.
+
+### Phase 22 — comparison report export and scope details (2026-10-09)
+
+- [x] Public comparison reports (site download and the report inside the ZIP) are rendered by `site_extras.public_report` from the same filtered data as the page and JSON. Draft values never reach a public output; the full report with draft values stays internal (`outputs/.../comparisons/interpretation/report.html`). The ZIP report uses `figures/<file>` paths, and the build fails if any of its images is missing from the package. Checked by extracting the ONDJ package: 4 of 4 images resolve.
+- [x] R3 view: EMI samples are labelled "Entire sample in the domain" (VIII), "Partly overlaps the domain — 69% / 44% of sample cells" (VII, VI) or "Outside the domain (national context)" (III). The probabilities still describe the whole ±0.5° sample, and this is stated. Evidence map links follow each finding's scope and name it, e.g. "Platform map (All Ethiopia)" for national-context findings.
+- [x] Publication check: the favoured-category threshold (`display.minimum_leading_probability`) is part of the fingerprint, and the saved source manifest must match the sources the comparison used (for restored or copied outputs).
+- [x] 18 comparison tests, including one that injects an unreviewed paragraph into a copy of the real outputs and confirms it appears in no public output.

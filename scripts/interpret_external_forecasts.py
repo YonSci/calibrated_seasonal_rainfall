@@ -73,6 +73,11 @@ def triple(p):
     return ' / '.join(f'{v}%' for v in rounded_triple(vals))
 
 
+def and_join(items):
+    items = list(items)
+    return items[0] if len(items) == 1 else ', '.join(items[:-1]) + ' and ' + items[-1]
+
+
 def window_sentence(f):
     lim = next((x for x in f['limitations'] if isinstance(x, dict) and x.get('code') == 'target_window_mismatch'), None)
     if not lim:
@@ -126,10 +131,12 @@ def summary_items(comparison, manifest):
         status = 'validated' if all(z['status'] == 'validated' for z in zones) else 'draft'
         ids = sorted({i for z in zones for i in z['evidence_ids']})
         for key in ('all_ethiopia', 'season_domain'):
-            inside = [z for z in zones if key == 'all_ethiopia' or (z.get('platform_neighbourhood') or {}).get('domain_share', 0) >= 0.5]
+            dshare = lambda z: (z.get('platform_neighbourhood') or {}).get('domain_share', 0)
+            inside = [z for z in zones if key == 'all_ethiopia' or dshare(z) > 0]
+            partial = [z for z in inside if key == 'season_domain' and dshare(z) < 1]
             opp = [z for z in inside if z['relationship'] == 'opposing_favoured_categories']
             same = [z for z in inside if z['relationship'] == 'same_favoured_category']
-            name = lambda zs: ', '.join(z['area'].split()[-1] for z in zs)
+            name = lambda zs: and_join(z['area'].split()[-1] for z in zs)
             parts = []
             if opp:
                 parts.append(f'Opposing categories near the arrow{"s" if len(opp) > 1 else ""} of zone{"s" if len(opp) > 1 else ""} {name(opp)}: '
@@ -141,8 +148,12 @@ def summary_items(comparison, manifest):
             others = [z for z in inside if z not in opp and z not in same]
             if others:
                 parts.append(' '.join(f'Zone {z["area"].split()[-1]}: {RELATION[z["relationship"]].lower()}.' for z in others))
+            if partial:
+                parts.append(f'The sample{"s" if len(partial) > 1 else ""} near zone{"s" if len(partial) > 1 else ""} {name(partial)} only partly '
+                             f'overlap{"" if len(partial) > 1 else "s"} the domain ({and_join(f"{100 * dshare(z):.0f}%" for z in partial)} of sample cells); '
+                             'the values describe the whole sample.')
             if not inside:
-                parts.append('No EMI zone arrow points into this area; see the national context.')
+                parts.append('No EMI sample overlaps this area; see the national context.')
             out.append(dict(id=f'emi_zones_{key}_summary', area_key=key, source_id=zones[0]['source_id'], status=status,
                             title='EMI — sampled neighbourhoods near the zone arrows' + (' in the domain' if key == 'season_domain' else ''),
                             text=' '.join(parts) + ' Sampled neighbourhoods (±0.5°), not complete EMI zones.', evidence_ids=ids,

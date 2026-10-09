@@ -498,7 +498,7 @@
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — sampled neighbourhoods near the zone arrows",
-   "text": "Opposing categories near the arrow of zone III: platform below normal, EMI above normal. Both favour above normal near the arrows of zones VI, VII, VIII. Sampled neighbourhoods (±0.5°), not complete EMI zones.",
+   "text": "Opposing categories near the arrow of zone III: platform below normal, EMI above normal. Both favour above normal near the arrows of zones VI, VII and VIII. Sampled neighbourhoods (±0.5°), not complete EMI zones.",
    "evidence_ids": [
     "emi_bega_2026_27_outlook_page21",
     "platform_forecast_ondj"
@@ -518,13 +518,14 @@
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — sampled neighbourhoods near the zone arrows in the domain",
-   "text": "Both favour above normal near the arrows of zones VII, VIII. Sampled neighbourhoods (±0.5°), not complete EMI zones.",
+   "text": "Both favour above normal near the arrows of zones VI, VII and VIII. The samples near zones VI and VII only partly overlap the domain (44% and 69% of sample cells); the values describe the whole sample. Sampled neighbourhoods (±0.5°), not complete EMI zones.",
    "evidence_ids": [
     "emi_bega_2026_27_outlook_page21",
     "platform_forecast_ondj"
    ],
    "scope": {
     "zones": [
+     "VI",
      "VII",
      "VIII"
     ]
@@ -820,6 +821,6 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-09T10:50:31+00:00",
+ "created_utc": "2026-10-09T11:34:29+00:00",
  "engine": "rules v2"
 }

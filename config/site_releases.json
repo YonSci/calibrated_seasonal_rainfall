@@ -116,7 +116,7 @@
   {
     "id": "2026-10-09.6",
     "date": "2026-10-09",
-    "commit": null,
+    "commit": "3b83be4",
     "title": "Clearer, scoped comparison with official outlooks; review and publication safeguards",
     "cycles": [
       "ONDJ 2026/27"
@@ -129,6 +129,21 @@
       {
         "type": "analysis",
         "text": "Bounded sensitivity checks (EMI neighbourhood size and arrow position, ICPAC registration by one pixel); tie-aware favoured category; reviews bound to the extracted contents; publication withheld when the saved comparison no longer matches its inputs."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-09.7",
+    "date": "2026-10-09",
+    "commit": null,
+    "title": "Comparison reports and scope details corrected",
+    "cycles": [
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Public and packaged comparison reports generated from the published (reviewed, current) data only; report figures resolve inside the ZIP; EMI samples labelled by their overlap with the domain; evidence maps follow each finding's scope; publication check includes the favoured-category threshold and the saved source manifest."
       }
     ]
   }

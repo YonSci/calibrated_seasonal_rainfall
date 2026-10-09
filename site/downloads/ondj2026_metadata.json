@@ -2,9 +2,9 @@
  "cycle": "ONDJ 2026/27",
  "initialization": "2026-09-01",
  "initialization_month": "September",
- "built_utc": "2026-10-09 10:50 UTC",
- "release": "2026-10-09.6",
- "code_version": "f477821",
+ "built_utc": "2026-10-09 11:36 UTC",
+ "release": "2026-10-09.7",
+ "code_version": "3b83be4",
  "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
  "record": {
   "Model initialization": "1 September 2026 · ECMWF SEAS5 (system 51), 51 members",
@@ -15,7 +15,7 @@
   "Observations processed through": "None yet",
   "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 9 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
   "Verification last run": "Not run",
-  "Method / version": "Shared climatology blend (λ = 0.28 for ONDJ) · code f477821"
+  "Method / version": "Shared climatology blend (λ = 0.28 for ONDJ) · code 3b83be4"
  },
  "rainfall_domain": {
   "view": "ondj_rainfall_domain",
@@ -126,11 +126,11 @@
   "data/Jan_forecast_2026.nc",
   "comparison/comparison.json",
   "comparison/sources_and_reviews.json",
-  "comparison/report.html",
   "comparison/figures/icpac_ond_2026_update_rainfall.png",
   "comparison/figures/emi_bega_2026_27_outlook_page21_figure.jpg",
   "comparison/figures/emi_bega_2026_27_outlook_anchors.png",
-  "comparison/figures/icpac_ond_2026_update_rainfall_comparison.png"
+  "comparison/figures/icpac_ond_2026_update_rainfall_comparison.png",
+  "comparison/report.html"
  ],
  "status": "research reconstruction; not an official EMI or ICPAC forecast"
 }
