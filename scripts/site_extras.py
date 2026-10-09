@@ -410,3 +410,51 @@ def build_releases(out, current_data, esc):
         '<p class="caveat">Research reconstructions; not official EMI or ICPAC forecasts.</p></main></body></html>\n',
         encoding='utf-8', newline='')
     return releases[-1]['id']
+
+
+# ---------------------------------------------------------------- official outlook comparison
+def export_comparison(cycle, cid, out):
+    """Publish a cycle's official-outlook comparison: sources, figures, validated findings only."""
+    import shutil
+    ext = cycle.raw.get('external_comparison')
+    if not ext:
+        return None
+    base = ROOT / ext['output_root']
+    files = [base / 'sources/source_manifest.json', base / 'comparison/comparison.json', base / 'interpretation/interpretation.json']
+    if not all(f.is_file() for f in files):
+        return None
+    manifest, comparison, interp = (json.loads(f.read_text(encoding='utf-8')) for f in files)
+    assets = out / 'assets/external' / cid
+    assets.mkdir(parents=True, exist_ok=True)
+    sources = []
+    for s in manifest['sources']:
+        x = s.get('extraction', {})
+        figures = []
+        for e in s.get('evidence', []):
+            src = base / 'sources' / e['file']
+            shutil.copy2(src, assets / src.name)
+            figures.append(dict(id=e['id'], file=f'assets/external/{cid}/{src.name}', caption=e['caption']))
+        sources.append(dict(id=s['source_id'], provider=s['provider'], product=s.get('product'), representation=s.get('representation'),
+                            label=s.get('label'), season_label=s.get('season_label'), target_start=s.get('target_start'),
+                            target_end=s.get('target_end'), issue_date=s.get('issue_date'), initialization=s.get('initialization'),
+                            reference_period=s.get('reference_period'), retrieved_utc=s.get('retrieved_utc'), sha256=s.get('sha256'),
+                            page=s.get('requested_url'), download=s.get('download_url'), narrative=s.get('narrative', []),
+                            extraction=dict(status=x.get('status'), method=x.get('method'), review=x.get('review')),
+                            figures=figures))
+    validated = {s['id'] for s in sources if s['extraction']['status'] == 'validated'}
+    maps = []
+    for m in comparison['maps']:
+        sid = next((s for s in validated if m.startswith(s)), None)
+        if sid:                                     # comparison maps only for reviewed extractions
+            shutil.copy2(base / 'comparison/maps' / m, assets / m)
+            maps.append(dict(source_id=sid, file=f'assets/external/{cid}/{m}'))
+    metrics = [dict(metric=m['metric'], source_id=m.get('source_id'), where=m.get('zone') or m.get('area'), status=m['status'],
+                    reason=m.get('reason'), basis=m.get('basis'), value=m.get('value') if m['status'] == 'available' else None)
+               for m in comparison['metrics']]
+    paragraphs = [p for p in interp['paragraphs'] if p['status'] == 'validated']
+    data = dict(platform=comparison['platform'], sources=sources, maps=maps, metrics=metrics, paragraphs=paragraphs,
+                evidence=interp['evidence'], notes=comparison['notes'], created_utc=interp['created_utc'], engine=interp['engine'])
+    rel = f'data/{cid}_comparison.json'
+    (out / 'data').mkdir(parents=True, exist_ok=True)
+    (out / rel).write_text(json.dumps(rounded(data), separators=(',', ':'), ensure_ascii=False), encoding='utf-8', newline='')
+    return rel

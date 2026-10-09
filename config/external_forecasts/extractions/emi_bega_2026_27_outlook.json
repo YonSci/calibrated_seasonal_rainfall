@@ -1,0 +1,38 @@
+{
+ "record_id": "emi_bega_2026_27_outlook",
+ "source_sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+ "figure_sha256": "2c02a6b4ea617d7361b6b4a550e7a3c79f661c0bb0fbe99f2489ae4e630ace96",
+ "method": "draft_figure_transcription",
+ "extraction_version": 1,
+ "created_by": "Draft transcription by the assistant (Claude) from the embedded figure of PDF page 21; not yet reviewed.",
+ "source_locator": {"pdf_page": 21, "figure_title": "NATIONAL OUTLOOK FOR (ONDJ 2026/27)"},
+ "figure_axes": {
+  "note": "Axis calibration of the 1022 x 530 px embedded figure from its tick labels (used only to place the arrow tips).",
+  "lon_deg": "32.5 + (x_px - 170) / 41.2",
+  "lat_deg": "14 - (y_px - 88.5) / 37.3"
+ },
+ "zones": [
+  {"zone_label": "III", "printed_order": "A/N/B", "printed": "A 55, N 25, B 20",
+   "probabilities": {"below": 0.20, "near": 0.25, "above": 0.55},
+   "anchor": {"lon": 35.73, "lat": 9.40, "pixel": [303, 260], "kind": "arrow tip", "uncertainty_deg": 0.5}},
+  {"zone_label": "VI", "printed_order": "A/N/B", "printed": "A 60, N 25, B 15",
+   "probabilities": {"below": 0.15, "near": 0.25, "above": 0.60},
+   "anchor": {"lon": 40.36, "lat": 7.18, "pixel": [494, 343], "kind": "arrow tip", "uncertainty_deg": 0.5}},
+  {"zone_label": "VII", "printed_order": "A/N/B", "printed": "A 60, N 15, B 25",
+   "probabilities": {"below": 0.25, "near": 0.15, "above": 0.60},
+   "anchor": {"lon": 36.87, "lat": 6.29, "pixel": [350, 376], "kind": "arrow tip", "uncertainty_deg": 0.5}},
+  {"zone_label": "VIII", "printed_order": "A/N/B", "printed": "A 75, N 15, B 10",
+   "probabilities": {"below": 0.10, "near": 0.15, "above": 0.75},
+   "anchor": {"lon": 43.47, "lat": 6.53, "pixel": [622, 367], "kind": "arrow tip", "uncertainty_deg": 0.5}}
+ ],
+ "geometry_note": "The figure shows no zone boundaries (purple lines are river basins). Each zone is located only by the tip of its arrow; zone polygons require alignment with EMI's zone map before any zone-mean calculation.",
+ "checks_for_reviewer": [
+  "PDF page 21 figure is titled 'NATIONAL OUTLOOK FOR (ONDJ 2026/27)'.",
+  "Printed values per zone, in the printed order A (above), N (normal), B (below): III 55/25/20, VI 60/25/15, VII 60/15/25, VIII 75/15/10.",
+  "Zone VII label is partly cut at the figure's left edge ('one VII'); the values are fully legible.",
+  "Arrow-tip locations (approximate, +/- 0.5 deg) correspond to the arrow heads in the figure.",
+  "No reference period is stated for the probabilities."
+ ],
+ "status": "draft",
+ "review": null
+}

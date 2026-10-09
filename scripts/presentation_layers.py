@@ -395,6 +395,8 @@ def build_gallery(output, forecast_targets, verified_targets, pending, details):
     pending_text = html.escape(', '.join(pending) or 'None among requested targets')
     report_link = (' · <a href="'+html.escape(details['verification_report'],quote=True)+'">Consolidated verification report</a>'
                    if details.get('verification_report') else '')
+    if details.get('external_comparison_report'):
+        report_link += ' · <a href="'+html.escape(details['external_comparison_report'],quote=True)+'">Comparison with official outlooks</a>'
     page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ethiopia rainfall — forecast and verification views</title><style>
 body{{margin:0;background:#edf2f4;color:#20313b;font:16px/1.5 system-ui,sans-serif}}main{{max-width:1280px;margin:auto;padding:28px}}

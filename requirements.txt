@@ -12,3 +12,5 @@ cdsapi==0.7.7
 pyshp==3.1.6
 pyproj==3.7.2
 # shapely is needed only to rebuild the Ethiopia mask (build_region_mask.py)
+# Official forecast comparison: PDF text and embedded figures (external_forecasts.py)
+pypdf==6.19.0

@@ -34,5 +34,16 @@
     "pdf": true
   },
   "season_domain_mask": "data/masks/init09_ONDJ_regime_domain.nc",
-  "notes": "September-initialized ONDJ 2026/27 cycle. Reference ONDJ seasons 1993/94-2024/25 (observations through Jan 2025). Verification possible after CHIRPS Jan 2027. Presentation domain: ONDJ R3 (Deyr) regime domain (scientific masking walkthrough), replacing the earlier >=120 mm/20 % rule (2026-10-08)."
+  "notes": "September-initialized ONDJ 2026/27 cycle. Reference ONDJ seasons 1993/94-2024/25 (observations through Jan 2025). Verification possible after CHIRPS Jan 2027. Presentation domain: ONDJ R3 (Deyr) regime domain (scientific masking walkthrough), replacing the earlier >=120 mm/20 % rule (2026-10-08).",
+  "external_comparison": {
+    "enabled": true,
+    "registry": "config/external_forecasts/ondj_2026_27.json",
+    "cache_root": "data/external_forecasts",
+    "output_root": "outputs/operational_2026_ondj/comparisons",
+    "products": [
+      "rainfall_probability",
+      "rainfall_anomaly"
+    ],
+    "interpretation_engine": "rules"
+  }
 }

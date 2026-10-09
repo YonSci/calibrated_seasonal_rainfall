@@ -4,6 +4,7 @@ Examples (Windows CMD):
   python scripts\run_operational.py --plan
   python scripts\run_operational.py --workflow products
   python scripts\run_operational.py --workflow all
+  python scripts\run_operational.py --config config\cycles\sep_2026_ondj.json --workflow products --compare-external --refresh-external
 
 No fitting or regridding is triggered. Existing scientific stages remain authoritative.
 The cycle (forecast year, reference period, folders) comes from --config, default
@@ -44,6 +45,7 @@ PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operation
                    "delivery_map_base.py","delivery_output_runs.py","plot_forecast_products.py",
                    "output_runs.py","cycle.py","common.py","run_monthly.py","followup_common.py",
                    "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py"]
+EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "interpret_external_forecasts.py"]
 VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
                   "verification_report_core.py","build_verification_report.py"]
 
@@ -90,6 +92,15 @@ def configuration(filename, targets=None):
         not 1<=settings["monthly_anomaly_limit_mm"]<=5000 or not 1<=settings["jjas_anomaly_limit_mm"]<=10000 or
         not 72<=settings["dpi"]<=300 or type(settings["pdf"]) is not bool):
         raise ValueError("Invalid display configuration")
+    ext = cfg.get("external_comparison")
+    if ext is not None:
+        for key in ["registry","cache_root","output_root"]:
+            if key not in ext:
+                raise ValueError("external_comparison needs "+key)
+        if not path(ext["output_root"]).is_relative_to(path(cfg["output_root"])):
+            raise ValueError("external_comparison.output_root must be inside the cycle output_root")
+        if ext.get("interpretation_engine","rules")!="rules":
+            raise ValueError("Only the deterministic 'rules' interpretation engine is implemented")
     output = path(cfg["output_root"])
     # All operational writes are isolated from input data, prior delivery and science outputs.
     if not output.is_relative_to(ROOT/"outputs") or output==ROOT/"outputs":
@@ -285,6 +296,44 @@ def report_stages(runner,cfg,targets,code_inputs):
     return f"reports/{tag}/VERIFICATION_REPORT.html"
 
 
+def external_stages(runner,cfg,info,refresh):
+    """Official outlook comparison: refresh (network, before hashing), prepare, compare, interpret."""
+    import external_forecasts as ef
+    from compare_external_forecasts import compare
+    from interpret_external_forecasts import interpret
+    ext = cfg.get("external_comparison")
+    if not ext or not ext.get("enabled",True):
+        raise ValueError("--compare-external needs an enabled external_comparison block in the cycle file")
+    if SEASON not in info["sources"]:
+        raise ValueError("--compare-external compares the season target; include "+SEASON+" in the targets")
+    registry_path, cache = path(ext["registry"]), ext["cache_root"]
+    registry = ef.load_registry(registry_path)
+    if refresh:
+        # Remote checking happens before any stage hashes its inputs, so a replaced
+        # official product at an unchanged URL is never skipped.
+        changed = ef.refresh(registry,cache)
+        print("External sources changed:",", ".join(changed) or "none",flush=True)
+    current = ef.cache_dir(registry,cache)/"current.json"
+    if not current.is_file():
+        raise ValueError("No official forecast snapshots yet; add --refresh-external")
+    snaps = []
+    for item in read(current).values():
+        snaps += [path(item["file"]),path(item["meta"])]
+    out = path(ext["output_root"])
+    code = [ROOT/"scripts"/s for s in EXTERNAL_SCRIPTS]
+    extractions = path(registry["extractions_dir"])
+    native, mask = info["sources"][SEASON], presentation_mask(cfg)
+    minimum = cfg["display"]["minimum_leading_probability"]
+    runner.stage("external_prepare",[*code,registry_path,current,*snaps,extractions,mask],[out/"sources"],
+                 action=lambda:ef.prepare(registry,cache,mask,out/"sources"))
+    runner.stage("external_compare",[*code,registry_path,out/"sources",native,mask],[out/"comparison"],
+                 settings={"minimum_leading_probability":minimum},
+                 action=lambda:compare(out/"sources",native,mask,registry,out/"comparison",minimum))
+    runner.stage("external_interpret",[*code,out/"comparison",out/"sources"],[out/"interpretation"],
+                 action=lambda:interpret(out/"comparison",out/"sources",out/"interpretation"))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config",default="config/operational.json")
@@ -295,6 +344,8 @@ def main():
     ap.add_argument("--plan",action="store_true",help="Preflight and show planned stages without writing project outputs; verify/all checks remote availability")
     ap.add_argument("--force",action="store_true",help="Rebuild derived stages with backups; never refit or replace frozen forecasts")
     ap.add_argument("--resume",action="store_true",help="Content-checked resume is already the default")
+    ap.add_argument("--compare-external",action="store_true",help="Compare with official outlooks (cycle external_comparison block)")
+    ap.add_argument("--refresh-external",action="store_true",help="Check the official sources online first and keep changed products")
     a = ap.parse_args()
     runner = None
     try:
@@ -312,6 +363,9 @@ def main():
             stages = (["prepare complete observations","score each available target","regime summary","verification report"] if a.workflow!="products" else [])
             if a.workflow!="verify":
                 stages.append("forecast views: national and season rainfall domain for each requested target")
+            if a.compare_external:
+                stages += [("check official sources online, then " if a.refresh_external else "")+"prepare official outlook records",
+                           "compare with the native "+SEASON+" forecast","interpretation and review report"]
             stages += ["verification views: national and season rainfall domain for each ready target","offline gallery and run manifest"]
             for i,item in enumerate(stages,1):
                 print(str(i)+".",item)
@@ -342,11 +396,15 @@ def main():
                 dest = output/f"presentation/verification/{target}"
                 runner.stage("verification_view_"+target,[*common,*verification_files(vr,target)],[dest],
                              action=lambda t=target,o=dest:build_verification(vr,presentation_mask(cfg),path(cfg["boundary"]),t,o,cfg["display"]))
+            comparison = external_stages(runner,cfg,info,a.refresh_external) if a.compare_external else None
             pending = [t for t in cfg["targets"] if t not in verified]
             gallery_inputs = [*common]
+            if comparison:
+                gallery_inputs.append(comparison/"interpretation")
             for kind,targets in [("forecast",forecasts),("verification",verified)]:
                 gallery_inputs += [output/f"presentation/{kind}/{t}" for t in targets]
             details = {"workflow":a.workflow,"forecast_status":"retrospective reconstruction", "verification_report":report,
+                       **({"external_comparison_report":str((comparison/"interpretation/report.html").relative_to(output)).replace("\\","/")} if comparison else {}),
                        "complete_requested_verification":not pending,
                        **({"full_jjas_verified":"JJAS" in verified} if SEASON=="JJAS" else {"full_season_verified":SEASON in verified})}
             runner.stage("gallery",gallery_inputs,[output/"index.html",output/"presentation_summary.json"],

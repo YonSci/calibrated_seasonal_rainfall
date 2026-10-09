@@ -1,0 +1,36 @@
+{
+ "source_id": "icpac_ond_2026_update_rainfall",
+ "provider": "ICPAC",
+ "product": "rainfall_tercile_probability",
+ "representation": "dominant_category_map",
+ "label": "Rainfall forecast - October - December 2026_Update - IGAD Region",
+ "requested_url": "https://www.icpac.net/seasonal-forecast/october-december-2026_update/?region=1&resource_type=27",
+ "download_url": "https://www.icpac.net/media/images/GHA-PRCP.original.png",
+ "file": "data/external_forecasts/ondj_2026_27/icpac_ond_2026_update_rainfall/38789cddd2e31c49.png",
+ "sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6",
+ "bytes": 229790,
+ "retrieved_utc": "2026-10-09T08:44:54+00:00",
+ "target_start": "2026-10-01",
+ "target_end": "2026-12-31",
+ "season_label": "OND 2026 (update)",
+ "issue_date": null,
+ "initialization": null,
+ "reference_period": null,
+ "http_last_modified": "Tue, 06 Oct 2026 06:52:00 GMT",
+ "narrative": [
+  {
+   "text": "Above-normal rainfall is likely across most of the region, with the highest probabilities over north-eastern Kenya, central to southern Somalia and south-eastern Ethiopia.",
+   "locator": "detail page, rainfall forecast item"
+  },
+  {
+   "text": "Across much of the remaining region, the probability of above-normal rainfall is generally in the range of 50–70%.",
+   "locator": "detail page, rainfall forecast item"
+  }
+ ],
+ "products_listed_for_season": {
+  "27": "rainfall_tercile_probability",
+  "5": "temperature_tercile_probability"
+ },
+ "other_title_matches": null,
+ "extraction_version": 1
+}

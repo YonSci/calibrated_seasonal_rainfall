@@ -1,0 +1,31 @@
+{
+ "source_id": "emi_bega_2026_27_outlook",
+ "provider": "EMI",
+ "product": "rainfall_tercile_probability",
+ "representation": "zone_tercile_probabilities",
+ "label": "Kiremt 2026 Assessment and Bega 2026_27 Outlook Hydro met Bulletin",
+ "requested_url": "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/kiremt-2026-assessment-and-bega-2026_27-hydro-met-bulletin/",
+ "download_url": "https://www.ethiomet.gov.et/documents/796/Kiremt_2026_Assesment_and_Bega_2026_27_Outlook_hydromet_Bulletin_pVHz8Fp.pdf",
+ "file": "data/external_forecasts/ondj_2026_27/emi_bega_2026_27_outlook/d55c4d39500d13a9.pdf",
+ "sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+ "bytes": 1882705,
+ "retrieved_utc": "2026-10-09T08:45:10+00:00",
+ "target_start": "2026-10-01",
+ "target_end": "2027-01-31",
+ "season_label": "Bega (ONDJ) 2026/27",
+ "issue_date": null,
+ "initialization": null,
+ "reference_period": null,
+ "http_last_modified": null,
+ "narrative": [],
+ "products_listed_for_season": null,
+ "other_title_matches": [],
+ "extraction_version": 1,
+ "pdf_metadata": {
+  "Author": "Alex",
+  "Creator": "Microsoft® Word 2013",
+  "CreationDate": "D:20261007231335-09'00'",
+  "ModDate": "D:20261007231335-09'00'",
+  "Producer": "Microsoft® Word 2013"
+ }
+}

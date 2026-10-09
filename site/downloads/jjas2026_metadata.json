@@ -2,9 +2,9 @@
  "cycle": "JJAS 2026",
  "initialization": "2026-05-01",
  "initialization_month": "May",
- "built_utc": "2026-10-08 15:46 UTC",
- "release": "2026-10-08.3",
- "code_version": "f10eff3",
+ "built_utc": "2026-10-09 09:02 UTC",
+ "release": "2026-10-09.4",
+ "code_version": "61942f8",
  "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
  "record": {
   "Model initialization": "1 May 2026 · ECMWF SEAS5 (system 51), 51 members",
@@ -13,9 +13,9 @@
   "Publication status": "Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast",
   "Reference period": "CHIRPS v2.0 JJAS 1993–2025 (33 seasons)",
   "Observations processed through": "August 2026 (Jun, Jul, Aug)",
-  "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 8 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
+  "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 9 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
   "Verification last run": "5 Oct 2026",
-  "Method / version": "Shared climatology blend (λ = 0.50 for JJAS) · code f10eff3"
+  "Method / version": "Shared climatology blend (λ = 0.50 for JJAS) · code 61942f8"
  },
  "rainfall_domain": {
   "view": "jjas_r12_rainfall_domain",
@@ -29,7 +29,7 @@
    "end": "2026-09-30",
    "status": {
     "code": "awaiting",
-    "text": "Awaiting CHIRPS observations: Sep 2026 file not found in the checked CHIRPS listing (last checked 8 Oct 2026)"
+    "text": "Awaiting CHIRPS observations: Sep 2026 file not found in the checked CHIRPS listing (last checked 9 Oct 2026)"
    },
    "verified_areas": []
   },
@@ -78,7 +78,7 @@
    "end": "2026-09-30",
    "status": {
     "code": "awaiting",
-    "text": "Awaiting CHIRPS observations: Sep 2026 file not found in the checked CHIRPS listing (last checked 8 Oct 2026)"
+    "text": "Awaiting CHIRPS observations: Sep 2026 file not found in the checked CHIRPS listing (last checked 9 Oct 2026)"
    },
    "verified_areas": []
   }

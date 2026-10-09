@@ -1,0 +1,12 @@
+{
+ "icpac_ond_2026_update_rainfall": {
+  "sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6",
+  "file": "data/external_forecasts/ondj_2026_27/icpac_ond_2026_update_rainfall/38789cddd2e31c49.png",
+  "meta": "data/external_forecasts/ondj_2026_27/icpac_ond_2026_update_rainfall/38789cddd2e31c49.json"
+ },
+ "emi_bega_2026_27_outlook": {
+  "sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+  "file": "data/external_forecasts/ondj_2026_27/emi_bega_2026_27_outlook/d55c4d39500d13a9.pdf",
+  "meta": "data/external_forecasts/ondj_2026_27/emi_bega_2026_27_outlook/d55c4d39500d13a9.json"
+ }
+}

@@ -4,10 +4,20 @@
     "date": "2026-10-08",
     "commit": "e6304a3",
     "title": "Results site before the review-driven redesign",
-    "cycles": ["FMAM 2026", "JJAS 2026", "ONDJ 2026/27"],
+    "cycles": [
+      "FMAM 2026",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
     "changes": [
-      {"type": "verification", "text": "FMAM 2026 March, April and May verified against official CHIRPS v2.0 observations."},
-      {"type": "domain", "text": "ONDJ shown on the ONDJ R3 (Deyr) rainfall domain (575 cells) instead of the earlier >=120 mm / 20% rule."}
+      {
+        "type": "verification",
+        "text": "FMAM 2026 March, April and May verified against official CHIRPS v2.0 observations."
+      },
+      {
+        "type": "domain",
+        "text": "ONDJ shown on the ONDJ R3 (Deyr) rainfall domain (575 cells) instead of the earlier >=120 mm / 20% rule."
+      }
     ]
   },
   {
@@ -15,9 +25,16 @@
     "date": "2026-10-08",
     "commit": "a473e73",
     "title": "Redesign around the reader: one cycle selector, outlook first, verification narrative",
-    "cycles": ["FMAM 2026", "JJAS 2026", "ONDJ 2026/27"],
+    "cycles": [
+      "FMAM 2026",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
     "changes": [
-      {"type": "display", "text": "Cycle and area selectors drive every section; shareable view links; outlook and map first; status panel with precise target statuses; verification narrative and paired anomaly chart; per-cycle CSV downloads."}
+      {
+        "type": "display",
+        "text": "Cycle and area selectors drive every section; shareable view links; outlook and map first; status panel with precise target statuses; verification narrative and paired anomaly chart; per-cycle CSV downloads."
+      }
     ]
   },
   {
@@ -25,21 +42,60 @@
     "date": "2026-10-08",
     "commit": "385448c",
     "title": "Area-specific historical skill and clearer uncertainty",
-    "cycles": ["FMAM 2026", "JJAS 2026", "ONDJ 2026/27"],
+    "cycles": [
+      "FMAM 2026",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
     "changes": [
-      {"type": "analysis", "text": "Historical skill computed for each cycle's rainfall domain and the R0-R3 regions from stored cross-validated probabilities (no refitting)."},
-      {"type": "display", "text": "Skill labels reflect intervals and Holm-adjusted p-values; verification narrative always reports the rainfall error; climatology defined as observed tercile frequencies; unavailable verification explained; separate verification panels."}
+      {
+        "type": "analysis",
+        "text": "Historical skill computed for each cycle's rainfall domain and the R0-R3 regions from stored cross-validated probabilities (no refitting)."
+      },
+      {
+        "type": "display",
+        "text": "Skill labels reflect intervals and Holm-adjusted p-values; verification narrative always reports the rainfall error; climatology defined as observed tercile frequencies; unavailable verification explained; separate verification panels."
+      }
     ]
   },
   {
     "id": "2026-10-08.3",
     "date": "2026-10-08",
-    "commit": null,
+    "commit": "61942f8",
     "title": "Historical verification explorer, forecast-and-evidence package, map comparison and release archive",
-    "cycles": ["FMAM 2026", "JJAS 2026", "ONDJ 2026/27"],
+    "cycles": [
+      "FMAM 2026",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
     "changes": [
-      {"type": "analysis", "text": "Historical diagnostics per cycle, target and area: performance by year, reliability diagrams, probability histograms and category Brier skill (cross-validated and exploratory)."},
-      {"type": "display", "text": "PDF bulletin and one-click ZIP package per cycle; side-by-side forecast vs observed anomaly maps; release archive and change log; research label on phones; keyboard focus kept when leaving an unavailable view."}
+      {
+        "type": "analysis",
+        "text": "Historical diagnostics per cycle, target and area: performance by year, reliability diagrams, probability histograms and category Brier skill (cross-validated and exploratory)."
+      },
+      {
+        "type": "display",
+        "text": "PDF bulletin and one-click ZIP package per cycle; side-by-side forecast vs observed anomaly maps; release archive and change log; research label on phones; keyboard focus kept when leaving an unavailable view."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-09.4",
+    "date": "2026-10-09",
+    "commit": null,
+    "title": "Comparison with official outlooks (ICPAC OND 2026 update, EMI Bega 2026/27)",
+    "cycles": [
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "New pipeline: ICPAC and EMI products discovered, downloaded and versioned by content hash; standardized records; comparison with the native ONDJ forecast; rule-based interpretation. Comparison numbers are published only after a person reviews the extracted values."
+      },
+      {
+        "type": "display",
+        "text": "Outlooks section shows the official figures, the providers' own text, source records and the status of each comparison; ONDJ gallery links the review report."
+      }
     ]
   }
 ]

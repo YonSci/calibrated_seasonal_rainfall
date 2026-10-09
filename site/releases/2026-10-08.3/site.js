@@ -360,49 +360,6 @@
     }).catch(() => { body.innerHTML = '<p class="notice">The diagnostics file could not be loaded. Try reloading the page.</p>'; });
   }
 
-  // ---------- comparison with official outlooks (data/<cycle>_comparison.json; validated content only)
-  const CMP = {};
-  const METRIC = {display_official_probabilities: 'Official probabilities shown', favoured_category_relationship: 'Favoured-category relationship',
-    zone_mean_probability: 'Platform mean over the official zone', same_event_probability_difference: 'Probability difference for the same event',
-    mapped_category_agreement: 'Mapped category agreement', rainfall_anomaly_difference: 'Rainfall anomaly difference', forecast_accuracy: 'Which forecast is more accurate'};
-  const REASON = {transcription_awaiting_review: 'transcribed values await review against the published figure',
-    transcription_and_anchor_awaiting_review: 'transcribed values and locations await review', digitization_awaiting_review: 'digitized map awaits review',
-    zone_geometry_requires_alignment: 'the zone boundary is not published with the figure', official_reference_period_unknown: 'the official reference period is not stated',
-    target_window_mismatch: 'the target periods differ', official_publishes_only_favoured_category_interval: 'only the favoured category and its interval are published',
-    official_amount_anomaly_not_found_in_checked_products: 'no official rainfall-amount anomaly product was found in the checked products'};
-  const plainReason = r => !r ? '' : r.split(';').map(x => x.trim()).map(x => x.startsWith('out_of_scope') ? 'needs observations and a separate verification design (see Verification)' : (REASON[x] || x.replace(/_/g, ' '))).join('; ');
-  function renderComparison() {
-    const c = cyc(), body = $('cmp-body');
-    if (!c.comparison) { body.innerHTML = '<p class="caveat">No comparison with official outlooks is configured for this cycle.</p>'; return; }
-    body.innerHTML = '<p class="caveat">Loading…</p>';
-    if (!CMP[c.id]) CMP[c.id] = fetch(BASE + c.comparison).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-    const want = c.id;
-    CMP[c.id].then(X => {
-      if (cyc().id !== want) return;
-      const ev = X.evidence || {};
-      const st = s => s === 'validated' ? '<span class="status published">Extraction reviewed</span>' : '<span class="status awaiting">Extraction awaiting review</span>';
-      let h = '<p>Official outlooks for this season from ICPAC and the Ethiopian Meteorology Institute (EMI), compared with this platform\'s forecast. The comparison describes agreement between outlooks; it does not say which is more accurate. Numbers are compared only after the values extracted from the official figures have been checked by a person.</p>';
-      if (X.paragraphs.length) h += '<div class="box">' + X.paragraphs.map(p => '<p>' + esc(p.text) + (p.evidence_ids.length ? '<br><span class="caveat">Evidence: ' + p.evidence_ids.map(i => esc((ev[i] || {}).label || i)).join('; ') + '</span>' : '') + '</p>').join('') + '</div>';
-      if (X.maps.length) h += X.maps.map(m => '<figure class="map-figure wide"><a href="' + m.file + '" target="_blank" rel="noopener"><img loading="lazy" src="' + m.file + '" alt="Comparison map ' + esc(m.source_id) + '"></a></figure>').join('');
-      h += '<div class="grid2">' + X.sources.map(s => {
-        const same = s.target_start === X.platform.target_start && s.target_end === X.platform.target_end;
-        return '<div class="box"><h3>' + esc(s.provider) + ': ' + esc(s.season_label || s.label) + '</h3>' + st(s.extraction.status) +
-          '<dl class="meta"><dt>Product</dt><dd>' + esc(s.label) + '</dd><dt>Target period</dt><dd>' + dt(s.target_start) + ' – ' + dt(s.target_end) +
-          (same ? '' : ' <strong>(differs from this forecast: ' + dt(X.platform.target_start) + ' – ' + dt(X.platform.target_end) + ')</strong>') + '</dd>' +
-          '<dt>Issue date</dt><dd>' + esc(s.issue_date || 'not stated by the provider') + '</dd><dt>Reference period</dt><dd>' + esc(s.reference_period || 'not stated') + '</dd>' +
-          '<dt>Retrieved</dt><dd>' + esc((s.retrieved_utc || '').slice(0, 10)) + ' · content hash ' + esc((s.sha256 || '').slice(0, 12)) + '</dd>' +
-          '<dt>Source</dt><dd><a href="' + esc(s.page) + '" rel="noopener">product page</a> · <a href="' + esc(s.download) + '" rel="noopener">original file</a></dd></dl>' +
-          (s.narrative.length ? '<blockquote class="quote">' + s.narrative.map(n => esc(n.text)).join('<br>') + '<br><span class="caveat">— ' + esc(s.provider) + ', ' + esc(s.narrative[0].locator) + '</span></blockquote>' : '') +
-          s.figures.map(f => '<figure><a href="' + f.file + '" target="_blank" rel="noopener"><img loading="lazy" src="' + f.file + '" alt="' + esc(f.caption) + '"></a><figcaption>' + esc(f.caption) + ' (original figure)</figcaption></figure>').join('') + '</div>';
-      }).join('') + '</div>';
-      h += '<details><summary>What is compared, and what is not</summary><div class="table-wrap"><table class="compact"><thead><tr><th scope="col">Comparison</th><th scope="col">Where</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead><tbody>' +
-        X.metrics.map(m => '<tr><td>' + esc(METRIC[m.metric] || m.metric) + '</td><td>' + esc(m.where ? (String(m.where).length < 5 ? 'EMI zone ' + m.where : m.where) : '—') + '</td><td>' +
-          esc(m.status.replace(/_/g, ' ')) + '</td><td>' + esc(plainReason(m.reason) || (m.basis || '').replace(/_/g, ' ')) + '</td></tr>').join('') + '</tbody></table></div>' +
-        '<ul class="caveat">' + X.notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul></details>';
-      body.innerHTML = h;
-    }).catch(() => { body.innerHTML = '<p class="notice">The comparison file could not be loaded.</p>'; });
-  }
-
   // ---------- one-click package (files are zipped in the browser)
   function loadZip() {
     if (window.JSZip) return Promise.resolve(window.JSZip);
@@ -465,7 +422,7 @@
     const c = cyc();
     $('cycle').value = c.id;
     $('view').innerHTML = c.views.map(v => '<option value="' + v[0] + '"' + (v[0] === S.view ? ' selected' : '') + '>' + esc(v[1]) + '</option>').join('');
-    renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDiag(); renderComparison(); renderDownloads(); sync();
+    renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDiag(); renderDownloads(); sync();
   }
 
   // Anchor offset follows the real height of the sticky header (wrapped controls included).
