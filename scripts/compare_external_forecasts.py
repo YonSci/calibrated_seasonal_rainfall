@@ -281,6 +281,37 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                 numbers=value, probability_difference_pp=None,
                 target_windows=dict(platform=[platform['target_start'], platform['target_end']], official=[r['target_start'], r['target_end']]),
                 limitations=lim, evidence_ids=[plat_ev, *r['evidence_ids'], f'{r["source_id"]}_comparison_map']))
+        # ICPAC at the same sampled locations as the EMI zones (±box around each arrow tip): ICPAC's printed
+        # favoured category and interval there, against the platform's area mean of local probabilities.
+        wa = lambda m: float(w[m].sum())
+        lon2 = np.repeat(nat['lon'][None], len(nat['lat']), 0)
+        for z in [z for z in recs if z['representation'] == 'zone_tercile_probabilities' and z.get('anchor')]:
+            a, zone = z['anchor'], z['source_locator']['zone_label']
+            h = a.get('uncertainty_deg', 0.5)
+            box = (np.abs(lat2 - a['lat']) <= h) & (np.abs(lon2 - a['lon']) <= h) & nat['eligible']
+            if not box.any():
+                continue
+            shown = box & (st == 'forecast')
+            pmean = area_mean(nat['p'], box, w)
+            combos = {}
+            for c_ in CATS:
+                for lo in sorted(set(low[shown & (cat == c_)].tolist())):
+                    combos[f'{c_} {int(lo)}-{int(lo) + 10}%'] = wa(shown & (cat == c_) & (low == lo)) / wa(shown)
+            oc = max(CATS, key=lambda c_: wa(shown & (cat == c_))) if shown.any() else 'unknown'
+            top = max(combos, key=combos.get) if combos else None
+            both_ok = validated and z['extraction_status'] == 'validated'
+            findings.append(dict(
+                id=f'{r["record_id"]}_sample_{zone}', kind='icpac_sample', source_id=r['source_id'], provider=r['provider'],
+                area=f'Near EMI zone {zone} arrow', zone=zone, status='validated' if both_ok else 'draft',
+                official_category=oc, official_main_interval=top, official_interval_shares=combos,
+                official_category_share=wa(shown & (cat == oc)) / wa(shown) if shown.any() else None,
+                official_shown_share=wa(shown) / wa(box), official_no_forecast_share=wa(box & (st == 'no_forecast_shown')) / wa(box),
+                platform_category=favoured(pmean, minimum), platform_mean_local_probabilities=pmean,
+                relationship=relationship(favoured(pmean, minimum), oc),
+                domain_share=float((box & domain).sum() / box.sum()), cells=int(box.sum()),
+                comparison_basis='reviewed_digitization at reviewed sample locations' if both_ok else 'draft',
+                limitations=lim + ['sample_location_taken_from_emi_arrow_tip'],
+                evidence_ids=[plat_ev, *r['evidence_ids'], f'{r["source_id"]}_comparison_map']))
         metric(metric='same_event_probability_difference', source_id=r['source_id'], status='unavailable', value=None,
                reason='target_window_mismatch; official_publishes_only_favoured_category_interval')
         icpac_map(tmp / 'maps' / f'{r["source_id"]}_comparison.png', nat, cat, st, pc, areas['season_domain'][1], validated, minimum)

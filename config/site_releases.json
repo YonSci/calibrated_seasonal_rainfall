@@ -135,7 +135,7 @@
   {
     "id": "2026-10-09.7",
     "date": "2026-10-09",
-    "commit": null,
+    "commit": "112ece8",
     "title": "Comparison reports and scope details corrected",
     "cycles": [
       "ONDJ 2026/27"
@@ -144,6 +144,21 @@
       {
         "type": "display",
         "text": "Public and packaged comparison reports generated from the published (reviewed, current) data only; report figures resolve inside the ZIP; EMI samples labelled by their overlap with the domain; evidence maps follow each finding's scope; publication check includes the favoured-category threshold and the saved source manifest."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-09.8",
+    "date": "2026-10-09",
+    "commit": null,
+    "title": "EMI figure beside the platform map; ICPAC comparison table",
+    "cycles": [
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The platform map with EMI zone values is shown next to EMI's official ONDJ 2026/27 figure; a new ICPAC table gives ICPAC's printed favoured category and interval against the platform's below/near/above probabilities at the sampled locations and for each area."
       }
     ]
   }

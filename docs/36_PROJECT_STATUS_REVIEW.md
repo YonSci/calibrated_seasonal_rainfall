@@ -424,3 +424,15 @@ Third site review: two remaining interface fixes, then four optional features.
 - [x] R3 view: EMI samples are labelled "Entire sample in the domain" (VIII), "Partly overlaps the domain — 69% / 44% of sample cells" (VII, VI) or "Outside the domain (national context)" (III). The probabilities still describe the whole ±0.5° sample, and this is stated. Evidence map links follow each finding's scope and name it, e.g. "Platform map (All Ethiopia)" for national-context findings.
 - [x] Publication check: the favoured-category threshold (`display.minimum_leading_probability`) is part of the fingerprint, and the saved source manifest must match the sources the comparison used (for restored or copied outputs).
 - [x] 18 comparison tests, including one that injects an unreviewed paragraph into a copy of the real outputs and confirms it appears in no public output.
+
+### Phase 23 — EMI figure side by side and an ICPAC table (2026-10-09)
+
+- [x] The comparison map "Platform ONDJ 2026/27 favoured category with EMI zone values at their arrow tips" is shown next to EMI's own official figure, "NATIONAL OUTLOOK FOR (ONDJ 2026/27)" (bulletin page 21), on the site and in the public reports.
+  - EMI's seasonal climate forecast PDFs contain full zone maps, but the zones change every season (Bega 2025/26 and Kiremt 2026 have different layouts).
+  - EMI's Bega 2026/27 forecast page has no document yet, so no all-zones map exists for this season; earlier seasons' zones are not used.
+  - When the PDF appears, the refresh will pick it up as a changed source for review.
+- [x] ICPAC table, matching the EMI table: ICPAC's printed favoured category and interval (the other two categories are not published) against the platform's below / near / above probabilities.
+  - Rows cover the four sampled locations (EMI arrow-tip boxes) and both areas.
+  - Zone III is "not comparable" because ICPAC shows no forecast category there (grey).
+  - Zones VI, VII and VIII and both areas favour above normal in both outlooks.
+  - Locations come from the reviewed EMI arrow tips, so these rows publish only when both extractions are reviewed.

@@ -620,6 +620,122 @@
    ]
   }
  ],
+ "icpac_table": [
+  {
+   "id": "icpac_ond_2026_update_rainfall_sample_III",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Near zone III arrow",
+   "zone": "III",
+   "official": "no forecast category shown",
+   "official_note": "100% of the sample grey (no forecast category shown)",
+   "platform": "50% / 31% / 19%",
+   "relationship": "Not comparable: ICPAC shows no forecast category here",
+   "relationship_code": "unknown",
+   "domain_share": 0.0,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_ondj",
+    "icpac_ond_2026_update_rainfall_map",
+    "icpac_ond_2026_update_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_ond_2026_update_rainfall_sample_VI",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Near zone VI arrow",
+   "zone": "VI",
+   "official": "Above normal 70–80%",
+   "official_note": "31% of the sample grey (no forecast category shown)",
+   "platform": "22% / 24% / 54%",
+   "relationship": "Same category",
+   "relationship_code": "same_favoured_category",
+   "domain_share": 0.4375,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_ondj",
+    "icpac_ond_2026_update_rainfall_map",
+    "icpac_ond_2026_update_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_ond_2026_update_rainfall_sample_VII",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Near zone VII arrow",
+   "zone": "VII",
+   "official": "Above normal 60–70%",
+   "official_note": "",
+   "platform": "24% / 21% / 55%",
+   "relationship": "Same category",
+   "relationship_code": "same_favoured_category",
+   "domain_share": 0.6875,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_ondj",
+    "icpac_ond_2026_update_rainfall_map",
+    "icpac_ond_2026_update_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_ond_2026_update_rainfall_sample_VIII",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Near zone VIII arrow",
+   "zone": "VIII",
+   "official": "Above normal 70–80%",
+   "official_note": "75% of shown cells; also Above normal 80–90% (25%)",
+   "platform": "19% / 24% / 57%",
+   "relationship": "Same category",
+   "relationship_code": "same_favoured_category",
+   "domain_share": 1.0,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_ondj",
+    "icpac_ond_2026_update_rainfall_map",
+    "icpac_ond_2026_update_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_ond_2026_update_rainfall_all_ethiopia_finding_row",
+   "kind": "area",
+   "status": "validated",
+   "location": "All Ethiopia",
+   "zone": null,
+   "official": "Above normal (most often 70–80%)",
+   "official_note": "shown on 46% of the area; 54% grey (no forecast category shown)",
+   "platform": "28% / 27% / 45%",
+   "relationship": "Same category (where both show a category)",
+   "relationship_code": "same_favoured_category",
+   "domain_share": null,
+   "area_key": "all_ethiopia",
+   "evidence_ids": [
+    "platform_forecast_ondj",
+    "icpac_ond_2026_update_rainfall_map",
+    "icpac_ond_2026_update_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_ond_2026_update_rainfall_season_domain_finding_row",
+   "kind": "area",
+   "status": "validated",
+   "location": "ONDJ R3 (Deyr) rainfall domain",
+   "zone": null,
+   "official": "Above normal (most often 70–80%)",
+   "official_note": "shown on >99% of the area; <1% grey (no forecast category shown)",
+   "platform": "19% / 24% / 57%",
+   "relationship": "Same category (where both show a category)",
+   "relationship_code": "same_favoured_category",
+   "domain_share": null,
+   "area_key": "season_domain",
+   "evidence_ids": [
+    "platform_forecast_ondj",
+    "icpac_ond_2026_update_rainfall_map",
+    "icpac_ond_2026_update_rainfall_comparison_map"
+   ]
+  }
+ ],
  "paragraphs": [
   {
    "id": "emi_bega_2026_27_outlook_zone_III_finding_text",
@@ -821,6 +937,6 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-09T11:34:29+00:00",
+ "created_utc": "2026-10-09T12:08:18+00:00",
  "engine": "rules v2"
 }

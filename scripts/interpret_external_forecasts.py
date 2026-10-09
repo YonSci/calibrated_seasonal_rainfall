@@ -194,6 +194,46 @@ def robustness(comparison):
                 text=' '.join(parts), evidence_ids=[], scope={})
 
 
+def interval_text(key):
+    """'above 70-80%' -> 'Above normal 70–80%'."""
+    if not key:
+        return 'no forecast category shown'
+    c, iv = key.split(' ', 1)
+    return f'{SHORT[c].capitalize()} {iv.replace("-", "–")}'
+
+
+def icpac_table(comparison):
+    """ICPAC's printed favoured category and interval vs the platform, at the sampled locations and per area."""
+    rows = []
+    for f in [f for f in comparison['findings'] if f['kind'] == 'icpac_sample']:
+        main = interval_text(f['official_main_interval'])
+        extra = []
+        if f['official_main_interval'] and f['official_interval_shares'][f['official_main_interval']] < 0.995:
+            extra.append(f'{share(f["official_interval_shares"][f["official_main_interval"]])} of shown cells; also '
+                         + ', '.join(f'{interval_text(k)} ({share(v)})' for k, v in sorted(f['official_interval_shares'].items(), key=lambda kv: -kv[1])
+                                     if k != f['official_main_interval']))
+        if f['official_no_forecast_share'] > 0.005:
+            extra.append(f'{share(f["official_no_forecast_share"])} of the sample grey (no forecast category shown)')
+        rows.append(dict(id=f['id'], kind='sample', status=f['status'], location=f'Near zone {f["zone"]} arrow', zone=f['zone'],
+                         official=main, official_note='; '.join(extra),
+                         platform=triple(f['platform_mean_local_probabilities']) if f['platform_mean_local_probabilities'] else '—',
+                         relationship=('Not comparable: ICPAC shows no forecast category here' if f['official_category'] == 'unknown'
+                                       else RELATION[f['relationship']]), relationship_code=f['relationship'],
+                         domain_share=f['domain_share'], area_key=None, evidence_ids=f['evidence_ids']))
+    for f in [f for f in comparison['findings'] if f['kind'] == 'area']:
+        n = f['numbers']
+        top = max(n['official_interval_shares'].items(), key=lambda kv: kv[1])[0] if n['official_interval_shares'] else None
+        rows.append(dict(id=f['id'] + '_row', kind='area', status=f['status'], location=f['area'], zone=None,
+                         official=f'{SHORT[f["official_category"]].capitalize()} (most often {interval_text(top).split(" ", 2)[-1]})'
+                                  if top and f['official_category'] in SHORT else '—',
+                         official_note=f'shown on {share(n["area_share_official_forecast_shown"])} of the area; '
+                                       f'{share(n["area_share_official_no_forecast"])} grey (no forecast category shown)',
+                         platform=triple(n['platform_mean_local_probabilities']) if n.get('platform_mean_local_probabilities') else '—',
+                         relationship=RELATION[f['relationship']] + ' (where both show a category)', relationship_code=f['relationship'],
+                         domain_share=None, area_key=f['area_key'], evidence_ids=f['evidence_ids']))
+    return rows
+
+
 def emi_table(comparison):
     rows = []
     for f in [f for f in comparison['findings'] if f['kind'] == 'zone']:
@@ -292,7 +332,7 @@ def evidence(comparison, manifest):
     return ev
 
 
-def report(path, comparison, manifest, items, table, paras, ev, image_prefix=''):
+def report(path, comparison, manifest, items, table, paras, ev, image_prefix='', itable=()):
     esc = html.escape
     rows = []
     for s in manifest['sources']:
@@ -339,6 +379,9 @@ section{{border:1px solid #ddd;border-radius:8px;padding:12px 16px;margin:16px 0
 <h2>EMI zones: official values and sampled platform neighbourhoods</h2><table><tr><th>Location</th><th>Official below / near / above</th>
 <th>Platform neighbourhood below / near / above</th><th>Relationship</th><th>Share of sample in the domain</th></tr>{zone_rows}</table>
 <p class="muted">Platform values: area mean of local probabilities within ±0.5° of each arrow tip, not the complete EMI zone. Rounded to add up to 100%.</p>
+<h2>ICPAC: printed favoured category and interval vs the platform</h2><table><tr><th>Location</th><th>ICPAC (favoured category, printed interval)</th>
+<th>Platform below / near / above</th><th>Relationship</th></tr>{"".join(f'<tr><td>{tag(r["status"])}{esc(r["location"])}</td><td>{esc(r["official"])}<br><span class="muted">{esc(r["official_note"])}</span></td><td>{esc(r["platform"])}</td><td>{esc(r["relationship"])}</td></tr>' for r in itable)}</table>
+<p class="muted">ICPAC publishes only the favoured category and its probability interval (the other two categories are not published) for October–December; the platform covers October–January.</p>
 <h2>Detailed interpretation</h2>{ps}{"".join(rows)}
 <h2>Metrics and eligibility</h2><table><tr><th>Metric</th><th>Source / area</th><th>Status</th><th>Reason</th><th>Value (draft values shown for review)</th></tr>{"".join(draft_rows)}</table>
 <h2>Notes</h2><ul>{"".join(f"<li>{esc(n)}</li>" for n in comparison["notes"])}</ul></body></html>'''
@@ -351,17 +394,17 @@ def interpret(comparison_dir, sources_dir, out):
     tmp = ef.staging(out)
     comparison = read_json(comparison_dir / 'comparison.json')
     manifest = read_json(sources_dir / 'source_manifest.json')
-    items, table = summary_items(comparison, manifest), emi_table(comparison)
+    items, table, itable = summary_items(comparison, manifest), emi_table(comparison), icpac_table(comparison)
     paras = paragraphs(comparison, manifest)
     ev = evidence(comparison, manifest)
     result = dict(created_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), engine=ENGINE, registry=comparison['registry'],
-                  platform=comparison['platform'], inputs=comparison.get('inputs'), summary=items, emi_table=table,
+                  platform=comparison['platform'], inputs=comparison.get('inputs'), summary=items, emi_table=table, icpac_table=itable,
                   paragraphs=paras, evidence=ev, published_paragraphs=[p['id'] for p in paras if p['status'] == 'validated'])
     (tmp / 'interpretation.json').write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding='utf-8', newline='')
     # Report beside the comparison maps so relative image links work from comparisons/interpretation/.
     for m in comparison['maps']:
         shutil.copy2(comparison_dir / 'maps' / m, tmp / m)
-    report(tmp / 'report.html', comparison, manifest, items, table, paras, ev)
+    report(tmp / 'report.html', comparison, manifest, items, table, paras, ev, itable=itable)
     ef.publish(tmp, out)
     return result
 

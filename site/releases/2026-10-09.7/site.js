@@ -414,15 +414,8 @@
       // 2. maps
       const cap = {icpac: 'Platform ' + season.label + ' vs ICPAC (left to right: platform favoured category, ICPAC favoured category, agreement). Periods differ; see the findings.',
                    emi: 'Platform ' + season.label + ' favoured category with EMI zone values at their arrow tips; boxes show the sampled ±0.5° neighbourhoods.'};
-      // The EMI comparison map is shown next to EMI's own official figure (the zones as EMI published them).
-      const emiFig = X.sources.filter(s => s.provider === 'EMI').flatMap(s => s.figures)[0];
-      const fig = (file, alt, caption) => '<figure><a href="' + href(file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(file) +
-        '" alt="' + esc(alt) + '"></a><figcaption>' + esc(caption) + '</figcaption></figure>';
-      if (X.maps.length) h += X.maps.map(m => m.name.includes('anchors')
-        ? '<div class="cmp-pair">' + fig(m.file, 'Platform map with EMI zone values', cap.emi) +
-          (emiFig ? fig(emiFig.file, 'EMI official figure', 'EMI official figure (as published): ' + emiFig.caption + '. EMI publishes zone values with arrows; no zone boundaries are given.') : '') + '</div>'
-        : '<figure class="map-figure wide"><a href="' + href(m.file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(m.file) +
-          '" alt="Comparison map"></a><figcaption>' + esc(cap.icpac) + '</figcaption></figure>').join('');
+      if (X.maps.length) h += X.maps.map(m => '<figure class="map-figure' + (m.name.includes('anchors') ? ' cmp-square' : ' wide') + '"><a href="' + href(m.file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(m.file) +
+        '" alt="Comparison map"></a><figcaption>' + esc(m.name.includes('anchors') ? cap.emi : cap.icpac) + '</figcaption></figure>').join('');
       // 3. compact tables
       const agree = X.metrics.filter(m => m.metric === 'mapped_category_agreement' && m.value);
       if (agree.length) h += '<div class="table-wrap"><table class="compact"><caption>ICPAC category agreement (only where both outlooks show a favoured category)</caption><thead><tr><th scope="col">Area</th><th scope="col">Compared area (share of the analysed area)</th><th scope="col">Category agreement within it</th><th scope="col">Opposite categories within it</th></tr></thead><tbody>' +
@@ -437,20 +430,6 @@
               (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + overlap(r.domain_share) + '</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td><td class="nowrap">' + esc(r.platform) +
               '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
           '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities over the whole ±0.5° sample around each arrow tip (also where a sample only partly overlaps the domain), not complete EMI zones: the figure publishes no zone boundaries. Percentages are rounded to add up to 100%.</p>';
-      }
-      if ((X.icpac_table || []).length) {
-        const samples = X.icpac_table.filter(r => r.kind === 'sample'), arows = X.icpac_table.filter(r => r.kind === 'area');
-        const ordered = [...(areaKey === 'all_ethiopia' ? samples : [...samples].sort((a, b) => b.domain_share - a.domain_share)),
-                         ...arows.filter(r => r.area_key === areaKey), ...arows.filter(r => r.area_key !== areaKey)];
-        h += '<div class="table-wrap"><table class="compact"><caption>ICPAC: printed favoured category and interval vs the platform (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">ICPAC (favoured category, printed interval)</th><th scope="col">Platform</th><th scope="col">Relationship</th><th scope="col">Evidence</th></tr></thead><tbody>' +
-          ordered.map(r => { const mapView = r.kind === 'area' ? (r.area_key === 'season_domain' ? c.domain_view : 'all_ethiopia')
-                                             : (areaKey === 'season_domain' && r.domain_share >= 1 ? c.domain_view : 'all_ethiopia');
-            const where = r.kind === 'sample' ? (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + overlap(r.domain_share) + '</span>')
-                                              : (r.area_key === areaKey ? '<br><span class="caveat">selected area</span>' : '<br><span class="caveat">' + otherName.toLowerCase() + '</span>');
-            return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>' + esc(r.location) + where + '</td><td>' + esc(r.official) +
-              (r.official_note ? '<br><span class="caveat">' + esc(r.official_note) + '</span>' : '') + '</td><td class="nowrap">' + esc(r.platform) + '</td><td>' + esc(r.relationship) +
-              '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
-          '</tbody></table></div><p class="caveat">ICPAC publishes only the favoured category and its probability interval (the other two categories are not published), for October–December; the platform covers October–January, so the two are compared as tendencies, not as the same event. Sample locations are the EMI arrow-tip boxes; platform values are area means of local probabilities over each sample or area.</p>';
       }
       if (ctx.length) h += '<details><summary>' + otherName + '</summary><ul class="findings">' + ctx.map(item).join('') + '</ul></details>';
       // 4. detailed interpretation

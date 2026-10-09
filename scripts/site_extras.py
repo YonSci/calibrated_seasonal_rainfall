@@ -591,7 +591,8 @@ def export_comparison(cycle, cid, out):
     rerun = (f'python scripts\\run_operational.py --config {Path(cycle.path).resolve().relative_to(ROOT)} --workflow products --compare-external'
              + (' --refresh-external' if any('official product' in r for r in stale) else ''))
     data = dict(platform=comparison['platform'], sources=sources, maps=maps, metrics=metrics, summary=keep(interp.get('summary', [])),
-                emi_table=keep(interp.get('emi_table', [])), paragraphs=keep(interp['paragraphs']), evidence=evidence,
+                emi_table=keep(interp.get('emi_table', [])), icpac_table=keep(interp.get('icpac_table', [])),
+                paragraphs=keep(interp['paragraphs']), evidence=evidence,
                 notes=comparison['notes'], stale=stale, rerun=rerun, created_utc=interp['created_utc'], engine=interp['engine'])
     rel = f'data/{cid}_comparison.json'
     (out / 'data').mkdir(parents=True, exist_ok=True)
@@ -679,9 +680,15 @@ def public_report(data, prefix):
             parts.append(f'<h2>Key findings — {esc(title)}</h2><ul>' +
                          ''.join(f'<li><strong>{esc(i["title"])}.</strong> {esc(i["text"])}</li>' for i in items) + '</ul>')
     if data['maps']:
-        parts.append('<h2>Comparison maps</h2>' + ''.join(
-            f'<figure><img src="{esc(prefix + name(m["file"]))}" alt="Comparison map"><figcaption>{esc(name(m["file"]))}</figcaption></figure>'
-            for m in data['maps']))
+        emi_fig = next((f for s in data['sources'] if s['provider'] == 'EMI' for f in s['figures']), None)
+        out = []
+        for m in data['maps']:
+            fig = f'<figure><img src="{esc(prefix + name(m["file"]))}" alt="Comparison map"><figcaption>{esc(name(m["file"]))}</figcaption></figure>'
+            if 'anchors' in m['file'] and emi_fig:
+                fig = ('<div class="pair">' + fig + f'<figure><img src="{esc(prefix + name(emi_fig["file"]))}" alt="EMI official figure">'
+                       f'<figcaption>EMI official figure: {esc(emi_fig["caption"])}</figcaption></figure></div>')
+            out.append(fig)
+        parts.append('<h2>Comparison maps</h2>' + ''.join(out))
     agree = [m for m in data['metrics'] if m['metric'] == 'mapped_category_agreement' and m['value']]
     if agree:
         parts.append('<h2>ICPAC category agreement</h2><p class="muted">Only where both outlooks show a favoured category.</p><table>'
@@ -696,6 +703,15 @@ def public_report(data, prefix):
                              f'<td>{esc(r["relationship"])}</td><td>{esc(overlap_label(r.get("domain_share")))}</td></tr>' for r in data['emi_table']) +
                      '</table><p class="muted">Platform values are area means of local probabilities over the whole ±0.5° sample around each arrow '
                      'tip, not complete EMI zones and not restricted to the domain. Percentages are rounded to add up to 100%.</p>')
+    if data.get('icpac_table'):
+        parts.append('<h2>ICPAC: printed favoured category and interval vs the platform</h2><table><tr><th>Location</th>'
+                     '<th>ICPAC (favoured category, printed interval)</th><th>Platform below / near / above</th><th>Relationship</th></tr>' +
+                     ''.join(f'<tr><td>{esc(r["location"])}' + (f'<br><span class="muted">{esc(overlap_label(r["domain_share"]))}</span>' if r.get('domain_share') is not None else '')
+                             + f'</td><td>{esc(r["official"])}' + (f'<br><span class="muted">{esc(r["official_note"])}</span>' if r['official_note'] else '')
+                             + f'</td><td>{esc(r["platform"])}</td><td>{esc(r["relationship"])}</td></tr>' for r in data['icpac_table']) +
+                     '</table><p class="muted">ICPAC publishes only the favoured category and its probability interval (the other two categories are not '
+                     'published), for October–December; the platform covers October–January. Sample locations are the EMI arrow-tip boxes; '
+                     'platform values are area means of local probabilities over each sample or area.</p>')
     if data['paragraphs']:
         parts.append('<h2>Detailed interpretation</h2>' + ''.join(f'<p>{esc(p["text"])}</p>' for p in data['paragraphs']))
     for s in data['sources']:
@@ -721,7 +737,7 @@ def public_report(data, prefix):
             f'<title>Official outlook comparison — {esc(plat["label"])}</title><style>body{{font:15px/1.55 system-ui,sans-serif;max-width:1100px;'
             'margin:24px auto;padding:0 16px;color:#111}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border-bottom:1px solid #ddd;'
             'padding:6px 8px;text-align:left;vertical-align:top}img{max-width:100%}figure{margin:12px 0}.muted{color:#555;font-size:.92em}'
-            '.warn{background:#fdf1d8;padding:10px}blockquote{border-left:3px solid #ccc;margin:8px 0;padding:4px 12px;color:#333}</style></head><body>'
+            '.warn{background:#fdf1d8;padding:10px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}blockquote{border-left:3px solid #ccc;margin:8px 0;padding:4px 12px;color:#333}</style></head><body>'
             + ''.join(parts) + '</body></html>\n')
 
 

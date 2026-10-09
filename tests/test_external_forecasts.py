@@ -187,6 +187,13 @@ class Pipeline(unittest.TestCase):
         emi = {i['area_key']: i for i in res['summary'] if i['id'].startswith('emi_zones_')}
         self.assertIn('zone III', emi['all_ethiopia']['text'])
         self.assertNotIn('zone III', emi['season_domain']['text'])
+        # ICPAC table: one row per sampled location plus one per area, ICPAC values as category + printed interval.
+        it = res['icpac_table']
+        self.assertEqual(sorted(r['zone'] for r in it if r['kind'] == 'sample'), ['III', 'VI', 'VII', 'VIII'])
+        self.assertEqual({r['area_key'] for r in it if r['kind'] == 'area'}, {'all_ethiopia', 'season_domain'})
+        row8 = next(r for r in it if r.get('zone') == 'VIII')
+        self.assertTrue(row8['official'].startswith('Above normal') and '%' in row8['official'])
+        self.assertEqual(sum(int(x.rstrip('%')) for x in row8['platform'].split(' / ')), 100)
         robust = next(i for i in res['summary'] if i['id'] == 'robustness_summary')
         self.assertIn('not statistical confidence intervals', robust['text'])
         # The synthetic forecast changes from below to above at 36 deg E, within the tested shifts of zone III's
