@@ -65,6 +65,11 @@ class Pipeline(unittest.TestCase):
         self.reg = ef.load_registry(REGISTRY)
         shutil.copytree(ROOT / self.reg['extractions_dir'], self.tmp / 'extractions')
         self.reg['extractions_dir'] = str(self.tmp / 'extractions')
+        # Start every test from unreviewed copies, whatever the real records' review state is.
+        for p in (self.tmp / 'extractions').glob('*.json'):
+            rec = json.loads(p.read_text(encoding='utf-8'))
+            rec.update(status='draft', review=None)
+            p.write_text(json.dumps(rec), encoding='utf-8')
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)

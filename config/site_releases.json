@@ -82,7 +82,7 @@
   {
     "id": "2026-10-09.4",
     "date": "2026-10-09",
-    "commit": null,
+    "commit": "d932d97",
     "title": "Comparison with official outlooks (ICPAC OND 2026 update, EMI Bega 2026/27)",
     "cycles": [
       "ONDJ 2026/27"
@@ -95,6 +95,21 @@
       {
         "type": "display",
         "text": "Outlooks section shows the official figures, the providers' own text, source records and the status of each comparison; ONDJ gallery links the review report."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-09.5",
+    "date": "2026-10-09",
+    "commit": null,
+    "title": "Reviewed comparison with official outlooks published",
+    "cycles": [
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "EMI zone values and the digitized ICPAC map were reviewed by the project team; the comparison findings, numbers and maps are now published (agreement in the south and south-east, disagreement in EMI zone III)."
       }
     ]
   }

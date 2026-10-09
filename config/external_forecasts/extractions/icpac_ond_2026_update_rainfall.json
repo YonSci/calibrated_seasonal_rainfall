@@ -119,6 +119,19 @@
   "The digitized comparison map (outputs/.../comparisons/maps/icpac_digitized.png) matches the original over Ethiopia.",
   "Grey areas are treated as 'no forecast shown'."
  ],
- "status": "draft",
- "review": null
+ "status": "validated",
+ "review": {
+  "reviewer": "Yonas 1",
+  "reviewed_utc": "2026-10-09T09:21:08+00:00",
+  "decision": "validated",
+  "note": null,
+  "confirmed_checks": [
+   "The map title reads 'Rainfall Forecast for Oct - Dec 2026_Update' (OND 2026, IGAD region).",
+   "Colour bars from top to bottom are Above (boxes 40-50 ... 90-100 %), Normal and Below (boxes 40-50 ... 80-90 %).",
+   "Axis ticks are 25-50 deg E and 10 deg S - 20 deg N in 5-degree steps (plain latitude-longitude map).",
+   "The digitized comparison map (outputs/.../comparisons/maps/icpac_digitized.png) matches the original over Ethiopia.",
+   "Grey areas are treated as 'no forecast shown'."
+  ],
+  "source_sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6"
+ }
 }
