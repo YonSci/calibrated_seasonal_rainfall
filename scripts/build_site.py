@@ -1210,17 +1210,19 @@ JS = r'''
             share1(v.agreement_share_where_both_favoured) + '</td><td>' + share1(v.opposing_share_where_both_favoured) + '</td></tr>'; }).join('') + '</tbody></table></div>';
       if (X.emi_table.length) {
         const rows = areaKey === 'all_ethiopia' ? X.emi_table : [...X.emi_table].sort((a, b) => b.domain_share - a.domain_share);
-        const hasZone = rows.some(r => r.zone_mean);
+        const hasZone = rows.some(r => r.zone_mean), hasArrow = rows.some(r => r.platform !== '—');
         h += '<div class="table-wrap"><table class="compact"><caption>EMI zones: printed values and the platform (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">Official</th>' +
-          (hasZone ? '<th scope="col">Platform over the whole zone</th>' : '') + '<th scope="col">Platform near the arrow (±0.5°)</th><th scope="col">Relationship near the arrow</th><th scope="col">Evidence</th></tr></thead><tbody>' +
+          (hasZone ? '<th scope="col">Platform over the whole zone</th>' : '') + (hasArrow ? '<th scope="col">Platform near the arrow (±0.5°)</th><th scope="col">Relationship near the arrow</th>' : '') + '<th scope="col">Evidence</th></tr></thead><tbody>' +
           rows.map(r => { const mapView = areaKey === 'season_domain' && r.domain_share >= 1 ? c.domain_view : 'all_ethiopia';
             const zoneCell = hasZone ? '<td>' + (r.zone_mean ? '<span class="nowrap">' + esc(r.zone_mean) + '</span><br><span class="caveat">' + esc(r.zone_relationship) +
               (r.zone_name ? ' · ' + esc(r.zone_name) + ' region' : '') + (areaKey === 'season_domain' && ok(r.zone_domain_share) && r.zone_domain_share < 1 ? ' · ' + (100 * r.zone_domain_share).toFixed(0) + '% of the zone in the domain' : '') + '</span>' : '—') + '</td>' : '';
             return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>Zone ' + esc(r.zone) +
-              (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + overlap(r.domain_share) + ' (arrow sample)</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td>' + zoneCell + '<td class="nowrap">' + esc(r.platform) +
-              '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
+              (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + (hasArrow ? overlap(r.domain_share) + ' (arrow sample)' : overlap(r.zone_domain_share)) + '</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td>' + zoneCell + (hasArrow ? '<td class="nowrap">' + esc(r.platform) +
+              '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td>' : '') + '<td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
           '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities. ' + (hasZone ? '"Whole zone" uses EMI\'s homogeneous rainfall regions as published in 2013 (assumed unchanged for 2026/27); ' : '') + '"near the arrow" uses the ±0.5° sample around each arrow tip, also where it only partly overlaps the domain. Percentages are rounded to add up to 100%.</p>';
       }
+      const icpacSrc = X.sources.find(s => s.provider === 'ICPAC');
+      const icpacPeriod = icpacSrc ? dt(icpacSrc.target_start) + ' – ' + dt(icpacSrc.target_end) : 'its own period';
       if ((X.icpac_table || []).length) {
         const samples = X.icpac_table.filter(r => r.kind === 'sample'), arows = X.icpac_table.filter(r => r.kind === 'area');
         const ordered = [...(areaKey === 'all_ethiopia' ? samples : [...samples].sort((a, b) => b.domain_share - a.domain_share)),
@@ -1233,7 +1235,7 @@ JS = r'''
             return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>' + esc(r.location) + where + '</td><td>' + esc(r.official) +
               (r.official_note ? '<br><span class="caveat">' + esc(r.official_note) + '</span>' : '') + '</td><td class="nowrap">' + esc(r.platform) + '</td><td>' + esc(r.relationship) +
               '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
-          '</tbody></table></div><p class="caveat">ICPAC publishes only the favoured category and its probability interval (the other two categories are not published), for October–December; the platform covers October–January, so the two are compared as tendencies, not as the same event. Sample locations are the EMI arrow-tip boxes; platform values are area means of local probabilities over each sample or area.</p>';
+          '</tbody></table></div><p class="caveat">ICPAC publishes only the favoured category and its probability interval (the other two categories are not published), for ' + icpacPeriod + '; the platform covers ' + dt(X.platform.target_start) + ' – ' + dt(X.platform.target_end) + ', so the two are compared as tendencies, not as the same event. Locations are the EMI arrow-tip boxes or the digitized EMI zones; platform values are area means of local probabilities over each location or area.</p>';
       }
       if (ctx.length) h += '<details><summary>' + otherName + '</summary><ul class="findings">' + ctx.map(item).join('') + '</ul></details>';
       // 4. detailed interpretation

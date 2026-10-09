@@ -455,3 +455,17 @@ Third site review: two remaining interface fixes, then four optional features.
   Until the review, these stay internal (draft columns are stripped from published rows; the map is withheld).
 - [x] Draft results: whole-zone means agree with the arrow samples. Zone III (Southwest) opposes EMI: the platform gives 47 / 25 / 28 % below / near / above, against EMI's 55 % above. Zones VI, VII and VIII agree on above normal.
 - [x] Review: the region layer was validated by the project team on 2026-10-09 (14:10 UTC), against the source image hash and the derived grid hash, together with the assumption that EMI still uses the regions published in 2013. The comparison was rerun. The site now shows the redrawn region map beside the platform map, region lines on the platform map, and whole-zone means: zone III (Southwest) 47 / 25 / 28 %, opposing EMI; zones VI, VII and VIII agree on above normal.
+
+### Phase 25 — comparison pipeline generalised; FMAM guide (2026-10-09)
+
+- [x] The pipeline was generalised beyond ONDJ, checked by an FMAM 2026 dry run in a scratch folder (nothing for FMAM was committed):
+  - map titles, period notes and ICPAC/EMI labels come from the registry;
+  - the narrative extractor works for any season;
+  - the cache may sit outside the repository.
+- [x] New capabilities:
+  - EMI zones drawn as filled polygons (Belg) are digitized from their fill colours, georeferenced by the country-outline bounding box, with specks removed. This gives whole-zone means without arrows, and ICPAC rows "within each EMI zone".
+  - `draft-record` writes draft extraction records: ICPAC axis ticks and legend boxes (legend sampled at the colour bar's centre), or EMI's outlook page, figure and fill colours.
+  - Image loading handles transparent margins, and frame detection handles dark-grey frames.
+  - The reviewed ICPAC OND digitization is byte-identical, and the ONDJ findings and tables are unchanged.
+- [x] Guide for the team: `docs/42_FMAM_OFFICIAL_COMPARISON_GUIDE.md` (registry and cycle block, refresh, draft records, completing them, run, review, site), with the dry-run results to check against.
+- [ ] FMAM comparison: to be run by the project team following docs/42.

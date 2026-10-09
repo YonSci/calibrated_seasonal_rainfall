@@ -329,3 +329,35 @@ class RainfallRegions(unittest.TestCase):
             grid = to_grid(region, lon, lat, d.lat.values.astype(float), d.lon.values.astype(float), 0.25)
             self.assertTrue(np.array_equal(grid, d.region.values))
         self.assertEqual(len(set(qc['components'].values())), 8)
+
+
+class FigureTools(unittest.TestCase):
+    @unittest.skipUnless(HAVE_CACHE, 'official snapshots not present')
+    def test_draft_layout_detection_on_the_ond_map(self):
+        current = json.loads((CACHE / 'ondj_2026_27/current.json').read_text())['icpac_ond_2026_update_rainfall']
+        lay = ef.detect_dominant_map_layout(ROOT / current['file'])
+        self.assertEqual((len(lay['x_ticks_px']), len(lay['y_ticks_px'])), (6, 7))
+        self.assertEqual([len(b) for b in lay['legend_bars']], [6, 5, 5])
+        self.assertEqual(lay['legend_bars'][0][0], [9, 63, 33])          # the bar's centre colour, not its edge
+
+    def test_zone_figure_digitization(self):
+        """A synthetic two-zone figure: west half one colour, east half another, placed by the country outline box."""
+        from PIL import Image
+        import xarray as xr
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            img = np.full((300, 400, 3), 255, 'uint8')
+            img[20:280, 20:200] = (54, 222, 42)
+            img[20:280, 200:380] = (18, 138, 54)
+            Image.fromarray(img).save(tmp / 'fig.png')
+            rec = dict(geometry=dict(method='fill_colour_zones', colour_tolerance=40, bbox_deg=[33.0, 48.0, 3.4, 14.9]),
+                       zones=[dict(zone_label='West', fill_rgb=[54, 222, 42]), dict(zone_label='East', fill_rgb=[18, 138, 54])])
+            with xr.open_dataset(MASK) as m:
+                lat, lon = m.lat.values.astype(float), m.lon.values.astype(float)
+            grid, qc = ef.digitize_zone_figure(tmp / 'fig.png', rec, lat, lon)
+            i = int(np.argmin(abs(lat - 9.0)))
+            self.assertEqual(grid[i, int(np.argmin(abs(lon - 35.0)))], 'West')
+            self.assertEqual(grid[i, int(np.argmin(abs(lon - 45.0)))], 'East')
+            self.assertEqual(qc['bbox_deg'], [33.0, 48.0, 3.4, 14.9])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)

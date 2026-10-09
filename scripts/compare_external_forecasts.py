@@ -163,6 +163,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                            long=layer['region_names'], validated=layer['status'] == 'validated', citation=layer.get('citation'))
 
     # ------------------------------------------------------------------ EMI zone records
+    zone_masks = {}                                   # zone label -> geometry (for ICPAC within EMI zones)
     for r in [r for r in recs if r['representation'] == 'zone_tercile_probabilities']:
         validated = r['extraction_status'] == 'validated'
         state = 'available' if validated else 'pending_review'
@@ -207,21 +208,27 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                reason=None if validated else 'transcription_and_anchor_awaiting_review', value=rel if validated else None,
                draft_value=None if validated else rel, basis='reviewed_visual (arrow-tip neighbourhood)' if validated else 'draft_visual',
                evidence_ids=[*r['evidence_ids'], plat_ev])
-        zone_mean, zone_rel, zone_ok = None, None, False
-        if regions and zone in regions['names']:
+        zone_mean, zone_rel, zone_ok, zmask, basis = None, None, False, None, None
+        if r.get('geometry_file') and (sources_dir / r['geometry_file']).is_file():
+            zg = np.array(read_json(sources_dir / r['geometry_file'])['zone'], dtype=object)
+            zmask, basis, zone_ok, region_name = (zg == zone) & nat['eligible'], 'zone polygons digitized from the EMI figure', validated, None
+            zone_masks[zone] = zg == zone
+        elif regions and zone in regions['names']:
             zmask = (regions['grid'] == regions['names'].index(zone) + 1) & nat['eligible']
-            if zmask.any():
-                zm = area_mean(nat['p'], zmask, w)
-                zone_ok = validated and regions['validated']
-                zone_rel = relationship(favoured(zm, minimum), off_cat)
-                zone_mean = dict(mean_local_probabilities=zm, cells=int(zmask.sum()), region_name=regions['long'].get(zone),
-                                 domain_share=float((zmask & domain).sum() / zmask.sum()), relationship=zone_rel,
-                                 status='validated' if zone_ok else 'draft')
+            basis, zone_ok, region_name = 'EMI homogeneous rainfall regions as published in 2013 (digitized)', validated and regions['validated'], regions['long'].get(zone)
+            zone_masks[zone] = regions['grid'] == regions['names'].index(zone) + 1
+        if zmask is not None and zmask.any():
+            zm = area_mean(nat['p'], zmask, w)
+            zone_rel = relationship(favoured(zm, minimum), off_cat)
+            zone_mean = dict(mean_local_probabilities=zm, cells=int(zmask.sum()), region_name=region_name, basis=basis,
+                             domain_share=float((zmask & domain).sum() / zmask.sum()), relationship=zone_rel,
+                             status='validated' if zone_ok else 'draft')
+        else:
+            zone_ok = False
         if zone_mean:
             metric(metric='zone_mean_probability', source_id=r['source_id'], zone=zone, status='available' if zone_ok else 'pending_review',
                    value=zone_mean if zone_ok else None, draft_value=None if zone_ok else zone_mean,
-                   reason=None if zone_ok else 'region_boundaries_awaiting_review',
-                   basis='EMI homogeneous rainfall regions as published in 2013 (digitized)', evidence_ids=[plat_ev, *r['evidence_ids']])
+                   reason=None if zone_ok else 'zone_boundaries_awaiting_review', basis=basis, evidence_ids=[plat_ev, *r['evidence_ids']])
         else:
             metric(metric='zone_mean_probability', source_id=r['source_id'], zone=zone, status='unavailable', value=None,
                    reason='zone_geometry_requires_alignment',
@@ -253,6 +260,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
         cat = np.array(g['category'], dtype=object)
         st = np.array(g['state'], dtype=object)
         low = np.array([[np.nan if v is None else v for v in row] for row in g['low']])
+        high = np.array([[np.nan if v is None else v for v in row] for row in g['high']])
         wl = window_limitation(platform, r)
         lim = [wl] if wl else []
         lim += ['official_reference_period_unknown', 'digitized_from_published_image', 'official_other_category_probabilities_not_published']
@@ -273,7 +281,8 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
             intervals = {}
             for c in CATS:
                 for lo in sorted(set(low[shown & (cat == c)].tolist())):
-                    intervals[f'{c} {int(lo)}-{int(lo) + 10}%'] = wa(shown & (cat == c) & (low == lo)) / wa(shown)
+                    hi_ = high[shown & (cat == c) & (low == lo)][0]
+                    intervals[f'{c} {int(lo)}-{int(hi_)}%'] = wa(shown & (cat == c) & (low == lo)) / wa(shown)
             value = dict(area_share_official_forecast_shown=wa(shown) / total, area_share_official_no_forecast=wa(grey) / total,
                          area_share_both_favoured=wa(both) / total,
                          agreement_share_where_both_favoured=wa(same) / wa(both) if both.any() else None,
@@ -314,10 +323,16 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
         # favoured category and interval there, against the platform's area mean of local probabilities.
         wa = lambda m: float(w[m].sum())
         lon2 = np.repeat(nat['lon'][None], len(nat['lat']), 0)
-        for z in [z for z in recs if z['representation'] == 'zone_tercile_probabilities' and z.get('anchor')]:
-            a, zone = z['anchor'], z['source_locator']['zone_label']
-            h = a.get('uncertainty_deg', 0.5)
-            box = (np.abs(lat2 - a['lat']) <= h) & (np.abs(lon2 - a['lon']) <= h) & nat['eligible']
+        for z in [z for z in recs if z['representation'] == 'zone_tercile_probabilities'
+                  and (z.get('anchor') or z['source_locator']['zone_label'] in zone_masks)]:
+            a, zone = z.get('anchor'), z['source_locator']['zone_label']
+            if a:
+                h = a.get('uncertainty_deg', 0.5)
+                box = (np.abs(lat2 - a['lat']) <= h) & (np.abs(lon2 - a['lon']) <= h) & nat['eligible']
+                where = f'Near EMI zone {zone} arrow'
+            else:
+                box = zone_masks[zone] & nat['eligible']
+                where = f'Within EMI zone {zone}'
             if not box.any():
                 continue
             shown = box & (st == 'forecast')
@@ -325,13 +340,14 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
             combos = {}
             for c_ in CATS:
                 for lo in sorted(set(low[shown & (cat == c_)].tolist())):
-                    combos[f'{c_} {int(lo)}-{int(lo) + 10}%'] = wa(shown & (cat == c_) & (low == lo)) / wa(shown)
+                    hi_ = high[shown & (cat == c_) & (low == lo)][0]
+                    combos[f'{c_} {int(lo)}-{int(hi_)}%'] = wa(shown & (cat == c_) & (low == lo)) / wa(shown)
             oc = max(CATS, key=lambda c_: wa(shown & (cat == c_))) if shown.any() else 'unknown'
             top = max(combos, key=combos.get) if combos else None
             both_ok = validated and z['extraction_status'] == 'validated'
             findings.append(dict(
                 id=f'{r["record_id"]}_sample_{zone}', kind='icpac_sample', source_id=r['source_id'], provider=r['provider'],
-                area=f'Near EMI zone {zone} arrow', zone=zone, status='validated' if both_ok else 'draft',
+                area=where, zone=zone, status='validated' if both_ok else 'draft',
                 official_category=oc, official_main_interval=top, official_interval_shares=combos,
                 official_category_share=wa(shown & (cat == oc)) / wa(shown) if shown.any() else None,
                 official_shown_share=wa(shown) / wa(box), official_no_forecast_share=wa(box & (st == 'no_forecast_shown')) / wa(box),
@@ -339,11 +355,12 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                 relationship=relationship(favoured(pmean, minimum), oc),
                 domain_share=float((box & domain).sum() / box.sum()), cells=int(box.sum()),
                 comparison_basis='reviewed_digitization at reviewed sample locations' if both_ok else 'draft',
-                limitations=lim + ['sample_location_taken_from_emi_arrow_tip'],
+                limitations=lim + ['sample_location_taken_from_emi_arrow_tip' if a else 'sample_area_is_digitized_emi_zone'],
                 evidence_ids=[plat_ev, *r['evidence_ids'], f'{r["source_id"]}_comparison_map']))
         metric(metric='same_event_probability_difference', source_id=r['source_id'], status='unavailable', value=None,
                reason='target_window_mismatch; official_publishes_only_favoured_category_interval')
-        icpac_map(tmp / 'maps' / f'{r["source_id"]}_comparison.png', nat, cat, st, pc, areas['season_domain'][1], validated, minimum)
+        icpac_map(tmp / 'maps' / f'{r["source_id"]}_comparison.png', nat, cat, st, pc, areas['season_domain'][1], validated, minimum,
+                  platform['label'], f'{r["provider"]} {next((x["season_label"] for x in manifest["sources"] if x["source_id"] == r["source_id"]), "")}', wl)
 
     # ------------------------------------------------------------------ explicitly unavailable
     metric(metric='rainfall_anomaly_difference', status='unavailable', value=None,
@@ -352,12 +369,15 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
            reason='out_of_scope: needs observations and a separate verification design (see the Verification section)')
     if any(r['representation'] == 'zone_tercile_probabilities' for r in recs):
         zone_recs = [r for r in recs if r['representation'] == 'zone_tercile_probabilities']
+        emi_label = next((x['season_label'] for x in manifest['sources'] if x['source_id'] == zone_recs[0]['source_id']), 'EMI')
+        by_region = regions and any(z['source_locator']['zone_label'] in regions['names'] for z in zone_recs) and not zone_masks_from_figure(zone_recs)
         emi_map(tmp / 'maps' / f'{zone_recs[0]["source_id"]}_anchors.png', nat, zone_recs, areas['season_domain'][1],
                 all(r['extraction_status'] == 'validated' for r in zone_recs), minimum,
-                regions if regions and regions['validated'] else None)   # region lines only once the layer is reviewed
-        if regions:
+                regions if by_region and regions['validated'] else None,   # region lines only once the layer is reviewed
+                platform['label'], {k: v for k, v in zone_masks.items()} if zone_masks_from_figure(zone_recs) else None)
+        if by_region:
             region_map(tmp / 'maps' / f'{zone_recs[0]["source_id"]}_regions.png', zone_recs, regions,
-                       regions['validated'] and all(r['extraction_status'] == 'validated' for r in zone_recs))
+                       regions['validated'] and all(r['extraction_status'] == 'validated' for r in zone_recs), emi_label)
     result = dict(created_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), registry=registry['id'],
                   platform=dict(platform, native_forecast=repo_path(native_path),
                                 native_sha256=nat['sha256'], minimum_leading_probability=minimum,
@@ -392,7 +412,7 @@ def _boundary(ax):
         pass
 
 
-def icpac_map(path, nat, cat, st, pc, domain, validated, minimum):
+def icpac_map(path, nat, cat, st, pc, domain, validated, minimum, platform_label='', official_label='ICPAC', window=None):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -408,8 +428,8 @@ def icpac_map(path, nat, cat, st, pc, domain, validated, minimum):
     agree[both] = np.where(cat[both] == pc[both], 1, np.where(np.isin(cat[both], ['above', 'below']) & np.isin(pc[both], ['above', 'below']), 0, .5))
     fig, axes = plt.subplots(1, 3, figsize=(15, 5.2))
     ext = [nat['lon'][0] - .125, nat['lon'][-1] + .125, nat['lat'][0] - .125, nat['lat'][-1] + .125]
-    for ax, data, title in [(axes[0], code(np.where(nat['eligible'], pc, 'unknown')), f'Platform ONDJ 2026/27: favoured tercile (≥{minimum:.0%})'),
-                            (axes[1], code(off), 'ICPAC OND 2026 update: favoured tercile (digitized)')]:
+    for ax, data, title in [(axes[0], code(np.where(nat['eligible'], pc, 'unknown')), f'Platform {platform_label}: favoured tercile (≥{minimum:.0%})'),
+                            (axes[1], code(off), f'{official_label}: favoured tercile (digitized)')]:
         ax.imshow(data, origin='lower', extent=ext, cmap=cmap, vmin=-.5, vmax=5.5, interpolation='nearest')
         ax.set_title(title, fontsize=10)
     axes[2].imshow(np.where(nat['eligible'], agree, np.nan), origin='lower', extent=ext, interpolation='nearest',
@@ -424,7 +444,13 @@ def icpac_map(path, nat, cat, st, pc, domain, validated, minimum):
                 Patch(color=COLOURS['noforecast'], label='ICPAC grey: no forecast category shown'),
                 Patch(color='#2a78d6', label='same category'), Patch(color='#e2b25c', label='near vs other'),
                 Patch(color='#b03a24', label='opposite (above vs below)')], loc='lower center', ncol=4, fontsize=8, frameon=False)
-    fig.suptitle('Platform ONDJ 2026/27 vs ICPAC OND 2026 update — different target windows (January only in the platform)', fontsize=11)
+    if window:
+        parts = ([f'{", ".join(window["only_platform"])} only in the platform'] if window['only_platform'] else []) + \
+                ([f'{", ".join(window["only_official"])} only in {official_label.split()[0]}'] if window['only_official'] else [])
+        note = ' — different target windows (' + '; '.join(parts) + ')'
+    else:
+        note = ' — same target window'
+    fig.suptitle(f'Platform {platform_label} vs {official_label}{note}', fontsize=11)
     fig.subplots_adjust(bottom=.2, top=.9, wspace=.12)
     _draft(fig, validated)
     fig.savefig(path, dpi=130, facecolor='white')
@@ -436,7 +462,11 @@ def _region_lines(ax, regions, color='#222', lw=.9):
         ax.contour(regions['flon'], regions['flat'], (regions['fine'] == k).astype(float), levels=[.5], colors=color, linewidths=lw)
 
 
-def region_map(path, recs, regions, validated):
+def zone_masks_from_figure(recs):
+    return any(r.get('geometry_file') for r in recs)
+
+
+def region_map(path, recs, regions, validated, emi_label='EMI outlook'):
     # EMI homogeneous rainfall regions (redrawn) with the Bega 2026/27 values printed for each zone.
     import matplotlib
     matplotlib.use('Agg')
@@ -463,15 +493,15 @@ def region_map(path, recs, regions, validated):
         ax.text(x, y, text, ha='center', va='center', fontsize=8 if p else 7, weight='bold' if p else 'normal',
                 color='#111' if p else '#555', bbox=dict(boxstyle='round,pad=.25', fc='white', ec='#888' if p else 'none', alpha=.85 if p else .6))
     ax.set_xlim(33, 48); ax.set_ylim(3, 15); ax.set_aspect('equal'); ax.tick_params(labelsize=8)
-    ax.set_title('EMI homogeneous rainfall regions with the Bega (ONDJ) 2026/27 printed values', fontsize=10)
+    ax.set_title(f'EMI homogeneous rainfall regions with the {emi_label} printed values', fontsize=10)
     fig.text(.5, .01, 'Regions redrawn after Korecha and Sorteberg (2013), Water Resources Research, doi:10.1002/2013WR013760; '
-             'values: EMI Bega 2026/27 outlook (A above, N near, B below normal).', ha='center', fontsize=7, color='#444')
+             f'values: EMI {emi_label} outlook (A above, N near, B below normal).', ha='center', fontsize=7, color='#444')
     _draft(fig, validated)
     fig.savefig(path, dpi=130, facecolor='white', bbox_inches='tight')
     plt.close(fig)
 
 
-def emi_map(path, nat, recs, domain, validated, minimum, regions=None):
+def emi_map(path, nat, recs, domain, validated, minimum, regions=None, platform_label='', zone_masks=None):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -490,6 +520,14 @@ def emi_map(path, nat, recs, domain, validated, minimum, regions=None):
     if regions:
         _region_lines(ax, regions, color='#333', lw=.7)
     ax.contour(nat['lon'], nat['lat'], domain.astype(float), levels=[.5], colors='#446761', linewidths=.8)
+    lon2, lat2 = np.meshgrid(nat['lon'], nat['lat'])
+    for label, m in (zone_masks or {}).items():          # EMI zones digitized from the figure: outline and values
+        ax.contour(nat['lon'], nat['lat'], m.astype(float), levels=[.5], colors='black', linewidths=1.3)
+        rr = next((r for r in recs if r['source_locator']['zone_label'] == label), None)
+        if rr is not None and m.any():
+            p = rr['probabilities']
+            ax.text(float(np.median(lon2[m])), float(np.median(lat2[m])), f'EMI zone {label}\nA {p["above"]:.0%} N {p["near"]:.0%} B {p["below"]:.0%}',
+                    ha='center', va='center', fontsize=8, bbox=dict(boxstyle='round,pad=.25', fc='white', ec='#999', alpha=.9))
     for r in recs:
         a = r.get('anchor')
         if not a:
@@ -501,7 +539,8 @@ def emi_map(path, nat, recs, domain, validated, minimum, regions=None):
                     (a['lon'], a['lat'] + h), xytext=(0, 6), textcoords='offset points', ha='center', fontsize=8,
                     bbox=dict(boxstyle='round,pad=.25', fc='white', ec='#999', alpha=.9))
     ax.set_xlim(ext[:2]); ax.set_ylim(ext[2:]); ax.set_aspect('equal'); ax.tick_params(labelsize=8)
-    ax.set_title('Platform ONDJ 2026/27 favoured tercile with EMI zone values at their arrow tips (±0.5° boxes)'
+    ax.set_title(f'Platform {platform_label} favoured tercile with EMI zone values'
+                 + (' (zones digitized from the EMI figure)' if zone_masks else ' at their arrow tips (±0.5° boxes)')
                  + ('\nthin lines: EMI homogeneous rainfall regions' if regions else ''), fontsize=10)
     ax.legend(handles=[Patch(color=COLOURS[k], label=NAMES[k]) for k in CATS] +
               [Patch(facecolor='white', edgecolor='grey', label='no clear category (<40%)')], loc='lower left', fontsize=8)

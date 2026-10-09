@@ -180,7 +180,7 @@
   {
     "id": "2026-10-09.10",
     "date": "2026-10-09",
-    "commit": null,
+    "commit": "c5c825d",
     "title": "Reviewed EMI rainfall regions published",
     "cycles": [
       "ONDJ 2026/27"
@@ -189,6 +189,21 @@
       {
         "type": "analysis",
         "text": "The digitized EMI homogeneous rainfall regions were reviewed by the project team; the site now shows the redrawn region map with EMI's 2026/27 values beside the platform map, region lines on the platform map, and platform means over each whole EMI zone (zone III opposing, VI-VIII agreeing on above normal)."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-09.11",
+    "date": "2026-10-09",
+    "commit": null,
+    "title": "Comparison pipeline ready for other seasons",
+    "cycles": [
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Map titles and table notes use each season's own labels and months; zone tables hide arrow columns for seasons whose EMI zones have no arrows. ONDJ results unchanged."
       }
     ]
   }

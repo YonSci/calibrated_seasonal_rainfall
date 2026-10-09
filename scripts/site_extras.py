@@ -717,16 +717,21 @@ def public_report(data, prefix):
                              f'<td>{_pct(m["value"]["opposing_share_where_both_favoured"], True)}</td></tr>' for m in agree) + '</table>')
     if data['emi_table']:
         zone = any(r.get('zone_mean') for r in data['emi_table'])
+        arrow = any(r['platform'] != '—' for r in data['emi_table'])
         parts.append('<h2>EMI zones: printed values and the platform</h2><table><tr><th>Zone</th><th>Official below / near / above</th>'
                      + ('<th>Platform over the whole zone (region)</th>' if zone else '') +
-                     f'<th>Platform near the arrow (±0.5°)</th><th>Relationship near the arrow</th><th>Arrow sample vs the {esc(dom)}</th></tr>' +
+                     (f'<th>Platform near the arrow (±0.5°)</th><th>Relationship near the arrow</th><th>Arrow sample vs the {esc(dom)}</th>' if arrow else '')
+                     + '</tr>' +
                      ''.join(f'<tr><td>Zone {esc(r["zone"])}</td><td>{esc(r["official"])}</td>'
                              + (f'<td>{esc(r.get("zone_mean") or "—")}<br><span class="muted">{esc(r.get("zone_relationship") or "")}</span></td>' if zone else '')
-                             + f'<td>{esc(r["platform"])}</td><td>{esc(r["relationship"])}</td><td>{esc(overlap_label(r.get("domain_share")))}</td></tr>'
+                             + (f'<td>{esc(r["platform"])}</td><td>{esc(r["relationship"])}</td><td>{esc(overlap_label(r.get("domain_share")))}</td>' if arrow else '')
+                             + '</tr>'
                              for r in data['emi_table']) +
                      '</table><p class="muted">Platform values are area means of local probabilities: over the whole zone (EMI homogeneous rainfall '
                      'region as published in 2013, assumed unchanged) where reviewed, and over the ±0.5° sample around each arrow tip. '
                      'Percentages are rounded to add up to 100%.</p>')
+    icpac = next((s for s in data['sources'] if s['provider'] == 'ICPAC'), None)
+    icpac_period = f'{icpac["target_start"]} to {icpac["target_end"]}' if icpac else 'its own period'
     if data.get('icpac_table'):
         parts.append('<h2>ICPAC: printed favoured category and interval vs the platform</h2><table><tr><th>Location</th>'
                      '<th>ICPAC (favoured category, printed interval)</th><th>Platform below / near / above</th><th>Relationship</th></tr>' +
@@ -734,8 +739,8 @@ def public_report(data, prefix):
                              + f'</td><td>{esc(r["official"])}' + (f'<br><span class="muted">{esc(r["official_note"])}</span>' if r['official_note'] else '')
                              + f'</td><td>{esc(r["platform"])}</td><td>{esc(r["relationship"])}</td></tr>' for r in data['icpac_table']) +
                      '</table><p class="muted">ICPAC publishes only the favoured category and its probability interval (the other two categories are not '
-                     'published), for October–December; the platform covers October–January. Sample locations are the EMI arrow-tip boxes; '
-                     'platform values are area means of local probabilities over each sample or area.</p>')
+                     f'published), for {icpac_period}; the platform covers {plat["target_start"]} to {plat["target_end"]}. Locations are the EMI arrow-tip '
+                     'boxes or the digitized EMI zones; platform values are area means of local probabilities over each location or area.</p>')
     if data['paragraphs']:
         parts.append('<h2>Detailed interpretation</h2>' + ''.join(f'<p>{esc(p["text"])}</p>' for p in data['paragraphs']))
     for s in data['sources']:

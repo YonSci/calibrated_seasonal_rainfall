@@ -197,6 +197,7 @@
     ],
     "cells": 200,
     "region_name": "Southwest",
+    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.0,
     "relationship": "opposing_favoured_categories",
     "status": "validated"
@@ -248,6 +249,7 @@
     ],
     "cells": 143,
     "region_name": "South Highland",
+    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.6643356643356644,
     "relationship": "same_favoured_category",
     "status": "validated"
@@ -299,6 +301,7 @@
     ],
     "cells": 58,
     "region_name": "South",
+    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.7068965517241379,
     "relationship": "same_favoured_category",
     "status": "validated"
@@ -350,6 +353,7 @@
     ],
     "cells": 430,
     "region_name": "South-Southeast lowlands",
+    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.986046511627907,
     "relationship": "same_favoured_category",
     "status": "validated"
@@ -586,7 +590,7 @@
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — whole zones (rainfall regions)",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone III (Southwest): opposing: platform below normal, EMI above normal, platform 47% / 25% / 28%; zone VI (South Highland): both favour above normal, platform 21% / 24% / 55%; zone VII (South): both favour above normal, platform 24% / 26% / 50%; zone VIII (South-Southeast lowlands): both favour above normal, platform 18% / 24% / 58%. Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged for 2026/27.",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone III (Southwest): opposing: platform below normal, EMI above normal, platform 47% / 25% / 28%; zone VI (South Highland): both favour above normal, platform 21% / 24% / 55%; zone VII (South): both favour above normal, platform 24% / 26% / 50%; zone VIII (South-Southeast lowlands): both favour above normal, platform 18% / 24% / 58%. Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged.",
    "evidence_ids": [
     "emi_bega_2026_27_outlook_page21",
     "platform_forecast_ondj"
@@ -606,7 +610,7 @@
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — whole zones (rainfall regions)",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone VI (South Highland): both favour above normal, platform 21% / 24% / 55% over the whole zone (66% of it in the domain); zone VII (South): both favour above normal, platform 24% / 26% / 50% over the whole zone (71% of it in the domain); zone VIII (South-Southeast lowlands): both favour above normal, platform 18% / 24% / 58% over the whole zone (99% of it in the domain). Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged for 2026/27.",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone VI (South Highland): both favour above normal, platform 21% / 24% / 55% over the whole zone (66% of it in the domain); zone VII (South): both favour above normal, platform 24% / 26% / 50% over the whole zone (71% of it in the domain); zone VIII (South-Southeast lowlands): both favour above normal, platform 18% / 24% / 58% over the whole zone (99% of it in the domain). Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged.",
    "evidence_ids": [
     "emi_bega_2026_27_outlook_page21",
     "platform_forecast_ondj"
@@ -913,7 +917,7 @@
    "area_key": "zone",
    "status": "validated",
    "relationship": null,
-   "text": "For every EMI zone, the platform value is the area mean of local probabilities within ±0.5° of the arrow tip, not the complete EMI zone: the figure publishes no zone boundaries and no reference period, so exact zone probability differences are not calculated.",
+   "text": "For every EMI zone, the platform value near the arrow is the area mean of local probabilities within ±0.5° of the arrow tip, not the complete EMI zone: the figure publishes no zone boundaries and no reference period, so exact zone probability differences are not calculated.",
    "evidence_ids": []
   },
   {
@@ -1049,7 +1053,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-09T14:11:46+00:00",
+ "created_utc": "2026-10-09T15:00:26+00:00",
  "engine": "rules v2",
  "reference_layers": [
   {

@@ -278,7 +278,7 @@ def refresh(registry, cache_root):
             meta = dict(
                 source_id=spec['id'], provider=spec['provider'], product=spec['product'],
                 representation=spec['representation'], label=found['label'],
-                requested_url=found['detail_url'], download_url=final, file=str(stored.relative_to(ROOT)).replace('\\', '/'),
+                requested_url=found['detail_url'], download_url=final, file=rel(stored),
                 sha256=digest, bytes=len(data), retrieved_utc=checked,
                 target_start=spec['target_start'], target_end=spec['target_end'], season_label=spec['season_label'],
                 # Not stated by the provider on the checked pages -> null (never a retrieval or file date).
@@ -293,8 +293,7 @@ def refresh(registry, cache_root):
         previous = current.get(spec['id'], {}).get('sha256')
         if previous != digest:
             changed.append(spec['id'])
-        current[spec['id']] = dict(sha256=digest, file=str(stored.relative_to(ROOT)).replace('\\', '/'),
-                                   meta=str(stored.with_suffix('.json').relative_to(ROOT)).replace('\\', '/'))
+        current[spec['id']] = dict(sha256=digest, file=rel(stored), meta=rel(stored.with_suffix('.json')))
         entry = dict(source_id=spec['id'], checked_utc=checked, status='ok', sha256=digest, changed=previous != digest,
                      skipped_candidates=found.get('skipped') or None,
                      new_snapshot=new, download_url=final)
@@ -329,6 +328,8 @@ CONTENT_FIELDS = ('method', 'extraction_version', 'template', 'zones', 'source_l
 
 def content_sha256(record):
     fields = {k: record.get(k) for k in CONTENT_FIELDS}
+    if record.get('geometry'):                    # zones digitized from the figure: their settings are content too
+        fields['geometry'] = record['geometry']
     if record.get('derived_sha256'):              # digitized reference layers: the derived file is part of the content
         fields['derived_sha256'] = record['derived_sha256']
     return sha256(json.dumps(fields, sort_keys=True, ensure_ascii=False).encode('utf-8'))
@@ -385,6 +386,41 @@ def pdf_figure(pdf_path, page, out_path):
     return out_path, sha256(im.data), im.image.size
 
 
+def load_rgb(path):
+    """RGB array; transparent areas become white (some maps have transparent margins)."""
+    from PIL import Image
+    im = Image.open(path)
+    if im.mode in ('RGBA', 'LA') or 'transparency' in im.info:
+        im = im.convert('RGBA')
+        bg = Image.new('RGBA', im.size, (255, 255, 255, 255))
+        im = Image.alpha_composite(bg, im)
+    return np.asarray(im.convert('RGB')).astype(int)
+
+
+def frame_lines(dark):
+    """Rows/columns of the axis frame: long unbroken dark runs (bold title text is not a line)."""
+    H, W = dark.shape
+
+    def longest(v):
+        best = run = 0
+        for b in v:
+            run = run + 1 if b else 0
+            best = max(best, run)
+        return best
+    rows = [y for y in range(H) if dark[y].sum() > 0.5 * W and longest(dark[y]) > 0.5 * W]
+    cols = [x for x in range(W) if dark[:, x].sum() > 0.5 * H and longest(dark[:, x]) > 0.5 * H]
+    return rows, cols
+
+
+def frame_and_dark(a):
+    for threshold in (150, 400):                 # black frames first; dark-grey frames as a fallback
+        dark = a.sum(-1) < threshold
+        rows, cols = frame_lines(dark)
+        if len(rows) >= 2 and len(cols) >= 2:
+            return dark, rows, cols
+    raise ValueError('Axis frame not found')
+
+
 def digitize_dominant_map(png_path, template, lat, lon, shift_px=(0, 0)):
     """Dominant-category map (favoured tercile + printed interval) -> the platform's 0.25 deg grid.
 
@@ -394,12 +430,10 @@ def digitize_dominant_map(png_path, template, lat, lon, shift_px=(0, 0)):
     not vote. Returns arrays and quality-control numbers; nothing is interpolated.
     """
     from PIL import Image
-    a = np.asarray(Image.open(png_path).convert('RGB')).astype(int)
+    a = load_rgb(png_path)
     H, W, _ = a.shape
-    dark = a.sum(-1) < 150
-    # Axis frame: the longest dark horizontal and vertical lines.
-    rows = [y for y in range(H) if dark[y].sum() > 0.5 * W]
-    cols = [x for x in range(W) if dark[:, x].sum() > 0.5 * H]
+    # Axis frame: the longest dark horizontal and vertical lines (black, or dark grey on some maps).
+    dark, rows, cols = frame_and_dark(a)
     if len(rows) < 2 or len(cols) < 2:
         raise ValueError('Axis frame not found')
     top, bottom, left, right = min(rows), max(rows), min(cols), max(cols)
@@ -490,6 +524,213 @@ def digitize_dominant_map(png_path, template, lat, lon, shift_px=(0, 0)):
     return dict(category=cat, low=lo, high=hi, state=state, votes=votes_used), qc
 
 
+MONTHS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')
+
+
+def page_narrative(text, page):
+    # Month-by-month statements when the page has them; otherwise the opening sentences.
+    alt = '|'.join(MONTHS)
+    parts = re.findall(rf'((?:{alt})\s*:.*?)(?=(?:{alt})\s*:|$)', text)
+    if parts:
+        return [dict(text=t.strip(), locator=f'PDF page {page}') for t in parts]
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    return [dict(text=' '.join(sentences[:4]).strip()[:900], locator=f'PDF page {page}')] if sentences and sentences[0] else []
+
+
+def country_bbox():
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import delivery_map_base as base
+    lines = base.boundary_lines(ROOT / 'data/boundaries/ethiopia/eth_admin0.shp')
+    xs = np.concatenate([np.asarray(x) for x, _ in lines])
+    ys = np.concatenate([np.asarray(y) for _, y in lines])
+    return [float(xs.min()), float(xs.max()), float(ys.min()), float(ys.max())], lines
+
+
+def digitize_zone_figure(img_path, record, lat, lon):
+    # Zones drawn as filled polygons (no axes): classify pixels by the zones' fill colours, georeference by
+    # matching the bounding box of the filled silhouette to Ethiopia's bounding box, give text and boundary
+    # pixels inside the silhouette to the nearest zone, then take the majority per grid cell.
+    from PIL import Image
+    from scipy import ndimage as ndi
+    from matplotlib.path import Path as MPath
+    g = record['geometry']
+    a = load_rgb(img_path)
+    classes = [(z['zone_label'], z['fill_rgb']) for z in record['zones']] + \
+              [('excluded:' + e['label'], e['fill_rgb']) for e in g.get('excluded_fills', [])]
+    pal = np.array([c for _, c in classes])
+    d = np.sqrt(((a[:, :, None, :] - pal[None, None]) ** 2).sum(-1))
+    best, ok = d.argmin(-1), d.min(-1) <= g.get('colour_tolerance', 40)
+    lab = np.where(ok, best + 1, 0)
+    silhouette = ndi.binary_opening(lab > 0, np.ones((3, 3)))
+    filled = ndi.binary_fill_holes(ndi.binary_closing(silhouette, np.ones((7, 7))))
+    ys, xs = np.nonzero(silhouette)
+    x0, x1, y0, y1 = xs.min(), xs.max(), ys.min(), ys.max()
+    bbox = g.get('bbox_deg') or country_bbox()[0]
+    _, (ni, nj) = ndi.distance_transform_edt(lab == 0, return_indices=True)
+    lab = np.where(filled, lab[ni, nj], 0)
+    px_lon = bbox[0] + (np.arange(a.shape[1]) - x0) / (x1 - x0) * (bbox[1] - bbox[0])
+    px_lat = bbox[3] - (np.arange(a.shape[0]) - y0) / (y1 - y0) * (bbox[3] - bbox[2])
+    step = float(abs(lat[1] - lat[0]))
+    grid = np.full((len(lat), len(lon)), '', dtype=object)
+    for i, la in enumerate(lat):
+        r = np.where(np.abs(px_lat - la) <= step / 2)[0]
+        if not len(r):
+            continue
+        for j, lo in enumerate(lon):
+            c = np.where(np.abs(px_lon - lo) <= step / 2)[0]
+            if not len(c):
+                continue
+            v = lab[np.ix_(r, c)].ravel()
+            v = v[v > 0]
+            if len(v):
+                grid[i, j] = classes[np.bincount(v).argmax() - 1][0]
+    # Remove specks (printed numbers, line ends): components smaller than min_zone_cells take the nearest larger zone.
+    names = sorted({v for v in grid.ravel() if v})
+    code = np.zeros(grid.shape, int)
+    for k, nm in enumerate(names, 1):
+        code[grid == nm] = k
+    keep = code > 0
+    for k in range(1, len(names) + 1):
+        comp, n = ndi.label(code == k)
+        for c_ in range(1, n + 1):
+            if (comp == c_).sum() < g.get('min_zone_cells', 3):
+                keep[comp == c_] = False
+    if keep.any():
+        _, (ki, kj) = ndi.distance_transform_edt(~keep, return_indices=True)
+        cleaned = np.where(code > 0, code[ki, kj], 0)
+        grid = np.where(cleaned > 0, np.array([''] + names, dtype=object)[cleaned], '')
+    # QC: overlap of the digitized silhouette with this project's Ethiopia outline on the grid.
+    _, lines = country_bbox()
+    LON, LAT = np.meshgrid(lon, lat)
+    inside = np.zeros(LON.shape, bool)
+    for x, y in lines:
+        inside |= MPath(np.column_stack([x, y])).contains_points(np.column_stack([LON.ravel(), LAT.ravel()])).reshape(LON.shape)
+    drawn = grid != ''
+    iou = float((drawn & inside).sum() / (drawn | inside).sum())
+    qc = dict(silhouette_px=[int(x0), int(y0), int(x1), int(y1)], bbox_deg=bbox, outline_iou=iou,
+              pixels_matched=float(ok.mean()), cells={k: int((grid == k).sum()) for k, _ in classes})
+    return grid, qc
+
+
+def detect_figure_colours(img_path, n=10):
+    # The most frequent non-white, non-black colours (coarse bins) with their mean position (0-1).
+    from PIL import Image
+    a = load_rgb(img_path)
+    q = (a // 12) * 12 + 6
+    keep = (q.sum(-1) < 700) & (q.sum(-1) > 60)
+    cols, counts = np.unique(q[keep], axis=0, return_counts=True)
+    out = []
+    for k in np.argsort(counts)[::-1][:n]:
+        m = (np.abs(q - cols[k]).sum(-1) == 0)
+        ys, xs = np.nonzero(m)
+        out.append(dict(fill_rgb=[int(v) for v in cols[k]], pixels=int(counts[k]),
+                        position=[round(float(xs.mean() / a.shape[1]), 2), round(float(ys.mean() / a.shape[0]), 2)]))
+    return out
+
+
+def detect_dominant_map_layout(png_path):
+    # Axis-frame ticks and legend boxes of an ICPAC-style dominant-category map (for a draft template).
+    from PIL import Image
+    a = load_rgb(png_path)
+    H, W, _ = a.shape
+    # Axis frame: the longest dark horizontal and vertical lines (black, or dark grey on some maps).
+    dark, rows, cols = frame_and_dark(a)
+    top, bottom, left, right = min(rows), max(rows), min(cols), max(cols)
+
+    def runs(idx):
+        out, cur = [], []
+        for i in idx:
+            if cur and i != cur[-1] + 1:
+                out.append(sum(cur) / len(cur)); cur = []
+            cur.append(i)
+        return out + ([sum(cur) / len(cur)] if cur else [])
+    xt = runs([x for x in range(left + 2, right - 1) if dark[bottom + 2:bottom + 11, x].sum() >= 5])
+    yt = runs([y for y in range(top + 1, bottom) if dark[y, left - 9:left - 1].sum() >= 5])
+    found = []
+    for lx in range(right + 5, W - 2, 3):           # the legend column with the most colour boxes
+        col, boxes, start = a[:, lx], [], None
+        for y in range(1, H):
+            if start is None:
+                start = y
+            if np.abs(col[y] - col[y - 1]).sum() >= 12:
+                if y - start > 15 and not (col[start] > 245).all() and col[start].sum() > 60:
+                    boxes.append([start, y - 1, [int(v) for v in col[(start + y) // 2]]])
+                start = y
+        found.append((lx, boxes))
+    most = max(len(b) for _, b in found)
+    middle = [f for f in found if len(f[1]) == most]
+    best = middle[len(middle) // 2]                 # the bar's centre column, not its shaded edge
+    bars, cur = [], []
+    for b in best[1]:                               # split into bars at gaps between boxes
+        if cur and b[0] - cur[-1][1] > 12:
+            bars.append(cur); cur = []
+        cur.append(b)
+    if cur:
+        bars.append(cur)
+    return dict(frame=[left, top, right, bottom], x_ticks_px=xt, y_ticks_px=yt, legend_x=best[0],
+                legend_bars=[[b[2] for b in bar] for bar in bars])
+
+
+def draft_record(registry, record_id, cache_root):
+    # Write a draft extraction record for the current snapshot of a source, with everything that can be
+    # detected filled in and the rest marked TODO for the person preparing the review.
+    spec = next((s for s in registry['sources'] if s['id'] == record_id), None)
+    if spec is None:
+        raise KeyError(f'{record_id} is not a source in the registry')
+    cur = read_json(cache_dir(registry, cache_root) / 'current.json').get(record_id)
+    if not cur:
+        raise ValueError('No snapshot yet: run refresh first')
+    rec_dir = resolve(registry['extractions_dir'])
+    path = rec_dir / f'{record_id}.json'
+    if path.exists():
+        raise FileExistsError(f'{path} exists; edit it or delete it first')
+    src = resolve(cur['file'])
+    rec = dict(record_id=record_id, source_sha256=cur['sha256'], extraction_version=EXTRACTION_VERSION,
+               created_by='Draft written by external_forecasts.py draft-record; TODO fields completed by the preparer.', status='draft', review=None)
+    if spec['representation'] == 'dominant_category_map':
+        lay = detect_dominant_map_layout(src)
+        rec.update(method='automatic_raster_digitization', template=dict(
+            x_ticks_deg='TODO: tick labels left to right, e.g. [25, 30, 35, 40, 45, 50]', x_ticks_px_detected=lay['x_ticks_px'],
+            y_ticks_deg='TODO: tick labels top to bottom, e.g. [20, 15, 10, 5, 0, -5, -10]', y_ticks_px_detected=lay['y_ticks_px'],
+            legend_x=lay['legend_x'], no_forecast_rgb=[190, 190, 190],
+            no_forecast_meaning="Grey areas are not explained in the legend; treated as 'no forecast shown' (not as a category).",
+            colour_tolerance=30,
+            legend_bars=[dict(category='TODO: above / near / below (top to bottom)',
+                              intervals_top_down=f'TODO: {len(b)} intervals, e.g. [[90, 100], [80, 90], ...]', box_colours_detected=b)
+                         for b in lay['legend_bars']]),
+            checks_for_reviewer=['Title, season and region of the map match the registry entry.',
+                                 'Colour bars, top to bottom, are the categories and intervals given in legend_bars.',
+                                 'Axis ticks are the degrees given in x_ticks_deg and y_ticks_deg.',
+                                 'The digitized comparison map matches the original over Ethiopia.'])
+        print(f'Detected {len(lay["x_ticks_px"])} x ticks, {len(lay["y_ticks_px"])} y ticks, legend column {lay["legend_x"]}, '
+              f'bars with {[len(b) for b in lay["legend_bars"]]} boxes. Complete the TODO fields from the image: {src}')
+    else:
+        pages = find_outlook_pages(src, spec['page_keywords'])
+        if not pages:
+            raise ValueError('No candidate outlook page found; check page_keywords in the registry')
+        page = pages[0]['page']
+        fig, fig_sha, _ = pdf_figure(src, page, rec_dir / f'_{record_id}_page{page}_figure_for_drafting')
+        colours = detect_figure_colours(fig)
+        rec.update(method='draft_figure_transcription', source_locator=dict(pdf_page=page, figure_title='TODO: title printed on the figure'),
+                   figure_sha256=fig_sha,
+                   geometry=dict(method='fill_colour_zones', colour_tolerance=40, bbox_deg=None,
+                                 excluded_fills=[dict(label='TODO e.g. Climatologically dry', fill_rgb='TODO: one of the detected colours')]),
+                   detected_colours=colours,
+                   zones=[dict(zone_label='TODO short name, e.g. West', printed_order='A/N/B', printed='TODO e.g. A 45, N 30, B 25',
+                               probabilities=dict(below='TODO', near='TODO', above='TODO'), fill_rgb='TODO: detected colour of this zone')],
+                   checks_for_reviewer=['The figure is the outlook for the target season.',
+                                        'Each zone has the printed A/N/B values and the fill colour of its polygon.',
+                                        'The digitized zones (comparison map) match the zones of the figure.',
+                                        'No reference period is stated for the probabilities (if so).'])
+        print(f'Outlook page {page}; figure saved for drafting: {fig}\nDetected colours (fill_rgb, pixels, mean position x/y from top-left):')
+        for c in colours:
+            print('  ', c)
+    rec_dir.mkdir(parents=True, exist_ok=True)
+    write_json(path, rec)
+    print('Draft record written:', path)
+
+
 def prepare(registry, cache_root, grid_path, out_dir):
     """Standardized records + previews for the current snapshots (offline, deterministic)."""
     import xarray as xr
@@ -565,8 +806,7 @@ def prepare(registry, cache_root, grid_path, out_dir):
                 evidence.append(dict(id=f'{spec["id"]}_page{page}', file=f'previews/{fig.name}',
                                      caption=f'{meta["label"]}, PDF page {page}', pdf_page=page))
                 summary = pages[0]['text']
-                entry['narrative'] = [dict(text=t.strip(), locator=f'PDF page {page}')
-                                      for t in re.findall(r'((?:October|November|December|January)\s*:.*?)(?=(?:October|November|December|January)\s*:|$)', summary)]
+                entry['narrative'] = page_narrative(summary, page)
                 if rec:
                     if rec['source_locator']['pdf_page'] != page:
                         status = 'needs_extraction_review'
@@ -574,6 +814,16 @@ def prepare(registry, cache_root, grid_path, out_dir):
                     if rec.get('figure_sha256') and rec['figure_sha256'] != fig_sha:
                         status = 'needs_extraction_review'
                         entry['extraction'].update(status=status, note='The embedded figure differs from the reviewed one')
+                    geometry_file = None
+                    if rec.get('geometry'):
+                        try:
+                            zgrid, zqc = digitize_zone_figure(fig, rec, lat, lon)
+                            geometry_file = f'{spec["id"]}_zones.json'
+                            write_json(tmp / geometry_file, dict(lat=lat.tolist(), lon=lon.tolist(), zone=zgrid.tolist(), qc=zqc))
+                            entry['zone_digitization_qc'] = zqc
+                        except (ValueError, KeyError, TypeError) as exc:
+                            status = 'needs_extraction_review'
+                            entry['extraction'].update(status=status, note=f'Zone digitization failed: {exc}')
                     for z in rec['zones']:
                         p = z['probabilities']
                         if abs(sum(p.values()) - 1) > 1e-6 or set(p) != set(CATEGORIES):
@@ -584,7 +834,8 @@ def prepare(registry, cache_root, grid_path, out_dir):
                                             source_locator=dict(rec['source_locator'], zone_label=z['zone_label']),
                                             probabilities=p, printed_order=z.get('printed_order'),
                                             anchor=z.get('anchor'), reference_period=meta.get('reference_period'),
-                                            geometry_id=None, geometry_status='requires_alignment',
+                                            geometry_id=geometry_file and z['zone_label'], geometry_file=geometry_file,
+                                            geometry_status='digitized_from_figure' if geometry_file else 'requires_alignment',
                                             extraction_method=rec['method'], extraction_status=status,
                                             evidence_ids=[e['id'] for e in evidence]))
         entry['evidence'] = evidence
@@ -677,7 +928,7 @@ def load_registry(path):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('command', choices=['refresh', 'prepare', 'review', 'status'])
+    ap.add_argument('command', choices=['refresh', 'prepare', 'review', 'status', 'draft-record'])
     ap.add_argument('--registry', required=True)
     ap.add_argument('--cache-root', default='data/external_forecasts')
     ap.add_argument('--grid', help='prepare: NetCDF on the platform grid (lat, lon)')
@@ -696,6 +947,10 @@ def main():
         if not (a.record and a.reviewer):
             ap.error('review needs --record and --reviewer')
         review(reg, a.record, a.reviewer, a.reject, a.note, a.cache_root)
+    elif a.command == 'draft-record':
+        if not a.record:
+            ap.error('draft-record needs --record')
+        draft_record(reg, a.record, a.cache_root)
     else:
         status(reg, a.cache_root)
 
