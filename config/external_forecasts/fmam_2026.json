@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "fmam_2026",
+  "description": "Official seasonal rainfall outlooks compared with the platform's January-initialized FMAM 2026 forecast.",
+  "platform": {
+    "target": "FMAM",
+    "label": "FMAM 2026",
+    "target_start": "2026-02-01",
+    "target_end": "2026-05-31"
+  },
+  "extractions_dir": "config/external_forecasts/extractions",
+  "sources": [
+    {
+      "id": "icpac_mam_2026_rainfall",
+      "provider": "ICPAC",
+      "adapter": "icpac",
+      "product": "rainfall_tercile_probability",
+      "representation": "dominant_category_map",
+      "index_url": "https://www.icpac.net/seasonal-forecast/?year=2026&resource_type=27&region=1",
+      "slug": "Mar-May-2026",
+      "region": "1",
+      "resource_type": "27",
+      "image_alt": "Rainfall forecast",
+      "expected_label": [
+        "Rainfall forecast",
+        "March - May 2026",
+        "IGAD Region"
+      ],
+      "season_label": "MAM 2026",
+      "target_start": "2026-03-01",
+      "target_end": "2026-05-31",
+      "issue_date": null,
+      "initialization": null,
+      "reference_period": null
+    },
+    {
+      "id": "emi_belg_2026_outlook",
+      "provider": "EMI",
+      "adapter": "emi",
+      "product": "rainfall_tercile_probability",
+      "representation": "zone_tercile_probabilities",
+      "listing_urls": [
+        "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/",
+        "https://www.ethiomet.gov.et/products/seasonal-forecast/"
+      ],
+      "outlook_season": "belg",
+      "outlook_years": [
+        2026
+      ],
+      "page_keywords": [
+        "FMAM",
+        "Belg",
+        "2026"
+      ],
+      "season_label": "Belg (FMAM) 2026",
+      "target_start": "2026-02-01",
+      "target_end": "2026-05-31",
+      "issue_date": null,
+      "initialization": null,
+      "reference_period": null
+    }
+  ],
+  "anomaly_products_checked": {
+    "ICPAC": "Products listed for Mar-May-2026 (IGAD region): rainfall tercile probability (27) only; no rainfall-anomaly product.",
+    "EMI": "The Belg 2026 outlook bulletin gives zone tercile probabilities; no rainfall-amount anomaly map."
+  }
+}

@@ -1,0 +1,234 @@
+{
+ "record_id": "emi_belg_2026_outlook",
+ "source_sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+ "extraction_version": 1,
+ "created_by": "Draft written by draft-record; values and colours completed by the assistant (Claude) from the figure; not yet reviewed.",
+ "status": "validated",
+ "review": {
+  "reviewer": "Yonas M",
+  "reviewed_utc": "2026-10-09T15:22:08+00:00",
+  "decision": "validated",
+  "note": null,
+  "confirmed_checks": [
+   "PDF page 22 ('Summery and advisory for coming Belg (FMAM), 2026') carries the zone outlook figure.",
+   "Printed values (A/N/B): West 45/30/25, North-central 60/30/10, South-central 55/30/15, Southeast 45/35/20.",
+   "Each zone's fill colour matches the zone where its values are printed; the grey 'Climatological Dry' area is excluded.",
+   "The digitized zones on the comparison map match the zones of the EMI figure.",
+   "No reference period is stated for the probabilities."
+  ],
+  "source_sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+  "content_sha256": "b6a203d7c72147f50ca64cd11738d53dbd646c8615e59cf898554ff77a302c04"
+ },
+ "method": "draft_figure_transcription",
+ "source_locator": {
+  "pdf_page": 22,
+  "figure_title": "Belg (FMAM) 2026 zone outlook (no printed title; \"The number represents the probability of A Above Normal, N Normal, B Below Normal\")"
+ },
+ "figure_sha256": "dae2bae6165feadfbf912731fde581fb1f78470c75e5ef60409f42d432bfb4ec",
+ "geometry": {
+  "method": "fill_colour_zones",
+  "colour_tolerance": 40,
+  "bbox_deg": null,
+  "excluded_fills": [
+   {
+    "label": "Climatologically dry",
+    "fill_rgb": [
+     114,
+     114,
+     114
+    ]
+   }
+  ]
+ },
+ "detected_colours": [
+  {
+   "fill_rgb": [
+    18,
+    138,
+    54
+   ],
+   "pixels": 73222,
+   "position": [
+    0.48,
+    0.4
+   ]
+  },
+  {
+   "fill_rgb": [
+    18,
+    162,
+    66
+   ],
+   "pixels": 48002,
+   "position": [
+    0.67,
+    0.74
+   ]
+  },
+  {
+   "fill_rgb": [
+    54,
+    222,
+    42
+   ],
+   "pixels": 42558,
+   "position": [
+    0.22,
+    0.59
+   ]
+  },
+  {
+   "fill_rgb": [
+    42,
+    114,
+    18
+   ],
+   "pixels": 37871,
+   "position": [
+    0.37,
+    0.82
+   ]
+  },
+  {
+   "fill_rgb": [
+    114,
+    114,
+    114
+   ],
+   "pixels": 32500,
+   "position": [
+    0.26,
+    0.28
+   ]
+  },
+  {
+   "fill_rgb": [
+    30,
+    162,
+    66
+   ],
+   "pixels": 10594,
+   "position": [
+    0.67,
+    0.74
+   ]
+  },
+  {
+   "fill_rgb": [
+    18,
+    138,
+    42
+   ],
+   "pixels": 7951,
+   "position": [
+    0.47,
+    0.37
+   ]
+  },
+  {
+   "fill_rgb": [
+    54,
+    222,
+    54
+   ],
+   "pixels": 6971,
+   "position": [
+    0.2,
+    0.6
+   ]
+  },
+  {
+   "fill_rgb": [
+    18,
+    162,
+    54
+   ],
+   "pixels": 4549,
+   "position": [
+    0.68,
+    0.73
+   ]
+  },
+  {
+   "fill_rgb": [
+    102,
+    102,
+    102
+   ],
+   "pixels": 4137,
+   "position": [
+    0.26,
+    0.25
+   ]
+  }
+ ],
+ "zones": [
+  {
+   "zone_label": "West",
+   "printed_order": "A/N/B",
+   "printed": "A 45, N 30, B 25",
+   "probabilities": {
+    "below": 0.25,
+    "near": 0.3,
+    "above": 0.45
+   },
+   "fill_rgb": [
+    54,
+    222,
+    42
+   ]
+  },
+  {
+   "zone_label": "North-central",
+   "printed_order": "A/N/B",
+   "printed": "A 60, N 30, B 10",
+   "probabilities": {
+    "below": 0.1,
+    "near": 0.3,
+    "above": 0.6
+   },
+   "fill_rgb": [
+    18,
+    138,
+    54
+   ]
+  },
+  {
+   "zone_label": "South-central",
+   "printed_order": "A/N/B",
+   "printed": "A 55, N 30, B 15",
+   "probabilities": {
+    "below": 0.15,
+    "near": 0.3,
+    "above": 0.55
+   },
+   "fill_rgb": [
+    42,
+    114,
+    18
+   ]
+  },
+  {
+   "zone_label": "Southeast",
+   "printed_order": "A/N/B",
+   "printed": "A 45, N 35, B 20",
+   "probabilities": {
+    "below": 0.2,
+    "near": 0.35,
+    "above": 0.45
+   },
+   "fill_rgb": [
+    18,
+    162,
+    66
+   ]
+  }
+ ],
+ "checks_for_reviewer": [
+  "PDF page 22 ('Summery and advisory for coming Belg (FMAM), 2026') carries the zone outlook figure.",
+  "Printed values (A/N/B): West 45/30/25, North-central 60/30/10, South-central 55/30/15, Southeast 45/35/20.",
+  "Each zone's fill colour matches the zone where its values are printed; the grey 'Climatological Dry' area is excluded.",
+  "The digitized zones on the comparison map match the zones of the EMI figure.",
+  "No reference period is stated for the probabilities."
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "source_id": "icpac_mam_2026_rainfall",
+ "provider": "ICPAC",
+ "product": "rainfall_tercile_probability",
+ "representation": "dominant_category_map",
+ "label": "Rainfall forecast - March - May 2026 - IGAD Region",
+ "requested_url": "https://www.icpac.net/seasonal-forecast/Mar-May-2026/?region=1&resource_type=27",
+ "download_url": "https://www.icpac.net/media/images/GHA-MAM-Rainfall.original.png",
+ "file": "data/external_forecasts/fmam_2026/icpac_mam_2026_rainfall/a9d7f6106eb5cb61.png",
+ "sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+ "bytes": 280536,
+ "retrieved_utc": "2026-10-09T15:15:47+00:00",
+ "target_start": "2026-03-01",
+ "target_end": "2026-05-31",
+ "season_label": "MAM 2026",
+ "issue_date": null,
+ "initialization": null,
+ "reference_period": null,
+ "http_last_modified": "Wed, 25 Feb 2026 09:10:27 GMT",
+ "narrative": [
+  {
+   "text": "Wetter than normal conditions expected over most parts of Ethiopia, parts of northern and central and southern Somalia, northern Eritrea, South Sudan, central to southern Kenya, Uganda, Rwanda, Burundi, and Tanzania.",
+   "locator": "detail page, rainfall forecast item"
+  },
+  {
+   "text": "Normal to drier than normal conditions are expected over western and northern Kenya, western and eastern Uganda, south-western to central and north-eastern Ethiopia, Djibouti, western South Sudan and most parts of Somalia.",
+   "locator": "detail page, rainfall forecast item"
+  }
+ ],
+ "products_listed_for_season": {
+  "27": "rainfall_tercile_probability"
+ },
+ "other_title_matches": null,
+ "skipped_candidates": null,
+ "extraction_version": 1
+}

@@ -49,6 +49,19 @@ class CycleTests(unittest.TestCase):
         self.assertEqual(season_window(feb, 2026)[1].isoformat(), '2026-02-28')   # non-leap year
         self.assertEqual(season_window(feb, 1996)[1].isoformat(), '1996-02-29')   # leap year
 
+    def test_february_initialized_fmam_cycle(self):
+        from common import season_window, load_config
+        jan = load_cycle(ROOT / 'config/cycles/jan_2026_fmam.json')
+        c = load_cycle(ROOT / 'config/cycles/feb_2026_fmam.json')
+        self.assertEqual((c.tag, c.season_name, c.targets), ('init02', 'FMAM', jan.targets))
+        project = load_config('config/fmam_feb/project.json')
+        start, end = season_window(project, 2026)
+        self.assertEqual((start.isoformat(), end.isoformat()), ('2026-02-01', '2026-05-31'))   # lead 0: starts on the init date
+        self.assertEqual((season_window(project, 2024)[1] - season_window(project, 2024)[0]).days + 1, 121)  # 121-day download covers leap years
+        for key in ('output_root', 'verification_root', 'season_domain_mask'):
+            self.assertNotEqual(c.raw[key], jan.raw[key])                 # the two FMAM cycles never share outputs
+        self.assertNotEqual(c.raw.get('site_id'), jan.raw.get('site_id'))
+
     def test_target_windows_for_verification(self):
         from cycle import target_window
         ondj = load_cycle(ROOT / 'config/cycles/sep_2026_ondj.json')

@@ -1,0 +1,855 @@
+{
+ "sources": [
+  {
+   "source_id": "icpac_mam_2026_rainfall",
+   "provider": "ICPAC",
+   "product": "rainfall_tercile_probability",
+   "representation": "dominant_category_map",
+   "label": "Rainfall forecast - March - May 2026 - IGAD Region",
+   "requested_url": "https://www.icpac.net/seasonal-forecast/Mar-May-2026/?region=1&resource_type=27",
+   "download_url": "https://www.icpac.net/media/images/GHA-MAM-Rainfall.original.png",
+   "file": "data/external_forecasts/fmam_2026/icpac_mam_2026_rainfall/a9d7f6106eb5cb61.png",
+   "sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+   "bytes": 280536,
+   "retrieved_utc": "2026-10-09T15:15:47+00:00",
+   "target_start": "2026-03-01",
+   "target_end": "2026-05-31",
+   "season_label": "MAM 2026",
+   "issue_date": null,
+   "initialization": null,
+   "reference_period": null,
+   "http_last_modified": "Wed, 25 Feb 2026 09:10:27 GMT",
+   "narrative": [
+    {
+     "text": "Wetter than normal conditions expected over most parts of Ethiopia, parts of northern and central and southern Somalia, northern Eritrea, South Sudan, central to southern Kenya, Uganda, Rwanda, Burundi, and Tanzania.",
+     "locator": "detail page, rainfall forecast item"
+    },
+    {
+     "text": "Normal to drier than normal conditions are expected over western and northern Kenya, western and eastern Uganda, south-western to central and north-eastern Ethiopia, Djibouti, western South Sudan and most parts of Somalia.",
+     "locator": "detail page, rainfall forecast item"
+    }
+   ],
+   "products_listed_for_season": {
+    "27": "rainfall_tercile_probability"
+   },
+   "other_title_matches": null,
+   "skipped_candidates": null,
+   "extraction_version": 1,
+   "extraction": {
+    "status": "validated",
+    "note": null,
+    "record": "config/external_forecasts/extractions/icpac_mam_2026_rainfall.json",
+    "content_sha256": "c1ba1eb7fc458a2955ef2fe902cb3ab40a8c83ba837bbb80195526fa1d56e49e",
+    "method": "automatic_raster_digitization",
+    "review": {
+     "reviewer": "Yonas M",
+     "reviewed_utc": "2026-10-09T15:21:49+00:00",
+     "decision": "validated",
+     "note": null,
+     "confirmed_checks": [
+      "Title reads 'Rainfall Probabilistic Forecast for Mar - May 2026_Update' (IGAD region); the product page label is 'Rainfall forecast - March - May 2026'.",
+      "Colour bars, top to bottom, are Above, Normal and Below, each with seven boxes: 90-100, 80-90, 70-80, 60-70, 50-60, 40-50 and 33-40 %.",
+      "Axis ticks are 25-50 deg E and 20 deg N - 10 deg S in 5-degree steps.",
+      "The digitized comparison map matches the original over Ethiopia.",
+      "Grey areas are treated as 'no forecast shown'."
+     ],
+     "source_sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+     "content_sha256": "c1ba1eb7fc458a2955ef2fe902cb3ab40a8c83ba837bbb80195526fa1d56e49e"
+    },
+    "checks_for_reviewer": [
+     "Title reads 'Rainfall Probabilistic Forecast for Mar - May 2026_Update' (IGAD region); the product page label is 'Rainfall forecast - March - May 2026'.",
+     "Colour bars, top to bottom, are Above, Normal and Below, each with seven boxes: 90-100, 80-90, 70-80, 60-70, 50-60, 40-50 and 33-40 %.",
+     "Axis ticks are 25-50 deg E and 20 deg N - 10 deg S in 5-degree steps.",
+     "The digitized comparison map matches the original over Ethiopia.",
+     "Grey areas are treated as 'no forecast shown'."
+    ]
+   },
+   "digitization_qc": {
+    "frame_px": [
+     149,
+     101,
+     842,
+     912
+    ],
+    "x_ticks_px": [
+     245.0,
+     351.5,
+     458.0,
+     565.0,
+     671.0,
+     778.0
+    ],
+    "y_ticks_px": [
+     197.0,
+     303.0,
+     410.0,
+     517.0,
+     624.0,
+     730.5,
+     837.0
+    ],
+    "px_per_degree": [
+     21.31714285714286,
+     21.349999999999987
+    ],
+    "tick_fit_max_residual_px": [
+     0.29523809523823275,
+     0.42857142857161534
+    ],
+    "legend_colours": {
+     "above_90-100": [
+      0,
+      80,
+      0
+     ],
+     "above_80-90": [
+      17,
+      128,
+      4
+     ],
+     "above_70-80": [
+      42,
+      156,
+      10
+     ],
+     "above_60-70": [
+      57,
+      170,
+      14
+     ],
+     "above_50-60": [
+      73,
+      184,
+      18
+     ],
+     "above_40-50": [
+      100,
+      249,
+      100
+     ],
+     "above_33-40": [
+      186,
+      255,
+      186
+     ],
+     "near_90-100": [
+      0,
+      255,
+      255
+     ],
+     "near_80-90": [
+      25,
+      255,
+      255
+     ],
+     "near_70-80": [
+      76,
+      255,
+      255
+     ],
+     "near_60-70": [
+      102,
+      255,
+      255
+     ],
+     "near_50-60": [
+      127,
+      255,
+      255
+     ],
+     "near_40-50": [
+      178,
+      255,
+      255
+     ],
+     "near_33-40": [
+      229,
+      255,
+      255
+     ],
+     "below_90-100": [
+      255,
+      0,
+      0
+     ],
+     "below_80-90": [
+      255,
+      56,
+      0
+     ],
+     "below_70-80": [
+      255,
+      113,
+      0
+     ],
+     "below_60-70": [
+      255,
+      141,
+      0
+     ],
+     "below_50-60": [
+      255,
+      170,
+      0
+     ],
+     "below_40-50": [
+      255,
+      226,
+      0
+     ],
+     "below_33-40": [
+      255,
+      255,
+      127
+     ]
+    },
+    "pixels_classified_share": 0.8210718897976754,
+    "pixels_no_forecast_share": 0.13427679724494188
+   },
+   "evidence": [
+    {
+     "id": "icpac_mam_2026_rainfall_map",
+     "file": "previews/icpac_mam_2026_rainfall.png",
+     "caption": "Rainfall forecast - March - May 2026 - IGAD Region"
+    }
+   ]
+  },
+  {
+   "source_id": "emi_belg_2026_outlook",
+   "provider": "EMI",
+   "product": "rainfall_tercile_probability",
+   "representation": "zone_tercile_probabilities",
+   "label": "Bega 2025-26 Assessment and Belg2026 hydro met Bulletin",
+   "requested_url": "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/bega-2025-26-assessment-and-belg2026-hydro-met-bulletin/",
+   "download_url": "https://www.ethiomet.gov.et/documents/625/Bega_2025_26_and_Belg_outlook2026E_Hydromet_bulletin_English_bulletin.pdf",
+   "file": "data/external_forecasts/fmam_2026/emi_belg_2026_outlook/4a0d4eedcc7c108a.pdf",
+   "sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+   "bytes": 2650897,
+   "retrieved_utc": "2026-10-09T15:16:15+00:00",
+   "target_start": "2026-02-01",
+   "target_end": "2026-05-31",
+   "season_label": "Belg (FMAM) 2026",
+   "issue_date": null,
+   "initialization": null,
+   "reference_period": null,
+   "http_last_modified": null,
+   "narrative": [
+    {
+     "text": "Summery and advisory for coming Belg (FMAM), 2026 For Belg 2026, rainfall in the Belg-benefiting catchments is anticipated to be normal to above normal Rainfall condition. February is expected to remain mostly dry, while from March through May, the catchments are likely to experience better conditions, to increase the availability of surface water and groundwater recharge. Tercile probability on basin map for coming belg 2026 Season During the coming Belg 2026 season (typically February to May), meteorological forecasts indicate that Most of Belg Benefiting catchments are likely to receive above Normal rainfall amounts over Most of Genale dawa, and lower Reft vally and close to normal or above normal rainfall condition over Wabeshebele, Awash Afar Denakel, Ommo Gibe, Baro Akobo and Upper and Middle Abay Basins. This pattern has important implications for both surface water discharge (riv",
+     "locator": "PDF page 22"
+    }
+   ],
+   "products_listed_for_season": null,
+   "other_title_matches": [
+    "Belg 2026 Seasonal Climate Forecast"
+   ],
+   "skipped_candidates": [],
+   "extraction_version": 1,
+   "pdf_metadata": {
+    "Author": "Alex",
+    "Creator": "Microsoft® Word 2013",
+    "CreationDate": "D:20260216024848-09'00'",
+    "ModDate": "D:20260216024848-09'00'",
+    "Producer": "Microsoft® Word 2013"
+   },
+   "extraction": {
+    "status": "validated",
+    "note": null,
+    "record": "config/external_forecasts/extractions/emi_belg_2026_outlook.json",
+    "content_sha256": "b6a203d7c72147f50ca64cd11738d53dbd646c8615e59cf898554ff77a302c04",
+    "method": "draft_figure_transcription",
+    "review": {
+     "reviewer": "Yonas M",
+     "reviewed_utc": "2026-10-09T15:22:08+00:00",
+     "decision": "validated",
+     "note": null,
+     "confirmed_checks": [
+      "PDF page 22 ('Summery and advisory for coming Belg (FMAM), 2026') carries the zone outlook figure.",
+      "Printed values (A/N/B): West 45/30/25, North-central 60/30/10, South-central 55/30/15, Southeast 45/35/20.",
+      "Each zone's fill colour matches the zone where its values are printed; the grey 'Climatological Dry' area is excluded.",
+      "The digitized zones on the comparison map match the zones of the EMI figure.",
+      "No reference period is stated for the probabilities."
+     ],
+     "source_sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+     "content_sha256": "b6a203d7c72147f50ca64cd11738d53dbd646c8615e59cf898554ff77a302c04"
+    },
+    "checks_for_reviewer": [
+     "PDF page 22 ('Summery and advisory for coming Belg (FMAM), 2026') carries the zone outlook figure.",
+     "Printed values (A/N/B): West 45/30/25, North-central 60/30/10, South-central 55/30/15, Southeast 45/35/20.",
+     "Each zone's fill colour matches the zone where its values are printed; the grey 'Climatological Dry' area is excluded.",
+     "The digitized zones on the comparison map match the zones of the EMI figure.",
+     "No reference period is stated for the probabilities."
+    ]
+   },
+   "candidate_pages": [
+    {
+     "page": 22,
+     "keyword_hits": 3,
+     "images": 1
+    },
+    {
+     "page": 1,
+     "keyword_hits": 2,
+     "images": 1
+    }
+   ],
+   "zone_digitization_qc": {
+    "silhouette_px": [
+     18,
+     56,
+     1008,
+     817
+    ],
+    "bbox_deg": [
+     32.99180000000007,
+     47.988240000000076,
+     3.40667000000019,
+     14.845476907000148
+    ],
+    "outline_iou": 0.9263420724094882,
+    "pixels_matched": 0.40553612720167753,
+    "cells": {
+     "West": 324,
+     "North-central": 431,
+     "South-central": 270,
+     "Southeast": 375,
+     "excluded:Climatologically dry": 202
+    }
+   },
+   "evidence": [
+    {
+     "id": "emi_belg_2026_outlook_page22",
+     "file": "previews/emi_belg_2026_outlook_page22_figure.jpg",
+     "caption": "Bega 2025-26 Assessment and Belg2026 hydro met Bulletin, PDF page 22",
+     "pdf_page": 22
+    }
+   ]
+  }
+ ],
+ "extraction_records": {
+  "icpac_mam_2026_rainfall": {
+   "record_id": "icpac_mam_2026_rainfall",
+   "source_sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+   "extraction_version": 1,
+   "created_by": "Draft written by draft-record; TODO fields completed by the assistant (Claude) from the image; not yet reviewed.",
+   "status": "validated",
+   "review": {
+    "reviewer": "Yonas M",
+    "reviewed_utc": "2026-10-09T15:21:49+00:00",
+    "decision": "validated",
+    "note": null,
+    "confirmed_checks": [
+     "Title reads 'Rainfall Probabilistic Forecast for Mar - May 2026_Update' (IGAD region); the product page label is 'Rainfall forecast - March - May 2026'.",
+     "Colour bars, top to bottom, are Above, Normal and Below, each with seven boxes: 90-100, 80-90, 70-80, 60-70, 50-60, 40-50 and 33-40 %.",
+     "Axis ticks are 25-50 deg E and 20 deg N - 10 deg S in 5-degree steps.",
+     "The digitized comparison map matches the original over Ethiopia.",
+     "Grey areas are treated as 'no forecast shown'."
+    ],
+    "source_sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+    "content_sha256": "c1ba1eb7fc458a2955ef2fe902cb3ab40a8c83ba837bbb80195526fa1d56e49e"
+   },
+   "method": "automatic_raster_digitization",
+   "template": {
+    "x_ticks_deg": [
+     25,
+     30,
+     35,
+     40,
+     45,
+     50
+    ],
+    "x_ticks_px_detected": [
+     245.0,
+     351.5,
+     458.0,
+     565.0,
+     671.0,
+     778.0
+    ],
+    "y_ticks_deg": [
+     20,
+     15,
+     10,
+     5,
+     0,
+     -5,
+     -10
+    ],
+    "y_ticks_px_detected": [
+     197.0,
+     303.0,
+     410.0,
+     517.0,
+     624.0,
+     730.5,
+     837.0
+    ],
+    "legend_x": 883,
+    "no_forecast_rgb": [
+     190,
+     190,
+     190
+    ],
+    "no_forecast_meaning": "Grey areas are not explained in the legend; treated as 'no forecast shown' (not as a category).",
+    "colour_tolerance": 30,
+    "legend_bars": [
+     {
+      "category": "above",
+      "intervals_top_down": [
+       [
+        90,
+        100
+       ],
+       [
+        80,
+        90
+       ],
+       [
+        70,
+        80
+       ],
+       [
+        60,
+        70
+       ],
+       [
+        50,
+        60
+       ],
+       [
+        40,
+        50
+       ],
+       [
+        33,
+        40
+       ]
+      ],
+      "box_colours_detected": [
+       [
+        0,
+        80,
+        0
+       ],
+       [
+        17,
+        128,
+        4
+       ],
+       [
+        42,
+        156,
+        10
+       ],
+       [
+        57,
+        170,
+        14
+       ],
+       [
+        73,
+        184,
+        18
+       ],
+       [
+        100,
+        249,
+        100
+       ],
+       [
+        186,
+        255,
+        186
+       ]
+      ]
+     },
+     {
+      "category": "near",
+      "intervals_top_down": [
+       [
+        90,
+        100
+       ],
+       [
+        80,
+        90
+       ],
+       [
+        70,
+        80
+       ],
+       [
+        60,
+        70
+       ],
+       [
+        50,
+        60
+       ],
+       [
+        40,
+        50
+       ],
+       [
+        33,
+        40
+       ]
+      ],
+      "box_colours_detected": [
+       [
+        0,
+        255,
+        255
+       ],
+       [
+        25,
+        255,
+        255
+       ],
+       [
+        76,
+        255,
+        255
+       ],
+       [
+        102,
+        255,
+        255
+       ],
+       [
+        127,
+        255,
+        255
+       ],
+       [
+        178,
+        255,
+        255
+       ],
+       [
+        229,
+        255,
+        255
+       ]
+      ]
+     },
+     {
+      "category": "below",
+      "intervals_top_down": [
+       [
+        90,
+        100
+       ],
+       [
+        80,
+        90
+       ],
+       [
+        70,
+        80
+       ],
+       [
+        60,
+        70
+       ],
+       [
+        50,
+        60
+       ],
+       [
+        40,
+        50
+       ],
+       [
+        33,
+        40
+       ]
+      ],
+      "box_colours_detected": [
+       [
+        255,
+        0,
+        0
+       ],
+       [
+        255,
+        56,
+        0
+       ],
+       [
+        255,
+        113,
+        0
+       ],
+       [
+        255,
+        141,
+        0
+       ],
+       [
+        255,
+        170,
+        0
+       ],
+       [
+        255,
+        226,
+        0
+       ],
+       [
+        255,
+        255,
+        127
+       ]
+      ]
+     }
+    ]
+   },
+   "checks_for_reviewer": [
+    "Title reads 'Rainfall Probabilistic Forecast for Mar - May 2026_Update' (IGAD region); the product page label is 'Rainfall forecast - March - May 2026'.",
+    "Colour bars, top to bottom, are Above, Normal and Below, each with seven boxes: 90-100, 80-90, 70-80, 60-70, 50-60, 40-50 and 33-40 %.",
+    "Axis ticks are 25-50 deg E and 20 deg N - 10 deg S in 5-degree steps.",
+    "The digitized comparison map matches the original over Ethiopia.",
+    "Grey areas are treated as 'no forecast shown'."
+   ]
+  },
+  "emi_belg_2026_outlook": {
+   "record_id": "emi_belg_2026_outlook",
+   "source_sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+   "extraction_version": 1,
+   "created_by": "Draft written by draft-record; values and colours completed by the assistant (Claude) from the figure; not yet reviewed.",
+   "status": "validated",
+   "review": {
+    "reviewer": "Yonas M",
+    "reviewed_utc": "2026-10-09T15:22:08+00:00",
+    "decision": "validated",
+    "note": null,
+    "confirmed_checks": [
+     "PDF page 22 ('Summery and advisory for coming Belg (FMAM), 2026') carries the zone outlook figure.",
+     "Printed values (A/N/B): West 45/30/25, North-central 60/30/10, South-central 55/30/15, Southeast 45/35/20.",
+     "Each zone's fill colour matches the zone where its values are printed; the grey 'Climatological Dry' area is excluded.",
+     "The digitized zones on the comparison map match the zones of the EMI figure.",
+     "No reference period is stated for the probabilities."
+    ],
+    "source_sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+    "content_sha256": "b6a203d7c72147f50ca64cd11738d53dbd646c8615e59cf898554ff77a302c04"
+   },
+   "method": "draft_figure_transcription",
+   "source_locator": {
+    "pdf_page": 22,
+    "figure_title": "Belg (FMAM) 2026 zone outlook (no printed title; \"The number represents the probability of A Above Normal, N Normal, B Below Normal\")"
+   },
+   "figure_sha256": "dae2bae6165feadfbf912731fde581fb1f78470c75e5ef60409f42d432bfb4ec",
+   "geometry": {
+    "method": "fill_colour_zones",
+    "colour_tolerance": 40,
+    "bbox_deg": null,
+    "excluded_fills": [
+     {
+      "label": "Climatologically dry",
+      "fill_rgb": [
+       114,
+       114,
+       114
+      ]
+     }
+    ]
+   },
+   "detected_colours": [
+    {
+     "fill_rgb": [
+      18,
+      138,
+      54
+     ],
+     "pixels": 73222,
+     "position": [
+      0.48,
+      0.4
+     ]
+    },
+    {
+     "fill_rgb": [
+      18,
+      162,
+      66
+     ],
+     "pixels": 48002,
+     "position": [
+      0.67,
+      0.74
+     ]
+    },
+    {
+     "fill_rgb": [
+      54,
+      222,
+      42
+     ],
+     "pixels": 42558,
+     "position": [
+      0.22,
+      0.59
+     ]
+    },
+    {
+     "fill_rgb": [
+      42,
+      114,
+      18
+     ],
+     "pixels": 37871,
+     "position": [
+      0.37,
+      0.82
+     ]
+    },
+    {
+     "fill_rgb": [
+      114,
+      114,
+      114
+     ],
+     "pixels": 32500,
+     "position": [
+      0.26,
+      0.28
+     ]
+    },
+    {
+     "fill_rgb": [
+      30,
+      162,
+      66
+     ],
+     "pixels": 10594,
+     "position": [
+      0.67,
+      0.74
+     ]
+    },
+    {
+     "fill_rgb": [
+      18,
+      138,
+      42
+     ],
+     "pixels": 7951,
+     "position": [
+      0.47,
+      0.37
+     ]
+    },
+    {
+     "fill_rgb": [
+      54,
+      222,
+      54
+     ],
+     "pixels": 6971,
+     "position": [
+      0.2,
+      0.6
+     ]
+    },
+    {
+     "fill_rgb": [
+      18,
+      162,
+      54
+     ],
+     "pixels": 4549,
+     "position": [
+      0.68,
+      0.73
+     ]
+    },
+    {
+     "fill_rgb": [
+      102,
+      102,
+      102
+     ],
+     "pixels": 4137,
+     "position": [
+      0.26,
+      0.25
+     ]
+    }
+   ],
+   "zones": [
+    {
+     "zone_label": "West",
+     "printed_order": "A/N/B",
+     "printed": "A 45, N 30, B 25",
+     "probabilities": {
+      "below": 0.25,
+      "near": 0.3,
+      "above": 0.45
+     },
+     "fill_rgb": [
+      54,
+      222,
+      42
+     ]
+    },
+    {
+     "zone_label": "North-central",
+     "printed_order": "A/N/B",
+     "printed": "A 60, N 30, B 10",
+     "probabilities": {
+      "below": 0.1,
+      "near": 0.3,
+      "above": 0.6
+     },
+     "fill_rgb": [
+      18,
+      138,
+      54
+     ]
+    },
+    {
+     "zone_label": "South-central",
+     "printed_order": "A/N/B",
+     "printed": "A 55, N 30, B 15",
+     "probabilities": {
+      "below": 0.15,
+      "near": 0.3,
+      "above": 0.55
+     },
+     "fill_rgb": [
+      42,
+      114,
+      18
+     ]
+    },
+    {
+     "zone_label": "Southeast",
+     "printed_order": "A/N/B",
+     "printed": "A 45, N 35, B 20",
+     "probabilities": {
+      "below": 0.2,
+      "near": 0.35,
+      "above": 0.45
+     },
+     "fill_rgb": [
+      18,
+      162,
+      66
+     ]
+    }
+   ],
+   "checks_for_reviewer": [
+    "PDF page 22 ('Summery and advisory for coming Belg (FMAM), 2026') carries the zone outlook figure.",
+    "Printed values (A/N/B): West 45/30/25, North-central 60/30/10, South-central 55/30/15, Southeast 45/35/20.",
+    "Each zone's fill colour matches the zone where its values are printed; the grey 'Climatological Dry' area is excluded.",
+    "The digitized zones on the comparison map match the zones of the EMI figure.",
+    "No reference period is stated for the probabilities."
+   ]
+  }
+ },
+ "anomaly_products_checked": {
+  "ICPAC": "Products listed for Mar-May-2026 (IGAD region): rainfall tercile probability (27) only; no rainfall-anomaly product.",
+  "EMI": "The Belg 2026 outlook bulletin gives zone tercile probabilities; no rainfall-amount anomaly map."
+ }
+}

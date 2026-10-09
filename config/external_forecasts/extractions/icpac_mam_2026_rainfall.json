@@ -1,0 +1,286 @@
+{
+ "record_id": "icpac_mam_2026_rainfall",
+ "source_sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+ "extraction_version": 1,
+ "created_by": "Draft written by draft-record; TODO fields completed by the assistant (Claude) from the image; not yet reviewed.",
+ "status": "validated",
+ "review": {
+  "reviewer": "Yonas M",
+  "reviewed_utc": "2026-10-09T15:21:49+00:00",
+  "decision": "validated",
+  "note": null,
+  "confirmed_checks": [
+   "Title reads 'Rainfall Probabilistic Forecast for Mar - May 2026_Update' (IGAD region); the product page label is 'Rainfall forecast - March - May 2026'.",
+   "Colour bars, top to bottom, are Above, Normal and Below, each with seven boxes: 90-100, 80-90, 70-80, 60-70, 50-60, 40-50 and 33-40 %.",
+   "Axis ticks are 25-50 deg E and 20 deg N - 10 deg S in 5-degree steps.",
+   "The digitized comparison map matches the original over Ethiopia.",
+   "Grey areas are treated as 'no forecast shown'."
+  ],
+  "source_sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+  "content_sha256": "c1ba1eb7fc458a2955ef2fe902cb3ab40a8c83ba837bbb80195526fa1d56e49e"
+ },
+ "method": "automatic_raster_digitization",
+ "template": {
+  "x_ticks_deg": [
+   25,
+   30,
+   35,
+   40,
+   45,
+   50
+  ],
+  "x_ticks_px_detected": [
+   245.0,
+   351.5,
+   458.0,
+   565.0,
+   671.0,
+   778.0
+  ],
+  "y_ticks_deg": [
+   20,
+   15,
+   10,
+   5,
+   0,
+   -5,
+   -10
+  ],
+  "y_ticks_px_detected": [
+   197.0,
+   303.0,
+   410.0,
+   517.0,
+   624.0,
+   730.5,
+   837.0
+  ],
+  "legend_x": 883,
+  "no_forecast_rgb": [
+   190,
+   190,
+   190
+  ],
+  "no_forecast_meaning": "Grey areas are not explained in the legend; treated as 'no forecast shown' (not as a category).",
+  "colour_tolerance": 30,
+  "legend_bars": [
+   {
+    "category": "above",
+    "intervals_top_down": [
+     [
+      90,
+      100
+     ],
+     [
+      80,
+      90
+     ],
+     [
+      70,
+      80
+     ],
+     [
+      60,
+      70
+     ],
+     [
+      50,
+      60
+     ],
+     [
+      40,
+      50
+     ],
+     [
+      33,
+      40
+     ]
+    ],
+    "box_colours_detected": [
+     [
+      0,
+      80,
+      0
+     ],
+     [
+      17,
+      128,
+      4
+     ],
+     [
+      42,
+      156,
+      10
+     ],
+     [
+      57,
+      170,
+      14
+     ],
+     [
+      73,
+      184,
+      18
+     ],
+     [
+      100,
+      249,
+      100
+     ],
+     [
+      186,
+      255,
+      186
+     ]
+    ]
+   },
+   {
+    "category": "near",
+    "intervals_top_down": [
+     [
+      90,
+      100
+     ],
+     [
+      80,
+      90
+     ],
+     [
+      70,
+      80
+     ],
+     [
+      60,
+      70
+     ],
+     [
+      50,
+      60
+     ],
+     [
+      40,
+      50
+     ],
+     [
+      33,
+      40
+     ]
+    ],
+    "box_colours_detected": [
+     [
+      0,
+      255,
+      255
+     ],
+     [
+      25,
+      255,
+      255
+     ],
+     [
+      76,
+      255,
+      255
+     ],
+     [
+      102,
+      255,
+      255
+     ],
+     [
+      127,
+      255,
+      255
+     ],
+     [
+      178,
+      255,
+      255
+     ],
+     [
+      229,
+      255,
+      255
+     ]
+    ]
+   },
+   {
+    "category": "below",
+    "intervals_top_down": [
+     [
+      90,
+      100
+     ],
+     [
+      80,
+      90
+     ],
+     [
+      70,
+      80
+     ],
+     [
+      60,
+      70
+     ],
+     [
+      50,
+      60
+     ],
+     [
+      40,
+      50
+     ],
+     [
+      33,
+      40
+     ]
+    ],
+    "box_colours_detected": [
+     [
+      255,
+      0,
+      0
+     ],
+     [
+      255,
+      56,
+      0
+     ],
+     [
+      255,
+      113,
+      0
+     ],
+     [
+      255,
+      141,
+      0
+     ],
+     [
+      255,
+      170,
+      0
+     ],
+     [
+      255,
+      226,
+      0
+     ],
+     [
+      255,
+      255,
+      127
+     ]
+    ]
+   }
+  ]
+ },
+ "checks_for_reviewer": [
+  "Title reads 'Rainfall Probabilistic Forecast for Mar - May 2026_Update' (IGAD region); the product page label is 'Rainfall forecast - March - May 2026'.",
+  "Colour bars, top to bottom, are Above, Normal and Below, each with seven boxes: 90-100, 80-90, 70-80, 60-70, 50-60, 40-50 and 33-40 %.",
+  "Axis ticks are 25-50 deg E and 20 deg N - 10 deg S in 5-degree steps.",
+  "The digitized comparison map matches the original over Ethiopia.",
+  "Grey areas are treated as 'no forecast shown'."
+ ]
+}

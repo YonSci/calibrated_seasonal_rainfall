@@ -229,7 +229,7 @@ def build_cycle(cfg_path, published, today, sha):
     raw = cycle_entries(c)
     if not raw:
         return None
-    cid = f'{season.lower()}{c.year}'
+    cid = c.raw.get('site_id') or f'{season.lower()}{c.year}'      # site_id keeps a second cycle of one season distinct
     listing = out_root / 'entries.json'
     ej = json.loads(listing.read_text(encoding='utf-8')) if listing.is_file() else {}
     definition, note = domain_text(c, ej)

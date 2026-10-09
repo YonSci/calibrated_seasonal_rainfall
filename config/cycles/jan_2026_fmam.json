@@ -34,5 +34,16 @@
     "pdf": true
   },
   "season_domain_mask": "data/masks/init01_FMAM_regime_domain.nc",
-  "notes": "January-initialized FMAM 2026 cycle (Belg). Reference FMAM 1993-2025. Presentation domain: FMAM R2 (Belg) regime domain. Guide: docs/39_FMAM_RUN_GUIDE.md."
+  "notes": "January-initialized FMAM 2026 cycle (Belg). Reference FMAM 1993-2025. Presentation domain: FMAM R2 (Belg) regime domain. Guide: docs/39_FMAM_RUN_GUIDE.md.",
+  "external_comparison": {
+    "enabled": true,
+    "registry": "config/external_forecasts/fmam_2026.json",
+    "cache_root": "data/external_forecasts",
+    "output_root": "outputs/operational_2026_fmam/comparisons",
+    "products": [
+      "rainfall_probability",
+      "rainfall_anomaly"
+    ],
+    "interpretation_engine": "rules"
+  }
 }

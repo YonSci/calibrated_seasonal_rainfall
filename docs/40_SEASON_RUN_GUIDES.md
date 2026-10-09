@@ -139,6 +139,8 @@ The forecasts stay **frozen**: verification only reads them (SHA-256 checked bef
 
   February and FMAM follow automatically (`--workflow all`) once the file appears.
 * Leap years: February and FMAM have 29 / 121 days in 1996, 2000, …, 2024; this is handled automatically.
+* A second FMAM cycle from the **1 February** initialization (`config\cycles\feb_2026_fmam.json`, tag `init02`, 121
+  lead days, February at lead 0) runs alongside the January cycle: `docs/43_FMAM_FEB_INIT_RUN_GUIDE.md`.
 
 ### ONDJ (September initialization)
 

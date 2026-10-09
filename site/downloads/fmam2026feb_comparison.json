@@ -1,0 +1,988 @@
+{
+ "platform": {
+  "target": "FMAM",
+  "label": "FMAM 2026",
+  "target_start": "2026-02-01",
+  "target_end": "2026-05-31",
+  "native_forecast": "outputs/verification_2026_fmam_feb/frozen_forecasts/init02_FMAM/forecast_2026.nc",
+  "native_sha256": "0bbeeff048ee36bdf52cd5f88cda5a2b29c698721c75e042c8f834ceabc29216",
+  "minimum_leading_probability": 0.4,
+  "areas": {
+   "all_ethiopia": "All Ethiopia",
+   "season_domain": "FMAM R2 (Belg) rainfall domain"
+  }
+ },
+ "sources": [
+  {
+   "id": "icpac_mam_2026_rainfall",
+   "provider": "ICPAC",
+   "product": "rainfall_tercile_probability",
+   "representation": "dominant_category_map",
+   "label": "Rainfall forecast - March - May 2026 - IGAD Region",
+   "season_label": "MAM 2026",
+   "target_start": "2026-03-01",
+   "target_end": "2026-05-31",
+   "issue_date": null,
+   "initialization": null,
+   "reference_period": null,
+   "retrieved_utc": "2026-10-09T15:15:47+00:00",
+   "sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+   "page": "https://www.icpac.net/seasonal-forecast/Mar-May-2026/?region=1&resource_type=27",
+   "download": "https://www.icpac.net/media/images/GHA-MAM-Rainfall.original.png",
+   "narrative": [
+    {
+     "text": "Wetter than normal conditions expected over most parts of Ethiopia, parts of northern and central and southern Somalia, northern Eritrea, South Sudan, central to southern Kenya, Uganda, Rwanda, Burundi, and Tanzania.",
+     "locator": "detail page, rainfall forecast item"
+    },
+    {
+     "text": "Normal to drier than normal conditions are expected over western and northern Kenya, western and eastern Uganda, south-western to central and north-eastern Ethiopia, Djibouti, western South Sudan and most parts of Somalia.",
+     "locator": "detail page, rainfall forecast item"
+    }
+   ],
+   "extraction": {
+    "status": "validated",
+    "method": "automatic_raster_digitization",
+    "review": {
+     "reviewer": "Yonas M",
+     "reviewed_utc": "2026-10-09T15:21:49+00:00",
+     "decision": "validated",
+     "note": null,
+     "confirmed_checks": [
+      "Title reads 'Rainfall Probabilistic Forecast for Mar - May 2026_Update' (IGAD region); the product page label is 'Rainfall forecast - March - May 2026'.",
+      "Colour bars, top to bottom, are Above, Normal and Below, each with seven boxes: 90-100, 80-90, 70-80, 60-70, 50-60, 40-50 and 33-40 %.",
+      "Axis ticks are 25-50 deg E and 20 deg N - 10 deg S in 5-degree steps.",
+      "The digitized comparison map matches the original over Ethiopia.",
+      "Grey areas are treated as 'no forecast shown'."
+     ],
+     "source_sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+     "content_sha256": "c1ba1eb7fc458a2955ef2fe902cb3ab40a8c83ba837bbb80195526fa1d56e49e"
+    },
+    "note": null
+   },
+   "refresh": {
+    "state": "checked",
+    "text": "Checked 2026-10-09: new product, reviewed",
+    "checked_utc": "2026-10-09T15:15:47+00:00"
+   },
+   "figures": [
+    {
+     "id": "icpac_mam_2026_rainfall_map",
+     "file": "assets/external/fmam2026feb/icpac_mam_2026_rainfall.png",
+     "caption": "Rainfall forecast - March - May 2026 - IGAD Region"
+    }
+   ]
+  },
+  {
+   "id": "emi_belg_2026_outlook",
+   "provider": "EMI",
+   "product": "rainfall_tercile_probability",
+   "representation": "zone_tercile_probabilities",
+   "label": "Bega 2025-26 Assessment and Belg2026 hydro met Bulletin",
+   "season_label": "Belg (FMAM) 2026",
+   "target_start": "2026-02-01",
+   "target_end": "2026-05-31",
+   "issue_date": null,
+   "initialization": null,
+   "reference_period": null,
+   "retrieved_utc": "2026-10-09T15:16:15+00:00",
+   "sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+   "page": "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/bega-2025-26-assessment-and-belg2026-hydro-met-bulletin/",
+   "download": "https://www.ethiomet.gov.et/documents/625/Bega_2025_26_and_Belg_outlook2026E_Hydromet_bulletin_English_bulletin.pdf",
+   "narrative": [
+    {
+     "text": "Summery and advisory for coming Belg (FMAM), 2026 For Belg 2026, rainfall in the Belg-benefiting catchments is anticipated to be normal to above normal Rainfall condition. February is expected to remain mostly dry, while from March through May, the catchments are likely to experience better conditions, to increase the availability of surface water and groundwater recharge. Tercile probability on basin map for coming belg 2026 Season During the coming Belg 2026 season (typically February to May), meteorological forecasts indicate that Most of Belg Benefiting catchments are likely to receive above Normal rainfall amounts over Most of Genale dawa, and lower Reft vally and close to normal or above normal rainfall condition over Wabeshebele, Awash Afar Denakel, Ommo Gibe, Baro Akobo and Upper and Middle Abay Basins. This pattern has important implications for both surface water discharge (riv",
+     "locator": "PDF page 22"
+    }
+   ],
+   "extraction": {
+    "status": "validated",
+    "method": "draft_figure_transcription",
+    "review": {
+     "reviewer": "Yonas M",
+     "reviewed_utc": "2026-10-09T15:22:08+00:00",
+     "decision": "validated",
+     "note": null,
+     "confirmed_checks": [
+      "PDF page 22 ('Summery and advisory for coming Belg (FMAM), 2026') carries the zone outlook figure.",
+      "Printed values (A/N/B): West 45/30/25, North-central 60/30/10, South-central 55/30/15, Southeast 45/35/20.",
+      "Each zone's fill colour matches the zone where its values are printed; the grey 'Climatological Dry' area is excluded.",
+      "The digitized zones on the comparison map match the zones of the EMI figure.",
+      "No reference period is stated for the probabilities."
+     ],
+     "source_sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+     "content_sha256": "b6a203d7c72147f50ca64cd11738d53dbd646c8615e59cf898554ff77a302c04"
+    },
+    "note": null
+   },
+   "refresh": {
+    "state": "checked",
+    "text": "Checked 2026-10-09: new product, reviewed",
+    "checked_utc": "2026-10-09T15:16:15+00:00"
+   },
+   "figures": [
+    {
+     "id": "emi_belg_2026_outlook_page22",
+     "file": "assets/external/fmam2026feb/emi_belg_2026_outlook_page22_figure.jpg",
+     "caption": "Bega 2025-26 Assessment and Belg2026 hydro met Bulletin, PDF page 22"
+    }
+   ]
+  }
+ ],
+ "maps": [
+  {
+   "source_id": "emi_belg_2026_outlook",
+   "file": "assets/external/fmam2026feb/emi_belg_2026_outlook_anchors.png",
+   "name": "emi_belg_2026_outlook_anchors.png"
+  },
+  {
+   "source_id": "icpac_mam_2026_rainfall",
+   "file": "assets/external/fmam2026feb/icpac_mam_2026_rainfall_comparison.png",
+   "name": "icpac_mam_2026_rainfall_comparison.png"
+  }
+ ],
+ "metrics": [
+  {
+   "metric": "display_official_probabilities",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "West",
+   "status": "available",
+   "reason": null,
+   "basis": null,
+   "value": {
+    "below": 0.25,
+    "near": 0.3,
+    "above": 0.45
+   }
+  },
+  {
+   "metric": "favoured_category_relationship",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "West",
+   "status": "unavailable",
+   "reason": null,
+   "basis": "reviewed_visual (arrow-tip neighbourhood)",
+   "value": null
+  },
+  {
+   "metric": "zone_mean_probability",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "West",
+   "status": "available",
+   "reason": null,
+   "basis": "zone polygons digitized from the EMI figure",
+   "value": {
+    "mean_local_probabilities": [
+     0.3153669435487847,
+     0.3303948847220045,
+     0.3542381717292106
+    ],
+    "cells": 309,
+    "region_name": null,
+    "basis": "zone polygons digitized from the EMI figure",
+    "domain_share": 0.08737864077669903,
+    "relationship": "weak_signal",
+    "status": "validated"
+   }
+  },
+  {
+   "metric": "same_event_probability_difference",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "West",
+   "status": "unavailable",
+   "reason": "zone_geometry_requires_alignment; official_reference_period_unknown",
+   "basis": null,
+   "value": null
+  },
+  {
+   "metric": "display_official_probabilities",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "North-central",
+   "status": "available",
+   "reason": null,
+   "basis": null,
+   "value": {
+    "below": 0.1,
+    "near": 0.3,
+    "above": 0.6
+   }
+  },
+  {
+   "metric": "favoured_category_relationship",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "North-central",
+   "status": "unavailable",
+   "reason": null,
+   "basis": "reviewed_visual (arrow-tip neighbourhood)",
+   "value": null
+  },
+  {
+   "metric": "zone_mean_probability",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "North-central",
+   "status": "available",
+   "reason": null,
+   "basis": "zone polygons digitized from the EMI figure",
+   "value": {
+    "mean_local_probabilities": [
+     0.2570657807674874,
+     0.34912671691154523,
+     0.3938075023209674
+    ],
+    "cells": 402,
+    "region_name": null,
+    "basis": "zone polygons digitized from the EMI figure",
+    "domain_share": 0.7661691542288557,
+    "relationship": "weak_signal",
+    "status": "validated"
+   }
+  },
+  {
+   "metric": "same_event_probability_difference",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "North-central",
+   "status": "unavailable",
+   "reason": "zone_geometry_requires_alignment; official_reference_period_unknown",
+   "basis": null,
+   "value": null
+  },
+  {
+   "metric": "display_official_probabilities",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "South-central",
+   "status": "available",
+   "reason": null,
+   "basis": null,
+   "value": {
+    "below": 0.15,
+    "near": 0.3,
+    "above": 0.55
+   }
+  },
+  {
+   "metric": "favoured_category_relationship",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "South-central",
+   "status": "unavailable",
+   "reason": null,
+   "basis": "reviewed_visual (arrow-tip neighbourhood)",
+   "value": null
+  },
+  {
+   "metric": "zone_mean_probability",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "South-central",
+   "status": "available",
+   "reason": null,
+   "basis": "zone polygons digitized from the EMI figure",
+   "value": {
+    "mean_local_probabilities": [
+     0.2254893605910239,
+     0.32646209707281704,
+     0.44804854233615915
+    ],
+    "cells": 253,
+    "region_name": null,
+    "basis": "zone polygons digitized from the EMI figure",
+    "domain_share": 0.15810276679841898,
+    "relationship": "same_favoured_category",
+    "status": "validated"
+   }
+  },
+  {
+   "metric": "same_event_probability_difference",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "South-central",
+   "status": "unavailable",
+   "reason": "zone_geometry_requires_alignment; official_reference_period_unknown",
+   "basis": null,
+   "value": null
+  },
+  {
+   "metric": "display_official_probabilities",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "Southeast",
+   "status": "available",
+   "reason": null,
+   "basis": null,
+   "value": {
+    "below": 0.2,
+    "near": 0.35,
+    "above": 0.45
+   }
+  },
+  {
+   "metric": "favoured_category_relationship",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "Southeast",
+   "status": "unavailable",
+   "reason": null,
+   "basis": "reviewed_visual (arrow-tip neighbourhood)",
+   "value": null
+  },
+  {
+   "metric": "zone_mean_probability",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "Southeast",
+   "status": "available",
+   "reason": null,
+   "basis": "zone polygons digitized from the EMI figure",
+   "value": {
+    "mean_local_probabilities": [
+     0.19571460988521672,
+     0.31872908979959697,
+     0.4855563003151862
+    ],
+    "cells": 331,
+    "region_name": null,
+    "basis": "zone polygons digitized from the EMI figure",
+    "domain_share": 0.006042296072507553,
+    "relationship": "same_favoured_category",
+    "status": "validated"
+   }
+  },
+  {
+   "metric": "same_event_probability_difference",
+   "source_id": "emi_belg_2026_outlook",
+   "where": "Southeast",
+   "status": "unavailable",
+   "reason": "zone_geometry_requires_alignment; official_reference_period_unknown",
+   "basis": null,
+   "value": null
+  },
+  {
+   "metric": "mapped_category_agreement",
+   "source_id": "icpac_mam_2026_rainfall",
+   "where": "All Ethiopia",
+   "status": "available",
+   "reason": null,
+   "basis": "reviewed_digitization",
+   "value": {
+    "area_share_official_forecast_shown": 0.8883462213591926,
+    "area_share_official_no_forecast": 0.11165377864080737,
+    "area_share_both_favoured": 0.5922145412383907,
+    "agreement_share_where_both_favoured": 0.54802740322772,
+    "opposing_share_where_both_favoured": 0.11345235261567567,
+    "official_category_shares": {
+     "below": 0.061926674539698794,
+     "near": 0.2503467789772973,
+     "above": 0.6877265464830039
+    },
+    "official_interval_shares": {
+     "below 40-50%": 0.061926674539698794,
+     "near 33-40%": 0.2503467789772973,
+     "above 33-40%": 0.000747009372706041,
+     "above 40-50%": 0.5730307798957781,
+     "above 50-60%": 0.11394875721451977
+    },
+    "platform_category_shares": {
+     "below": 0.0744852142195819,
+     "near": 0.06288568131327789,
+     "above": 0.5022879800942501,
+     "weak": 0.36034112437289
+    },
+    "platform_mean_local_probabilities": [
+     0.2657686995282153,
+     0.33018207952520684,
+     0.4040492209465779
+    ],
+    "cells": 1478,
+    "registration_sensitivity": {
+     "shifts_px": 8,
+     "agreement_range": [
+      0.53657809459729,
+      0.5556581852642235
+     ],
+     "compared_area_range": [
+      0.5895065630975006,
+      0.5928872893101791
+     ]
+    },
+    "overlap_majority": {
+     "official": "above",
+     "platform": "above",
+     "official_share": 0.6382404292379437,
+     "platform_share": 0.8447690193515167
+    }
+   }
+  },
+  {
+   "metric": "mapped_category_agreement",
+   "source_id": "icpac_mam_2026_rainfall",
+   "where": "FMAM R2 (Belg) rainfall domain",
+   "status": "available",
+   "reason": null,
+   "basis": "reviewed_digitization",
+   "value": {
+    "area_share_official_forecast_shown": 0.9003830989345127,
+    "area_share_official_no_forecast": 0.0996169010654871,
+    "area_share_both_favoured": 0.5090310122367504,
+    "agreement_share_where_both_favoured": 0.6651487288986923,
+    "opposing_share_where_both_favoured": 0.0,
+    "official_category_shares": {
+     "below": 0.005277816508796738,
+     "near": 0.20763812009035756,
+     "above": 0.7870840634008457
+    },
+    "official_interval_shares": {
+     "below 40-50%": 0.005277816508796738,
+     "near 33-40%": 0.20763812009035756,
+     "above 33-40%": 0.0026183598747241774,
+     "above 40-50%": 0.6733452907819578,
+     "above 50-60%": 0.11112041274416368
+    },
+    "platform_category_shares": {
+     "below": 0.004740293605485507,
+     "near": 0.09559829050298417,
+     "above": 0.4276572069251576,
+     "weak": 0.47200420896637263
+    },
+    "platform_mean_local_probabilities": [
+     0.2555677214590549,
+     0.34946572105298646,
+     0.3949665574879585
+    ],
+    "cells": 418,
+    "registration_sensitivity": {
+     "shifts_px": 8,
+     "agreement_range": [
+      0.6462403111047098,
+      0.6619522618317243
+     ],
+     "compared_area_range": [
+      0.5090310122367504,
+      0.5114035478198055
+     ]
+    },
+    "overlap_majority": {
+     "official": "above",
+     "platform": "above",
+     "official_share": 0.7544990458235207,
+     "platform_share": 0.8261571300500629
+    }
+   }
+  },
+  {
+   "metric": "same_event_probability_difference",
+   "source_id": "icpac_mam_2026_rainfall",
+   "where": null,
+   "status": "unavailable",
+   "reason": "target_window_mismatch; official_publishes_only_favoured_category_interval",
+   "basis": null,
+   "value": null
+  },
+  {
+   "metric": "rainfall_anomaly_difference",
+   "source_id": null,
+   "where": null,
+   "status": "unavailable",
+   "reason": "official_amount_anomaly_not_found_in_checked_products",
+   "basis": null,
+   "value": null
+  },
+  {
+   "metric": "forecast_accuracy",
+   "source_id": null,
+   "where": null,
+   "status": "unavailable",
+   "reason": "out_of_scope: needs observations and a separate verification design (see the Verification section)",
+   "basis": null,
+   "value": null
+  }
+ ],
+ "summary": [
+  {
+   "id": "icpac_mam_2026_rainfall_all_ethiopia_finding_summary",
+   "area_key": "all_ethiopia",
+   "source_id": "icpac_mam_2026_rainfall",
+   "status": "validated",
+   "title": "ICPAC — All Ethiopia",
+   "text": "Category agreement of 54.8% within the compared area, which covers 59% of the analysed national area. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ],
+   "scope": {
+    "compared_area_share": 0.5922145412383907,
+    "period": "Mar 2026–May 2026 vs Feb 2026–May 2026"
+   }
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_season_domain_finding_summary",
+   "area_key": "season_domain",
+   "source_id": "icpac_mam_2026_rainfall",
+   "status": "validated",
+   "title": "ICPAC — FMAM R2 (Belg) rainfall domain",
+   "text": "Category agreement of 66.5% within the compared area, which covers 51% of the analysed domain. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ],
+   "scope": {
+    "compared_area_share": 0.5090310122367504,
+    "period": "Mar 2026–May 2026 vs Feb 2026–May 2026"
+   }
+  },
+  {
+   "id": "emi_whole_zones_all_ethiopia_summary",
+   "area_key": "all_ethiopia",
+   "source_id": "emi_belg_2026_outlook",
+   "status": "validated",
+   "title": "EMI — whole zones",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 32% / 33% / 35%; zone North-central: no clear category in one source, platform 26% / 35% / 39%; zone South-central: both favour above normal, platform 22% / 33% / 45%; zone Southeast: both favour above normal, platform 20% / 32% / 48%. Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
+   "evidence_ids": [
+    "emi_belg_2026_outlook_page22",
+    "platform_forecast_fmam"
+   ],
+   "scope": {
+    "zones": [
+     "West",
+     "North-central",
+     "South-central",
+     "Southeast"
+    ]
+   }
+  },
+  {
+   "id": "emi_whole_zones_season_domain_summary",
+   "area_key": "season_domain",
+   "source_id": "emi_belg_2026_outlook",
+   "status": "validated",
+   "title": "EMI — whole zones",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 32% / 33% / 35% over the whole zone (9% of it in the domain); zone North-central: no clear category in one source, platform 26% / 35% / 39% over the whole zone (77% of it in the domain); zone South-central: both favour above normal, platform 22% / 33% / 45% over the whole zone (16% of it in the domain); zone Southeast: both favour above normal, platform 20% / 32% / 48% over the whole zone (1% of it in the domain). Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
+   "evidence_ids": [
+    "emi_belg_2026_outlook_page22",
+    "platform_forecast_fmam"
+   ],
+   "scope": {
+    "zones": [
+     "West",
+     "North-central",
+     "South-central",
+     "Southeast"
+    ]
+   }
+  },
+  {
+   "id": "robustness_summary",
+   "area_key": "any",
+   "source_id": null,
+   "status": "validated",
+   "title": "Robustness of the extraction",
+   "text": "With the ICPAC map as digitized and shifted by one source pixel in each direction, the All Ethiopia category agreement stays between 53.7% and 55.6%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the FMAM R2 (Belg) rainfall domain category agreement stays between 64.6% and 66.5%. These are bounded sensitivity checks of the extraction, not statistical confidence intervals; exact EMI zone comparisons remain unavailable.",
+   "evidence_ids": [],
+   "scope": {}
+  }
+ ],
+ "emi_table": [
+  {
+   "id": "emi_belg_2026_outlook_zone_West_finding",
+   "status": "validated",
+   "zone": "West",
+   "official": "25% / 30% / 45%",
+   "platform": "—",
+   "relationship": "—",
+   "relationship_code": null,
+   "domain_share": null,
+   "center": null,
+   "stable": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ],
+   "zone_name": null,
+   "zone_domain_share": 0.08737864077669903,
+   "zone_cells": 309,
+   "zone_mean": "32% / 33% / 35%",
+   "zone_relationship": "No clear category in one source",
+   "zone_relationship_code": "weak_signal"
+  },
+  {
+   "id": "emi_belg_2026_outlook_zone_North-central_finding",
+   "status": "validated",
+   "zone": "North-central",
+   "official": "10% / 30% / 60%",
+   "platform": "—",
+   "relationship": "—",
+   "relationship_code": null,
+   "domain_share": null,
+   "center": null,
+   "stable": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ],
+   "zone_name": null,
+   "zone_domain_share": 0.7661691542288557,
+   "zone_cells": 402,
+   "zone_mean": "26% / 35% / 39%",
+   "zone_relationship": "No clear category in one source",
+   "zone_relationship_code": "weak_signal"
+  },
+  {
+   "id": "emi_belg_2026_outlook_zone_South-central_finding",
+   "status": "validated",
+   "zone": "South-central",
+   "official": "15% / 30% / 55%",
+   "platform": "—",
+   "relationship": "—",
+   "relationship_code": null,
+   "domain_share": null,
+   "center": null,
+   "stable": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ],
+   "zone_name": null,
+   "zone_domain_share": 0.15810276679841898,
+   "zone_cells": 253,
+   "zone_mean": "22% / 33% / 45%",
+   "zone_relationship": "Same category",
+   "zone_relationship_code": "same_favoured_category"
+  },
+  {
+   "id": "emi_belg_2026_outlook_zone_Southeast_finding",
+   "status": "validated",
+   "zone": "Southeast",
+   "official": "20% / 35% / 45%",
+   "platform": "—",
+   "relationship": "—",
+   "relationship_code": null,
+   "domain_share": null,
+   "center": null,
+   "stable": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ],
+   "zone_name": null,
+   "zone_domain_share": 0.006042296072507553,
+   "zone_cells": 331,
+   "zone_mean": "20% / 32% / 48%",
+   "zone_relationship": "Same category",
+   "zone_relationship_code": "same_favoured_category"
+  }
+ ],
+ "icpac_table": [
+  {
+   "id": "icpac_mam_2026_rainfall_sample_West",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Within zone West",
+   "zone": "West",
+   "official": "Above normal 40–50%",
+   "official_note": "60% of shown cells; also Above normal 50–60% (36%), Near normal 33–40% (5%)",
+   "platform": "32% / 33% / 35%",
+   "relationship": "No clear category in one source",
+   "relationship_code": "weak_signal",
+   "domain_share": 0.08737864077669903,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_sample_North-central",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Within zone North-central",
+   "zone": "North-central",
+   "official": "Above normal 40–50%",
+   "official_note": "58% of shown cells; also Near normal 33–40% (32%), Below normal 40–50% (5%), Above normal 50–60% (5%), Above normal 33–40% (<1%); 4% of the sample grey (no forecast category shown)",
+   "platform": "26% / 35% / 39%",
+   "relationship": "No clear category in one source",
+   "relationship_code": "weak_signal",
+   "domain_share": 0.7661691542288557,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_sample_South-central",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Within zone South-central",
+   "zone": "South-central",
+   "official": "Near normal 33–40%",
+   "official_note": "48% of shown cells; also Above normal 40–50% (32%), Below normal 40–50% (20%)",
+   "platform": "22% / 33% / 45%",
+   "relationship": "Near normal vs other",
+   "relationship_code": "near_versus_other",
+   "domain_share": 0.15810276679841898,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_sample_Southeast",
+   "kind": "sample",
+   "status": "validated",
+   "location": "Within zone Southeast",
+   "zone": "Southeast",
+   "official": "Above normal 40–50%",
+   "official_note": "77% of shown cells; also Near normal 33–40% (19%), Below normal 40–50% (4%)",
+   "platform": "20% / 32% / 48%",
+   "relationship": "Same category",
+   "relationship_code": "same_favoured_category",
+   "domain_share": 0.006042296072507553,
+   "area_key": null,
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_all_ethiopia_finding_row",
+   "kind": "area",
+   "status": "validated",
+   "location": "All Ethiopia",
+   "zone": null,
+   "official": "Above normal (most often 40–50%)",
+   "official_note": "shown on 89% of the area; 11% grey (no forecast category shown)",
+   "platform": "27% / 33% / 40%",
+   "relationship": "Same category (where both show a category)",
+   "relationship_code": "same_favoured_category",
+   "domain_share": null,
+   "area_key": "all_ethiopia",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_season_domain_finding_row",
+   "kind": "area",
+   "status": "validated",
+   "location": "FMAM R2 (Belg) rainfall domain",
+   "zone": null,
+   "official": "Above normal (most often 40–50%)",
+   "official_note": "shown on 90% of the area; 10% grey (no forecast category shown)",
+   "platform": "26% / 35% / 39%",
+   "relationship": "Same category (where both show a category)",
+   "relationship_code": "same_favoured_category",
+   "domain_share": null,
+   "area_key": "season_domain",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  }
+ ],
+ "paragraphs": [
+  {
+   "id": "emi_belg_2026_outlook_zone_West_finding_text",
+   "finding": "emi_belg_2026_outlook_zone_West_finding",
+   "source_id": "emi_belg_2026_outlook",
+   "area": "EMI zone West",
+   "area_key": "zone",
+   "status": "validated",
+   "relationship": "weak_signal",
+   "text": "The platform does not show a unique favoured category over EMI zone West under its applicable rule. EMI prints 25% / 30% / 45% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 32% / 33% / 35%: no clear category in one source.",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ]
+  },
+  {
+   "id": "emi_belg_2026_outlook_zone_North-central_finding_text",
+   "finding": "emi_belg_2026_outlook_zone_North-central_finding",
+   "source_id": "emi_belg_2026_outlook",
+   "area": "EMI zone North-central",
+   "area_key": "zone",
+   "status": "validated",
+   "relationship": "weak_signal",
+   "text": "The platform does not show a unique favoured category over EMI zone North-central under its applicable rule. EMI prints 10% / 30% / 60% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 26% / 35% / 39%: no clear category in one source.",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ]
+  },
+  {
+   "id": "emi_belg_2026_outlook_zone_South-central_finding_text",
+   "finding": "emi_belg_2026_outlook_zone_South-central_finding",
+   "source_id": "emi_belg_2026_outlook",
+   "area": "EMI zone South-central",
+   "area_key": "zone",
+   "status": "validated",
+   "relationship": "same_favoured_category",
+   "text": "Both outlooks favour wetter-than-normal conditions over EMI zone South-central. EMI prints 15% / 30% / 55% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 22% / 33% / 45%: same category.",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ]
+  },
+  {
+   "id": "emi_belg_2026_outlook_zone_Southeast_finding_text",
+   "finding": "emi_belg_2026_outlook_zone_Southeast_finding",
+   "source_id": "emi_belg_2026_outlook",
+   "area": "EMI zone Southeast",
+   "area_key": "zone",
+   "status": "validated",
+   "relationship": "same_favoured_category",
+   "text": "Both outlooks favour wetter-than-normal conditions over EMI zone Southeast. EMI prints 20% / 35% / 45% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 20% / 32% / 48%: same category.",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "emi_belg_2026_outlook_page22"
+   ]
+  },
+  {
+   "id": "emi_shared_limitation",
+   "finding": null,
+   "source_id": "emi_belg_2026_outlook",
+   "area": null,
+   "area_key": "zone",
+   "status": "validated",
+   "relationship": null,
+   "text": "The EMI zones were digitized from the figure's fill colours and placed by fitting the country outline, so their boundaries are approximate; the figure states no reference period, so probability differences are not calculated.",
+   "evidence_ids": []
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_all_ethiopia_finding_text",
+   "finding": "icpac_mam_2026_rainfall_all_ethiopia_finding",
+   "source_id": "icpac_mam_2026_rainfall",
+   "area": "All Ethiopia",
+   "area_key": "all_ethiopia",
+   "status": "validated",
+   "relationship": "same_favoured_category",
+   "text": "The outlooks favour different categories over much of their shared displayed area in Ethiopia. ICPAC shows a favoured category on 89% of Ethiopia and no forecast category shown (the legend does not explain the grey areas) on 11%; where it shows one it favours above normal on 69%, most often at 40-50% and 33-40%. The platform favours above normal on 50% and below normal on 7% of Ethiopia. There is category agreement of 54.8% within the compared area, which covers 59% of the analysed national area; opposite categories (above vs below) on 11% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "icpac_mam_2026_rainfall_season_domain_finding_text",
+   "finding": "icpac_mam_2026_rainfall_season_domain_finding",
+   "source_id": "icpac_mam_2026_rainfall",
+   "area": "FMAM R2 (Belg) rainfall domain",
+   "area_key": "season_domain",
+   "status": "validated",
+   "relationship": "same_favoured_category",
+   "text": "Above-normal rainfall is the most common favoured category in both outlooks in the FMAM R2 (Belg) rainfall domain, but they disagree over a substantial part of their shared displayed area. ICPAC shows a favoured category on 90% of the FMAM R2 (Belg) rainfall domain and no forecast category shown (the legend does not explain the grey areas) on 10%; where it shows one it favours above normal on 79%, most often at 40-50% and 33-40%. The platform favours above normal on 43% and below normal on <1% of the FMAM R2 (Belg) rainfall domain. There is category agreement of 66.5% within the compared area, which covers 51% of the analysed domain. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "evidence_ids": [
+    "platform_forecast_fmam",
+    "icpac_mam_2026_rainfall_map",
+    "icpac_mam_2026_rainfall_comparison_map"
+   ]
+  },
+  {
+   "id": "not_calculated",
+   "finding": null,
+   "source_id": null,
+   "area": null,
+   "area_key": "any",
+   "status": "validated",
+   "relationship": null,
+   "text": "Not calculated: rainfall-anomaly differences, because no official rainfall-amount anomaly product was found in the checked ICPAC and EMI products; which forecast is more accurate, because that needs observations and a separate verification design (see Verification); same-event probability differences, because the target windows or spatial supports differ and ICPAC publishes only favoured-category intervals.",
+   "evidence_ids": []
+  }
+ ],
+ "evidence": {
+  "platform_forecast_fmam": {
+   "label": "Platform FMAM 2026 forecast data (NetCDF)",
+   "kind": "platform",
+   "links": [
+    {
+     "label": "Platform map",
+     "href": "assets/maps/fmam2026feb/forecast/FMAM/{view}/tercile_outlook.png"
+    },
+    {
+     "label": "Platform data (NetCDF)",
+     "href": "downloads/data/fmam2026feb/FMAM_forecast_2026.nc"
+    }
+   ]
+  },
+  "icpac_mam_2026_rainfall_map": {
+   "label": "ICPAC figure: Rainfall forecast - March - May 2026 - IGAD Region",
+   "kind": "official_figure",
+   "links": [
+    {
+     "label": "Official figure",
+     "href": "assets/external/fmam2026feb/icpac_mam_2026_rainfall.png"
+    },
+    {
+     "label": "Original file",
+     "href": "https://www.icpac.net/media/images/GHA-MAM-Rainfall.original.png"
+    }
+   ]
+  },
+  "icpac_mam_2026_rainfall_record": {
+   "label": "ICPAC source record",
+   "kind": "source_record",
+   "links": [
+    {
+     "label": "Source record",
+     "href": "downloads/fmam2026feb_comparison_sources.json"
+    }
+   ]
+  },
+  "emi_belg_2026_outlook_page22": {
+   "label": "EMI figure: Bega 2025-26 Assessment and Belg2026 hydro met Bulletin, PDF page 22",
+   "kind": "official_figure",
+   "links": [
+    {
+     "label": "Official figure",
+     "href": "assets/external/fmam2026feb/emi_belg_2026_outlook_page22_figure.jpg"
+    },
+    {
+     "label": "Original PDF page",
+     "href": "https://www.ethiomet.gov.et/documents/625/Bega_2025_26_and_Belg_outlook2026E_Hydromet_bulletin_English_bulletin.pdf#page=22"
+    }
+   ]
+  },
+  "emi_belg_2026_outlook_record": {
+   "label": "EMI source record",
+   "kind": "source_record",
+   "links": [
+    {
+     "label": "Source record",
+     "href": "downloads/fmam2026feb_comparison_sources.json"
+    }
+   ]
+  },
+  "emi_belg_2026_outlook_comparison_map": {
+   "label": "Comparison map",
+   "kind": "comparison_map",
+   "links": [
+    {
+     "label": "Comparison map",
+     "href": "assets/external/fmam2026feb/emi_belg_2026_outlook_anchors.png"
+    }
+   ]
+  },
+  "icpac_mam_2026_rainfall_comparison_map": {
+   "label": "Comparison map",
+   "kind": "comparison_map",
+   "links": [
+    {
+     "label": "Comparison map",
+     "href": "assets/external/fmam2026feb/icpac_mam_2026_rainfall_comparison.png"
+    }
+   ]
+  }
+ },
+ "notes": [
+  "Area means are area-weighted means of local grid-cell probabilities, not probabilities of area-mean rainfall.",
+  "Favoured category: the leading tercile where it reaches 40% (the map display rule); otherwise no clear category.",
+  "An OND probability cannot be built by averaging monthly probabilities; ONDJ and OND are compared only as spatial tendencies."
+ ],
+ "stale": [],
+ "rerun": "python scripts\\run_operational.py --config config\\cycles\\feb_2026_fmam.json --workflow products --compare-external",
+ "created_utc": "2026-10-09T19:27:11+00:00",
+ "engine": "rules v2",
+ "reference_layers": []
+}

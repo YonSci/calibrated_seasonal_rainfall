@@ -1,0 +1,34 @@
+{
+ "source_id": "emi_belg_2026_outlook",
+ "provider": "EMI",
+ "product": "rainfall_tercile_probability",
+ "representation": "zone_tercile_probabilities",
+ "label": "Bega 2025-26 Assessment and Belg2026 hydro met Bulletin",
+ "requested_url": "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/bega-2025-26-assessment-and-belg2026-hydro-met-bulletin/",
+ "download_url": "https://www.ethiomet.gov.et/documents/625/Bega_2025_26_and_Belg_outlook2026E_Hydromet_bulletin_English_bulletin.pdf",
+ "file": "data/external_forecasts/fmam_2026/emi_belg_2026_outlook/4a0d4eedcc7c108a.pdf",
+ "sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+ "bytes": 2650897,
+ "retrieved_utc": "2026-10-09T15:16:15+00:00",
+ "target_start": "2026-02-01",
+ "target_end": "2026-05-31",
+ "season_label": "Belg (FMAM) 2026",
+ "issue_date": null,
+ "initialization": null,
+ "reference_period": null,
+ "http_last_modified": null,
+ "narrative": [],
+ "products_listed_for_season": null,
+ "other_title_matches": [
+  "Belg 2026 Seasonal Climate Forecast"
+ ],
+ "skipped_candidates": [],
+ "extraction_version": 1,
+ "pdf_metadata": {
+  "Author": "Alex",
+  "Creator": "Microsoft® Word 2013",
+  "CreationDate": "D:20260216024848-09'00'",
+  "ModDate": "D:20260216024848-09'00'",
+  "Producer": "Microsoft® Word 2013"
+ }
+}

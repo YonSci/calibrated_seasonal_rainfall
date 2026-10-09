@@ -1,0 +1,12 @@
+{
+ "icpac_mam_2026_rainfall": {
+  "sha256": "a9d7f6106eb5cb61e2b7ac9aa3e15a43750615d0d55131e726d6c554738240fe",
+  "file": "data/external_forecasts/fmam_2026/icpac_mam_2026_rainfall/a9d7f6106eb5cb61.png",
+  "meta": "data/external_forecasts/fmam_2026/icpac_mam_2026_rainfall/a9d7f6106eb5cb61.json"
+ },
+ "emi_belg_2026_outlook": {
+  "sha256": "4a0d4eedcc7c108ab4a6f91c242adde43f46b4dad024e17a48b3b7164392d066",
+  "file": "data/external_forecasts/fmam_2026/emi_belg_2026_outlook/4a0d4eedcc7c108a.pdf",
+  "meta": "data/external_forecasts/fmam_2026/emi_belg_2026_outlook/4a0d4eedcc7c108a.json"
+ }
+}
