@@ -2,7 +2,7 @@ FMAM 2026 — January initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-09 09:37 UTC (site release 2026-10-09.5) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-09 10:50 UTC (site release 2026-10-09.6) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
@@ -18,7 +18,7 @@ Reference period: CHIRPS v2.0 FMAM 1993–2025 (33 seasons)
 Observations processed through: May 2026 (Mar, Apr, May)
 CHIRPS archive: Official CHIRPS v2.0 p25 by_month listing checked 9 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found
 Verification last run: 8 Oct 2026
-Method / version: Shared climatology blend (λ = 0.43 for FMAM) · code d932d97
+Method / version: Shared climatology blend (λ = 0.43 for FMAM) · code f477821
 Rainfall domain: Fixed 1993-2025 descriptive domain (Belg): rainfall regime R2 (GitHub-refined classification of the CHIRPS daily climatology) with FMAM climatological CHIRPS rainfall >=80 mm; patches smaller than 3 cells removed. Scientific masking walkthrough logic; no onset gate. The same domain is used for the season and each of its months.
 
 Contents

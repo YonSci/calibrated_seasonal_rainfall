@@ -362,6 +362,8 @@ def package_files(cyc):
     files = [(f'downloads/{cid}_README.txt', 'README.txt'), (f'downloads/{cid}_metadata.json', 'metadata.json'),
              (f'downloads/{cid}_summary.csv', 'summary.csv'), (f'downloads/{cid}_bulletin.pdf', 'bulletin.pdf')]
     for d in cyc['downloads']:
+        if '_comparison' in d['href']:
+            continue                                      # added below with the comparison folder
         if d['href'].endswith('.html'):
             files.append((d['href'], 'reports/' + d['href'].split('/')[-1].removeprefix(f'{cid}_')))
         elif d['href'].endswith('.md'):
@@ -372,6 +374,7 @@ def package_files(cyc):
                 files += [(f'{e["folder"]}/{name}.png', f'maps/{kind}/{t["id"]}/{view}/{name}.png') for name, _ in e['images']]
         if t.get('netcdf'):
             files.append((t['netcdf'], 'data/' + t['netcdf'].split('/')[-1]))
+    files += [tuple(x) for x in cyc.get('comparison_package', [])]
     return [[a, b] for a, b in files if (OUT / a).is_file() or a.endswith(('README.txt', 'metadata.json'))]
 
 
@@ -489,7 +492,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased'):
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top">Ethiopia Seasonal Rainfall</a>
-    <nav aria-label="Sections"><a href="#outlooks">Outlooks</a><a href="#maps">Maps</a><a href="#verification">Verification</a><a href="#history">Historical performance</a><a href="#methods">Methods &amp; data</a><a href="#downloads">Downloads</a></nav>
+    <nav aria-label="Sections"><a href="#outlooks">Outlooks</a><a href="#official">Compare outlooks</a><a href="#maps">Maps</a><a href="#verification">Verification</a><a href="#history">Historical performance</a><a href="#methods">Methods &amp; data</a><a href="#downloads">Downloads</a></nav>
   </div>
   <div class="cyclebar">
     <div class="wrap pickers">
@@ -530,7 +533,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased'):
   </div>
   <h2 class="h3">All targets in this cycle</h2>
   <div id="ol-table"></div>
-  <h2 class="h3" id="official">Comparison with official outlooks</h2>
+  <h2 class="h3" id="official">Official outlook comparison</h2>
   <div id="cmp-body" aria-live="polite"></div>
   <details class="panel-details" open>
     <summary>Cycle status and record</summary>
@@ -746,6 +749,8 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:8px}
 .chart{width:100%;max-width:720px;height:auto;display:block}.chart text{fill:var(--ink2);font:13px Inter,system-ui,sans-serif}
 .chart .val{fill:var(--ink);font-weight:600}.chart .axis{stroke:var(--line)}.chart .zero{stroke:var(--ink2)}
 .legend{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.9rem;margin:4px 0}
+.scope{font-size:.95rem;margin:4px 0 8px}.nowrap{white-space:nowrap}.cmp-square{max-width:640px}.findings{margin:0;padding-left:20px}.findings li{margin:6px 0}
+.evlinks{display:block;font-size:.85rem;color:var(--muted)}.evlinks a{white-space:nowrap}
 .quote{margin:8px 0;padding:8px 12px;border-left:3px solid var(--line);color:var(--ink2);font-size:.92rem}
 .chart.rel{max-width:340px}.check{display:inline-flex;gap:8px;align-items:center;font-size:.92rem;margin:0 0 10px}
 .hbars{display:grid;gap:6px;margin:8px 0 12px}.hbar{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center;font-size:.88rem}
@@ -777,6 +782,9 @@ JS = r'''
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const dt = s => { const [y, m, d] = s.split('-').map(Number); return d + ' ' + MON[m - 1] + ' ' + y; };
   const pc = (x, d = 0) => ok(x) ? (100 * x).toFixed(d) + '%' : '—';
+  // Shares near the ends are not rounded to 'all' or 'none'; agreement shares keep one decimal.
+  const share = x => !ok(x) ? '—' : (x >= 0.995 && x < 1) ? '>99%' : (x > 0 && x < 0.005) ? '<1%' : (100 * x).toFixed(0) + '%';
+  const share1 = x => !ok(x) ? '—' : x >= 0.99995 ? '100%' : (100 * x).toFixed(1) + '%';
   const PRODUCTS = D.products;
   const HELP = {
     tercile_outlook: '<p>Colour shows the <strong>most likely tercile</strong> at each place, shaded by its probability: yellow–red for below normal, cyan for near normal, green for above normal. Terciles split the reference-period rainfall into three equally likely parts, so climatology is about 33% each. Places where no category reaches 40% are left white.</p>',
@@ -1046,11 +1054,11 @@ JS = r'''
   }
 
   // ---------- historical verification explorer (data/<cycle>_diagnostics.json, loaded on demand)
-  const BASE = window.SITE_BASE || '';
+  const siteURL = path => new URL(path, window.SITE_BASE || document.baseURI).href;
   const DIAG = {};
   function loadDiag(c) {
     if (!c.diagnostics) return Promise.resolve(null);
-    if (!DIAG[c.id]) DIAG[c.id] = fetch(BASE + c.diagnostics).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    if (!DIAG[c.id]) DIAG[c.id] = fetch(siteURL(c.diagnostics)).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
     return DIAG[c.id];
   }
   function yearChart(rows) {
@@ -1139,30 +1147,80 @@ JS = r'''
     official_amount_anomaly_not_found_in_checked_products: 'no official rainfall-amount anomaly product was found in the checked products'};
   const plainReason = r => !r ? '' : r.split(';').map(x => x.trim()).map(x => x.startsWith('out_of_scope') ? 'needs observations and a separate verification design (see Verification)' : (REASON[x] || x.replace(/_/g, ' '))).join('; ');
   function renderComparison() {
-    const c = cyc(), body = $('cmp-body');
+    const c = cyc(), body = $('cmp-body'), head = $('official');
+    const season = c.targets.find(t => t.kind === 'season') || c.targets[0];
+    head.textContent = 'Official outlook comparison — ' + season.label;
     if (!c.comparison) { body.innerHTML = '<p class="caveat">No comparison with official outlooks is configured for this cycle.</p>'; return; }
     body.innerHTML = '<p class="caveat">Loading…</p>';
-    if (!CMP[c.id]) CMP[c.id] = fetch(BASE + c.comparison).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-    const want = c.id;
+    if (!CMP[c.id]) CMP[c.id] = fetch(siteURL(c.comparison)).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const want = [c.id, S.target, S.view].join('|');
     CMP[c.id].then(X => {
-      if (cyc().id !== want) return;
+      if ([cyc().id, S.target, S.view].join('|') !== want) return;
       const ev = X.evidence || {};
+      const areaKey = S.view === 'all_ethiopia' ? 'all_ethiopia' : 'season_domain';
+      const areaName = viewLabel(S.view), otherName = areaKey === 'all_ethiopia' ? 'Rainfall-domain context' : 'National context';
+      const href = p => esc(siteURL(String(p).replace('{view}', S.view)));
+      const links = (ids, sid) => {
+        const seen = new Set(), out = [];
+        [...ids, ...(sid ? [sid + '_record'] : [])].forEach(i => ((ev[i] || {}).links || []).forEach(l => {
+          if (!seen.has(l.href)) { seen.add(l.href); out.push('<a href="' + href(l.href) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>'); }
+        }));
+        return out.length ? '<span class="evlinks">Evidence: ' + out.join(' · ') + '</span>' : '';
+      };
+      const item = i => '<li><strong>' + esc(i.title) + '.</strong> ' + esc(i.text) + links(i.evidence_ids, i.source_id) + '</li>';
+      let h = '<p class="scope"><strong>Season:</strong> ' + esc(season.label) + ' (' + dt(season.start) + ' – ' + dt(season.end) + ') · <strong>Area:</strong> ' + esc(areaName) + '</p>';
+      if (S.target !== season.id) h += '<p class="notice">This comparison covers the full ' + esc(season.id) + ' season. A separate ' + esc(tgt().label) + ' comparison is not available.</p>';
+      if (X.stale.length) h += '<p class="notice"><strong>Comparison withheld.</strong> The saved comparison no longer matches the current ' + esc(X.stale.join(', ')) +
+        '. Its findings are not shown until it is regenerated: <code>' + esc(X.rerun) + '</code></p>';
+      h += '<p class="caveat">Official outlooks from ICPAC and the Ethiopian Meteorology Institute (EMI), compared with this platform\'s forecast. The comparison describes agreement between outlooks, not which is more accurate, and uses only values a person has checked against the published figures.</p>';
+      // 1. key findings for the selected area; the rest as context
+      const mine = X.summary.filter(i => i.area_key === areaKey || i.area_key === 'any');
+      const ctx = X.summary.filter(i => i.area_key !== areaKey && i.area_key !== 'any');
+      if (mine.length) h += '<div class="box"><h3>Key findings — ' + esc(areaName) + '</h3><ul class="findings">' + mine.map(item).join('') + '</ul></div>';
+      // 2. maps
+      const cap = {icpac: 'Platform ' + season.label + ' vs ICPAC (left to right: platform favoured category, ICPAC favoured category, agreement). Periods differ; see the findings.',
+                   emi: 'Platform ' + season.label + ' favoured category with EMI zone values at their arrow tips; boxes show the sampled ±0.5° neighbourhoods.'};
+      if (X.maps.length) h += X.maps.map(m => '<figure class="map-figure' + (m.name.includes('anchors') ? ' cmp-square' : ' wide') + '"><a href="' + href(m.file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(m.file) +
+        '" alt="Comparison map"></a><figcaption>' + esc(m.name.includes('anchors') ? cap.emi : cap.icpac) + '</figcaption></figure>').join('');
+      // 3. compact tables
+      const agree = X.metrics.filter(m => m.metric === 'mapped_category_agreement' && m.value);
+      if (agree.length) h += '<div class="table-wrap"><table class="compact"><caption>ICPAC category agreement (only where both outlooks show a favoured category)</caption><thead><tr><th scope="col">Area</th><th scope="col">Compared area (share of the analysed area)</th><th scope="col">Category agreement within it</th><th scope="col">Opposite categories within it</th></tr></thead><tbody>' +
+        agree.map(m => { const v = m.value, here = (areaKey === 'all_ethiopia') === (m.where === 'All Ethiopia');
+          return '<tr' + (here ? ' class="current"' : '') + '><td>' + esc(m.where) + (here ? '' : ' <span class="caveat">(' + otherName.toLowerCase() + ')</span>') + '</td><td>' + share(v.area_share_both_favoured) + '</td><td>' +
+            share1(v.agreement_share_where_both_favoured) + '</td><td>' + share1(v.opposing_share_where_both_favoured) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+      if (X.emi_table.length) {
+        const rows = [...X.emi_table].sort((a, b) => (b.domain_share >= .5) - (a.domain_share >= .5));
+        h += '<div class="table-wrap"><table class="compact"><caption>EMI zones: printed values and the platform\'s sampled neighbourhood (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">Official</th><th scope="col">Platform neighbourhood</th><th scope="col">Relationship</th><th scope="col">Evidence</th></tr></thead><tbody>' +
+          rows.map(r => { const inside = areaKey === 'all_ethiopia' || r.domain_share >= .5;
+            return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>Near zone ' + esc(r.zone) + ' arrow' +
+              (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + (inside ? 'in the domain' : 'outside the domain (national context)') + '</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td><td class="nowrap">' + esc(r.platform) +
+              '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td><td>' + links(r.evidence_ids).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
+          '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities within ±0.5° of each arrow tip, not complete EMI zones (the figure publishes no zone boundaries). Percentages are rounded to add up to 100%.</p>';
+      }
+      if (ctx.length) h += '<details><summary>' + otherName + '</summary><ul class="findings">' + ctx.map(item).join('') + '</ul></details>';
+      // 4. detailed interpretation
+      if (X.paragraphs.length) {
+        const order = p => (p.area_key === areaKey ? 0 : p.area_key === 'zone' ? 1 : p.area_key === 'any' ? 3 : 2);
+        h += '<details><summary>Detailed interpretation</summary>' + [...X.paragraphs].sort((a, b) => order(a) - order(b)).map(p =>
+          '<p>' + (p.area_key !== 'zone' && p.area_key !== 'any' && p.area_key !== areaKey ? '<span class="caveat">' + otherName + ':</span> ' : '') + esc(p.text) + links(p.evidence_ids) + '</p>').join('') + '</details>';
+      }
+      // 5. sources, extraction review and methods
       const st = s => s === 'validated' ? '<span class="status published">Extraction reviewed</span>' : '<span class="status awaiting">Extraction awaiting review</span>';
-      let h = '<p>Official outlooks for this season from ICPAC and the Ethiopian Meteorology Institute (EMI), compared with this platform\'s forecast. The comparison describes agreement between outlooks; it does not say which is more accurate. Numbers are compared only after the values extracted from the official figures have been checked by a person.</p>';
-      if (X.paragraphs.length) h += '<div class="box">' + X.paragraphs.map(p => '<p>' + esc(p.text) + (p.evidence_ids.length ? '<br><span class="caveat">Evidence: ' + p.evidence_ids.map(i => esc((ev[i] || {}).label || i)).join('; ') + '</span>' : '') + '</p>').join('') + '</div>';
-      if (X.maps.length) h += X.maps.map(m => '<figure class="map-figure wide"><a href="' + m.file + '" target="_blank" rel="noopener"><img loading="lazy" src="' + m.file + '" alt="Comparison map ' + esc(m.source_id) + '"></a></figure>').join('');
-      h += '<div class="grid2">' + X.sources.map(s => {
+      const chk = r => '<span class="status ' + ({checked: 'published', new_awaiting_review: 'awaiting', refresh_failed: 'awaiting'}[r.state] || 'not_started') + '">' + esc(r.text) + '</span>';
+      h += '<details><summary>Sources, extraction review and methods</summary><div class="grid2">' + X.sources.map(s => {
         const same = s.target_start === X.platform.target_start && s.target_end === X.platform.target_end;
-        return '<div class="box"><h3>' + esc(s.provider) + ': ' + esc(s.season_label || s.label) + '</h3>' + st(s.extraction.status) +
+        const rv = s.extraction.review;
+        return '<div class="box"><h3>' + esc(s.provider) + ': ' + esc(s.season_label || s.label) + '</h3><p>' + st(s.extraction.status) + ' ' + chk(s.refresh) + '</p>' +
           '<dl class="meta"><dt>Product</dt><dd>' + esc(s.label) + '</dd><dt>Target period</dt><dd>' + dt(s.target_start) + ' – ' + dt(s.target_end) +
           (same ? '' : ' <strong>(differs from this forecast: ' + dt(X.platform.target_start) + ' – ' + dt(X.platform.target_end) + ')</strong>') + '</dd>' +
           '<dt>Issue date</dt><dd>' + esc(s.issue_date || 'not stated by the provider') + '</dd><dt>Reference period</dt><dd>' + esc(s.reference_period || 'not stated') + '</dd>' +
           '<dt>Retrieved</dt><dd>' + esc((s.retrieved_utc || '').slice(0, 10)) + ' · content hash ' + esc((s.sha256 || '').slice(0, 12)) + '</dd>' +
+          (rv ? '<dt>Review</dt><dd>' + esc(rv.decision) + ' by ' + esc(rv.reviewer) + ', ' + esc((rv.reviewed_utc || '').slice(0, 10)) + '</dd>' : '') +
+          (s.extraction.note ? '<dt>Note</dt><dd>' + esc(s.extraction.note) + '</dd>' : '') +
           '<dt>Source</dt><dd><a href="' + esc(s.page) + '" rel="noopener">product page</a> · <a href="' + esc(s.download) + '" rel="noopener">original file</a></dd></dl>' +
           (s.narrative.length ? '<blockquote class="quote">' + s.narrative.map(n => esc(n.text)).join('<br>') + '<br><span class="caveat">— ' + esc(s.provider) + ', ' + esc(s.narrative[0].locator) + '</span></blockquote>' : '') +
-          s.figures.map(f => '<figure><a href="' + f.file + '" target="_blank" rel="noopener"><img loading="lazy" src="' + f.file + '" alt="' + esc(f.caption) + '"></a><figcaption>' + esc(f.caption) + ' (original figure)</figcaption></figure>').join('') + '</div>';
-      }).join('') + '</div>';
-      h += '<details><summary>What is compared, and what is not</summary><div class="table-wrap"><table class="compact"><thead><tr><th scope="col">Comparison</th><th scope="col">Where</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead><tbody>' +
+          s.figures.map(f => '<figure><a href="' + href(f.file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(f.file) + '" alt="' + esc(f.caption) + '"></a><figcaption>' + esc(f.caption) + ' (original figure)</figcaption></figure>').join('') + '</div>';
+      }).join('') + '</div><div class="table-wrap"><table class="compact"><caption>What is compared, and what is not</caption><thead><tr><th scope="col">Comparison</th><th scope="col">Where</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead><tbody>' +
         X.metrics.map(m => '<tr><td>' + esc(METRIC[m.metric] || m.metric) + '</td><td>' + esc(m.where ? (String(m.where).length < 5 ? 'EMI zone ' + m.where : m.where) : '—') + '</td><td>' +
           esc(m.status.replace(/_/g, ' ')) + '</td><td>' + esc(plainReason(m.reason) || (m.basis || '').replace(/_/g, ' ')) + '</td></tr>').join('') + '</tbody></table></div>' +
         '<ul class="caveat">' + X.notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul></details>';
@@ -1187,7 +1245,7 @@ JS = r'''
       let n = 0;
       for (const [src, dest] of c.package) {
         prog.textContent = 'Adding file ' + (++n) + ' of ' + c.package.length + '…';
-        const r = await fetch(BASE + src);
+        const r = await fetch(siteURL(src));
         if (!r.ok) throw new Error(src + ' (' + r.status + ')');
         zip.file(root + dest, await r.arrayBuffer());
       }
@@ -1313,7 +1371,13 @@ def main():
     for c in cycles:
         write_csv(c)
         c['diagnostics'] = extras.export_diagnostics(c['tag'], c['id'], c['views'], OUT)
-        c['comparison'] = extras.export_comparison(load_cycle(ROOT / c['cfg']), c['id'], OUT)
+        exported = extras.export_comparison(load_cycle(ROOT / c['cfg']), c['id'], OUT)
+        c['comparison'] = exported and exported['rel']
+        if exported:
+            c['downloads'] += exported['downloads']
+            c['comparison_package'] = exported['package']
+            if exported['stale']:
+                print(f'{c["id"]}: comparison withheld (stale: {", ".join(exported["stale"])})')
         extras.bulletin_pdf(c, OUT / f'downloads/{c["id"]}_bulletin.pdf', built, OUT)
         c['package'] = package_files(c)
         meta = extras.package_metadata(c, built, release_id, sha, c['package'])

@@ -132,6 +132,8 @@
    "The digitized comparison map (outputs/.../comparisons/maps/icpac_digitized.png) matches the original over Ethiopia.",
    "Grey areas are treated as 'no forecast shown'."
   ],
-  "source_sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6"
+  "source_sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6",
+  "content_sha256": "ece360f66b6c5a4eb8adfc5e9f84c3178fa3ca0d16db2907e5e534ac3467b06f",
+  "content_hash_note": "Added 2026-10-09 when reviews were bound to the extraction contents; the record contents are unchanged since this review (commit f477821)."
  }
 }

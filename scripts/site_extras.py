@@ -363,6 +363,40 @@ def differences(old, new):
     return out or ['Forecast numbers, statuses and verification are unchanged; differences are in presentation only.']
 
 
+def _has(sha, path):
+    try:
+        _git('cat-file', '-e', f'{sha}:{path}')
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def comparison_differences(sha, out, current):
+    """What changed in the published official-outlook comparisons since a release commit."""
+    lines = []
+    for c in current['cycles']:
+        rel = c.get('comparison')
+        if not rel or not (out / rel).is_file():
+            continue
+        new = json.loads((out / rel).read_text(encoding='utf-8'))
+        old = json.loads(_git('show', f'{sha}:site/{rel}').decode('utf-8')) if _has(sha, f'site/{rel}') else None
+        count = lambda d: len([p for p in d.get('paragraphs', []) if p.get('finding')])
+        if old is None:
+            lines.append(f'{c["label"]}: comparison with official outlooks added ({count(new)} published findings).')
+            continue
+        if count(old) != count(new):
+            lines.append(f'{c["label"]}: published comparison findings {count(old)} → {count(new)}.')
+        ost = {s['id']: s['extraction']['status'] for s in old.get('sources', [])}
+        for s in new.get('sources', []):
+            if ost.get(s['id']) != s['extraction']['status']:
+                lines.append(f'{c["label"]}: {s["provider"]} extraction {ost.get(s["id"], "absent")} → {s["extraction"]["status"]}.')
+        if count(old) == count(new) and [p['text'] for p in old.get('paragraphs', [])] != [p['text'] for p in new.get('paragraphs', [])]:
+            lines.append(f'{c["label"]}: comparison wording or numbers changed.')
+        if new.get('stale') and not old.get('stale'):
+            lines.append(f'{c["label"]}: comparison withheld because its inputs changed.')
+    return lines
+
+
 def build_releases(out, current_data, esc):
     """site/releases/: archived pages (exact published page per release commit) and the change log."""
     releases = load_releases()
@@ -382,15 +416,26 @@ def build_releases(out, current_data, esc):
             for name in ('site.js', 'style.css'):
                 (folder / name).write_bytes(_git('show', f'{sha}:site/assets/{name}'))
             page = page.replace('assets/style.css', 'style.css').replace('assets/site.js', 'site.js')
-            page = re.sub(r'(["\'(])(assets/|downloads/|data/)', lambda m: m.group(1) + raw + m.group(2), page)
+            # Assets and downloads come from the release commit; the page's data files are copied next to it
+            # (with their own asset links pointed at the commit) so the archived script loads them unchanged.
+            page = re.sub(r'(["\'(])(assets/|downloads/)', lambda m: m.group(1) + raw + m.group(2), page)
+            names = _git('ls-tree', '--name-only', f'{sha}:site/data').decode().split() if _has(sha, 'site/data') else []
+            for name in names:
+                text = _git('show', f'{sha}:site/data/{name}').decode('utf-8')
+                text = re.sub(r'"(assets/|downloads/)', lambda m: '"' + raw + m.group(1), text)
+                (folder / 'data').mkdir(exist_ok=True)
+                (folder / 'data' / name).write_text(text, encoding='utf-8', newline='')
             banner = (f'<div style="background:#fdf1d8;color:#5c3d00;padding:10px 16px;font:14px/1.5 system-ui,sans-serif;'
                       f'border-bottom:1px solid #e2b25c">Archived release <strong>{esc(r["id"])}</strong> ({esc(r["date"])}): '
                       f'the page as published then (code {sha[:7]}). <a href="../../index.html">Current release</a> · '
                       f'<a href="../index.html">Change log</a></div>')
-            page = page.replace('<body>', '<body>' + banner + f'<script>window.SITE_BASE={json.dumps(raw)}</script>', 1)
+            page = page.replace('<body>', '<body>' + banner, 1)
             (folder / 'index.html').write_text(page, encoding='utf-8', newline='')
             link = f'{r["id"]}/index.html'
             diff = differences(_site_data(_git('show', f'{sha}:site/index.html').decode('utf-8')), current_data)
+            extra = comparison_differences(sha, out, current_data)
+            if extra:
+                diff = [d for d in diff if not d.startswith('Forecast numbers, statuses and verification are unchanged')] + extra
         badges = ''.join(f'<span class="status ready">{esc(CHANGE_TYPES.get(c["type"], c["type"]))}</span> ' for c in r['changes'])
         items = ''.join(f'<li><strong>{esc(CHANGE_TYPES.get(c["type"], c["type"]))}:</strong> {esc(c["text"])}</li>' for c in r['changes'])
         files = f'{REPO}/tree/{r["commit"]}/site' if r.get('commit') else f'{REPO}/tree/main/site'
@@ -412,9 +457,61 @@ def build_releases(out, current_data, esc):
     return releases[-1]['id']
 
 
+
 # ---------------------------------------------------------------- official outlook comparison
+def _current_inputs(cycle, registry_path):
+    """Recompute what a saved comparison depends on, from the files as they are now."""
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import external_forecasts as ef
+    from compare_external_forecasts import input_fingerprint
+    ext = cycle.raw['external_comparison']
+    registry = ef.load_registry(registry_path)
+    season = cycle.season_name
+    vr = cycle.root('verification_root')
+    frozen = vr / f'frozen_forecasts/{cycle.tag}_{season}/forecast_{cycle.year}.nc'
+    native = frozen if (vr / 'frozen_forecasts/freeze_manifest.json').is_file() else cycle.forecast_file(cycle.root('forecast_root'), season)
+    mask = cycle.root('regime_mask') if season == 'JJAS' else cycle.root('season_domain_mask')
+    current_path = ef.cache_dir(registry, ext['cache_root']) / 'current.json'
+    current = json.loads(current_path.read_text(encoding='utf-8')) if current_path.is_file() else {}
+    sources = {}
+    for sid, cur in current.items():
+        rec, _ = ef.extraction_record(registry, sid)
+        status, _ = ef.extraction_check(rec, cur['sha256'])
+        sources[sid] = dict(sha256=cur['sha256'], extraction_status=status, content_sha256=rec and ef.content_sha256(rec))
+    return input_fingerprint(native, mask, registry, sources, None), registry, ef.cache_dir(registry, ext['cache_root'])
+
+
+def _stale_reasons(saved, now):
+    names = dict(native_sha256='the platform forecast', domain_mask_sha256='the rainfall-domain mask', registry_sha256='the source registry')
+    out = [names[k] for k in names if (saved or {}).get(k) != now.get(k)]
+    old, new = (saved or {}).get('sources', {}), now.get('sources', {})
+    for sid in sorted(set(old) | set(new)):
+        a, b = old.get(sid, {}), new.get(sid, {})
+        if a.get('sha256') != b.get('sha256'):
+            out.append(f'the official product {sid}')
+        elif (a.get('extraction_status'), a.get('content_sha256')) != (b.get('extraction_status'), b.get('content_sha256')):
+            out.append(f'the extraction record of {sid}')
+    return out
+
+
+def _refresh_state(r, extraction_status):
+    if not r:
+        return dict(state='not_checked', text='Not checked online in this build; saved product shown')
+    day = r['checked_utc'][:10]
+    if r.get('status') == 'failed':
+        return dict(state='refresh_failed', text=f'Refresh failed on {day}; saved product shown', checked_utc=r['checked_utc'])
+    if r.get('changed') and extraction_status != 'validated':
+        return dict(state='new_awaiting_review', text=f'New product found on {day}; awaiting extraction review', checked_utc=r['checked_utc'])
+    skipped = [s['title'] for s in r.get('skipped_candidates') or []]
+    return dict(state='checked', text=f'Checked {day}: ' + ('unchanged' if not r.get('changed') else 'new product, reviewed')
+                + (f'; a matching page without a document yet was skipped ({"; ".join(skipped)})' if skipped else ''),
+                checked_utc=r['checked_utc'])
+
+
 def export_comparison(cycle, cid, out):
-    """Publish a cycle's official-outlook comparison: sources, figures, validated findings only."""
+    """Publish a cycle's official-outlook comparison: validated content only, and only while the saved
+    results still match the current forecast, sources, extraction records, registry and mask."""
     import shutil
     ext = cycle.raw.get('external_comparison')
     if not ext:
@@ -424,9 +521,17 @@ def export_comparison(cycle, cid, out):
     if not all(f.is_file() for f in files):
         return None
     manifest, comparison, interp = (json.loads(f.read_text(encoding='utf-8')) for f in files)
+    now_inputs, registry, cache = _current_inputs(cycle, ROOT / ext['registry'])
+    saved = dict(comparison.get('inputs') or {}, minimum_leading_probability=None)
+    stale = _stale_reasons(saved, now_inputs)
+    if interp.get('inputs') != comparison.get('inputs'):
+        stale.append('the interpretation (older than the comparison)')
+    status_path = cache / 'refresh_status.json'
+    refresh = json.loads(status_path.read_text(encoding='utf-8')) if status_path.is_file() else {}
     assets = out / 'assets/external' / cid
     assets.mkdir(parents=True, exist_ok=True)
-    sources = []
+    season = cycle.season_name
+    sources, public = [], {}
     for s in manifest['sources']:
         x = s.get('extraction', {})
         figures = []
@@ -434,27 +539,82 @@ def export_comparison(cycle, cid, out):
             src = base / 'sources' / e['file']
             shutil.copy2(src, assets / src.name)
             figures.append(dict(id=e['id'], file=f'assets/external/{cid}/{src.name}', caption=e['caption']))
+            public[e['id']] = f'assets/external/{cid}/{src.name}'
         sources.append(dict(id=s['source_id'], provider=s['provider'], product=s.get('product'), representation=s.get('representation'),
                             label=s.get('label'), season_label=s.get('season_label'), target_start=s.get('target_start'),
                             target_end=s.get('target_end'), issue_date=s.get('issue_date'), initialization=s.get('initialization'),
                             reference_period=s.get('reference_period'), retrieved_utc=s.get('retrieved_utc'), sha256=s.get('sha256'),
                             page=s.get('requested_url'), download=s.get('download_url'), narrative=s.get('narrative', []),
-                            extraction=dict(status=x.get('status'), method=x.get('method'), review=x.get('review')),
-                            figures=figures))
+                            extraction=dict(status=x.get('status'), method=x.get('method'), review=x.get('review'), note=x.get('note')),
+                            refresh=_refresh_state(refresh.get(s['source_id']), x.get('status')), figures=figures))
     validated = {s['id'] for s in sources if s['extraction']['status'] == 'validated'}
     maps = []
-    for m in comparison['maps']:
-        sid = next((s for s in validated if m.startswith(s)), None)
-        if sid:                                     # comparison maps only for reviewed extractions
-            shutil.copy2(base / 'comparison/maps' / m, assets / m)
-            maps.append(dict(source_id=sid, file=f'assets/external/{cid}/{m}'))
+    if not stale:
+        for m in comparison['maps']:
+            sid = next((v for v in validated if m.startswith(v)), None)
+            if sid:                                     # comparison maps only for reviewed extractions
+                shutil.copy2(base / 'comparison/maps' / m, assets / m)
+                maps.append(dict(source_id=sid, file=f'assets/external/{cid}/{m}', name=m))
+    # Evidence identifiers -> public links (internal repository paths are never published as links).
+    nc = f'downloads/data/{cid}/{season}_forecast_{cycle.year}.nc'
+    evidence = {}
+    for k, e in interp['evidence'].items():
+        kind = e.get('kind')
+        if kind == 'platform':
+            links = [dict(label='Platform map', href=f'assets/maps/{cid}/forecast/{season}/' + '{view}/tercile_outlook.png'),
+                     dict(label='Platform data (NetCDF)', href=nc)]
+        elif kind == 'official_figure':
+            links = [dict(label='Official figure', href=public.get(k)),
+                     dict(label='Original PDF page' if '#page=' in (e.get('url') or '') else 'Original file', href=e.get('url'))]
+        elif kind == 'comparison_map':
+            m = next((m for m in maps if m['name'] == e.get('map')), None)
+            links = [dict(label='Comparison map', href=m['file'])] if m else []
+        elif kind == 'source_record':
+            links = [dict(label='Source record', href=f'downloads/{cid}_comparison_sources.json')]
+        else:
+            links = []
+        evidence[k] = dict(label=e['label'], kind=kind, links=[l for l in links if l['href']])
+    keep = (lambda items: [i for i in items if i['status'] == 'validated']) if not stale else (lambda items: [])
     metrics = [dict(metric=m['metric'], source_id=m.get('source_id'), where=m.get('zone') or m.get('area'), status=m['status'],
-                    reason=m.get('reason'), basis=m.get('basis'), value=m.get('value') if m['status'] == 'available' else None)
+                    reason=m.get('reason'), basis=m.get('basis'), value=m.get('value') if m['status'] == 'available' and not stale else None)
                for m in comparison['metrics']]
-    paragraphs = [p for p in interp['paragraphs'] if p['status'] == 'validated']
-    data = dict(platform=comparison['platform'], sources=sources, maps=maps, metrics=metrics, paragraphs=paragraphs,
-                evidence=interp['evidence'], notes=comparison['notes'], created_utc=interp['created_utc'], engine=interp['engine'])
+    rerun = (f'python scripts\\run_operational.py --config {Path(cycle.path).resolve().relative_to(ROOT)} --workflow products --compare-external'
+             + (' --refresh-external' if any('official product' in r for r in stale) else ''))
+    data = dict(platform=comparison['platform'], sources=sources, maps=maps, metrics=metrics, summary=keep(interp.get('summary', [])),
+                emi_table=keep(interp.get('emi_table', [])), paragraphs=keep(interp['paragraphs']), evidence=evidence,
+                notes=comparison['notes'], stale=stale, rerun=rerun, created_utc=interp['created_utc'], engine=interp['engine'])
     rel = f'data/{cid}_comparison.json'
     (out / 'data').mkdir(parents=True, exist_ok=True)
     (out / rel).write_text(json.dumps(rounded(data), separators=(',', ':'), ensure_ascii=False), encoding='utf-8', newline='')
-    return rel
+    # Downloads: comparison data, source records with review metadata, and a readable report.
+    dl = out / 'downloads'
+    dl.mkdir(parents=True, exist_ok=True)
+    records = {}
+    ex_dir = Path(registry['extractions_dir'])
+    ex_dir = ex_dir if ex_dir.is_absolute() else ROOT / ex_dir
+    for s in registry['sources']:
+        p = ex_dir / f'{s["id"]}.json'
+        if p.is_file():
+            records[s['id']] = json.loads(p.read_text(encoding='utf-8'))
+    (dl / f'{cid}_comparison.json').write_text(json.dumps(data, indent=1, ensure_ascii=False), encoding='utf-8', newline='')
+    (dl / f'{cid}_comparison_sources.json').write_text(
+        json.dumps(dict(sources=manifest['sources'], extraction_records=records, anomaly_products_checked=manifest.get('anomaly_products_checked')),
+                   indent=1, ensure_ascii=False), encoding='utf-8', newline='')
+    downloads = [dict(label='Comparison with official outlooks (JSON)', href=f'downloads/{cid}_comparison.json',
+                      note='Published findings, tables, metrics with their status and reasons, sources and evidence links'),
+                 dict(label='Official outlook sources and extraction reviews (JSON)', href=f'downloads/{cid}_comparison_sources.json',
+                      note='Source pages, download links, file hashes, retrieval times and the reviewed extraction records')]
+    package = [[f'downloads/{cid}_comparison.json', 'comparison/comparison.json'],
+               [f'downloads/{cid}_comparison_sources.json', 'comparison/sources_and_reviews.json']]
+    report = base / 'interpretation/report.html'
+    if report.is_file() and not stale:
+        page = report.read_text(encoding='utf-8').replace('src="../sources/previews/', f'src="../assets/external/{cid}/')
+        for m in maps:
+            page = page.replace(f'src="{m["name"]}"', f'src="../{m["file"]}"')
+        (dl / f'{cid}_comparison_report.html').write_text(page, encoding='utf-8', newline='')
+        downloads.insert(0, dict(label='Comparison with official outlooks (report, HTML)', href=f'downloads/{cid}_comparison_report.html',
+                                 note='Key findings, maps, the EMI table, detailed interpretation, sources and review status'))
+        package.append([f'downloads/{cid}_comparison_report.html', 'comparison/report.html'])
+    package += [[f['file'], 'comparison/figures/' + Path(f['file']).name] for s in sources for f in s['figures']]
+    package += [[m['file'], 'comparison/figures/' + m['name']] for m in maps]
+    return dict(rel=rel, downloads=downloads, package=package, stale=stale)

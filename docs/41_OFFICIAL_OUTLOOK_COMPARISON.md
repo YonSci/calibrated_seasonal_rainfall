@@ -89,3 +89,15 @@ Every paragraph keeps its status and evidence identifiers. The draft results (no
 - that drafts are never published;
 - that review publishes the zone III disagreement with the required wording;
 - that a replaced source returns to review.
+
+## Publication safeguards (added 2026-10-09)
+
+- **Content-bound reviews.** `review` stores `content_sha256`, a hash of the record's scientific contents: method, version, template, zones, source locator, figure calibration and figure hash. If the source file changes, or the contents are edited after review, the record returns to `needs_extraction_review` (`status` prints the reason).
+- **Freshness at publication.** `comparison.json` records an input fingerprint: native forecast, domain mask, registry, and source and extraction states. `build_site.py` recomputes it and withholds the findings when anything differs, printing `comparison withheld (stale: ...)` and showing the rerun command on the page.
+- **Refresh status.** `refresh_status.json` holds the latest check per source. It is kept separate from `current.json`, so routine checks do not trigger recalculation. The site shows "checked, unchanged", "new product awaiting review" or "refresh failed; saved product shown".
+- **Sensitivity checks.** The comparison records:
+  - EMI relationships for neighbourhood half-widths 0.25–1.0° and arrow shifts up to ±0.5°;
+  - ICPAC agreement with the map registration shifted by one source pixel.
+
+  These are reported as bounded checks of the extraction, not confidence intervals.
+

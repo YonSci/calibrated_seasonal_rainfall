@@ -1,0 +1,566 @@
+{
+ "sources": [
+  {
+   "source_id": "icpac_ond_2026_update_rainfall",
+   "provider": "ICPAC",
+   "product": "rainfall_tercile_probability",
+   "representation": "dominant_category_map",
+   "label": "Rainfall forecast - October - December 2026_Update - IGAD Region",
+   "requested_url": "https://www.icpac.net/seasonal-forecast/october-december-2026_update/?region=1&resource_type=27",
+   "download_url": "https://www.icpac.net/media/images/GHA-PRCP.original.png",
+   "file": "data/external_forecasts/ondj_2026_27/icpac_ond_2026_update_rainfall/38789cddd2e31c49.png",
+   "sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6",
+   "bytes": 229790,
+   "retrieved_utc": "2026-10-09T08:44:54+00:00",
+   "target_start": "2026-10-01",
+   "target_end": "2026-12-31",
+   "season_label": "OND 2026 (update)",
+   "issue_date": null,
+   "initialization": null,
+   "reference_period": null,
+   "http_last_modified": "Tue, 06 Oct 2026 06:52:00 GMT",
+   "narrative": [
+    {
+     "text": "Above-normal rainfall is likely across most of the region, with the highest probabilities over north-eastern Kenya, central to southern Somalia and south-eastern Ethiopia.",
+     "locator": "detail page, rainfall forecast item"
+    },
+    {
+     "text": "Across much of the remaining region, the probability of above-normal rainfall is generally in the range of 50–70%.",
+     "locator": "detail page, rainfall forecast item"
+    }
+   ],
+   "products_listed_for_season": {
+    "27": "rainfall_tercile_probability",
+    "5": "temperature_tercile_probability"
+   },
+   "other_title_matches": null,
+   "extraction_version": 1,
+   "extraction": {
+    "status": "validated",
+    "note": null,
+    "record": "config/external_forecasts/extractions/icpac_ond_2026_update_rainfall.json",
+    "content_sha256": "ece360f66b6c5a4eb8adfc5e9f84c3178fa3ca0d16db2907e5e534ac3467b06f",
+    "method": "automatic_raster_digitization",
+    "review": {
+     "reviewer": "Yonas 1",
+     "reviewed_utc": "2026-10-09T09:21:08+00:00",
+     "decision": "validated",
+     "note": null,
+     "confirmed_checks": [
+      "The map title reads 'Rainfall Forecast for Oct - Dec 2026_Update' (OND 2026, IGAD region).",
+      "Colour bars from top to bottom are Above (boxes 40-50 ... 90-100 %), Normal and Below (boxes 40-50 ... 80-90 %).",
+      "Axis ticks are 25-50 deg E and 10 deg S - 20 deg N in 5-degree steps (plain latitude-longitude map).",
+      "The digitized comparison map (outputs/.../comparisons/maps/icpac_digitized.png) matches the original over Ethiopia.",
+      "Grey areas are treated as 'no forecast shown'."
+     ],
+     "source_sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6",
+     "content_sha256": "ece360f66b6c5a4eb8adfc5e9f84c3178fa3ca0d16db2907e5e534ac3467b06f",
+     "content_hash_note": "Added 2026-10-09 when reviews were bound to the extraction contents; the record contents are unchanged since this review (commit f477821)."
+    },
+    "checks_for_reviewer": [
+     "The map title reads 'Rainfall Forecast for Oct - Dec 2026_Update' (OND 2026, IGAD region).",
+     "Colour bars from top to bottom are Above (boxes 40-50 ... 90-100 %), Normal and Below (boxes 40-50 ... 80-90 %).",
+     "Axis ticks are 25-50 deg E and 10 deg S - 20 deg N in 5-degree steps (plain latitude-longitude map).",
+     "The digitized comparison map (outputs/.../comparisons/maps/icpac_digitized.png) matches the original over Ethiopia.",
+     "Grey areas are treated as 'no forecast shown'."
+    ]
+   },
+   "digitization_qc": {
+    "frame_px": [
+     145,
+     106,
+     943,
+     961
+    ],
+    "x_ticks_px": [
+     246.5,
+     358.5,
+     472.0,
+     584.0,
+     696.0,
+     809.0
+    ],
+    "y_ticks_px": [
+     207.0,
+     320.5,
+     432.5,
+     544.5,
+     657.5,
+     769.5,
+     881.5
+    ],
+    "px_per_degree": [
+     22.49714285714285,
+     22.47499999999999
+    ],
+    "tick_fit_max_residual_px": [
+     0.5761904761902201,
+     0.5892857142858361
+    ],
+    "legend_colours": {
+     "above_90-100": [
+      9,
+      63,
+      33
+     ],
+     "above_80-90": [
+      14,
+      92,
+      48
+     ],
+     "above_70-80": [
+      21,
+      122,
+      64
+     ],
+     "above_60-70": [
+      57,
+      171,
+      14
+     ],
+     "above_50-60": [
+      75,
+      236,
+      75
+     ],
+     "above_40-50": [
+      199,
+      245,
+      199
+     ],
+     "near_80-90": [
+      0,
+      207,
+      207
+     ],
+     "near_70-80": [
+      46,
+      217,
+      217
+     ],
+     "near_60-70": [
+      102,
+      217,
+      217
+     ],
+     "near_50-60": [
+      157,
+      230,
+      230
+     ],
+     "near_40-50": [
+      217,
+      242,
+      242
+     ],
+     "below_80-90": [
+      255,
+      0,
+      0
+     ],
+     "below_70-80": [
+      255,
+      71,
+      0
+     ],
+     "below_60-70": [
+      255,
+      125,
+      0
+     ],
+     "below_50-60": [
+      255,
+      236,
+      0
+     ],
+     "below_40-50": [
+      255,
+      255,
+      145
+     ]
+    },
+    "pixels_classified_share": 0.26025777305341485,
+    "pixels_no_forecast_share": 0.18040718103168277
+   },
+   "evidence": [
+    {
+     "id": "icpac_ond_2026_update_rainfall_map",
+     "file": "previews/icpac_ond_2026_update_rainfall.png",
+     "caption": "Rainfall forecast - October - December 2026_Update - IGAD Region"
+    }
+   ]
+  },
+  {
+   "source_id": "emi_bega_2026_27_outlook",
+   "provider": "EMI",
+   "product": "rainfall_tercile_probability",
+   "representation": "zone_tercile_probabilities",
+   "label": "Kiremt 2026 Assessment and Bega 2026_27 Outlook Hydro met Bulletin",
+   "requested_url": "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/kiremt-2026-assessment-and-bega-2026_27-hydro-met-bulletin/",
+   "download_url": "https://www.ethiomet.gov.et/documents/796/Kiremt_2026_Assesment_and_Bega_2026_27_Outlook_hydromet_Bulletin_pVHz8Fp.pdf",
+   "file": "data/external_forecasts/ondj_2026_27/emi_bega_2026_27_outlook/d55c4d39500d13a9.pdf",
+   "sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+   "bytes": 1882705,
+   "retrieved_utc": "2026-10-09T08:45:10+00:00",
+   "target_start": "2026-10-01",
+   "target_end": "2027-01-31",
+   "season_label": "Bega (ONDJ) 2026/27",
+   "issue_date": null,
+   "initialization": null,
+   "reference_period": null,
+   "http_last_modified": null,
+   "narrative": [
+    {
+     "text": "October: Humid to wet conditions across southern and southwestern catchments Baro-Akobo, Wabi Shebelle, Genale Dawa, Ogaden, and Abay support initial surface water accumulation.",
+     "locator": "PDF page 21"
+    },
+    {
+     "text": "November: Moisture shifts southward; wet to very wet conditions continue in Genale Dawa, Wabi Shebelle, Baro- Akobo, Ogaden, and parts of Abay Rift Valley, while northern areas dry out.",
+     "locator": "PDF page 21"
+    },
+    {
+     "text": "December: Dry to arid conditions dominate northern, central, and eastern basins Afar-Denakil, Aysha, middle upper Abay, Tekeze, and Awash. Sub-humid to wet levels persist in Omo-Gibe, Rift Valley, Baro-Akobo, Genale Dawa, Wabi Shebelle, and middle lower Ogaden.",
+     "locator": "PDF page 21"
+    },
+    {
+     "text": "January: Arid conditions expand across most northern, central, and eastern catchments. Sub-humid to wet conditions remain confined to Omo-Gibe, Rift Valley, and upper Genale Dawa.",
+     "locator": "PDF page 21"
+    }
+   ],
+   "products_listed_for_season": null,
+   "other_title_matches": [],
+   "extraction_version": 1,
+   "pdf_metadata": {
+    "Author": "Alex",
+    "Creator": "Microsoft® Word 2013",
+    "CreationDate": "D:20261007231335-09'00'",
+    "ModDate": "D:20261007231335-09'00'",
+    "Producer": "Microsoft® Word 2013"
+   },
+   "extraction": {
+    "status": "validated",
+    "note": null,
+    "record": "config/external_forecasts/extractions/emi_bega_2026_27_outlook.json",
+    "content_sha256": "1fd91db56555f45ff0ab775944d63dd196ca9b212e6f35110ac7b381be7d3428",
+    "method": "draft_figure_transcription",
+    "review": {
+     "reviewer": "yonas 1",
+     "reviewed_utc": "2026-10-09T09:20:42+00:00",
+     "decision": "validated",
+     "note": null,
+     "confirmed_checks": [
+      "PDF page 21 figure is titled 'NATIONAL OUTLOOK FOR (ONDJ 2026/27)'.",
+      "Printed values per zone, in the printed order A (above), N (normal), B (below): III 55/25/20, VI 60/25/15, VII 60/15/25, VIII 75/15/10.",
+      "Zone VII label is partly cut at the figure's left edge ('one VII'); the values are fully legible.",
+      "Arrow-tip locations (approximate, +/- 0.5 deg) correspond to the arrow heads in the figure.",
+      "No reference period is stated for the probabilities."
+     ],
+     "source_sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+     "content_sha256": "1fd91db56555f45ff0ab775944d63dd196ca9b212e6f35110ac7b381be7d3428",
+     "content_hash_note": "Added 2026-10-09 when reviews were bound to the extraction contents; the record contents are unchanged since this review (commit f477821)."
+    },
+    "checks_for_reviewer": [
+     "PDF page 21 figure is titled 'NATIONAL OUTLOOK FOR (ONDJ 2026/27)'.",
+     "Printed values per zone, in the printed order A (above), N (normal), B (below): III 55/25/20, VI 60/25/15, VII 60/15/25, VIII 75/15/10.",
+     "Zone VII label is partly cut at the figure's left edge ('one VII'); the values are fully legible.",
+     "Arrow-tip locations (approximate, +/- 0.5 deg) correspond to the arrow heads in the figure.",
+     "No reference period is stated for the probabilities."
+    ]
+   },
+   "candidate_pages": [
+    {
+     "page": 21,
+     "keyword_hits": 3,
+     "images": 1
+    },
+    {
+     "page": 1,
+     "keyword_hits": 1,
+     "images": 1
+    },
+    {
+     "page": 20,
+     "keyword_hits": 1,
+     "images": 9
+    }
+   ],
+   "evidence": [
+    {
+     "id": "emi_bega_2026_27_outlook_page21",
+     "file": "previews/emi_bega_2026_27_outlook_page21_figure.jpg",
+     "caption": "Kiremt 2026 Assessment and Bega 2026_27 Outlook Hydro met Bulletin, PDF page 21",
+     "pdf_page": 21
+    }
+   ]
+  }
+ ],
+ "extraction_records": {
+  "icpac_ond_2026_update_rainfall": {
+   "record_id": "icpac_ond_2026_update_rainfall",
+   "source_sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6",
+   "method": "automatic_raster_digitization",
+   "extraction_version": 1,
+   "created_by": "Template prepared by the assistant (Claude) from the downloaded image; values are computed from the image by external_forecasts.digitize_dominant_map.",
+   "template": {
+    "x_ticks_deg": [
+     25,
+     30,
+     35,
+     40,
+     45,
+     50
+    ],
+    "y_ticks_deg": [
+     20,
+     15,
+     10,
+     5,
+     0,
+     -5,
+     -10
+    ],
+    "legend_x": 915,
+    "no_forecast_rgb": [
+     190,
+     190,
+     190
+    ],
+    "no_forecast_meaning": "Grey areas are not explained in the legend; treated as 'no forecast shown' (not as a category).",
+    "colour_tolerance": 30,
+    "legend_bars": [
+     {
+      "category": "above",
+      "intervals_top_down": [
+       [
+        90,
+        100
+       ],
+       [
+        80,
+        90
+       ],
+       [
+        70,
+        80
+       ],
+       [
+        60,
+        70
+       ],
+       [
+        50,
+        60
+       ],
+       [
+        40,
+        50
+       ]
+      ]
+     },
+     {
+      "category": "near",
+      "intervals_top_down": [
+       [
+        80,
+        90
+       ],
+       [
+        70,
+        80
+       ],
+       [
+        60,
+        70
+       ],
+       [
+        50,
+        60
+       ],
+       [
+        40,
+        50
+       ]
+      ]
+     },
+     {
+      "category": "below",
+      "intervals_top_down": [
+       [
+        80,
+        90
+       ],
+       [
+        70,
+        80
+       ],
+       [
+        60,
+        70
+       ],
+       [
+        50,
+        60
+       ],
+       [
+        40,
+        50
+       ]
+      ]
+     }
+    ]
+   },
+   "checks_for_reviewer": [
+    "The map title reads 'Rainfall Forecast for Oct - Dec 2026_Update' (OND 2026, IGAD region).",
+    "Colour bars from top to bottom are Above (boxes 40-50 ... 90-100 %), Normal and Below (boxes 40-50 ... 80-90 %).",
+    "Axis ticks are 25-50 deg E and 10 deg S - 20 deg N in 5-degree steps (plain latitude-longitude map).",
+    "The digitized comparison map (outputs/.../comparisons/maps/icpac_digitized.png) matches the original over Ethiopia.",
+    "Grey areas are treated as 'no forecast shown'."
+   ],
+   "status": "validated",
+   "review": {
+    "reviewer": "Yonas 1",
+    "reviewed_utc": "2026-10-09T09:21:08+00:00",
+    "decision": "validated",
+    "note": null,
+    "confirmed_checks": [
+     "The map title reads 'Rainfall Forecast for Oct - Dec 2026_Update' (OND 2026, IGAD region).",
+     "Colour bars from top to bottom are Above (boxes 40-50 ... 90-100 %), Normal and Below (boxes 40-50 ... 80-90 %).",
+     "Axis ticks are 25-50 deg E and 10 deg S - 20 deg N in 5-degree steps (plain latitude-longitude map).",
+     "The digitized comparison map (outputs/.../comparisons/maps/icpac_digitized.png) matches the original over Ethiopia.",
+     "Grey areas are treated as 'no forecast shown'."
+    ],
+    "source_sha256": "38789cddd2e31c49b72ec97b821856d1d82d100e75971aef173b8f28d276afa6",
+    "content_sha256": "ece360f66b6c5a4eb8adfc5e9f84c3178fa3ca0d16db2907e5e534ac3467b06f",
+    "content_hash_note": "Added 2026-10-09 when reviews were bound to the extraction contents; the record contents are unchanged since this review (commit f477821)."
+   }
+  },
+  "emi_bega_2026_27_outlook": {
+   "record_id": "emi_bega_2026_27_outlook",
+   "source_sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+   "figure_sha256": "2c02a6b4ea617d7361b6b4a550e7a3c79f661c0bb0fbe99f2489ae4e630ace96",
+   "method": "draft_figure_transcription",
+   "extraction_version": 1,
+   "created_by": "Draft transcription by the assistant (Claude) from the embedded figure of PDF page 21; not yet reviewed.",
+   "source_locator": {
+    "pdf_page": 21,
+    "figure_title": "NATIONAL OUTLOOK FOR (ONDJ 2026/27)"
+   },
+   "figure_axes": {
+    "note": "Axis calibration of the 1022 x 530 px embedded figure from its tick labels (used only to place the arrow tips).",
+    "lon_deg": "32.5 + (x_px - 170) / 41.2",
+    "lat_deg": "14 - (y_px - 88.5) / 37.3"
+   },
+   "zones": [
+    {
+     "zone_label": "III",
+     "printed_order": "A/N/B",
+     "printed": "A 55, N 25, B 20",
+     "probabilities": {
+      "below": 0.2,
+      "near": 0.25,
+      "above": 0.55
+     },
+     "anchor": {
+      "lon": 35.73,
+      "lat": 9.4,
+      "pixel": [
+       303,
+       260
+      ],
+      "kind": "arrow tip",
+      "uncertainty_deg": 0.5
+     }
+    },
+    {
+     "zone_label": "VI",
+     "printed_order": "A/N/B",
+     "printed": "A 60, N 25, B 15",
+     "probabilities": {
+      "below": 0.15,
+      "near": 0.25,
+      "above": 0.6
+     },
+     "anchor": {
+      "lon": 40.36,
+      "lat": 7.18,
+      "pixel": [
+       494,
+       343
+      ],
+      "kind": "arrow tip",
+      "uncertainty_deg": 0.5
+     }
+    },
+    {
+     "zone_label": "VII",
+     "printed_order": "A/N/B",
+     "printed": "A 60, N 15, B 25",
+     "probabilities": {
+      "below": 0.25,
+      "near": 0.15,
+      "above": 0.6
+     },
+     "anchor": {
+      "lon": 36.87,
+      "lat": 6.29,
+      "pixel": [
+       350,
+       376
+      ],
+      "kind": "arrow tip",
+      "uncertainty_deg": 0.5
+     }
+    },
+    {
+     "zone_label": "VIII",
+     "printed_order": "A/N/B",
+     "printed": "A 75, N 15, B 10",
+     "probabilities": {
+      "below": 0.1,
+      "near": 0.15,
+      "above": 0.75
+     },
+     "anchor": {
+      "lon": 43.47,
+      "lat": 6.53,
+      "pixel": [
+       622,
+       367
+      ],
+      "kind": "arrow tip",
+      "uncertainty_deg": 0.5
+     }
+    }
+   ],
+   "geometry_note": "The figure shows no zone boundaries (purple lines are river basins). Each zone is located only by the tip of its arrow; zone polygons require alignment with EMI's zone map before any zone-mean calculation.",
+   "checks_for_reviewer": [
+    "PDF page 21 figure is titled 'NATIONAL OUTLOOK FOR (ONDJ 2026/27)'.",
+    "Printed values per zone, in the printed order A (above), N (normal), B (below): III 55/25/20, VI 60/25/15, VII 60/15/25, VIII 75/15/10.",
+    "Zone VII label is partly cut at the figure's left edge ('one VII'); the values are fully legible.",
+    "Arrow-tip locations (approximate, +/- 0.5 deg) correspond to the arrow heads in the figure.",
+    "No reference period is stated for the probabilities."
+   ],
+   "status": "validated",
+   "review": {
+    "reviewer": "yonas 1",
+    "reviewed_utc": "2026-10-09T09:20:42+00:00",
+    "decision": "validated",
+    "note": null,
+    "confirmed_checks": [
+     "PDF page 21 figure is titled 'NATIONAL OUTLOOK FOR (ONDJ 2026/27)'.",
+     "Printed values per zone, in the printed order A (above), N (normal), B (below): III 55/25/20, VI 60/25/15, VII 60/15/25, VIII 75/15/10.",
+     "Zone VII label is partly cut at the figure's left edge ('one VII'); the values are fully legible.",
+     "Arrow-tip locations (approximate, +/- 0.5 deg) correspond to the arrow heads in the figure.",
+     "No reference period is stated for the probabilities."
+    ],
+    "source_sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+    "content_sha256": "1fd91db56555f45ff0ab775944d63dd196ca9b212e6f35110ac7b381be7d3428",
+    "content_hash_note": "Added 2026-10-09 when reviews were bound to the extraction contents; the record contents are unchanged since this review (commit f477821)."
+   }
+  }
+ },
+ "anomaly_products_checked": {
+  "ICPAC": "Products listed for october-december-2026_update (IGAD region): rainfall tercile probability (27) and temperature (5); no rainfall-anomaly product (23, 25).",
+  "EMI": "The Bega 2026/27 outlook bulletin gives analogue-year moisture outlooks and zone tercile probabilities; no rainfall-amount anomaly map for ONDJ 2026/27."
+ }
+}

@@ -186,27 +186,56 @@ class EMIAdapter:
 
     def discover(self):
         s = self.spec
-        candidates = []
+        candidates, errors = [], []
         for listing in s['listing_urls']:
-            _, body, _ = fetch(listing)
+            try:                                  # each listing on its own: one failure must not hide the others
+                _, body, _ = fetch(listing)
+            except OSError as exc:
+                errors.append(str(exc))
+                continue
             doc = body.decode('utf-8', 'cp1252_fallback')
             for href, inner in re.findall(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', doc, re.S):
                 title = text_of(inner)
                 if title and self.matches(title):
                     candidates.append((urllib.parse.urljoin(listing, html.unescape(href)), title, listing))
         if not candidates:
-            raise ValueError(f'EMI: no product whose outlook part names {s["outlook_season"]} {s["outlook_years"]}')
-        detail, title, listing = candidates[0]
-        final, body, _ = fetch(detail)
-        doc = body.decode('utf-8', 'cp1252_fallback')
-        pdfs = [html.unescape(x) for x in re.findall(r'(?:href|src|data)="([^"]+\.pdf[^"]*)"', doc, re.I)]
-        if not pdfs:
-            raise ValueError(f'EMI: no PDF on {final}')
-        return dict(detail_url=final, download_url=urllib.parse.urljoin(final, pdfs[0]), label=title, listing_url=listing,
-                    other_matches=[c[1] for c in candidates[1:]], narrative=[])
+            raise ValueError(f'EMI: no product whose outlook part names {s["outlook_season"]} {s["outlook_years"]}'
+                             + (f' (listing errors: {"; ".join(errors)})' if errors else ''))
+        # Take the first matching product that actually carries a document; a page published before its
+        # PDF is attached (a placeholder) is recorded and skipped.
+        skipped = []
+        for detail, title, listing in dict.fromkeys(candidates):
+            try:
+                final, body, _ = fetch(detail)
+            except OSError as exc:
+                skipped.append(dict(title=title, url=detail, reason=str(exc)))
+                continue
+            doc = body.decode('utf-8', 'cp1252_fallback')
+            pdfs = [html.unescape(x) for x in re.findall(r'(?:href|src|data)="([^"]+\.pdf[^"]*)"', doc, re.I)]
+            if not pdfs:
+                skipped.append(dict(title=title, url=final, reason='no PDF on the page yet'))
+                continue
+            return dict(detail_url=final, download_url=urllib.parse.urljoin(final, pdfs[0]), label=title, listing_url=listing,
+                        other_matches=[c[1] for c in candidates if c[1] != title], skipped=skipped, narrative=[])
+        raise ValueError('EMI: no matching product has a PDF yet: ' + '; '.join(f'{s["title"]} ({s["reason"]})' for s in skipped))
 
 
 ADAPTERS = {'icpac': ICPACAdapter, 'emi': EMIAdapter}
+
+
+def staging(out):
+    """Sibling staging folder in the form the project's safe publisher expects."""
+    out = Path(out)
+    tmp = out.with_name(out.name + '_building_' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
+    tmp.mkdir(parents=True)
+    return tmp
+
+
+def publish(tmp, out):
+    """Replace `out` with the complete staging folder; the previous output is kept as a backup
+    and restored if the swap fails (Windows file locks)."""
+    from verify2026_outputs import publish_stage
+    publish_stage(tmp, out, regenerate=True)
 
 
 # ======================================================================================= refresh
@@ -221,6 +250,10 @@ def refresh(registry, cache_root):
     current_path = base / 'current.json'
     current = read_json(current_path) if current_path.is_file() else {}
     log = base / 'retrieval_log.jsonl'
+    # The latest check per source, kept apart from current.json (a stage input) so routine
+    # checks never force recalculation.
+    status_path = base / 'refresh_status.json'
+    latest = read_json(status_path) if status_path.is_file() else {}
     changed = []
     for spec in registry['sources']:
         checked = now()
@@ -231,6 +264,7 @@ def refresh(registry, cache_root):
             entry = dict(source_id=spec['id'], checked_utc=checked, status='failed', error=str(exc))
             with log.open('a', encoding='utf-8') as f:
                 f.write(json.dumps(entry) + '\n')
+            latest[spec['id']] = dict(entry, saved_snapshot=current.get(spec['id'], {}).get('sha256'))
             print(f'{spec["id"]}: retrieval failed ({exc}); the previous snapshot stays current')
             continue
         digest = sha256(data)
@@ -252,7 +286,7 @@ def refresh(registry, cache_root):
                 reference_period=spec.get('reference_period'),
                 http_last_modified=headers.get('Last-Modified'), narrative=found.get('narrative', []),
                 products_listed_for_season=found.get('products_listed_for_season'),
-                other_title_matches=found.get('other_matches'), extraction_version=EXTRACTION_VERSION)
+                other_title_matches=found.get('other_matches'), skipped_candidates=found.get('skipped'), extraction_version=EXTRACTION_VERSION)
             if ext == '.pdf':
                 meta['pdf_metadata'] = pdf_metadata(stored)
             write_json(stored.with_suffix('.json'), meta)
@@ -262,12 +296,16 @@ def refresh(registry, cache_root):
         current[spec['id']] = dict(sha256=digest, file=str(stored.relative_to(ROOT)).replace('\\', '/'),
                                    meta=str(stored.with_suffix('.json').relative_to(ROOT)).replace('\\', '/'))
         entry = dict(source_id=spec['id'], checked_utc=checked, status='ok', sha256=digest, changed=previous != digest,
+                     skipped_candidates=found.get('skipped') or None,
                      new_snapshot=new, download_url=final)
         with log.open('a', encoding='utf-8') as f:
             f.write(json.dumps(entry) + '\n')
+        latest[spec['id']] = entry
         print(f'{spec["id"]}: {"CHANGED" if previous and previous != digest else "new" if previous is None else "unchanged"} '
               f'{digest[:12]} ({len(data) / 1e3:.0f} kB) from {final}')
-    write_json(current_path, current)
+    if json.dumps(read_json(current_path) if current_path.is_file() else None, sort_keys=True) != json.dumps(current, sort_keys=True):
+        write_json(current_path, current)
+    write_json(status_path, latest)
     return changed
 
 
@@ -283,12 +321,36 @@ def extraction_record(registry, source_id):
     return (read_json(p), p) if p.is_file() else (None, p)
 
 
-def extraction_status(record, digest):
+# Everything in an extraction record that determines published numbers. A review covers exactly
+# these contents: editing a probability, an arrow position, the calibration or the legend template
+# after review sends the record back to review even when the source file is unchanged.
+CONTENT_FIELDS = ('method', 'extraction_version', 'template', 'zones', 'source_locator', 'figure_axes', 'figure_sha256')
+
+
+def content_sha256(record):
+    fields = {k: record.get(k) for k in CONTENT_FIELDS}
+    return sha256(json.dumps(fields, sort_keys=True, ensure_ascii=False).encode('utf-8'))
+
+
+def extraction_check(record, digest):
+    """(status, note): validated only if both the source file and the reviewed contents are unchanged."""
     if record is None:
-        return 'needs_extraction'
+        return 'needs_extraction', 'No extraction record for this source'
     if record.get('source_sha256') != digest:
-        return 'needs_extraction_review'          # the source changed after this record was made
-    return {'validated': 'validated', 'rejected': 'rejected'}.get(record.get('status'), 'needs_extraction_review')
+        return 'needs_extraction_review', 'The source file changed after this record was made'
+    state = record.get('status')
+    if state == 'validated':
+        reviewed = (record.get('review') or {}).get('content_sha256')
+        if reviewed != content_sha256(record):
+            return 'needs_extraction_review', 'The extracted values or settings changed after review'
+        return 'validated', None
+    if state == 'rejected':
+        return 'rejected', (record.get('review') or {}).get('note')
+    return 'needs_extraction_review', 'Draft extraction awaiting review'
+
+
+def extraction_status(record, digest):
+    return extraction_check(record, digest)[0]
 
 
 def find_outlook_pages(pdf_path, keywords, require_image=True):
@@ -321,7 +383,7 @@ def pdf_figure(pdf_path, page, out_path):
     return out_path, sha256(im.data), im.image.size
 
 
-def digitize_dominant_map(png_path, template, lat, lon):
+def digitize_dominant_map(png_path, template, lat, lon, shift_px=(0, 0)):
     """Dominant-category map (favoured tercile + printed interval) -> the platform's 0.25 deg grid.
 
     Georeference from the detected axis frame and tick marks (expected tick values from the
@@ -391,8 +453,8 @@ def digitize_dominant_map(png_path, template, lat, lon):
     # Pixel centres -> lon/lat.
     xs = np.arange(left + 2, right - 1)
     ys = np.arange(top + 2, bottom - 1)
-    plon = (xs - fx[1]) / fx[0]
-    plat = (ys - fy[1]) / fy[0]
+    plon = (xs + shift_px[0] - fx[1]) / fx[0]            # shift_px: registration sensitivity only
+    plat = (ys + shift_px[1] - fy[1]) / fy[0]
     step = float(abs(lat[1] - lat[0]))
     cat = np.full((len(lat), len(lon)), '', dtype=object)
     lo = np.full((len(lat), len(lon)), np.nan)
@@ -430,9 +492,7 @@ def prepare(registry, cache_root, grid_path, out_dir):
     """Standardized records + previews for the current snapshots (offline, deterministic)."""
     import xarray as xr
     out_dir = Path(out_dir)
-    tmp = out_dir.with_name(out_dir.name + '_building')
-    if tmp.exists():
-        shutil.rmtree(tmp)
+    tmp = staging(out_dir)
     (tmp / 'previews').mkdir(parents=True)
     current_path = cache_dir(registry, cache_root) / 'current.json'
     if not current_path.is_file():
@@ -451,8 +511,9 @@ def prepare(registry, cache_root, grid_path, out_dir):
         if sha256(src.read_bytes()) != cur['sha256']:
             raise ValueError(f'{src}: stored bytes do not match the recorded SHA-256')
         rec, rec_path = extraction_record(registry, spec['id'])
-        status = extraction_status(rec, cur['sha256'])
-        entry = dict(meta, extraction=dict(status=status, record=rel(rec_path),
+        status, note = extraction_check(rec, cur['sha256'])
+        entry = dict(meta, extraction=dict(status=status, note=note, record=rel(rec_path),
+                                           content_sha256=rec and content_sha256(rec),
                                            method=rec and rec.get('method'), review=rec and rec.get('review'),
                                            checks_for_reviewer=rec and rec.get('checks_for_reviewer')))
         evidence = []
@@ -460,8 +521,22 @@ def prepare(registry, cache_root, grid_path, out_dir):
             preview = tmp / 'previews' / f'{spec["id"]}{src.suffix}'
             shutil.copy2(src, preview)
             evidence.append(dict(id=f'{spec["id"]}_map', file=f'previews/{preview.name}', caption=meta['label']))
+            fields = None
             if rec:
-                fields, qc = digitize_dominant_map(src, rec['template'], lat, lon)
+                try:
+                    fields, qc = digitize_dominant_map(src, rec['template'], lat, lon)
+                except ValueError as exc:      # e.g. a new image layout: report it instead of failing
+                    status = 'needs_extraction_review'
+                    entry['extraction'].update(status=status, note=f'The digitization template does not fit this image: {exc}')
+            if fields is not None:
+                # Registration sensitivity: the same digitization with the map shifted by one source pixel.
+                shifts = {}
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        if dx or dy:
+                            alt, _ = digitize_dominant_map(src, rec['template'], lat, lon, (dx, dy))
+                            shifts[f'{dx},{dy}'] = dict(category=alt['category'].tolist(), state=alt['state'].tolist())
+                write_json(tmp / f'{spec["id"]}_grid_shifts.json', shifts)
                 grid = dict(lat=lat.tolist(), lon=lon.tolist(), category=fields['category'].tolist(),
                             low=np.where(np.isnan(fields['low']), None, fields['low']).tolist(),
                             high=np.where(np.isnan(fields['high']), None, fields['high']).tolist(),
@@ -520,9 +595,7 @@ def prepare(registry, cache_root, grid_path, out_dir):
     write_json(tmp / 'source_manifest.json', dict(created_utc=now(), registry=registry['id'], sources=manifest,
                                                   anomaly_products_checked=registry.get('anomaly_products_checked')))
     write_json(tmp / 'official_records.json', dict(created_utc=now(), registry=registry['id'], records=records))
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
-    tmp.replace(out_dir)
+    publish(tmp, out_dir)
     return out_dir
 
 
@@ -538,7 +611,7 @@ def review(registry, record_id, reviewer, reject=False, note=None, cache_root=No
     rec['status'] = 'rejected' if reject else 'validated'
     rec['review'] = dict(reviewer=reviewer, reviewed_utc=now(), decision=rec['status'], note=note,
                          confirmed_checks=[] if reject else rec.get('checks_for_reviewer', []),
-                         source_sha256=rec['source_sha256'])
+                         source_sha256=rec['source_sha256'], content_sha256=content_sha256(rec))
     write_json(p, rec)
     print(f'{record_id}: {rec["status"]} by {reviewer} for source {rec["source_sha256"][:12]}')
 
@@ -549,8 +622,8 @@ def status(registry, cache_root):
     for spec in registry['sources']:
         cur = current.get(spec['id'])
         rec, _ = extraction_record(registry, spec['id'])
-        st = extraction_status(rec, cur['sha256']) if cur else 'not_retrieved'
-        print(f'{spec["id"]}: source {cur["sha256"][:12] if cur else "-"} | extraction {st}')
+        st, note = extraction_check(rec, cur['sha256']) if cur else ('not_retrieved', None)
+        print(f'{spec["id"]}: source {cur["sha256"][:12] if cur else "-"} | extraction {st}' + (f' ({note})' if note else ''))
 
 
 def load_registry(path):

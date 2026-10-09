@@ -46,8 +46,35 @@ def favoured(p, minimum):
     """Favoured category under the display rule: the leading category if it reaches `minimum`."""
     if p is None or any(v is None or not np.isfinite(v) for v in p):
         return 'unknown'
-    k = int(np.argmax(p))
+    order = np.argsort(p)[::-1]
+    if abs(p[order[0]] - p[order[1]]) < 1e-9:     # tied leaders: no unique favoured category
+        return 'weak'
+    k = int(order[0])
     return CATS[k] if p[k] >= minimum else 'weak'
+
+
+def file_sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def input_fingerprint(native_path, domain_mask, registry, sources, minimum):
+    """Everything a published comparison depends on; build_site re-checks it before publishing.
+
+    sources: {source_id: {sha256, extraction_status, content_sha256}}.
+    """
+    return dict(native_sha256=file_sha(native_path), domain_mask_sha256=file_sha(domain_mask),
+                registry_sha256=hashlib.sha256(json.dumps(registry, sort_keys=True).encode()).hexdigest(),
+                minimum_leading_probability=minimum, sources=sources)
+
+
+def manifest_states(manifest):
+    return {s['source_id']: dict(sha256=s.get('sha256'), extraction_status=s.get('extraction', {}).get('status'),
+                                 content_sha256=s.get('extraction', {}).get('content_sha256'))
+            for s in manifest['sources'] if s.get('sha256')}
+
+
+HALF_WIDTHS = (0.25, 0.5, 0.75, 1.0)
+CENTRE_SHIFTS = (-0.5, -0.25, 0.0, 0.25, 0.5)
 
 
 def relationship(platform, official):
@@ -101,10 +128,9 @@ def area_mean(p, mask, w):
 
 def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, domain_label=None):
     import xarray as xr
+    import external_forecasts as ef
     sources_dir, out = Path(sources_dir), Path(out)
-    tmp = out.with_name(out.name + '_building')
-    if tmp.exists():
-        shutil.rmtree(tmp)
+    tmp = ef.staging(out)
     (tmp / 'maps').mkdir(parents=True)
     recs = read_json(sources_dir / 'official_records.json')['records']
     manifest = read_json(sources_dir / 'source_manifest.json')
@@ -139,15 +165,31 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                evidence_ids=r['evidence_ids'])
         a = r.get('anchor')
         neighbourhood = None
-        if a:
-            half = a.get('uncertainty_deg', 0.5)
-            box = (np.abs(lat2 - a['lat']) <= half) & (np.abs(np.repeat(nat['lon'][None], len(nat['lat']), 0) - a['lon']) <= half) & nat['eligible']
-            mean = area_mean(nat['p'], box, w)
-            neighbourhood = dict(center=[a['lon'], a['lat']], half_width_deg=half, cells=int(box.sum()), mean_local_probabilities=mean)
-        plat_cat = favoured(neighbourhood and neighbourhood['mean_local_probabilities'], minimum)
         off_p = [r['probabilities'][c] for c in CATS]
         off_cat = favoured(off_p, minimum)
+        lon2 = np.repeat(nat['lon'][None], len(nat['lat']), 0)
+        box_at = lambda x, y, h: (np.abs(lat2 - y) <= h) & (np.abs(lon2 - x) <= h) & nat['eligible']
+        sensitivity = None
+        if a:
+            half = a.get('uncertainty_deg', 0.5)
+            box = box_at(a['lon'], a['lat'], half)
+            mean = area_mean(nat['p'], box, w)
+            neighbourhood = dict(center=[a['lon'], a['lat']], half_width_deg=half, cells=int(box.sum()), mean_local_probabilities=mean,
+                                 domain_share=float((box & domain).sum() / box.sum()) if box.any() else 0.0)
+            # Bounded sensitivity: other neighbourhood sizes and shifted arrow-tip positions.
+            rels = {}
+            for h in HALF_WIDTHS:
+                for dx in CENTRE_SHIFTS:
+                    for dy in CENTRE_SHIFTS:
+                        b = box_at(a['lon'] + dx, a['lat'] + dy, h)
+                        if b.any():
+                            k = relationship(favoured(area_mean(nat['p'], b, w), minimum), off_cat)
+                            rels[k] = rels.get(k, 0) + 1
+        plat_cat = favoured(neighbourhood and neighbourhood['mean_local_probabilities'], minimum)
         rel = relationship(plat_cat, off_cat)
+        if a:
+            sensitivity = dict(tested=sum(rels.values()), relationships=rels, stable=set(rels) == {rel},
+                               half_widths_deg=list(HALF_WIDTHS), centre_shifts_deg=list(CENTRE_SHIFTS))
         metric(metric='favoured_category_relationship', source_id=r['source_id'], zone=zone,
                status=state if neighbourhood and neighbourhood['cells'] else 'unavailable',
                reason=None if validated else 'transcription_and_anchor_awaiting_review', value=rel if validated else None,
@@ -161,7 +203,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
         findings.append(dict(
             id=f'{r["record_id"]}_finding', kind='zone', source_id=r['source_id'], provider=r['provider'], area=f'EMI zone {zone}',
             status='validated' if validated else 'draft', official_category=off_cat, official_probabilities=r['probabilities'],
-            platform_category=plat_cat, platform_neighbourhood=neighbourhood, relationship=rel,
+            platform_category=plat_cat, platform_neighbourhood=neighbourhood, relationship=rel, sensitivity=sensitivity,
             comparison_basis='reviewed_visual' if validated else 'draft_visual', probability_difference_pp=None,
             target_windows=dict(platform=[platform['target_start'], platform['target_end']], official=[r['target_start'], r['target_end']]),
             limitations=lim + ['platform_value_is_neighbourhood_of_arrow_tip_not_zone_mean'],
@@ -170,7 +212,13 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
     # ------------------------------------------------------------------ ICPAC dominant-category map
     for r in [r for r in recs if r['representation'] == 'dominant_category_map']:
         validated = r['extraction_status'] == 'validated'
+        if not (sources_dir / r['grid_file']).is_file():
+            metric(metric='mapped_category_agreement', source_id=r['source_id'], status='pending_review', value=None,
+                   reason='digitization_unavailable')
+            continue
         g = read_json(sources_dir / r['grid_file'])
+        shift_file = sources_dir / r['grid_file'].replace('_grid.json', '_grid_shifts.json')
+        shifts = read_json(shift_file) if shift_file.is_file() else {}
         if not (np.allclose(g['lat'], nat['lat']) and np.allclose(g['lon'], nat['lon'])):
             raise ValueError('Digitized grid differs from the native grid')
         cat = np.array(g['category'], dtype=object)
@@ -207,6 +255,17 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                    value=value if validated else None, draft_value=None if validated else value,
                    reason=None if validated else 'digitization_awaiting_review', basis='reviewed_digitization' if validated else 'draft_digitization',
                    limitations=lim, evidence_ids=[*r['evidence_ids'], plat_ev, f'{r["source_id"]}_comparison_map'])
+            # Registration sensitivity: the same statistics with the map shifted by one source pixel.
+            if shifts:
+                ag, cov = [], []
+                for alt in shifts.values():
+                    acat, ast = np.array(alt['category'], dtype=object), np.array(alt['state'], dtype=object)
+                    b2 = amask & (ast == 'forecast') & np.isin(pc, CATS)
+                    if b2.any():
+                        ag.append(wa(b2 & (acat == pc)) / wa(b2))
+                        cov.append(wa(b2) / total)
+                value['registration_sensitivity'] = dict(shifts_px=len(shifts), agreement_range=[min(ag), max(ag)] if ag else None,
+                                                          compared_area_range=[min(cov), max(cov)] if cov else None)
             # Relationship over the overlap only: where both show a favoured category.
             if both.any():
                 om = max(CATS, key=lambda c: wa(both & (cat == c)))
@@ -216,7 +275,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
             else:
                 om = pm = 'unknown'
             findings.append(dict(
-                id=f'{r["record_id"]}_{key}_finding', kind='area', source_id=r['source_id'], provider=r['provider'], area=label,
+                id=f'{r["record_id"]}_{key}_finding', kind='area', area_key=key, source_id=r['source_id'], provider=r['provider'], area=label,
                 status='validated' if validated else 'draft', official_category=om, platform_category=pm,
                 relationship=relationship(pm, om), comparison_basis='reviewed_digitization' if validated else 'draft_digitization',
                 numbers=value, probability_difference_pp=None,
@@ -239,15 +298,14 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                   platform=dict(platform, native_forecast=repo_path(native_path),
                                 native_sha256=nat['sha256'], minimum_leading_probability=minimum,
                                 areas={k: v[0] for k, v in areas.items()}),
+                  inputs=input_fingerprint(native_path, domain_mask, registry, manifest_states(manifest), minimum),
                   metrics=metrics, findings=findings,
                   maps=sorted(p.name for p in (tmp / 'maps').glob('*.png')),
                   notes=['Area means are area-weighted means of local grid-cell probabilities, not probabilities of area-mean rainfall.',
                          'Favoured category: the leading tercile where it reaches 40% (the map display rule); otherwise no clear category.',
                          'An OND probability cannot be built by averaging monthly probabilities; ONDJ and OND are compared only as spatial tendencies.'])
     write_json(tmp / 'comparison.json', result)
-    if out.exists():
-        shutil.rmtree(out)
-    tmp.replace(out)
+    ef.publish(tmp, out)
     return result
 
 
@@ -299,7 +357,7 @@ def icpac_map(path, nat, cat, st, pc, domain, validated, minimum):
         ax.set_xlim(ext[:2]); ax.set_ylim(ext[2:]); ax.set_aspect('equal'); ax.tick_params(labelsize=8)
     fig.legend(handles=[Patch(color=COLOURS[k], label=NAMES[k]) for k in CATS] +
                [Patch(facecolor='white', edgecolor='grey', label='platform: no clear category (<40%)'),
-                Patch(color=COLOURS['noforecast'], label='ICPAC: no forecast shown (grey on the map)'),
+                Patch(color=COLOURS['noforecast'], label='ICPAC grey: no forecast category shown'),
                 Patch(color='#2a78d6', label='same category'), Patch(color='#e2b25c', label='near vs other'),
                 Patch(color='#b03a24', label='opposite (above vs below)')], loc='lower center', ncol=4, fontsize=8, frameon=False)
     fig.suptitle('Platform ONDJ 2026/27 vs ICPAC OND 2026 update — different target windows (January only in the platform)', fontsize=11)

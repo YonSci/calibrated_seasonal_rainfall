@@ -117,6 +117,8 @@
    "Arrow-tip locations (approximate, +/- 0.5 deg) correspond to the arrow heads in the figure.",
    "No reference period is stated for the probabilities."
   ],
-  "source_sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1"
+  "source_sha256": "d55c4d39500d13a9da842a575f735bd07cf2ed08ac924ec8012e197a66e921a1",
+  "content_sha256": "1fd91db56555f45ff0ab775944d63dd196ca9b212e6f35110ac7b381be7d3428",
+  "content_hash_note": "Added 2026-10-09 when reviews were bound to the extraction contents; the record contents are unchanged since this review (commit f477821)."
  }
 }

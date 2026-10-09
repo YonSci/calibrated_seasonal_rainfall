@@ -28,6 +28,28 @@ class Matching(unittest.TestCase):
         self.assertFalse(a.matches('Bega 2026-27 Assessment and Belg 2027 hydro met Bulletin'))
         self.assertFalse(a.matches('kiremt 2025_Assessment and Bega ,2025_2026 Outlook Hydro met Bulletin'))
 
+    def test_emi_skips_a_matching_page_without_a_document(self):
+        pages = {
+            'L1': b'<a href="/f/bega-forecast/">Bega 2026/27 Seasonal Climate Forecast</a>',
+            'L2': b'<a href="/h/bulletin/">Kiremt 2026 Assessment and Bega 2026_27 Outlook Hydro met Bulletin</a>',
+            'https://x.test/f/bega-forecast/': b'<h1>Bega 2026/27 Seasonal Climate Forecast</h1>',
+            'https://x.test/h/bulletin/': b'<a href="/documents/1/bulletin.pdf">PDF</a>'}
+        real = ef.fetch
+        ef.fetch = lambda url, **kw: (url, pages[url], {})
+        try:
+            a = ef.EMIAdapter(dict(outlook_season='bega', outlook_years=[2026, 2027], listing_urls=['L1', 'L2']))
+            import urllib.parse
+            orig = urllib.parse.urljoin
+            urllib.parse.urljoin = lambda base, u: u if u.startswith('http') else 'https://x.test' + u
+            try:
+                found = a.discover()
+            finally:
+                urllib.parse.urljoin = orig
+        finally:
+            ef.fetch = real
+        self.assertTrue(found['download_url'].endswith('bulletin.pdf'))
+        self.assertEqual(found['skipped'][0]['reason'], 'no PDF on the page yet')
+
     def test_year_forms(self):
         self.assertEqual(ef._years('Bega 2026_27'), {2026, 2027})
         self.assertEqual(ef._years('bega 2025/26'), {2025, 2026})
@@ -35,6 +57,8 @@ class Matching(unittest.TestCase):
 
     def test_extraction_status_follows_source_hash(self):
         rec = dict(source_sha256='a' * 64, status='validated')
+        self.assertEqual(ef.extraction_status(rec, 'a' * 64), 'needs_extraction_review')   # not bound to its contents
+        rec['review'] = dict(content_sha256=ef.content_sha256(rec))
         self.assertEqual(ef.extraction_status(rec, 'a' * 64), 'validated')
         self.assertEqual(ef.extraction_status(rec, 'b' * 64), 'needs_extraction_review')
         self.assertEqual(ef.extraction_status(dict(rec, status='draft'), 'a' * 64), 'needs_extraction_review')
@@ -42,6 +66,32 @@ class Matching(unittest.TestCase):
 
 
 class Rules(unittest.TestCase):
+    def test_tied_leaders_have_no_favoured_category(self):
+        self.assertEqual(favoured([.40, .40, .20], .4), 'weak')
+        self.assertEqual(favoured([.41, .40, .19], .4), 'below')
+
+    def test_review_covers_the_extracted_contents(self):
+        rec = dict(source_sha256='a' * 64, status='validated', zones=[dict(zone_label='III', probabilities=dict(below=.2, near=.25, above=.55))])
+        rec['review'] = dict(content_sha256=ef.content_sha256(rec))
+        self.assertEqual(ef.extraction_status(rec, 'a' * 64), 'validated')
+        rec['zones'][0]['probabilities'] = dict(below=.55, near=.25, above=.2)      # edited after review
+        self.assertEqual(ef.extraction_check(rec, 'a' * 64), ('needs_extraction_review', 'The extracted values or settings changed after review'))
+
+    def test_number_formatting(self):
+        from interpret_external_forecasts import share, share1, rounded_triple
+        self.assertEqual((share(.9965), share(.003), share(1.0), share(0.0), share(.4547)), ('>99%', '<1%', '100%', '0%', '45%'))
+        self.assertEqual((share1(.94478), share1(1.0)), ('94.5%', '100%'))
+        self.assertEqual(sum(rounded_triple([.2196, .2432, .5372])), 100)
+        self.assertEqual(rounded_triple([.2196, .2432, .5372]), [22, 24, 54])
+
+    def test_stale_inputs_are_named(self):
+        from site_extras import _stale_reasons
+        saved = dict(native_sha256='n', domain_mask_sha256='m', registry_sha256='r',
+                     sources=dict(s1=dict(sha256='x', extraction_status='validated', content_sha256='c')))
+        self.assertEqual(_stale_reasons(saved, saved), [])
+        now = dict(saved, native_sha256='n2', sources=dict(s1=dict(sha256='x', extraction_status='validated', content_sha256='c2')))
+        self.assertEqual(_stale_reasons(saved, now), ['the platform forecast', 'the extraction record of s1'])
+
     def test_favoured_and_relationship(self):
         self.assertEqual(favoured([.2, .25, .55], .4), 'above')
         self.assertEqual(favoured([.35, .33, .32], .4), 'weak')
@@ -133,6 +183,29 @@ class Pipeline(unittest.TestCase):
         icpac = [p for p in res['paragraphs'] if p['source_id'] == 'icpac_ond_2026_update_rainfall']
         self.assertTrue(icpac and all(p['status'] == 'draft' for p in icpac))
         self.assertIn('Jan 2027', icpac[0]['text'])
+        # Area-scoped summaries: zone III (west) is outside the ONDJ domain, so only the national summary names it.
+        emi = {i['area_key']: i for i in res['summary'] if i['id'].startswith('emi_zones_')}
+        self.assertIn('zone III', emi['all_ethiopia']['text'])
+        self.assertNotIn('zone III', emi['season_domain']['text'])
+        robust = next(i for i in res['summary'] if i['id'] == 'robustness_summary')
+        self.assertIn('not statistical confidence intervals', robust['text'])
+        # The synthetic forecast changes from below to above at 36 deg E, within the tested shifts of zone III's
+        # arrow tip (35.7 deg E): the sensitivity check must flag it; zone VIII (43.5 deg E) is stable.
+        table = {r['zone']: r for r in res['emi_table']}
+        self.assertFalse(table['III']['stable'])
+        self.assertTrue(table['VIII']['stable'])
+
+    def test_layout_change_is_reported_not_fatal(self):
+        p = self.tmp / 'extractions/icpac_ond_2026_update_rainfall.json'
+        rec = json.loads(p.read_text(encoding='utf-8'))
+        rec['template']['x_ticks_deg'] = rec['template']['x_ticks_deg'][:-1]      # as if the map layout changed
+        p.write_text(json.dumps(rec), encoding='utf-8')
+        ef.prepare(self.reg, CACHE, MASK, self.tmp / 'sources')
+        manifest = json.loads((self.tmp / 'sources/source_manifest.json').read_text(encoding='utf-8'))
+        icpac = next(s for s in manifest['sources'] if s['source_id'] == 'icpac_ond_2026_update_rainfall')
+        self.assertEqual(icpac['extraction']['status'], 'needs_extraction_review')
+        self.assertIn('does not fit', icpac['extraction']['note'])
+        compare(self.tmp / 'sources', self.native(), MASK, self.reg, self.tmp / 'comparison')   # still runs
 
     def test_changed_source_needs_review_again(self):
         ef.review(self.reg, 'emi_bega_2026_27_outlook', 'Test reviewer', cache_root=CACHE)

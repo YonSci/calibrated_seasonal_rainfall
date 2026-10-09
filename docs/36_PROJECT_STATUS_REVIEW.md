@@ -387,3 +387,33 @@ Third site review: two remaining interface fixes, then four optional features.
 - [x] Review: both extraction records were validated by the project team on 2026-10-09 (EMI 09:20 UTC, ICPAC 09:21 UTC) against the source hashes, and the comparison was rerun. The site now publishes the findings: agreement on above-normal rainfall over the ONDJ R3 domain and in EMI zones VI, VII and VIII, and disagreement in EMI zone III (west), where the platform favours below normal near the arrow tip (50 / 31 / 19 %) and EMI prints 55 % above.
 - [x] Unavailable metrics are stated with reasons: zone means (no zone polygons), same-event probability differences (OND vs ONDJ windows; ICPAC publishes intervals only), rainfall-anomaly differences (no official anomaly product), accuracy (needs verification).
 - [x] Tests: `tests/test_external_forecasts.py` (9 tests). Re-rendered ONDJ maps are byte-identical to the earlier ones; a rerun resumes every stage.
+
+### Phase 21 — comparison review: scope, readability and safeguards (2026-10-09)
+
+- [x] Scope follows the interface:
+  - a persistent heading ("Official outlook comparison — ONDJ 2026/27");
+  - a notice when a monthly target is selected (the comparison covers the full season);
+  - key findings filtered to the selected area, with the rest under "National context" or "Rainfall-domain context";
+  - each EMI sample labelled in or outside the domain.
+- [x] Reading order: scope, key findings, maps, compact tables (ICPAC agreement with the compared-area share; EMI official vs neighbourhood probabilities with relationship and evidence), then the detailed interpretation and the sources/review/methods in expandable sections.
+- [x] Wording:
+  - agreement shares always carry their denominator ("94.5% within the compared area, which covers 45% of the analysed national area");
+  - the opening sentence is driven by spatial agreement ("predominant tendency … with localized disagreement");
+  - ">99%" and "<1%" instead of rounding to all or none;
+  - probability triples rounded to add up to 100;
+  - ICPAC grey described as "no forecast category shown".
+- [x] Evidence links: platform map and data, official figure, original PDF page, comparison map and source record, all public URLs.
+- [x] Downloads and navigation: comparison report (HTML), comparison JSON, and sources with extraction reviews (JSON); the cycle ZIP package now includes them and the figures; "Compare outlooks" added to the navigation.
+- [x] Archived pages: data files are copied next to each archived page (asset links point at the release commit) and no base prefix is injected, so the archived 2026-10-09.4 comparison loads again. Release differences now report comparison changes.
+- [x] Safeguards:
+  - each review stores a hash of the extracted contents (values, arrow positions, calibration, legend template), and an edit after review returns the record to review; the two existing reviews were given this hash because their contents are unchanged since review (commit f477821);
+  - `build_site.py` withholds findings, numbers and maps when the saved comparison no longer matches the current forecast, sources, extraction records, registry or mask, and shows the rerun command (tested by editing a reviewed setting).
+- [x] Refresh recovery:
+  - EMI listing pages are tried independently;
+  - `refresh_status.json`, kept outside the stage inputs, records "checked, unchanged", "new product awaiting review" or "refresh failed; saved product shown";
+  - an ICPAC layout that no longer fits the template is reported instead of failing;
+  - stages publish through the project's safe publisher (backup and rollback).
+- [x] Sensitivity checks, reported as bounded checks rather than confidence intervals:
+  - EMI relationships tested under 100 variants per zone (half-widths 0.25–1.0°, arrow shifts up to ±0.5°): all four are stable;
+  - ICPAC national agreement stays between 94.5% and 95.0% under one-pixel registration shifts, and R3 stays at 100%.
+- [x] Tied leading probabilities give "no unique favoured category". 14 comparison tests.

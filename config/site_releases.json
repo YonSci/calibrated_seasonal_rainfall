@@ -101,7 +101,7 @@
   {
     "id": "2026-10-09.5",
     "date": "2026-10-09",
-    "commit": null,
+    "commit": "f477821",
     "title": "Reviewed comparison with official outlooks published",
     "cycles": [
       "ONDJ 2026/27"
@@ -110,6 +110,25 @@
       {
         "type": "analysis",
         "text": "EMI zone values and the digitized ICPAC map were reviewed by the project team; the comparison findings, numbers and maps are now published (agreement in the south and south-east, disagreement in EMI zone III)."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-09.6",
+    "date": "2026-10-09",
+    "commit": null,
+    "title": "Clearer, scoped comparison with official outlooks; review and publication safeguards",
+    "cycles": [
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Comparison follows the selected area (season scope stated for monthly targets); key findings, maps and compact tables first; agreement shares always with their compared area; clickable evidence; comparison downloads and package files; 'Compare outlooks' in the navigation; archived comparison pages repaired."
+      },
+      {
+        "type": "analysis",
+        "text": "Bounded sensitivity checks (EMI neighbourhood size and arrow position, ICPAC registration by one pixel); tie-aware favoured category; reviews bound to the extracted contents; publication withheld when the saved comparison no longer matches its inputs."
       }
     ]
   }
