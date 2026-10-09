@@ -150,6 +150,18 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
     def metric(**kw):
         metrics.append(kw)
 
+    # ------------------------------------------------------------------ EMI rainfall regions (zone boundaries)
+    layer = next((l for l in manifest.get('reference_layers', []) if l.get('kind') == 'region_map'), None)
+    regions = None
+    if layer and layer.get('derived_sha256'):
+        import xarray as xr2
+        with xr2.open_dataset(ROOT / layer['mask'] if not Path(layer['mask']).is_absolute() else layer['mask']) as rg:
+            if not (np.allclose(rg.lat.values, nat['lat']) and np.allclose(rg.lon.values, nat['lon'])):
+                raise ValueError('Region grid differs from the native forecast grid')
+            regions = dict(grid=rg.region.values.astype(int), fine=rg.region_fine.values.astype(int),
+                           flat=rg.lat_fine.values, flon=rg.lon_fine.values, names=list(layer['region_names']),
+                           long=layer['region_names'], validated=layer['status'] == 'validated', citation=layer.get('citation'))
+
     # ------------------------------------------------------------------ EMI zone records
     for r in [r for r in recs if r['representation'] == 'zone_tercile_probabilities']:
         validated = r['extraction_status'] == 'validated'
@@ -195,15 +207,32 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                reason=None if validated else 'transcription_and_anchor_awaiting_review', value=rel if validated else None,
                draft_value=None if validated else rel, basis='reviewed_visual (arrow-tip neighbourhood)' if validated else 'draft_visual',
                evidence_ids=[*r['evidence_ids'], plat_ev])
-        metric(metric='zone_mean_probability', source_id=r['source_id'], zone=zone, status='unavailable', value=None,
-               reason='zone_geometry_requires_alignment',
-               detail='The figure locates the zone only by an arrow; zone polygons are needed for an area mean over the zone.')
+        zone_mean, zone_rel, zone_ok = None, None, False
+        if regions and zone in regions['names']:
+            zmask = (regions['grid'] == regions['names'].index(zone) + 1) & nat['eligible']
+            if zmask.any():
+                zm = area_mean(nat['p'], zmask, w)
+                zone_ok = validated and regions['validated']
+                zone_rel = relationship(favoured(zm, minimum), off_cat)
+                zone_mean = dict(mean_local_probabilities=zm, cells=int(zmask.sum()), region_name=regions['long'].get(zone),
+                                 domain_share=float((zmask & domain).sum() / zmask.sum()), relationship=zone_rel,
+                                 status='validated' if zone_ok else 'draft')
+        if zone_mean:
+            metric(metric='zone_mean_probability', source_id=r['source_id'], zone=zone, status='available' if zone_ok else 'pending_review',
+                   value=zone_mean if zone_ok else None, draft_value=None if zone_ok else zone_mean,
+                   reason=None if zone_ok else 'region_boundaries_awaiting_review',
+                   basis='EMI homogeneous rainfall regions as published in 2013 (digitized)', evidence_ids=[plat_ev, *r['evidence_ids']])
+        else:
+            metric(metric='zone_mean_probability', source_id=r['source_id'], zone=zone, status='unavailable', value=None,
+                   reason='zone_geometry_requires_alignment',
+                   detail='The figure locates the zone only by an arrow; zone polygons are needed for an area mean over the zone.')
         metric(metric='same_event_probability_difference', source_id=r['source_id'], zone=zone, status='unavailable', value=None,
                reason='zone_geometry_requires_alignment; official_reference_period_unknown')
         findings.append(dict(
             id=f'{r["record_id"]}_finding', kind='zone', source_id=r['source_id'], provider=r['provider'], area=f'EMI zone {zone}',
             status='validated' if validated else 'draft', official_category=off_cat, official_probabilities=r['probabilities'],
             platform_category=plat_cat, platform_neighbourhood=neighbourhood, relationship=rel, sensitivity=sensitivity,
+            zone_mean=zone_mean,
             comparison_basis='reviewed_visual' if validated else 'draft_visual', probability_difference_pp=None,
             target_windows=dict(platform=[platform['target_start'], platform['target_end']], official=[r['target_start'], r['target_end']]),
             limitations=lim + ['platform_value_is_neighbourhood_of_arrow_tip_not_zone_mean'],
@@ -324,7 +353,11 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
     if any(r['representation'] == 'zone_tercile_probabilities' for r in recs):
         zone_recs = [r for r in recs if r['representation'] == 'zone_tercile_probabilities']
         emi_map(tmp / 'maps' / f'{zone_recs[0]["source_id"]}_anchors.png', nat, zone_recs, areas['season_domain'][1],
-                all(r['extraction_status'] == 'validated' for r in zone_recs), minimum)
+                all(r['extraction_status'] == 'validated' for r in zone_recs), minimum,
+                regions if regions and regions['validated'] else None)   # region lines only once the layer is reviewed
+        if regions:
+            region_map(tmp / 'maps' / f'{zone_recs[0]["source_id"]}_regions.png', zone_recs, regions,
+                       regions['validated'] and all(r['extraction_status'] == 'validated' for r in zone_recs))
     result = dict(created_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), registry=registry['id'],
                   platform=dict(platform, native_forecast=repo_path(native_path),
                                 native_sha256=nat['sha256'], minimum_leading_probability=minimum,
@@ -398,7 +431,47 @@ def icpac_map(path, nat, cat, st, pc, domain, validated, minimum):
     plt.close(fig)
 
 
-def emi_map(path, nat, recs, domain, validated, minimum):
+def _region_lines(ax, regions, color='#222', lw=.9):
+    for k in range(1, len(regions['names']) + 1):
+        ax.contour(regions['flon'], regions['flat'], (regions['fine'] == k).astype(float), levels=[.5], colors=color, linewidths=lw)
+
+
+def region_map(path, recs, regions, validated):
+    # EMI homogeneous rainfall regions (redrawn) with the Bega 2026/27 values printed for each zone.
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    pastel = ['#f3e2c7', '#d9e9f5', '#dcefd9', '#f7f1c9', '#d8e2f0', '#f6dccb', '#ecd9e6', '#e4e4e4']
+    fine = np.where(regions['fine'] > 0, regions['fine'], np.nan)
+    fig, ax = plt.subplots(figsize=(8.6, 7))
+    ax.imshow(fine, origin='lower', extent=[regions['flon'][0] - .025, regions['flon'][-1] + .025, regions['flat'][0] - .025, regions['flat'][-1] + .025],
+              cmap=ListedColormap(pastel), vmin=.5, vmax=8.5, interpolation='nearest')
+    _region_lines(ax, regions, lw=1.2)
+    _boundary(ax)
+    values = {r['source_locator']['zone_label']: r['probabilities'] for r in recs}
+    lon2, lat2 = np.meshgrid(regions['flon'], regions['flat'])
+    for k, key in enumerate(regions['names'], 1):
+        m = regions['fine'] == k
+        if not m.any():
+            continue
+        x, y = float(np.median(lon2[m])), float(np.median(lat2[m]))
+        if key == 'VIII':
+            x, y = 44.0, 6.3                      # visual centre of the lowlands, away from the narrow southern strip
+        p = values.get(key)
+        text = f'{key}\n{regions["long"][key]}' + (f'\nA {p["above"]:.0%}  N {p["near"]:.0%}  B {p["below"]:.0%}' if p else '\n(no value printed)')
+        ax.text(x, y, text, ha='center', va='center', fontsize=8 if p else 7, weight='bold' if p else 'normal',
+                color='#111' if p else '#555', bbox=dict(boxstyle='round,pad=.25', fc='white', ec='#888' if p else 'none', alpha=.85 if p else .6))
+    ax.set_xlim(33, 48); ax.set_ylim(3, 15); ax.set_aspect('equal'); ax.tick_params(labelsize=8)
+    ax.set_title('EMI homogeneous rainfall regions with the Bega (ONDJ) 2026/27 printed values', fontsize=10)
+    fig.text(.5, .01, 'Regions redrawn after Korecha and Sorteberg (2013), Water Resources Research, doi:10.1002/2013WR013760; '
+             'values: EMI Bega 2026/27 outlook (A above, N near, B below normal).', ha='center', fontsize=7, color='#444')
+    _draft(fig, validated)
+    fig.savefig(path, dpi=130, facecolor='white', bbox_inches='tight')
+    plt.close(fig)
+
+
+def emi_map(path, nat, recs, domain, validated, minimum, regions=None):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -414,6 +487,8 @@ def emi_map(path, nat, recs, domain, validated, minimum):
     fig, ax = plt.subplots(figsize=(8.6, 7))
     ax.imshow(data, origin='lower', extent=ext, cmap=ListedColormap([COLOURS[k] for k in keys]), vmin=-.5, vmax=4.5, interpolation='nearest')
     _boundary(ax)
+    if regions:
+        _region_lines(ax, regions, color='#333', lw=.7)
     ax.contour(nat['lon'], nat['lat'], domain.astype(float), levels=[.5], colors='#446761', linewidths=.8)
     for r in recs:
         a = r.get('anchor')
@@ -426,7 +501,8 @@ def emi_map(path, nat, recs, domain, validated, minimum):
                     (a['lon'], a['lat'] + h), xytext=(0, 6), textcoords='offset points', ha='center', fontsize=8,
                     bbox=dict(boxstyle='round,pad=.25', fc='white', ec='#999', alpha=.9))
     ax.set_xlim(ext[:2]); ax.set_ylim(ext[2:]); ax.set_aspect('equal'); ax.tick_params(labelsize=8)
-    ax.set_title('Platform ONDJ 2026/27 favoured tercile with EMI zone values at their arrow tips (±0.5° boxes)', fontsize=10)
+    ax.set_title('Platform ONDJ 2026/27 favoured tercile with EMI zone values at their arrow tips (±0.5° boxes)'
+                 + ('\nthin lines: EMI homogeneous rainfall regions' if regions else ''), fontsize=10)
     ax.legend(handles=[Patch(color=COLOURS[k], label=NAMES[k]) for k in CATS] +
               [Patch(facecolor='white', edgecolor='grey', label='no clear category (<40%)')], loc='lower left', fontsize=8)
     _draft(fig, validated)

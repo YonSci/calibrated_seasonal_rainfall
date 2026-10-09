@@ -558,10 +558,16 @@ def export_comparison(cycle, cid, out):
                             extraction=dict(status=x.get('status'), method=x.get('method'), review=x.get('review'), note=x.get('note')),
                             refresh=_refresh_state(refresh.get(s['source_id']), x.get('status')), figures=figures))
     validated = {s['id'] for s in sources if s['extraction']['status'] == 'validated'}
+    layers = [dict(id=l['id'], provider=l.get('provider'), status=l['status'], note=l.get('note'), citation=l.get('citation'), doi=l.get('doi'),
+                   url=l.get('url'), license_note=l.get('license_note'), review=l.get('review'), region_names=l.get('region_names'))
+              for l in manifest.get('reference_layers', [])]
+    regions_ok = any(l['status'] == 'validated' for l in layers)
     maps = []
     if not stale:
         for m in comparison['maps']:
             sid = next((v for v in validated if m.startswith(v)), None)
+            if sid and 'regions' in m and not regions_ok:
+                sid = None                              # the region map also needs the reviewed region layer
             if sid:                                     # comparison maps only for reviewed extractions
                 shutil.copy2(base / 'comparison/maps' / m, assets / m)
                 maps.append(dict(source_id=sid, file=f'assets/external/{cid}/{m}', name=m))
@@ -584,7 +590,9 @@ def export_comparison(cycle, cid, out):
         else:
             links = []
         evidence[k] = dict(label=e['label'], kind=kind, links=[l for l in links if l['href']])
-    keep = (lambda items: [i for i in items if i['status'] == 'validated']) if not stale else (lambda items: [])
+    # Published rows never carry draft columns (e.g. zone means before the region layer is reviewed).
+    clean = lambda i: {k: v for k, v in i.items() if not k.endswith('_draft')}
+    keep = (lambda items: [clean(i) for i in items if i['status'] == 'validated']) if not stale else (lambda items: [])
     metrics = [dict(metric=m['metric'], source_id=m.get('source_id'), where=m.get('zone') or m.get('area'), status=m['status'],
                     reason=m.get('reason'), basis=m.get('basis'), value=m.get('value') if m['status'] == 'available' and not stale else None)
                for m in comparison['metrics']]
@@ -593,7 +601,8 @@ def export_comparison(cycle, cid, out):
     data = dict(platform=comparison['platform'], sources=sources, maps=maps, metrics=metrics, summary=keep(interp.get('summary', [])),
                 emi_table=keep(interp.get('emi_table', [])), icpac_table=keep(interp.get('icpac_table', [])),
                 paragraphs=keep(interp['paragraphs']), evidence=evidence,
-                notes=comparison['notes'], stale=stale, rerun=rerun, created_utc=interp['created_utc'], engine=interp['engine'])
+                notes=comparison['notes'], stale=stale, rerun=rerun, created_utc=interp['created_utc'], engine=interp['engine'],
+                reference_layers=layers)
     rel = f'data/{cid}_comparison.json'
     (out / 'data').mkdir(parents=True, exist_ok=True)
     (out / rel).write_text(json.dumps(rounded(data), separators=(',', ':'), ensure_ascii=False), encoding='utf-8', newline='')
@@ -681,12 +690,22 @@ def public_report(data, prefix):
                          ''.join(f'<li><strong>{esc(i["title"])}.</strong> {esc(i["text"])}</li>' for i in items) + '</ul>')
     if data['maps']:
         emi_fig = next((f for s in data['sources'] if s['provider'] == 'EMI' for f in s['figures']), None)
+        region = next((m for m in data['maps'] if 'regions' in m['file']), None)
+        cite = next((l['citation'] for l in data.get('reference_layers', []) if l.get('citation')), '')
+        if region:                                    # reviewed region layer: zones as regions with EMI's values
+            right = (f'<figure><img src="{esc(prefix + name(region["file"]))}" alt="EMI rainfall regions"><figcaption>EMI zones as homogeneous '
+                     f'rainfall regions with the Bega 2026/27 printed values; regions redrawn after {esc(cite.split(" (figure")[0])} '
+                     '(layout as published in 2013).</figcaption></figure>')
+        elif emi_fig:
+            right = (f'<figure><img src="{esc(prefix + name(emi_fig["file"]))}" alt="EMI official figure">'
+                     f'<figcaption>EMI official figure: {esc(emi_fig["caption"])}</figcaption></figure>')
+        else:
+            right = ''
         out = []
-        for m in data['maps']:
+        for m in [m for m in data['maps'] if 'regions' not in m['file']]:
             fig = f'<figure><img src="{esc(prefix + name(m["file"]))}" alt="Comparison map"><figcaption>{esc(name(m["file"]))}</figcaption></figure>'
-            if 'anchors' in m['file'] and emi_fig:
-                fig = ('<div class="pair">' + fig + f'<figure><img src="{esc(prefix + name(emi_fig["file"]))}" alt="EMI official figure">'
-                       f'<figcaption>EMI official figure: {esc(emi_fig["caption"])}</figcaption></figure></div>')
+            if 'anchors' in m['file'] and right:
+                fig = '<div class="pair">' + fig + right + '</div>'
             out.append(fig)
         parts.append('<h2>Comparison maps</h2>' + ''.join(out))
     agree = [m for m in data['metrics'] if m['metric'] == 'mapped_category_agreement' and m['value']]
@@ -697,12 +716,17 @@ def public_report(data, prefix):
                              f'<td>{_pct(m["value"]["agreement_share_where_both_favoured"], True)}</td>'
                              f'<td>{_pct(m["value"]["opposing_share_where_both_favoured"], True)}</td></tr>' for m in agree) + '</table>')
     if data['emi_table']:
-        parts.append('<h2>EMI zones: printed values and the platform\'s sampled neighbourhood</h2><table><tr><th>Location</th>'
-                     f'<th>Official below / near / above</th><th>Platform neighbourhood below / near / above</th><th>Relationship</th><th>Relation to the {esc(dom)}</th></tr>' +
-                     ''.join(f'<tr><td>Near zone {esc(r["zone"])} arrow</td><td>{esc(r["official"])}</td><td>{esc(r["platform"])}</td>'
-                             f'<td>{esc(r["relationship"])}</td><td>{esc(overlap_label(r.get("domain_share")))}</td></tr>' for r in data['emi_table']) +
-                     '</table><p class="muted">Platform values are area means of local probabilities over the whole ±0.5° sample around each arrow '
-                     'tip, not complete EMI zones and not restricted to the domain. Percentages are rounded to add up to 100%.</p>')
+        zone = any(r.get('zone_mean') for r in data['emi_table'])
+        parts.append('<h2>EMI zones: printed values and the platform</h2><table><tr><th>Zone</th><th>Official below / near / above</th>'
+                     + ('<th>Platform over the whole zone (region)</th>' if zone else '') +
+                     f'<th>Platform near the arrow (±0.5°)</th><th>Relationship near the arrow</th><th>Arrow sample vs the {esc(dom)}</th></tr>' +
+                     ''.join(f'<tr><td>Zone {esc(r["zone"])}</td><td>{esc(r["official"])}</td>'
+                             + (f'<td>{esc(r.get("zone_mean") or "—")}<br><span class="muted">{esc(r.get("zone_relationship") or "")}</span></td>' if zone else '')
+                             + f'<td>{esc(r["platform"])}</td><td>{esc(r["relationship"])}</td><td>{esc(overlap_label(r.get("domain_share")))}</td></tr>'
+                             for r in data['emi_table']) +
+                     '</table><p class="muted">Platform values are area means of local probabilities: over the whole zone (EMI homogeneous rainfall '
+                     'region as published in 2013, assumed unchanged) where reviewed, and over the ±0.5° sample around each arrow tip. '
+                     'Percentages are rounded to add up to 100%.</p>')
     if data.get('icpac_table'):
         parts.append('<h2>ICPAC: printed favoured category and interval vs the platform</h2><table><tr><th>Location</th>'
                      '<th>ICPAC (favoured category, printed interval)</th><th>Platform below / near / above</th><th>Relationship</th></tr>' +

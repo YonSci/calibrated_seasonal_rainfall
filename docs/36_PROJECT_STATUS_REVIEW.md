@@ -436,3 +436,22 @@ Third site review: two remaining interface fixes, then four optional features.
   - Zone III is "not comparable" because ICPAC shows no forecast category there (grey).
   - Zones VI, VII and VIII and both areas favour above normal in both outlooks.
   - Locations come from the reviewed EMI arrow tips, so these rows publish only when both extractions are reviewed.
+
+### Phase 24 — EMI zones as rainfall regions (2026-10-09)
+
+- [x] The project team supplied the map "Homogeneous rainfall regions currently used for the preparation of seasonal rainfall forecast in Ethiopia" (Korecha and Sorteberg 2013, Water Resources Research 49(11):7681–7697, doi:10.1002/2013WR013760).
+  - The figure is under the publisher's terms, so it is kept locally only (`data/raw/reference/`, not tracked).
+  - `scripts/digitize_rainfall_regions.py` digitizes regions I–VIII deterministically: axis-tick georeference (residual < 1 px), thick-line extraction, flood fill inside this project's Ethiopia boundary.
+  - Output: `data/masks/emi_rainfall_regions_korecha2013.nc` (0.25° grid and a 0.05° display grid), with the citation and the image hash. Only this derived grid is published.
+- [x] Independent check: each EMI 2026/27 arrow tip falls in the region with the same number (III Southwest, VI South Highland, VII South, VIII South-Southeast lowlands).
+- [x] The registry gained a `reference_layers` entry, with the extraction record `emi_rainfall_regions`. Its review is bound to the source image hash and the derived grid hash.
+- [x] Once reviewed, the comparison adds:
+  - platform area means of local probabilities over each whole EMI zone ("zone mean", no longer unavailable);
+  - a "whole zones" key finding;
+  - a column in the EMI table;
+  - a redrawn region map with EMI's printed values, which replaces EMI's own figure on the right of the platform map (EMI's figure stays under Sources);
+  - region boundaries drawn on the platform map.
+
+  Until the review, these stay internal (draft columns are stripped from published rows; the map is withheld).
+- [x] Draft results: whole-zone means agree with the arrow samples. Zone III (Southwest) opposes EMI: the platform gives 47 / 25 / 28 % below / near / above, against EMI's 55 % above. Zones VI, VII and VIII agree on above normal.
+- [ ] **Review needed:** `python scripts\external_forecasts.py review --registry config\external_forecasts\ondj_2026_27.json --record emi_rainfall_regions --reviewer "Name"`. QC figure: `outputs/operational_2026_ondj/comparisons_review/emi_rainfall_regions_qc.png`. The review also accepts the assumption that EMI still uses the 2013 regions.

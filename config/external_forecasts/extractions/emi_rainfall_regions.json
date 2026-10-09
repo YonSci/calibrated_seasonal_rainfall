@@ -1,0 +1,39 @@
+{
+ "record_id": "emi_rainfall_regions",
+ "source_sha256": "494eeca4b1fde746c7fc1a264763c3105b7ecd96d94eceeadcf7e4e4d4cc5454",
+ "source_file": "data/raw/reference/ethiopia_homogeneous_rainfall_regions_10.1002_2013WR013760.png",
+ "citation": "Korecha, D., and A. Sorteberg (2013), Validation of operational seasonal rainfall forecast in Ethiopia, Water Resources Research, 49(11), 7681-7697, doi:10.1002/2013WR013760 (figure: homogeneous rainfall regions currently used for the preparation of seasonal rainfall forecast in Ethiopia).",
+ "doi": "10.1002/2013WR013760",
+ "url": "https://agupubs.onlinelibrary.wiley.com/doi/10.1002/2013WR013760",
+ "license_note": "Publisher's terms (Wiley); the figure is not redistributed. Only the digitized region grid derived from it is stored and published, with this citation.",
+ "method": "automatic_region_digitization",
+ "extraction_version": 1,
+ "created_by": "Template prepared by the assistant (Claude) from the figure supplied by the project team; regions computed by scripts/digitize_rainfall_regions.py.",
+ "template": {
+  "x_ticks_deg": [34, 36, 38, 40, 42, 44, 46],
+  "x_ticks_px": [65.5, 147.5, 229.5, 311.0, 393.0, 475.0, 557.0],
+  "y_ticks_deg": [14, 12, 10, 8, 6, 4],
+  "y_ticks_px": [46.0, 128.5, 211.5, 293.5, 377.0, 459.5],
+  "dark_threshold": 300,
+  "line_opening_px": 3,
+  "minimum_region_px": 500,
+  "regions": {
+   "I": {"name": "Northeast", "seed": [41.0, 12.8]},
+   "II": {"name": "Northwest", "seed": [36.6, 12.0]},
+   "III": {"name": "Southwest", "seed": [35.3, 8.7]},
+   "IV": {"name": "Central", "seed": [38.6, 9.3]},
+   "V": {"name": "East", "seed": [41.8, 8.4]},
+   "VI": {"name": "South Highland", "seed": [39.6, 6.9]},
+   "VII": {"name": "South", "seed": [35.6, 5.8]},
+   "VIII": {"name": "South-Southeast lowlands", "seed": [44.0, 6.0]}
+  }
+ },
+ "checks_for_reviewer": [
+  "The digitized regions (QC figure) follow the thick boundaries of the source figure for all eight regions I-VIII.",
+  "The strip along the southern border (about 36-40 deg E, 4-5 deg N) has no separating line in the source and is assigned to region VIII.",
+  "Region numbers match the EMI Bega 2026/27 zone labels: III Southwest, VI South Highland, VII South, VIII South-Southeast lowlands (each EMI arrow tip falls in the region of the same number).",
+  "The region layout is the one published in 2013; using it for the 2026/27 zones assumes EMI still uses these regions."
+ ],
+ "status": "draft",
+ "review": null
+}

@@ -158,10 +158,40 @@ def summary_items(comparison, manifest):
                             title='EMI — sampled neighbourhoods near the zone arrows' + (' in the domain' if key == 'season_domain' else ''),
                             text=' '.join(parts) + ' Sampled neighbourhoods (±0.5°), not complete EMI zones.', evidence_ids=ids,
                             scope=dict(zones=[z['area'].split()[-1] for z in inside])))
+    zm = [z for z in zones if (z.get('zone_mean') or {}).get('mean_local_probabilities')]
+    if zm:
+        status = 'validated' if all(z['zone_mean']['status'] == 'validated' for z in zm) else 'draft'
+        for key in ('all_ethiopia', 'season_domain'):
+            inside = [z for z in zm if key == 'all_ethiopia' or z['zone_mean']['domain_share'] > 0]
+            if not inside:
+                continue
+            parts = []
+            for z in inside:
+                m, n = z['zone_mean'], z['area'].split()[-1]
+                rel = m['relationship']
+                verb = {'same_favoured_category': f'both favour {SHORT[z["official_category"]]}',
+                        'opposing_favoured_categories': f'opposing: platform {SHORT[favoured_name(m)]}, EMI {SHORT[z["official_category"]]}',
+                        'weak_signal': 'no clear category in one source', 'near_versus_other': 'near normal vs other'}.get(rel, 'unknown')
+                part = f'zone {n} ({m["region_name"]}): {verb}, platform {triple(m["mean_local_probabilities"])}'
+                if key == 'season_domain' and m['domain_share'] < 1:
+                    part += f' over the whole zone ({100 * m["domain_share"]:.0f}% of it in the domain)'
+                parts.append(part)
+            out.append(dict(id=f'emi_whole_zones_{key}_summary', area_key=key, source_id=zones[0]['source_id'], status=status,
+                            title='EMI — whole zones (rainfall regions)',
+                            text='Platform area mean of local probabilities over each EMI zone, below / near / above: ' + '; '.join(parts) +
+                                 '. Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), '
+                                 'assumed unchanged for 2026/27.',
+                            evidence_ids=sorted({i for z in inside for i in z['evidence_ids']}), scope=dict(zones=[z['area'].split()[-1] for z in inside])))
     robust = robustness(comparison)
     if robust:
         out.append(robust)
     return out
+
+
+def favoured_name(m):
+    p = m['mean_local_probabilities']
+    k = max(range(3), key=lambda i: p[i])
+    return ('below', 'near', 'above')[k] if p[k] >= 0.4 else 'weak'
 
 
 def robustness(comparison):
@@ -242,8 +272,21 @@ def emi_table(comparison):
                          platform=triple(nb['mean_local_probabilities']) if nb.get('mean_local_probabilities') else '—',
                          relationship=RELATION[f['relationship']], relationship_code=f['relationship'],
                          domain_share=nb.get('domain_share'), center=nb.get('center'),
-                         stable=(f.get('sensitivity') or {}).get('stable'), evidence_ids=f['evidence_ids']))
+                         stable=(f.get('sensitivity') or {}).get('stable'), evidence_ids=f['evidence_ids'],
+                         **zone_columns(f.get('zone_mean'))))
     return rows
+
+
+def zone_columns(zm):
+    """Platform mean over the whole zone (digitized EMI rainfall region); draft values kept apart."""
+    if not zm:
+        return {}
+    t = triple(zm['mean_local_probabilities'])
+    ok = zm.get('status') == 'validated'
+    return dict(zone_name=zm.get('region_name'), zone_domain_share=zm.get('domain_share'), zone_cells=zm.get('cells'),
+                zone_mean=t if ok else None, zone_relationship=RELATION[zm['relationship']] if ok else None,
+                zone_relationship_code=zm['relationship'] if ok else None,
+                zone_mean_draft=None if ok else t, zone_relationship_draft=None if ok else RELATION[zm['relationship']])
 
 
 def paragraphs(comparison, manifest):
@@ -268,6 +311,10 @@ def paragraphs(comparison, manifest):
             lead = f'The platform favours {NAMES[f["platform_category"]]} and the EMI outlook {NAMES[f["official_category"]]} rainfall {place}.'
         text = (lead + f' EMI prints {triple(f["official_probabilities"])} (below / near / above); the platform\'s area mean of local '
                 f'probabilities in the sampled neighbourhood is {triple(nb["mean_local_probabilities"]) if nb.get("mean_local_probabilities") else "not available"}.')
+        zm = f.get('zone_mean') or {}
+        if zm.get('status') == 'validated':           # never mix draft zone means into a published paragraph
+            text += (f' Over the whole zone (the EMI {zm["region_name"]} rainfall region), the platform area mean is '
+                     f'{triple(zm["mean_local_probabilities"])}: {RELATION[zm["relationship"]].lower()}.')
         out.append(dict(id=f['id'] + '_text', finding=f['id'], source_id=f['source_id'], area=f['area'], area_key='zone',
                         status=f['status'], relationship=rel, text=text, evidence_ids=f['evidence_ids']))
     if zones:

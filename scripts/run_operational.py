@@ -324,9 +324,10 @@ def external_stages(runner,cfg,info,refresh):
     extractions = path(registry["extractions_dir"])
     native, mask = info["sources"][SEASON], presentation_mask(cfg)
     minimum = cfg["display"]["minimum_leading_probability"]
-    runner.stage("external_prepare",[*code,registry_path,current,*snaps,extractions,mask],[out/"sources"],
+    layers = [path(l["mask"]) for l in registry.get("reference_layers",[])]
+    runner.stage("external_prepare",[*code,registry_path,current,*snaps,extractions,mask,*layers],[out/"sources"],
                  action=lambda:ef.prepare(registry,cache,mask,out/"sources"))
-    runner.stage("external_compare",[*code,registry_path,out/"sources",native,mask],[out/"comparison"],
+    runner.stage("external_compare",[*code,registry_path,out/"sources",native,mask,*layers],[out/"comparison"],
                  settings={"minimum_leading_probability":minimum},
                  action=lambda:compare(out/"sources",native,mask,registry,out/"comparison",minimum))
     runner.stage("external_interpret",[*code,out/"comparison",out/"sources"],[out/"interpretation"],

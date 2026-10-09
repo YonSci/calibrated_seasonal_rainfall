@@ -1191,9 +1191,15 @@ JS = r'''
       const emiFig = X.sources.filter(s => s.provider === 'EMI').flatMap(s => s.figures)[0];
       const fig = (file, alt, caption) => '<figure><a href="' + href(file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(file) +
         '" alt="' + esc(alt) + '"></a><figcaption>' + esc(caption) + '</figcaption></figure>';
-      if (X.maps.length) h += X.maps.map(m => m.name.includes('anchors')
-        ? '<div class="cmp-pair">' + fig(m.file, 'Platform map with EMI zone values', cap.emi) +
-          (emiFig ? fig(emiFig.file, 'EMI official figure', 'EMI official figure (as published): ' + emiFig.caption + '. EMI publishes zone values with arrows; no zone boundaries are given.') : '') + '</div>'
+      // Right-hand panel: the EMI zones as regions (reviewed digitization) or, until then, EMI's own figure.
+      const regionMap = X.maps.find(m => m.name.includes('regions'));
+      const layer = (X.reference_layers || [])[0];
+      const right = regionMap
+        ? fig(regionMap.file, 'EMI homogeneous rainfall regions with the Bega 2026/27 values', 'EMI zones as homogeneous rainfall regions, with the values EMI printed for Bega 2026/27. Regions redrawn after ' +
+              (layer ? layer.citation.split(' (figure')[0] : 'Korecha and Sorteberg (2013)') + '; region layout as published in 2013. EMI\'s own figure is under Sources.')
+        : (emiFig ? fig(emiFig.file, 'EMI official figure', 'EMI official figure (as published): ' + emiFig.caption + '. EMI publishes zone values with arrows; no zone boundaries are given.') : '');
+      if (X.maps.length) h += X.maps.filter(m => !m.name.includes('regions')).map(m => m.name.includes('anchors')
+        ? '<div class="cmp-pair">' + fig(m.file, 'Platform map with EMI zone values', cap.emi) + right + '</div>'
         : '<figure class="map-figure wide"><a href="' + href(m.file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(m.file) +
           '" alt="Comparison map"></a><figcaption>' + esc(cap.icpac) + '</figcaption></figure>').join('');
       // 3. compact tables
@@ -1204,12 +1210,16 @@ JS = r'''
             share1(v.agreement_share_where_both_favoured) + '</td><td>' + share1(v.opposing_share_where_both_favoured) + '</td></tr>'; }).join('') + '</tbody></table></div>';
       if (X.emi_table.length) {
         const rows = areaKey === 'all_ethiopia' ? X.emi_table : [...X.emi_table].sort((a, b) => b.domain_share - a.domain_share);
-        h += '<div class="table-wrap"><table class="compact"><caption>EMI zones: printed values and the platform\'s sampled neighbourhood (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">Official</th><th scope="col">Platform neighbourhood</th><th scope="col">Relationship</th><th scope="col">Evidence</th></tr></thead><tbody>' +
+        const hasZone = rows.some(r => r.zone_mean);
+        h += '<div class="table-wrap"><table class="compact"><caption>EMI zones: printed values and the platform (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">Official</th>' +
+          (hasZone ? '<th scope="col">Platform over the whole zone</th>' : '') + '<th scope="col">Platform near the arrow (±0.5°)</th><th scope="col">Relationship near the arrow</th><th scope="col">Evidence</th></tr></thead><tbody>' +
           rows.map(r => { const mapView = areaKey === 'season_domain' && r.domain_share >= 1 ? c.domain_view : 'all_ethiopia';
-            return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>Near zone ' + esc(r.zone) + ' arrow' +
-              (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + overlap(r.domain_share) + '</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td><td class="nowrap">' + esc(r.platform) +
+            const zoneCell = hasZone ? '<td>' + (r.zone_mean ? '<span class="nowrap">' + esc(r.zone_mean) + '</span><br><span class="caveat">' + esc(r.zone_relationship) +
+              (r.zone_name ? ' · ' + esc(r.zone_name) + ' region' : '') + (areaKey === 'season_domain' && ok(r.zone_domain_share) && r.zone_domain_share < 1 ? ' · ' + (100 * r.zone_domain_share).toFixed(0) + '% of the zone in the domain' : '') + '</span>' : '—') + '</td>' : '';
+            return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>Zone ' + esc(r.zone) +
+              (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + overlap(r.domain_share) + ' (arrow sample)</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td>' + zoneCell + '<td class="nowrap">' + esc(r.platform) +
               '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
-          '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities over the whole ±0.5° sample around each arrow tip (also where a sample only partly overlaps the domain), not complete EMI zones: the figure publishes no zone boundaries. Percentages are rounded to add up to 100%.</p>';
+          '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities. ' + (hasZone ? '"Whole zone" uses EMI\'s homogeneous rainfall regions as published in 2013 (assumed unchanged for 2026/27); ' : '') + '"near the arrow" uses the ±0.5° sample around each arrow tip, also where it only partly overlaps the domain. Percentages are rounded to add up to 100%.</p>';
       }
       if ((X.icpac_table || []).length) {
         const samples = X.icpac_table.filter(r => r.kind === 'sample'), arows = X.icpac_table.filter(r => r.kind === 'area');

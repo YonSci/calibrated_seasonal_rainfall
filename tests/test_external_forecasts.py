@@ -177,6 +177,11 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(zone3['status'], 'validated')
         self.assertEqual(zone3['relationship'], 'opposing_favoured_categories')
         self.assertIn('disagreement in the favoured rainfall category', zone3['text'])
+        # Region layer still a draft: whole-zone means stay out of the published columns and paragraphs.
+        row3 = next(r for r in res['emi_table'] if r['zone'] == 'III')
+        self.assertIsNone(row3.get('zone_mean'))
+        self.assertTrue(row3.get('zone_mean_draft'))
+        self.assertNotIn('whole zone', zone3['text'])
         zone8 = next(p for p in res['paragraphs'] if p['area'] == 'EMI zone VIII')
         self.assertIn('wetter-than-normal', zone8['text'])
         # ICPAC is still a draft: its findings stay unpublished, and its window mismatch is recorded.
@@ -201,6 +206,18 @@ class Pipeline(unittest.TestCase):
         table = {r['zone']: r for r in res['emi_table']}
         self.assertFalse(table['III']['stable'])
         self.assertTrue(table['VIII']['stable'])
+
+    def test_reviewed_regions_publish_whole_zone_means(self):
+        ef.review(self.reg, 'emi_bega_2026_27_outlook', 'Test reviewer', cache_root=CACHE)
+        ef.review(self.reg, 'emi_rainfall_regions', 'Test reviewer', cache_root=CACHE)
+        res = self.run_all()
+        row3 = next(r for r in res['emi_table'] if r['zone'] == 'III')
+        self.assertTrue(row3['zone_mean'] and row3['zone_name'] == 'Southwest')
+        self.assertIsNone(row3.get('zone_mean_draft'))
+        para = next(p for p in res['paragraphs'] if p['area'] == 'EMI zone III')
+        self.assertIn('whole zone', para['text'])
+        maps = json.loads((self.tmp / 'comparison/comparison.json').read_text(encoding='utf-8'))['maps']
+        self.assertIn('emi_bega_2026_27_outlook_regions.png', maps)
 
     def test_layout_change_is_reported_not_fatal(self):
         p = self.tmp / 'extractions/icpac_ond_2026_update_rainfall.json'
@@ -281,3 +298,34 @@ class Publication(unittest.TestCase):
             self.assertTrue(all((site / 'downloads' / s).resolve().is_file() for s in local_images(web)))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+REGIONS = ROOT / 'data/masks/emi_rainfall_regions_korecha2013.nc'
+REGION_IMAGE = ROOT / 'data/raw/reference/ethiopia_homogeneous_rainfall_regions_10.1002_2013WR013760.png'
+
+
+@unittest.skipUnless(REGIONS.is_file(), 'digitized regions not present')
+class RainfallRegions(unittest.TestCase):
+    def test_emi_arrow_tips_fall_in_the_region_with_the_same_number(self):
+        import xarray as xr
+        rec = json.loads((ROOT / 'config/external_forecasts/extractions/emi_bega_2026_27_outlook.json').read_text(encoding='utf-8'))
+        names = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
+        with xr.open_dataset(REGIONS) as d:
+            r, lat, lon = d.region.values, d.lat.values, d.lon.values
+            self.assertEqual(json.loads(d.attrs['region_names'])['VIII'], 'South-Southeast lowlands')
+            self.assertIn('10.1002/2013WR013760', d.attrs['doi'])
+        for z in rec['zones']:
+            i, j = np.argmin(abs(lat - z['anchor']['lat'])), np.argmin(abs(lon - z['anchor']['lon']))
+            self.assertEqual(names[r[i, j] - 1], z['zone_label'])
+        self.assertEqual(set(np.unique(r)) - {0}, set(range(1, 9)))
+
+    @unittest.skipUnless(REGION_IMAGE.is_file(), 'source figure is kept locally only')
+    def test_digitization_reproduces_the_stored_grid(self):
+        import xarray as xr
+        from digitize_rainfall_regions import digitize, to_grid
+        rec = json.loads((ROOT / 'config/external_forecasts/extractions/emi_rainfall_regions.json').read_text(encoding='utf-8'))
+        region, lon, lat, qc = digitize(REGION_IMAGE, rec['template'])
+        with xr.open_dataset(REGIONS) as d:
+            grid = to_grid(region, lon, lat, d.lat.values.astype(float), d.lon.values.astype(float), 0.25)
+            self.assertTrue(np.array_equal(grid, d.region.values))
+        self.assertEqual(len(set(qc['components'].values())), 8)

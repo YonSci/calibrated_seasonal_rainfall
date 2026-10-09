@@ -150,7 +150,7 @@
   {
     "id": "2026-10-09.8",
     "date": "2026-10-09",
-    "commit": null,
+    "commit": "6f1ff6d",
     "title": "EMI figure beside the platform map; ICPAC comparison table",
     "cycles": [
       "ONDJ 2026/27"
@@ -159,6 +159,21 @@
       {
         "type": "display",
         "text": "The platform map with EMI zone values is shown next to EMI's official ONDJ 2026/27 figure; a new ICPAC table gives ICPAC's printed favoured category and interval against the platform's below/near/above probabilities at the sampled locations and for each area."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-09.9",
+    "date": "2026-10-09",
+    "commit": null,
+    "title": "EMI zones as homogeneous rainfall regions (digitized, pending review)",
+    "cycles": [
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "EMI homogeneous rainfall regions I-VIII digitized from Korecha and Sorteberg (2013, doi:10.1002/2013WR013760) as a reviewable reference layer; once reviewed, the comparison adds platform means over each whole EMI zone and a redrawn region map with EMI's 2026/27 values beside the platform map. Region boundaries drawn on the platform map."
       }
     ]
   }

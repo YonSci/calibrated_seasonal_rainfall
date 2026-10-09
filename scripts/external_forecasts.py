@@ -329,6 +329,8 @@ CONTENT_FIELDS = ('method', 'extraction_version', 'template', 'zones', 'source_l
 
 def content_sha256(record):
     fields = {k: record.get(k) for k in CONTENT_FIELDS}
+    if record.get('derived_sha256'):              # digitized reference layers: the derived file is part of the content
+        fields['derived_sha256'] = record['derived_sha256']
     return sha256(json.dumps(fields, sort_keys=True, ensure_ascii=False).encode('utf-8'))
 
 
@@ -592,7 +594,16 @@ def prepare(registry, cache_root, grid_path, out_dir):
                                 target_start=spec['target_start'], target_end=spec['target_end'],
                                 evidence_ids=[e['id'] for e in evidence]))
         manifest.append(entry)
-    write_json(tmp / 'source_manifest.json', dict(created_utc=now(), registry=registry['id'], sources=manifest,
+    layers = []
+    for layer in registry.get('reference_layers', []):
+        st, note, derived = reference_check(registry, layer)
+        rec, rec_path = extraction_record(registry, layer['extraction'])
+        layers.append(dict(layer, status=st, note=note, derived_sha256=derived, record=rel(rec_path),
+                           content_sha256=rec and content_sha256(rec), citation=rec and rec.get('citation'),
+                           doi=rec and rec.get('doi'), url=rec and rec.get('url'), license_note=rec and rec.get('license_note'),
+                           review=rec and rec.get('review'), checks_for_reviewer=rec and rec.get('checks_for_reviewer'),
+                           region_names={k: v['name'] for k, v in (rec or {}).get('template', {}).get('regions', {}).items()}))
+    write_json(tmp / 'source_manifest.json', dict(created_utc=now(), registry=registry['id'], sources=manifest, reference_layers=layers,
                                                   anomaly_products_checked=registry.get('anomaly_products_checked')))
     write_json(tmp / 'official_records.json', dict(created_utc=now(), registry=registry['id'], records=records))
     publish(tmp, out_dir)
@@ -600,14 +611,45 @@ def prepare(registry, cache_root, grid_path, out_dir):
 
 
 # ======================================================================================= review
+def reference_layer(registry, layer_id):
+    return next((r for r in registry.get('reference_layers', []) if r['id'] == layer_id), None)
+
+
+def reference_check(registry, layer):
+    """(status, note, derived file hash) for a reference layer (e.g. digitized rainfall regions)."""
+    rec, _ = extraction_record(registry, layer['extraction'])
+    mask = resolve(layer['mask'])
+    if rec is None or not mask.is_file():
+        return 'needs_extraction', 'Reference layer or its record is missing', None
+    import xarray as xr
+    with xr.open_dataset(mask) as m:
+        image_sha = m.attrs.get('source_image_sha256')
+    derived = sha256(mask.read_bytes())
+    if image_sha != rec['source_sha256']:
+        return 'needs_extraction_review', 'The digitized layer was made from a different source image', derived
+    if rec.get('derived_sha256') not in (None, derived):
+        return 'needs_extraction_review', 'The digitized layer changed after review', derived
+    status, note = extraction_check(rec, rec['source_sha256'])
+    return status, note, derived
+
+
 def review(registry, record_id, reviewer, reject=False, note=None, cache_root=None):
     rec, p = extraction_record(registry, record_id)
     if rec is None:
         raise FileNotFoundError(p)
-    cache_root = cache_root or registry.get('cache_root', 'data/external_forecasts')
-    current = read_json(cache_dir(registry, cache_root) / 'current.json').get(record_id, {})
-    if current.get('sha256') != rec['source_sha256']:
-        raise ValueError('The current source differs from the one this record describes; create a new extraction record first')
+    layer = next((r for r in registry.get('reference_layers', []) if r['extraction'] == record_id), None)
+    if layer:                                     # a digitized reference layer: bind the review to the derived file too
+        mask = resolve(layer['mask'])
+        import xarray as xr
+        with xr.open_dataset(mask) as m:
+            if m.attrs.get('source_image_sha256') != rec['source_sha256']:
+                raise ValueError('The digitized layer was made from a different source image; digitize again first')
+        rec['derived_sha256'] = sha256(mask.read_bytes())
+    else:
+        cache_root = cache_root or registry.get('cache_root', 'data/external_forecasts')
+        current = read_json(cache_dir(registry, cache_root) / 'current.json').get(record_id, {})
+        if current.get('sha256') != rec['source_sha256']:
+            raise ValueError('The current source differs from the one this record describes; create a new extraction record first')
     rec['status'] = 'rejected' if reject else 'validated'
     rec['review'] = dict(reviewer=reviewer, reviewed_utc=now(), decision=rec['status'], note=note,
                          confirmed_checks=[] if reject else rec.get('checks_for_reviewer', []),

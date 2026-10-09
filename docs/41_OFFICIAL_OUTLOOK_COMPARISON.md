@@ -101,3 +101,23 @@ Every paragraph keeps its status and evidence identifiers. The draft results (no
 
   These are reported as bounded checks of the extraction, not confidence intervals.
 
+## Reference layer: EMI homogeneous rainfall regions (added 2026-10-09)
+
+- **Source:** Korecha and Sorteberg (2013), doi:10.1002/2013WR013760, the figure of the homogeneous rainfall regions used for EMI seasonal forecasts. Kept locally (publisher's terms); only the digitized grid is published.
+- **Digitize again** (needs the local image):
+  ```bat
+  python scripts\digitize_rainfall_regions.py --image dataaweference\ethiopia_homogeneous_rainfall_regions_10.1002_2013WR013760.png --qc outputs\operational_2026_ondj\comparisons_review\emi_rainfall_regions_qc.png
+  ```
+- **Review:**
+  ```bat
+  python scripts\external_forecasts.py review --registry config\external_forecasts\ondj_2026_27.json --record emi_rainfall_regions --reviewer "Name"
+  ```
+  Then rerun the comparison and `build_site.py`.
+- **After review:**
+  - whole-zone platform means;
+  - the redrawn region map with EMI's values on the right of the platform map;
+  - region lines on the platform map.
+
+  Re-digitizing changes the derived file hash, which sends the record back to review.
+- **Assumption, stated on the page:** EMI's 2026/27 zones are the regions as published in 2013. The arrow tips of the four printed zones fall in the matching regions. The southern strip (about 36–40°E, 4–5°N) has no separating line in the source and is assigned to region VIII.
+

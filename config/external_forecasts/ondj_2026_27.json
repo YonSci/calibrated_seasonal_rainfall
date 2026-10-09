@@ -2,7 +2,12 @@
   "schema_version": 1,
   "id": "ondj_2026_27",
   "description": "Official seasonal rainfall outlooks compared with the platform's September-initialized ONDJ 2026/27 forecast.",
-  "platform": {"target": "ONDJ", "label": "ONDJ 2026/27", "target_start": "2026-10-01", "target_end": "2027-01-31"},
+  "platform": {
+    "target": "ONDJ",
+    "label": "ONDJ 2026/27",
+    "target_start": "2026-10-01",
+    "target_end": "2027-01-31"
+  },
   "extractions_dir": "config/external_forecasts/extractions",
   "sources": [
     {
@@ -16,7 +21,12 @@
       "region": "1",
       "resource_type": "27",
       "image_alt": "Rainfall forecast",
-      "expected_label": ["Rainfall forecast", "October - December 2026", "Update", "IGAD Region"],
+      "expected_label": [
+        "Rainfall forecast",
+        "October - December 2026",
+        "Update",
+        "IGAD Region"
+      ],
       "season_label": "OND 2026 (update)",
       "target_start": "2026-10-01",
       "target_end": "2026-12-31",
@@ -30,11 +40,20 @@
       "adapter": "emi",
       "product": "rainfall_tercile_probability",
       "representation": "zone_tercile_probabilities",
-      "listing_urls": ["https://www.ethiomet.gov.et/products/seasonal-forecast/",
-                       "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/"],
+      "listing_urls": [
+        "https://www.ethiomet.gov.et/products/seasonal-forecast/",
+        "https://www.ethiomet.gov.et/products/seasonal-hydromet-bulletin/"
+      ],
       "outlook_season": "bega",
-      "outlook_years": [2026, 2027],
-      "page_keywords": ["ONDJ", "Bega", "2026-27"],
+      "outlook_years": [
+        2026,
+        2027
+      ],
+      "page_keywords": [
+        "ONDJ",
+        "Bega",
+        "2026-27"
+      ],
       "season_label": "Bega (ONDJ) 2026/27",
       "target_start": "2026-10-01",
       "target_end": "2027-01-31",
@@ -46,5 +65,16 @@
   "anomaly_products_checked": {
     "ICPAC": "Products listed for october-december-2026_update (IGAD region): rainfall tercile probability (27) and temperature (5); no rainfall-anomaly product (23, 25).",
     "EMI": "The Bega 2026/27 outlook bulletin gives analogue-year moisture outlooks and zone tercile probabilities; no rainfall-amount anomaly map for ONDJ 2026/27."
-  }
+  },
+  "reference_layers": [
+    {
+      "id": "emi_rainfall_regions",
+      "kind": "region_map",
+      "extraction": "emi_rainfall_regions",
+      "mask": "data/masks/emi_rainfall_regions_korecha2013.nc",
+      "provider": "EMI homogeneous rainfall regions (as published by Korecha and Sorteberg 2013)",
+      "zone_source": "emi_bega_2026_27_outlook",
+      "use": "Boundaries for the EMI zone labels: platform means over each zone, and the region map shown beside the platform map."
+    }
+  ]
 }

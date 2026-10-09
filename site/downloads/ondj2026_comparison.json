@@ -181,9 +181,9 @@
    "metric": "zone_mean_probability",
    "source_id": "emi_bega_2026_27_outlook",
    "where": "III",
-   "status": "unavailable",
-   "reason": "zone_geometry_requires_alignment",
-   "basis": null,
+   "status": "pending_review",
+   "reason": "region_boundaries_awaiting_review",
+   "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": null
   },
   {
@@ -221,9 +221,9 @@
    "metric": "zone_mean_probability",
    "source_id": "emi_bega_2026_27_outlook",
    "where": "VI",
-   "status": "unavailable",
-   "reason": "zone_geometry_requires_alignment",
-   "basis": null,
+   "status": "pending_review",
+   "reason": "region_boundaries_awaiting_review",
+   "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": null
   },
   {
@@ -261,9 +261,9 @@
    "metric": "zone_mean_probability",
    "source_id": "emi_bega_2026_27_outlook",
    "where": "VII",
-   "status": "unavailable",
-   "reason": "zone_geometry_requires_alignment",
-   "basis": null,
+   "status": "pending_review",
+   "reason": "region_boundaries_awaiting_review",
+   "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": null
   },
   {
@@ -301,9 +301,9 @@
    "metric": "zone_mean_probability",
    "source_id": "emi_bega_2026_27_outlook",
    "where": "VIII",
-   "status": "unavailable",
-   "reason": "zone_geometry_requires_alignment",
-   "basis": null,
+   "status": "pending_review",
+   "reason": "region_boundaries_awaiting_review",
+   "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": null
   },
   {
@@ -560,7 +560,13 @@
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
-   ]
+   ],
+   "zone_name": "Southwest",
+   "zone_domain_share": 0.0,
+   "zone_cells": 200,
+   "zone_mean": null,
+   "zone_relationship": null,
+   "zone_relationship_code": null
   },
   {
    "id": "emi_bega_2026_27_outlook_zone_VI_finding",
@@ -579,7 +585,13 @@
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
-   ]
+   ],
+   "zone_name": "South Highland",
+   "zone_domain_share": 0.6643356643356644,
+   "zone_cells": 143,
+   "zone_mean": null,
+   "zone_relationship": null,
+   "zone_relationship_code": null
   },
   {
    "id": "emi_bega_2026_27_outlook_zone_VII_finding",
@@ -598,7 +610,13 @@
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
-   ]
+   ],
+   "zone_name": "South",
+   "zone_domain_share": 0.7068965517241379,
+   "zone_cells": 58,
+   "zone_mean": null,
+   "zone_relationship": null,
+   "zone_relationship_code": null
   },
   {
    "id": "emi_bega_2026_27_outlook_zone_VIII_finding",
@@ -617,7 +635,13 @@
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
-   ]
+   ],
+   "zone_name": "South-Southeast lowlands",
+   "zone_domain_share": 0.986046511627907,
+   "zone_cells": 430,
+   "zone_mean": null,
+   "zone_relationship": null,
+   "zone_relationship_code": null
   }
  ],
  "icpac_table": [
@@ -842,7 +866,18 @@
    "area_key": "any",
    "status": "validated",
    "relationship": null,
-   "text": "Not calculated: rainfall-anomaly differences, because no official rainfall-amount anomaly product was found in the checked ICPAC and EMI products; which forecast is more accurate, because that needs observations and a separate verification design (see Verification); zone-mean platform probabilities for EMI zones, because the zone boundaries are not published with the figure; same-event probability differences, because the target windows or spatial supports differ and ICPAC publishes only favoured-category intervals.",
+   "text": "Not calculated: rainfall-anomaly differences, because no official rainfall-amount anomaly product was found in the checked ICPAC and EMI products; which forecast is more accurate, because that needs observations and a separate verification design (see Verification); same-event probability differences, because the target windows or spatial supports differ and ICPAC publishes only favoured-category intervals.",
+   "evidence_ids": []
+  },
+  {
+   "id": "pending_review",
+   "finding": null,
+   "source_id": null,
+   "area": null,
+   "area_key": "any",
+   "status": "validated",
+   "relationship": null,
+   "text": "Awaiting review: the values extracted from the EMI Bega (ONDJ) 2026/27 outlook have not yet been checked against the published figures by a person, so no comparison numbers are published for them yet. The original figures are shown below.",
    "evidence_ids": []
   }
  ],
@@ -912,12 +947,7 @@
   "emi_bega_2026_27_outlook_comparison_map": {
    "label": "Comparison map",
    "kind": "comparison_map",
-   "links": [
-    {
-     "label": "Comparison map",
-     "href": "assets/external/ondj2026/emi_bega_2026_27_outlook_anchors.png"
-    }
-   ]
+   "links": []
   },
   "icpac_ond_2026_update_rainfall_comparison_map": {
    "label": "Comparison map",
@@ -937,6 +967,29 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-09T12:08:18+00:00",
- "engine": "rules v2"
+ "created_utc": "2026-10-09T13:52:18+00:00",
+ "engine": "rules v2",
+ "reference_layers": [
+  {
+   "id": "emi_rainfall_regions",
+   "provider": "EMI homogeneous rainfall regions (as published by Korecha and Sorteberg 2013)",
+   "status": "needs_extraction_review",
+   "note": "Draft extraction awaiting review",
+   "citation": "Korecha, D., and A. Sorteberg (2013), Validation of operational seasonal rainfall forecast in Ethiopia, Water Resources Research, 49(11), 7681-7697, doi:10.1002/2013WR013760 (figure: homogeneous rainfall regions currently used for the preparation of seasonal rainfall forecast in Ethiopia).",
+   "doi": "10.1002/2013WR013760",
+   "url": "https://agupubs.onlinelibrary.wiley.com/doi/10.1002/2013WR013760",
+   "license_note": "Publisher's terms (Wiley); the figure is not redistributed. Only the digitized region grid derived from it is stored and published, with this citation.",
+   "review": null,
+   "region_names": {
+    "I": "Northeast",
+    "II": "Northwest",
+    "III": "Southwest",
+    "IV": "Central",
+    "V": "East",
+    "VI": "South Highland",
+    "VII": "South",
+    "VIII": "South-Southeast lowlands"
+   }
+  }
+ ]
 }
