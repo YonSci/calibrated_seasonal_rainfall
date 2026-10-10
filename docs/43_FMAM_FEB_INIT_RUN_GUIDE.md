@@ -131,17 +131,18 @@ python scripts\prepare_verification_2026.py --config config\fmam_feb\project.jso
 ## Step 10 — Maps, skill summaries, verification and the official comparison
 
 ```bat
-python scripts\run_operational.py --config config\cycles\feb_2026_fmam.json --workflow all --verification-targets Mar Apr May --compare-external
+python scripts\run_operational.py --config config\cycles\feb_2026_fmam.json --workflow all --verification-targets Feb Mar Apr May FMAM --compare-external
 python scripts\regional_skill.py --cycle config\cycles\feb_2026_fmam.json
 python scripts\historical_diagnostics.py --cycle config\cycles\feb_2026_fmam.json
 ```
 
-**Expect:** `Ready: …\outputs\operational_2026_fmam_feb\index.html`; the verification for March–May; and
+**Expect:** `Ready: …\outputs\operational_2026_fmam_feb\index.html`; the verification for all five targets; and
 `outputs\operational_2026_fmam_feb\comparisons\…` with the ICPAC and EMI comparison. The comparison reuses the FMAM
 registry and the extraction records you reviewed for January (same official products), so no new extraction work is
 needed. Records still in draft show up only in the review report, not on the site.
 
-If CHIRPS February 2026 has been published by then, use `--verification-targets Feb Mar Apr May FMAM`.
+February 2026 comes from the official annual CHIRPS p25 file because its `by_month` file was never published (see Step 14 of
+`docs/39_FMAM_RUN_GUIDE.md`).
 
 ## Step 11 — Site, tests, publish
 

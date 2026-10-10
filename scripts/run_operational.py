@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ORDER = ["Jun", "Jul", "Aug", "Sep", "JJAS"]
 MONTHS = {"Jun":6,"Jul":7,"Aug":8,"Sep":9}
 BASE = "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/"
+ANNUAL_BASE = "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/"   # same product, one file per year
 # Cycle values; configuration() replaces them with the selected cycle file's values.
 YEAR, REF_YEARS, OVERLAP_YEAR = 2026, list(range(1993,2026)), 2025
 TAG, SEASON, MONTH_YEAR = "init05", "JJAS", {}
@@ -160,9 +161,19 @@ def choose_verification(requested, target_scope, checker=probe):
     if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
         raise ValueError("--verification-targets must be 'auto' alone or target names")
     needed = [m for m in MONTHS if m in wanted or SEASON in wanted]
-    records = {m:checker(BASE+f"chirps-v2.0.{MONTH_YEAR.get(m,YEAR)}.{MONTHS[m]:02d}.days_p25.nc") for m in needed}
+    def record(m):
+        y = MONTH_YEAR.get(m,YEAR)
+        r = checker(BASE+f"chirps-v2.0.{y}.{MONTHS[m]:02d}.days_p25.nc")
+        if r["status"]!="unavailable":
+            return r
+        # by_month not published: the same official p25 data in the annual file (identity-checked when prepared)
+        a = checker(ANNUAL_BASE+f"chirps-v2.0.{y}.days_p25.nc")
+        if a["status"]=="available":
+            return dict(a,source="annual p25 file (by_month file not published)",by_month=r)
+        return r if a["status"]=="unavailable" else a
+    records = {m:record(m) for m in needed}
     for m,r in records.items():
-        print("CHIRPS availability:",m,r["status"],flush=True)
+        print("CHIRPS availability:",m,r["status"]+(" ("+r["source"]+")" if r.get("source") else ""),flush=True)
     unknown = [m for m,r in records.items() if r["status"]=="unknown"]
     if unknown:
         raise ValueError("Observation availability is unknown for "+", ".join(unknown)+". Check connectivity and retry; network failures are not treated as absent observations. Use --workflow products for an offline presentation run.")

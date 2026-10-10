@@ -14,6 +14,9 @@ MONTHS={calendar.month_abbr[m]:m for m in season_months(CYCLE.project)}
 PERIODS={k:(f'{m:02d}-01',f'{m:02d}-{calendar.monthrange(2000,m)[1]:02d}') for k,m in MONTHS.items()}  # same convention as monthly_config
 PERIODS[_SEASON['name']]=(_SEASON['start'],_SEASON['end'])
 BASE='https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/by_month/'
+# The same official daily p25 product as one file per year; used only for a month whose by_month file is not
+# published, after other months of that year are shown to be identical in both files.
+ANNUAL_BASE='https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/netcdf/p25/'
 from cycle import SEASON, TARGET_ORDER, DOMAIN_VIEW, target_window
 TAG=CYCLE.tag                                    # e.g. init05, init09
 TARGETS=[SEASON,*MONTHS]                         # freeze/verification order: season, then months

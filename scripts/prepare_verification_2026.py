@@ -42,6 +42,10 @@ def fetch(year,month,cache):
         receipt=dest.with_suffix('.download.json')
         if not receipt.is_file():raise ValueError('Cached file has no download provenance: '+str(dest)+'. Move it out of this cache and rerun to download from the official archive.')
         record=read(receipt)
+        if record.get('derived_from'):
+            if record.get('sha256')!=sha(dest) or record['derived_from'].get('url')!=ANNUAL_BASE+record['derived_from']['file']:
+                raise ValueError('Cached month subset differs from its recorded derivation: '+str(dest))
+            print('Using cached',name,'(month subset of the official annual p25 file)',flush=True);return dest
         if record.get('url')!=BASE+name or record.get('sha256')!=sha(dest):raise ValueError('Cached data differ from their recorded official download: '+str(dest))
         print('Using cached',name,flush=True);return dest
     cache.mkdir(parents=True,exist_ok=True);part=cache/(name+'.'+uuid.uuid4().hex+'.part')
@@ -56,10 +60,88 @@ def fetch(year,month,cache):
         part.replace(dest)
         write(dest.with_suffix('.download.json'),{'url':url,'retrieved_utc':now(),'sha256':sha(dest),'product':'CHIRPS v2.0 official daily p25 archive; no preliminary-product substitution'})
     except urllib.error.HTTPError as exc:
-        if exc.code==404:raise ValueError(f'{name} is not available at the official archive. Exclude this month for now; no incomplete total will be created.') from exc
+        if exc.code==404:
+            if part.exists():part.unlink()
+            return from_annual(year,month,cache)
         raise
     finally:
         if part.exists():part.unlink()
+    return dest
+
+def download_annual(year,cache,need):
+    """Official annual p25 file (cached with a receipt); refreshed when it lacks the needed month."""
+    name=f'chirps-v2.0.{year}.days_p25.nc';dest=cache/name;url=ANNUAL_BASE+name
+    def covers(p):
+        with xr.open_dataset(p) as d:
+            days=set(np.asarray(d.time.values).astype('datetime64[D]'))
+        return need<=days
+    if dest.is_file():
+        rec=read(dest.with_suffix('.download.json'))
+        if rec.get('url')!=url or rec.get('sha256')!=sha(dest):raise ValueError('Cached annual file differs from its recorded official download: '+str(dest))
+        if covers(dest):return dest,rec
+    cache.mkdir(parents=True,exist_ok=True);part=cache/(name+'.'+uuid.uuid4().hex+'.part')
+    print('Downloading',name,'(official annual p25 file)',flush=True)
+    for attempt in range(1,4):   # a large file: retry a stalled or truncated transfer before giving up
+        try:
+            with urllib.request.urlopen(url,timeout=120) as response,part.open('wb') as out:
+                shutil.copyfileobj(response,out,length=1024*1024)
+                expected=response.headers.get('Content-Length');modified=response.headers.get('Last-Modified')
+            if expected and part.stat().st_size!=int(expected):raise ValueError('Incomplete download')
+            part.replace(dest);break
+        except (OSError,ValueError) as exc:
+            if attempt==3 or isinstance(exc,urllib.error.HTTPError):raise
+            print(f'Download attempt {attempt} failed ({exc}); retrying',flush=True)
+        finally:
+            if part.exists():part.unlink()
+    rec={'url':url,'retrieved_utc':now(),'sha256':sha(dest),'http_last_modified':modified,
+         'product':'CHIRPS v2.0 official daily p25 archive, annual file'}
+    write(dest.with_suffix('.download.json'),rec)
+    if not covers(dest):raise ValueError(f'{name} does not yet contain every day of the requested month; no incomplete total will be created.')
+    return dest,rec
+
+def from_annual(year,month,cache):
+    """Month subset of the official annual p25 file when the by_month file is not published.
+
+    Accepted only after at least one other month of the same year is bit-identical in the annual file and
+    in its published by_month file (same values, grid and days), i.e. the two are the same product.
+    """
+    import calendar as cal
+    name=f'chirps-v2.0.{year}.{month:02d}.days_p25.nc';dest=cache/name
+    days=np.arange(np.datetime64(f'{year}-{month:02d}-01'),np.datetime64(f'{year}-{month:02d}-01')+np.timedelta64(cal.monthrange(year,month)[1],'D'))
+    print(f'{name} is not published; checking the official annual p25 file',flush=True)
+    annual,arec=download_annual(year,cache,set(days))
+    checks=[]
+    for other in sorted((m for m in range(1,13) if m!=month),key=lambda m:abs(m-month)):
+        ref=f'chirps-v2.0.{year}.{other:02d}.days_p25.nc'
+        try:
+            with urllib.request.urlopen(urllib.request.Request(BASE+ref,method='HEAD'),timeout=30):pass
+        except urllib.error.HTTPError:
+            continue
+        p=fetch(year,other,cache)
+        with xr.open_dataset(p) as a,xr.open_dataset(annual) as b:
+            sub=b.precip.sel(time=a.time)
+            # CHIRPS names its axes latitude/longitude; compare every axis whatever its name
+            same=(a.precip.dims==sub.dims and all(np.array_equal(a[k].values,sub[k].values) for k in a.precip.dims)
+                  and np.array_equal(a.precip.values,sub.values,equal_nan=True))
+        checks.append({'month':f'{year}-{other:02d}','by_month_url':BASE+ref,'by_month_sha256':sha(p),'identical':bool(same)})
+        if not same:raise ValueError(f'The annual p25 file differs from the published {ref}; it is not used as a substitute.')
+        if len(checks)==2:break
+    if not checks:raise ValueError(f'No published by_month file of {year} to check the annual file against; {name} not created.')
+    with xr.open_dataset(annual) as b:
+        sub=b.sel(time=slice(str(days[0]),str(days[-1]))).load()
+    t=np.asarray(sub.time.values).astype('datetime64[D]')
+    if not np.array_equal(t,days):raise ValueError(f'The annual file does not hold every day of {year}-{month:02d} exactly once')
+    sub.attrs.update(history_subset=f'{year}-{month:02d} extracted unchanged from {annual.name} (official annual p25 file); the by_month file was not published')
+    part=cache/(name+'.'+uuid.uuid4().hex+'.part.nc')
+    try:
+        sub.to_netcdf(part);part.replace(dest)
+    finally:
+        if part.exists():part.unlink()
+    write(dest.with_suffix('.download.json'),{'url':arec['url'],'retrieved_utc':now(),'sha256':sha(dest),
+        'derived_from':{'file':annual.name,'url':arec['url'],'sha256':arec['sha256'],'http_last_modified':arec.get('http_last_modified')},
+        'month':f'{year}-{month:02d}','equivalence_check':checks,
+        'product':'CHIRPS v2.0 official daily p25 archive: month subset of the annual p25 file (by_month file not published when checked); values unchanged'})
+    print(f'Created {name} from the annual file (identical to the published by_month files for '+', '.join(c['month'] for c in checks)+')',flush=True)
     return dest
 
 def main():
@@ -94,7 +176,7 @@ def main():
             month=MONTHS[name];my=month_year(name);p=fetch(my,month,cache)
             with xr.open_dataset(p) as new:b=daily_block(new,my,month,grid.lat,grid.lon)
             z,count=total(b);expected=b.sizes['time']
-            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count.astype('int16'))},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':name,'season_start':str(b.time.values[0])[:10],'season_end':str(b.time.values[-1])[:10],'expected_days':expected,'product':'CHIRPS Version 2.0 daily p25','source_url':BASE+p.name,'source_sha256':sha(p),'processing_utc':now(),'grid_method':'native coordinate match; no interpolation','forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
+            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count.astype('int16'))},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':name,'season_start':str(b.time.values[0])[:10],'season_end':str(b.time.values[-1])[:10],'expected_days':expected,'product':'CHIRPS Version 2.0 daily p25','source_url':read(p.with_suffix('.download.json')).get('url',BASE+p.name),'source_sha256':sha(p),'processing_utc':now(),'grid_method':'native coordinate match; no interpolation','forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
             ds.precip_season.attrs['units']='mm'
             with staged_output(root/'observations'/name,a.regenerate) as stage:
                 ds.to_netcdf(stage/f'chirps_{YEAR}_common.nc',encoding={k:{'zlib':True,'complevel':4} for k in ds.data_vars})

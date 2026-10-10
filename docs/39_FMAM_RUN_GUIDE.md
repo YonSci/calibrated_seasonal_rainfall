@@ -187,20 +187,22 @@ green tick (about 1 and 3 minutes). Then open <https://yonsci.github.io/calibrat
 | `Unexpected member count` | Incomplete download for that year | Delete that year's file and re-download it |
 | Page unchanged after push | Deployment running or browser cache | Wait for the green tick, then Ctrl + F5 |
 
-## Step 14 — Verification (added 2026-10-08)
+## Step 14 — Verification (added 2026-10-08; February added 2026-10-10)
 
-Verification now works for FMAM (see `docs/40_SEASON_RUN_GUIDES.md`, sections 3 and 4). Freeze the forecasts, then verify the
-months already published. **February 2026 is missing from the official CHIRPS v2.0 archive**, so verify March–May now;
-February and FMAM follow automatically once the file is published:
+Verification now works for FMAM (see `docs/40_SEASON_RUN_GUIDES.md`, sections 3 and 4). Freeze the forecasts, then verify.
+**CHIRPS never published the February 2026 `by_month` file.** The preparation step then takes February from the official
+annual p25 file (`chirps-v2.0.2026.days_p25.nc`, same product). It does so only after checking that the annual file is
+bit-identical to the published `by_month` files of neighbouring months (January and March 2026). The provenance is recorded in
+`data\raw\chirps\verification_p25\chirps-v2.0.2026.02.days_p25.download.json`. All five targets can therefore be verified:
 
 ```bat
 set CALIBRATION_CYCLE=config\cycles\jan_2026_fmam.json
-python scripts\prepare_verification_2026.py --config configmam\project.json --input-root outputsinal_shared_blend --root outputserification_2026_fmam --freeze-only
-python scriptsun_operational.py --config config\cycles\jan_2026_fmam.json --workflow all --verification-targets Mar Apr May
+python scripts\prepare_verification_2026.py --config config\fmam\project.json --input-root outputs\final_shared_blend --root outputs\verification_2026_fmam --freeze-only
+python scripts\run_operational.py --config config\cycles\jan_2026_fmam.json --workflow all --verification-targets Feb Mar Apr May FMAM --compare-external
 set CALIBRATION_CYCLE=
-python scriptsuild_site.py
+python scripts\build_site.py
 git add -A
-git commit -m "Verify FMAM 2026 March-May"
+git commit -m "Verify FMAM 2026 February-May and FMAM"
 git push
 ```
 
@@ -208,7 +210,6 @@ The site's FMAM section then shows a *Verification against CHIRPS* table, and th
 
 ## What this test does not cover
 
-* **February 2026 verification** waits for the official CHIRPS file (see Step 14).
 * **Method changes.** The FMAM run uses the frozen final method; any change must pass `scripts/decision_gates.py` first.
 
 When the run is finished, record its key numbers (λ per target, skill, the FMAM 2026 probabilities over the R2 domain)

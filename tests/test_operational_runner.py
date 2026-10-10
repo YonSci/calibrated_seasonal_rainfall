@@ -150,10 +150,16 @@ class OperationalTests(unittest.TestCase):
             self.assertFalse((root/"state/RUNNING.lock").exists())
 
     def test_availability_and_scope(self):
-        def checker(url):return {"status":"unavailable" if ".09." in url else "available","url":url}
+        def checker(url):return {"status":"unavailable" if ".09." in url or url.startswith(ops.ANNUAL_BASE+"chirps") else "available","url":url}
         months,ready,r=ops.choose_verification(["auto"],ops.ORDER,checker)
         self.assertEqual(ready,["Jun","Jul","Aug"])
         self.assertEqual(r["pending"],["Sep","JJAS"])
+        # A by_month file not published, but the annual file is: the month is taken from the annual file
+        def annual(url):return {"status":"unavailable" if ".09." in url else "available","url":url}
+        months,ready,r=ops.choose_verification(["auto"],ops.ORDER,annual)
+        self.assertEqual(ready,ops.ORDER)
+        self.assertEqual(r["files"]["Sep"]["url"],ops.ANNUAL_BASE+f"chirps-v2.0.{ops.YEAR}.days_p25.nc")
+        self.assertEqual(r["files"]["Sep"]["by_month"]["status"],"unavailable")
         with self.assertRaisesRegex(ValueError,"not ready"):
             ops.choose_verification(["JJAS"],ops.ORDER,checker)
         with self.assertRaisesRegex(ValueError,"unknown"):
