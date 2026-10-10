@@ -542,7 +542,11 @@ def _observed(base, assets, cid, stale):
     if stale or why:
         return dict(stale=why or ['the comparison'], rows=[], map=None)
     shutil.copy2(base / 'observed' / o['map'], assets / o['map'])
+    side = o.get('side_by_side_map')
+    if side:
+        shutil.copy2(base / 'observed' / side, assets / side)
     return dict(stale=[], rows=o['rows'], map=f'assets/external/{cid}/{o["map"]}', name=o['map'], notes=o['notes'],
+                side_by_side_map=f'assets/external/{cid}/{side}' if side else None, side_by_side_name=side,
                 windows=o['windows'], reference_years=o['reference_years'], created_utc=o['created_utc'])
 
 
@@ -661,6 +665,8 @@ def export_comparison(cycle, cid, out):
     package += [[m['file'], 'comparison/figures/' + m['name']] for m in maps]
     if observed and observed['map']:
         package.append([observed['map'], 'comparison/figures/' + observed['name']])
+    if observed and observed.get('side_by_side_map'):
+        package.append([observed['side_by_side_map'], 'comparison/figures/' + observed['side_by_side_name']])
     (dl / f'{cid}_comparison_report.html').write_text(public_report(data, f'../assets/external/{cid}/'), encoding='utf-8', newline='')
     packaged = public_report(data, 'figures/')
     in_zip = {z for _, z in package}
@@ -780,6 +786,10 @@ def public_report(data, prefix):
         sk = lambda x: '—' if x is None else f'{x:+.2f}'
         out = [f'<h2>Against CHIRPS observations</h2><p class="muted">Each outlook is scored against what CHIRPS observed for its own period; '
                f'observed terciles from CHIRPS {obs["reference_years"][0]}–{obs["reference_years"][1]} per 0.25° cell. One season only.</p>']
+        if obs.get('side_by_side_map'):
+            out.append(f'<figure><img src="{esc(prefix + name(obs["side_by_side_map"]))}" alt="Outlooks and observed terciles"><figcaption>Top: the '
+                       'favoured category of the platform, EMI and ICPAC; bottom: the tercile CHIRPS observed (same colours), for the season and '
+                       'for ICPAC\'s period.</figcaption></figure>')
         for key, title in [('all_ethiopia', 'All Ethiopia'), ('season_domain', dom)]:
             rows = [r for r in obs['rows'] if r.get('area_key') == key and (r['source_id'] != 'platform_on_emi_zones' or r['area_share'] < .995)]
             if rows:

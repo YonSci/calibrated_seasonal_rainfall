@@ -242,11 +242,13 @@ def verify_external(comparison_root, verification_root, processed_root, tag, yea
     tmp = ef.staging(out)
     figure = 'observed_comparison.png'
     observed_map(tmp / figure, lon, lat, region, domain, maps, plat, zone_recs, rows)
+    side = 'forecasts_and_observed.png'
+    side_by_side_map(tmp / side, lon, lat, region, domain, maps, plat, zone_recs)
     inputs = dict(comparison_sha256=sha(comp_file), official_records_sha256=sha(rec_file), native_sha256=sha(native), domain_mask_sha256=sha(domain_mask),
                   observations={k: v for o in cache.values() if 'files' in o for k, v in o['files'].items()})
     write_json(tmp / 'observed_verification.json', dict(
         created_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), season=season, year=year,
-        reference_years=[ref_years[0], ref_years[-1]], inputs=inputs, rows=rows, map=figure,
+        reference_years=[ref_years[0], ref_years[-1]], inputs=inputs, rows=rows, map=figure, side_by_side_map=side,
         windows={', '.join(k): v.get('basis', v.get('unavailable')) for k, v in cache.items()},
         notes=['Single season: descriptive scores for one year, not evidence of general skill.',
                'Each outlook is scored against observations for its own target window; the observed tercile uses CHIRPS '
@@ -338,6 +340,81 @@ def observed_map(path, lon, lat, region, domain, maps, plat, zone_recs, rows):
     fig.suptitle(f'Outlooks against CHIRPS observations — {plat["label"]} (single season; black lines in the EMI panel: EMI zones)', fontsize=11)
     fig.subplots_adjust(left=.03, right=.99, bottom=.1 if nrows > 1 else .2, top=.92, wspace=.06, hspace=.14)
     _draft(fig, True)
+    fig.savefig(path, dpi=130, facecolor='white')
+    plt.close(fig)
+
+
+def side_by_side_map(path, lon, lat, region, domain, maps, plat, zone_recs):
+    """The outlooks' favoured categories next to the observed CHIRPS terciles, in the same colours.
+
+    Top row: platform, EMI and ICPAC as published (favoured category at >= 40%). Bottom row: the observed
+    tercile for the season and, when ICPAC's window differs, for ICPAC's window, under the ICPAC panel.
+    """
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    from matplotlib.patches import Patch
+    ext = [lon[0] - .125, lon[-1] + .125, lat[0] - .125, lat[-1] + .125]
+    keys = [*CATS, 'weak', 'noforecast']
+    cmap = ListedColormap([COLOURS[k] for k in keys[:-1]] + ['white'])   # no outlook: white, hatched (grey is near normal)
+    pwin = months(plat['target_start'], plat['target_end'])
+    span = lambda win: win[0] if len(win) == 1 else f'{win[0].split()[0]}–{win[-1]}'
+
+    def code(fav, support):
+        z = np.full(fav.shape, np.nan)
+        for i, j in zip(*np.nonzero(support)):
+            v = fav[i, j]
+            z[i, j] = keys.index(v) if v in keys else keys.index('weak')
+        return z
+
+    def frame(ax, title, zones=False):
+        ax.set_facecolor(COLOURS['unknown'])
+        _boundary(ax)
+        interior_contour(ax, lon, lat, domain & region, region, colors='#446761', linewidths=.8)
+        if zones:
+            for r in zone_recs:
+                interior_contour(ax, lon, lat, r['_mask'], region, colors='black', linewidths=1.1)
+        ax.set_xlim(ext[:2]); ax.set_ylim(ext[2:]); ax.set_aspect('equal'); ax.tick_params(labelsize=7)
+        ax.set_title(title, fontsize=9.5)
+
+    pfav, po = maps['platform']
+    support = po['y'] >= 0
+    top = [(code(pfav, support), f'Platform {plat["label"]}', False)]
+    if 'emi' in maps:
+        efav, _, _ = maps['emi']
+        top.append((code(efav, support), f'EMI {span(pwin)} (zone values)', True))
+    if 'icpac' in maps:
+        ifav, io, ilabel, iwin = maps['icpac']
+        top.append((code(ifav, support), f'ICPAC {span(iwin)}', False))
+    obs = lambda o: np.where(o['y'] >= 0, o['y'], np.nan).astype(float)
+    bottom = [(obs(po), f'Observed {span(pwin)} (CHIRPS)', False)]
+    if 'icpac' in maps and iwin != pwin:
+        bottom.append((obs(io), f'Observed {span(iwin)} (CHIRPS), ICPAC\'s period', False))
+    cols = len(top)
+    fig, axes = plt.subplots(2, cols, figsize=(4.7 * cols, 9.2), squeeze=False)
+    for ax, (z, title, zones) in zip(axes[0], top):
+        ax.imshow(z, origin='lower', extent=ext, cmap=cmap, vmin=-.5, vmax=len(keys) - .5, interpolation='nearest')
+        none = z == keys.index('noforecast')
+        if none.any():
+            ax.contourf(lon, lat, none.astype(float), levels=[.5, 1.5], colors='none', hatches=['////'])
+        frame(ax, title + ': favoured category', zones)
+    slots = [0, cols - 1] if len(bottom) == 2 else [0]
+    for k, (z, title, zones) in zip(slots, bottom):
+        axes[1, k].imshow(z, origin='lower', extent=ext, cmap=cmap, vmin=-.5, vmax=len(keys) - .5, interpolation='nearest')
+        frame(axes[1, k], title + ': tercile', zones)
+    for k in range(cols):
+        if k not in slots:
+            axes[1, k].axis('off')
+    if cols > 2 and len(bottom) == 2:
+        axes[1, 1].text(.5, .5, 'Same colours above and below:\nthe favoured category of each\noutlook (top) and the tercile\nthat was observed (bottom).\n\nEach outlook is shown with\nthe observations for its own\nperiod: platform and EMI\n' + span(pwin) + ', ICPAC ' + span(iwin) + '.',
+                        ha='center', va='center', fontsize=9, transform=axes[1, 1].transAxes)
+    fig.legend(handles=[Patch(color=COLOURS[c], label=NAMES[c]) for c in CATS] +
+               [Patch(facecolor='white', edgecolor='grey', label='no favoured category (<40%)'),
+                Patch(facecolor='white', edgecolor='#555', hatch='////', label='no outlook (ICPAC grey; outside the EMI zones)')],
+               loc='lower center', ncol=5, fontsize=8.5, frameon=False)
+    fig.suptitle(f'Official outlooks, the platform forecast and the observed CHIRPS terciles — {plat["label"]}', fontsize=11)
+    fig.subplots_adjust(left=.03, right=.99, bottom=.07, top=.92, wspace=.06, hspace=.12)
     fig.savefig(path, dpi=130, facecolor='white')
     plt.close(fig)
 

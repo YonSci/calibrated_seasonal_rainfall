@@ -81,6 +81,10 @@ per 0.25° cell, as in the platform verification; the official reference periods
 | Opposite outer category observed | yes | yes | yes |
 | RPSS against the CHIRPS climatology, on identical cells | yes | yes (zone values applied over each digitized zone) | no: only the favoured category and its interval are published, and the others are not inferred |
 
+The stage also draws `forecasts_and_observed.png`: the favoured category of the platform, EMI and ICPAC side by side, above the
+tercile CHIRPS observed for the season and for ICPAC's period, in the same colours. The EMI zone and ICPAC tables on the site
+gain an *Observed (CHIRPS)* column with the observed below / near / above shares.
+
 The scores are given for All Ethiopia, the season domain and each EMI zone, with the share of the area each outlook covers
 (EMI leaves out its climatologically dry areas). The platform is also scored on the EMI cells only, for a like-for-like
 RPSS. These are **single-season** descriptive scores, not evidence of general skill. The site publishes them only while

@@ -1205,6 +1205,12 @@ JS = r'''
       if (X.stale.length) h += '<p class="notice"><strong>Comparison withheld.</strong> The saved comparison no longer matches the current ' + esc(X.stale.join(', ')) +
         '. Its findings are not shown until it is regenerated: <code>' + esc(X.rerun) + '</code></p>';
       const O = X.observed, scored = !!(O && O.rows && O.rows.length);
+      // Observed CHIRPS tercile shares (below / near / above) for a zone or area, as scored for a given outlook.
+      const obsRow = (sid, zone, akey) => !scored ? null : O.rows.find(r => (zone ? r.area_key === 'zone' && r.zone === zone : r.area_key === akey) &&
+        (sid === 'icpac' ? r.provider === 'ICPAC' : r.source_id === sid));
+      const obsSpan = r => r.window[0] === r.window[1] ? r.window[0] : r.window[0].split(' ')[0] + '–' + r.window[1];
+      const obsTxt = r => { if (!r) return '—'; const f = r.observed_fractions, k = ['below', 'near', 'above'], top = k.reduce((a, b) => f[b] > f[a] ? b : a);
+        return k.map(c => (c === top ? '<strong>' : '') + Math.round(100 * f[c]) + '%' + (c === top ? '</strong>' : '')).join(' / '); };
       h += '<p class="caveat">Official outlooks from ICPAC and the Ethiopian Meteorology Institute (EMI), compared with this platform\'s forecast, using only values a person has checked against the published figures. ' +
         (scored ? 'The first parts describe agreement between the outlooks; <a href="#cmp-observed">Against CHIRPS observations</a> scores each of them against what was observed this season.</p>'
                 : 'The comparison describes agreement between outlooks, not which is more accurate.</p>');
@@ -1244,13 +1250,15 @@ JS = r'''
         const rows = areaKey === 'all_ethiopia' ? X.emi_table : [...X.emi_table].sort((a, b) => b.domain_share - a.domain_share);
         const hasZone = rows.some(r => r.zone_mean), hasArrow = rows.some(r => r.platform !== '—');
         h += '<div class="table-wrap"><table class="compact"><caption>EMI zones: printed values and the platform (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">Official</th>' +
-          (hasZone ? '<th scope="col">Platform over the whole zone</th>' : '') + (hasArrow ? '<th scope="col">Platform near the arrow (±0.5°)</th><th scope="col">Relationship near the arrow</th>' : '') + '<th scope="col">Evidence</th></tr></thead><tbody>' +
+          (hasZone ? '<th scope="col">Platform over the whole zone</th>' : '') + (hasArrow ? '<th scope="col">Platform near the arrow (±0.5°)</th><th scope="col">Relationship near the arrow</th>' : '') +
+          (hasZone && scored ? '<th scope="col">Observed (CHIRPS) ' + esc(obsSpan(O.rows.find(r => r.source_id === 'emi') || O.rows[0])) + '</th>' : '') + '<th scope="col">Evidence</th></tr></thead><tbody>' +
           rows.map(r => { const mapView = areaKey === 'season_domain' && r.domain_share >= 1 ? c.domain_view : 'all_ethiopia';
             const zoneCell = hasZone ? '<td>' + (r.zone_mean ? '<span class="nowrap">' + esc(r.zone_mean) + '</span><br><span class="caveat">' + esc(r.zone_relationship) +
               (r.zone_name ? ' · ' + esc(r.zone_name) + ' region' : '') + (areaKey === 'season_domain' && ok(r.zone_domain_share) && r.zone_domain_share < 1 ? ' · ' + (100 * r.zone_domain_share).toFixed(0) + '% of the zone in the domain' : '') + '</span>' : '—') + '</td>' : '';
             return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>Zone ' + esc(r.zone) +
               (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + (hasArrow ? overlap(r.domain_share) + ' (arrow sample)' : overlap(r.zone_domain_share)) + '</span>') + '</td><td class="nowrap">' + esc(r.official) + '</td>' + zoneCell + (hasArrow ? '<td class="nowrap">' + esc(r.platform) +
-              '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td>' : '') + '<td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
+              '</td><td>' + esc(r.relationship) + (r.stable === false ? ' <span class="caveat">(sensitive to location)</span>' : '') + '</td>' : '') +
+              (hasZone && scored ? '<td class="nowrap">' + obsTxt(obsRow('emi', r.zone)) + '</td>' : '') + '<td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
           '</tbody></table></div><p class="caveat">Platform values are area means of local probabilities. ' + (hasZone ? '"Whole zone" uses EMI\'s homogeneous rainfall regions as published in 2013 (assumed unchanged for 2026/27); ' : '') + '"near the arrow" uses the ±0.5° sample around each arrow tip, also where it only partly overlaps the domain. Percentages are rounded to add up to 100%.</p>';
       }
       const icpacSrc = X.sources.find(s => s.provider === 'ICPAC');
@@ -1259,14 +1267,16 @@ JS = r'''
         const samples = X.icpac_table.filter(r => r.kind === 'sample'), arows = X.icpac_table.filter(r => r.kind === 'area');
         const ordered = [...(areaKey === 'all_ethiopia' ? samples : [...samples].sort((a, b) => b.domain_share - a.domain_share)),
                          ...arows.filter(r => r.area_key === areaKey), ...arows.filter(r => r.area_key !== areaKey)];
-        h += '<div class="table-wrap"><table class="compact"><caption>ICPAC: printed favoured category and interval vs the platform (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">ICPAC (favoured category, printed interval)</th><th scope="col">Platform</th><th scope="col">Relationship</th><th scope="col">Evidence</th></tr></thead><tbody>' +
+        h += '<div class="table-wrap"><table class="compact"><caption>ICPAC: printed favoured category and interval vs the platform (below / near / above)</caption><thead><tr><th scope="col">Location</th><th scope="col">ICPAC (favoured category, printed interval)</th><th scope="col">Platform</th><th scope="col">Relationship</th>' + (scored ? '<th scope="col">Observed (CHIRPS)</th>' : '') + '<th scope="col">Evidence</th></tr></thead><tbody>' +
           ordered.map(r => { const mapView = r.kind === 'area' ? (r.area_key === 'season_domain' ? c.domain_view : 'all_ethiopia')
                                              : (areaKey === 'season_domain' && r.domain_share >= 1 ? c.domain_view : 'all_ethiopia');
             const where = r.kind === 'sample' ? (areaKey === 'all_ethiopia' ? '' : '<br><span class="caveat">' + overlap(r.domain_share) + '</span>')
                                               : (r.area_key === areaKey ? '<br><span class="caveat">selected area</span>' : '<br><span class="caveat">' + otherName.toLowerCase() + '</span>');
             return '<tr' + (r.relationship_code === 'opposing_favoured_categories' ? ' class="current"' : '') + '><td>' + esc(r.location) + where + '</td><td>' + esc(r.official) +
-              (r.official_note ? '<br><span class="caveat">' + esc(r.official_note) + '</span>' : '') + '</td><td class="nowrap">' + esc(r.platform) + '</td><td>' + esc(r.relationship) +
-              '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
+              (r.official_note ? '<br><span class="caveat">' + esc(r.official_note) + '</span>' : '') + '</td><td class="nowrap">' + esc(r.platform) + '</td><td>' + esc(r.relationship) + '</td>' +
+              (scored ? (() => { const oi = obsRow('icpac', r.zone, r.area_key), op = obsRow('platform', r.zone, r.area_key);
+                return '<td class="nowrap">' + [oi, op].filter(Boolean).map(o => esc(obsSpan(o)) + ': ' + obsTxt(o)).join('<br>') + '</td>'; })() : '') +
+              '<td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
           '</tbody></table></div><p class="caveat">ICPAC publishes only the favoured category and its probability interval (the other two categories are not published), for ' + icpacPeriod + '; the platform covers ' + dt(X.platform.target_start) + ' – ' + dt(X.platform.target_end) + ', so the two are compared as tendencies, not as the same event. Locations are the EMI arrow-tip boxes or the digitized EMI zones; platform values are area means of local probabilities over each location or area.</p>';
       }
       // 3b. against observations (single season), once the season has been verified
@@ -1277,6 +1287,8 @@ JS = r'''
         const rows = O.rows.filter(r => r.area_key === areaKey && (r.source_id !== 'platform_on_emi_zones' || r.area_share < 0.995));
         h += '<h3 id="cmp-observed">Against CHIRPS observations — ' + esc(areaName) + '</h3><p class="caveat">Each outlook is scored against what CHIRPS observed for <em>its own</em> period, with observed terciles from CHIRPS ' +
           O.reference_years.join('–') + ' in each 0.25° cell. One season only: these numbers describe 2026, not general skill.</p>' +
+          (O.side_by_side_map ? '<figure class="map-figure wide"><a href="' + href(O.side_by_side_map) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(O.side_by_side_map) +
+            '" alt="Platform, EMI and ICPAC favoured categories with the observed CHIRPS terciles"></a><figcaption>Top: the favoured category of the platform, EMI and ICPAC (same colours as the observed terciles; white: no category reaches 40%; hatched: no outlook). Bottom: the tercile CHIRPS observed, for the season and for ICPAC\'s period.</figcaption></figure>' : '') +
           '<div class="table-wrap"><table class="compact"><caption>Favoured category vs observed, and probability skill</caption><thead><tr><th scope="col">Outlook</th><th scope="col">Period</th><th scope="col">Covers</th><th scope="col">Favours a category on</th><th scope="col">Favoured category observed</th><th scope="col">Opposite category observed</th><th scope="col">Chance</th><th scope="col">RPSS vs climatology</th></tr></thead><tbody>' +
           rows.map(r => '<tr><td>' + esc(r.source_id === 'platform_on_emi_zones' ? 'Platform, on the EMI zones only' : r.provider + ' — ' + r.label) + '</td><td class="nowrap">' + esc(win(r)) + '</td><td>' + pc(r.area_share) + '</td><td>' + pc(r.favoured_share) +
             '</td><td><strong>' + pc(r.hit_share) + '</strong></td><td>' + pc(r.opposite_share) + '</td><td>' + pc(r.chance_of_favoured) + '</td><td>' + (r.provider === 'ICPAC' ? '<span class="caveat">not computed</span>' : sk(r.rpss)) + '</td></tr>').join('') +

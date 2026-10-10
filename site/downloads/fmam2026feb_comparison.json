@@ -981,7 +981,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\feb_2026_fmam.json --workflow products --compare-external",
- "created_utc": "2026-10-10T09:05:26+00:00",
+ "created_utc": "2026-10-10T11:32:57+00:00",
  "engine": "rules v2",
  "reference_layers": [],
  "observed": {
@@ -1607,6 +1607,8 @@
    "RPSS: ranked probability skill score against the CHIRPS climatology, on identical cells; ICPAC publishes only the favoured category and its interval, so no RPSS is computed for ICPAC.",
    "EMI zone probabilities are applied uniformly over each digitized zone."
   ],
+  "side_by_side_map": "assets/external/fmam2026feb/forecasts_and_observed.png",
+  "side_by_side_name": "forecasts_and_observed.png",
   "windows": {
    "Feb 2026, Mar 2026, Apr 2026, May 2026": "verified FMAM observations",
    "Mar 2026, Apr 2026, May 2026": "sum of verified monthly totals (Mar, Apr, May); terciles from the same months 1993-2025"
@@ -1615,6 +1617,6 @@
    1993,
    2025
   ],
-  "created_utc": "2026-10-10T09:05:27+00:00"
+  "created_utc": "2026-10-10T11:33:06+00:00"
  }
 }
