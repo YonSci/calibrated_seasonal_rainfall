@@ -109,6 +109,24 @@ def read_block(path, lat, lon):
     return sub.reshape(len(lat), 5, len(lon), 5)
 
 
+def write_review_cache(archive, path):
+    """The rainfall-domain review's monthly cache (same contract as the v2 calendar cache), from the v3 archive."""
+    with xr.open_dataset(archive) as d:
+        m = d.monthly_total.load()
+    years = sorted({int(t.dt.year) for t in m.time if (m.time.dt.year == int(t.dt.year)).sum() == 12})
+    cube = np.stack([[m.sel(time=f'{y}-{mo:02d}-01').values for mo in range(1, 13)] for y in years]).astype('float64')
+    ds = xr.Dataset({'monthly_total': (('year', 'month', 'lat', 'lon'), cube)},
+                    coords=dict(year=np.array(years, 'int32'), month=np.arange(1, 13, dtype='int32'), lat=m.lat.values, lon=m.lon.values))
+    ds.monthly_total.attrs['units'] = 'mm'
+    ds.attrs.update(source_path=str(archive), source_sha256=sha(archive), dataset='CHIRPS v3.0 (0.05 deg monthly, 0.25 deg block mean)',
+                    calendar_policy='Published CHIRPS v3 monthly totals (calendar months; Feb29 included as published); no daily cycle',
+                    missing_policy='A cell is missing in a month when fewer than the required 0.05 deg sub-cells are valid; no imputation',
+                    created_utc=now(), script='scripts/prepare_chirps_v3.py --review-cache')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    ds.to_netcdf(path)
+    print(f'Review cache: {path} ({years[0]}-{years[-1]})')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--first', default='1993-01')
@@ -116,6 +134,8 @@ def main():
     ap.add_argument('--min-valid', type=int, default=13, help='valid 0.05 deg cells needed out of 25 (default: a majority)')
     ap.add_argument('--workers', type=int, default=2)
     ap.add_argument('--out', default=str(OUT))
+    ap.add_argument('--review-cache', help='Also write monthly_total(year, month, lat, lon) for the rainfall-domain review '
+                                           '(complete calendar years only) to this path')
     a = ap.parse_args()
     with xr.open_dataset(GRID) as g:
         lat, lon = g.lat.values.astype('float64'), g.lon.values.astype('float64')
@@ -156,6 +176,8 @@ def main():
     ds.to_netcdf(tmp, encoding={'monthly_total': {'zlib': True, 'complevel': 4}, 'valid_subcells': {'zlib': True}})
     tmp.replace(out)
     (out.parent / (out.stem + '.receipts.json')).write_text(json.dumps(receipts, indent=1), encoding='utf-8')
+    if a.review_cache:
+        write_review_cache(out, Path(a.review_cache))
     print(f'Saved {out}: {len(todo)} months, {int(np.isfinite(totals[0]).sum())} valid cells in the first month')
 
 
