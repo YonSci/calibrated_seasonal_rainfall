@@ -2,6 +2,7 @@
 
 Explicit source contract: ECMWF tp in metres accumulated since initialization,
 first endpoint at init+24 h, and all endpoints 24 h apart. CHIRPS is daily mm.
+A monthly CHIRPS archive ("chirps_temporal": "monthly", e.g. CHIRPS v3) is summed over whole months.
 Unsupported structures fail rather than guessing units or interval meanings.
 """
 import argparse
@@ -109,7 +110,42 @@ def model_season(ds, cfg, year):
     return out, qc
 
 
+def chirps_season_monthly(da, cfg, year):
+    """Season total from a monthly CHIRPS archive (CHIRPS v3 track): the sum of the season's whole calendar
+    months. Every month must be present; a cell missing in any month stays missing (no partial seasons)."""
+    if str(da.attrs.get("units", "")).strip().lower() != "mm":
+        raise ValueError(f"Expected monthly CHIRPS totals in mm; found {da.attrs.get('units')!r}")
+    if set(da.dims) != {"time", "lat", "lon"}:
+        raise ValueError(f"Expected CHIRPS time/lat/lon, found {list(da.dims)}")
+    days = season_dates(cfg, year)
+    if days[0].day != 1 or (days[-1] + pd.Timedelta(days=1)).day != 1:
+        raise ValueError("A monthly CHIRPS archive can only build seasons of whole calendar months")
+    starts = pd.date_range(days[0], days[-1], freq="MS")
+    stamps = pd.DatetimeIndex(da.time.values)
+    if not stamps.is_unique or not (stamps == stamps.to_period("M").to_timestamp()).all():
+        raise ValueError("Monthly CHIRPS times must be unique first-of-month labels")
+    if np.any(stamps.get_indexer(starts) < 0):
+        raise ValueError(f"Missing CHIRPS months for {year}")
+    block = da.sel(time=starts).transpose("time", "lat", "lon").load()
+    if np.isinf(block.values).any() or (block.values < 0).any():
+        raise ValueError("Invalid negative or infinite CHIRPS rainfall")
+    total = block.sum("time", skipna=False)
+    if not np.isfinite(total.values).any():
+        raise ValueError(f"No complete CHIRPS cells for {year}")
+    # valid_day_count keeps its meaning: days covered by valid monthly totals
+    count = sum(xr.where(block.isel(time=i).notnull(), int(starts[i].days_in_month), 0) for i in range(len(starts)))
+    total.name = "precip_season"
+    total.attrs = {"units": "mm", "long_name": "Observed seasonal total precipitation"}
+    out = xr.Dataset({"precip_season": total, "valid_day_count": count.astype("int16")})
+    out = out.expand_dims(year=[year])
+    out.attrs.update(grid="native CHIRPS; no remapping", expected_days=len(days), source_temporal="monthly totals",
+                     source_version=str(da.attrs.get("long_name", "")))
+    return out
+
+
 def chirps_season(ds, cfg, year):
+    if cfg.get("chirps_temporal", "daily") == "monthly":       # e.g. CHIRPS v3 (et_chirps3_monthly_r25.nc)
+        return chirps_season_monthly(ds[cfg["chirps_variable"]], cfg, year)
     da = ds[cfg["chirps_variable"]]
     units = str(da.attrs.get("units", "")).strip().lower()
     if units not in {"mm/day", "mm/d", "mm day-1", "mm day^-1", "mm d-1", "mm"}:

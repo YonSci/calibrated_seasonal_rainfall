@@ -61,5 +61,35 @@ class Comparison(unittest.TestCase):
         self.assertAlmostEqual(float(cv.corr(x, 2 * x + 1)[0, 0]), 1.0)
 
 
+
+class MonthlyArchive(unittest.TestCase):
+    """prepare_seasonal: a monthly CHIRPS archive (v3 track) sums whole months; incomplete seasons are refused."""
+
+    def setUp(self):
+        import pandas as pd
+        import xarray as xr
+        times = pd.date_range('2024-09-01', '2025-02-01', freq='MS')
+        data = np.ones((len(times), 1, 2))
+        data[:, 0, 1] = np.nan                                     # one cell missing throughout
+        self.da = xr.DataArray(data, dims=('time', 'lat', 'lon'), coords=dict(time=times, lat=[5.0], lon=[40.0, 40.25]),
+                               attrs={'units': 'mm'})
+        self.cfg = dict(initialization_month=9, season=dict(name='ONDJ', start='10-01', end='01-31'),
+                        chirps_temporal='monthly', chirps_variable='monthly_total')
+
+    def test_cross_year_sum_and_day_count(self):
+        import prepare_seasonal as ps
+        out = ps.chirps_season(self.da.to_dataset(name='monthly_total'), self.cfg, 2024)
+        self.assertEqual(float(out.precip_season.values[0, 0, 0]), 4.0)      # Oct, Nov, Dec 2024 and Jan 2025
+        self.assertTrue(np.isnan(out.precip_season.values[0, 0, 1]))
+        self.assertEqual(int(out.valid_day_count.values[0, 0, 0]), 123)
+        self.assertEqual(out.attrs['expected_days'], 123)
+
+    def test_missing_month_is_refused(self):
+        import prepare_seasonal as ps
+        short = self.da.sel(time=self.da.time < np.datetime64('2025-01-01')).to_dataset(name='monthly_total')
+        with self.assertRaisesRegex(ValueError, 'Missing CHIRPS months'):
+            ps.chirps_season(short, self.cfg, 2024)
+
+
 if __name__ == '__main__':
     unittest.main()
