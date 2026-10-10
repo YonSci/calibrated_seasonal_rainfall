@@ -179,7 +179,7 @@ def load_monthly(cfg):
     checks['calendar_policy'] = attrs.get('calendar_policy', 'not recorded')
     if 'Feb29' not in checks['calendar_policy']:
         raise ValueError('The cache does not document that monthly totals retain February 29')
-    qc['source'] = dict(path=attrs.get('source_path'), sha256=attrs.get('source_sha256'), dataset='CHIRPS v2.0 (0.25 deg)')
+    qc['source'] = dict(path=attrs.get('source_path'), sha256=attrs.get('source_sha256'), dataset=attrs.get('dataset', 'CHIRPS v2.0 (0.25 deg)'))
     if not qc['source']['sha256']:
         raise ValueError('The cache does not record its CHIRPS source hash')
     if noleap is not None:                     # actual-calendar totals = 365-day cycle + Feb 29 rain only
@@ -194,6 +194,9 @@ def load_monthly(cfg):
             note='Annual monthly-total sum minus the 365-day cycle sum: zero in non-leap years, Feb 29 rain (>= 0) in leap years.')
         if not checks['calendar_consistency']['passed']:
             raise ValueError('Monthly totals are inconsistent with the daily cycle (calendar problem)')
+    else:                                      # a monthly product (CHIRPS v3): no daily cycle to check against
+        checks['calendar_consistency'] = dict(passed=True, note='Not applicable: the cache holds the published monthly totals '
+                                              '(calendar months, February 29 included as published); there is no daily cycle.')
     return da, qc
 
 
