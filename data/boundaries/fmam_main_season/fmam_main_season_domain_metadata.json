@@ -1,0 +1,15 @@
+{
+  "name": "FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual)",
+  "season": "FMAM",
+  "method": "share",
+  "cells": 573,
+  "area_km2": 430887,
+  "pct_eth": 38.1,
+  "ref_years": "1993-2025",
+  "definition": "Fixed 1993-2025 descriptive domain (Belg / Gu / Ganna): cells where FMAM brings at least 40% of the mean annual CHIRPS rainfall, with FMAM climatological rainfall >=80 mm; patches smaller than 3 cells removed. The same domain is used for the season and each of its months.",
+  "source_mask": "data/masks/FMAM_main_season_domain.nc",
+  "boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "polygons": 2,
+  "created_utc": "2026-10-09T21:59:00.382461+00:00",
+  "note": "Smooth outline: Gaussian-smoothed (sigma 0.6 cells) 0/1 mask contoured at 0.5, clipped to the national boundary, pieces < 500 km2 dropped. The forecast statistics use the 0.25-degree cell mask."
+}

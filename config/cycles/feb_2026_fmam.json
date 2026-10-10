@@ -33,9 +33,15 @@
     "dpi": 180,
     "pdf": true
   },
-  "season_domain_mask": "data/masks/init02_FMAM_regime_domain.nc",
+  "season_domain_mask": "data/masks/fmam_coverage_chirps_v2_1993_2025_v1.nc",
+  "extra_domain_masks": [
+    {
+      "view": "fmam_main_season_domain",
+      "mask": "data/masks/FMAM_main_season_domain.nc"
+    }
+  ],
   "site_id": "fmam2026feb",
-  "notes": "February-initialized FMAM 2026 cycle (Belg), run alongside the January cycle. Reference FMAM 1993-2025. Presentation domain: FMAM R2 (Belg) regime domain. Guide: docs/43_FMAM_FEB_INIT_RUN_GUIDE.md.",
+  "notes": "February-initialized FMAM 2026 cycle (Belg). Reference FMAM 1993-2025. Main domain (adopted 2026-10-10): FMAM >= 100 mm and >= 20% of annual rainfall (rainfall-domain review fmam_chirps_domain_review_v1, candidate mm100_share20; docs/44). Second view: FMAM main season (>= 40% of annual). Guide: docs/43_FMAM_FEB_INIT_RUN_GUIDE.md.",
   "external_comparison": {
     "enabled": true,
     "registry": "config/external_forecasts/fmam_2026.json",

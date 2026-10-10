@@ -39,7 +39,7 @@
     const c = D.cycles.find(x => x.id === q.get('cycle')) || D.cycles.find(x => x.id === D.default);
     S.cycle = c.id;
     S.target = c.targets.some(t => t.id === q.get('target')) ? q.get('target') : c.targets[0].id;
-    S.view = c.views.some(v => v[0] === q.get('view')) ? q.get('view') : c.domain_view;
+    S.view = c.views.some(v => v[0] === q.get('view')) ? q.get('view') : c.default_view;
     S.kind = q.get('kind') === 'verification' ? 'verification' : 'forecast';
     S.product = q.get('product') || 'tercile_outlook';
     S.period = q.get('period') === 'operational' ? 'operational' : 'training';
@@ -127,7 +127,7 @@
         (v ? v.mean_local_probabilities.map(z => pc(z)).join(' / ') : '—') + '</td><td>' + (v ? fx(v.probability_domain_area_percent) + '% of area' : '—') + '</td><td>' + (v ? sg(v.mean_anomaly_mm) + ' mm' : '—') + '</td><td>' + status(x.status) + '</td></tr>'; }).join('') +
       '</tbody></table></div><p class="caveat">Probability coverage is the share of the area with tercile probabilities; averages are over that share only. Cells with very little reference-period rainfall have no terciles.</p>';
     $('ol-meta').innerHTML = '<dl class="meta">' + c.meta.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') +
-      '<dt>Rainfall domain</dt><dd>' + esc(c.definition) + (c.note ? ' ' + esc(c.note) : '') + '</dd></dl>';
+      '<dt>Rainfall domain</dt><dd>' + esc((c.definitions || {})[S.view] || c.definition) + (c.note ? ' ' + esc(c.note) : '') + '</dd></dl>';
   }
 
   // ---------- maps
@@ -557,8 +557,89 @@
     const c = cyc();
     $('cycle').value = c.id;
     $('view').innerHTML = c.views.map(v => '<option value="' + v[0] + '"' + (v[0] === S.view ? ' selected' : '') + '>' + esc(v[1]) + '</option>').join('');
-    renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDiag(); renderComparison(); renderDownloads(); sync();
+    renderOutlook(); renderMaps(); renderVerification(); renderHistory(); renderDiag(); renderComparison(); renderDomains(); renderDownloads(); sync();
   }
+
+  // ---------- rainfall climatology and domains (review; independent of the selected cycle)
+  const DR = {tab: 'climatology', cand: null};
+  function renderDomains() {
+    const box = $('dr-body');
+    const R = (D.reviews || [])[0];
+    if (!R) { box.innerHTML = '<p>No rainfall-domain review has been built yet.</p>'; return; }
+    if (!DR.cand) DR.cand = R.selected || R.focus || R.candidates[0].id;
+    const fig = (f, alt) => '<figure class="map-figure"><img src="' + siteURL(R.base + f) + '" alt="' + esc(alt) + '" loading="lazy" style="max-width:100%;height:auto"><figcaption class="caveat">' + esc(alt) + '</figcaption></figure>';
+    const pc = x => x == null ? '—' : Math.round(100 * x) + '%';
+    const km = x => x == null ? '—' : Math.round(x).toLocaleString('en-US') + ' km²';
+    const tbl = (cap, head, rows) => '<div class="table-wrap"><table><caption>' + esc(cap) + '</caption><thead><tr>' + head.map(x => '<th scope="col">' + esc(x) + '</th>').join('') +
+      '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(x => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+    let h = '<p class="caveat">' + esc(R.season) + ' climatology from CHIRPS v2.0 ' + esc(R.period) + ' · built ' + esc(R.built.slice(0, 10)) +
+      ' · <a href="' + siteURL(R.report) + '">Full review report</a></p>';
+    if (R.stale.length) h += '<p class="notice">This review was built before a change to ' + esc(R.stale.join(', ')) + '; its numbers describe the earlier inputs.</p>';
+    h += '<p>' + (R.selected ? 'Selected domain: <strong>' + esc(R.selected) + '</strong>' + (R.rationale ? ' — ' + esc(R.rationale) : '')
+      : 'No candidate has been selected yet. The review shows the evidence; a domain is exported to the forecast products only after an explicit selection.') + '</p>';
+    const tabs = [['climatology', 'Climatology'], ['references', 'References'], ['candidates', 'Candidate domains'], ['assessment', 'Assessment']];
+    h += '<div class="tabs" role="group" aria-label="Review view">' + tabs.map(([k, l]) => '<button type="button" class="tab" data-dt="' + k + '" aria-pressed="' + (DR.tab === k) + '">' + l + '</button>').join('') + '</div>';
+    if (DR.tab === 'climatology') {
+      h += '<p>Ratio of climatological means from actual-calendar monthly totals (February 29 included). Every year of the period is required in each cell; nothing is filled in.</p>' +
+        R.figures.climatology.map(f => fig(f, {'fmam_total_mm.png': R.season + ' mean rainfall', 'annual_total_mm.png': 'Mean annual rainfall (the share denominator)',
+          'fmam_share_percent.png': R.season + ' share of annual rainfall', 'monthly_cycle_review.png': 'Monthly cycle by EMI rainfall region'}[f] || f)).join('') +
+        tbl('Reference periods', ['Period', 'Status', 'Note'], R.periods.map(p => [esc(p.period), esc(p.status), esc(p.note || '')])) +
+        '<p class="caveat">Calendar check ' + (R.qc.calendar ? 'passed' : 'FAILED') + '; ' + R.qc.years.count + ' years (' + R.qc.years.first + '–' + R.qc.years.last + '); ' +
+        R.qc.incomplete_cells + ' cells without a complete baseline; Ethiopia ' + km(R.country_km2) + ', of which ' + km(R.qc.outside_grid_km2) + ' lies beyond the grid. CHIRPS source ' + esc(R.qc.source) + '….</p>';
+    } else if (DR.tab === 'references') {
+      h += '<p>EMI\'s long-term Belg maps (Belg 2026 Seasonal Climate Forecast, pp. 23–24) are climatologies printed in a 2026 publication; their averaging period is not documented. ' +
+        'Until their georeferencing and legend digitization are reviewed they are compared <strong>visually only</strong>.</p>' +
+        tbl('Registered climatology references', ['Reference', 'Comparison mode', 'Why not higher', 'Digitization', 'Outline match (IoU)', 'Control / check error'],
+          R.references.map(r => [esc(r.id), esc(r.mode.replace(/_/g, ' ')), esc(r.reasons.join('; ') || '—'), esc(r.status), r.iou, (r.control_km || 0).toFixed(1) + ' / ' + (r.check_km || 0).toFixed(1) + ' km'])) +
+        R.figures.references.map(f => fig(f, f.startsWith('reference_comparison') ? 'CHIRPS, EMI as published, and CHIRPS in the EMI classes' : 'Registration and digitized classes (' + f.replace('georeference_qc_', '').replace('.png', '') + ')')).join('');
+    } else if (DR.tab === 'candidates') {
+      const cur = R.candidates.find(c => c.id === DR.cand) || R.comparators.find(c => c.id === DR.cand);
+      const isCand = !!R.candidates.find(c => c.id === DR.cand);
+      h += '<div class="map-controls"><span>' + esc(R.season) + ' rainfall</span><div class="seg" role="group" aria-label="Rainfall cutoff">' +
+        R.mm.map(v => '<button type="button" data-dmm="' + v + '" aria-pressed="' + (isCand && cur.mm === v) + '">≥ ' + v + ' mm</button>').join('') + '</div>' +
+        '<span>Share of annual</span><div class="seg" role="group" aria-label="Share cutoff">' +
+        R.shares.map(v => '<button type="button" data-dsh="' + v + '" aria-pressed="' + (isCand && cur.share === v) + '">≥ ' + v + '%</button>').join('') + '</div>' +
+        '<label>Comparison <select id="dr-comp"><option value="">— threshold candidates —</option>' + R.comparators.map(c => '<option value="' + c.id + '"' + (c.id === DR.cand ? ' selected' : '') + '>' + esc(c.label) + '</option>').join('') + '</select></label></div>';
+      const rows = [['Included area', km(cur.km2) + ' (' + cur.pct.toFixed(1) + '% of Ethiopia)']];
+      const ref = cur.ref || {};
+      rows.push(['Agreement with EMI-implied membership', ref.agreement == null ? '<span class="caveat">' + esc(ref.note || 'not computed') + '</span>'
+        : pc(ref.agreement) + ' <span class="caveat">(' + esc(ref.mode) + '; undecided ' + km(ref.undecided_area_km2) + ')</span>']);
+      rows.push(['Domain files', '<a href="' + siteURL(R.base + 'domains/' + DR.cand + '.nc') + '" download>NetCDF</a> · <a href="' + siteURL(R.base + 'domains/' + DR.cand + '.geojson') + '" download>GeoJSON outline</a>']);
+      if (isCand) {
+        rows.push(['Unknown area', km(cur.unknown)]);
+        Object.entries(cur.baseline).forEach(([k, v]) => rows.push(['Baseline ' + k, v.status === 'unavailable' ? 'unavailable: ' + esc(v.note) : '+' + km(v.gained_area_km2) + ' / −' + km(v.lost_area_km2)]));
+      }
+      h += '<div class="grid2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">' + fig('candidates/' + DR.cand + '.png', (isCand ? 'Candidate ' : '') + DR.cand + ' (blue: included; dark grey: insufficient data)') +
+        '<div>' + tbl(DR.cand, ['Measure', 'Value'], rows.map(r => [esc(r[0]), r[1]])) +
+        tbl('Share of each EMI rainfall region included', ['Region', 'Included'], Object.entries(cur.regions).map(([k, v]) => [esc(k), v == null ? '—' : v + '%'])) + '</div></div>' +
+        tbl('Named comparisons', ['Rule', 'Share of Ethiopia', 'Agreement with EMI-implied membership', 'Files'], R.comparators.map(c => [esc(c.label), c.pct.toFixed(1) + '%',
+          (c.ref || {}).agreement == null ? '<span class="caveat">' + esc((c.ref || {}).note || '—') + '</span>' : pc(c.ref.agreement),
+          '<a href="' + siteURL(R.base + 'domains/' + c.id + '.nc') + '" download>NetCDF</a> · <a href="' + siteURL(R.base + 'domains/' + c.id + '.geojson') + '" download>GeoJSON</a>'])) +
+        R.figures.candidates.map(f => fig(f, {'domains_named_comparisons.png': 'Named comparisons side by side', 'domains_all_candidates.png': 'All threshold candidates (rows: rainfall cutoff; columns: share cutoff)', 'candidate_area_heatmap.png': 'Included share of Ethiopia for each candidate', 'candidate_inclusion_map.png': 'How many candidates include each cell',
+          'regional_inclusion.png': 'Regional inclusion by candidate'}[f] || f)).join('');
+    } else {
+      h += tbl('Agreement of CHIRPS with the EMI classes', ['Reference', 'Mode', 'Exact class', 'Within one class', 'CHIRPS wetter / drier', 'Outside the class interval (median / 90th pct)', 'Comparable / uncertain area'],
+        R.comparisons.map(c => [esc(c.id), esc(c.mode.replace(/_/g, ' ')) + (c.draft ? ' <span class="caveat">(unreviewed preview)</span>' : ''), pc(c.exact), pc(c.within1), pc(c.wetter) + ' / ' + pc(c.drier),
+          (c.dev_median || 0).toFixed(1) + ' / ' + (c.dev_p90 || 0).toFixed(1) + ' ' + (c.units === 'percent' ? 'pp' : esc(c.units)), km(c.comparable) + ' / ' + km(c.uncertain)])) +
+        tbl('Largest changes between neighbouring cutoffs', ['From', 'To', 'Changed', 'Area switching'], R.neighbours.map(n => [esc(n.from_candidate), esc(n.to_candidate), esc(n.changed.replace(/_/g, ' ')), km(n.switched_area_km2)])) +
+        R.figures.assessment.map(f => fig(f, 'Baseline sensitivity of ' + R.focus)).join('') +
+        '<p class="caveat">Candidates nested (raising a cutoff never adds a cell): ' + (R.monotonic ? 'yes' : 'NO') + '. Dataset sensitivity: not assessed (CHIRPS only).</p>';
+    }
+    box.innerHTML = h;
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-dt],[data-dmm],[data-dsh]');
+    if (!b) return;
+    const R = (D.reviews || [])[0];
+    const cur = R.candidates.find(c => c.id === DR.cand) || R.candidates.find(c => c.id === R.focus) || R.candidates[0];
+    if (b.dataset.dt) DR.tab = b.dataset.dt;
+    if (b.dataset.dmm) DR.cand = R.candidates.find(c => c.mm === +b.dataset.dmm && c.share === cur.share).id;
+    if (b.dataset.dsh) DR.cand = R.candidates.find(c => c.share === +b.dataset.dsh && c.mm === cur.mm).id;
+    renderDomains();
+    const again = document.querySelector('#dr-body [data-' + Object.keys(b.dataset)[0].replace(/[A-Z]/g, m => '-' + m.toLowerCase()) + '="' + Object.values(b.dataset)[0] + '"]');
+    if (again) again.focus({preventScroll: true});
+  });
+  document.addEventListener('change', e => { if (e.target.id === 'dr-comp') { const R = D.reviews[0]; DR.cand = e.target.value || R.focus; renderDomains(); $('dr-comp').focus(); } });
 
   // Anchor offset follows the real height of the sticky header (wrapped controls included).
   const header = document.querySelector('.top');
@@ -569,7 +650,7 @@
   offset();
 
   init();
-  $('cycle').addEventListener('change', e => { const c = D.cycles.find(x => x.id === e.target.value); S.cycle = c.id; S.target = c.targets[0].id; S.view = c.domain_view; renderAll(); });
+  $('cycle').addEventListener('change', e => { const c = D.cycles.find(x => x.id === e.target.value); S.cycle = c.id; S.target = c.targets[0].id; S.view = c.default_view; renderAll(); });
   $('view').addEventListener('change', e => { S.view = e.target.value; renderAll(); });
   $('mp-target').addEventListener('change', e => { S.target = e.target.value; renderAll(); });
   $('dg-target').addEventListener('change', e => { S.target = e.target.value; renderAll(); });

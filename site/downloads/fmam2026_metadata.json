@@ -2,9 +2,9 @@
  "cycle": "FMAM 2026",
  "initialization": "2026-01-01",
  "initialization_month": "January",
- "built_utc": "2026-10-09 19:28 UTC",
+ "built_utc": "2026-10-10 01:58 UTC",
  "release": "2026-10-09.11",
- "code_version": "3b8a55d",
+ "code_version": "34a024a",
  "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
  "record": {
   "Model initialization": "1 January 2026 · ECMWF SEAS5 (system 51), 51 members",
@@ -13,9 +13,9 @@
   "Publication status": "Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast",
   "Reference period": "CHIRPS v2.0 FMAM 1993–2025 (33 seasons)",
   "Observations processed through": "May 2026 (Mar, Apr, May)",
-  "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 9 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
-  "Verification last run": "9 Oct 2026",
-  "Method / version": "Shared climatology blend (λ = 0.43 for FMAM) · code 3b8a55d"
+  "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
+  "Verification last run": "10 Oct 2026",
+  "Method / version": "Shared climatology blend (λ = 0.43 for FMAM) · code 34a024a"
  },
  "rainfall_domain": {
   "view": "fmam_rainfall_domain",
@@ -29,7 +29,7 @@
    "end": "2026-05-31",
    "status": {
     "code": "awaiting",
-    "text": "Awaiting CHIRPS observations: Feb 2026 file not found in the checked CHIRPS listing (last checked 9 Oct 2026)"
+    "text": "Awaiting CHIRPS observations: Feb 2026 file not found in the checked CHIRPS listing (last checked 10 Oct 2026)"
    },
    "verified_areas": []
   },
@@ -39,7 +39,7 @@
    "end": "2026-02-28",
    "status": {
     "code": "awaiting",
-    "text": "Awaiting CHIRPS observations: Feb 2026 file not found in the checked CHIRPS listing (last checked 9 Oct 2026)"
+    "text": "Awaiting CHIRPS observations: Feb 2026 file not found in the checked CHIRPS listing (last checked 10 Oct 2026)"
    },
    "verified_areas": []
   },
@@ -53,6 +53,7 @@
    },
    "verified_areas": [
     "all_ethiopia",
+    "fmam_main_season_domain",
     "fmam_rainfall_domain"
    ]
   },
@@ -66,6 +67,7 @@
    },
    "verified_areas": [
     "all_ethiopia",
+    "fmam_main_season_domain",
     "fmam_rainfall_domain"
    ]
   },
@@ -79,6 +81,7 @@
    },
    "verified_areas": [
     "all_ethiopia",
+    "fmam_main_season_domain",
     "fmam_rainfall_domain"
    ]
   }
@@ -97,6 +100,10 @@
   "maps/forecast/FMAM/fmam_rainfall_domain/rainfall_total_mm.png",
   "maps/forecast/FMAM/fmam_rainfall_domain/rainfall_anomaly_mm.png",
   "maps/forecast/FMAM/fmam_rainfall_domain/rainfall_anomaly_percent.png",
+  "maps/forecast/FMAM/fmam_main_season_domain/tercile_outlook.png",
+  "maps/forecast/FMAM/fmam_main_season_domain/rainfall_total_mm.png",
+  "maps/forecast/FMAM/fmam_main_season_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/FMAM/fmam_main_season_domain/rainfall_anomaly_percent.png",
   "data/FMAM_forecast_2026.nc",
   "maps/forecast/Feb/all_ethiopia/tercile_outlook.png",
   "maps/forecast/Feb/all_ethiopia/rainfall_total_mm.png",
@@ -106,6 +113,10 @@
   "maps/forecast/Feb/fmam_rainfall_domain/rainfall_total_mm.png",
   "maps/forecast/Feb/fmam_rainfall_domain/rainfall_anomaly_mm.png",
   "maps/forecast/Feb/fmam_rainfall_domain/rainfall_anomaly_percent.png",
+  "maps/forecast/Feb/fmam_main_season_domain/tercile_outlook.png",
+  "maps/forecast/Feb/fmam_main_season_domain/rainfall_total_mm.png",
+  "maps/forecast/Feb/fmam_main_season_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/Feb/fmam_main_season_domain/rainfall_anomaly_percent.png",
   "data/Feb_forecast_2026.nc",
   "maps/forecast/Mar/all_ethiopia/tercile_outlook.png",
   "maps/forecast/Mar/all_ethiopia/rainfall_total_mm.png",
@@ -115,6 +126,10 @@
   "maps/forecast/Mar/fmam_rainfall_domain/rainfall_total_mm.png",
   "maps/forecast/Mar/fmam_rainfall_domain/rainfall_anomaly_mm.png",
   "maps/forecast/Mar/fmam_rainfall_domain/rainfall_anomaly_percent.png",
+  "maps/forecast/Mar/fmam_main_season_domain/tercile_outlook.png",
+  "maps/forecast/Mar/fmam_main_season_domain/rainfall_total_mm.png",
+  "maps/forecast/Mar/fmam_main_season_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/Mar/fmam_main_season_domain/rainfall_anomaly_percent.png",
   "maps/verification/Mar/all_ethiopia/verification_comparison.png",
   "maps/verification/Mar/all_ethiopia/verification_comparison_error.png",
   "maps/verification/Mar/all_ethiopia/verification_observed_anomaly.png",
@@ -133,6 +148,15 @@
   "maps/verification/Mar/fmam_rainfall_domain/verification_rps_difference.png",
   "maps/verification/Mar/fmam_rainfall_domain/verification_crps.png",
   "maps/verification/Mar/fmam_rainfall_domain/verification_maps.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_comparison.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_comparison_error.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_observed_anomaly.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_forecast_anomaly.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_error.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_observed_tercile.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_rps_difference.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_crps.png",
+  "maps/verification/Mar/fmam_main_season_domain/verification_maps.png",
   "data/Mar_forecast_2026.nc",
   "maps/forecast/Apr/all_ethiopia/tercile_outlook.png",
   "maps/forecast/Apr/all_ethiopia/rainfall_total_mm.png",
@@ -142,6 +166,10 @@
   "maps/forecast/Apr/fmam_rainfall_domain/rainfall_total_mm.png",
   "maps/forecast/Apr/fmam_rainfall_domain/rainfall_anomaly_mm.png",
   "maps/forecast/Apr/fmam_rainfall_domain/rainfall_anomaly_percent.png",
+  "maps/forecast/Apr/fmam_main_season_domain/tercile_outlook.png",
+  "maps/forecast/Apr/fmam_main_season_domain/rainfall_total_mm.png",
+  "maps/forecast/Apr/fmam_main_season_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/Apr/fmam_main_season_domain/rainfall_anomaly_percent.png",
   "maps/verification/Apr/all_ethiopia/verification_comparison.png",
   "maps/verification/Apr/all_ethiopia/verification_comparison_error.png",
   "maps/verification/Apr/all_ethiopia/verification_observed_anomaly.png",
@@ -160,6 +188,15 @@
   "maps/verification/Apr/fmam_rainfall_domain/verification_rps_difference.png",
   "maps/verification/Apr/fmam_rainfall_domain/verification_crps.png",
   "maps/verification/Apr/fmam_rainfall_domain/verification_maps.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_comparison.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_comparison_error.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_observed_anomaly.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_forecast_anomaly.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_error.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_observed_tercile.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_rps_difference.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_crps.png",
+  "maps/verification/Apr/fmam_main_season_domain/verification_maps.png",
   "data/Apr_forecast_2026.nc",
   "maps/forecast/May/all_ethiopia/tercile_outlook.png",
   "maps/forecast/May/all_ethiopia/rainfall_total_mm.png",
@@ -169,6 +206,10 @@
   "maps/forecast/May/fmam_rainfall_domain/rainfall_total_mm.png",
   "maps/forecast/May/fmam_rainfall_domain/rainfall_anomaly_mm.png",
   "maps/forecast/May/fmam_rainfall_domain/rainfall_anomaly_percent.png",
+  "maps/forecast/May/fmam_main_season_domain/tercile_outlook.png",
+  "maps/forecast/May/fmam_main_season_domain/rainfall_total_mm.png",
+  "maps/forecast/May/fmam_main_season_domain/rainfall_anomaly_mm.png",
+  "maps/forecast/May/fmam_main_season_domain/rainfall_anomaly_percent.png",
   "maps/verification/May/all_ethiopia/verification_comparison.png",
   "maps/verification/May/all_ethiopia/verification_comparison_error.png",
   "maps/verification/May/all_ethiopia/verification_observed_anomaly.png",
@@ -187,6 +228,15 @@
   "maps/verification/May/fmam_rainfall_domain/verification_rps_difference.png",
   "maps/verification/May/fmam_rainfall_domain/verification_crps.png",
   "maps/verification/May/fmam_rainfall_domain/verification_maps.png",
+  "maps/verification/May/fmam_main_season_domain/verification_comparison.png",
+  "maps/verification/May/fmam_main_season_domain/verification_comparison_error.png",
+  "maps/verification/May/fmam_main_season_domain/verification_observed_anomaly.png",
+  "maps/verification/May/fmam_main_season_domain/verification_forecast_anomaly.png",
+  "maps/verification/May/fmam_main_season_domain/verification_error.png",
+  "maps/verification/May/fmam_main_season_domain/verification_observed_tercile.png",
+  "maps/verification/May/fmam_main_season_domain/verification_rps_difference.png",
+  "maps/verification/May/fmam_main_season_domain/verification_crps.png",
+  "maps/verification/May/fmam_main_season_domain/verification_maps.png",
   "data/May_forecast_2026.nc",
   "comparison/comparison.json",
   "comparison/sources_and_reviews.json",

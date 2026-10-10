@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "note": "Climatology references for the rainfall-domain review. Forecast products live in config/external_forecasts; their probabilities and categories are not climatology references. Undocumented values are null with a *_reason. Analyst choices (registration, legend colours, classification) are in extractions/<id>.json with their own review.",
+  "references": [
+    {
+      "id": "emi_belg_map_2e",
+      "document_id": "emi_belg_2026_scf",
+      "identity": {
+        "publisher": "Ethiopian Meteorological Institute (EMI)",
+        "document_title": "Belg 2026 Seasonal Climate Forecast (Amharic seasonal climate bulletin: Bega 2025/26 assessment and Belg 2026 outlook)",
+        "landing_url": "https://www.ethiomet.gov.et/products/seasonal-forecast/belg-2026-seasonal-climate-forecast/",
+        "document_url": "https://www.ethiomet.gov.et/documents/636/Belg_2026_Seasonal_Climate_Forecast_.pdf",
+        "document_sha256": "2fbeb7261fec5d6bf3db030cf01694b9f69aa81740b3f637181af729e69a34d2",
+        "language": "am",
+        "pdf_creation_date": "2026-03-09",
+        "publication_year": 2026,
+        "note": "These panels are long-term climatologies printed in a 2026 publication; 2026 is not their averaging period."
+      },
+      "location": {
+        "page": 23,
+        "panel": "2(e) - ካርታ 2ሠ",
+        "image_name": "Image136.jpg",
+        "legend_image_name": null,
+        "legend_region_px": [
+          0,
+          329,
+          480,
+          520
+        ],
+        "extracted_image_sha256": "5421fd8123b7cae56d1c2125cadad191db3497bce07d3362cb996316cb2d16c9",
+        "caption_original": "ካርታ 2ሠ የበልግ ወቅት የረጅም ጊዜ አማካይ የዝናብ መጠን",
+        "caption_translation": "Map 2(e): long-term mean Belg-season rainfall (mm)"
+      },
+      "quantity": {
+        "name": "mean_belg_rainfall",
+        "units": "mm",
+        "season_months": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "numerator": "Belg (February-May) rainfall total",
+        "denominator": null,
+        "comparable_field": "season_mean_mm"
+      },
+      "temporal": {
+        "reference_years": null,
+        "reference_years_reason": "not_documented (the panel says \"long-term mean\" without years)",
+        "aggregation": null,
+        "aggregation_reason": "not_documented",
+        "documentation_status": "not_documented"
+      },
+      "provenance": {
+        "dataset": null,
+        "dataset_reason": "not_documented",
+        "station_network": null,
+        "station_network_reason": "not_documented (the bulletin does not state the data behind these maps)",
+        "interpolation": null,
+        "interpolation_reason": "not_documented",
+        "version": null,
+        "version_reason": "not_documented"
+      },
+      "spatial": {
+        "original_crs": null,
+        "original_crs_reason": "not_documented",
+        "analysis_crs": "EPSG:4326 (0.25 degree CHIRPS grid)",
+        "resolution": null,
+        "resolution_reason": "not_documented (published image about 3-4 km per pixel)"
+      },
+      "representation": {
+        "kind": "published_image",
+        "classes": [
+          {
+            "class_id": 1,
+            "source_label": "20-50",
+            "unit": "mm",
+            "lower_displayed": 20,
+            "upper_displayed": 50,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 2,
+            "source_label": "51-100",
+            "unit": "mm",
+            "lower_displayed": 51,
+            "upper_displayed": 100,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 3,
+            "source_label": "101-200",
+            "unit": "mm",
+            "lower_displayed": 101,
+            "upper_displayed": 200,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 4,
+            "source_label": "201-300",
+            "unit": "mm",
+            "lower_displayed": 201,
+            "upper_displayed": 300,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 5,
+            "source_label": "301-400",
+            "unit": "mm",
+            "lower_displayed": 301,
+            "upper_displayed": 400,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 6,
+            "source_label": "401-500",
+            "unit": "mm",
+            "lower_displayed": 401,
+            "upper_displayed": 500,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 7,
+            "source_label": "501-800",
+            "unit": "mm",
+            "lower_displayed": 501,
+            "upper_displayed": 800,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          }
+        ],
+        "grey_class_note": "Light grey is the valid lowest class (20-50 mm), not missing data."
+      },
+      "institutional_status": {
+        "status": "official_published_figure",
+        "digitization": "analyst digitization in this project (not an EMI-supplied grid)"
+      }
+    },
+    {
+      "id": "emi_belg_map_3e",
+      "document_id": "emi_belg_2026_scf",
+      "identity": {
+        "publisher": "Ethiopian Meteorological Institute (EMI)",
+        "document_title": "Belg 2026 Seasonal Climate Forecast (Amharic seasonal climate bulletin: Bega 2025/26 assessment and Belg 2026 outlook)",
+        "landing_url": "https://www.ethiomet.gov.et/products/seasonal-forecast/belg-2026-seasonal-climate-forecast/",
+        "document_url": "https://www.ethiomet.gov.et/documents/636/Belg_2026_Seasonal_Climate_Forecast_.pdf",
+        "document_sha256": "2fbeb7261fec5d6bf3db030cf01694b9f69aa81740b3f637181af729e69a34d2",
+        "language": "am",
+        "pdf_creation_date": "2026-03-09",
+        "publication_year": 2026,
+        "note": "These panels are long-term climatologies printed in a 2026 publication; 2026 is not their averaging period."
+      },
+      "location": {
+        "page": 24,
+        "panel": "3(e) - ካርታ 3ሠ",
+        "image_name": "Image140.png",
+        "legend_image_name": "Image138.png",
+        "legend_region_px": null,
+        "extracted_image_sha256": "4483182ee56a64cde90339785b8c7201e17adc1bfdb49558d5b3d3efe5d7acb6",
+        "legend_image_sha256": "784e4a979486beaf4c8e7dd439500a688cccc332123a74436ca6a0c8e2980e1a",
+        "caption_original": "ካርታ 3ሠ የበልግ ወቅት የረጅም ጊዜ አማካይ የዝናብ ድርሻ %",
+        "caption_translation": "Map 3(e): long-term mean Belg-season share of annual rainfall (%)"
+      },
+      "quantity": {
+        "name": "belg_share_of_annual",
+        "units": "percent",
+        "season_months": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "numerator": "Belg (February-May) rainfall",
+        "denominator": "annual rainfall",
+        "comparable_field": "season_share_percent",
+        "ratio_convention": null,
+        "ratio_convention_reason": "not_documented (ratio of means or mean of yearly ratios is not stated)"
+      },
+      "temporal": {
+        "reference_years": null,
+        "reference_years_reason": "not_documented (the panel says \"long-term mean\" without years)",
+        "aggregation": null,
+        "aggregation_reason": "not_documented",
+        "documentation_status": "not_documented"
+      },
+      "provenance": {
+        "dataset": null,
+        "dataset_reason": "not_documented",
+        "station_network": null,
+        "station_network_reason": "not_documented (the bulletin does not state the data behind these maps)",
+        "interpolation": null,
+        "interpolation_reason": "not_documented",
+        "version": null,
+        "version_reason": "not_documented"
+      },
+      "spatial": {
+        "original_crs": null,
+        "original_crs_reason": "not_documented",
+        "analysis_crs": "EPSG:4326 (0.25 degree CHIRPS grid)",
+        "resolution": null,
+        "resolution_reason": "not_documented (published image about 3-4 km per pixel)"
+      },
+      "representation": {
+        "kind": "published_image",
+        "classes": [
+          {
+            "class_id": 1,
+            "source_label": "< 10",
+            "unit": "percent",
+            "lower_displayed": null,
+            "upper_displayed": 10,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 2,
+            "source_label": "11-20",
+            "unit": "percent",
+            "lower_displayed": 11,
+            "upper_displayed": 20,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 3,
+            "source_label": "21-30",
+            "unit": "percent",
+            "lower_displayed": 21,
+            "upper_displayed": 30,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 4,
+            "source_label": "31-40",
+            "unit": "percent",
+            "lower_displayed": 31,
+            "upper_displayed": 40,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 5,
+            "source_label": "41-50",
+            "unit": "percent",
+            "lower_displayed": 41,
+            "upper_displayed": 50,
+            "lower_inclusive": true,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          },
+          {
+            "class_id": 6,
+            "source_label": "> 50",
+            "unit": "percent",
+            "lower_displayed": 50,
+            "upper_displayed": null,
+            "lower_inclusive": false,
+            "reference_value": null,
+            "exact_continuous_edges_verified": false,
+            "quality_flag": "draft"
+          }
+        ],
+        "grey_class_note": "Light grey is the valid lowest class (< 10 %), not missing data."
+      },
+      "institutional_status": {
+        "status": "official_published_figure",
+        "digitization": "analyst digitization in this project (not an EMI-supplied grid)"
+      }
+    }
+  ]
+}

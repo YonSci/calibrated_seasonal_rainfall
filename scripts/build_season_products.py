@@ -39,7 +39,7 @@ def main():
     (out / 'entries.json').write_text(json.dumps(dict(
         created_utc=datetime.now(timezone.utc).isoformat(), cycle=str(CYCLE.path), forecast_year=CYCLE.year,
         initialization_month=CYCLE.init_month, season=CYCLE.season_name, reference_years=CYCLE.reference_label,
-        domain_definition=result['domain_definition'], domain_note=result['domain_note'], entries=entries), indent=2),
+        domain_definition=result['domain_definition'], domain_definitions=result['domain_definitions'], domain_note=result['domain_note'], entries=entries), indent=2),
         encoding='utf-8')
     print('Entries:', out / 'entries.json')
 

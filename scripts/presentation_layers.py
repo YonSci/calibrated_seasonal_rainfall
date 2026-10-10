@@ -4,6 +4,7 @@
 Smooth only continuous display fields. Summaries use the original grid and the
 original forecast/verification eligibility. No model fitting or score selection.
 """
+import gc
 import html
 import json
 from pathlib import Path
@@ -43,6 +44,34 @@ def definition_for(mask):
     return mask.attrs["domain_definition"] if SEASON_VIEW else DEFINITION
 
 
+def extra_domains(reference, country):
+    """Further views from the cycle's "extra_domain_masks" (e.g. the FMAM-dominant domain), in cycle-file order."""
+    out = {}
+    for view, path in CYCLE.extra_domains():
+        with xr.open_dataset(path) as ds:
+            mask = ds.load()
+        same_grid(mask, reference)
+        focused = (mask.season_domain.values == 1) & country
+        if mask.attrs.get("season") != SEASON or not focused.any():
+            raise ValueError(f"Expected a non-empty {SEASON} domain mask: {path}")
+        VIEWS[view] = mask.attrs.get("view_label", view)
+        out[view] = focused
+    return out
+
+
+def view_definitions(mask):
+    """Definition of every non-national view, keyed by view."""
+    defs = {view: definition_for(mask) for view in VIEWS if view != "all_ethiopia"}
+    for view, path in CYCLE.extra_domains():
+        with xr.open_dataset(path) as ds:
+            defs[view] = ds.attrs["domain_definition"]
+    return defs
+
+
+def mask_files():
+    return [path for _, path in CYCLE.extra_domains()]
+
+
 def load_mask(path, reference):
     with xr.open_dataset(path) as ds:
         mask = ds.load()
@@ -54,7 +83,7 @@ def load_mask(path, reference):
             raise ValueError(f"Expected a non-empty {SEASON} rainfall-domain mask: {path}")
         if mask.attrs.get("view_label"):          # e.g. "ONDJ R3 (Deyr) rainfall domain"
             VIEWS[SEASON_VIEW] = mask.attrs["view_label"]
-        return mask, {"all_ethiopia": country, SEASON_VIEW: focused}
+        return mask, {"all_ethiopia": country, SEASON_VIEW: focused, **extra_domains(reference, country)}
     country_name = "country_mask" if "country_mask" in reference else "region_mask"
     ref = xr.Dataset({"country_mask": reference[country_name]})
     domains = make_domains(mask, ref)
@@ -184,6 +213,7 @@ def save_figure(fig, path, settings):
     if settings["pdf"]:
         fig.savefig(path.with_suffix(".pdf"), facecolor="white")
     plt.close(fig)
+    gc.collect()        # closed figures hold reference cycles; collect now so peak memory does not grow with each view
 
 
 def forecast_maps(forecast, fields, domains, lines, target, out, settings):
@@ -308,7 +338,7 @@ def verification_maps(fields, domains, lines, target, out, settings):
 
 
 def build_forecast(source, mask_path, boundary, target, destination, settings):
-    hashes = {str(p):sha(p) for p in [source,mask_path,*boundary_files(boundary)]}
+    hashes = {str(p):sha(p) for p in [source,mask_path,*mask_files(),*boundary_files(boundary)]}
     with xr.open_dataset(source) as ds:
         f = ds.load()
     check_forecast(f,target)
@@ -317,7 +347,7 @@ def build_forecast(source, mask_path, boundary, target, destination, settings):
     g = base.derive(f,settings["minimum_leading_probability"],settings["percent_anomaly_minimum_climatology_mm"])
     lines = base.boundary_lines(boundary)
     result = {"kind":"forecast","target":target,"year":YEAR,"created_utc":now(),
-              "domain_definition":definition,"domain_note":NOTE,"source_sha256":hashes,
+              "domain_definition":definition,"domain_definitions":view_definitions(mask),"domain_note":NOTE,"source_sha256":hashes,
               "display":settings,"forecast_sha256":sha(source),
               "summaries":{view:forecast_summary(f,g,domain) for view,domain in domains.items()}}
     with staged_output(destination,True) as stage:
@@ -347,10 +377,10 @@ def build_verification(root, mask_path, boundary, target, destination, settings)
     mask,domains = load_mask(mask_path,fields)
     definition = definition_for(mask)
     mask_digest = sha(mask_path)
-    boundary_digests = {str(p):sha(p) for p in boundary_files(boundary)}
+    boundary_digests = {str(p):sha(p) for p in [*mask_files(),*boundary_files(boundary)]}
     summaries = {view:summarize_domain(fields,domain) for view,domain in domains.items()}
     result = {"kind":"verification","target":target,"year":YEAR,"created_utc":now(),
-              "domain_definition":definition,"domain_note":NOTE,"display":settings,
+              "domain_definition":definition,"domain_definitions":view_definitions(mask),"domain_note":NOTE,"display":settings,
               "provenance":provenance,"mask_sha256":mask_digest,"boundary_sha256":boundary_digests,
               "frozen_forecasts":snapshot,"summaries":summaries,
               "score_note":"Existing native-grid score fields aggregated on each domain; country scores reproduced. Single year, overlapping targets, no significance or reliability claim."}
@@ -369,6 +399,15 @@ def build_verification(root, mask_path, boundary, target, destination, settings)
     return result
 
 
+def gallery_definition(records):
+    """Domain definition(s) of the rendered products; they must agree across targets."""
+    defs = {r.get("domain_definition", DEFINITION) for r in records}
+    if len(defs) > 1:
+        raise ValueError("Rendered products use different domain definitions; rerun the presentation stages")
+    definition = defs.pop() if defs else DEFINITION
+    return definition, (records[0].get("domain_definitions") if records else None) or {}
+
+
 def build_gallery(output, forecast_targets, verified_targets, pending, details):
     """Static, offline gallery. User selects target, product and presentation domain."""
     output = Path(output)
@@ -376,6 +415,10 @@ def build_gallery(output, forecast_targets, verified_targets, pending, details):
     summary = {"created_utc":now(),"forecast_targets":forecast_targets,"verified_targets":verified_targets,
                "pending_verification_targets":pending,"domain_definition":DEFINITION,"domain_note":NOTE,
                "details":details,"forecasts":[],"verification":[]}
+    records = [read(output/"presentation"/k/t/"presentation_summary.json")
+               for k,ts in [("forecast",forecast_targets),("verification",verified_targets)] for t in ts]
+    definition, definitions = gallery_definition(records)          # the masks actually rendered, not the JJAS default
+    summary.update(domain_definition=definition, domain_definitions=definitions)
     for kind,targets in [("forecast",forecast_targets),("verification",verified_targets)]:
         for target in targets:
             folder = output/"presentation"/kind/target
@@ -404,7 +447,7 @@ header,section{{background:white;border:1px solid #d7e2e7;border-radius:12px;pad
 .note{{background:#f5f8f9;padding:14px;border-left:4px solid #27877a}}.pending{{color:#765321}}label{{display:inline-block;margin:0 20px 15px 0}}select{{display:block;padding:9px;font:inherit;border:1px solid #8aa1ad;border-radius:5px}}a{{color:#06628a}}img{{max-width:100%;height:auto}}figure{{margin:10px 0 28px}}figcaption{{font-weight:600}}table{{border-collapse:collapse;width:100%;margin:15px 0}}td,th{{padding:8px;text-align:left;border-bottom:1px solid #dbe4e9}}.subtle{{font-size:14px;color:#526772}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:20px}}.wide{{grid-template-columns:1fr}}@media(max-width:750px){{main{{padding:10px}}.grid{{grid-template-columns:1fr}}header,section{{padding:16px}}}}
 </style><main><header><div class="tag">{CYCLE.init_month_name} initialization · {YEAR} · research reconstruction</div>
 <h1>Ethiopia rainfall forecast and verification</h1><p>National and fixed '''+html.escape(list(VIEWS.values())[1])+''' views for each month and the season.</p>
-<p class="note">''' + html.escape(DEFINITION + ' ' + NOTE) + '''</p><p class="pending">Pending verification: '''+pending_text+'''. Pending does not mean zero rainfall or zero skill.</p>
+<p class="note">''' + html.escape(definition + ' ' + NOTE) + '''</p><p class="pending">Pending verification: '''+pending_text+'''. Pending does not mean zero rainfall or zero skill.</p>
 <p class="subtle">The forecasts remain frozen. The domain changes only presentation and the area summarized. Continuous map colors are interpolated for display; statistics and NetCDF fields retain the original grid. Not an official EMI/ICPAC product.</p>
 <p><a href="presentation_summary.json">Combined summaries and provenance</a> · <a href="state/latest_run.json">Latest run record</a>'''+report_link+'''</p></header>
 <section><label>Target<select id="target">'''+buttons+'''</select></label>

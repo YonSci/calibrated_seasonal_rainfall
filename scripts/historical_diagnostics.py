@@ -49,7 +49,13 @@ def areas(cycle):
         if not (np.array_equal(d.lat.values, lat) and np.array_equal(d.lon.values, lon)):
             raise ValueError('Season domain grid differs from the regime mask')
         domain = country & (d.season_domain.values == 1)
-    return {'all_ethiopia': country, f'{cycle.season_name.lower()}_rainfall_domain': domain}, lat, lon
+    out = {'all_ethiopia': country, f'{cycle.season_name.lower()}_rainfall_domain': domain}
+    for view, path in cycle.extra_domains():         # extra presentation views (cycle "extra_domain_masks")
+        with xr.open_dataset(path) as d:
+            if not (np.array_equal(d.lat.values, lat) and np.array_equal(d.lon.values, lon)):
+                raise ValueError(f'{path}: grid differs from the regime mask')
+            out[view] = country & (d.season_domain.values == 1)
+    return out, lat, lon
 
 
 def diagnose(path, masks):

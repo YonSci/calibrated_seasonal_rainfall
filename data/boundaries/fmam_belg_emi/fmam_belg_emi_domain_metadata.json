@@ -1,0 +1,15 @@
+{
+  "name": "Belg rainfall areas (EMI definition: FMAM >=20% of annual and >=100 mm)",
+  "season": "FMAM",
+  "method": "share",
+  "cells": 1069,
+  "area_km2": 806266,
+  "pct_eth": 71.4,
+  "ref_years": "1993-2025",
+  "definition": "Fixed 1993-2025 descriptive domain (Belg / Gu / Ganna): cells where FMAM brings at least 20% of the mean annual CHIRPS rainfall, with FMAM climatological rainfall >=100 mm; patches smaller than 3 cells removed. The same domain is used for the season and each of its months.",
+  "source_mask": "data/masks/FMAM_belg_emi_domain.nc",
+  "boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "polygons": 1,
+  "created_utc": "2026-10-09T22:40:17.403775+00:00",
+  "note": "Smooth outline: Gaussian-smoothed (sigma 0.6 cells) 0/1 mask contoured at 0.5, clipped to the national boundary, pieces < 500 km2 dropped. The forecast statistics use the 0.25-degree cell mask."
+}

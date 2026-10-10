@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "assessment_id": "fmam_chirps_domain_review_v1",
+  "project_config": "config/fmam/project.json",
+  "monthly_cache": "data/processed/regime_climatology/chirps_calendar_cache.nc",
+  "monthly_variable": "monthly_total",
+  "country_mask": "data/masks/ethiopia_common.nc",
+  "country_boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "regions_mask": "data/masks/emi_rainfall_regions_korecha2013.nc",
+  "season_name": "FMAM",
+  "season_months": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "annual_months": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "application_period": [
+    1993,
+    2025
+  ],
+  "additional_reference_periods": [
+    [
+      1981,
+      2010
+    ],
+    [
+      1991,
+      2020
+    ],
+    [
+      1996,
+      2025
+    ]
+  ],
+  "require_complete_baseline": true,
+  "unavailable_optional_period": "record_unavailable",
+  "annual_share_method": "ratio_of_climatological_means",
+  "candidate_thresholds": {
+    "seasonal_rainfall_mm": [
+      75,
+      100,
+      125,
+      150
+    ],
+    "annual_share_percent": [
+      10,
+      15,
+      20,
+      25,
+      30
+    ]
+  },
+  "candidate_cleanup": "none",
+  "comparators": [
+    {
+      "id": "r2_regime_rule",
+      "kind": "mask_file",
+      "path": "data/masks/init01_FMAM_regime_domain.nc",
+      "label": "Existing R2 (Belg) regime rule: R2 membership, FMAM >= 80 mm, patches < 3 cells removed",
+      "reference_note": "Regime membership is not an amount/share threshold, so EMI classes imply no membership for it."
+    },
+    {
+      "id": "share40_mm80",
+      "kind": "rule",
+      "rule": "share",
+      "annual_share_percent": 40,
+      "seasonal_rainfall_mm": 80,
+      "label": "40% contribution rule: FMAM >= 40% of annual and >= 80 mm (no cleanup)"
+    },
+    {
+      "id": "wettest_mm80",
+      "kind": "rule",
+      "rule": "wettest",
+      "seasonal_rainfall_mm": 80,
+      "label": "Wettest-season rule: FMAM wetter than JJAS and ONDJ, >= 80 mm (no cleanup)",
+      "reference_note": "Wettest-season membership compares FMAM with JJAS and ONDJ; the EMI maps give no JJAS/ONDJ amounts."
+    },
+    {
+      "id": "belg_emi_view",
+      "kind": "mask_file",
+      "path": "data/masks/FMAM_belg_emi_domain.nc",
+      "label": "Current default site view: >= 20% and >= 100 mm from the 365-day cycle, patches < 3 cells removed",
+      "reference_thresholds": {
+        "seasonal_rainfall_mm": 100,
+        "annual_share_percent": 20
+      }
+    }
+  ],
+  "reference_registry": "config/climatology_references/registry.json",
+  "reference_ids": [
+    "emi_belg_map_2e",
+    "emi_belg_map_3e"
+  ],
+  "reference_cache": "data/climatology_references",
+  "output_root": "outputs/rainfall_domain_review/fmam_v1",
+  "export": {
+    "mask": "data/masks/fmam_coverage_chirps_v2_1993_2025_v1.nc",
+    "boundary": "data/boundaries/fmam_coverage_v1/fmam_coverage_chirps_v2_1993_2025_v1"
+  },
+  "selected_candidate": "mm100_share20",
+  "selection_rationale": "Adopted 2026-10-10 as the main FMAM working domain for Ethiopia: Belg brings considerable rain (EMI: northeastern, central, southern, southwestern, eastern and southeastern Ethiopia). Both cutoffs are EMI legend breaks (101-200 mm; 21-30 %), so EMI maps 2(e)/3(e) can check the largest share of the country; stable against the 1996-2025 baseline."
+}

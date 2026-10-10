@@ -141,6 +141,28 @@ The forecasts stay **frozen**: verification only reads them (SHA-256 checked bef
 * Leap years: February and FMAM have 29 / 121 days in 1996, 2000, …, 2024; this is handled automatically.
 * A second FMAM cycle from the **1 February** initialization (`config\cycles\feb_2026_fmam.json`, tag `init02`, 121
   lead days, February at lead 0) runs alongside the January cycle: `docs/43_FMAM_FEB_INIT_RUN_GUIDE.md`.
+* **Main FMAM working domain (adopted 2026-10-10): FMAM >= 100 mm and >= 20 % of annual rainfall**, selected in the
+  rainfall-domain review (`docs/44_RAINFALL_DOMAIN_REVIEW.md`, candidate `mm100_share20`). It follows EMI's description
+  of Belg as the small rainy season that brings considerable rain to the northeastern, central, southern, southwestern,
+  eastern and southeastern parts of the country: 820,657 km², 72.6 % of Ethiopia (all EMI regions except II Northwest).
+  Both cutoffs are EMI legend breaks, so EMI's long-term Belg maps can check most of the country. Both FMAM cycles use it
+  as `season_domain_mask` (the forecast summaries, skill, diagnostics and the ICPAC/EMI comparison "season domain"):
+  `data\masks\fmam_coverage_chirps_v2_1993_2025_v1.nc`, boundary in `data\boundaries\fmam_coverage_v1\`. It replaces the
+  earlier R2 (Belg) regime domain and the earlier 20 % / 100 mm view built from the 365-day cycle. Rebuild only through
+  the review (`run_rainfall_domain_review.py … --stage export`); a new selection gets a new version number.
+
+* Both FMAM cycles also have the view **FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual)**: cells where February–May brings at least 40 % of the mean annual CHIRPS 1993–2025 rainfall,
+  with FMAM >= 80 mm; 573 cells, 38.8 % of Ethiopia (south, south-east and an Afar lowland patch). Build the mask and
+  its boundary file with
+
+  ```bat
+  python scripts\build_season_domain.py --config config\fmam\project.json --method share --min-share 0.40
+  python scripts\export_domain_boundary.py --mask data\masks\FMAM_main_season_domain.nc --out data\boundaries\fmam_main_season\fmam_main_season_domain --smooth
+  ```
+
+  (`data\masks\FMAM_main_season_domain.nc`; boundary shapefile/GeoJSON in `data\boundaries\fmam_main_season\`). A
+  cycle lists the mask under `extra_domain_masks` and picks the start view with `default_view`. After adding a view,
+  rerun `run_operational.py … --workflow products`, `regional_skill.py --cycle …` and `historical_diagnostics.py --cycle …`.
 
 ### ONDJ (September initialization)
 

@@ -773,3 +773,74 @@ def public_report(data, prefix):
 def local_images(page):
     """Relative image references of an HTML page."""
     return [s for s in re.findall(r'<img[^>]+src="([^"]+)"', page) if not re.match(r'^(?:[a-z]+:)?//', s) and not s.startswith('data:')]
+
+
+# ------------------------------------------------------------------ rainfall-domain review (climatology section)
+REVIEW_NAMES = {'review_config': 'the review configuration', 'monthly_cache': 'the CHIRPS monthly cache',
+                'chirps_source_sha256': 'the CHIRPS source file', 'country_boundary': 'the country boundary',
+                'country_mask': 'the country mask', 'reference_registry': 'the reference registry',
+                'regions_mask': 'the rainfall-region layer', 'reference_documents': 'a reference document or panel',
+                'season_months': 'the season months', 'application_period': 'the reference period',
+                'thresholds': 'the candidate thresholds', 'code': 'the calculation code', 'method_version': 'the method version'}
+
+
+def export_domain_review(out):
+    """Publish each rainfall-domain review report (config/rainfall_domains/*.json) under assets/domain_review/.
+
+    Returns the slim data the "Rainfall climatology and domains" section renders. A review whose inputs
+    changed after its report was built is still shown (it is evidence, not a forecast) with the stale
+    reasons stated, mirroring the comparison freshness check.
+    """
+    import shutil
+    import sys
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import rainfall_climatology_core as rc
+    import run_rainfall_domain_review as runner
+    reviews = []
+    for path in sorted((ROOT / 'config/rainfall_domains').glob('*.json')):
+        cfg = rc.load_review_config(path)
+        report = (ROOT / cfg['output_root']).resolve() / 'report'
+        if not (report / 'assessment_results.json').is_file():
+            continue
+        data = json.loads((report / 'assessment_results.json').read_text(encoding='utf-8'))
+        saved = json.loads((report / 'fingerprint.json').read_text(encoding='utf-8'))
+        now = runner.fingerprint(cfg)
+        stale = [REVIEW_NAMES.get(k.split(':')[0], k) + (f' ({k.split(":", 1)[1]})' if ':' in k else '')
+                 for k in now if now[k] != saved.get(k)]
+        rel = f'assets/domain_review/{cfg["assessment_id"]}/'
+        dest = out / rel
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.copytree(report, dest, ignore=shutil.ignore_patterns('*.json'))
+        res, cmp_ = data['candidates'], data['comparison']
+        slim_c = [dict(id=c['candidate_id'], mm=c['rainfall_threshold_mm'], share=c['share_threshold_percent'],
+                       km2=c['included_area_km2'], pct=c['included_country_percent'], unknown=c['unknown_area_km2'],
+                       regions=c['regional_inclusion_percent'], ref=c['reference_comparison_status'],
+                       baseline=c['baseline_sensitivity']) for c in res['candidates']]
+        slim_comp = [dict(id=c['comparator_id'], label=c['label'], km2=c['included_area_km2'], pct=c['included_country_percent'],
+                          regions=c['regional_inclusion_percent'], ref=c.get('reference_comparison_status') or {}) for c in res['comparators']]
+        refs = [dict(id=r['reference_id'], mode=r['comparison_mode'], reasons=r['mode_reasons'], status=r['extraction_status'],
+                     iou=r['registration']['outline_iou'], control_km=r['registration']['control_rmse_km'],
+                     check_km=r['registration']['check_rmse_km'], document=r['document_sha256'][:12],
+                     panel=rel + data['reference_panels'][r['reference_id']]) for r in data['references']['references']]
+        comps = []
+        for c in cmp_['comparisons']:
+            m = c.get('metrics') or c.get('draft_preview')
+            comps.append(dict(id=c['reference_id'], mode=c['comparison_mode'], draft='draft_preview' in c, units=c['units'],
+                              exact=m['exact_agreement'], within1=m['within_one_class'], wetter=m['field_wetter_share'],
+                              drier=m['field_drier_share'], dev_median=m['interval_deviation']['median'],
+                              dev_p90=m['interval_deviation']['p90'], comparable=m['comparable_area'], uncertain=m['uncertain_area']))
+        q = data['qc']
+        reviews.append(dict(
+            id=cfg['assessment_id'], season=cfg['season_name'], period=data['period'], built=data['created_utc'], base=rel,
+            report=rel + 'review_report.html', stale=stale, selected=data.get('selected_candidate'), rationale=data.get('selection_rationale'),
+            focus=data.get('focus_candidate'), figures=data['figures'], candidates=slim_c, comparators=slim_comp,
+            mm=sorted({c['mm'] for c in slim_c}), shares=sorted({c['share'] for c in slim_c}),
+            references=refs, comparisons=comps, neighbours=res['neighbour_changes'][:6], monotonic=res['monotonic'],
+            periods=q['periods'], country_km2=q['area']['country_area_km2'],
+            qc=dict(calendar=q['checks']['calendar_consistency']['passed'], years=q['checks']['years'],
+                    incomplete_cells=q['completeness']['cells_without_complete_baseline'],
+                    outside_grid_km2=q['area']['country_outside_grid_km2'], source=(q['source']['sha256'] or '')[:12])))
+        if stale:
+            print(f'{cfg["assessment_id"]}: review report is stale ({", ".join(stale)}); rerun run_rainfall_domain_review.py --stage report')
+    return reviews

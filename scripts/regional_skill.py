@@ -139,11 +139,20 @@ def cycle_main(args):
     from cycle import load_cycle
     c = load_cycle(ROOT / args.cycle)
     season = c.season_name
+    view_labels = {}
     if season == 'JJAS':
         masks, label = region_masks(ROOT / args.regime_mask), 'JJAS R1+R2 rainfall domain'
         masks['season_domain'] = masks.pop('R1_R2_jjas_domain')
     else:
         masks, label = region_masks(ROOT / args.regime_mask, c.root('season_domain_mask'))
+    with xr.open_dataset(ROOT / args.regime_mask) as m:
+        grid = m.lat.values, m.lon.values
+    for view, path in c.extra_domains():               # extra presentation views, scored under their view key
+        with xr.open_dataset(path) as d:
+            if not (np.array_equal(d.lat.values, grid[0]) and np.array_equal(d.lon.values, grid[1])):
+                raise ValueError(f'{path}: grid differs from the regime mask')
+            masks[view] = masks['ethiopia'] & (d.season_domain.values == 1)
+            view_labels[view] = d.attrs.get('view_label', view)
     targets = args.targets or list(c.targets)
     results = {}
     for t in targets:
@@ -151,16 +160,17 @@ def cycle_main(args):
         for mode in ('training', 'operational'):
             path = ROOT / f'outputs/local_calibration/{c.tag}_{t}/{mode}/local_probabilities_and_weights.nc'
             results[t][mode] = score_mode(path, masks)[0]
-        tr, op = results[t]['training'].get('season_domain', {}), results[t]['operational'].get('season_domain', {})
-        if 'rpss_blend' in tr and 'rpss_blend' in op:
-            print(f"{t:5s} {label}: {tr['rpss_blend']:+.3f} [{tr['rpss_blend_95'][0]:+.3f}, {tr['rpss_blend_95'][1]:+.3f}] "
-                  f"{tr['years_blend_better']}/{tr['years']} | exploratory {op['rpss_blend']:+.3f} "
-                  f"({op['years_blend_better']}/{op['years']}), coverage {tr['probability_coverage']:.0%}")
-        else:
-            print(f'{t:5s} {label}: insufficient coverage')
+        for key, name in [('season_domain', label), *view_labels.items()]:
+            tr, op = results[t]['training'].get(key, {}), results[t]['operational'].get(key, {})
+            if 'rpss_blend' in tr and 'rpss_blend' in op:
+                print(f"{t:5s} {name}: {tr['rpss_blend']:+.3f} [{tr['rpss_blend_95'][0]:+.3f}, {tr['rpss_blend_95'][1]:+.3f}] "
+                      f"{tr['years_blend_better']}/{tr['years']} | exploratory {op['rpss_blend']:+.3f} "
+                      f"({op['years_blend_better']}/{op['years']}), coverage {tr['probability_coverage']:.0%}")
+            else:
+                print(f'{t:5s} {name}: insufficient coverage')
     out = ROOT / f'outputs/regional_skill/{c.tag}_regional_skill.json'
     save_json(out, dict(created_utc=datetime.now(timezone.utc).isoformat(), protocol=__doc__.strip(), cycle=str(args.cycle),
-                        season=season, domain_label=label, regions=list(masks), targets=results))
+                        season=season, domain_label=label, view_labels=view_labels, regions=list(masks), targets=results))
     print('Saved:', out)
 
 

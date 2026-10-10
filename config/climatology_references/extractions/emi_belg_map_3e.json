@@ -1,0 +1,205 @@
+{
+  "reference_id": "emi_belg_map_3e",
+  "status": "draft",
+  "created_utc": "2026-10-10T00:11:17+00:00",
+  "legend": [
+    {
+      "class_id": 1,
+      "source_label": "< 10",
+      "rgb": [
+        224,
+        224,
+        224
+      ]
+    },
+    {
+      "class_id": 2,
+      "source_label": "11-20",
+      "rgb": [
+        255,
+        168,
+        18
+      ]
+    },
+    {
+      "class_id": 3,
+      "source_label": "21-30",
+      "rgb": [
+        255,
+        228,
+        20
+      ]
+    },
+    {
+      "class_id": 4,
+      "source_label": "31-40",
+      "rgb": [
+        173,
+        255,
+        20
+      ]
+    },
+    {
+      "class_id": 5,
+      "source_label": "41-50",
+      "rgb": [
+        129,
+        194,
+        0
+      ]
+    },
+    {
+      "class_id": 6,
+      "source_label": "> 50",
+      "rgb": [
+        0,
+        156,
+        13
+      ]
+    }
+  ],
+  "registration": {
+    "method": "outline_fit_affine",
+    "status": "draft",
+    "frame_px": [
+      28,
+      454,
+      25,
+      575
+    ],
+    "affine": [
+      [
+        0.02947955941860749,
+        0.0,
+        31.651923223679823
+      ],
+      [
+        0.0,
+        -0.029471681202455607,
+        16.22020705033759
+      ]
+    ],
+    "control_points": [
+      {
+        "name": "north",
+        "role": "control",
+        "pixel": [
+          213.0,
+          48.0
+        ],
+        "lonlat": [
+          37.940296291000095,
+          14.845476907000148
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "south",
+        "role": "control",
+        "pixel": [
+          266.0,
+          434.0
+        ],
+        "lonlat": [
+          39.560270000000116,
+          3.40667000000019
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "west",
+        "role": "control",
+        "pixel": [
+          46.0,
+          280.0
+        ],
+        "lonlat": [
+          32.99180000000007,
+          7.926040000000057
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "east",
+        "role": "control",
+        "pixel": [
+          553.0,
+          279.0
+        ],
+        "lonlat": [
+          47.988240000000076,
+          8.004110000000082
+        ],
+        "clipped_by_frame": false
+      }
+    ],
+    "check_points": [
+      {
+        "name": "northeast",
+        "role": "check",
+        "pixel": [
+          553.0,
+          279.0
+        ],
+        "lonlat": [
+          47.988240000000076,
+          8.004110000000082
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "southwest",
+        "role": "check",
+        "pixel": [
+          146.0,
+          397.0
+        ],
+        "lonlat": [
+          35.95111000000003,
+          4.521110000000135
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "northwest",
+        "role": "check",
+        "pixel": [
+          165.0,
+          68.0
+        ],
+        "lonlat": [
+          36.55273739800009,
+          14.278901204000135
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "southeast",
+        "role": "check",
+        "pixel": [
+          454.0,
+          381.0
+        ],
+        "lonlat": [
+          44.95083000000017,
+          4.902500000000032
+        ],
+        "clipped_by_frame": false
+      }
+    ],
+    "proposed_by": "automatic draft: silhouette extreme points, refined by fitting the country outline (scale and offset per axis); points touching the map frame are not used"
+  },
+  "classification": {
+    "tolerance_rgb": 45.0,
+    "majority": 0.6,
+    "coverage": 0.5,
+    "rule": "nearest legend colour per pixel; majority over the 0.25 deg cell footprint"
+  },
+  "edge_convention": {
+    "name": "midpoint_between_displayed_bounds",
+    "threshold_tolerance": 0.5,
+    "note": "Rounded legend labels: adjacent classes meet halfway between displayed bounds; exact continuous edges are not verified."
+  },
+  "review": null,
+  "how_to_review": "Check the QC figure in outputs/.../references/<id>/georeference_qc.png (outline, control and check points, digitized classes). Edit control points or legend colours here (or replace the registration with QGIS GCPs), then run the runner with --review-reference <id> --reviewer \"Name\"."
+}

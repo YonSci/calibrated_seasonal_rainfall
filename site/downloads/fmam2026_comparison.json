@@ -9,7 +9,7 @@
   "minimum_leading_probability": 0.4,
   "areas": {
    "all_ethiopia": "All Ethiopia",
-   "season_domain": "FMAM R2 (Belg) rainfall domain"
+   "season_domain": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)"
   }
  },
  "sources": [
@@ -179,7 +179,7 @@
     "cells": 309,
     "region_name": null,
     "basis": "zone polygons digitized from the EMI figure",
-    "domain_share": 0.08737864077669903,
+    "domain_share": 0.7928802588996764,
     "relationship": "weak_signal",
     "status": "validated"
    }
@@ -231,7 +231,7 @@
     "cells": 402,
     "region_name": null,
     "basis": "zone polygons digitized from the EMI figure",
-    "domain_share": 0.7661691542288557,
+    "domain_share": 0.6840796019900498,
     "relationship": "weak_signal",
     "status": "validated"
    }
@@ -283,7 +283,7 @@
     "cells": 253,
     "region_name": null,
     "basis": "zone polygons digitized from the EMI figure",
-    "domain_share": 0.15810276679841898,
+    "domain_share": 1.0,
     "relationship": "weak_signal",
     "status": "validated"
    }
@@ -335,7 +335,7 @@
     "cells": 331,
     "region_name": null,
     "basis": "zone polygons digitized from the EMI figure",
-    "domain_share": 0.006042296072507553,
+    "domain_share": 0.9093655589123867,
     "relationship": "weak_signal",
     "status": "validated"
    }
@@ -408,56 +408,55 @@
   {
    "metric": "mapped_category_agreement",
    "source_id": "icpac_mam_2026_rainfall",
-   "where": "FMAM R2 (Belg) rainfall domain",
+   "where": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
    "status": "available",
    "reason": null,
    "basis": "reviewed_digitization",
    "value": {
-    "area_share_official_forecast_shown": 0.9003830989345127,
-    "area_share_official_no_forecast": 0.0996169010654871,
-    "area_share_both_favoured": 0.09596376095043442,
-    "agreement_share_where_both_favoured": 0.2487637171061222,
-    "opposing_share_where_both_favoured": 0.3002527014186119,
+    "area_share_official_forecast_shown": 1.0,
+    "area_share_official_no_forecast": 0.0,
+    "area_share_both_favoured": 0.23189806301668395,
+    "agreement_share_where_both_favoured": 0.3604749499699773,
+    "opposing_share_where_both_favoured": 0.22914247501544605,
     "official_category_shares": {
-     "below": 0.005277816508796738,
-     "near": 0.20763812009035756,
-     "above": 0.7870840634008457
+     "below": 0.06808869185348652,
+     "near": 0.2597442094559439,
+     "above": 0.6721670986905696
     },
     "official_interval_shares": {
-     "below 40-50%": 0.005277816508796738,
-     "near 33-40%": 0.20763812009035756,
-     "above 33-40%": 0.0026183598747241774,
-     "above 40-50%": 0.6733452907819578,
-     "above 50-60%": 0.11112041274416368
+     "below 40-50%": 0.06808869185348652,
+     "near 33-40%": 0.2597442094559439,
+     "above 40-50%": 0.5933804278230398,
+     "above 50-60%": 0.07878667086752988
     },
     "platform_category_shares": {
-     "below": 0.04082730290943015,
-     "near": 0.057493856739314696,
-     "above": 0.004757728976706386,
-     "weak": 0.8969211113745486
+     "below": 0.13624091970883934,
+     "near": 0.027755880963262928,
+     "above": 0.06790126234458176,
+     "weak": 0.768101936983316
     },
     "platform_mean_local_probabilities": [
-     0.3419767289805698,
-     0.3306071970457398,
-     0.3274160739736903
+     0.3462881120534845,
+     0.3177605951887618,
+     0.33595129275775387
     ],
-    "cells": 418,
+    "cells": 1075,
     "registration_sensitivity": {
      "shifts_px": 8,
      "agreement_range": [
-      0.17456966149257447,
-      0.27385412314446167
+      0.3406618399782679,
+      0.3685166817430355
      ],
      "compared_area_range": [
-      0.09596376095043442,
-      0.09596376095043442
+      0.23096305528888067,
+      0.23189806301668395
      ]
     },
     "overlap_majority": {
      "official": "above",
-     "platform": "near",
-     "official_share": 0.6509493800880524,
-     "platform_share": 0.5496495910554541
+     "platform": "below",
+     "official_share": 0.561905081024834,
+     "platform_share": 0.5875034829378348
     }
    }
   },
@@ -512,15 +511,15 @@
    "area_key": "season_domain",
    "source_id": "icpac_mam_2026_rainfall",
    "status": "validated",
-   "title": "ICPAC — FMAM R2 (Belg) rainfall domain",
-   "text": "Category agreement of 24.9% within the compared area, which covers 10% of the analysed domain. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
+   "title": "ICPAC — FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
+   "text": "Category agreement of 36.0% within the compared area, which covers 23% of the analysed domain. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
     "icpac_mam_2026_rainfall_comparison_map"
    ],
    "scope": {
-    "compared_area_share": 0.09596376095043442,
+    "compared_area_share": 0.23189806301668395,
     "period": "Mar 2026–May 2026 vs Feb 2026–May 2026"
    }
   },
@@ -550,7 +549,7 @@
    "source_id": "emi_belg_2026_outlook",
    "status": "validated",
    "title": "EMI — whole zones",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 33% / 32% / 35% over the whole zone (9% of it in the domain); zone North-central: no clear category in one source, platform 35% / 32% / 33% over the whole zone (77% of it in the domain); zone South-central: no clear category in one source, platform 38% / 31% / 31% over the whole zone (16% of it in the domain); zone Southeast: no clear category in one source, platform 33% / 31% / 36% over the whole zone (1% of it in the domain). Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 33% / 32% / 35% over the whole zone (79% of it in the domain); zone North-central: no clear category in one source, platform 35% / 32% / 33% over the whole zone (68% of it in the domain); zone South-central: no clear category in one source, platform 38% / 31% / 31%; zone Southeast: no clear category in one source, platform 33% / 31% / 36% over the whole zone (91% of it in the domain). Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
    "evidence_ids": [
     "emi_belg_2026_outlook_page22",
     "platform_forecast_fmam"
@@ -570,7 +569,7 @@
    "source_id": null,
    "status": "validated",
    "title": "Robustness of the extraction",
-   "text": "With the ICPAC map as digitized and shifted by one source pixel in each direction, the All Ethiopia category agreement stays between 38.3% and 41.8%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the FMAM R2 (Belg) rainfall domain category agreement stays between 17.5% and 27.4%. These are bounded sensitivity checks of the extraction, not statistical confidence intervals; exact EMI zone comparisons remain unavailable.",
+   "text": "With the ICPAC map as digitized and shifted by one source pixel in each direction, the All Ethiopia category agreement stays between 38.3% and 41.8%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm) category agreement stays between 34.1% and 36.9%. These are bounded sensitivity checks of the extraction, not statistical confidence intervals; exact EMI zone comparisons remain unavailable.",
    "evidence_ids": [],
    "scope": {}
   }
@@ -592,7 +591,7 @@
     "emi_belg_2026_outlook_page22"
    ],
    "zone_name": null,
-   "zone_domain_share": 0.08737864077669903,
+   "zone_domain_share": 0.7928802588996764,
    "zone_cells": 309,
    "zone_mean": "33% / 32% / 35%",
    "zone_relationship": "No clear category in one source",
@@ -614,7 +613,7 @@
     "emi_belg_2026_outlook_page22"
    ],
    "zone_name": null,
-   "zone_domain_share": 0.7661691542288557,
+   "zone_domain_share": 0.6840796019900498,
    "zone_cells": 402,
    "zone_mean": "35% / 32% / 33%",
    "zone_relationship": "No clear category in one source",
@@ -636,7 +635,7 @@
     "emi_belg_2026_outlook_page22"
    ],
    "zone_name": null,
-   "zone_domain_share": 0.15810276679841898,
+   "zone_domain_share": 1.0,
    "zone_cells": 253,
    "zone_mean": "38% / 31% / 31%",
    "zone_relationship": "No clear category in one source",
@@ -658,7 +657,7 @@
     "emi_belg_2026_outlook_page22"
    ],
    "zone_name": null,
-   "zone_domain_share": 0.006042296072507553,
+   "zone_domain_share": 0.9093655589123867,
    "zone_cells": 331,
    "zone_mean": "33% / 31% / 36%",
    "zone_relationship": "No clear category in one source",
@@ -677,7 +676,7 @@
    "platform": "33% / 32% / 35%",
    "relationship": "No clear category in one source",
    "relationship_code": "weak_signal",
-   "domain_share": 0.08737864077669903,
+   "domain_share": 0.7928802588996764,
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_fmam",
@@ -696,7 +695,7 @@
    "platform": "35% / 32% / 33%",
    "relationship": "No clear category in one source",
    "relationship_code": "weak_signal",
-   "domain_share": 0.7661691542288557,
+   "domain_share": 0.6840796019900498,
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_fmam",
@@ -715,7 +714,7 @@
    "platform": "38% / 31% / 31%",
    "relationship": "No clear category in one source",
    "relationship_code": "weak_signal",
-   "domain_share": 0.15810276679841898,
+   "domain_share": 1.0,
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_fmam",
@@ -734,7 +733,7 @@
    "platform": "33% / 31% / 36%",
    "relationship": "No clear category in one source",
    "relationship_code": "weak_signal",
-   "domain_share": 0.006042296072507553,
+   "domain_share": 0.9093655589123867,
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_fmam",
@@ -765,13 +764,13 @@
    "id": "icpac_mam_2026_rainfall_season_domain_finding_row",
    "kind": "area",
    "status": "validated",
-   "location": "FMAM R2 (Belg) rainfall domain",
+   "location": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
    "zone": null,
    "official": "Above normal (most often 40–50%)",
-   "official_note": "shown on 90% of the area; 10% grey (no forecast category shown)",
-   "platform": "34% / 33% / 33%",
-   "relationship": "Near normal vs other (where both show a category)",
-   "relationship_code": "near_versus_other",
+   "official_note": "shown on 100% of the area; 0% grey (no forecast category shown)",
+   "platform": "35% / 32% / 33%",
+   "relationship": "Opposing categories (where both show a category)",
+   "relationship_code": "opposing_favoured_categories",
    "domain_share": null,
    "area_key": "season_domain",
    "evidence_ids": [
@@ -868,11 +867,11 @@
    "id": "icpac_mam_2026_rainfall_season_domain_finding_text",
    "finding": "icpac_mam_2026_rainfall_season_domain_finding",
    "source_id": "icpac_mam_2026_rainfall",
-   "area": "FMAM R2 (Belg) rainfall domain",
+   "area": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
    "area_key": "season_domain",
    "status": "validated",
-   "relationship": "near_versus_other",
-   "text": "The outlooks favour different categories over much of their shared displayed area in the FMAM R2 (Belg) rainfall domain. ICPAC shows a favoured category on 90% of the FMAM R2 (Belg) rainfall domain and no forecast category shown (the legend does not explain the grey areas) on 10%; where it shows one it favours above normal on 79%, most often at 40-50% and 33-40%. The platform favours above normal on <1% and below normal on 4% of the FMAM R2 (Belg) rainfall domain. There is category agreement of 24.9% within the compared area, which covers 10% of the analysed domain; opposite categories (above vs below) on 30% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "relationship": "opposing_favoured_categories",
+   "text": "The outlooks favour different categories over much of their shared displayed area in the FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm). ICPAC shows a favoured category on 100% of the FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm) and no forecast category shown (the legend does not explain the grey areas) on 0%; where it shows one it favours above normal on 67%, most often at 40-50% and 33-40%. The platform favours above normal on 7% and below normal on 14% of the FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm). There is category agreement of 36.0% within the compared area, which covers 23% of the analysed domain; opposite categories (above vs below) on 23% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
@@ -982,7 +981,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\jan_2026_fmam.json --workflow products --compare-external",
- "created_utc": "2026-10-09T15:22:31+00:00",
+ "created_utc": "2026-10-10T01:56:15+00:00",
  "engine": "rules v2",
  "reference_layers": []
 }

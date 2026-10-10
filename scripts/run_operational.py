@@ -39,6 +39,11 @@ def forecast_file(root, target):
 def presentation_mask(cfg):
     """JJAS uses the regime reconciliation mask (R1+R2); other seasons their own rainfall-domain mask."""
     return path(cfg["regime_mask"] if SEASON == "JJAS" else cfg["season_domain_mask"])
+
+
+def extra_masks(cfg):
+    """Masks of further presentation views (cycle "extra_domain_masks"), e.g. the FMAM-dominant domain."""
+    return [path(e["mask"]) for e in cfg.get("extra_domain_masks", [])]
 PATH_KEYS = ["project_config","forecast_root","verification_root","processed_root","download_cache",
              "regime_mask","boundary","historical_review","output_root"]
 PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operational.py",
@@ -186,7 +191,7 @@ def preflight(cfg, workflow, verification_request):
     scripts = PRODUCT_SCRIPTS + (VERIFY_SCRIPTS if workflow in ["verify","all"] else [])
     require([ROOT/"scripts"/s for s in scripts])
     mp,bp,vr = path(cfg["regime_mask"]),path(cfg["boundary"]),path(cfg["verification_root"])
-    require([mp,presentation_mask(cfg),*boundary_files(bp)])
+    require([mp,presentation_mask(cfg),*extra_masks(cfg),*boundary_files(bp)])
     lines = base.boundary_lines(bp)
     if not lines:
         raise ValueError("Empty Ethiopia boundary")
@@ -383,7 +388,7 @@ def main():
             verified = info["ready"] if a.workflow=="products" else verify_stages(runner,cfg,info,code_inputs)
             report = report_stages(runner,cfg,verified,code_inputs) if a.workflow!="products" else None
             vr = path(cfg["verification_root"])
-            common = [*code_inputs,presentation_mask(cfg),*boundary_files(path(cfg["boundary"]))]
+            common = [*code_inputs,presentation_mask(cfg),*extra_masks(cfg),*boundary_files(path(cfg["boundary"]))]
             if info["snapshot"]:
                 common.append(vr/"frozen_forecasts")
             forecasts = []

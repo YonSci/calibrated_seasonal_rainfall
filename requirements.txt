@@ -11,6 +11,7 @@ cdsapi==0.7.7
 # Runtime additions used by the mask builder and operational runner (installed versions)
 pyshp==3.1.6
 pyproj==3.7.2
-# shapely is needed only to rebuild the Ethiopia mask (build_region_mask.py)
+# Geometry: Ethiopia mask, domain boundaries and the rainfall-domain review area weights
+shapely==2.2.0
 # Official forecast comparison: PDF text and embedded figures (external_forecasts.py)
 pypdf==6.19.0

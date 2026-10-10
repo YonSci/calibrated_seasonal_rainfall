@@ -93,6 +93,10 @@ class Cycle:
             raise KeyError(f'Cycle file {self.path} has no "{key}"')
         return resolve(value)
 
+    def extra_domains(self):
+        """Additional presentation views beyond the season domain: [(view, mask path)] from "extra_domain_masks"."""
+        return [(e['view'], resolve(e['mask'])) for e in self.raw.get('extra_domain_masks', [])]
+
     @property
     def project(self):
         """The project configuration (season, archive) this cycle forecasts."""

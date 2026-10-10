@@ -2,13 +2,13 @@ FMAM 2026 — January initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-09 19:28 UTC (site release 2026-10-09.11) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-10 01:58 UTC (site release 2026-10-09.11) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
-The forecast is close to climatology in the FMAM R2 (Belg) rainfall domain: no tercile
-stands out on average. Mean forecast rainfall is 212 mm against a 1993–2025 average of 213
-mm (0 mm, 0%).
+The forecast is close to climatology in the FMAM rainfall domain (FMAM >= 20% of annual
+and >= 100 mm): no tercile stands out on average. Mean forecast rainfall is 284 mm against
+a 1993–2025 average of 287 mm (−3 mm, −1%).
 
 Model initialization: 1 January 2026 · ECMWF SEAS5 (system 51), 51 members
 Target period: 1 Feb 2026 – 31 May 2026
@@ -16,9 +16,9 @@ Forecast record: Frozen 8 Oct 2026 (after the target period ended, before this p
 Publication status: Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast
 Reference period: CHIRPS v2.0 FMAM 1993–2025 (33 seasons)
 Observations processed through: May 2026 (Mar, Apr, May)
-CHIRPS archive: Official CHIRPS v2.0 p25 by_month listing checked 9 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found
-Verification last run: 9 Oct 2026
-Method / version: Shared climatology blend (λ = 0.43 for FMAM) · code 3b8a55d
+CHIRPS archive: Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found
+Verification last run: 10 Oct 2026
+Method / version: Shared climatology blend (λ = 0.43 for FMAM) · code 34a024a
 Rainfall domain: Fixed 1993-2025 descriptive domain (Belg): rainfall regime R2 (GitHub-refined classification of the CHIRPS daily climatology) with FMAM climatological CHIRPS rainfall >=80 mm; patches smaller than 3 cells removed. Scientific masking walkthrough logic; no onset gate. The same domain is used for the season and each of its months.
 
 Contents
