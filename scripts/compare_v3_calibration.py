@@ -78,6 +78,25 @@ def gates(root):
                   for t, v in tgts.items()} for fam, tgts in g.items()}
 
 
+def domain_reviews(roots):
+    """Included share of Ethiopia for every review candidate and comparator, v2 vs v3 climatology."""
+    out = {}
+    for season in ('fmam', 'jjas', 'ondj'):
+        rows = {}
+        for side, root in roots.items():
+            f = root / f'outputs/rainfall_domain_review/{season}_v1/report/assessment_results.json'
+            if not f.is_file():
+                continue
+            res = json.loads(f.read_text(encoding='utf-8'))['candidates']
+            for c in res['candidates']:
+                st = c.get('reference_comparison_status') or {}
+                rows.setdefault(c['candidate_id'], {})[side] = dict(percent=c['included_country_percent'], emi_agreement=st.get('agreement'))
+            for c in res['comparators']:
+                rows.setdefault(c['comparator_id'], {})[side] = dict(percent=c['included_country_percent'], label=c['label'])
+        out[season.upper()] = rows
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--v3-root', default=str(ROOT.parent / 'calibrated_seasonal_rainfall_v3'))
@@ -87,7 +106,7 @@ def main():
         country = m.region_mask.values == 1
     res = dict(created_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), roots={k: str(v) for k, v in roots.items()},
                note='Each side is scored against its own CHIRPS version; skill compares how the method works with each dataset.',
-               cycles={}, decision_gates={k: gates(v) for k, v in roots.items()})
+               cycles={}, decision_gates={k: gates(v) for k, v in roots.items()}, domain_reviews=domain_reviews(roots))
     for name, (tag, targets, season) in CYCLES.items():
         rows = {}
         for t in targets:

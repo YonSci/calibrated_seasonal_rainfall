@@ -9,7 +9,7 @@ evaluated in a parallel track and, if adopted, used from the next forecast cycle
 |---|---|---|
 | 1 | v3 archive on the project's 0.25° grid | done (`prepare_chirps_v3.py`) |
 | 2 | v2 vs v3 comparison over Ethiopia | done (`compare_chirps_versions.py`) |
-| 3 | v3 calibration in separate configs and outputs (development + final), decision gates, domain reviews | next |
+| 3 | v3 calibration in separate configs and outputs (development + final), decision gates, domain reviews | done (worktree `chirps-v3`, `compare_v3_calibration.py`) |
 | 4 | Decision: adopt v3 from the next cycle, as a method release | after step 3 |
 
 ## Step 1 — the v3 archive
@@ -62,13 +62,53 @@ correction, terciles, blend weights) must be refitted with v3 — a v2-calibrate
 v3 (Option A). The amount thresholds of the domain rules (100/120 mm) would cover a slightly larger area with v3; the
 domain reviews should be rerun with v3 before a domain is chosen for a v3 cycle.
 
-## Step 3 — what it needs (next)
+## Step 3 — the v3 calibration (done 2026-10-11)
 
-1. `prepare_seasonal.py` reads a daily archive; the v3 track needs it to accept the monthly archive (sums of whole
-   months — exact for every target).
-2. Separate project and cycle configs for v3 (e.g. `config\v3\…`) with their own processed, calibration, model and
-   output folders, so no v2 file is overwritten.
-3. Development and final calibration, the decision gates (`decision_gates.py`), historical diagnostics and the domain
-   reviews with the v3 climatology.
-4. The verification downloads (`prepare_verification_2026.py`, `run_operational.py`, `verify2026_common.py`) and the
-   site's "CHIRPS v2.0" text read the observation source from the configuration instead of hard-coded v2 URLs.
+**Where it runs.** Branch `chirps-v3`, checked out as a separate git worktree `..\calibrated_seasonal_rainfall_v3`. Its project and
+monthly configs read the v3 archive (`"chirps_file": "data/raw/chirps/et/et_chirps3_monthly_r25.nc"`, `"chirps_variable":
+"monthly_total"`, `"chirps_temporal": "monthly"`; `prepare_seasonal.py` sums whole months). `data/interim`, `data/processed`,
+`outputs` and `models` are git-ignored, so the worktree has its own and nothing of the v2 track can be overwritten. Raw ECMWF
+and CHIRPS data are linked from the main folder (directory junctions and hard links, no copies). One command runs the chain
+for the four cycles — seasonal and monthly preparation, nested historical evaluation (1993–2016) and the exploratory years
+(2017 onwards), the final shared blend, regional skill, the development calibration with its amount verification,
+historical diagnostics — and then the JJAS decision gates:
+
+```bat
+cd /d D:\calibrated_seasonal_rainfall_v3
+D:\calibrated_seasonal_rainfall\.venv\Scripts\python.exe scriptsun_chirps_v3_track.py
+D:\calibrated_seasonal_rainfall\.venv\Scripts\python.exe scriptsun_rainfall_domain_review.py --config configainfall_domainsmam_review.json
+cd /d D:\calibrated_seasonal_rainfall
+python scripts\compare_v3_calibration.py
+```
+
+Results (`outputs\chirps_v3_comparison\calibration_comparison.json`). Each side is scored against **its own** observations,
+so the numbers say how well the method works with each dataset, not which dataset is right.
+
+| Cycle · season | λ v2 → v3 | Cross-validated RPSS 1993–2016, v2 → v3 | Exploratory RPSS, v2 → v3 | Amount CRPSS (dev. run), v2 → v3 |
+|---|---|---|---|---|
+| May · JJAS | 0.50 → 0.59 | +0.046 [+0.003, +0.087] → +0.027 [−0.006, +0.057] | +0.050 → +0.039 | +0.017 → −0.018 |
+| January · FMAM | 0.43 → 0.34 | +0.027 → +0.032 | −0.004 → +0.017 | −0.001 → +0.016 |
+| February · FMAM | 0.44 → 0.40 | +0.022 → +0.021 | +0.043 → +0.059 | +0.053 → +0.071 |
+| September · ONDJ | 0.28 → 0.18 | +0.020 → +0.039 | +0.063 → +0.075 (2017–2024) | +0.181 → +0.178 |
+| February · Feb (month) | 0.48 → 0.50 | +0.120 → +0.126 | +0.007 → +0.056 | — |
+
+* **Method decisions are unchanged.** The JJAS decision gates give the same outcome with v3 as with v2: none of the
+  candidate changes (Ethiopia-only λ, square-root correction, no blend, plain climatology) passes, so the shared
+  climatology blend stays.
+* **Skill is similar overall, with season differences.** FMAM and ONDJ score slightly better with v3; JJAS scores lower
+  (its cross-validated interval now includes zero, and amount skill turns slightly negative). All differences are
+  within the year-to-year uncertainty.
+* **2026 season forecasts would change little** (national mean probabilities, below / near / above): JJAS 51/25/24 % →
+  47/27/27 %; FMAM (January) 34/32/34 % → 34/31/35 %; FMAM (February) 27/33/40 % → 26/32/42 %; ONDJ 28/27/45 % → 27/27/46 %.
+  These v3 forecasts are for comparison only and are not published (Option A).
+* **Domains under the same rules grow slightly** with v3: the FMAM working rule (≥ 100 mm and ≥ 20 %) covers 72.6 → 75.6 % of
+  Ethiopia; its draft agreement with the EMI Belg maps rises 0.91 → 0.93. JJAS and ONDJ candidates move by up to a few
+  percent. The regime-based domains (R1+R2, R3) are fixed masks and do not change; the regimes themselves are a v2 daily
+  product and are not rebuilt (v3 has no observed daily product).
+
+## Step 4 — decision (open)
+
+The evidence does not force a choice: v3 is wetter and better documented, the method holds, and skill is similar. If v3 is
+adopted for the next cycle: merge the `chirps-v3` configs, rebuild the domain masks from the v3 reviews (explicit selection),
+make the verification downloads and the site text read the observation source from the configuration (they still name
+CHIRPS v2.0 and its p25 URLs), and publish it as a method release. Until then the v2 chain is the published one.
