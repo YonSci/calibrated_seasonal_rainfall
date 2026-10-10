@@ -184,14 +184,19 @@ def crop_panels(src, folder):
     return [list(p) for p in PANELS]
 
 
+ALL_ETHIOPIA = ('All Ethiopia: every 0.25° grid cell inside the national boundary (1,484 cells), with no rainfall-domain '
+                'restriction. Probabilities are shown where the forecast is eligible.')
+
+
 def view_definitions(c, entries_json):
-    """Definition text per non-national view (several when the cycle has extra_domain_masks)."""
-    if 'domain_definitions' in entries_json:
-        return entries_json['domain_definitions']
+    """Definition text per view: All Ethiopia explicitly, and each rainfall-domain view from the current presentation
+    summary (written by the latest run); an older entries.json listing is used only when no summary exists."""
     summary = c.root('output_root') / f'presentation/forecast/{c.season_name}/presentation_summary.json'
     if summary.is_file():
-        return json.loads(summary.read_text(encoding='utf-8')).get('domain_definitions', {})
-    return {}
+        found = json.loads(summary.read_text(encoding='utf-8')).get('domain_definitions', {})
+    else:
+        found = entries_json.get('domain_definitions') or {}
+    return {'all_ethiopia': ALL_ETHIOPIA, **found}
 
 
 def view_criteria(c, domain_view):
@@ -209,14 +214,16 @@ def view_criteria(c, domain_view):
 
 
 def domain_text(c, entries_json):
-    if 'domain_definition' in entries_json:
-        return entries_json['domain_definition'], entries_json.get('domain_note', '')
+    """The cycle's primary rainfall-domain definition: current presentation summary, else the mask itself; an older
+    entries.json listing (from before the runner gallery) only as a last resort."""
     summary = c.root('output_root') / f'presentation/forecast/{c.season_name}/presentation_summary.json'
     if summary.is_file():
         s = json.loads(summary.read_text(encoding='utf-8'))
         return s['domain_definition'], s.get('domain_note', '')
-    with xr.open_dataset(c.root('season_domain_mask')) as m:
-        return m.attrs['domain_definition'], ''
+    if c.raw.get('season_domain_mask') and c.root('season_domain_mask').is_file():
+        with xr.open_dataset(c.root('season_domain_mask')) as m:
+            return m.attrs['domain_definition'], ''
+    return entries_json.get('domain_definition', ''), entries_json.get('domain_note', '')
 
 
 def ref_label(c, crosses):
@@ -978,7 +985,8 @@ JS = r'''
         (v ? v.mean_local_probabilities.map(z => pc(z)).join(' / ') : '—') + '</td><td>' + (v ? fx(v.probability_domain_area_percent) + '% of area' : '—') + '</td><td>' + (v ? sg(v.mean_anomaly_mm) + ' mm' : '—') + '</td><td>' + status(x.status) + '</td></tr>'; }).join('') +
       '</tbody></table></div><p class="caveat">Probability coverage is the share of the area with tercile probabilities; averages are over that share only. Cells with very little reference-period rainfall have no terciles.</p>';
     $('ol-meta').innerHTML = '<dl class="meta">' + c.meta.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') +
-      '<dt>Rainfall domain</dt><dd>' + esc((c.definitions || {})[S.view] || c.definition) + (c.note ? ' ' + esc(c.note) : '') + '</dd></dl>';
+      (S.view === 'all_ethiopia' ? '<dt>Area</dt><dd>' + esc((c.definitions || {}).all_ethiopia || 'All Ethiopia') + '</dd>'
+        : '<dt>Rainfall domain</dt><dd>' + esc((c.definitions || {})[S.view] || c.definition) + (c.note ? ' ' + esc(c.note) : '') + '</dd>') + '</dl>';
   }
 
   // ---------- maps
@@ -1278,7 +1286,8 @@ JS = r'''
       };
       const overlap = x => !ok(x) ? '' : x <= 0 ? 'Outside the domain (national context)' : x >= 1 ? 'Entire sample in the domain' :
         'Partly overlaps the domain — ' + (100 * x).toFixed(0) + '% of sample cells';
-      const item = i => '<li><strong>' + esc(i.title) + '.</strong> ' + esc(i.text) + links(i.evidence_ids, i.source_id, scopeView(i.area_key)) + '</li>';
+      // A finding may name its own evidence area (e.g. whole EMI zones: the national map), independent of the selected area.
+      const item = i => '<li><strong>' + esc(i.title) + '.</strong> ' + esc(i.text) + links(i.evidence_ids, i.source_id, scopeView(i.evidence_area || i.area_key)) + '</li>';
       let h = '<p class="scope"><strong>Season:</strong> ' + esc(season.label) + ' (' + dt(season.start) + ' – ' + dt(season.end) + ') · <strong>Area:</strong> ' + esc(areaName) + '</p>';
       if (missingArea) h += '<p class="notice">Comparison results have not been generated for the ' + esc(missingArea) + '. The national (All Ethiopia) results are shown instead.</p>';
       if (S.target !== season.id) h += '<p class="notice">This comparison covers the full ' + esc(season.id) + ' season. A separate ' + esc(tgt().label) + ' comparison is not available.</p>';
@@ -1375,7 +1384,7 @@ JS = r'''
         h += '<h3 id="cmp-observed">Against CHIRPS observations — ' + esc(areaName) + '</h3><p class="caveat">Each outlook is scored against what CHIRPS observed for <em>its own</em> period, with observed terciles from CHIRPS ' +
           O.reference_years.join('–') + ' in each 0.25° cell. One season only: these numbers describe 2026, not general skill.</p>' +
           (O.side_by_side_map ? '<figure class="map-figure wide"><a href="' + href(O.side_by_side_map) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(O.side_by_side_map) +
-            '" alt="Platform, EMI and ICPAC favoured categories with the observed CHIRPS terciles"></a><figcaption>Top: the favoured category of the platform, EMI and ICPAC (same colours as the observed terciles; white: no category reaches 40%; hatched: no outlook). Bottom: the tercile CHIRPS observed, for the season and for ICPAC\'s period.</figcaption></figure>' : '') +
+            '" alt="Platform, EMI and ICPAC favoured categories with the observed CHIRPS terciles"></a><figcaption>Top: the favoured category of the platform, EMI and ICPAC, in the same colours as the observed terciles. Platform and EMI: an untied leading probability of at least 40%; ICPAC: the dominant category ICPAC printed, including its 33–40% intervals. White: no favoured category under the applicable rule; hatched: no outlook. Bottom: the tercile CHIRPS observed, for the season and for ICPAC\'s period.</figcaption></figure>' : '') +
           '<div class="table-wrap"><table class="compact"><caption>Favoured category vs observed, and probability skill — ' + esc(areaName) + '</caption><thead><tr><th scope="col">Outlook</th><th scope="col">Period</th><th scope="col">Observations available</th><th scope="col">Outlook issued</th><th scope="col">Favoured category shown</th><th scope="col">Favoured category observed</th><th scope="col">Opposite category observed</th><th scope="col">Chance</th><th scope="col">RPSS vs climatology</th></tr></thead><tbody>' +
           rows.map(r => '<tr><td>' + esc(r.source_id === 'platform_on_emi_zones' ? 'Platform, on the EMI zones only' : r.provider + ' — ' + r.label) + '</td><td class="nowrap">' + esc(win(r)) + '</td><td>' + pc(r.observation_coverage) + '</td><td>' + pc(r.outlook_coverage) + '</td><td>' + pc(r.favoured_coverage) +
             (ok(r.favoured_below_40_share) && r.favoured_below_40_share > 0.005 ? '<br><span class="caveat">' + pc(r.favoured_below_40_share) + ' of it on the 33–40% interval</span>' : '') +

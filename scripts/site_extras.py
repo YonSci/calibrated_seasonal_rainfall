@@ -321,7 +321,18 @@ def package_metadata(cyc, built, release_id, sha, files):
 
 # ---------------------------------------------------------------- release archive
 def load_releases():
-    return json.loads(RELEASES.read_text(encoding='utf-8')) if RELEASES.is_file() else []
+    releases = json.loads(RELEASES.read_text(encoding='utf-8')) if RELEASES.is_file() else []
+    check_releases(releases)
+    return releases
+
+
+def check_releases(releases):
+    """Exactly one current release: the newest has no commit (it is the page being built); every earlier release is
+    pinned to the commit it was last published at, so the archive shows that page instead of today's."""
+    open_ = [r['id'] for r in releases if not r.get('commit')]
+    if releases and open_ != [releases[-1]['id']]:
+        raise ValueError('config/site_releases.json: only the newest release may have "commit": null (the current release); '
+                         f'unpinned: {", ".join(open_) or "none"}. Pin earlier releases to the commit they were last published at.')
 
 
 def _git(*args):
@@ -813,8 +824,9 @@ def public_report(data, prefix):
                f'observed terciles from CHIRPS {obs["reference_years"][0]}–{obs["reference_years"][1]} per 0.25° cell. One season only.</p>']
         if obs.get('side_by_side_map'):
             out.append(f'<figure><img src="{esc(prefix + name(obs["side_by_side_map"]))}" alt="Outlooks and observed terciles"><figcaption>Top: the '
-                       'favoured category of the platform, EMI and ICPAC; bottom: the tercile CHIRPS observed (same colours), for the season and '
-                       'for ICPAC\'s period.</figcaption></figure>')
+                       'favoured category of the platform, EMI and ICPAC (platform and EMI: untied leading probability of at least 40%; ICPAC: its printed '
+                       'dominant category, including 33–40% intervals; white: no favoured category under the applicable rule; hatched: no '
+                       'outlook); bottom: the tercile CHIRPS observed (same colours), for the season and for ICPAC\'s period.</figcaption></figure>')
         for key, title in (obs.get('areas') or {'all_ethiopia': 'All Ethiopia', 'season_domain': dom}).items():
             emi = next((r for r in obs['rows'] if r.get('area_key') == key and r['source_id'] == 'emi'), None)
             rows = [r for r in obs['rows'] if r.get('area_key') == key and (r['source_id'] != 'platform_on_emi_zones' or (emi and emi['outlook_coverage'] < .995))]

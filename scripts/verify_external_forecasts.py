@@ -143,6 +143,10 @@ RULES = {'Platform': 'untied leading tercile probability of at least 40%', 'EMI'
          'ICPAC': 'the dominant category ICPAC printed, including its 33–40% intervals'}
 
 
+RULE_NOTE = ('Favoured category - platform and EMI: an untied leading tercile probability of at least 40%; '
+             'ICPAC: the dominant category ICPAC printed, including its 33-40% intervals.')
+
+
 def verify_external(comparison_root, verification_root, processed_root, tag, year, ref_years, season, domain_mask, out=None, extra_domains=None):
     import xarray as xr
     import external_forecasts as ef
@@ -372,11 +376,12 @@ def observed_map(path, lon, lat, region, domain, maps, plat, zone_recs, rows):
         ax.text(0, .95, '\n'.join(lines), va='top', ha='left', fontsize=8, family='monospace', transform=ax.transAxes)
     fig.legend(handles=[Patch(color=COLOURS[c], label='observed ' + NAMES[c]) for c in CATS] +
                [Patch(color=OUTCOMES[k], label=OUTCOME_NAMES[k]) for k in OUTCOMES] +
-               [Patch(facecolor='white', edgecolor='grey', label='no favoured category (<40%)'),
-                Patch(color=COLOURS['noforecast'], label='no outlook (ICPAC grey; outside the EMI zones)')],
-               loc='lower center', ncol=4, fontsize=8, frameon=False)
+               [Patch(facecolor='white', edgecolor='grey', label='white: no favoured category under the applicable rule'),
+                Patch(color=COLOURS['noforecast'], label='hatched / grey: no outlook (ICPAC grey; outside the EMI zones)')],
+               loc='lower center', ncol=4, fontsize=8, frameon=False, bbox_to_anchor=(.5, .02))
+    fig.text(.5, .005, RULE_NOTE, ha='center', va='bottom', fontsize=8, color='#333')
     fig.suptitle(f'Outlooks against CHIRPS observations — {plat["label"]} (single season; black lines in the EMI panel: EMI zones)', fontsize=11)
-    fig.subplots_adjust(left=.03, right=.99, bottom=.1 if nrows > 1 else .2, top=.92, wspace=.06, hspace=.14)
+    fig.subplots_adjust(left=.03, right=.99, bottom=.12 if nrows > 1 else .24, top=.92, wspace=.06, hspace=.14)
     _draft(fig, True)
     fig.savefig(path, dpi=130, facecolor='white')
     plt.close(fig)
@@ -448,11 +453,12 @@ def side_by_side_map(path, lon, lat, region, domain, maps, plat, zone_recs):
         axes[1, 1].text(.5, .5, 'Same colours above and below:\nthe favoured category of each\noutlook (top) and the tercile\nthat was observed (bottom).\n\nEach outlook is shown with\nthe observations for its own\nperiod: platform and EMI\n' + span(pwin) + ', ICPAC ' + span(iwin) + '.',
                         ha='center', va='center', fontsize=9, transform=axes[1, 1].transAxes)
     fig.legend(handles=[Patch(color=COLOURS[c], label=NAMES[c]) for c in CATS] +
-               [Patch(facecolor='white', edgecolor='grey', label='no favoured category (<40%)'),
-                Patch(facecolor='white', edgecolor='#555', hatch='////', label='no outlook (ICPAC grey; outside the EMI zones)')],
-               loc='lower center', ncol=5, fontsize=8.5, frameon=False)
+               [Patch(facecolor='white', edgecolor='grey', label='white: no favoured category under the applicable rule'),
+                Patch(facecolor='white', edgecolor='#555', hatch='////', label='hatched / grey: no outlook (ICPAC grey; outside the EMI zones)')],
+               loc='lower center', ncol=5, fontsize=8.5, frameon=False, bbox_to_anchor=(.5, .02))
+    fig.text(.5, .005, RULE_NOTE, ha='center', va='bottom', fontsize=8.5, color='#333')
     fig.suptitle(f'Official outlooks, the platform forecast and the observed CHIRPS terciles — {plat["label"]}', fontsize=11)
-    fig.subplots_adjust(left=.03, right=.99, bottom=.07, top=.92, wspace=.06, hspace=.12)
+    fig.subplots_adjust(left=.03, right=.99, bottom=.09, top=.92, wspace=.06, hspace=.12)
     fig.savefig(path, dpi=130, facecolor='white')
     plt.close(fig)
 

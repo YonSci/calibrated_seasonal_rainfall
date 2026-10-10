@@ -155,6 +155,14 @@ class Rules(unittest.TestCase):
         self.assertEqual(out[-1]['id'], 'observed_note')
         self.assertEqual(_with_observed(paras, None), paras)
 
+    def test_exactly_one_current_release(self):
+        from site_extras import check_releases
+        check_releases([dict(id='a', commit='abc'), dict(id='b', commit=None)])
+        with self.assertRaisesRegex(ValueError, 'unpinned: a, b'):
+            check_releases([dict(id='a', commit=None), dict(id='b', commit=None)])
+        with self.assertRaises(ValueError):
+            check_releases([dict(id='a', commit=None), dict(id='b', commit='abc')])
+
     def test_window_mismatch_names_months(self):
         lim = window_limitation(dict(target_start='2026-10-01', target_end='2027-01-31'),
                                 dict(target_start='2026-10-01', target_end='2026-12-31'))

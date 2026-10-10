@@ -2,7 +2,7 @@ FMAM 2026 — January initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-10 15:54 UTC (site release 2026-10-10.1) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-10 18:23 UTC (site release 2026-10-10.1) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
@@ -18,8 +18,8 @@ Reference period: CHIRPS v2.0 FMAM 1993–2025 (33 seasons)
 Observations processed through: May 2026 (Feb, Mar, Apr, May)
 CHIRPS archive: Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found
 Verification last run: 10 Oct 2026
-Method / version: Shared climatology blend (λ = 0.43 for FMAM) · code b7a480a
-Rainfall domain: Fixed 1993-2025 descriptive domain (Belg): rainfall regime R2 (GitHub-refined classification of the CHIRPS daily climatology) with FMAM climatological CHIRPS rainfall >=80 mm; patches smaller than 3 cells removed. Scientific masking walkthrough logic; no onset gate. The same domain is used for the season and each of its months.
+Method / version: Shared climatology blend (λ = 0.43 for FMAM) · code dce83b8
+Rainfall domain: Fixed 1993-2025 CHIRPS v2.0 domain: cells where mean FMAM rainfall (actual-calendar monthly totals, February 29 included) is >= 100 mm and FMAM brings >= 20% of the mean annual rainfall (ratio of climatological means); complete baseline required; no patch removal or smoothing. Selected in assessment fmam_chirps_domain_review_v1. The same domain is used for the season and each of its months. The included share of Ethiopia describes this rule; it is not an independently established official share of FMAM-dependent area.
 
 Contents
 --------

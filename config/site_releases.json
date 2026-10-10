@@ -195,7 +195,7 @@
   {
     "id": "2026-10-09.11",
     "date": "2026-10-09",
-    "commit": null,
+    "commit": "b7a480a",
     "title": "Comparison pipeline ready for other seasons",
     "cycles": [
       "ONDJ 2026/27"

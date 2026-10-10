@@ -615,6 +615,7 @@
   {
    "id": "emi_whole_zones_all_ethiopia_summary",
    "area_key": "all_ethiopia",
+   "evidence_area": "all_ethiopia",
    "source_id": "emi_belg_2026_outlook",
    "status": "validated",
    "title": "EMI — whole zones",
@@ -635,6 +636,7 @@
   {
    "id": "emi_whole_zones_season_domain_summary",
    "area_key": "season_domain",
+   "evidence_area": "all_ethiopia",
    "source_id": "emi_belg_2026_outlook",
    "status": "validated",
    "title": "EMI — whole zones",
@@ -655,6 +657,7 @@
   {
    "id": "emi_whole_zones_fmam_main_season_domain_summary",
    "area_key": "fmam_main_season_domain",
+   "evidence_area": "all_ethiopia",
    "source_id": "emi_belg_2026_outlook",
    "status": "validated",
    "title": "EMI — whole zones",
@@ -1171,7 +1174,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\feb_2026_fmam.json --workflow products --compare-external",
- "created_utc": "2026-10-10T15:44:07+00:00",
+ "created_utc": "2026-10-10T18:21:15+00:00",
  "engine": "rules v2",
  "reference_layers": [],
  "observed": {
@@ -1992,6 +1995,6 @@
    1993,
    2025
   ],
-  "created_utc": "2026-10-10T15:44:12+00:00"
+  "created_utc": "2026-10-10T18:21:18+00:00"
  }
 }

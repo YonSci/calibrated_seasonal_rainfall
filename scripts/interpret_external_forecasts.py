@@ -156,7 +156,8 @@ def summary_items(comparison, manifest):
                              'the values describe the whole sample.')
             if not inside:
                 parts.append('No EMI sample overlaps this area; see the national context.')
-            out.append(dict(id=f'emi_zones_{key}_summary', area_key=key, source_id=zones[0]['source_id'], status=status,
+            # The values describe whole arrow samples, so the evidence map is the national one whatever the selected area.
+            out.append(dict(id=f'emi_zones_{key}_summary', area_key=key, evidence_area='all_ethiopia', source_id=zones[0]['source_id'], status=status,
                             title='EMI — sampled neighbourhoods near the zone arrows' + (' in the domain' if key != 'all_ethiopia' else ''),
                             text=' '.join(parts) + ' Sampled neighbourhoods (±0.5°), not complete EMI zones.', evidence_ids=ids,
                             scope=dict(zones=[z['area'].split()[-1] for z in inside])))
@@ -182,7 +183,8 @@ def summary_items(comparison, manifest):
             basis = zm[0]['zone_mean'].get('basis') or ''
             boundary = ('EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged'
                         if 'regions' in basis else 'the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline)')
-            out.append(dict(id=f'emi_whole_zones_{key}_summary', area_key=key, source_id=zones[0]['source_id'], status=status,
+            # Whole-zone averages: the evidence map is the national one, which shows every zone completely.
+            out.append(dict(id=f'emi_whole_zones_{key}_summary', area_key=key, evidence_area='all_ethiopia', source_id=zones[0]['source_id'], status=status,
                             title='EMI — whole zones' + (' (rainfall regions)' if 'regions' in basis else ''),
                             text='Platform area mean of local probabilities over each EMI zone, below / near / above: ' + '; '.join(parts) +
                                  f'. Zone boundaries: {boundary}.',

@@ -560,6 +560,7 @@
   {
    "id": "emi_zones_all_ethiopia_summary",
    "area_key": "all_ethiopia",
+   "evidence_area": "all_ethiopia",
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — sampled neighbourhoods near the zone arrows",
@@ -580,6 +581,7 @@
   {
    "id": "emi_zones_season_domain_summary",
    "area_key": "season_domain",
+   "evidence_area": "all_ethiopia",
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — sampled neighbourhoods near the zone arrows in the domain",
@@ -599,6 +601,7 @@
   {
    "id": "emi_whole_zones_all_ethiopia_summary",
    "area_key": "all_ethiopia",
+   "evidence_area": "all_ethiopia",
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — whole zones (rainfall regions)",
@@ -619,6 +622,7 @@
   {
    "id": "emi_whole_zones_season_domain_summary",
    "area_key": "season_domain",
+   "evidence_area": "all_ethiopia",
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — whole zones (rainfall regions)",
@@ -1101,7 +1105,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-10T15:51:18+00:00",
+ "created_utc": "2026-10-10T18:22:47+00:00",
  "engine": "rules v2",
  "reference_layers": [
   {
