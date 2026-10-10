@@ -279,7 +279,7 @@ def stage_sensitivity(cfg, out, clim_file, weights_file, ref_dir):
             row['reference_comparison_status'] = dict(mode='unavailable', note='No reference registered')
         row['baseline_sensitivity'] = {b['period']: (b['candidates'].get(c['id']) if b['status'] == 'available'
                                                       else dict(status='unavailable', note=b['note'])) for b in baselines}
-        row['dataset_sensitivity'] = dict(status='not_assessed', note='Only CHIRPS v2.0 is configured; no second gridded dataset.')
+        row['dataset_sensitivity'] = dict(status='not_assessed', note='One CHIRPS version per review; see outputs/chirps_v3_comparison for v2.0 vs v3.0.')
         rows.append(row)
     comps = []
     for comp in cfg.get('comparators', []):
@@ -391,6 +391,8 @@ def domain_dataset(cfg, codes, clim, candidate, spec, row, fp, rationale, versio
     first, last = cfg['application_period']
     mm, sh = spec['seasonal_rainfall_mm'], spec['annual_share_percent']
     name = cfg['season_name']
+    with xr.open_dataset(source_path(cfg['monthly_cache'])) as mc:   # e.g. 'CHIRPS v3.0 (0.05 deg monthly, ...)'
+        dataset = mc.attrs.get('dataset', 'CHIRPS v2.0 (0.25 deg)').split(' (')[0]
     out = xr.Dataset({'season_domain': (('lat', 'lon'), (codes == ra.INCLUDED).astype('int8')),
                       'classification_code': (('lat', 'lon'), codes.astype('int8')),
                       'season_climatology_mm': clim.season_mean_mm,
@@ -401,8 +403,8 @@ def domain_dataset(cfg, codes, clim, candidate, spec, row, fp, rationale, versio
     out.classification_code.attrs['codes'] = '1 included, 0 excluded, -1 insufficient data, -2 outside Ethiopia'
     out.attrs.update(
         season=name, method='rainfall_domain_review', view_label=f'{name} rainfall contribution domain',
-        view_criteria=f'{name} >= {mm:g} mm and >= {sh:g}% of annual rainfall; CHIRPS v2.0 {first}-{last} climatology',
-        domain_definition=(f'Fixed {first}-{last} CHIRPS v2.0 domain: cells where mean {name} rainfall (actual-calendar monthly '
+        view_criteria=f'{name} >= {mm:g} mm and >= {sh:g}% of annual rainfall; {dataset} {first}-{last} climatology',
+        domain_definition=(f'Fixed {first}-{last} {dataset} domain: cells where mean {name} rainfall (actual-calendar monthly '
                            f'totals, February 29 included) is >= {mm:g} mm and {name} brings >= {sh:g}% of the mean annual rainfall '
                            f'(ratio of climatological means); complete baseline required; no patch removal or smoothing. '
                            f'Selected in assessment {cfg["assessment_id"]}. The same domain is used for the season and each of its months. '

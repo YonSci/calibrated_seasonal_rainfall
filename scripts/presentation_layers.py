@@ -35,6 +35,8 @@ NOTE = ("A presentation and summary domain, not a separate calibration, physical
         "monthly rainfall-regime classification, or independently validated EMI zone.")
 # Other seasons use their own rainfall domain (scripts/build_season_domain.py), same rule as R1+R2.
 SEASON = CYCLE.season_name
+import obs_source
+OBS_LABEL = obs_source.for_project(CYCLE.project)['label']     # CHIRPS v2.0 or v3.0
 SEASON_VIEW = None if SEASON == "JJAS" else f"{SEASON.lower()}_rainfall_domain"
 if SEASON_VIEW:
     VIEWS = {"all_ethiopia": "All Ethiopia", SEASON_VIEW: f"{SEASON} rainfall domain"}
@@ -330,7 +332,7 @@ def verification_maps(fields, domains, lines, target, out, settings):
             ax.tick_params(labelsize=8)
             ax.xaxis.label.set_size(9);ax.yaxis.label.set_size(9)
         fig.suptitle(f"{CYCLE.target_label(target)} | forecast verification",fontsize=20,y=.97)
-        fig.text(.5,.932,f"Frozen {CYCLE.init_month_name}-initialized shared blend · CHIRPS v2 observations · reference {REF_DASH}",ha="center",fontsize=11)
+        fig.text(.5,.932,f"Frozen {CYCLE.init_month_name}-initialized shared blend · {OBS_LABEL} observations · reference {REF_DASH}",ha="center",fontsize=11)
         fig.text(.5,.896,VIEWS[view]+" · presentation layer",ha="center",fontsize=12,color="#176d62")
         fig.text(.5,.079,"Negative RPS difference favors the forecast. Lower CRPS is better. National and domain panels share color scales.\nLight gray: outside focus. Dark gray: no eligible verification data. No observed category is inferred from neighboring cells.",ha="center",fontsize=9)
         footer(fig,settings,verification=True)

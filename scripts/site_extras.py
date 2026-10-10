@@ -153,7 +153,7 @@ def bulletin_pdf(cyc, out_pdf, built, site):
         # ---- page 1: outlook
         fig = plt.figure(figsize=(8.27, 11.69))
         fig.text(.07, .955, f'{season["label"]} rainfall outlook', fontsize=20, weight='bold', color=ink)
-        fig.text(.07, .932, f'ECMWF SEAS5 initialized 1 {cyc["init"]} {cyc["init_date"][:4]} · calibrated with CHIRPS v2.0 · {area}',
+        fig.text(.07, .932, f'ECMWF SEAS5 initialized 1 {cyc["init"]} {cyc["init_date"][:4]} · calibrated with {cyc.get("obs", "CHIRPS")} · {area}',
                  fontsize=9.5, color=muted)
         fig.text(.07, .912, 'Research reconstruction — not an official EMI or ICPAC forecast', fontsize=9, color=amber, weight='bold')
         y = _wrap(fig, .07, .89, interpretation(cyc, season, view), 98, 10.5, color=ink)
@@ -304,7 +304,7 @@ def package_readme(cyc, built, release_id):
         'Sources and attribution',
         '-----------------------',
         'Contains modified Copernicus Climate Change Service information (ECMWF SEAS5, system 51).',
-        'CHIRPS v2.0: Climate Hazards Center, UC Santa Barbara.',
+        f'{cyc.get("obs", "CHIRPS")}: Climate Hazards Center, UC Santa Barbara. {cyc.get("obs_citation", "")}'.rstrip(),
     ]
     return '\n'.join(lines) + '\n'
 
@@ -953,6 +953,7 @@ def export_domain_review(out):
                           ') are climatologies printed in that publication; their averaging period is not documented.') if docs else None
         reviews.append(dict(
             id=cfg['assessment_id'], season=cfg['season_name'], period=data['period'], built=data['created_utc'], base=rel,
+            dataset=(data['qc'].get('source') or {}).get('dataset', 'CHIRPS').split(' (')[0],
             reference_note=reference_note, note=cfg.get('note'),
             report=rel + 'review_report.html', stale=stale, selected=data.get('selected_candidate'), rationale=data.get('selection_rationale'),
             focus=data.get('focus_candidate'), figures=data['figures'], candidates=slim_c, comparators=slim_comp,

@@ -1,4 +1,4 @@
-"""Score frozen cycle-year forecasts against complete CHIRPS v2 observations; no fitting (cycle.py)."""
+"""Score frozen cycle-year forecasts against complete CHIRPS observations (v2.0 or v3.0, obs_source.py); no fitting (cycle.py)."""
 import argparse,sys
 import numpy as np
 import xarray as xr
@@ -10,6 +10,8 @@ from verify2026_common import *
 from verify2026_outputs import staged_output
 from verify2026_math import crps,probability_losses
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
+import obs_source
+OBS=obs_source.for_project(CYCLE.project)     # CHIRPS v2.0 or v3.0, from the cycle's project configuration
 
 
 def category(x,q1,q2):return np.where(x<q1,0,np.where(x>q2,2,1))
@@ -93,7 +95,7 @@ def plots(d,out,target):
         cb=fig.colorbar(im,ax=ax,shrink=.8,extend='neither' if key=='observed_category' else 'both')
         if key=='observed_category':cb.set_ticks([0,1,2]);cb.set_ticklabels(['Below','Near','Above'])
         ax.set(title=title,aspect='equal',xlabel='Longitude',ylabel='Latitude')
-    fig.suptitle(f'{CYCLE.target_label(target)} | frozen shared-blend forecast verification\nCHIRPS v2 observations; native grid; descriptive single-year assessment',fontsize=15)
+    fig.suptitle(f'{CYCLE.target_label(target)} | frozen shared-blend forecast verification\n{OBS["label"]} observations; native grid; descriptive single-year assessment',fontsize=15)
     fig.savefig(out/'verification_maps.png',dpi=180);plt.close(fig)
 
 def assess(root,processed,target,regenerate):
@@ -108,7 +110,7 @@ def assess(root,processed,target,regenerate):
     same_grid(o,f)
     expected=window_days(target);start,end=window_iso(target)
     if int(o.attrs['year'])!=YEAR or o.attrs['target']!=target or o.attrs['season_start']!=start or o.attrs['season_end']!=end or int(o.attrs['expected_days'])!=expected:raise ValueError('Wrong observation dates/target')
-    if o.attrs.get('product')!='CHIRPS Version 2.0 daily p25' or o.precip_season.attrs.get('units')!='mm':raise ValueError('Wrong observation product or units')
+    if o.attrs.get('product')!=OBS['product'] or o.precip_season.attrs.get('units')!='mm':raise ValueError('Wrong observation product or units')
     if o.attrs.get('forecast_freeze_sha256')!=sha(root/'frozen_forecasts/freeze_manifest.json'):raise ValueError('Observations prepared against a different freeze')
     obs=o.precip_season.values
     if np.isinf(obs).any() or (obs[np.isfinite(obs)]<0).any() or not np.array_equal(np.isfinite(obs),o.valid_day_count.values==expected):raise ValueError('Incomplete/invalid totals')
@@ -140,7 +142,7 @@ def main():
         rows=[assess(root,processed,t,a.regenerate) for t in targets]
         with staged_output(root/'reports'/'_'.join(targets),a.regenerate) as stage:
             write(stage/'verification_summary.json',{'year':YEAR,'targets':targets,'results':rows,'note':'No aggregate score across monthly and JJAS targets because they overlap. Forecasts and calibration remain frozen.'})
-            lines=[f'# Frozen {YEAR} forecast verification','','Single-year descriptive assessment against CHIRPS v2. Lower CRPS/RPS is better; positive skill means improvement over the specified historical climatology.','','| Target | Raw CRPS mm | Corrected CRPS mm | Climatology CRPS mm | Shared RPS | Climatology RPS | Shared RPSS |','|---|---:|---:|---:|---:|---:|---:|']
+            lines=[f'# Frozen {YEAR} forecast verification','',f'Single-year descriptive assessment against {OBS["label"]}. Lower CRPS/RPS is better; positive skill means improvement over the specified historical climatology.','','| Target | Raw CRPS mm | Corrected CRPS mm | Climatology CRPS mm | Shared RPS | Climatology RPS | Shared RPSS |','|---|---:|---:|---:|---:|---:|---:|']
             for r in rows:
                 am=r['amount'];pr=r['probability'];ss=pr['shared_blend']['rpss'];lines.append(f'| {r["target"]} | {am["raw"]["crps_mm"]:.3f} | {am["corrected"]["crps_mm"]:.3f} | {am["climatology"]["crps_mm"]:.3f} | {pr["shared_blend"]["rps"]:.6f} | {pr["climatology"]["rps"]:.6f} | {ss:.4f} |' if ss is not None else f'| {r["target"]} | undefined reference score |')
             lines+=['','See target verification_report.json files for category Brier/BSS, log loss, bias, MAE, RMSE, coverage and source hashes. Probability blending does not change the amount-corrected ensemble CRPS. Spatial cells are not independent cases; no single-year bootstrap or long-term reliability claim is made.']

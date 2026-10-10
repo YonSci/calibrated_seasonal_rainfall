@@ -29,6 +29,7 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 from cycle import load_cycle, target_window          # noqa: E402
 from significance import paired_summary              # noqa: E402
 import site_extras as extras                          # noqa: E402
+import obs_source                                     # noqa: E402
 
 OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
@@ -82,17 +83,18 @@ def git_sha():
         return 'unknown'
 
 
-def chirps_published(offline):
-    """(year, month) pairs in the official CHIRPS v2.0 p25 by_month listing; None when not checked."""
+def chirps_published(offline, src=None):
+    """(year, month) pairs in the official monthly-file listing of the cycle's CHIRPS version; None when not checked."""
+    src = src or obs_source.V2
     if offline:
         return None
     try:
-        with urllib.request.urlopen(CHIRPS_LISTING, timeout=30) as r:
+        with urllib.request.urlopen(src['listing'], timeout=30) as r:
             text = r.read().decode('utf-8', 'replace')
     except Exception as exc:
-        print('CHIRPS listing not checked:', exc)
+        print(f'{src["label"]} listing not checked:', exc)
         return None
-    return {(int(y), int(m)) for y, m in re.findall(r'chirps-v2\.0\.(\d{4})\.(\d{2})\.days_p25\.nc', text)}
+    return obs_source.published_months(src, text)
 
 
 def months_between(start, end):
@@ -254,8 +256,10 @@ def target_status(window, verified, processed, published, today):
 
 
 def build_cycle(cfg_path, published, today, sha):
-    """Everything the page shows for one cycle, plus the files to copy."""
+    """Everything the page shows for one cycle, plus the files to copy. `published`: {CHIRPS label: listing}."""
     c = load_cycle(ROOT / cfg_path)
+    src = obs_source.for_project(c.project)
+    published = published.get(src['label']) if isinstance(published, dict) else published
     out_root, season = c.root('output_root'), c.season_name
     raw = cycle_entries(c)
     if not raw:
@@ -348,7 +352,7 @@ def build_cycle(cfg_path, published, today, sha):
         latest = max(published)
         gaps = [f'{calendar.month_abbr[m]} {y}' for y, m in months_between(date(latest[0] - 1, 1, 1), date(*latest, 1))
                 if (y, m) not in published]
-        archive = (f'Official CHIRPS v2.0 p25 by_month listing checked {day(today)}: monthly files through '
+        archive = (f'Official {src["label"]} monthly listing checked {day(today)}: monthly files through '
                    f'{calendar.month_abbr[latest[1]]} {latest[0]}'
                    + (f'; {", ".join(gaps)} file not found' if gaps else ''))
     lam = next((x['lambda'] for x in targets if x['kind'] == 'season'), None)
@@ -358,7 +362,7 @@ def build_cycle(cfg_path, published, today, sha):
         ['Forecast record', frozen],
         ['Publication status', 'Research reconstruction: produced after the initialization date with the published '
                                'method; not an official EMI or ICPAC forecast'],
-        ['Reference period', f'CHIRPS v2.0 {season} {ref_label(c, crosses)} ({len(c.reference_years)} seasons)'],
+        ['Reference period', f'{src["label"]} {season} {ref_label(c, crosses)} ({len(c.reference_years)} seasons)'],
         ['Observations processed through', obs_text],
         ['CHIRPS archive', archive],
         ['Verification last run', last_run],
@@ -412,7 +416,7 @@ def build_cycle(cfg_path, published, today, sha):
         copies.append((bulletin, OUT / f'downloads/{cid}_bulletin.md'))
         downloads.append(dict(label='Original forecast bulletin (Markdown)', href=f'downloads/{cid}_bulletin.md',
                               note='Text bulletin issued with the frozen forecast'))
-    data = dict(id=cid, cfg=cfg_path, tag=c.tag, season=season, label=c.target_label(season), init=c.init_month_name,
+    data = dict(id=cid, cfg=cfg_path, tag=c.tag, season=season, obs=src['label'], obs_citation=src['citation'], label=c.target_label(season), init=c.init_month_name,
                 option=f'{c.target_label(season)} — {c.init_month_name} initialization',
                 init_date=date(c.year, c.init_month, 1).isoformat(), views=views, domain_view=domain_view,
                 default_view=default_view, definition=definition, definitions=view_definitions(c, ej), criteria=view_criteria(c, domain_view), note=note, reference=ref_label(c, crosses), targets=targets, meta=meta, regions=regions,
@@ -486,6 +490,9 @@ def jjas_evidence():
 def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None):
     gates, ens, mono, clip, raw = (ev[k] for k in ('gates', 'ens', 'mono', 'clip', 'raw'))
     raw_rpss = raw.get('raw_rps_skill')
+    obs_labels = sorted({c['obs'] for c in cycles})                 # e.g. ['CHIRPS v3.0']
+    obs = ' and '.join(obs_labels)
+    srcs = [s_ for s_ in (obs_source.V2, obs_source.V3) if s_['label'] in obs_labels]
     # Areas, from each season's active domain configuration (the views offered in the area selector).
     seen, area_parts = set(), []
     for c in cycles:
@@ -532,7 +539,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
         ('Calibrate', 'Per-cell amount correction, smoothed tercile counts and one climatology-blend weight per target.', 'final_shared_blend.py'),
         ('Evaluate', 'Nested cross-validation 1993–2016; exploratory fixed-fit scores for later years; whole-year significance tests.', 'local_blend.py · decision_gates.py'),
         ('Deliver', 'Maps, summaries and an offline gallery; forecasts frozen with SHA-256 hashes before observations are used.', 'run_operational.py · build_season_products.py'),
-        ('Verify', 'Official CHIRPS v2.0 monthly files, checked against the archive where they overlap, scored per month and season.', 'prepare_verification_2026.py · verify_frozen_2026.py'),
+        ('Verify', f'Official {obs} monthly files, checked against the archive where they overlap, scored per month and season.', 'prepare_verification_2026.py · verify_frozen_2026.py'),
     ]
     flow = ''.join(f'<li class="step"><span class="step-n">{i}</span><div><h4>{a}</h4><p>{b}</p><code>{c}</code></div></li>'
                    for i, (a, b, c) in enumerate(steps, 1))
@@ -643,7 +650,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
 
 <section id="verification" class="wrap">
   <h2>Verification</h2>
-  <p>Frozen forecasts compared with official CHIRPS v2.0 observations once a target period is complete. Each result is one season or month, so it shows what happened this time, not long-term reliability.</p>
+  <p>Frozen forecasts compared with official {obs} observations once a target period is complete. Each result is one season or month, so it shows what happened this time, not long-term reliability.</p>
   <div id="vf-body" aria-live="polite"></div>
 </section>
 
@@ -684,7 +691,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
       <h3>Data</h3>
       {table(['Source', 'Details'], [
           ['ECMWF SEAS5', 'Copernicus CDS <code>seasonal-original-single-levels</code>, system 51, total precipitation, 1993 to the forecast year; 25 members to 2016, 51 from 2017; 1° grid'],
-          ['CHIRPS v2.0', '0.25° daily rainfall; archive 1993–2025; verification months from the official monthly files, checked against the archive where they overlap'],
+          *[[s_['label'], s_['description'] + '; archive from 1993; verification months from the official monthly files, checked against the archive where they overlap. ' + s_['citation'] + '.'] for s_ in srcs],
           ['Areas', areas_text],
       ], 'Data sources', 'compact')}
     </div>
@@ -1529,7 +1536,7 @@ JS = r'''
       '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(x => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
     let h = (R.selected ? '' : '<p class="notice">Evidence only: no candidate has been selected for ' + esc(R.season) + ', so the forecast products keep their current domain (' +
         esc(c.views.filter(v => v[0] !== 'all_ethiopia').map(v => v[1]).join('; ')) + ').</p>') +
-      '<p class="caveat">' + esc(R.season) + ' climatology from CHIRPS v2.0 ' + esc(R.period) + ' · built ' + esc(R.built.slice(0, 10)) +
+      '<p class="caveat">' + esc(R.season) + ' climatology from ' + esc(R.dataset || 'CHIRPS') + ' ' + esc(R.period) + ' · built ' + esc(R.built.slice(0, 10)) +
       ' · <a href="' + siteURL(R.report) + '">Full review report</a></p>';
     if (R.stale.length) h += '<p class="notice">This review was built before a change to ' + esc(R.stale.join(', ')) + '; its numbers describe the earlier inputs.</p>';
     h += '<p>' + (R.selected ? 'Selected domain: <strong>' + esc(R.selected) + '</strong>' + (R.rationale ? ' — ' + esc(R.rationale) : '')
@@ -1646,7 +1653,9 @@ def main():
         OUT = Path(a.out).resolve()
     INCLUDE_BACKTESTS = a.include_backtests
     today, sha = date.today(), git_sha()
-    published = chirps_published(a.offline)
+    sources = {obs_source.for_project(load_cycle(ROOT / cfg).project)['label']: obs_source.for_project(load_cycle(ROOT / cfg).project)
+               for cfg in CYCLE_FILES if (ROOT / cfg).is_file() and ('backtest' not in cfg or a.include_backtests)}
+    published = {label: chirps_published(a.offline, src) for label, src in sources.items()}
     cycles, copies = [], []
     for cfg in CYCLE_FILES:
         if 'backtest' in cfg and not INCLUDE_BACKTESTS:

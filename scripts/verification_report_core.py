@@ -9,6 +9,8 @@ import shutil
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
 
 from cycle import SEASON, TARGET_ORDER, DOMAIN_VIEW
+import obs_source
+OBS = obs_source.for_project(CYCLE.project)
 ORDER = TARGET_ORDER                       # months in season order, then the season
 LABELS = {'all_country': 'All Ethiopia', 'regime_0': 'R0: arid / marginal',
           'regime_1': 'R1: western unimodal', 'regime_2': 'R2: Belg–Kiremt rule',
@@ -195,7 +197,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     r = Report()
     init = CYCLE.init_month_name                 # every cycle-specific statement comes from the cycle file
     r.heading(f'Ethiopia rainfall forecast verification — {SEASON} {YEAR}, {init} initialization', 1)
-    r.paragraph(f'{init} {YEAR} initialization | {SEASON} {YEAR} season and its months | ECMWF seasonal forecasts | CHIRPS v2 verification | Reference period {REF_DASH}')
+    r.paragraph(f'{init} {YEAR} initialization | {SEASON} {YEAR} season and its months | ECMWF seasonal forecasts | {OBS["label"]} verification | Reference period {REF_DASH}')
     r.paragraph('Verified targets: ' + ', '.join(targets) + '. ' + ('Pending in this report: ' + ', '.join(missing) + '. No full-' + SEASON + ' conclusion is inferred from monthly results.' if SEASON in missing else f'{SEASON} is assessed directly against its complete seasonal observations; overlapping monthly and seasonal scores are not pooled.'), 'status')
     r.paragraph(f'This is a retrospective assessment of the reconstructed forecasts. It does not establish an actual {init} {YEAR} issuance, independent prospective validation, or an official EMI/ICPAC forecast. All results below concern the submitted verification evidence.', 'note')
     r.heading('Decision and principal findings')
@@ -269,7 +271,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     r.heading('Completion and future work')
     r.paragraph('Retain the frozen forecasts and archive this report as a verification addendum. A future calibration revision needs a separate historical evaluation with all preprocessing and model selection inside year-based validation. This report does not fit or adopt a revised model.')
     if SEASON in missing:
-        r.paragraph('Complete the remaining months and ' + SEASON + ' only after the official CHIRPS v2 daily monthly observations pass the existing completeness and overlap checks. Then regenerate this report with all targets. Until then, no full-' + SEASON + ' verification result is available in this report.', 'status')
+        r.paragraph('Complete the remaining months and ' + SEASON + ' only after the official ' + OBS['label'] + ' monthly observations pass the existing completeness and overlap checks. Then regenerate this report with all targets. Until then, no full-' + SEASON + ' verification result is available in this report.', 'status')
     r.heading('Evidence and reproducibility')
     r.paragraph(provenance['audit_scope'])
     for name, value in provenance.get('source_sha256', {}).items():

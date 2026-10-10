@@ -22,6 +22,7 @@ import sys
 import urllib.request
 import urllib.error
 from operational_core import StageRunner, exclusive_run, read, write, sha, now
+import obs_source
 
 ROOT = Path(__file__).resolve().parents[1]
 ORDER = ["Jun", "Jul", "Aug", "Sep", "JJAS"]
@@ -50,11 +51,11 @@ PATH_KEYS = ["project_config","forecast_root","verification_root","processed_roo
 PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operational.py",
                    "delivery_map_base.py","delivery_output_runs.py","plot_forecast_products.py",
                    "output_runs.py","cycle.py","common.py","run_monthly.py","followup_common.py",
-                   "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py"]
+                   "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py","obs_source.py"]
 EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "interpret_external_forecasts.py",
                     "verify_external_forecasts.py", "verify2026_math.py"]
 VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
-                  "verification_report_core.py","build_verification_report.py"]
+                  "verification_report_core.py","build_verification_report.py","prepare_chirps_v3.py"]
 
 
 def path(value):
@@ -156,7 +157,7 @@ def probe(url):
         return {"status":"unknown","detail":str(exc),"url":url}
 
 
-def choose_verification(requested, target_scope, checker=probe):
+def choose_verification(requested, target_scope, checker=probe, src=None):
     explicit = requested != ["auto"]
     wanted = requested if explicit else target_scope
     if not wanted or len(set(wanted))!=len(wanted) or not set(wanted)<=set(ORDER):
@@ -164,6 +165,8 @@ def choose_verification(requested, target_scope, checker=probe):
     needed = [m for m in MONTHS if m in wanted or SEASON in wanted]
     def record(m):
         y = MONTH_YEAR.get(m,YEAR)
+        if src is not None and src["temporal"] == "monthly":       # CHIRPS v3.0: the official monthly file only
+            return checker(obs_source.month_url(src,y,MONTHS[m]))
         r = checker(BASE+f"chirps-v2.0.{y}.{MONTHS[m]:02d}.days_p25.nc")
         if r["status"]!="unavailable":
             return r
@@ -239,7 +242,8 @@ def preflight(cfg, workflow, verification_request):
             inspect_source(vr,t,snapshot)
         months, ready, availability = [], existing, {"mode":"offline existing verified outputs"}
     else:
-        months,ready,availability = choose_verification(verification_request,cfg["targets"])
+        months,ready,availability = choose_verification(verification_request,cfg["targets"],
+                                                         src=obs_source.for_project(read(cfg["project_config"])))
         require([path(cfg["project_config"])])
         project = read(cfg["project_config"])
         from cycle import load_cycle
@@ -270,8 +274,13 @@ def verify_stages(runner,cfg,info,code_inputs):
     originals = [forecast_file(path(cfg["forecast_root"]),t) for t in ORDER]
     prepared = [*months, *([SEASON] if set(months)==set(MONTHS) else [])]
     cache_outputs = []
+    src = obs_source.for_project(read(config))
     for m in months:
         for year in [OVERLAP_YEAR,MONTH_YEAR.get(m,YEAR)]:
+            if src["temporal"] == "monthly":                        # CHIRPS v3.0 monthly files share the archive's cache
+                f = ROOT/"data/raw/chirps/v3/africa_monthly"/src["month_file"].format(year=year,month=MONTHS[m])
+                cache_outputs.extend([f,f.parent/(f.name+".download.json")])
+                continue
             f = path(cfg["download_cache"])/f"chirps-v2.0.{year}.{MONTHS[m]:02d}.days_p25.nc"
             cache_outputs.extend([f,f.with_suffix(".download.json")])
     runner.stage("prepare_observations_"+"_".join(months),

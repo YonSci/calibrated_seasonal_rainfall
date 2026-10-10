@@ -29,6 +29,8 @@ class Ctx:
         self.cfg, self.folders = cfg, folders
         first, last = cfg['application_period']
         self.period = f'{first}–{last}'
+        with xr.open_dataset(source_path(cfg['monthly_cache'])) as mc:      # the CHIRPS version behind the cache
+            self.dataset = mc.attrs.get('dataset', 'CHIRPS v2.0 (0.25 deg)').split(' (')[0]
         with xr.open_dataset(folders['climatology'] / f'{cfg["season_name"].lower()}_climatology_{first}_{last}.nc') as c:
             self.clim = c.load()
         with xr.open_dataset(folders['inspect'] / 'area_weights.nc') as w:
@@ -82,7 +84,7 @@ def field_map(ctx, values, levels, colors, title, label, path, extend='max'):
 
 
 def climatology_figures(ctx, out):
-    c, src = ctx.clim, f'CHIRPS v2.0 {ctx.period}'
+    c, src = ctx.clim, f'{ctx.dataset} {ctx.period}'
     field_map(ctx, c.season_mean_mm.values, [0, 50, 100, 200, 300, 400, 500, 800, 1200], BLUES,
               f'{ctx.season} mean rainfall (mm)\n{src}, actual-calendar monthly totals', 'mm', out / f'{ctx.season.lower()}_total_mm.png')
     field_map(ctx, c.annual_mean_mm.values, [0, 200, 400, 600, 800, 1000, 1400, 1800, 2600], BLUES,
@@ -273,7 +275,7 @@ def domain_maps(ctx, out, res, cube):
     cands, comps = res['candidates'], res['comparators']
     cdir = out / 'candidates'
     cdir.mkdir()
-    src = f'CHIRPS v2.0 {ctx.period}'
+    src = f'{ctx.dataset} {ctx.period}'
     rows = [(c['candidate_id'], c, True) for c in cands] + [(c['comparator_id'], c, False) for c in comps]
     for cid, row, is_c in rows:
         title, sub = domain_text(ctx, row, is_c)
@@ -390,7 +392,7 @@ def report_html(cfg, data):
                ['Years', f'{q["checks"]["years"]["first"]}–{q["checks"]["years"]["last"]} ({q["checks"]["years"]["count"]})', 'gaps: ' + (', '.join(map(str, q['checks']['years']['gaps'])) or 'none')],
                ['Completeness', f'{q["completeness"]["cells_without_complete_baseline"]} cells', esc(q['completeness']['note'])],
                ['Area', f'{q["area"]["country_area_km2"]:,.0f} km²', f'{q["area"]["country_outside_grid_km2"]:,.1f} km² beyond the grid; ' + esc(q['area']['method'])],
-               ['Source', 'CHIRPS v2.0', 'sha256 ' + esc((q['source']['sha256'] or '')[:16]) + '…'],
+               ['Source', esc(q['source'].get('dataset') or 'CHIRPS'), 'sha256 ' + esc((q['source']['sha256'] or '')[:16]) + '…'],
                ['Nested candidates', 'yes' if res['monotonic'] else 'NO', 'raising either cutoff never adds a cell']]
     sel = cfg.get('selected_candidate')
     sl = cfg['season_name'].lower()
@@ -406,7 +408,7 @@ table{{border-collapse:collapse;font-size:.86rem;width:100%}}th,td{{border-botto
 .note{{border-left:3px solid var(--accent);padding:4px 10px;background:color-mix(in srgb,var(--accent) 8%,transparent)}}
 </style></head><body><main>
 <h1>{esc(cfg["season_name"])} rainfall domain review <span class="muted">{esc(cfg["assessment_id"])}</span></h1>
-<p class="muted">CHIRPS v2.0 {data["period"]} · built {esc(data["created_utc"])} · fingerprint {esc(data["fingerprint_sha256"][:12])}</p>
+<p class="muted">{esc(q["source"].get("dataset") or "CHIRPS")} {data["period"]} · built {esc(data["created_utc"])} · fingerprint {esc(data["fingerprint_sha256"][:12])}</p>
 <p class="note">Selected candidate: <b>{esc(sel) if sel else "none yet"}</b>{(" — " + esc(cfg.get("selection_rationale") or "")) if sel else ". The review shows the evidence; a domain is exported only after an explicit selection."}</p>
 
 <h2 id="climatology">1. Climatology</h2>
