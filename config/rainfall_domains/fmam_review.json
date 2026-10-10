@@ -2,7 +2,7 @@
   "schema_version": 1,
   "assessment_id": "fmam_chirps_domain_review_v1",
   "project_config": "config/fmam/project.json",
-  "monthly_cache": "data/processed/regime_climatology/chirps_calendar_cache.nc",
+  "monthly_cache": "data/processed/regime_climatology/chirps3_calendar_cache.nc",
   "monthly_variable": "monthly_total",
   "country_mask": "data/masks/ethiopia_common.nc",
   "country_boundary": "data/boundaries/ethiopia/eth_admin0.shp",
