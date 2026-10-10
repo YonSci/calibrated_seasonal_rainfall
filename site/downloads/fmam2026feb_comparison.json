@@ -482,9 +482,9 @@
    "metric": "forecast_accuracy",
    "source_id": null,
    "where": null,
-   "status": "unavailable",
-   "reason": "out_of_scope: needs observations and a separate verification design (see the Verification section)",
-   "basis": null,
+   "status": "available",
+   "reason": null,
+   "basis": "single-season scores against CHIRPS observations (see Against CHIRPS observations)",
    "value": null
   }
  ],
@@ -981,7 +981,640 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\feb_2026_fmam.json --workflow products --compare-external",
- "created_utc": "2026-10-10T01:57:21+00:00",
+ "created_utc": "2026-10-10T09:05:26+00:00",
  "engine": "rules v2",
- "reference_layers": []
+ "reference_layers": [],
+ "observed": {
+  "stale": [],
+  "rows": [
+   {
+    "source_id": "platform",
+    "provider": "Platform",
+    "label": "FMAM 2026",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "all_ethiopia",
+    "area": "All Ethiopia",
+    "cells": 1478,
+    "favoured_share": 0.63965887562711,
+    "observed_fractions": {
+     "below": 0.043502140475761855,
+     "near": 0.3796538979232377,
+     "above": 0.5768439616010004
+    },
+    "hit_share": 0.3624272424109288,
+    "near_other_share": 0.47630036864160075,
+    "opposite_share": 0.1612723889474704,
+    "chance_of_favoured": 0.33333333333333326,
+    "favoured_categories": {
+     "below": 0.11644521331242054,
+     "near": 0.09831127763470163,
+     "above": 0.7852435090528777
+    },
+    "rps": 0.40308711245065665,
+    "climatology_rps": 0.42900425624780963,
+    "rpss": 0.060412323233880016,
+    "area_share": 1.0
+   },
+   {
+    "source_id": "platform",
+    "provider": "Platform",
+    "label": "FMAM 2026",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "season_domain",
+    "area": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
+    "cells": 1075,
+    "favoured_share": 0.7211278753561928,
+    "observed_fractions": {
+     "below": 0.03172165361783494,
+     "near": 0.4467951569666733,
+     "above": 0.5214831894154918
+    },
+    "hit_share": 0.4100565688843162,
+    "near_other_share": 0.5382694275250194,
+    "opposite_share": 0.05167400359066448,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "below": 0.01671179710546349,
+     "near": 0.09400434236990353,
+     "above": 0.8892838605246329
+    },
+    "rps": 0.35378822052695635,
+    "climatology_rps": 0.4066238365666645,
+    "rpss": 0.12993733098833216,
+    "area_share": 1.0
+   },
+   {
+    "source_id": "emi",
+    "provider": "EMI",
+    "label": "Belg (FMAM) 2026",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "all_ethiopia",
+    "area": "All Ethiopia",
+    "cells": 1295,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.048808969821988624,
+     "near": 0.4020842039207774,
+     "above": 0.549106826257234
+    },
+    "hit_share": 0.549106826257234,
+    "near_other_share": 0.4020842039207774,
+    "opposite_share": 0.048808969821988624,
+    "chance_of_favoured": 0.33333333333333337,
+    "favoured_categories": {
+     "above": 1.0
+    },
+    "rps": 0.32427581595098787,
+    "climatology_rps": 0.4215274875819631,
+    "rpss": 0.23071252645668883,
+    "area_share": 0.8774901941216255
+   },
+   {
+    "source_id": "emi",
+    "provider": "EMI",
+    "label": "Belg (FMAM) 2026",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "season_domain",
+    "area": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
+    "cells": 1074,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.0317509608870615,
+     "near": 0.4472079458493748,
+     "above": 0.5210410932635635
+    },
+    "hit_share": 0.5210410932635635,
+    "near_other_share": 0.4472079458493748,
+    "opposite_share": 0.0317509608870615,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "above": 1.0
+    },
+    "rps": 0.3189525144894954,
+    "climatology_rps": 0.40648624027243063,
+    "rpss": 0.2153424079601547,
+    "area_share": 0.9990769643372114
+   },
+   {
+    "source_id": "platform_on_emi_zones",
+    "provider": "Platform",
+    "label": "FMAM 2026 (on the EMI zones)",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "all_ethiopia",
+    "area": "All Ethiopia",
+    "cells": 1295,
+    "favoured_share": 0.6672027089012255,
+    "observed_fractions": {
+     "below": 0.048808969821988624,
+     "near": 0.4020842039207774,
+     "above": 0.549106826257234
+    },
+    "hit_share": 0.3913953767372936,
+    "near_other_share": 0.5066392814354681,
+    "opposite_share": 0.1019653418272385,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "below": 0.04037191800429554,
+     "near": 0.10283706797451714,
+     "above": 0.8567910140211874
+    },
+    "rps": 0.3819373853122481,
+    "climatology_rps": 0.4215274875819631,
+    "rpss": 0.09392057086672678,
+    "area_share": 0.8774901941216255
+   },
+   {
+    "source_id": "platform_on_emi_zones",
+    "provider": "Platform",
+    "label": "FMAM 2026 (on the EMI zones)",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "season_domain",
+    "area": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
+    "cells": 1074,
+    "favoured_share": 0.7208702286226654,
+    "observed_fractions": {
+     "below": 0.0317509608870615,
+     "near": 0.4472079458493748,
+     "above": 0.5210410932635635
+    },
+    "hit_share": 0.41058210941942586,
+    "near_other_share": 0.5376776600701162,
+    "opposite_share": 0.05174023051045797,
+    "chance_of_favoured": 0.33333333333333337,
+    "favoured_categories": {
+     "below": 0.016733215435176745,
+     "near": 0.0928431917413124,
+     "above": 0.8904235928235109
+    },
+    "rps": 0.3535859045856381,
+    "climatology_rps": 0.40648624027243063,
+    "rpss": 0.13014053231257783,
+    "area_share": 0.9990769643372114
+   },
+   {
+    "source_id": "emi",
+    "provider": "EMI",
+    "label": "EMI zone West",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone West",
+    "zone": "West",
+    "official": {
+     "below": 0.25,
+     "near": 0.3,
+     "above": 0.45
+    },
+    "cells": 309,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.0,
+     "near": 0.03878422813385363,
+     "above": 0.9612157718661463
+    },
+    "hit_share": 0.9612157718661463,
+    "near_other_share": 0.03878422813385363,
+    "opposite_share": 0.0,
+    "chance_of_favoured": 0.33333333333333326,
+    "favoured_categories": {
+     "above": 1.0
+    },
+    "rps": 0.36112157718661464,
+    "climatology_rps": 0.5426274795109376,
+    "rpss": 0.33449449056268143
+   },
+   {
+    "source_id": "platform",
+    "provider": "Platform",
+    "label": "EMI zone West",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone West",
+    "zone": "West",
+    "official": null,
+    "cells": 309,
+    "favoured_share": 0.34639120873927914,
+    "observed_fractions": {
+     "below": 0.0,
+     "near": 0.03878422813385363,
+     "above": 0.9612157718661463
+    },
+    "hit_share": 0.36510040157174467,
+    "near_other_share": 0.3369333690413889,
+    "opposite_share": 0.29796622938686645,
+    "chance_of_favoured": 0.33333333333333326,
+    "favoured_categories": {
+     "below": 0.32585743442781767,
+     "near": 0.30904216400043766,
+     "above": 0.36510040157174467
+    },
+    "rps": 0.5106718069294808,
+    "climatology_rps": 0.5426274795109376,
+    "rpss": 0.05889062715780269
+   },
+   {
+    "source_id": "emi",
+    "provider": "EMI",
+    "label": "EMI zone North-central",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone North-central",
+    "zone": "North-central",
+    "official": {
+     "below": 0.1,
+     "near": 0.3,
+     "above": 0.6
+    },
+    "cells": 402,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.00997916042350276,
+     "near": 0.6130474416976812,
+     "above": 0.3769733978788161
+    },
+    "hit_share": 0.3769733978788161,
+    "near_other_share": 0.6130474416976812,
+    "opposite_share": 0.00997916042350276,
+    "chance_of_favoured": 0.33333333333333337,
+    "favoured_categories": {
+     "above": 1.0
+    },
+    "rps": 0.30258864876303904,
+    "climatology_rps": 0.35120640832299516,
+    "rpss": 0.13843073021390795
+   },
+   {
+    "source_id": "platform",
+    "provider": "Platform",
+    "label": "EMI zone North-central",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone North-central",
+    "zone": "North-central",
+    "official": null,
+    "cells": 402,
+    "favoured_share": 0.5118558624299532,
+    "observed_fractions": {
+     "below": 0.00997916042350276,
+     "near": 0.6130474416976812,
+     "above": 0.3769733978788161
+    },
+    "hit_share": 0.2968561818701026,
+    "near_other_share": 0.6982612802969497,
+    "opposite_share": 0.0048825378329478385,
+    "chance_of_favoured": 0.33333333333333337,
+    "favoured_categories": {
+     "near": 0.1943040214113723,
+     "above": 0.8056959785886277
+    },
+    "rps": 0.3213039528305342,
+    "climatology_rps": 0.35120640832299516,
+    "rpss": 0.08514211239836056
+   },
+   {
+    "source_id": "emi",
+    "provider": "EMI",
+    "label": "EMI zone South-central",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone South-central",
+    "zone": "South-central",
+    "official": {
+     "below": 0.15,
+     "near": 0.3,
+     "above": 0.55
+    },
+    "cells": 253,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.0,
+     "near": 0.2606709034134962,
+     "above": 0.7393290965865039
+    },
+    "hit_share": 0.7393290965865039,
+    "near_other_share": 0.2606709034134962,
+    "opposite_share": 0.0,
+    "chance_of_favoured": 0.33333333333333337,
+    "favoured_categories": {
+     "above": 1.0
+    },
+    "rps": 0.2510670903413496,
+    "climatology_rps": 0.46866525441772355,
+    "rpss": 0.4642933565594083
+   },
+   {
+    "source_id": "platform",
+    "provider": "Platform",
+    "label": "EMI zone South-central",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone South-central",
+    "zone": "South-central",
+    "official": null,
+    "cells": 253,
+    "favoured_share": 0.8815954568238439,
+    "observed_fractions": {
+     "below": 0.0,
+     "near": 0.2606709034134962,
+     "above": 0.7393290965865039
+    },
+    "hit_share": 0.7176626124416178,
+    "near_other_share": 0.2823373875583823,
+    "opposite_share": 0.0,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "near": 0.04033608944643392,
+     "above": 0.959663910553566
+    },
+    "rps": 0.33054548795430067,
+    "climatology_rps": 0.46866525441772355,
+    "rpss": 0.2947087823590099
+   },
+   {
+    "source_id": "emi",
+    "provider": "EMI",
+    "label": "EMI zone Southeast",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone Southeast",
+    "zone": "Southeast",
+    "official": {
+     "below": 0.2,
+     "near": 0.35,
+     "above": 0.45
+    },
+    "cells": 331,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.17820486189774581,
+     "near": 0.5948370219443023,
+     "above": 0.22695811615795192
+    },
+    "hit_share": 0.22695811615795192,
+    "near_other_share": 0.5948370219443023,
+    "opposite_share": 0.17820486189774581,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "above": 1.0
+    },
+    "rps": 0.37211872875444263,
+    "climatology_rps": 0.3572765482407882,
+    "rpss": -0.041542554602972404
+   },
+   {
+    "source_id": "platform",
+    "provider": "Platform",
+    "label": "EMI zone Southeast",
+    "window": [
+     "Feb 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone Southeast",
+    "zone": "Southeast",
+    "official": null,
+    "cells": 331,
+    "favoured_share": 0.9879178124898497,
+    "observed_fractions": {
+     "below": 0.17820486189774581,
+     "near": 0.5948370219443023,
+     "above": 0.22695811615795192
+    },
+    "hit_share": 0.23584477287248498,
+    "near_other_share": 0.5960087764126077,
+    "opposite_share": 0.16814645071490716,
+    "chance_of_favoured": 0.33333333333333326,
+    "favoured_categories": {
+     "near": 0.021399565247846777,
+     "above": 0.9786004347521529
+    },
+    "rps": 0.3744016383075058,
+    "climatology_rps": 0.3572765482407882,
+    "rpss": -0.047932309442197285
+   },
+   {
+    "source_id": "icpac_mam_2026_rainfall",
+    "provider": "ICPAC",
+    "label": "MAM 2026",
+    "window": [
+     "Mar 2026",
+     "May 2026"
+    ],
+    "area_key": "all_ethiopia",
+    "area": "All Ethiopia",
+    "cells": 1478,
+    "favoured_share": 0.8883462213591926,
+    "observed_fractions": {
+     "below": 0.045570827784195814,
+     "near": 0.3302915653921256,
+     "above": 0.6241376068236786
+    },
+    "hit_share": 0.5433222877144014,
+    "near_other_share": 0.37939577356766796,
+    "opposite_share": 0.07728193871793068,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "below": 0.061926674539698794,
+     "near": 0.2503467789772973,
+     "above": 0.6877265464830039
+    },
+    "area_share": 1.0
+   },
+   {
+    "source_id": "icpac_mam_2026_rainfall",
+    "provider": "ICPAC",
+    "label": "MAM 2026",
+    "window": [
+     "Mar 2026",
+     "May 2026"
+    ],
+    "area_key": "season_domain",
+    "area": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
+    "cells": 1075,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.035472964783260105,
+     "near": 0.39116358093535886,
+     "above": 0.573363454281381
+    },
+    "hit_share": 0.5279416215994014,
+    "near_other_share": 0.40765543870181603,
+    "opposite_share": 0.06440293969878262,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "below": 0.06808869185348652,
+     "near": 0.2597442094559439,
+     "above": 0.6721670986905696
+    },
+    "area_share": 1.0
+   },
+   {
+    "source_id": "icpac_mam_2026_rainfall",
+    "provider": "ICPAC",
+    "label": "EMI zone West",
+    "window": [
+     "Mar 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone West",
+    "zone": "West",
+    "cells": 309,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.0,
+     "near": 0.02587148088608129,
+     "above": 0.9741285191139187
+    },
+    "hit_share": 0.9351110075365738,
+    "near_other_share": 0.06488899246342586,
+    "opposite_share": 0.0,
+    "chance_of_favoured": 0.33333333333333326,
+    "favoured_categories": {
+     "near": 0.045448197047642504,
+     "above": 0.9545518029523574
+    }
+   },
+   {
+    "source_id": "icpac_mam_2026_rainfall",
+    "provider": "ICPAC",
+    "label": "EMI zone North-central",
+    "window": [
+     "Mar 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone North-central",
+    "zone": "North-central",
+    "cells": 402,
+    "favoured_share": 0.9605801115487711,
+    "observed_fractions": {
+     "below": 0.0,
+     "near": 0.5059523044391581,
+     "above": 0.4940476955608418
+    },
+    "hit_share": 0.5202766342588101,
+    "near_other_share": 0.4591431639432993,
+    "opposite_share": 0.020580201797890624,
+    "chance_of_favoured": 0.33333333333333337,
+    "favoured_categories": {
+     "below": 0.04655250545458995,
+     "near": 0.32114143657270217,
+     "above": 0.6323060579727078
+    }
+   },
+   {
+    "source_id": "icpac_mam_2026_rainfall",
+    "provider": "ICPAC",
+    "label": "EMI zone South-central",
+    "window": [
+     "Mar 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone South-central",
+    "zone": "South-central",
+    "cells": 253,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.0,
+     "near": 0.20145652469194186,
+     "above": 0.7985434753080581
+    },
+    "hit_share": 0.34757694770506964,
+    "near_other_share": 0.5298354161349345,
+    "opposite_share": 0.12258763615999597,
+    "chance_of_favoured": 0.33333333333333337,
+    "favoured_categories": {
+     "below": 0.197606350936116,
+     "near": 0.4785583625123428,
+     "above": 0.32383528655154126
+    }
+   },
+   {
+    "source_id": "icpac_mam_2026_rainfall",
+    "provider": "ICPAC",
+    "label": "EMI zone Southeast",
+    "window": [
+     "Mar 2026",
+     "May 2026"
+    ],
+    "area_key": "zone",
+    "area": "EMI zone Southeast",
+    "zone": "Southeast",
+    "cells": 331,
+    "favoured_share": 1.0,
+    "observed_fractions": {
+     "below": 0.19937587985875654,
+     "near": 0.5646111194400905,
+     "above": 0.23601300070115303
+    },
+    "hit_share": 0.33273912841596165,
+    "near_other_share": 0.48001096027044593,
+    "opposite_share": 0.18724991131359242,
+    "chance_of_favoured": 0.3333333333333333,
+    "favoured_categories": {
+     "below": 0.03926813579362519,
+     "near": 0.19343418933475764,
+     "above": 0.7672976748716172
+    }
+   }
+  ],
+  "map": "assets/external/fmam2026feb/observed_comparison.png",
+  "name": "observed_comparison.png",
+  "notes": [
+   "Single season: descriptive scores for one year, not evidence of general skill.",
+   "Each outlook is scored against observations for its own target window; the observed tercile uses CHIRPS 1993-2025 terciles per 0.25° cell (official reference periods are not stated).",
+   "Favoured category: the leading tercile where it reaches 40% (the map display rule). \"Chance\" is the climatological probability of the favoured category over the same cells (about one in three).",
+   "RPSS: ranked probability skill score against the CHIRPS climatology, on identical cells; ICPAC publishes only the favoured category and its interval, so no RPSS is computed for ICPAC.",
+   "EMI zone probabilities are applied uniformly over each digitized zone."
+  ],
+  "windows": {
+   "Feb 2026, Mar 2026, Apr 2026, May 2026": "verified FMAM observations",
+   "Mar 2026, Apr 2026, May 2026": "sum of verified monthly totals (Mar, Apr, May); terciles from the same months 1993-2025"
+  },
+  "reference_years": [
+   1993,
+   2025
+  ],
+  "created_utc": "2026-10-10T09:05:27+00:00"
+ }
 }

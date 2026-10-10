@@ -100,6 +100,31 @@ class Rules(unittest.TestCase):
         self.assertEqual(relationship('near', 'above'), 'near_versus_other')
         self.assertEqual(relationship('weak', 'above'), 'weak_signal')
 
+    def test_scores_against_observations(self):
+        from verify_external_forecasts import outcome, score
+        self.assertEqual(outcome('above', 2), 'hit')
+        self.assertEqual(outcome('below', 2), 'opposite')
+        self.assertEqual(outcome('near', 0), 'near_other')
+        # Four equal-area cells: observed above, above, below, and one not scored (-1).
+        obs = np.array([[2, 2], [0, -1]])
+        fav = np.array([['above', 'above'], ['above', 'weak']], dtype=object)
+        clim = np.full((2, 2, 3), 1 / 3)
+        w, mask = np.ones((2, 2)), np.ones((2, 2), bool)
+        r = score(fav, obs, clim, w, mask)
+        self.assertEqual(r['cells'], 3)
+        self.assertAlmostEqual(r['favoured_share'], 1.0)
+        self.assertAlmostEqual(r['hit_share'], 2 / 3)
+        self.assertAlmostEqual(r['opposite_share'], 1 / 3)
+        self.assertAlmostEqual(r['chance_of_favoured'], 1 / 3)
+        self.assertNotIn('rpss', r)                       # no probabilities given (as for ICPAC)
+        # Probabilities equal to climatology score RPSS 0 against that climatology.
+        from verify2026_math import probability_losses
+        _, rps_clim, _ = probability_losses(clim, obs)
+        r = score(fav, obs, clim, w, mask, clim, rps_clim)
+        self.assertAlmostEqual(r['rpss'], 0.0)
+        sharp = np.where(obs[..., None] == 2, [[[.1, .2, .7]]], [[[.2, .3, .5]]])
+        self.assertGreater(score(fav, obs, clim, w, mask, sharp, rps_clim)['rpss'], 0)
+
     def test_window_mismatch_names_months(self):
         lim = window_limitation(dict(target_start='2026-10-01', target_end='2027-01-31'),
                                 dict(target_start='2026-10-01', target_end='2026-12-31'))

@@ -1053,7 +1053,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-09T15:00:26+00:00",
+ "created_utc": "2026-10-10T09:07:23+00:00",
  "engine": "rules v2",
  "reference_layers": [
   {
@@ -1090,5 +1090,6 @@
     "VIII": "South-Southeast lowlands"
    }
   }
- ]
+ ],
+ "observed": null
 }

@@ -63,9 +63,28 @@ The validation is stored with the source hash. If a provider replaces the image 
 | Mapped category agreement (ICPAC) | validated digitization, common valid footprint | after review; computed over the overlap where both show a favoured category, with coverage |
 | Same-event probability difference | same window, support and event | unavailable |
 | Rainfall-anomaly difference | official anomaly product | unavailable |
-| Which forecast is more accurate | observations, separate design | out of scope (see Verification) |
+| Which forecast is more accurate | the season verified against CHIRPS | single-season scores (see *Against CHIRPS observations* below) |
 
 The favoured category uses the map rule: the leading tercile where it reaches 40 %, otherwise "no clear category". An OND probability is never built by averaging monthly probabilities.
+
+## Against CHIRPS observations (added 2026-10-10)
+
+Once the season has been verified (`verify_frozen_2026.py`), `run_operational.py --compare-external` adds the
+`external_verify` stage (`scripts/verify_external_forecasts.py`, output `<comparison root>\observed\`). It scores the
+platform, EMI and ICPAC against CHIRPS, each for **its own target window** (ICPAC MAM against observed Mar–May, built from
+the verified monthly totals; EMI and the platform against the verified season). Observed terciles are CHIRPS 1993–2025
+per 0.25° cell, as in the platform verification; the official reference periods are not stated.
+
+| Score | Platform | EMI | ICPAC |
+|---|---|---|---|
+| Favoured category observed (share of the area where the outlook favours one; chance about 33%) | yes | yes | yes |
+| Opposite outer category observed | yes | yes | yes |
+| RPSS against the CHIRPS climatology, on identical cells | yes | yes (zone values applied over each digitized zone) | no: only the favoured category and its interval are published, and the others are not inferred |
+
+The scores are given for All Ethiopia, the season domain and each EMI zone, with the share of the area each outlook covers
+(EMI leaves out its climatologically dry areas). The platform is also scored on the EMI cells only, for a like-for-like
+RPSS. These are **single-season** descriptive scores, not evidence of general skill. The site publishes them only while
+they were made from the saved comparison and the current observation files.
 
 ## Interpretation rules
 

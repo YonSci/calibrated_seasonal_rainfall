@@ -51,7 +51,8 @@ PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operation
                    "delivery_map_base.py","delivery_output_runs.py","plot_forecast_products.py",
                    "output_runs.py","cycle.py","common.py","run_monthly.py","followup_common.py",
                    "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py"]
-EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "interpret_external_forecasts.py"]
+EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "interpret_external_forecasts.py",
+                    "verify_external_forecasts.py", "verify2026_math.py"]
 VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
                   "verification_report_core.py","build_verification_report.py"]
 
@@ -312,8 +313,9 @@ def report_stages(runner,cfg,targets,code_inputs):
     return f"reports/{tag}/VERIFICATION_REPORT.html"
 
 
-def external_stages(runner,cfg,info,refresh):
-    """Official outlook comparison: refresh (network, before hashing), prepare, compare, interpret."""
+def external_stages(runner,cfg,info,refresh,verified=()):
+    """Official outlook comparison: refresh (network, before hashing), prepare, compare, interpret;
+    once the season is verified, also score the platform and the official outlooks against CHIRPS."""
     import external_forecasts as ef
     from compare_external_forecasts import compare
     from interpret_external_forecasts import interpret
@@ -348,6 +350,15 @@ def external_stages(runner,cfg,info,refresh):
                  action=lambda:compare(out/"sources",native,mask,registry,out/"comparison",minimum))
     runner.stage("external_interpret",[*code,out/"comparison",out/"sources"],[out/"interpretation"],
                  action=lambda:interpret(out/"comparison",out/"sources",out/"interpretation"))
+    vr = path(cfg["verification_root"])
+    if SEASON in verified:
+        from verify_external_forecasts import verify_external
+        processed = path(cfg["processed_root"])
+        observed = [vr/f"results/{SEASON}/verification_fields.nc",*[vr/f"observations/{m}/chirps_{YEAR}_common.nc" for m in MONTHS]]
+        history = [processed/f"{TAG}_{m}/chirps_{y}_common.nc" for m in MONTHS for y in REF_YEARS]
+        runner.stage("external_verify",[*code,out/"comparison",out/"sources",native,mask,*observed,*history],[out/"observed"],
+                     settings={"reference_years":[REF_YEARS[0],REF_YEARS[-1]]},
+                     action=lambda:verify_external(out,vr,processed,TAG,YEAR,REF_YEARS,SEASON,mask))
     return out
 
 
@@ -383,6 +394,8 @@ def main():
             if a.compare_external:
                 stages += [("check official sources online, then " if a.refresh_external else "")+"prepare official outlook records",
                            "compare with the native "+SEASON+" forecast","interpretation and review report"]
+                if SEASON in info["ready"]:
+                    stages += ["score the platform and the official outlooks against CHIRPS observations"]
             stages += ["verification views: national and season rainfall domain for each ready target","offline gallery and run manifest"]
             for i,item in enumerate(stages,1):
                 print(str(i)+".",item)
@@ -413,7 +426,7 @@ def main():
                 dest = output/f"presentation/verification/{target}"
                 runner.stage("verification_view_"+target,[*common,*verification_files(vr,target)],[dest],
                              action=lambda t=target,o=dest:build_verification(vr,presentation_mask(cfg),path(cfg["boundary"]),t,o,cfg["display"]))
-            comparison = external_stages(runner,cfg,info,a.refresh_external) if a.compare_external else None
+            comparison = external_stages(runner,cfg,info,a.refresh_external,verified) if a.compare_external else None
             pending = [t for t in cfg["targets"] if t not in verified]
             gallery_inputs = [*common]
             if comparison:

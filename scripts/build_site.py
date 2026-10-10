@@ -1204,14 +1204,21 @@ JS = r'''
       if (S.target !== season.id) h += '<p class="notice">This comparison covers the full ' + esc(season.id) + ' season. A separate ' + esc(tgt().label) + ' comparison is not available.</p>';
       if (X.stale.length) h += '<p class="notice"><strong>Comparison withheld.</strong> The saved comparison no longer matches the current ' + esc(X.stale.join(', ')) +
         '. Its findings are not shown until it is regenerated: <code>' + esc(X.rerun) + '</code></p>';
-      h += '<p class="caveat">Official outlooks from ICPAC and the Ethiopian Meteorology Institute (EMI), compared with this platform\'s forecast. The comparison describes agreement between outlooks, not which is more accurate, and uses only values a person has checked against the published figures.</p>';
+      const O = X.observed, scored = !!(O && O.rows && O.rows.length);
+      h += '<p class="caveat">Official outlooks from ICPAC and the Ethiopian Meteorology Institute (EMI), compared with this platform\'s forecast, using only values a person has checked against the published figures. ' +
+        (scored ? 'The first parts describe agreement between the outlooks; <a href="#cmp-observed">Against CHIRPS observations</a> scores each of them against what was observed this season.</p>'
+                : 'The comparison describes agreement between outlooks, not which is more accurate.</p>');
       // 1. key findings for the selected area; the rest as context
       const mine = X.summary.filter(i => i.area_key === areaKey || i.area_key === 'any');
       const ctx = X.summary.filter(i => i.area_key !== areaKey && i.area_key !== 'any');
       if (mine.length) h += '<div class="box"><h3>Key findings — ' + esc(areaName) + '</h3><ul class="findings">' + mine.map(item).join('') + '</ul></div>';
       // 2. maps
+      // EMI zones are either digitized areas (zone-mean rows only) or arrows with sampled ±0.5° boxes.
+      const emiZones = X.emi_table.some(r => r.zone_mean) && !X.emi_table.some(r => r.platform !== '—');
       const cap = {icpac: 'Platform ' + season.label + ' vs ICPAC (left to right: platform favoured category, ICPAC favoured category, agreement). Periods differ; see the findings.',
-                   emi: 'Platform ' + season.label + ' favoured category with EMI zone values at their arrow tips; boxes show the sampled ±0.5° neighbourhoods.'};
+                   emi: emiZones
+                     ? 'Platform ' + season.label + ' favoured category with the values EMI printed for each zone. Black lines: the EMI zones, digitized from EMI\'s figure; grey-green line: the edge of the season rainfall domain.'
+                     : 'Platform ' + season.label + ' favoured category with EMI zone values at their arrow tips; boxes show the sampled ±0.5° neighbourhoods.'};
       // The EMI comparison map is shown next to EMI's own official figure (the zones as EMI published them).
       const emiFig = X.sources.filter(s => s.provider === 'EMI').flatMap(s => s.figures)[0];
       const fig = (file, alt, caption) => '<figure><a href="' + href(file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(file) +
@@ -1222,7 +1229,7 @@ JS = r'''
       const right = regionMap
         ? fig(regionMap.file, 'EMI homogeneous rainfall regions with the Bega 2026/27 values', 'EMI zones as homogeneous rainfall regions, with the values EMI printed for Bega 2026/27. Regions redrawn after ' +
               (layer ? layer.citation.split(' (figure')[0] : 'Korecha and Sorteberg (2013)') + '; region layout as published in 2013. EMI\'s own figure is under Sources.')
-        : (emiFig ? fig(emiFig.file, 'EMI official figure', 'EMI official figure (as published): ' + emiFig.caption + '. EMI publishes zone values with arrows; no zone boundaries are given.') : '');
+        : (emiFig ? fig(emiFig.file, 'EMI official figure', 'EMI official figure (as published): ' + emiFig.caption + (emiZones ? '. The zone outlines on the left were digitized from this figure.' : '. EMI publishes zone values with arrows; no zone boundaries are given.')) : '');
       if (X.maps.length) h += X.maps.filter(m => !m.name.includes('regions')).map(m => m.name.includes('anchors')
         ? '<div class="cmp-pair">' + fig(m.file, 'Platform map with EMI zone values', cap.emi) + right + '</div>'
         : '<figure class="map-figure wide"><a href="' + href(m.file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(m.file) +
@@ -1261,6 +1268,31 @@ JS = r'''
               (r.official_note ? '<br><span class="caveat">' + esc(r.official_note) + '</span>' : '') + '</td><td class="nowrap">' + esc(r.platform) + '</td><td>' + esc(r.relationship) +
               '</td><td>' + links(r.evidence_ids, null, mapView).replace('Evidence: ', '') + '</td></tr>'; }).join('') +
           '</tbody></table></div><p class="caveat">ICPAC publishes only the favoured category and its probability interval (the other two categories are not published), for ' + icpacPeriod + '; the platform covers ' + dt(X.platform.target_start) + ' – ' + dt(X.platform.target_end) + ', so the two are compared as tendencies, not as the same event. Locations are the EMI arrow-tip boxes or the digitized EMI zones; platform values are area means of local probabilities over each location or area.</p>';
+      }
+      // 3b. against observations (single season), once the season has been verified
+      if (O && O.stale && O.stale.length) h += '<p class="notice"><strong>Scores against observations withheld.</strong> They were made from a different ' + esc(O.stale.join(', ')) + '; rerun <code>' + esc(X.rerun) + '</code>.</p>';
+      if (scored) {
+        const pc = x => ok(x) ? (100 * x).toFixed(0) + '%' : '—', sk = x => ok(x) ? (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(2) : '—';
+        const win = r => r.window[0] === r.window[1] ? r.window[0] : r.window[0].split(' ')[0] + '–' + r.window[1];
+        const rows = O.rows.filter(r => r.area_key === areaKey && (r.source_id !== 'platform_on_emi_zones' || r.area_share < 0.995));
+        h += '<h3 id="cmp-observed">Against CHIRPS observations — ' + esc(areaName) + '</h3><p class="caveat">Each outlook is scored against what CHIRPS observed for <em>its own</em> period, with observed terciles from CHIRPS ' +
+          O.reference_years.join('–') + ' in each 0.25° cell. One season only: these numbers describe 2026, not general skill.</p>' +
+          '<div class="table-wrap"><table class="compact"><caption>Favoured category vs observed, and probability skill</caption><thead><tr><th scope="col">Outlook</th><th scope="col">Period</th><th scope="col">Covers</th><th scope="col">Favours a category on</th><th scope="col">Favoured category observed</th><th scope="col">Opposite category observed</th><th scope="col">Chance</th><th scope="col">RPSS vs climatology</th></tr></thead><tbody>' +
+          rows.map(r => '<tr><td>' + esc(r.source_id === 'platform_on_emi_zones' ? 'Platform, on the EMI zones only' : r.provider + ' — ' + r.label) + '</td><td class="nowrap">' + esc(win(r)) + '</td><td>' + pc(r.area_share) + '</td><td>' + pc(r.favoured_share) +
+            '</td><td><strong>' + pc(r.hit_share) + '</strong></td><td>' + pc(r.opposite_share) + '</td><td>' + pc(r.chance_of_favoured) + '</td><td>' + (r.provider === 'ICPAC' ? '<span class="caveat">not computed</span>' : sk(r.rpss)) + '</td></tr>').join('') +
+          '</tbody></table></div><p class="caveat"><strong>Covers</strong>: share of the area the outlook gives a forecast for (EMI leaves out its climatologically dry areas). <strong>Favoured category observed</strong>: share of the area where the outlook favours a category (leading tercile ≥ 40%) on which that category was observed; <strong>chance</strong> is the climatological probability of that category there. <strong>RPSS</strong>: ranked probability skill score against the CHIRPS climatology (positive is better than climatology); ICPAC publishes only the favoured category and its interval, so its other probabilities are not inferred and no RPSS is computed.</p>';
+        const zones = [...new Set(O.rows.filter(r => r.area_key === 'zone').map(r => r.zone))];
+        if (zones.length) {
+          const z = (zone, sid) => O.rows.find(r => r.area_key === 'zone' && r.zone === zone && (sid === 'icpac' ? r.provider === 'ICPAC' : r.source_id === sid));
+          const cell = r => r ? pc(r.hit_share) + (ok(r.rpss) ? ' · RPSS ' + sk(r.rpss) : '') : '—';
+          const iwin = (O.rows.find(r => r.provider === 'ICPAC' && r.window) || {}).window;
+          h += '<div class="table-wrap"><table class="compact"><caption>By EMI zone: favoured category observed (and RPSS)</caption><thead><tr><th scope="col">EMI zone</th><th scope="col">Observed below / near / above</th><th scope="col">EMI</th><th scope="col">Platform</th><th scope="col">ICPAC' + (iwin ? ' (' + esc(win({window: iwin})) + ')' : '') + '</th></tr></thead><tbody>' +
+            zones.map(zone => { const e = z(zone, 'emi'), of = (e || z(zone, 'platform')).observed_fractions;
+              return '<tr><td>' + esc(zone) + (e && e.official ? '<br><span class="caveat">EMI: B ' + pc(e.official.below) + ' N ' + pc(e.official.near) + ' A ' + pc(e.official.above) + '</span>' : '') + '</td><td class="nowrap">' +
+                pc(of.below) + ' / ' + pc(of.near) + ' / ' + pc(of.above) + '</td><td>' + cell(e) + '</td><td>' + cell(z(zone, 'platform')) + '</td><td>' + cell(z(zone, 'icpac')) + '</td></tr>'; }).join('') +
+            '</tbody></table></div><p class="caveat">Observed shares are for ' + esc(win(z(zones[0], 'emi') || z(zones[0], 'platform'))) + '; the ICPAC column is scored against its own period.</p>';
+        }
+        if (O.map) h += '<figure class="map-figure wide"><a href="' + href(O.map) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(O.map) + '" alt="Outlooks against CHIRPS observations"></a><figcaption>Observed terciles (CHIRPS) and, for each outlook, where its favoured category was observed (blue), where near normal met an outer category (amber) and where the opposite outer category was observed (red). Each outlook is shown for its own period.</figcaption></figure>';
       }
       if (ctx.length) h += '<details><summary>' + otherName + '</summary><ul class="findings">' + ctx.map(item).join('') + '</ul></details>';
       // 4. detailed interpretation

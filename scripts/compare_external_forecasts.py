@@ -115,7 +115,7 @@ def load_native(path):
         raise ValueError(f'{path}: unexpected category labels {labels}')
     p = d.blend_probability.transpose('lat', 'lon', 'category').values[..., [labels.index(c) for c in CATS]]
     eligible = (d.probability_eligible.values == 1) & (d.region_mask.values == 1) & np.isfinite(p).all(-1)
-    return dict(lat=d.lat.values.astype(float), lon=d.lon.values.astype(float), p=p, eligible=eligible,
+    return dict(lat=d.lat.values.astype(float), lon=d.lon.values.astype(float), p=p, eligible=eligible, region=d.region_mask.values == 1,
                 anomaly=d.corrected_mean_anomaly.values, sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest())
 
 
@@ -164,6 +164,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
 
     # ------------------------------------------------------------------ EMI zone records
     zone_masks = {}                                   # zone label -> geometry (for ICPAC within EMI zones)
+    zone_extent = None                                # every digitized cell (zones and EMI's excluded areas)
     for r in [r for r in recs if r['representation'] == 'zone_tercile_probabilities']:
         validated = r['extraction_status'] == 'validated'
         state = 'available' if validated else 'pending_review'
@@ -213,6 +214,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
             zg = np.array(read_json(sources_dir / r['geometry_file'])['zone'], dtype=object)
             zmask, basis, zone_ok, region_name = (zg == zone) & nat['eligible'], 'zone polygons digitized from the EMI figure', validated, None
             zone_masks[zone] = zg == zone
+            zone_extent = zg != ''
         elif regions and zone in regions['names']:
             zmask = (regions['grid'] == regions['names'].index(zone) + 1) & nat['eligible']
             basis, zone_ok, region_name = 'EMI homogeneous rainfall regions as published in 2013 (digitized)', validated and regions['validated'], regions['long'].get(zone)
@@ -374,7 +376,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
         emi_map(tmp / 'maps' / f'{zone_recs[0]["source_id"]}_anchors.png', nat, zone_recs, areas['season_domain'][1],
                 all(r['extraction_status'] == 'validated' for r in zone_recs), minimum,
                 regions if by_region and regions['validated'] else None,   # region lines only once the layer is reviewed
-                platform['label'], {k: v for k, v in zone_masks.items()} if zone_masks_from_figure(zone_recs) else None)
+                platform['label'], {k: v for k, v in zone_masks.items()} if zone_masks_from_figure(zone_recs) else None, zone_extent)
         if by_region:
             region_map(tmp / 'maps' / f'{zone_recs[0]["source_id"]}_regions.png', zone_recs, regions,
                        regions['validated'] and all(r['extraction_status'] == 'validated' for r in zone_recs), emi_label)
@@ -412,6 +414,13 @@ def _boundary(ax):
         pass
 
 
+def interior_contour(ax, lon, lat, mask, inside, **kw):
+    """Outline of `mask` without the parts that run along the edge of `inside` (the country, or the
+    regions), so an area that reaches the border is not drawn a second time next to the boundary line.
+    Cells outside `inside` are masked, so only edges between two cells inside are drawn."""
+    ax.contour(lon, lat, np.ma.masked_where(~inside, mask.astype(float)), levels=[.5], **kw)
+
+
 def icpac_map(path, nat, cat, st, pc, domain, validated, minimum, platform_label='', official_label='ICPAC', window=None):
     import matplotlib
     matplotlib.use('Agg')
@@ -437,7 +446,7 @@ def icpac_map(path, nat, cat, st, pc, domain, validated, minimum, platform_label
     axes[2].set_title('Agreement where both favour a category', fontsize=10)
     for ax in axes:
         _boundary(ax)
-        ax.contour(nat['lon'], nat['lat'], domain.astype(float), levels=[.5], colors='#446761', linewidths=.8)
+        interior_contour(ax, nat['lon'], nat['lat'], domain, nat['region'], colors='#446761', linewidths=.8)
         ax.set_xlim(ext[:2]); ax.set_ylim(ext[2:]); ax.set_aspect('equal'); ax.tick_params(labelsize=8)
     fig.legend(handles=[Patch(color=COLOURS[k], label=NAMES[k]) for k in CATS] +
                [Patch(facecolor='white', edgecolor='grey', label='platform: no clear category (<40%)'),
@@ -458,8 +467,9 @@ def icpac_map(path, nat, cat, st, pc, domain, validated, minimum, platform_label
 
 
 def _region_lines(ax, regions, color='#222', lw=.9):
+    inside = regions['fine'] > 0                      # the regions' outer edge is the national border, drawn once by _boundary
     for k in range(1, len(regions['names']) + 1):
-        ax.contour(regions['flon'], regions['flat'], (regions['fine'] == k).astype(float), levels=[.5], colors=color, linewidths=lw)
+        interior_contour(ax, regions['flon'], regions['flat'], regions['fine'] == k, inside, colors=color, linewidths=lw)
 
 
 def zone_masks_from_figure(recs):
@@ -501,7 +511,7 @@ def region_map(path, recs, regions, validated, emi_label='EMI outlook'):
     plt.close(fig)
 
 
-def emi_map(path, nat, recs, domain, validated, minimum, regions=None, platform_label='', zone_masks=None):
+def emi_map(path, nat, recs, domain, validated, minimum, regions=None, platform_label='', zone_masks=None, zone_extent=None):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -519,10 +529,11 @@ def emi_map(path, nat, recs, domain, validated, minimum, regions=None, platform_
     _boundary(ax)
     if regions:
         _region_lines(ax, regions, color='#333', lw=.7)
-    ax.contour(nat['lon'], nat['lat'], domain.astype(float), levels=[.5], colors='#446761', linewidths=.8)
+    interior_contour(ax, nat['lon'], nat['lat'], domain, nat['region'], colors='#446761', linewidths=.8)
     lon2, lat2 = np.meshgrid(nat['lon'], nat['lat'])
-    for label, m in (zone_masks or {}).items():          # EMI zones digitized from the figure: outline and values
-        ax.contour(nat['lon'], nat['lat'], m.astype(float), levels=[.5], colors='black', linewidths=1.3)
+    extent = zone_extent if zone_extent is not None else nat['region']
+    for label, m in (zone_masks or {}).items():          # EMI zones digitized from the figure: dividing lines and values
+        interior_contour(ax, nat['lon'], nat['lat'], m, extent, colors='black', linewidths=1.3)
         rr = next((r for r in recs if r['source_locator']['zone_label'] == label), None)
         if rr is not None and m.any():
             p = rr['probabilities']

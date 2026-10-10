@@ -2,9 +2,9 @@
  "cycle": "JJAS 2026",
  "initialization": "2026-05-01",
  "initialization_month": "May",
- "built_utc": "2026-10-10 08:13 UTC",
+ "built_utc": "2026-10-10 09:14 UTC",
  "release": "2026-10-09.11",
- "code_version": "ca3165c",
+ "code_version": "535e338",
  "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
  "record": {
   "Model initialization": "1 May 2026 · ECMWF SEAS5 (system 51), 51 members",
@@ -15,7 +15,7 @@
   "Observations processed through": "August 2026 (Jun, Jul, Aug)",
   "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
   "Verification last run": "5 Oct 2026",
-  "Method / version": "Shared climatology blend (λ = 0.50 for JJAS) · code ca3165c"
+  "Method / version": "Shared climatology blend (λ = 0.50 for JJAS) · code 535e338"
  },
  "rainfall_domain": {
   "view": "jjas_r12_rainfall_domain",

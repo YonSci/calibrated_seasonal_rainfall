@@ -2,9 +2,9 @@
  "cycle": "FMAM 2026",
  "initialization": "2026-01-01",
  "initialization_month": "January",
- "built_utc": "2026-10-10 08:13 UTC",
+ "built_utc": "2026-10-10 09:14 UTC",
  "release": "2026-10-09.11",
- "code_version": "ca3165c",
+ "code_version": "535e338",
  "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
  "record": {
   "Model initialization": "1 January 2026 · ECMWF SEAS5 (system 51), 51 members",
@@ -15,7 +15,7 @@
   "Observations processed through": "May 2026 (Feb, Mar, Apr, May)",
   "CHIRPS archive": "Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found",
   "Verification last run": "10 Oct 2026",
-  "Method / version": "Shared climatology blend (λ = 0.43 for FMAM) · code ca3165c"
+  "Method / version": "Shared climatology blend (λ = 0.43 for FMAM) · code 535e338"
  },
  "rainfall_domain": {
   "view": "fmam_rainfall_domain",
@@ -307,6 +307,7 @@
   "comparison/figures/emi_belg_2026_outlook_page22_figure.jpg",
   "comparison/figures/emi_belg_2026_outlook_anchors.png",
   "comparison/figures/icpac_mam_2026_rainfall_comparison.png",
+  "comparison/figures/observed_comparison.png",
   "comparison/report.html"
  ],
  "status": "research reconstruction; not an official EMI or ICPAC forecast"
