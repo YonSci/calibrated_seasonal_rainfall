@@ -1224,8 +1224,9 @@ JS = r'''
       const hist = '<div class="hbars">' + d.histogram.map(h => '<div class="hbar"><span>' + esc(h.label) + '</span><div><i style="width:' + (100 * h.share).toFixed(1) + '%"></i></div><b>' + pc(h.share) + '</b></div>').join('') + '</div>';
       const relTable = '<details><summary>Reliability table (forecast bins, observed frequency, counts)</summary><div class="table-wrap"><table class="compact"><thead><tr><th scope="col">Category</th><th scope="col">Bin</th><th scope="col">Mean forecast</th><th scope="col">Observed frequency</th><th scope="col">Cell-years</th></tr></thead><tbody>' +
         d.reliability.flatMap((rows, k) => rows.map(r => '<tr><td>' + CAT[k] + '</td><td>' + pc(r.bin[0]) + '–' + pc(r.bin[1]) + '</td><td>' + pc(r.forecast) + '</td><td>' + pc(r.observed) + '</td><td>' + r.count.toLocaleString('en') + '</td></tr>')).join('') + '</tbody></table></div></details>';
-      const am = ((D2.amount || {})[t.id] || {})[area];
-      const amount = am ? '<div class="table-wrap"><table class="compact"><caption>Rainfall amounts, ' + esc(am.period) + '</caption><tbody>' +
+      // Amount scores come from the development run over all of Ethiopia; shown (labelled) whichever area is selected.
+      const amA = (D2.amount || {})[t.id] || {}, amArea = amA[area] ? area : (amA.all_ethiopia ? 'all_ethiopia' : area), am = amA[amArea];
+      const amount = am ? '<div class="table-wrap"><table class="compact"><caption>Rainfall amounts, ' + esc(am.period) + (amArea !== S.view ? ' — All Ethiopia (amount diagnostics are computed for the whole country)' : '') + '</caption><tbody>' +
           '<tr><td>Rainfall amount skill (CRPSS)</td><td>' + sg(am.crpss, 3) + '</td></tr><tr><td>CRPS, corrected / climatology</td><td>' + am.corrected_crps_mm.toFixed(1) + ' / ' + am.climatology_crps_mm.toFixed(1) + ' mm</td></tr>' +
           '<tr><td>Average rainfall error, corrected (raw model)</td><td>' + sg(am.corrected_bias_mm, 1) + ' mm (' + sg(am.raw_bias_mm, 1) + ' mm)</td></tr><tr><td>RMSE, corrected / climatology</td><td>' + am.corrected_rmse_mm.toFixed(1) + ' / ' + am.climatology_rmse_mm.toFixed(1) + ' mm</td></tr></tbody></table></div>'
         : '<p class="caveat">Historical rainfall-amount diagnostics (CRPS, CRPSS and amount errors) have not been generated for ' + esc(t.label) + ' in this area and period; this needs a separate cross-validated amount evaluation. Single-season amount scores are in the Verification section.</p>';
@@ -1526,7 +1527,9 @@ JS = r'''
     const km = x => x == null ? '—' : Math.round(x).toLocaleString('en-US') + ' km²';
     const tbl = (cap, head, rows) => '<div class="table-wrap"><table><caption>' + esc(cap) + '</caption><thead><tr>' + head.map(x => '<th scope="col">' + esc(x) + '</th>').join('') +
       '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(x => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
-    let h = '<p class="caveat">' + esc(R.season) + ' climatology from CHIRPS v2.0 ' + esc(R.period) + ' · built ' + esc(R.built.slice(0, 10)) +
+    let h = (R.selected ? '' : '<p class="notice">Evidence only: no candidate has been selected for ' + esc(R.season) + ', so the forecast products keep their current domain (' +
+        esc(c.views.filter(v => v[0] !== 'all_ethiopia').map(v => v[1]).join('; ')) + ').</p>') +
+      '<p class="caveat">' + esc(R.season) + ' climatology from CHIRPS v2.0 ' + esc(R.period) + ' · built ' + esc(R.built.slice(0, 10)) +
       ' · <a href="' + siteURL(R.report) + '">Full review report</a></p>';
     if (R.stale.length) h += '<p class="notice">This review was built before a change to ' + esc(R.stale.join(', ')) + '; its numbers describe the earlier inputs.</p>';
     h += '<p>' + (R.selected ? 'Selected domain: <strong>' + esc(R.selected) + '</strong>' + (R.rationale ? ' — ' + esc(R.rationale) : '')
@@ -1541,8 +1544,9 @@ JS = r'''
         '<p class="caveat">Calendar check ' + (R.qc.calendar ? 'passed' : 'FAILED') + '; ' + R.qc.years.count + ' years (' + R.qc.years.first + '–' + R.qc.years.last + '); ' +
         R.qc.incomplete_cells + ' cells without a complete baseline; Ethiopia ' + km(R.country_km2) + ', of which ' + km(R.qc.outside_grid_km2) + ' lies beyond the grid. CHIRPS source ' + esc(R.qc.source) + '….</p>';
     } else if (DR.tab === 'references') {
-      h += '<p>' + (R.reference_note ? esc(R.reference_note) + ' ' : 'The registered EMI long-term maps for ' + esc(R.season) + ' are climatologies whose averaging period is not documented. ') +
-        'Until their georeferencing and legend digitization are reviewed they are compared <strong>visually only</strong>.</p>' +
+      h += (!R.references.length ? '<p class="notice">No EMI long-term maps are registered for ' + esc(R.season) + '. ' + esc(R.note || '') + '</p>' :
+        '<p>' + (R.reference_note ? esc(R.reference_note) + ' ' : 'The registered EMI long-term maps for ' + esc(R.season) + ' are climatologies whose averaging period is not documented. ') +
+        'Until their georeferencing and legend digitization are reviewed they are compared <strong>visually only</strong>.</p>') +
         tbl('Registered climatology references', ['Reference', 'Comparison mode', 'Why not higher', 'Digitization', 'Outline match (IoU)', 'Control / check error'],
           R.references.map(r => [esc(r.id), esc(r.mode.replace(/_/g, ' ')), esc(r.reasons.join('; ') || '—'), esc(r.status), r.iou, (r.control_km || 0).toFixed(1) + ' / ' + (r.check_km || 0).toFixed(1) + ' km'])) +
         R.figures.references.map(f => fig(f, f.startsWith('reference_comparison') ? 'CHIRPS, EMI as published, and CHIRPS in the EMI classes' : 'Registration and digitized classes (' + f.replace('georeference_qc_', '').replace('.png', '') + ')')).join('');

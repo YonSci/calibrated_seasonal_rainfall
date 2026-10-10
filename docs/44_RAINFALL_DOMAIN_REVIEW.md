@@ -104,3 +104,18 @@ data are unchanged (re-exported with `--regenerate`). The included share (about 
 official estimate of Belg-dependent area; the thresholds coincide with EMI legend breaks, which makes the visual EMI comparison
 convenient, but that comparison is unreviewed and does not validate them. The earlier `FMAM_belg_emi_domain` mask is labelled
 as the previous site view in the review.
+
+## JJAS and ONDJ reviews (2026-10-10)
+
+`configainfall_domains\jjas_review.json` and `ondj_review.json` run the same review for the other seasons. Neither selects a
+candidate, so the operational domains (JJAS R1+R2, ONDJ R3 Deyr) are unchanged; the current domains are comparators.
+
+* **JJAS** — thresholds on the Kiremt legend breaks (100/200/400/600 mm; 20/40/60/80 % of annual). References: EMI *Kiremt 2026
+  Seasonal Climate Forecast* maps 2(e) (p. 25, mean Kiremt rainfall) and 3(e) (p. 26, Kiremt share of annual). Map 2(e) has a
+  vector legend (not an image): its colours are given as `legend_rgb` in the registry, sampled from the rendered page. Both
+  extractions are drafts until reviewed (`--review-reference emi_kiremt_map_2e` / `_3e`).
+* **ONDJ** — thresholds 30/60/120/200 mm; 10/20/30/40 %. No EMI references: the *Bega 2026/27 Seasonal Climate Forecast* had no
+  document when checked. Season months are summed within each calendar year (January of the same year); the climatological
+  mean is the sum of monthly means, so the pairing does not change it. Period 1993–2024 as in the ONDJ cycle.
+
+The site's *Rainfall climatology and domains* section shows the review of the selected cycle's season.

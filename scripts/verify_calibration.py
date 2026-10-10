@@ -53,18 +53,19 @@ def main():
     p.add_argument('--bootstrap',type=int,default=5000)
     p.add_argument('--subsamples',type=int,default=100)
     p.add_argument('--seed',type=int,default=20261003)
+    p.add_argument('--last-year',type=int,default=2025,help='Last evaluated season, as in run_calibration.py (2024 for ONDJ)')
     args=p.parse_args()
     if args.bootstrap<100 or args.subsamples<2:raise ValueError('Use at least 100 bootstrap draws and 2 subsamples.')
     if not re.fullmatch(r'[A-Za-z0-9_-]+',args.region_name):raise ValueError('Use a simple region name: letters, numbers, underscore or hyphen.')
     if args.region_mask and args.region_name=='full_domain':raise ValueError('Give --region-name when supplying a regional mask.')
     if not args.region_mask and args.region_name!='full_domain':raise ValueError('A regional label requires --region-mask.')
-    cfg=load_config(args.config);train=list(range(1993,2017));years=list(range(2017,2026))
+    cfg=load_config(args.config);train=list(range(1993,2017));years=list(range(2017,args.last_year+1))
     tag,models,obs,members,lat,lon=load_inputs(cfg,train+years,train+years)
     source=ROOT/'outputs/calibration'/tag/'development';fitted=ROOT/'models'/tag/'development'
     report=json.loads((source/'calibration_report.json').read_text())
     dm=json.loads((fitted/'dirichlet_parameters.json').read_text())
     if report['training_years']!=train or report['target_years']!=years or dm['training_year_list']!=train:
-        raise ValueError('Expected frozen 1993-2016 development fit and 2017-2025 evaluation.')
+        raise ValueError(f'Expected frozen 1993-2016 development fit and 2017-{args.last_year} evaluation.')
     with xr.open_dataset(fitted/'amount_parameters.nc') as d:
         if not np.array_equal(d.lat,lat) or not np.array_equal(d.lon,lon):raise ValueError('Parameter grid mismatch.')
         pars={k:d[k].values.reshape(-1) for k in d.data_vars}
@@ -123,7 +124,7 @@ def main():
         uncertainty_note='Paired iid resampling of 9 whole years; preserves within-year spatial/member dependence. Does not model interannual dependence or fitting uncertainty.')))
 
     # Spatial maps: temporal means and ratios of means, never spatially averaged skill ratios.
-    maps=xr.Dataset(coords={'lat':lat,'lon':lon},attrs={'region':json.dumps(region_info),'evaluation_years':'2017-2025',
+    maps=xr.Dataset(coords={'lat':lat,'lon':lon},attrs={'region':json.dumps(region_info),'evaluation_years':f'2017-{args.last_year}',
         'note':'Cell-level statistics from only nine seasons. No significance claims; grid cells are dependent.'})
     spatial={k:mean_valid(np.stack(v)) for k,v in fields.items()}
     for name in ('raw','corrected'):
@@ -146,7 +147,7 @@ def main():
         scale=dict(cmap='viridis',vmin=0,vmax=1) if key=='clipped_fraction' else dict(cmap='RdBu',vmin=-1,vmax=1)
         im=ax.pcolormesh(lon,lat,maps[key].values,shading='auto',**scale);ax.set_title(key.replace('_',' '),fontsize=9)
         ax.set_xlabel('Longitude');ax.set_ylabel('Latitude');fig.colorbar(im,ax=ax,shrink=.8)
-    fig.suptitle(f'2017–2025: {args.region_name} (no country boundaries supplied)')
+    fig.suptitle(f'2017–{args.last_year}: {args.region_name} (no country boundaries supplied)')
     savefig(fig,figures/'spatial_diagnostics.png')
 
     # Regional anomaly time series; a zero-anomaly line is the climatology forecast.

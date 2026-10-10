@@ -1,0 +1,214 @@
+{
+  "reference_id": "emi_kiremt_map_2e",
+  "status": "draft",
+  "created_utc": "2026-10-10T20:03:43+00:00",
+  "legend": [
+    {
+      "class_id": 1,
+      "source_label": "50-100",
+      "rgb": [
+        223,
+        223,
+        223
+      ]
+    },
+    {
+      "class_id": 2,
+      "source_label": "101-200",
+      "rgb": [
+        252,
+        169,
+        4
+      ]
+    },
+    {
+      "class_id": 3,
+      "source_label": "201-400",
+      "rgb": [
+        252,
+        252,
+        4
+      ]
+    },
+    {
+      "class_id": 4,
+      "source_label": "401-600",
+      "rgb": [
+        153,
+        228,
+        4
+      ]
+    },
+    {
+      "class_id": 5,
+      "source_label": "601-800",
+      "rgb": [
+        58,
+        195,
+        4
+      ]
+    },
+    {
+      "class_id": 6,
+      "source_label": "801-1,200",
+      "rgb": [
+        58,
+        167,
+        4
+      ]
+    },
+    {
+      "class_id": 7,
+      "source_label": "1,201-1,769",
+      "rgb": [
+        4,
+        116,
+        78
+      ]
+    }
+  ],
+  "registration": {
+    "method": "outline_fit_affine",
+    "status": "draft",
+    "frame_px": [
+      25,
+      477,
+      12,
+      601
+    ],
+    "affine": [
+      [
+        0.02755119985932476,
+        0.0,
+        32.04884755876597
+      ],
+      [
+        0.0,
+        -0.027551094247248466,
+        16.038796500486928
+      ]
+    ],
+    "control_points": [
+      {
+        "name": "north",
+        "role": "control",
+        "pixel": [
+          214.0,
+          44.0
+        ],
+        "lonlat": [
+          37.940296291000095,
+          14.845476907000148
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "south",
+        "role": "control",
+        "pixel": [
+          271.0,
+          458.0
+        ],
+        "lonlat": [
+          39.560270000000116,
+          3.40667000000019
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "west",
+        "role": "control",
+        "pixel": [
+          35.0,
+          292.0
+        ],
+        "lonlat": [
+          32.99180000000007,
+          7.926040000000057
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "east",
+        "role": "control",
+        "pixel": [
+          577.0,
+          292.0
+        ],
+        "lonlat": [
+          47.988240000000076,
+          8.004110000000082
+        ],
+        "clipped_by_frame": false
+      }
+    ],
+    "check_points": [
+      {
+        "name": "northeast",
+        "role": "check",
+        "pixel": [
+          577.0,
+          292.0
+        ],
+        "lonlat": [
+          47.988240000000076,
+          8.004110000000082
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "southwest",
+        "role": "check",
+        "pixel": [
+          142.0,
+          418.0
+        ],
+        "lonlat": [
+          35.95111000000003,
+          4.521110000000135
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "northwest",
+        "role": "check",
+        "pixel": [
+          164.0,
+          64.0
+        ],
+        "lonlat": [
+          36.55273739800009,
+          14.278901204000135
+        ],
+        "clipped_by_frame": false
+      },
+      {
+        "name": "southeast",
+        "role": "check",
+        "pixel": [
+          471.0,
+          401.0
+        ],
+        "lonlat": [
+          44.95083000000017,
+          4.902500000000032
+        ],
+        "clipped_by_frame": false
+      }
+    ],
+    "proposed_by": "automatic draft: silhouette extreme points, refined by fitting the country outline (scale and offset per axis); points touching the map frame are not used"
+  },
+  "classification": {
+    "tolerance_rgb": 45.0,
+    "majority": 0.6,
+    "coverage": 0.5,
+    "rule": "nearest legend colour per pixel; majority over the 0.25 deg cell footprint"
+  },
+  "edge_convention": {
+    "name": "midpoint_between_displayed_bounds",
+    "threshold_tolerance": 0.5,
+    "note": "Rounded legend labels: adjacent classes meet halfway between displayed bounds; exact continuous edges are not verified."
+  },
+  "review": null,
+  "how_to_review": "Check the QC figure in outputs/.../references/<id>/georeference_qc.png (outline, control and check points, digitized classes). Edit control points or legend colours here (or replace the registration with QGIS GCPs), then run the runner with --review-reference <id> --reviewer \"Name\"."
+}

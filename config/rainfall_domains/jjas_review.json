@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "assessment_id": "jjas_chirps_domain_review_v1",
+  "project_config": "config/project.json",
+  "monthly_cache": "data/processed/regime_climatology/chirps_calendar_cache.nc",
+  "monthly_variable": "monthly_total",
+  "country_mask": "data/masks/ethiopia_common.nc",
+  "country_boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "regions_mask": "data/masks/emi_rainfall_regions_korecha2013.nc",
+  "season_name": "JJAS",
+  "season_months": [
+    6,
+    7,
+    8,
+    9
+  ],
+  "annual_months": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "application_period": [
+    1993,
+    2025
+  ],
+  "additional_reference_periods": [
+    [
+      1981,
+      2010
+    ],
+    [
+      1991,
+      2020
+    ],
+    [
+      1996,
+      2025
+    ]
+  ],
+  "require_complete_baseline": true,
+  "unavailable_optional_period": "record_unavailable",
+  "annual_share_method": "ratio_of_climatological_means",
+  "candidate_thresholds": {
+    "seasonal_rainfall_mm": [
+      100,
+      200,
+      400,
+      600
+    ],
+    "annual_share_percent": [
+      20,
+      40,
+      60,
+      80
+    ]
+  },
+  "candidate_cleanup": "none",
+  "comparators": [
+    {
+      "id": "r12_regime_rule",
+      "kind": "mask_file",
+      "path": "data/masks/init05_JJAS_regime_domain.nc",
+      "label": "Current JJAS R1+R2 rainfall domain: R1/R2 membership, JJAS >= 120 mm and >= 20% of annual",
+      "reference_note": "Regime membership is not an amount/share threshold, so EMI classes imply no membership for it."
+    },
+    {
+      "id": "share60_mm200",
+      "kind": "rule",
+      "rule": "share",
+      "annual_share_percent": 60,
+      "seasonal_rainfall_mm": 200,
+      "label": "60% contribution rule: JJAS >= 60% of annual and >= 200 mm (no cleanup)"
+    },
+    {
+      "id": "wettest_mm100",
+      "kind": "rule",
+      "rule": "wettest",
+      "seasonal_rainfall_mm": 100,
+      "label": "Wettest-season rule: JJAS wetter than FMAM and ONDJ, >= 100 mm (no cleanup)",
+      "reference_note": "Wettest-season membership compares JJAS with FMAM and ONDJ; the EMI maps give no FMAM/ONDJ amounts."
+    }
+  ],
+  "reference_registry": "config/climatology_references/registry.json",
+  "reference_ids": [
+    "emi_kiremt_map_2e",
+    "emi_kiremt_map_3e"
+  ],
+  "reference_cache": "data/climatology_references",
+  "output_root": "outputs/rainfall_domain_review/jjas_v1",
+  "export": {
+    "mask": "data/masks/jjas_coverage_chirps_v2_1993_2025_v1.nc",
+    "boundary": "data/boundaries/jjas_coverage_v1/jjas_coverage_chirps_v2_1993_2025_v1"
+  },
+  "note": "Evidence for the JJAS rainfall domain. No candidate is selected: the operational JJAS domain (R1+R2) is unchanged unless a candidate is explicitly selected and exported. EMI references: Kiremt 2026 Seasonal Climate Forecast maps 2(e) and 3(e)."
+}

@@ -210,7 +210,7 @@
   {
     "id": "2026-10-10.1",
     "date": "2026-10-10",
-    "commit": null,
+    "commit": "39e6509",
     "title": "FMAM 2026 verified; February initialization; FMAM rainfall contribution domain; outlooks scored against CHIRPS",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -232,6 +232,32 @@
       {
         "type": "display",
         "text": "Verification reports state the cycle's own initialization and season; one current report per cycle. Comparison maps draw the national border once. Historical performance opens with a takeaway; technical detail is expandable."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-10.2",
+    "date": "2026-10-10",
+    "commit": null,
+    "title": "Climatology and domain reviews for JJAS and ONDJ; historical rainfall-amount skill for FMAM and ONDJ",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "Rainfall climatology and domain reviews for JJAS (with EMI's Kiremt 2026 long-term maps 2(e) and 3(e), digitization in draft) and ONDJ (no EMI long-term Bega maps published yet). Evidence only: the JJAS R1+R2 and ONDJ R3 domains are unchanged."
+      },
+      {
+        "type": "analysis",
+        "text": "Calibration development runs (fit 1993-2016, evaluate 2017 onwards) for both FMAM initializations and ONDJ, so Historical performance now shows rainfall-amount skill for every cycle (all of Ethiopia): FMAM CRPSS -0.001 (January) and +0.053 (February), ONDJ +0.18 (2017-2024), JJAS +0.017."
+      },
+      {
+        "type": "display",
+        "text": "The Rainfall climatology and domains section shows the selected season's review; comparison notes and map captions name each cycle's own periods and seasons."
       }
     ]
   }

@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "assessment_id": "ondj_chirps_domain_review_v1",
+  "project_config": "config/ondj/project.json",
+  "monthly_cache": "data/processed/regime_climatology/chirps_calendar_cache.nc",
+  "monthly_variable": "monthly_total",
+  "country_mask": "data/masks/ethiopia_common.nc",
+  "country_boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "regions_mask": "data/masks/emi_rainfall_regions_korecha2013.nc",
+  "season_name": "ONDJ",
+  "season_months": [
+    10,
+    11,
+    12,
+    1
+  ],
+  "annual_months": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "application_period": [
+    1993,
+    2024
+  ],
+  "additional_reference_periods": [
+    [
+      1981,
+      2010
+    ],
+    [
+      1991,
+      2020
+    ],
+    [
+      1996,
+      2025
+    ]
+  ],
+  "require_complete_baseline": true,
+  "unavailable_optional_period": "record_unavailable",
+  "annual_share_method": "ratio_of_climatological_means",
+  "candidate_thresholds": {
+    "seasonal_rainfall_mm": [
+      30,
+      60,
+      120,
+      200
+    ],
+    "annual_share_percent": [
+      10,
+      20,
+      30,
+      40
+    ]
+  },
+  "candidate_cleanup": "none",
+  "comparators": [
+    {
+      "id": "r3_regime_rule",
+      "kind": "mask_file",
+      "path": "data/masks/init09_ONDJ_regime_domain.nc",
+      "label": "Current ONDJ R3 (Deyr) rainfall domain: R3 membership, ONDJ >= 30 mm, patches < 3 cells removed",
+      "reference_note": "Regime membership is not an amount/share threshold."
+    },
+    {
+      "id": "earlier_mm120_share20",
+      "kind": "mask_file",
+      "path": "data/masks/init09_ONDJ_rainfall_domain.nc",
+      "label": "Earlier ONDJ rainfall domain (not in use): ONDJ >= 120 mm and >= 20% of annual (1993-2024)"
+    },
+    {
+      "id": "share40_mm60",
+      "kind": "rule",
+      "rule": "share",
+      "annual_share_percent": 40,
+      "seasonal_rainfall_mm": 60,
+      "label": "40% contribution rule: ONDJ >= 40% of annual and >= 60 mm (no cleanup)"
+    },
+    {
+      "id": "wettest_mm60",
+      "kind": "rule",
+      "rule": "wettest",
+      "seasonal_rainfall_mm": 60,
+      "label": "Wettest-season rule: ONDJ wetter than FMAM and JJAS, >= 60 mm (no cleanup)"
+    }
+  ],
+  "reference_registry": "config/climatology_references/registry.json",
+  "reference_ids": [],
+  "reference_cache": "data/climatology_references",
+  "output_root": "outputs/rainfall_domain_review/ondj_v1",
+  "export": {
+    "mask": "data/masks/ondj_coverage_chirps_v2_1993_2024_v1.nc",
+    "boundary": "data/boundaries/ondj_coverage_v1/ondj_coverage_chirps_v2_1993_2024_v1"
+  },
+  "note": "Evidence for the ONDJ rainfall domain. No candidate is selected: the operational ONDJ domain (R3 Deyr) is unchanged. No EMI long-term Bega maps are registered: the Bega 2026/27 Seasonal Climate Forecast had no document when checked (2026-10-10). ONDJ months are summed within each calendar year (January of the same year); the climatological mean is unaffected by the pairing."
+}

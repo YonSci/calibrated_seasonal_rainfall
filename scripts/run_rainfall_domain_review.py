@@ -9,12 +9,12 @@
 Stages run their prerequisites first and resume when inputs, settings and code are unchanged
 (operational_core.StageRunner); a changed input re-runs every dependent stage.
   inspect      monthly-cache validation (calendar, units, completeness, grid) and country area weights
-  climatology  continuous FMAM / annual climatology for the application period and available extra periods
+  climatology  continuous season / annual climatology for the application period and available extra periods
   references   acquire the registered reference documents, extract panels, georeference / classify (drafts until reviewed)
   compare      CHIRPS against the references in the mode their evidence supports
   sensitivity  every amount / share candidate, the named comparators, regional inclusion, baseline changes
   report       figures, tables, JSON results and the offline HTML report, with an input fingerprint
-  export       versioned FMAM domain mask (needs an explicitly selected candidate and rationale)
+  export       versioned season domain mask (needs an explicitly selected candidate and rationale)
 
 Reference digitization review (binds the analyst choices to the document and panel hashes):
     python scripts\\run_rainfall_domain_review.py --config ... --review-reference emi_belg_map_3e --reviewer "Name"
@@ -76,7 +76,8 @@ def load_extraction(ref_id):
 
 def references_used(cfg):
     reg = cr.load_registry(cfg['reference_registry'])
-    wanted = cfg.get('reference_ids') or [r['id'] for r in reg['references']]
+    # An explicit list (also an empty one: no published long-term maps for the season) is used as given.
+    wanted = cfg['reference_ids'] if 'reference_ids' in cfg else [r['id'] for r in reg['references']]
     return [r for r in reg['references'] if r['id'] in wanted]
 
 
@@ -129,8 +130,9 @@ def stage_climatology(cfg, out):
     first, last = cfg['application_period']
     sel = monthly.sel(year=list(range(first, last + 1)))
     f = sel.sel(month=cfg['season_months']).sum('month', skipna=False)
-    feb_mam = sel.sel(month=[2]).sum('month', skipna=False) + sel.sel(month=[3, 4, 5]).sum('month', skipna=False)
-    summary['identities'] = dict(season_equals_parts_max_abs_mm=float(np.nanmax(np.abs((f - feb_mam).values))),
+    months = cfg['season_months']                      # e.g. FMAM = Feb + MAM; ONDJ = Oct + NDJ
+    parts = sel.sel(month=months[:1]).sum('month', skipna=False) + sel.sel(month=months[1:]).sum('month', skipna=False)
+    summary['identities'] = dict(season_equals_parts_max_abs_mm=float(np.nanmax(np.abs((f - parts).values))),
                                  annual_equals_twelve_months=True)
     save_json(out / 'climatology_summary.json', summary)
     print('Climatology:', ', '.join(f'{p["period"]} {p["status"]}' for p in summary['periods']))
@@ -143,7 +145,11 @@ def ensure_extraction(record, panels, cfg):
         return json.loads(path.read_text(encoding='utf-8'))
     img = cr.load_rgb(panels['panel'])
     n = len(record['representation']['classes'])
-    if panels.get('legend'):
+    if record['location'].get('legend_rgb'):           # vector legend (not an image): colours sampled by the analyst
+        boxes = [dict(rgb=list(c)) for c in record['location']['legend_rgb']]
+        if len(boxes) != n:
+            raise ValueError(f'{record["id"]}: legend_rgb has {len(boxes)} colours for {n} classes')
+    elif panels.get('legend'):
         leg = cr.load_rgb(panels['legend'])
         boxes = cr.detect_legend_colours(leg, n, region=(0, leg.shape[0], 0, leg.shape[1] // 2))
     else:
@@ -448,7 +454,7 @@ def export(cfg, candidate, rationale, folders, regenerate=False):
         import subprocess
         subprocess.run([sys.executable, str(ROOT / 'scripts/export_domain_boundary.py'), '--mask', str(mask_path),
                         '--out', str(source_path(cfg['export']['boundary'])), '--smooth'], check=True)
-    print('To use it: set "season_domain_mask" (or an "extra_domain_masks" entry) in the FMAM cycle files to',
+    print(f'To use it: set "season_domain_mask" (or an "extra_domain_masks" entry) in the {cfg["season_name"]} cycle files to',
           rc.rel(mask_path), 'then rerun run_operational.py --workflow products, regional_skill.py and '
           'historical_diagnostics.py for each cycle, and build_site.py.')
 

@@ -953,7 +953,7 @@ def export_domain_review(out):
                           ') are climatologies printed in that publication; their averaging period is not documented.') if docs else None
         reviews.append(dict(
             id=cfg['assessment_id'], season=cfg['season_name'], period=data['period'], built=data['created_utc'], base=rel,
-            reference_note=reference_note,
+            reference_note=reference_note, note=cfg.get('note'),
             report=rel + 'review_report.html', stale=stale, selected=data.get('selected_candidate'), rationale=data.get('selection_rationale'),
             focus=data.get('focus_candidate'), figures=data['figures'], candidates=slim_c, comparators=slim_comp,
             mm=sorted({c['mm'] for c in slim_c}), shares=sorted({c['share'] for c in slim_c}),

@@ -84,11 +84,11 @@ def field_map(ctx, values, levels, colors, title, label, path, extend='max'):
 def climatology_figures(ctx, out):
     c, src = ctx.clim, f'CHIRPS v2.0 {ctx.period}'
     field_map(ctx, c.season_mean_mm.values, [0, 50, 100, 200, 300, 400, 500, 800, 1200], BLUES,
-              f'{ctx.season} mean rainfall (mm)\n{src}, actual-calendar monthly totals', 'mm', out / 'fmam_total_mm.png')
+              f'{ctx.season} mean rainfall (mm)\n{src}, actual-calendar monthly totals', 'mm', out / f'{ctx.season.lower()}_total_mm.png')
     field_map(ctx, c.annual_mean_mm.values, [0, 200, 400, 600, 800, 1000, 1400, 1800, 2600], BLUES,
               f'Mean annual rainfall (mm): the share denominator\n{src}', 'mm', out / 'annual_total_mm.png')
     field_map(ctx, c.season_share_percent.values, [0, 10, 15, 20, 25, 30, 40, 50, 100], BLUES,
-              f'{ctx.season} share of annual rainfall (%)\n{src}, ratio of climatological means', '%', out / 'fmam_share_percent.png', extend='neither')
+              f'{ctx.season} share of annual rainfall (%)\n{src}, ratio of climatological means', '%', out / f'{ctx.season.lower()}_share_percent.png', extend='neither')
     # monthly cycle per EMI rainfall region (area-weighted)
     keys = list(ctx.labels)
     fig, axes = plt.subplots(2, 4, figsize=(12, 5.2), sharey=True, constrained_layout=True)
@@ -240,7 +240,7 @@ def domain_text(ctx, row, is_candidate):
     agree = ('EMI agreement: not applicable' if st.get('agreement') is None
              else f'EMI agreement {100 * st["agreement"]:.0f}%' + (' (draft preview)' if 'draft' in str(st.get('mode')) else ''))
     if is_candidate:
-        title = f'FMAM ≥ {row["rainfall_threshold_mm"]:g} mm and ≥ {row["share_threshold_percent"]:g}% of annual'
+        title = f'{ctx.season} ≥ {row["rainfall_threshold_mm"]:g} mm and ≥ {row["share_threshold_percent"]:g}% of annual'
     else:
         title = row['label'].split(':')[0]
     return title, f'{row["included_area_km2"]:,.0f} km² · {row["included_country_percent"]:.1f}% of Ethiopia · {agree}'
@@ -292,10 +292,11 @@ def domain_maps(ctx, out, res, cube):
             c = next(x for x in cands if x['rainfall_threshold_mm'] == mm and x['share_threshold_percent'] == sh)
             st = c['reference_comparison_status']
             draw_domain(axes[i, j], ctx, cube.membership.sel(candidate=c['candidate_id']).values,
-                        f'≥ {mm:g} mm, ≥ {sh:g}%', f'{c["included_country_percent"]:.1f}% of Ethiopia · EMI {100 * st["agreement"]:.0f}%',
+                        f'≥ {mm:g} mm, ≥ {sh:g}%', f'{c["included_country_percent"]:.1f}% of Ethiopia' + (f' · EMI {100 * st["agreement"]:.0f}%' if st.get('agreement') is not None else ''),
                         fs=8.5, labels=False)
-    fig.suptitle(f'All {len(cands)} FMAM threshold candidates ({src}): rows = FMAM rainfall cutoff, columns = share-of-annual cutoff.\n'
-                 'EMI % = agreement with the membership the EMI maps imply (draft preview until the digitization is reviewed).',
+    fig.suptitle(f'All {len(cands)} {ctx.season} threshold candidates ({src}): rows = {ctx.season} rainfall cutoff, columns = share-of-annual cutoff.\n'
+                 + ('EMI % = agreement with the membership the EMI maps imply (draft preview until the digitization is reviewed).'
+                  if ctx.cfg.get('reference_ids', True) else 'No EMI long-term maps are registered for this season.'),
                  fontsize=10.5, x=.01, ha='left')
     domain_legend(fig)
     fig.get_layout_engine().set(rect=(0, .03, 1, .95))
@@ -392,8 +393,9 @@ def report_html(cfg, data):
                ['Source', 'CHIRPS v2.0', 'sha256 ' + esc((q['source']['sha256'] or '')[:16]) + '…'],
                ['Nested candidates', 'yes' if res['monotonic'] else 'NO', 'raising either cutoff never adds a cell']]
     sel = cfg.get('selected_candidate')
+    sl = cfg['season_name'].lower()
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FMAM rainfall domain review</title><style>
+<title>{esc(cfg["season_name"])} rainfall domain review</title><style>
 :root{{--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--line:#e0dfda;--accent:#256abf}}
 @media (prefers-color-scheme:dark){{:root{{--bg:#1a1a19;--ink:#fff;--ink2:#c3c2b7;--line:#383835;--accent:#6da7ec}} img{{background:#fcfcfb}}}}
 body{{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif;margin:0}}main{{max-width:1100px;margin:auto;padding:16px}}
@@ -409,7 +411,7 @@ table{{border-collapse:collapse;font-size:.86rem;width:100%}}th,td{{border-botto
 
 <h2 id="climatology">1. Climatology</h2>
 <p>Ratio of climatological means from actual-calendar monthly totals (February 29 included); every year of the period required per cell.</p>
-<div class="grid">{fig("fmam_total_mm.png", "FMAM mean rainfall")}{fig("annual_total_mm.png", "Mean annual rainfall")}{fig("fmam_share_percent.png", "FMAM share of annual rainfall")}</div>
+<div class="grid">{fig(sl + "_total_mm.png", cfg["season_name"] + " mean rainfall")}{fig("annual_total_mm.png", "Mean annual rainfall")}{fig(sl + "_share_percent.png", cfg["season_name"] + " share of annual rainfall")}</div>
 {fig("monthly_cycle_review.png", "Monthly cycle by EMI rainfall region")}
 <h3>Reference periods</h3>{periods}
 <h3>Quality control</h3>{table(["Check", "Result", "Detail"], qc_rows)}
@@ -471,8 +473,8 @@ def build(cfg, out, folders, fp):
                 candidates=res, selected_candidate=cfg.get('selected_candidate'), selection_rationale=cfg.get('selection_rationale'),
                 focus_candidate=focus, baseline_period=baseline_period, fingerprint=fp,
                 fingerprint_sha256=hashlib.sha256(json.dumps(fp, sort_keys=True).encode()).hexdigest(),
-                figures=dict(climatology=['fmam_total_mm.png', 'annual_total_mm.png', 'fmam_share_percent.png', 'monthly_cycle_review.png'],
-                             references=['reference_comparison.png'] + [f'georeference_qc_{r["record"]["id"]}.png' for r in refs],
+                figures=dict(climatology=[f'{ctx.season.lower()}_total_mm.png', 'annual_total_mm.png', f'{ctx.season.lower()}_share_percent.png', 'monthly_cycle_review.png'],
+                             references=(['reference_comparison.png'] if refs else []) + [f'georeference_qc_{r["record"]["id"]}.png' for r in refs],
                              candidates=['domains_named_comparisons.png', 'domains_all_candidates.png', 'candidate_area_heatmap.png',
                                          'candidate_inclusion_map.png', 'regional_inclusion.png'],
                              assessment=['baseline_changes.png'] if baseline_period else []),

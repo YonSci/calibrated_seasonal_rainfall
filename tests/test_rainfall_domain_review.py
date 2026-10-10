@@ -214,3 +214,33 @@ class Integration(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class OtherSeasons(unittest.TestCase):
+    """The JJAS and ONDJ reviews load, use only their own references, and a vector legend needs one colour per class."""
+
+    def test_season_configs_and_references(self):
+        import run_rainfall_domain_review as runner
+        for name, season, months, refs in [('jjas_review', 'JJAS', [6, 7, 8, 9], ['emi_kiremt_map_2e', 'emi_kiremt_map_3e']),
+                                           ('ondj_review', 'ONDJ', [10, 11, 12, 1], [])]:
+            cfg = rc.load_review_config(ROOT / f'config/rainfall_domains/{name}.json')
+            self.assertEqual((cfg['season_name'], cfg['season_months']), (season, months))
+            self.assertIsNone(cfg.get('selected_candidate'))                 # evidence only: operational domain unchanged
+            self.assertEqual([r['id'] for r in runner.references_used(cfg)], refs)   # [] means none, not all
+            for r in runner.references_used(cfg):
+                self.assertEqual(r['quantity']['season_months'], months)
+
+    def test_vector_legend_colours_match_classes(self):
+        reg = cr.load_registry(ROOT / 'config/climatology_references/registry.json')
+        rec = next(r for r in reg['references'] if r['id'] == 'emi_kiremt_map_2e')
+        self.assertEqual(len(rec['location']['legend_rgb']), len(rec['representation']['classes']))
+
+    def test_cross_year_climatology_is_sum_of_monthly_means(self):
+        years = [2001, 2002]
+        data = np.zeros((2, 12, 1, 1))
+        data[:, 9:12] = 10.0                     # Oct-Dec
+        data[0, 0], data[1, 0] = 4.0, 8.0       # January differs by year
+        monthly = xr.DataArray(data, dims=('year', 'month', 'lat', 'lon'),
+                               coords=dict(year=years, month=list(range(1, 13)), lat=[5.0], lon=[40.0]))
+        c = rc.climatology(monthly, 2001, 2002, [10, 11, 12, 1])
+        self.assertAlmostEqual(float(c.season_mean_mm), 30 + 6)      # mean OND + mean January

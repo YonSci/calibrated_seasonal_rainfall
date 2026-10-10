@@ -159,3 +159,18 @@ As of October 2026, JJAS 2026 has elapsed: this reconstructs the May-initialized
 - `No eligible...` or no calibration pairs: inspect training observation completeness, variability, thresholds and mask overlap. Do not replace NaNs with zero.
 - Optimizer failure: send the traceback; the script stops instead of silently using a failed fit.
 - Permission denied: close software holding an output NetCDF open.
+
+## Other seasons and the amount diagnostics (2026-10-10)
+
+The development run (fit 1993–2016, evaluate 2017 onwards) also exists for the FMAM (January and February initialization)
+and ONDJ cycles; `historical_diagnostics.py` reads its amount scores (Historical performance → Rainfall amounts):
+
+```bat
+set CALIBRATION_CYCLE=config\cycleseb_2026_fmam.json
+python scriptsun_calibration.py --config configmam_feb\project.json --mode development
+python scriptserify_calibration.py --config configmam_feb\project.json --region-mask data\masks\ethiopia_common.nc --region-name Ethiopia
+python scripts\historical_diagnostics.py --cycle config\cycleseb_2026_fmam.json
+```
+
+ONDJ seasons end in January, so its last complete season is 2024 (2024/25): add `--last-year 2024` to both
+`run_calibration.py` and `verify_calibration.py` (default 2025).

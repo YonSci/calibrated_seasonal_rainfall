@@ -16,8 +16,8 @@ rainfall domain):
 Training = nested leave-one-year-out 1993-2016 (cross-validated); operational =
 parameters fitted on 1993-2016 applied to later years (exploratory). Cell-years are
 spatially correlated, so counts overstate the independent sample (one season per
-year). Rainfall-amount diagnostics are included only where the pipeline already
-produced them (May-initialized JJAS, 2017-2025, all Ethiopia).
+year). Rainfall-amount diagnostics are included where the cycle's development run exists (run_calibration.py
+--mode development and verify_calibration.py --region-name Ethiopia; 2017 onwards, all Ethiopia).
 
     python scripts/historical_diagnostics.py --cycle config/cycles/sep_2026_ondj.json
 """
@@ -114,16 +114,18 @@ def diagnose(path, masks):
 
 
 def amount_records(cycle):
-    """Cross-validated rainfall-amount scores that the pipeline already produced (May JJAS only)."""
-    f = ROOT / 'outputs/verification/init05_JJAS/Ethiopia/verification_summary.json'
-    if cycle.tag != 'init05' or not f.is_file():
+    """Rainfall-amount scores of the cycle's development run (fit 1993-2016, evaluate 2017 onwards; run_calibration.py
+    --mode development, then verify_calibration.py --region-name Ethiopia), for the season target, all of Ethiopia."""
+    f = ROOT / f'outputs/verification/{cycle.tag}_{cycle.season_name}/Ethiopia/verification_summary.json'
+    if not f.is_file():
         return {}
-    s = json.loads(f.read_text(encoding='utf-8'))['summary']
-    return {'JJAS': {'all_ethiopia': dict(period='2017–2025 (exploratory; parameters fitted on 1993–2016)',
-                                          corrected_crps_mm=s['corrected_crps_mm'], climatology_crps_mm=s['climatology_crps_mm'],
-                                          crpss=s['corrected_crps_skill'], corrected_bias_mm=s['corrected_bias_mm'],
-                                          raw_bias_mm=s['raw_bias_mm'], corrected_rmse_mm=s['corrected_rmse_mm'],
-                                          climatology_rmse_mm=s['climatology_rmse_mm'])}}
+    d = json.loads(f.read_text(encoding='utf-8'))
+    s, yrs = d['summary'], d.get('evaluation_years') or [2017, 2025]
+    return {cycle.season_name: {'all_ethiopia': dict(period=f'{yrs[0]}–{yrs[-1]} (exploratory; parameters fitted on 1993–2016)',
+                                                     corrected_crps_mm=s['corrected_crps_mm'], climatology_crps_mm=s['climatology_crps_mm'],
+                                                     crpss=s['corrected_crps_skill'], corrected_bias_mm=s['corrected_bias_mm'],
+                                                     raw_bias_mm=s['raw_bias_mm'], corrected_rmse_mm=s['corrected_rmse_mm'],
+                                                     climatology_rmse_mm=s['climatology_rmse_mm'])}}
 
 
 def main():

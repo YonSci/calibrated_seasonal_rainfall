@@ -168,10 +168,11 @@ def main():
     p.add_argument('--config',default='config/project.json')
     p.add_argument('--mode',choices=['development','final'],default='development')
     p.add_argument('--land-mask',help='Optional common-grid NetCDF containing land_mask(lat,lon), 1=land/0=water.')
+    p.add_argument('--last-year',type=int,default=2025,help='Last complete observed season (e.g. 2024 for ONDJ, whose 2025/26 season ends in 2026)')
     args=p.parse_args();cfg=load_config(args.config)
     # Explicit fixed archive split for this project; no automatic hyperparameter tuning.
-    train=list(range(1993,2017 if args.mode=='development' else 2026))
-    targets=list(range(2017,2026)) if args.mode=='development' else [2026]
+    train=list(range(1993,2017 if args.mode=='development' else args.last_year+1))
+    targets=list(range(2017,args.last_year+1)) if args.mode=='development' else [args.last_year+1]
     obs_years=train+targets if args.mode=='development' else train
     tag,models,obs,members,lat,lon=load_inputs(cfg,train+targets,obs_years)
     land,mask_info=load_land(args.land_mask,lat,lon);area=cell_area(lat,lon)

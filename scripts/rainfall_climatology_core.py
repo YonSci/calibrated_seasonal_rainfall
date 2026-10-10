@@ -1,11 +1,13 @@
-"""Observational climatology for the rainfall-domain review (FMAM first).
+"""Observational climatology for the rainfall-domain review (any season: FMAM, JJAS, ONDJ).
 
 Input contract: monthly_total(year, month, lat, lon) in mm, actual-calendar monthly accumulations
 (February 29 retained), from the CHIRPS calendar cache written by prepare_regimes.py. Daily CHIRPS
 values are mm per one-day interval, so monthly and seasonal totals are plain sums (no 86 400 factor).
 
-Climatology = ratio of climatological means: share = 100 * mean(FMAM) / mean(annual), computed only
-where every requested year is complete (no partial baselines). A requested period that is not fully
+Climatology = ratio of climatological means: share = 100 * mean(season) / mean(annual), computed only
+where every requested year is complete (no partial baselines). A season crossing the year end (ONDJ) is
+summed from the same calendar year's months; its climatological mean is the sum of the monthly
+climatological means over the period, so how October-December and January are paired does not change it. A requested period that is not fully
 inside the data is reported as unavailable, never shortened.
 
 Area weights come from intersecting each grid cell with the Ethiopia polygon, measured on the WGS84
@@ -206,7 +208,7 @@ def period_status(available_years, period):
 
 
 def climatology(monthly, first_year, last_year, season_months, annual_months=tuple(range(1, 13))):
-    """FMAM / annual climatology for one complete period (ratio of climatological means)."""
+    """Season / annual climatology for one complete period (ratio of climatological means)."""
     years = list(range(first_year, last_year + 1))
     have = set(int(y) for y in monthly.year.values)
     missing = [y for y in years if y not in have]
