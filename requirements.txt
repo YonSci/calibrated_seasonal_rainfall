@@ -15,3 +15,6 @@ pyproj==3.7.2
 shapely==2.2.0
 # Official forecast comparison: PDF text and embedded figures (external_forecasts.py)
 pypdf==6.19.0
+# CHIRPS v3 (GeoTIFF, LZW): reading the 0.05 degree monthly files (prepare_chirps_v3.py)
+tifffile==2026.3.3
+imagecodecs==2024.12.30
