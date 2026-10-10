@@ -766,7 +766,7 @@ def public_report(data, prefix):
         cite = next((l['citation'] for l in data.get('reference_layers', []) if l.get('citation')), '')
         if region:                                    # reviewed region layer: zones as regions with EMI's values
             right = (f'<figure><img src="{esc(prefix + name(region["file"]))}" alt="EMI rainfall regions"><figcaption>EMI zones as homogeneous '
-                     f'rainfall regions with the Bega 2026/27 printed values; regions redrawn after {esc(cite.split(" (figure")[0])} '
+                     f'rainfall regions with the {esc(next((s["season_label"] for s in data["sources"] if s["provider"] == "EMI"), "EMI"))} printed values; regions redrawn after {esc(cite.split(" (figure")[0])} '
                      '(layout as published in 2013).</figcaption></figure>')
         elif emi_fig:
             right = (f'<figure><img src="{esc(prefix + name(emi_fig["file"]))}" alt="EMI official figure">'
@@ -944,8 +944,16 @@ def export_domain_review(out):
                               drier=m['field_drier_share'], dev_median=m['interval_deviation']['median'],
                               dev_p90=m['interval_deviation']['p90'], comparable=m['comparable_area'], uncertain=m['uncertain_area']))
         q = data['qc']
+        # Where the registered long-term maps come from (document and pages), for the References tab text.
+        used = runner.references_used(cfg)
+        docs = {}
+        for r in used:
+            docs.setdefault(r['identity']['document_title'], []).append(str(r['location'].get('page')))
+        reference_note = ("EMI's long-term maps (" +'; '.join(f'{t}, p. {", ".join(sorted(set(pp)))}' for t, pp in docs.items()) +
+                          ') are climatologies printed in that publication; their averaging period is not documented.') if docs else None
         reviews.append(dict(
             id=cfg['assessment_id'], season=cfg['season_name'], period=data['period'], built=data['created_utc'], base=rel,
+            reference_note=reference_note,
             report=rel + 'review_report.html', stale=stale, selected=data.get('selected_candidate'), rationale=data.get('selection_rationale'),
             focus=data.get('focus_candidate'), figures=data['figures'], candidates=slim_c, comparators=slim_comp,
             mm=sorted({c['mm'] for c in slim_c}), shares=sorted({c['share'] for c in slim_c}),

@@ -109,6 +109,21 @@ def window_limitation(platform, rec):
                 only_platform=[m for m in a if m not in b], only_official=[m for m in b if m not in a])
 
 
+def window_notes(platform, recs):
+    """One note per official period that differs from the platform's (e.g. ICPAC MAM vs FMAM, OND vs ONDJ)."""
+    span = lambda ms: ms[0] if len(ms) == 1 else f'{ms[0].split()[0]}–{ms[-1]}'
+    out, seen = [], set()
+    for r in recs:
+        if r.get('representation') == 'narrative' or not r.get('target_start'):
+            continue
+        wl = window_limitation(platform, r)
+        if wl and (r['provider'], tuple(wl['official_months'])) not in seen:
+            seen.add((r['provider'], tuple(wl['official_months'])))
+            out.append(f'{r["provider"]} covers {span(wl["official_months"])} and the platform {span(wl["platform_months"])}: a probability for '
+                       f'one period cannot be built by averaging monthly probabilities of the other, so they are compared only as spatial tendencies.')
+    return out
+
+
 def load_native(path):
     import xarray as xr
     with xr.open_dataset(path) as d:
@@ -402,7 +417,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                   notes=['Area means are area-weighted means of local grid-cell probabilities, not probabilities of area-mean rainfall.',
                          'Favoured category: for the platform and EMI, the untied leading tercile where it reaches 40% (the map display rule), '
                          'otherwise no clear category; for ICPAC, the dominant category ICPAC printed, including its 33–40% intervals.',
-                         'An OND probability cannot be built by averaging monthly probabilities; ONDJ and OND are compared only as spatial tendencies.'])
+                         *window_notes(platform, recs)])
     write_json(tmp / 'comparison.json', result)
     ef.publish(tmp, out)
     return result

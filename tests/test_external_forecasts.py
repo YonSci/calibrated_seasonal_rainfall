@@ -163,6 +163,17 @@ class Rules(unittest.TestCase):
         with self.assertRaises(ValueError):
             check_releases([dict(id='a', commit=None), dict(id='b', commit='abc')])
 
+    def test_period_notes_name_each_cycles_own_windows(self):
+        from compare_external_forecasts import window_notes
+        plat = dict(target_start='2026-02-01', target_end='2026-05-31')
+        recs = [dict(provider='ICPAC', representation='dominant_category_map', target_start='2026-03-01', target_end='2026-05-31'),
+                dict(provider='EMI', representation='zone_tercile_probabilities', target_start='2026-02-01', target_end='2026-05-31'),
+                dict(provider='ICPAC', representation='narrative', target_start='2026-03-01', target_end='2026-05-31')]
+        notes = window_notes(plat, recs)
+        self.assertEqual(len(notes), 1)                 # EMI shares the window; the narrative is not a forecast record
+        self.assertIn('ICPAC covers Mar–May 2026 and the platform Feb–May 2026', notes[0])
+        self.assertNotIn('OND', notes[0])
+
     def test_window_mismatch_names_months(self):
         lim = window_limitation(dict(target_start='2026-10-01', target_end='2027-01-31'),
                                 dict(target_start='2026-10-01', target_end='2026-12-31'))

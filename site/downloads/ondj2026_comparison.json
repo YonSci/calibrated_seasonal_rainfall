@@ -1101,11 +1101,11 @@
  "notes": [
   "Area means are area-weighted means of local grid-cell probabilities, not probabilities of area-mean rainfall.",
   "Favoured category: for the platform and EMI, the untied leading tercile where it reaches 40% (the map display rule), otherwise no clear category; for ICPAC, the dominant category ICPAC printed, including its 33–40% intervals.",
-  "An OND probability cannot be built by averaging monthly probabilities; ONDJ and OND are compared only as spatial tendencies."
+  "ICPAC covers Oct–Dec 2026 and the platform Oct–Jan 2027: a probability for one period cannot be built by averaging monthly probabilities of the other, so they are compared only as spatial tendencies."
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-10T18:22:47+00:00",
+ "created_utc": "2026-10-10T19:40:44+00:00",
  "engine": "rules v2",
  "reference_layers": [
   {

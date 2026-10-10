@@ -458,13 +458,14 @@
                      : 'Platform ' + season.label + ' favoured category with EMI zone values at their arrow tips; boxes show the sampled ±0.5° neighbourhoods.'};
       // The EMI comparison map is shown next to EMI's own official figure (the zones as EMI published them).
       const emiFig = X.sources.filter(s => s.provider === 'EMI').flatMap(s => s.figures)[0];
+      const emiSeason = (X.sources.find(s => s.provider === 'EMI') || {}).season_label || season.label;
       const fig = (file, alt, caption) => '<figure><a href="' + href(file) + '" target="_blank" rel="noopener"><img loading="lazy" src="' + href(file) +
         '" alt="' + esc(alt) + '"></a><figcaption>' + esc(caption) + '</figcaption></figure>';
       // Right-hand panel: the EMI zones as regions (reviewed digitization) or, until then, EMI's own figure.
       const regionMap = X.maps.find(m => m.name.includes('regions'));
       const layer = (X.reference_layers || [])[0];
       const right = regionMap
-        ? fig(regionMap.file, 'EMI homogeneous rainfall regions with the Bega 2026/27 values', 'EMI zones as homogeneous rainfall regions, with the values EMI printed for Bega 2026/27. Regions redrawn after ' +
+        ? fig(regionMap.file, 'EMI homogeneous rainfall regions with the ' + emiSeason + ' values', 'EMI zones as homogeneous rainfall regions, with the values EMI printed for ' + emiSeason + '. Regions redrawn after ' +
               (layer ? layer.citation.split(' (figure')[0] : 'Korecha and Sorteberg (2013)') + '; region layout as published in 2013. EMI\'s own figure is under Sources.')
         : (emiFig ? fig(emiFig.file, 'EMI official figure', 'EMI official figure (as published): ' + emiFig.caption + (emiZones ? '. The zone outlines on the left were digitized from this figure.' : '. EMI publishes zone values with arrows; no zone boundaries are given.')) : '');
       if (X.maps.length) h += X.maps.filter(m => !m.name.includes('regions')).map(m => m.name.includes('anchors')
@@ -645,10 +646,22 @@
 
   // ---------- rainfall climatology and domains (review; independent of the selected cycle)
   const DR = {tab: 'climatology', cand: null};
+  // The review of the selected cycle's season (each review belongs to one season).
+  const curReview = () => (D.reviews || []).find(r => r.season === cyc().season);
   function renderDomains() {
-    const box = $('dr-body');
-    const R = (D.reviews || [])[0];
-    if (!R) { box.innerHTML = '<p>No rainfall-domain review has been built yet.</p>'; return; }
+    const box = $('dr-body'), c = cyc();
+    const R = curReview();
+    if (!R) {
+      // No climatology review for this season: say so, and show the domains this cycle actually uses.
+      const others = (D.reviews || []).map(r => r.season);
+      box.innerHTML = '<p class="notice">No climatology and domain review has been run for ' + esc(c.season) + ' yet' +
+        (others.length ? ' (reviews exist for ' + esc(others.join(', ')) + '; select a cycle of that season to see one)' : '') + '.</p>' +
+        '<div class="table-wrap"><table><caption>Rainfall domains used by ' + esc(c.option) + '</caption><thead><tr><th scope="col">Area</th><th scope="col">Definition</th></tr></thead><tbody>' +
+        c.views.map(([v, label]) => '<tr><td>' + esc(label) + ((c.criteria || {})[v] ? '<br><span class="caveat">' + esc(c.criteria[v]) + '</span>' : '') + '</td><td>' +
+          esc((c.definitions || {})[v] || (v === c.domain_view ? c.definition : '—')) + '</td></tr>').join('') + '</tbody></table></div>';
+      return;
+    }
+    if (DR.rid !== R.id) { DR.rid = R.id; DR.cand = null; }          // a different season's review: start from its selection
     if (!DR.cand) DR.cand = R.selected || R.focus || R.candidates[0].id;
     const fig = (f, alt) => '<figure class="map-figure"><img src="' + siteURL(R.base + f) + '" alt="' + esc(alt) + '" loading="lazy" style="max-width:100%;height:auto"><figcaption class="caveat">' + esc(alt) + '</figcaption></figure>';
     const pc = x => x == null ? '—' : Math.round(100 * x) + '%';
@@ -664,13 +677,13 @@
     h += '<div class="tabs" role="group" aria-label="Review view">' + tabs.map(([k, l]) => '<button type="button" class="tab" data-dt="' + k + '" aria-pressed="' + (DR.tab === k) + '">' + l + '</button>').join('') + '</div>';
     if (DR.tab === 'climatology') {
       h += '<p>Ratio of climatological means from actual-calendar monthly totals (February 29 included). Every year of the period is required in each cell; nothing is filled in.</p>' +
-        R.figures.climatology.map(f => fig(f, {'fmam_total_mm.png': R.season + ' mean rainfall', 'annual_total_mm.png': 'Mean annual rainfall (the share denominator)',
-          'fmam_share_percent.png': R.season + ' share of annual rainfall', 'monthly_cycle_review.png': 'Monthly cycle by EMI rainfall region'}[f] || f)).join('') +
+        R.figures.climatology.map(f => fig(f, {[R.season.toLowerCase() + '_total_mm.png']: R.season + ' mean rainfall', 'annual_total_mm.png': 'Mean annual rainfall (the share denominator)',
+          [R.season.toLowerCase() + '_share_percent.png']: R.season + ' share of annual rainfall', 'monthly_cycle_review.png': 'Monthly cycle by EMI rainfall region'}[f] || f)).join('') +
         tbl('Reference periods', ['Period', 'Status', 'Note'], R.periods.map(p => [esc(p.period), esc(p.status), esc(p.note || '')])) +
         '<p class="caveat">Calendar check ' + (R.qc.calendar ? 'passed' : 'FAILED') + '; ' + R.qc.years.count + ' years (' + R.qc.years.first + '–' + R.qc.years.last + '); ' +
         R.qc.incomplete_cells + ' cells without a complete baseline; Ethiopia ' + km(R.country_km2) + ', of which ' + km(R.qc.outside_grid_km2) + ' lies beyond the grid. CHIRPS source ' + esc(R.qc.source) + '….</p>';
     } else if (DR.tab === 'references') {
-      h += '<p>EMI\'s long-term Belg maps (Belg 2026 Seasonal Climate Forecast, pp. 23–24) are climatologies printed in a 2026 publication; their averaging period is not documented. ' +
+      h += '<p>' + (R.reference_note ? esc(R.reference_note) + ' ' : 'The registered EMI long-term maps for ' + esc(R.season) + ' are climatologies whose averaging period is not documented. ') +
         'Until their georeferencing and legend digitization are reviewed they are compared <strong>visually only</strong>.</p>' +
         tbl('Registered climatology references', ['Reference', 'Comparison mode', 'Why not higher', 'Digitization', 'Outline match (IoU)', 'Control / check error'],
           R.references.map(r => [esc(r.id), esc(r.mode.replace(/_/g, ' ')), esc(r.reasons.join('; ') || '—'), esc(r.status), r.iou, (r.control_km || 0).toFixed(1) + ' / ' + (r.check_km || 0).toFixed(1) + ' km'])) +
@@ -713,7 +726,8 @@
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-dt],[data-dmm],[data-dsh]');
     if (!b) return;
-    const R = (D.reviews || [])[0];
+    const R = curReview();
+    if (!R) return;
     const cur = R.candidates.find(c => c.id === DR.cand) || R.candidates.find(c => c.id === R.focus) || R.candidates[0];
     if (b.dataset.dt) DR.tab = b.dataset.dt;
     if (b.dataset.dmm) DR.cand = R.candidates.find(c => c.mm === +b.dataset.dmm && c.share === cur.share).id;
@@ -722,7 +736,7 @@
     const again = document.querySelector('#dr-body [data-' + Object.keys(b.dataset)[0].replace(/[A-Z]/g, m => '-' + m.toLowerCase()) + '="' + Object.values(b.dataset)[0] + '"]');
     if (again) again.focus({preventScroll: true});
   });
-  document.addEventListener('change', e => { if (e.target.id === 'dr-comp') { const R = D.reviews[0]; DR.cand = e.target.value || R.focus; renderDomains(); $('dr-comp').focus(); } });
+  document.addEventListener('change', e => { if (e.target.id === 'dr-comp') { const R = curReview(); if (!R) return; DR.cand = e.target.value || R.focus; renderDomains(); $('dr-comp').focus(); } });
 
   // Anchor offset follows the real height of the sticky header (wrapped controls included).
   const header = document.querySelector('.top');
