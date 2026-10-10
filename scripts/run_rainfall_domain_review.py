@@ -394,11 +394,14 @@ def domain_dataset(cfg, codes, clim, candidate, spec, row, fp, rationale, versio
     out.season_share_of_annual.attrs.update(units='1', note='fraction 0-1 (the review uses percent)')
     out.classification_code.attrs['codes'] = '1 included, 0 excluded, -1 insufficient data, -2 outside Ethiopia'
     out.attrs.update(
-        season=name, method='rainfall_domain_review', view_label=f'{name} rainfall domain ({name} >= {sh:g}% of annual and >= {mm:g} mm)',
+        season=name, method='rainfall_domain_review', view_label=f'{name} rainfall contribution domain',
+        view_criteria=f'{name} >= {mm:g} mm and >= {sh:g}% of annual rainfall; CHIRPS v2.0 {first}-{last} climatology',
         domain_definition=(f'Fixed {first}-{last} CHIRPS v2.0 domain: cells where mean {name} rainfall (actual-calendar monthly '
                            f'totals, February 29 included) is >= {mm:g} mm and {name} brings >= {sh:g}% of the mean annual rainfall '
                            f'(ratio of climatological means); complete baseline required; no patch removal or smoothing. '
-                           f'Selected in assessment {cfg["assessment_id"]}. The same domain is used for the season and each of its months.'),
+                           f'Selected in assessment {cfg["assessment_id"]}. The same domain is used for the season and each of its months. '
+                           f'The included share of Ethiopia describes this rule; it is not an independently established official share '
+                           f'of {name}-dependent area.'),
         reference_years=f'{first}-{last}', domain_cells=int((codes == 1).sum()),
         domain_country_area_percent=float(row['included_country_percent']), domain_area_km2=float(row['included_area_km2']),
         assessment_id=cfg['assessment_id'], candidate_id=candidate, method_version=rc.METHOD_VERSION, domain_version=version,

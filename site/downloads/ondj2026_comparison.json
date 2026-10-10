@@ -199,6 +199,9 @@
     "region_name": "Southwest",
     "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.0,
+    "area_shares": {
+     "season_domain": 0.0
+    },
     "relationship": "opposing_favoured_categories",
     "status": "validated"
    }
@@ -251,6 +254,9 @@
     "region_name": "South Highland",
     "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.6643356643356644,
+    "area_shares": {
+     "season_domain": 0.6643356643356644
+    },
     "relationship": "same_favoured_category",
     "status": "validated"
    }
@@ -303,6 +309,9 @@
     "region_name": "South",
     "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.7068965517241379,
+    "area_shares": {
+     "season_domain": 0.7068965517241379
+    },
     "relationship": "same_favoured_category",
     "status": "validated"
    }
@@ -355,6 +364,9 @@
     "region_name": "South-Southeast lowlands",
     "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
     "domain_share": 0.986046511627907,
+    "area_shares": {
+     "season_domain": 0.986046511627907
+    },
     "relationship": "same_favoured_category",
     "status": "validated"
    }
@@ -644,6 +656,9 @@
    "relationship": "Opposing categories",
    "relationship_code": "opposing_favoured_categories",
    "domain_share": 0.0,
+   "area_shares": {
+    "season_domain": 0.0
+   },
    "center": [
     35.73,
     9.4
@@ -655,6 +670,9 @@
    ],
    "zone_name": "Southwest",
    "zone_domain_share": 0.0,
+   "zone_area_shares": {
+    "season_domain": 0.0
+   },
    "zone_cells": 200,
    "zone_mean": "47% / 25% / 28%",
    "zone_relationship": "Opposing categories",
@@ -669,6 +687,9 @@
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.4375,
+   "area_shares": {
+    "season_domain": 0.4375
+   },
    "center": [
     40.36,
     7.18
@@ -680,6 +701,9 @@
    ],
    "zone_name": "South Highland",
    "zone_domain_share": 0.6643356643356644,
+   "zone_area_shares": {
+    "season_domain": 0.6643356643356644
+   },
    "zone_cells": 143,
    "zone_mean": "21% / 24% / 55%",
    "zone_relationship": "Same category",
@@ -694,6 +718,9 @@
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.6875,
+   "area_shares": {
+    "season_domain": 0.6875
+   },
    "center": [
     36.87,
     6.29
@@ -705,6 +732,9 @@
    ],
    "zone_name": "South",
    "zone_domain_share": 0.7068965517241379,
+   "zone_area_shares": {
+    "season_domain": 0.7068965517241379
+   },
    "zone_cells": 58,
    "zone_mean": "24% / 26% / 50%",
    "zone_relationship": "Same category",
@@ -719,6 +749,9 @@
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 1.0,
+   "area_shares": {
+    "season_domain": 1.0
+   },
    "center": [
     43.47,
     6.53
@@ -730,6 +763,9 @@
    ],
    "zone_name": "South-Southeast lowlands",
    "zone_domain_share": 0.986046511627907,
+   "zone_area_shares": {
+    "season_domain": 0.986046511627907
+   },
    "zone_cells": 430,
    "zone_mean": "18% / 24% / 58%",
    "zone_relationship": "Same category",
@@ -749,6 +785,9 @@
    "relationship": "Not comparable: ICPAC shows no forecast category here",
    "relationship_code": "unknown",
    "domain_share": 0.0,
+   "area_shares": {
+    "season_domain": 0.0
+   },
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_ondj",
@@ -768,6 +807,9 @@
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.4375,
+   "area_shares": {
+    "season_domain": 0.4375
+   },
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_ondj",
@@ -787,6 +829,9 @@
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.6875,
+   "area_shares": {
+    "season_domain": 0.6875
+   },
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_ondj",
@@ -806,6 +851,9 @@
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 1.0,
+   "area_shares": {
+    "season_domain": 1.0
+   },
    "area_key": null,
    "evidence_ids": [
     "platform_forecast_ondj",
@@ -1048,12 +1096,12 @@
  },
  "notes": [
   "Area means are area-weighted means of local grid-cell probabilities, not probabilities of area-mean rainfall.",
-  "Favoured category: the leading tercile where it reaches 40% (the map display rule); otherwise no clear category.",
+  "Favoured category: for the platform and EMI, the untied leading tercile where it reaches 40% (the map display rule), otherwise no clear category; for ICPAC, the dominant category ICPAC printed, including its 33–40% intervals.",
   "An OND probability cannot be built by averaging monthly probabilities; ONDJ and OND are compared only as spatial tendencies."
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-10T09:07:23+00:00",
+ "created_utc": "2026-10-10T15:51:18+00:00",
  "engine": "rules v2",
  "reference_layers": [
   {

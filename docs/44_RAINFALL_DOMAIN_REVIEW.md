@@ -95,3 +95,12 @@ products --compare-external`, `regional_skill.py --cycle …`, `historical_diagn
 `build_site.py` publishes the report under **Rainfall domains** (`#domains`): Climatology, References, Candidate domains
 (cutoff selector with map, areas, EMI agreement, baselines and regional inclusion) and Assessment. If any input changed
 after the report was built, the section names the changed inputs.
+
+## Label and wording (2026-10-10)
+
+The exported FMAM mask is labelled **FMAM rainfall contribution domain**; its thresholds and baseline (`view_criteria`:
+"FMAM >= 100 mm and >= 20% of annual rainfall; CHIRPS v2.0 1993-2025 climatology") are shown under the area selector. The mask
+data are unchanged (re-exported with `--regenerate`). The included share (about 73% of Ethiopia) describes this rule, not an
+official estimate of Belg-dependent area; the thresholds coincide with EMI legend breaks, which makes the visual EMI comparison
+convenient, but that comparison is unreviewed and does not validate them. The earlier `FMAM_belg_emi_domain` mask is labelled
+as the previous site view in the review.

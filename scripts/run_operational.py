@@ -310,6 +310,9 @@ def report_stages(runner,cfg,targets,code_inputs):
     runner.stage("verification_report_"+tag,report_inputs,[out/f"reports/{tag}"],command=[sys.executable,str(ROOT/"scripts/build_verification_report.py"),
                  "--targets",*targets,"--verification-root",str(vr),"--regime-summary",str(regime),
                  "--historical-review",str(historical),"--output-root",str(out/"reports"),"--regenerate"])
+    # The one current report of this cycle; any other report folder is superseded (build_site archives it).
+    write(out/"reports/CURRENT.json",{"report":tag,"targets":list(targets),"written_utc":now(),
+                                      "file":f"reports/{tag}/VERIFICATION_REPORT.html"})
     return f"reports/{tag}/VERIFICATION_REPORT.html"
 
 
@@ -343,11 +346,12 @@ def external_stages(runner,cfg,info,refresh,verified=()):
     native, mask = info["sources"][SEASON], presentation_mask(cfg)
     minimum = cfg["display"]["minimum_leading_probability"]
     layers = [path(l["mask"]) for l in registry.get("reference_layers",[])]
+    extra = {e["view"]:path(e["mask"]) for e in cfg.get("extra_domain_masks",[])}   # further domain views, compared separately
     runner.stage("external_prepare",[*code,registry_path,current,*snaps,extractions,mask,*layers],[out/"sources"],
                  action=lambda:ef.prepare(registry,cache,mask,out/"sources"))
-    runner.stage("external_compare",[*code,registry_path,out/"sources",native,mask,*layers],[out/"comparison"],
-                 settings={"minimum_leading_probability":minimum},
-                 action=lambda:compare(out/"sources",native,mask,registry,out/"comparison",minimum))
+    runner.stage("external_compare",[*code,registry_path,out/"sources",native,mask,*layers,*extra.values()],[out/"comparison"],
+                 settings={"minimum_leading_probability":minimum,"extra_domains":sorted(extra)},
+                 action=lambda:compare(out/"sources",native,mask,registry,out/"comparison",minimum,extra_domains=extra))
     runner.stage("external_interpret",[*code,out/"comparison",out/"sources"],[out/"interpretation"],
                  action=lambda:interpret(out/"comparison",out/"sources",out/"interpretation"))
     vr = path(cfg["verification_root"])
@@ -356,9 +360,9 @@ def external_stages(runner,cfg,info,refresh,verified=()):
         processed = path(cfg["processed_root"])
         observed = [vr/f"results/{SEASON}/verification_fields.nc",*[vr/f"observations/{m}/chirps_{YEAR}_common.nc" for m in MONTHS]]
         history = [processed/f"{TAG}_{m}/chirps_{y}_common.nc" for m in MONTHS for y in REF_YEARS]
-        runner.stage("external_verify",[*code,out/"comparison",out/"sources",native,mask,*observed,*history],[out/"observed"],
-                     settings={"reference_years":[REF_YEARS[0],REF_YEARS[-1]]},
-                     action=lambda:verify_external(out,vr,processed,TAG,YEAR,REF_YEARS,SEASON,mask))
+        runner.stage("external_verify",[*code,out/"comparison",out/"sources",native,mask,*extra.values(),*observed,*history],[out/"observed"],
+                     settings={"reference_years":[REF_YEARS[0],REF_YEARS[-1]],"extra_domains":sorted(extra)},
+                     action=lambda:verify_external(out,vr,processed,TAG,YEAR,REF_YEARS,SEASON,mask,extra_domains=extra))
     return out
 
 

@@ -206,5 +206,33 @@
         "text": "Map titles and table notes use each season's own labels and months; zone tables hide arrow columns for seasons whose EMI zones have no arrows. ONDJ results unchanged."
       }
     ]
+  },
+  {
+    "id": "2026-10-10.1",
+    "date": "2026-10-10",
+    "commit": null,
+    "title": "FMAM 2026 verified; February initialization; FMAM rainfall contribution domain; outlooks scored against CHIRPS",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)"
+    ],
+    "changes": [
+      {
+        "type": "verification",
+        "text": "February 2026 and the full FMAM 2026 season verified for both initializations. CHIRPS never published the February by_month file; February is taken from the official annual p25 file after checking it is identical to the published by_month files of January and March 2026."
+      },
+      {
+        "type": "domain",
+        "text": "Main FMAM area: the FMAM rainfall contribution domain (FMAM >= 100 mm and >= 20% of annual rainfall, CHIRPS 1993-2025), replacing the earlier R2-based domain; the FMAM main-season domain (>= 40% of annual) is a second view. The earlier R2-based verification report is archived as superseded."
+      },
+      {
+        "type": "analysis",
+        "text": "The platform, EMI and ICPAC are scored against CHIRPS for each one's own period (single season): favoured-category matches with observation, outlook and favoured-category coverage, and RPSS for the platform and EMI. Observed CHIRPS terciles are shown alongside the three outlooks. Comparison results are computed separately for every domain view."
+      },
+      {
+        "type": "display",
+        "text": "Verification reports state the cycle's own initialization and season; one current report per cycle. Comparison maps draw the national border once. Historical performance opens with a takeaway; technical detail is expandable."
+      }
+    ]
   }
 ]

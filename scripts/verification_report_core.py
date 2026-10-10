@@ -193,10 +193,11 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
                'decision': 'Retain frozen shared-blend forecasts. Regional annotations are post-event verification findings, not forecast-time confidence labels or new masks. No automatic model switch.'}
     (out / 'report_summary.json').write_text(json.dumps(payload, indent=2, allow_nan=False), encoding='utf-8')
     r = Report()
-    r.heading(f'Ethiopia rainfall forecast verification — {YEAR}', 1)
-    r.paragraph(f'May initialization | ECMWF seasonal forecasts | CHIRPS v2 verification | Reference period {REF_DASH}')
-    r.paragraph('Verified targets: ' + ', '.join(targets) + '. ' + ('Pending in this report: ' + ', '.join(missing) + '. No full-' + SEASON + ' conclusion is inferred from monthly results.' if SEASON in missing else 'JJAS is assessed directly against its complete seasonal observations; overlapping monthly and seasonal scores are not pooled.'), 'status')
-    r.paragraph(f'This is a retrospective assessment of the reconstructed forecasts. It does not establish an actual May {YEAR} issuance, independent prospective validation, or an official EMI/ICPAC forecast. All results below concern the submitted verification evidence.', 'note')
+    init = CYCLE.init_month_name                 # every cycle-specific statement comes from the cycle file
+    r.heading(f'Ethiopia rainfall forecast verification — {SEASON} {YEAR}, {init} initialization', 1)
+    r.paragraph(f'{init} {YEAR} initialization | {SEASON} {YEAR} season and its months | ECMWF seasonal forecasts | CHIRPS v2 verification | Reference period {REF_DASH}')
+    r.paragraph('Verified targets: ' + ', '.join(targets) + '. ' + ('Pending in this report: ' + ', '.join(missing) + '. No full-' + SEASON + ' conclusion is inferred from monthly results.' if SEASON in missing else f'{SEASON} is assessed directly against its complete seasonal observations; overlapping monthly and seasonal scores are not pooled.'), 'status')
+    r.paragraph(f'This is a retrospective assessment of the reconstructed forecasts. It does not establish an actual {init} {YEAR} issuance, independent prospective validation, or an official EMI/ICPAC forecast. All results below concern the submitted verification evidence.', 'note')
     r.heading('Decision and principal findings')
     r.paragraph(payload['decision'])
     for target in targets:
@@ -207,7 +208,7 @@ def export_report(country, regimes, history, targets, out, provenance, maps=None
     r.table(['Target', 'Raw CRPS mm', 'Corrected CRPS mm', 'Climatology CRPS mm', 'Corrected CRPSS', 'Final RPSS'], [[t, *[number(rows[t]['domains']['all_country']['amount'][m]['crps_mm']) for m in ['raw', 'corrected', 'climatology']], percent(rows[t]['domains']['all_country']['amount']['corrected']['crpss']), percent(rows[t]['domains']['all_country']['probability']['shared_blend']['rpss'])] for t in targets])
     r.heading(f'Main {SEASON} rainfall domain: {LABELS[DOMAIN_VIEW]}')
     d0 = rows[targets[0]]['domains'][DOMAIN_VIEW]
-    r.paragraph(f"This fixed pre-{YEAR} domain contains {d0['domain_cells']} cells and {d0['domain_country_area_percent']:.1f}% of country grid area. Definition: {DOMAIN_DEFINITION}. Monthly rows evaluate each month inside that domain; they are not a complete-JJAS assessment.")
+    r.paragraph(f"This fixed pre-{YEAR} domain contains {d0['domain_cells']} cells and {d0['domain_country_area_percent']:.1f}% of country grid area. Definition: {DOMAIN_DEFINITION}. Monthly rows evaluate each month inside that domain; they are not a complete-{SEASON} assessment.")
     r.table(['Target', 'Amount CRPSS', 'Smoothed RPSS', 'Final RPSS', 'Mean error mm', 'Probability coverage'], [[t, percent(rows[t]['domains'][DOMAIN_VIEW]['amount']['corrected']['crpss']), percent(rows[t]['domains'][DOMAIN_VIEW]['probability']['corrected_smoothed']['rpss']), percent(rows[t]['domains'][DOMAIN_VIEW]['probability']['shared_blend']['rpss']), number(rows[t]['domains'][DOMAIN_VIEW]['amount']['corrected']['bias_mm']), number(rows[t]['domains'][DOMAIN_VIEW]['probability_domain_area_percent'], 1) + '%'] for t in targets])
     r.heading('Regional performance notes')
     for target in targets:

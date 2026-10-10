@@ -480,13 +480,16 @@ def _current_inputs(cycle, registry_path):
         status, _ = ef.extraction_check(rec, cur['sha256'])
         sources[sid] = dict(sha256=cur['sha256'], extraction_status=status, content_sha256=rec and ef.content_sha256(rec))
     minimum = cycle.raw['display']['minimum_leading_probability']      # the favoured-category rule
-    return input_fingerprint(native, mask, registry, sources, minimum), registry, ef.cache_dir(registry, ext['cache_root'])
+    extra = {e['view']: ROOT / e['mask'] for e in cycle.raw.get('extra_domain_masks', [])}
+    return input_fingerprint(native, mask, registry, sources, minimum, extra), registry, ef.cache_dir(registry, ext['cache_root'])
 
 
 def _stale_reasons(saved, now):
     names = dict(native_sha256='the platform forecast', domain_mask_sha256='the rainfall-domain mask', registry_sha256='the source registry',
                  minimum_leading_probability='the favoured-category threshold')
     out = [names[k] for k in names if (saved or {}).get(k) != now.get(k)]
+    if (saved or {}).get('extra_domain_masks_sha256') != now.get('extra_domain_masks_sha256'):
+        out.append('the further domain masks')
     old, new = (saved or {}).get('sources', {}), now.get('sources', {})
     for sid in sorted(set(old) | set(new)):
         a, b = old.get(sid, {}), new.get(sid, {})
@@ -537,7 +540,7 @@ def _observed(base, assets, cid, stale):
         why.append('the comparison')
     if o['inputs']['official_records_sha256'] != digest(base / 'sources/official_records.json'):
         why.append('the official records')
-    if any(digest(ROOT / p) != h for p, h in o['inputs']['observations'].items() if p != 'historical_monthly_totals'):
+    if any(digest(ROOT / p) != h for p, h in o['inputs']['observations'].items()):     # season, monthly and historical CHIRPS files
         why.append('the CHIRPS observations')
     if stale or why:
         return dict(stale=why or ['the comparison'], rows=[], map=None)
@@ -548,6 +551,25 @@ def _observed(base, assets, cid, stale):
     return dict(stale=[], rows=o['rows'], map=f'assets/external/{cid}/{o["map"]}', name=o['map'], notes=o['notes'],
                 side_by_side_map=f'assets/external/{cid}/{side}' if side else None, side_by_side_name=side,
                 windows=o['windows'], reference_years=o['reference_years'], created_utc=o['created_utc'])
+
+
+def _with_observed(paragraphs, observed):
+    """Once single-season scores are published, the interpretation no longer says accuracy is not calculated."""
+    if not (observed and observed.get('rows')):
+        return paragraphs
+    acc = 'which forecast is more accurate, because that needs observations and a separate verification design (see Verification)'
+    out = []
+    for p in paragraphs:
+        if p['id'] == 'not_calculated':
+            text = p['text'].replace('; ' + acc, '').replace(acc + '; ', '').replace(acc, '')
+            if text.strip().rstrip('.').strip() == 'Not calculated:':
+                continue
+            p = dict(p, text=text)
+        out.append(p)
+    out.append(dict(id='observed_note', finding=None, source_id=None, area=None, area_key='any', status='validated', relationship=None,
+                    text='Single-season performance against CHIRPS observations is now evaluated (see Against CHIRPS observations). One '
+                         'season does not establish that any provider, or the platform, is generally more skilful.', evidence_ids=[]))
+    return out
 
 
 def export_comparison(cycle, cid, out):
@@ -633,7 +655,7 @@ def export_comparison(cycle, cid, out):
              + (' --refresh-external' if any('official product' in r for r in stale) else ''))
     data = dict(platform=comparison['platform'], sources=sources, maps=maps, metrics=metrics, summary=keep(interp.get('summary', [])),
                 emi_table=keep(interp.get('emi_table', [])), icpac_table=keep(interp.get('icpac_table', [])),
-                paragraphs=keep(interp['paragraphs']), evidence=evidence,
+                paragraphs=_with_observed(keep(interp['paragraphs']), observed), evidence=evidence,
                 notes=comparison['notes'], stale=stale, rerun=rerun, created_utc=interp['created_utc'], engine=interp['engine'],
                 reference_layers=layers, observed=observed)
     rel = f'data/{cid}_comparison.json'
@@ -713,7 +735,7 @@ def public_report(data, prefix):
     dom = areas.get('season_domain', 'rainfall domain')
     name = lambda f: f.rsplit('/', 1)[-1]
     parts = [f'<h1>Official outlook comparison — {esc(plat["label"])}</h1>',
-             f'<p class="muted">Season {esc(plat["target_start"])} to {esc(plat["target_end"])} · areas: All Ethiopia and the {esc(dom)} · '
+             f'<p class="muted">Season {esc(plat["target_start"])} to {esc(plat["target_end"])} · areas: {esc("; ".join(areas.values()) if areas else "All Ethiopia and the " + dom)} · '
              f'built from reviewed extractions only ({esc(data["engine"])}, {esc(data["created_utc"][:10])}). Research reconstruction; not an '
              'official EMI or ICPAC forecast. ' + ('The first parts describe agreement between the outlooks; "Against CHIRPS observations" '
              'scores each of them against what was observed this season.</p>' if (data.get('observed') or {}).get('rows')
@@ -721,7 +743,7 @@ def public_report(data, prefix):
     if data['stale']:
         parts.append(f'<p class="warn"><strong>Comparison withheld.</strong> The saved comparison no longer matches the current '
                      f'{esc(", ".join(data["stale"]))}. Regenerate with <code>{esc(data["rerun"])}</code>.</p>')
-    groups = [('all_ethiopia', 'All Ethiopia'), ('season_domain', dom), ('any', 'Robustness of the extraction')]
+    groups = [*(areas or {'all_ethiopia': 'All Ethiopia', 'season_domain': dom}).items(), ('any', 'Robustness of the extraction')]
     for key, title in groups:
         items = [i for i in data['summary'] if i['area_key'] == key]
         if items:
@@ -757,6 +779,7 @@ def public_report(data, prefix):
     if data['emi_table']:
         zone = any(r.get('zone_mean') for r in data['emi_table'])
         arrow = any(r['platform'] != '—' for r in data['emi_table'])
+        digitized = zone and not arrow             # zones digitized from this outlook's own figure (not the 2013 regions)
         parts.append('<h2>EMI zones: printed values and the platform</h2><table><tr><th>Zone</th><th>Official below / near / above</th>'
                      + ('<th>Platform over the whole zone (region)</th>' if zone else '') +
                      (f'<th>Platform near the arrow (±0.5°)</th><th>Relationship near the arrow</th><th>Arrow sample vs the {esc(dom)}</th>' if arrow else '')
@@ -766,9 +789,11 @@ def public_report(data, prefix):
                              + (f'<td>{esc(r["platform"])}</td><td>{esc(r["relationship"])}</td><td>{esc(overlap_label(r.get("domain_share")))}</td>' if arrow else '')
                              + '</tr>'
                              for r in data['emi_table']) +
-                     '</table><p class="muted">Platform values are area means of local probabilities: over the whole zone (EMI homogeneous rainfall '
-                     'region as published in 2013, assumed unchanged) where reviewed, and over the ±0.5° sample around each arrow tip. '
-                     'Percentages are rounded to add up to 100%.</p>')
+                     '</table><p class="muted">Platform values are area means of local probabilities: '
+                     + ('over each EMI zone as drawn in EMI\'s figure for this outlook, digitized from that figure (approximate boundaries). '
+                        if digitized else 'over the whole zone (EMI homogeneous rainfall region as published in 2013, assumed unchanged) where '
+                        'reviewed, and over the ±0.5° sample around each arrow tip. ')
+                     + 'Percentages are rounded to add up to 100%.</p>')
     icpac = next((s for s in data['sources'] if s['provider'] == 'ICPAC'), None)
     icpac_period = f'{icpac["target_start"]} to {icpac["target_end"]}' if icpac else 'its own period'
     if data.get('icpac_table'):
@@ -790,13 +815,16 @@ def public_report(data, prefix):
             out.append(f'<figure><img src="{esc(prefix + name(obs["side_by_side_map"]))}" alt="Outlooks and observed terciles"><figcaption>Top: the '
                        'favoured category of the platform, EMI and ICPAC; bottom: the tercile CHIRPS observed (same colours), for the season and '
                        'for ICPAC\'s period.</figcaption></figure>')
-        for key, title in [('all_ethiopia', 'All Ethiopia'), ('season_domain', dom)]:
-            rows = [r for r in obs['rows'] if r.get('area_key') == key and (r['source_id'] != 'platform_on_emi_zones' or r['area_share'] < .995)]
+        for key, title in (obs.get('areas') or {'all_ethiopia': 'All Ethiopia', 'season_domain': dom}).items():
+            emi = next((r for r in obs['rows'] if r.get('area_key') == key and r['source_id'] == 'emi'), None)
+            rows = [r for r in obs['rows'] if r.get('area_key') == key and (r['source_id'] != 'platform_on_emi_zones' or (emi and emi['outlook_coverage'] < .995))]
             if rows:
-                out.append(f'<h3>{esc(title)}</h3><table><tr><th>Outlook</th><th>Period</th><th>Covers</th><th>Favours a category on</th>'
-                           '<th>Favoured category observed</th><th>Opposite observed</th><th>Chance</th><th>RPSS vs climatology</th></tr>' +
+                out.append(f'<h3>{esc(title)}</h3><table><tr><th>Outlook</th><th>Period</th><th>Observations available</th><th>Outlook issued</th>'
+                           '<th>Favoured category shown</th><th>Favoured category observed</th><th>Opposite observed</th><th>Chance</th><th>RPSS vs climatology</th></tr>' +
                            ''.join(f'<tr><td>{esc("Platform, on the EMI zones only" if r["source_id"] == "platform_on_emi_zones" else r["provider"] + " — " + r["label"])}</td>'
-                                   f'<td>{esc(win(r))}</td><td>{_pct(r["area_share"])}</td><td>{_pct(r["favoured_share"])}</td><td><strong>{_pct(r.get("hit_share"))}</strong></td>'
+                                   f'<td>{esc(win(r))}</td><td>{_pct(r["observation_coverage"])}</td><td>{_pct(r["outlook_coverage"])}</td><td>{_pct(r["favoured_coverage"])}'
+                                   + (f'<br><span class="muted">{_pct(r["favoured_below_40_share"])} of it on the 33–40% interval</span>' if (r.get('favoured_below_40_share') or 0) > .005 else '')
+                                   + f'</td><td><strong>{_pct(r.get("hit_share"))}</strong></td>'
                                    f'<td>{_pct(r.get("opposite_share"))}</td><td>{_pct(r.get("chance_of_favoured"))}</td>'
                                    f'<td>{"not computed" if r["provider"] == "ICPAC" else sk(r.get("rpss"))}</td></tr>' for r in rows) + '</table>')
         zones = list(dict.fromkeys(r['zone'] for r in obs['rows'] if r.get('area_key') == 'zone'))
@@ -804,7 +832,7 @@ def public_report(data, prefix):
             z = lambda zone, sid: next((r for r in obs['rows'] if r.get('area_key') == 'zone' and r['zone'] == zone
                                         and (r['provider'] == 'ICPAC' if sid == 'icpac' else r['source_id'] == sid)), None)
             cell = lambda r: '—' if not r else _pct(r.get('hit_share')) + (f' · RPSS {sk(r["rpss"])}' if r.get('rpss') is not None else '')
-            out.append('<h3>By EMI zone: favoured category observed (and RPSS)</h3><table><tr><th>Zone</th><th>Observed below / near / above</th>'
+            out.append('<h3>By EMI zone: favoured category observed (and RPSS)</h3><table><tr><th>Zone</th><th>Observed area share (below / near / above)</th>'
                        '<th>EMI</th><th>Platform</th><th>ICPAC</th></tr>' +
                        ''.join(f'<tr><td>{esc(zone)}</td><td>{" / ".join(_pct((z(zone, "emi") or z(zone, "platform"))["observed_fractions"][c]) for c in ("below", "near", "above"))}</td>'
                                f'<td>{cell(z(zone, "emi"))}</td><td>{cell(z(zone, "platform"))}</td><td>{cell(z(zone, "icpac"))}</td></tr>' for zone in zones) + '</table>')

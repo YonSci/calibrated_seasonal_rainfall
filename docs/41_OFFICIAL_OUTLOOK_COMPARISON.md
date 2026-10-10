@@ -77,13 +77,23 @@ per 0.25° cell, as in the platform verification; the official reference periods
 
 | Score | Platform | EMI | ICPAC |
 |---|---|---|---|
-| Favoured category observed (share of the area where the outlook favours one; chance about 33%) | yes | yes | yes |
+| Favoured category observed (within the cells where the outlook favours one; chance about 33%) | yes | yes | yes |
+| Favoured-category rule | untied leading probability >= 40% | same | the dominant category ICPAC printed, including its 33–40% intervals (share on 33–40% reported) |
 | Opposite outer category observed | yes | yes | yes |
 | RPSS against the CHIRPS climatology, on identical cells | yes | yes (zone values applied over each digitized zone) | no: only the favoured category and its interval are published, and the others are not inferred |
 
 The stage also draws `forecasts_and_observed.png`: the favoured category of the platform, EMI and ICPAC side by side, above the
 tercile CHIRPS observed for the season and for ICPAC's period, in the same colours. The EMI zone and ICPAC tables on the site
 gain an *Observed (CHIRPS)* column with the observed below / near / above shares.
+
+Coverage is reported in three separate fields: **observation coverage** (share of the area with usable CHIRPS observations),
+**outlook coverage** (share of those cells where the provider issued an outlook: ICPAC grey areas and EMI's excluded dry areas
+have none) and **favoured-category coverage** (share where the provider's rule selects a category).
+
+**Per-domain results (2026-10-10).** The comparison and the scores are computed for every domain view of the cycle:
+`all_ethiopia`, `season_domain` (the cycle's primary domain view, e.g. `fmam_rainfall_domain`) and each `extra_domain_masks`
+view under its own view id (e.g. `fmam_main_season_domain`). The site selects results, headings, coverage and evidence maps with the
+same identifier and shows an availability notice when a view has no results.
 
 The scores are given for All Ethiopia, the season domain and each EMI zone, with the share of the area each outlook covers
 (EMI leaves out its climatologically dry areas). The platform is also scored on the EMI cells only, for a like-for-like

@@ -95,19 +95,31 @@ def season_observations(vr, tag, season, processed_root, year, ref_years, window
     yh = category(h, q1, q2)
     clim = np.stack([(yh == k).mean(0) for k in range(3)], -1)
     y = np.where(ok, category(np.nan_to_num(obs), q1, q2), -1)
-    digest = hashlib.sha256(''.join(sha(p) for v in hist.values() for p in v).encode()).hexdigest()
-    return dict(y=y, clim=clim, support=ok, files={**{repo_path(p): sha(p) for p in obs_files}, 'historical_monthly_totals': digest, repo_path(fields): sha(fields)},
+    files = {repo_path(p): sha(p) for p in [*obs_files, *[p for v in hist.values() for p in v], fields]}
+    return dict(y=y, clim=clim, support=ok, files=files,
                 basis=f'sum of verified monthly totals ({", ".join(names)}); terciles from the same months {ref_years[0]}-{ref_years[-1]}')
 
 
-def score(fav, obs, clim, w, mask, probs=None, rps_clim=None):
-    """Favoured-category outcome shares, and RPSS where probabilities are given, over `mask`."""
-    cells = mask & (obs >= 0)
+def score(fav, obs, clim, w, mask, probs=None, rps_clim=None, area=None, issued=None):
+    """Coverage, favoured-category outcome shares and (with probabilities) RPSS.
+
+    area: the evaluation area; mask: its cells with usable observations (and any extra restriction);
+    issued: cells where the provider issued an outlook. Coverage fields, all area-weighted:
+      observation_coverage  share of the area with usable CHIRPS observations,
+      outlook_coverage      share of those cells where the provider issued an outlook,
+      favoured_coverage     share of those cells where its favoured-category rule selects a category.
+    Outcome shares (hit / near_other / opposite) are within the favoured cells; observed_fractions and RPSS
+    are over the cells with an outlook.
+    """
+    base = mask & (obs >= 0)
+    issued = np.ones(base.shape, bool) if issued is None else issued
+    cells = base & issued
     if not cells.any():
         return None
     wa = lambda m: float(w[m].sum())
     shown = cells & np.isin(fav, CATS)
-    row = dict(cells=int(cells.sum()), favoured_share=wa(shown) / wa(cells),
+    row = dict(cells=int(cells.sum()), observation_coverage=wa(base) / wa(area) if area is not None and area.any() else None,
+               outlook_coverage=wa(cells) / wa(base), favoured_coverage=wa(shown) / wa(base),
                observed_fractions={c: wa(cells & (obs == k)) / wa(cells) for k, c in enumerate(CATS)})
     if shown.any():
         oc = np.full(fav.shape, '', dtype=object)
@@ -127,7 +139,11 @@ def score(fav, obs, clim, w, mask, probs=None, rps_clim=None):
     return row
 
 
-def verify_external(comparison_root, verification_root, processed_root, tag, year, ref_years, season, domain_mask, out=None):
+RULES = {'Platform': 'untied leading tercile probability of at least 40%', 'EMI': 'untied leading tercile probability of at least 40%',
+         'ICPAC': 'the dominant category ICPAC printed, including its 33–40% intervals'}
+
+
+def verify_external(comparison_root, verification_root, processed_root, tag, year, ref_years, season, domain_mask, out=None, extra_domains=None):
     import xarray as xr
     import external_forecasts as ef
     base = Path(comparison_root)
@@ -152,7 +168,12 @@ def verify_external(comparison_root, verification_root, processed_root, tag, yea
     if sha(domain_mask) != comp['inputs']['domain_mask_sha256']:
         raise ValueError('The domain mask differs from the one the comparison used; rerun the comparison first')
     pv = f.probability_support.values == 1
-    areas = {'all_ethiopia': ('All Ethiopia', pv), 'season_domain': (plat['areas']['season_domain'], pv & domain)}
+    areas = {'all_ethiopia': ('All Ethiopia', region), 'season_domain': (plat['areas']['season_domain'], region & domain)}
+    for view, path in (extra_domains or {}).items():                  # further presentation domains, by view id
+        with xr.open_dataset(path) as m:
+            areas[view] = (plat['areas'].get(view, m.attrs.get('view_label', view)), region & (m.season_domain.values == 1))
+        if sha(path) != (comp['inputs'].get('extra_domain_masks_sha256') or {}).get(view):
+            raise ValueError(f'The {view} mask differs from the one the comparison used; rerun the comparison first')
     pwin = months(plat['target_start'], plat['target_end'])
     cache, rows, maps = {}, [], {}
 
@@ -163,14 +184,13 @@ def verify_external(comparison_root, verification_root, processed_root, tag, yea
             cache[key] = season_observations(vr, tag, season, processed_root, year, ref_years, win, pwin, native)
         return win, cache[key]
 
-    def add(source_id, provider, label, win, o, fav, probs=None, rps_clim=None, zones=None, extra=None):
+    def add(source_id, provider, label, win, o, fav, issued, probs=None, rps_clim=None, extra=None):
         for key, (name, amask) in areas.items():
-            base_ = amask & o['support'] & (o['y'] >= 0)
-            m = base_ & (zones if zones is not None else True)
-            r = score(fav, o['y'], o['clim'], w, m, probs, rps_clim)
+            m = amask & o['support']
+            r = score(fav, o['y'], o['clim'], w, m, probs, rps_clim, area=amask, issued=issued)
             if r:
-                r['area_share'] = float(w[m].sum() / w[base_].sum())      # share of the area this outlook covers
-                rows.append(dict(source_id=source_id, provider=provider, label=label, window=[win[0], win[-1]], area_key=key, area=name, **r, **(extra or {})))
+                rows.append(dict(source_id=source_id, provider=provider, label=label, window=[win[0], win[-1]], area_key=key, area=name,
+                                 favoured_rule=RULES[provider], **r, **(extra(amask & o['support']) if extra else {})))
 
     # Platform: the frozen season forecast against the verified season observations.
     pwin_, po = obs_for(plat['target_start'], plat['target_end'])
@@ -178,7 +198,7 @@ def verify_external(comparison_root, verification_root, processed_root, tag, yea
     pfav = np.full(pv.shape, 'unknown', dtype=object)
     for i, j in zip(*np.nonzero(pv)):
         pfav[i, j] = favoured(list(pp[i, j]), plat['minimum_leading_probability'])
-    add('platform', 'Platform', plat['label'], pwin_, po, pfav, pp, f.climatology_rps.values)
+    add('platform', 'Platform', plat['label'], pwin_, po, pfav, pv, pp, f.climatology_rps.values)
     maps['platform'] = (pfav, po)
 
     # EMI: zone probabilities, constant over each digitized zone (or reviewed rainfall region).
@@ -209,16 +229,19 @@ def verify_external(comparison_root, verification_root, processed_root, tag, yea
                 union |= r['_mask']
             # EMI's zones: the platform is also scored on exactly these cells for a like-for-like RPSS.
             add('emi', 'EMI', next(s['season_label'] for s in manifest['sources'] if s['source_id'] == zone_recs[0]['source_id']),
-                win, eo, efav, ep, f.climatology_rps.values if win == pwin else None, zones=union)
-            if win == pwin:
-                add('platform_on_emi_zones', 'Platform', plat['label'] + ' (on the EMI zones)', pwin_, po, pfav, pp, f.climatology_rps.values, zones=union)
+                win, eo, efav, union, ep, f.climatology_rps.values if win == pwin else None)
+            if win == pwin:      # the platform on exactly EMI's cells, for a like-for-like RPSS
+                add('platform_on_emi_zones', 'Platform', plat['label'] + ' (on the EMI zones)', pwin_, po, pfav, pv & union, pp, f.climatology_rps.values)
             for r in zone_recs:
                 zone = r['source_locator']['zone_label']
-                for sid, prov, fav, prb, o in [('emi', 'EMI', efav, ep, eo), ('platform', 'Platform', pfav, pp, po)]:
-                    s = score(fav, o['y'], o['clim'], w, r['_mask'] & pv & o['support'], prb, f.climatology_rps.values if o is po or win == pwin else None)
+                zarea = r['_mask'] & region
+                for sid, prov, fav, prb, o, iss in [('emi', 'EMI', efav, ep, eo, union), ('platform', 'Platform', pfav, pp, po, pv)]:
+                    s = score(fav, o['y'], o['clim'], w, zarea & o['support'], prb, f.climatology_rps.values if o is po or win == pwin else None,
+                              area=zarea, issued=iss)
                     if s:
                         rows.append(dict(source_id=sid, provider=prov, label=f'EMI zone {zone}', window=[win[0], win[-1]] if sid == 'emi' else [pwin_[0], pwin_[-1]],
-                                         area_key='zone', area=f'EMI zone {zone}', zone=zone, official=r['probabilities'] if sid == 'emi' else None, **s))
+                                         area_key='zone', area=f'EMI zone {zone}', zone=zone, official=r['probabilities'] if sid == 'emi' else None,
+                                         favoured_rule=RULES[prov], **s))
             maps['emi'] = (efav, eo, union)
 
     # ICPAC: favoured category only (dominant-category map), scored against its own window.
@@ -226,17 +249,26 @@ def verify_external(comparison_root, verification_root, processed_root, tag, yea
         g = read_json(base / 'sources' / r['grid_file'])
         cat, st = np.array(g['category'], dtype=object), np.array(g['state'], dtype=object)
         ifav = np.where(st == 'forecast', cat, np.where(st == 'no_forecast_shown', 'noforecast', 'unknown'))
+        low = np.array([[np.nan if v is None else v for v in row] for row in g['low']])
+        shown_icpac = st == 'forecast'
+
+        def interval_note(cells):
+            # How much of ICPAC's favoured area rests on its lowest (33–40%) printed interval: below the 40% rule.
+            fc = cells & shown_icpac & (io['y'] >= 0)
+            return dict(favoured_below_40_share=float(w[fc & (low < 40)].sum() / w[fc].sum()) if fc.any() else None)
         win, io = obs_for(r['target_start'], r['target_end'])
         label = next(s['season_label'] for s in manifest['sources'] if s['source_id'] == r['source_id'])
         if 'unavailable' in io:
             rows.append(dict(source_id=r['source_id'], provider='ICPAC', label=label, window=[win[0], win[-1]], unavailable=io['unavailable']))
             continue
-        add(r['source_id'], 'ICPAC', label, win, io, ifav)
+        add(r['source_id'], 'ICPAC', label, win, io, ifav, shown_icpac, extra=interval_note)
         for z in zone_recs:
-            s = score(ifav, io['y'], io['clim'], w, z['_mask'] & pv & io['support'])
+            zarea = z['_mask'] & region
+            s = score(ifav, io['y'], io['clim'], w, zarea & io['support'], area=zarea, issued=shown_icpac)
             if s:
                 rows.append(dict(source_id=r['source_id'], provider='ICPAC', label=f'EMI zone {z["source_locator"]["zone_label"]}', window=[win[0], win[-1]],
-                                 area_key='zone', area=f'EMI zone {z["source_locator"]["zone_label"]}', zone=z['source_locator']['zone_label'], **s))
+                                 area_key='zone', area=f'EMI zone {z["source_locator"]["zone_label"]}', zone=z['source_locator']['zone_label'],
+                                 favoured_rule=RULES['ICPAC'], **s, **interval_note(zarea & io['support'])))
         maps['icpac'] = (ifav, io, label, win)
 
     tmp = ef.staging(out)
@@ -245,16 +277,22 @@ def verify_external(comparison_root, verification_root, processed_root, tag, yea
     side = 'forecasts_and_observed.png'
     side_by_side_map(tmp / side, lon, lat, region, domain, maps, plat, zone_recs)
     inputs = dict(comparison_sha256=sha(comp_file), official_records_sha256=sha(rec_file), native_sha256=sha(native), domain_mask_sha256=sha(domain_mask),
+                  extra_domain_masks_sha256={v: sha(p) for v, p in sorted((extra_domains or {}).items())},
                   observations={k: v for o in cache.values() if 'files' in o for k, v in o['files'].items()})
     write_json(tmp / 'observed_verification.json', dict(
         created_utc=datetime.now(timezone.utc).isoformat(timespec='seconds'), season=season, year=year,
         reference_years=[ref_years[0], ref_years[-1]], inputs=inputs, rows=rows, map=figure, side_by_side_map=side,
+        areas={k: v[0] for k, v in areas.items()}, favoured_rules=RULES,
         windows={', '.join(k): v.get('basis', v.get('unavailable')) for k, v in cache.items()},
         notes=['Single season: descriptive scores for one year, not evidence of general skill.',
                'Each outlook is scored against observations for its own target window; the observed tercile uses CHIRPS '
                f'{ref_years[0]}-{ref_years[-1]} terciles per 0.25° cell (official reference periods are not stated).',
-               'Favoured category: the leading tercile where it reaches 40% (the map display rule). "Chance" is the climatological '
-               'probability of the favoured category over the same cells (about one in three).',
+               'Favoured category: for the platform and EMI, the untied leading tercile where it reaches 40% (the map display rule); for ICPAC, '
+               'the dominant category ICPAC printed, including its 33–40% intervals (the share resting on 33–40% is reported). "Chance" is the '
+               'climatological probability of the favoured category over the same cells (about one in three).',
+               'Coverage: observation coverage is the share of the area with usable CHIRPS observations; outlook coverage the share of those '
+               'cells where the provider issued an outlook (ICPAC grey areas and EMI\'s excluded dry areas have none); favoured-category '
+               'coverage the share where its rule selects a category. Match percentages are within the favoured cells.',
                'RPSS: ranked probability skill score against the CHIRPS climatology, on identical cells; ICPAC publishes only the '
                'favoured category and its interval, so no RPSS is computed for ICPAC.',
                'EMI zone probabilities are applied uniformly over each digitized zone.']))
@@ -327,7 +365,7 @@ def observed_map(path, lon, lat, region, domain, maps, plat, zone_recs, rows):
             for r in rs:
                 lines.append(f'  {r["provider"]:<8} hit {r["hit_share"]:.0%}  opposite {r["opposite_share"]:.0%}'
                              + (f'  RPSS {r["rpss"]:+.2f}' if r.get('rpss') is not None else '') + f'  ({r["window"][0][:3]}–{r["window"][1]}'
-                             + (f'; {r["area_share"]:.0%} of the area' if r['area_share'] < .995 else '') + ')')
+                             + (f'; outlook on {r["outlook_coverage"]:.0%}' if r['outlook_coverage'] < .995 else '') + ')')
             lines.append('')
         lines.append('hit: favoured category observed, as a share of the')
         lines.append('area where the outlook favours one (chance about 33%)')
@@ -430,11 +468,14 @@ def main():
     ap.add_argument('--season', required=True)
     ap.add_argument('--year', type=int, required=True)
     ap.add_argument('--domain-mask', required=True)
+    ap.add_argument('--extra-domain', nargs=2, action='append', default=[], metavar=('VIEW', 'MASK'),
+                    help='A further domain view and its mask (repeatable)')
     ap.add_argument('--reference-years', type=int, nargs=2, default=[1993, 2025])
     a = ap.parse_args()
     r = lambda p: Path(p) if Path(p).is_absolute() else ROOT / p
     print(verify_external(r(a.comparison), r(a.verification_root), r(a.processed_root), a.tag, a.year,
-                          list(range(a.reference_years[0], a.reference_years[1] + 1)), a.season, r(a.domain_mask)))
+                          list(range(a.reference_years[0], a.reference_years[1] + 1)), a.season, r(a.domain_mask),
+                          extra_domains={v: r(m) for v, m in a.extra_domain}))
 
 
 if __name__ == '__main__':

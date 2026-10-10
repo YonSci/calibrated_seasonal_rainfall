@@ -93,7 +93,7 @@
       "id": "belg_emi_view",
       "kind": "mask_file",
       "path": "data/masks/FMAM_belg_emi_domain.nc",
-      "label": "Current default site view: >= 20% and >= 100 mm from the 365-day cycle, patches < 3 cells removed",
+      "label": "Previous FMAM site view (FMAM_belg_emi_domain, used until 2026-10-10): >= 20% and >= 100 mm from the 365-day cycle, patches < 3 cells removed",
       "reference_thresholds": {
         "seasonal_rainfall_mm": 100,
         "annual_share_percent": 20
@@ -112,5 +112,5 @@
     "boundary": "data/boundaries/fmam_coverage_v1/fmam_coverage_chirps_v2_1993_2025_v1"
   },
   "selected_candidate": "mm100_share20",
-  "selection_rationale": "Adopted 2026-10-10 as the main FMAM working domain for Ethiopia: Belg brings considerable rain (EMI: northeastern, central, southern, southwestern, eastern and southeastern Ethiopia). Both cutoffs are EMI legend breaks (101-200 mm; 21-30 %), so EMI maps 2(e)/3(e) can check the largest share of the country; stable against the 1996-2025 baseline."
+  "selection_rationale": "Adopted 2026-10-10 as the broad FMAM working domain for Ethiopia: cells where FMAM contributes both a substantial amount (>= 100 mm) and a substantial share (>= 20%) of annual rainfall, i.e. a broad rainfall-contribution domain. The two cutoffs also coincide with EMI legend class breaks (101-200 mm; 21-30 %), which makes a visual comparison with EMI maps 2(e)/3(e) convenient; that comparison is visual and unreviewed and does not independently validate the thresholds. Stable against the 1996-2025 baseline. The included share of Ethiopia describes this rule, not an official estimate of Belg-dependent area."
 }

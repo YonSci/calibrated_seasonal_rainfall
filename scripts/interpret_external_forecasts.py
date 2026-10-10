@@ -132,10 +132,10 @@ def summary_items(comparison, manifest):
         zones_all, zones = zones, arrows
         status = 'validated' if all(z['status'] == 'validated' for z in zones) else 'draft'
         ids = sorted({i for z in zones for i in z['evidence_ids']})
-        for key in ('all_ethiopia', 'season_domain'):
-            dshare = lambda z: (z.get('platform_neighbourhood') or {}).get('domain_share', 0)
+        for key in area_keys(comparison):
+            dshare = lambda z: area_share(z.get('platform_neighbourhood') or {}, key)
             inside = [z for z in zones if key == 'all_ethiopia' or dshare(z) > 0]
-            partial = [z for z in inside if key == 'season_domain' and dshare(z) < 1]
+            partial = [z for z in inside if key != 'all_ethiopia' and dshare(z) < 1]
             opp = [z for z in inside if z['relationship'] == 'opposing_favoured_categories']
             same = [z for z in inside if z['relationship'] == 'same_favoured_category']
             name = lambda zs: and_join(z['area'].split()[-1] for z in zs)
@@ -157,15 +157,15 @@ def summary_items(comparison, manifest):
             if not inside:
                 parts.append('No EMI sample overlaps this area; see the national context.')
             out.append(dict(id=f'emi_zones_{key}_summary', area_key=key, source_id=zones[0]['source_id'], status=status,
-                            title='EMI — sampled neighbourhoods near the zone arrows' + (' in the domain' if key == 'season_domain' else ''),
+                            title='EMI — sampled neighbourhoods near the zone arrows' + (' in the domain' if key != 'all_ethiopia' else ''),
                             text=' '.join(parts) + ' Sampled neighbourhoods (±0.5°), not complete EMI zones.', evidence_ids=ids,
                             scope=dict(zones=[z['area'].split()[-1] for z in inside])))
     zones = [f for f in comparison['findings'] if f['kind'] == 'zone']
     zm = [z for z in zones if (z.get('zone_mean') or {}).get('mean_local_probabilities')]
     if zm:
         status = 'validated' if all(z['zone_mean']['status'] == 'validated' for z in zm) else 'draft'
-        for key in ('all_ethiopia', 'season_domain'):
-            inside = [z for z in zm if key == 'all_ethiopia' or z['zone_mean']['domain_share'] > 0]
+        for key in area_keys(comparison):
+            inside = [z for z in zm if key == 'all_ethiopia' or area_share(z['zone_mean'], key) > 0]
             if not inside:
                 continue
             parts = []
@@ -176,8 +176,8 @@ def summary_items(comparison, manifest):
                         'opposing_favoured_categories': f'opposing: platform {SHORT[favoured_name(m)]}, EMI {SHORT[z["official_category"]]}',
                         'weak_signal': 'no clear category in one source', 'near_versus_other': 'near normal vs other'}.get(rel, 'unknown')
                 part = f'zone {n}' + (f' ({m["region_name"]})' if m.get('region_name') else '') + f': {verb}, platform {triple(m["mean_local_probabilities"])}'
-                if key == 'season_domain' and m['domain_share'] < 1:
-                    part += f' over the whole zone ({100 * m["domain_share"]:.0f}% of it in the domain)'
+                if key != 'all_ethiopia' and area_share(m, key) < 1:
+                    part += f' over the whole zone ({100 * area_share(m, key):.0f}% of it in the domain)'
                 parts.append(part)
             basis = zm[0]['zone_mean'].get('basis') or ''
             boundary = ('EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged'
@@ -191,6 +191,16 @@ def summary_items(comparison, manifest):
     if robust:
         out.append(robust)
     return out
+
+
+def area_keys(comparison):
+    """All Ethiopia, the primary domain (season_domain) and any further domain views, in comparison order."""
+    return list((comparison['platform'].get('areas') or {'all_ethiopia': None, 'season_domain': None}))
+
+
+def area_share(obj, key):
+    """Share of a sample or zone inside the area `key` (older comparisons record only the primary domain)."""
+    return (obj.get('area_shares') or {}).get(key, obj.get('domain_share', 0) if key == 'season_domain' else 0)
 
 
 def favoured_name(m):
@@ -254,7 +264,7 @@ def icpac_table(comparison):
                          platform=triple(f['platform_mean_local_probabilities']) if f['platform_mean_local_probabilities'] else '—',
                          relationship=('Not comparable: ICPAC shows no forecast category here' if f['official_category'] == 'unknown'
                                        else RELATION[f['relationship']]), relationship_code=f['relationship'],
-                         domain_share=f['domain_share'], area_key=None, evidence_ids=f['evidence_ids']))
+                         domain_share=f['domain_share'], area_shares=f.get('area_shares'), area_key=None, evidence_ids=f['evidence_ids']))
     for f in [f for f in comparison['findings'] if f['kind'] == 'area']:
         n = f['numbers']
         top = max(n['official_interval_shares'].items(), key=lambda kv: kv[1])[0] if n['official_interval_shares'] else None
@@ -276,7 +286,7 @@ def emi_table(comparison):
         rows.append(dict(id=f['id'], status=f['status'], zone=f['area'].split()[-1], official=triple(f['official_probabilities']),
                          platform=triple(nb['mean_local_probabilities']) if nb.get('mean_local_probabilities') else '—',
                          relationship=RELATION[f['relationship']] if nb else '—', relationship_code=f['relationship'] if nb else None,
-                         domain_share=nb.get('domain_share'), center=nb.get('center'),
+                         domain_share=nb.get('domain_share'), area_shares=nb.get('area_shares'), center=nb.get('center'),
                          stable=(f.get('sensitivity') or {}).get('stable'), evidence_ids=f['evidence_ids'],
                          **zone_columns(f.get('zone_mean'))))
     return rows
@@ -288,7 +298,7 @@ def zone_columns(zm):
         return {}
     t = triple(zm['mean_local_probabilities'])
     ok = zm.get('status') == 'validated'
-    return dict(zone_name=zm.get('region_name'), zone_domain_share=zm.get('domain_share'), zone_cells=zm.get('cells'),
+    return dict(zone_name=zm.get('region_name'), zone_domain_share=zm.get('domain_share'), zone_area_shares=zm.get('area_shares'), zone_cells=zm.get('cells'),
                 zone_mean=t if ok else None, zone_relationship=RELATION[zm['relationship']] if ok else None,
                 zone_relationship_code=zm['relationship'] if ok else None,
                 zone_mean_draft=None if ok else t, zone_relationship_draft=None if ok else RELATION[zm['relationship']])

@@ -37,7 +37,8 @@
   "extra_domain_masks": [
     {
       "view": "fmam_main_season_domain",
-      "mask": "data/masks/FMAM_main_season_domain.nc"
+      "mask": "data/masks/FMAM_main_season_domain.nc",
+      "criteria": "FMAM >= 40% of annual and >= 80 mm; CHIRPS v2.0 1993-2025 climatology; patches < 3 cells removed"
     }
   ],
   "notes": "January-initialized FMAM 2026 cycle (Belg). Reference FMAM 1993-2025. Main domain (adopted 2026-10-10): FMAM >= 100 mm and >= 20% of annual rainfall (rainfall-domain review fmam_chirps_domain_review_v1, candidate mm100_share20; docs/44). Second view: FMAM main season (>= 40% of annual). Guide: docs/39_FMAM_RUN_GUIDE.md.",

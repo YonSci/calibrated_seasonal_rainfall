@@ -1,15 +1,15 @@
 {
-  "name": "FMAM rainfall domain (FMAM >= 20% of annual and >= 100 mm)",
+  "name": "FMAM rainfall contribution domain",
   "season": "FMAM",
   "method": "rainfall_domain_review",
   "cells": 1147,
   "area_km2": 822659,
   "pct_eth": 72.8,
   "ref_years": "1993-2025",
-  "definition": "Fixed 1993-2025 CHIRPS v2.0 domain: cells where mean FMAM rainfall (actual-calendar monthly totals, February 29 included) is >= 100 mm and FMAM brings >= 20% of the mean annual rainfall (ratio of climatological means); complete baseline required; no patch removal or smoothing. Selected in assessment fmam_chirps_domain_review_v1. The same domain is used for the season and each of its months.",
+  "definition": "Fixed 1993-2025 CHIRPS v2.0 domain: cells where mean FMAM rainfall (actual-calendar monthly totals, February 29 included) is >= 100 mm and FMAM brings >= 20% of the mean annual rainfall (ratio of climatological means); complete baseline required; no patch removal or smoothing. Selected in assessment fmam_chirps_domain_review_v1. The same domain is used for the season and each of its months. The included share of Ethiopia describes this rule; it is not an independently established official share of FMAM-dependent area.",
   "source_mask": "D:/calibrated_seasonal_rainfall/data/masks/fmam_coverage_chirps_v2_1993_2025_v1.nc",
   "boundary": "data/boundaries/ethiopia/eth_admin0.shp",
   "polygons": 1,
-  "created_utc": "2026-10-10T01:54:46.905760+00:00",
+  "created_utc": "2026-10-10T15:38:23.671453+00:00",
   "note": "Smooth outline: Gaussian-smoothed (sigma 0.6 cells) 0/1 mask contoured at 0.5, clipped to the national boundary, pieces < 500 km2 dropped. The forecast statistics use the 0.25-degree cell mask."
 }

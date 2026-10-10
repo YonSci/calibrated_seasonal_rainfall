@@ -112,7 +112,8 @@ class Rules(unittest.TestCase):
         w, mask = np.ones((2, 2)), np.ones((2, 2), bool)
         r = score(fav, obs, clim, w, mask)
         self.assertEqual(r['cells'], 3)
-        self.assertAlmostEqual(r['favoured_share'], 1.0)
+        self.assertAlmostEqual(r['favoured_coverage'], 1.0)
+        self.assertAlmostEqual(r['outlook_coverage'], 1.0)
         self.assertAlmostEqual(r['hit_share'], 2 / 3)
         self.assertAlmostEqual(r['opposite_share'], 1 / 3)
         self.assertAlmostEqual(r['chance_of_favoured'], 1 / 3)
@@ -124,6 +125,35 @@ class Rules(unittest.TestCase):
         self.assertAlmostEqual(r['rpss'], 0.0)
         sharp = np.where(obs[..., None] == 2, [[[.1, .2, .7]]], [[[.2, .3, .5]]])
         self.assertGreater(score(fav, obs, clim, w, mask, sharp, rps_clim)['rpss'], 0)
+
+    def test_coverage_fields_are_separate(self):
+        from verify_external_forecasts import score
+        # Six equal cells in the area; one without observations; the provider issues an outlook on four
+        # of the five observed cells and favours a category on three of them.
+        area = np.ones((2, 3), bool)
+        obs = np.array([[2, 2, 0], [1, 2, -1]])
+        issued = np.array([[True, True, True], [True, False, True]])
+        fav = np.array([['above', 'above', 'weak'], ['above', 'noforecast', 'above']], dtype=object)
+        r = score(fav, obs, np.full((2, 3, 3), 1 / 3), np.ones((2, 3)), area, area=area, issued=issued)
+        self.assertAlmostEqual(r['observation_coverage'], 5 / 6)
+        self.assertAlmostEqual(r['outlook_coverage'], 4 / 5)
+        self.assertAlmostEqual(r['favoured_coverage'], 3 / 5)
+        self.assertAlmostEqual(r['hit_share'], 2 / 3)          # above observed on two of the three favoured cells
+
+    def test_domain_shares_and_accuracy_wording(self):
+        from interpret_external_forecasts import area_keys, area_share
+        from site_extras import _with_observed
+        comp = dict(platform=dict(areas={'all_ethiopia': 'All Ethiopia', 'season_domain': 'D', 'fmam_main_season_domain': 'M'}))
+        self.assertEqual(area_keys(comp), ['all_ethiopia', 'season_domain', 'fmam_main_season_domain'])
+        z = dict(domain_share=0.8, area_shares={'season_domain': 0.8, 'fmam_main_season_domain': 0.3})
+        self.assertEqual(area_share(z, 'fmam_main_season_domain'), 0.3)
+        self.assertEqual(area_share(dict(domain_share=0.5), 'season_domain'), 0.5)     # older comparisons
+        acc = 'which forecast is more accurate, because that needs observations and a separate verification design (see Verification)'
+        paras = [dict(id='not_calculated', text='Not calculated: rainfall-anomaly differences, because x; ' + acc + '.')]
+        out = _with_observed(paras, dict(rows=[{}]))
+        self.assertNotIn('more accurate', out[0]['text'])
+        self.assertEqual(out[-1]['id'], 'observed_note')
+        self.assertEqual(_with_observed(paras, None), paras)
 
     def test_window_mismatch_names_months(self):
         lim = window_limitation(dict(target_start='2026-10-01', target_end='2027-01-31'),

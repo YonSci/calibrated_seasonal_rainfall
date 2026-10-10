@@ -2,14 +2,14 @@ FMAM 2026 — February initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-10 11:34 UTC (site release 2026-10-09.11) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-10 15:54 UTC (site release 2026-10-10.1) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
-The forecast leans toward above normal rainfall in the FMAM rainfall domain (FMAM >= 20%
-of annual and >= 100 mm): averaged over the area, the local probability of above normal is
-43%, against about 33% for climatology. Mean forecast rainfall is 316 mm against a
-1993–2025 average of 287 mm (+29 mm, +10%).
+The forecast leans toward above normal rainfall in the FMAM rainfall contribution domain:
+averaged over the area, the local probability of above normal is 43%, against about 33%
+for climatology. Mean forecast rainfall is 316 mm against a 1993–2025 average of 287 mm
+(+29 mm, +10%).
 
 Model initialization: 1 February 2026 · ECMWF SEAS5 (system 51), 51 members
 Target period: 1 Feb 2026 – 31 May 2026
@@ -19,8 +19,8 @@ Reference period: CHIRPS v2.0 FMAM 1993–2025 (33 seasons)
 Observations processed through: May 2026 (Feb, Mar, Apr, May)
 CHIRPS archive: Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found
 Verification last run: 10 Oct 2026
-Method / version: Shared climatology blend (λ = 0.44 for FMAM) · code f7ded9b
-Rainfall domain: Fixed 1993-2025 CHIRPS v2.0 domain: cells where mean FMAM rainfall (actual-calendar monthly totals, February 29 included) is >= 100 mm and FMAM brings >= 20% of the mean annual rainfall (ratio of climatological means); complete baseline required; no patch removal or smoothing. Selected in assessment fmam_chirps_domain_review_v1. The same domain is used for the season and each of its months.
+Method / version: Shared climatology blend (λ = 0.44 for FMAM) · code b7a480a
+Rainfall domain: Fixed 1993-2025 CHIRPS v2.0 domain: cells where mean FMAM rainfall (actual-calendar monthly totals, February 29 included) is >= 100 mm and FMAM brings >= 20% of the mean annual rainfall (ratio of climatological means); complete baseline required; no patch removal or smoothing. Selected in assessment fmam_chirps_domain_review_v1. The same domain is used for the season and each of its months. The included share of Ethiopia describes this rule; it is not an independently established official share of FMAM-dependent area.
 
 Contents
 --------

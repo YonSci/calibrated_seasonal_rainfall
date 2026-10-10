@@ -37,7 +37,8 @@
   "extra_domain_masks": [
     {
       "view": "fmam_main_season_domain",
-      "mask": "data/masks/FMAM_main_season_domain.nc"
+      "mask": "data/masks/FMAM_main_season_domain.nc",
+      "criteria": "FMAM >= 40% of annual and >= 80 mm; CHIRPS v2.0 1993-2025 climatology; patches < 3 cells removed"
     }
   ],
   "site_id": "fmam2026feb",

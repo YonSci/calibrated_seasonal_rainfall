@@ -57,14 +57,17 @@ def file_sha(p):
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
-def input_fingerprint(native_path, domain_mask, registry, sources, minimum):
+def input_fingerprint(native_path, domain_mask, registry, sources, minimum, extra_domains=None):
     """Everything a published comparison depends on; build_site re-checks it before publishing.
 
-    sources: {source_id: {sha256, extraction_status, content_sha256}}.
+    sources: {source_id: {sha256, extraction_status, content_sha256}}; extra_domains: {view: mask path}.
     """
-    return dict(native_sha256=file_sha(native_path), domain_mask_sha256=file_sha(domain_mask),
-                registry_sha256=hashlib.sha256(json.dumps(registry, sort_keys=True).encode()).hexdigest(),
-                minimum_leading_probability=minimum, sources=sources)
+    out = dict(native_sha256=file_sha(native_path), domain_mask_sha256=file_sha(domain_mask),
+               registry_sha256=hashlib.sha256(json.dumps(registry, sort_keys=True).encode()).hexdigest(),
+               minimum_leading_probability=minimum, sources=sources)
+    if extra_domains:
+        out['extra_domain_masks_sha256'] = {v: file_sha(m) for v, m in sorted(extra_domains.items())}
+    return out
 
 
 def manifest_states(manifest):
@@ -126,7 +129,9 @@ def area_mean(p, mask, w):
     return [float(np.average(p[..., k][mask], weights=ww)) for k in range(3)]
 
 
-def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, domain_label=None):
+def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, domain_label=None, extra_domains=None):
+    """extra_domains: {view id: mask path} for further presentation domains (the cycle's extra_domain_masks);
+    each gets its own area results under its view id, next to all_ethiopia and season_domain (the primary domain)."""
     import xarray as xr
     import external_forecasts as ef
     sources_dir, out = Path(sources_dir), Path(out)
@@ -143,6 +148,13 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
     lat2 = np.repeat(nat['lat'][:, None], len(nat['lon']), 1)
     w = np.cos(np.deg2rad(lat2))
     areas = {'all_ethiopia': ('All Ethiopia', nat['eligible']), 'season_domain': (domain_label, domain)}
+    for view, path in (extra_domains or {}).items():
+        with xr.open_dataset(path) as m:
+            if not (np.allclose(m.lat.values, nat['lat']) and np.allclose(m.lon.values, nat['lon'])):
+                raise ValueError(f'{path}: domain mask grid differs from the native forecast grid')
+            areas[view] = (m.attrs.get('view_label', view), (m.season_domain.values == 1) & nat['eligible'])
+    # Share of a sample or zone inside each domain (all_ethiopia is always the whole of it).
+    shares = lambda box: {k: float((box & a).sum() / box.sum()) if box.any() else 0.0 for k, (_, a) in areas.items() if k != 'all_ethiopia'}
     platform = registry['platform']
     metrics, findings = [], []
     plat_ev = 'platform_forecast_' + platform['target'].lower()
@@ -189,7 +201,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
             box = box_at(a['lon'], a['lat'], half)
             mean = area_mean(nat['p'], box, w)
             neighbourhood = dict(center=[a['lon'], a['lat']], half_width_deg=half, cells=int(box.sum()), mean_local_probabilities=mean,
-                                 domain_share=float((box & domain).sum() / box.sum()) if box.any() else 0.0)
+                                 domain_share=float((box & domain).sum() / box.sum()) if box.any() else 0.0, area_shares=shares(box))
             # Bounded sensitivity: other neighbourhood sizes and shifted arrow-tip positions.
             rels = {}
             for h in HALF_WIDTHS:
@@ -223,7 +235,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
             zm = area_mean(nat['p'], zmask, w)
             zone_rel = relationship(favoured(zm, minimum), off_cat)
             zone_mean = dict(mean_local_probabilities=zm, cells=int(zmask.sum()), region_name=region_name, basis=basis,
-                             domain_share=float((zmask & domain).sum() / zmask.sum()), relationship=zone_rel,
+                             domain_share=float((zmask & domain).sum() / zmask.sum()), area_shares=shares(zmask), relationship=zone_rel,
                              status='validated' if zone_ok else 'draft')
         else:
             zone_ok = False
@@ -355,7 +367,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                 official_shown_share=wa(shown) / wa(box), official_no_forecast_share=wa(box & (st == 'no_forecast_shown')) / wa(box),
                 platform_category=favoured(pmean, minimum), platform_mean_local_probabilities=pmean,
                 relationship=relationship(favoured(pmean, minimum), oc),
-                domain_share=float((box & domain).sum() / box.sum()), cells=int(box.sum()),
+                domain_share=float((box & domain).sum() / box.sum()), area_shares=shares(box), cells=int(box.sum()),
                 comparison_basis='reviewed_digitization at reviewed sample locations' if both_ok else 'draft',
                 limitations=lim + ['sample_location_taken_from_emi_arrow_tip' if a else 'sample_area_is_digitized_emi_zone'],
                 evidence_ids=[plat_ev, *r['evidence_ids'], f'{r["source_id"]}_comparison_map']))
@@ -384,11 +396,12 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
                   platform=dict(platform, native_forecast=repo_path(native_path),
                                 native_sha256=nat['sha256'], minimum_leading_probability=minimum,
                                 areas={k: v[0] for k, v in areas.items()}),
-                  inputs=input_fingerprint(native_path, domain_mask, registry, manifest_states(manifest), minimum),
+                  inputs=input_fingerprint(native_path, domain_mask, registry, manifest_states(manifest), minimum, extra_domains),
                   metrics=metrics, findings=findings,
                   maps=sorted(p.name for p in (tmp / 'maps').glob('*.png')),
                   notes=['Area means are area-weighted means of local grid-cell probabilities, not probabilities of area-mean rainfall.',
-                         'Favoured category: the leading tercile where it reaches 40% (the map display rule); otherwise no clear category.',
+                         'Favoured category: for the platform and EMI, the untied leading tercile where it reaches 40% (the map display rule), '
+                         'otherwise no clear category; for ICPAC, the dominant category ICPAC printed, including its 33–40% intervals.',
                          'An OND probability cannot be built by averaging monthly probabilities; ONDJ and OND are compared only as spatial tendencies.'])
     write_json(tmp / 'comparison.json', result)
     ef.publish(tmp, out)

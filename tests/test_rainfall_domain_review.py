@@ -203,7 +203,9 @@ class Integration(unittest.TestCase):
         self.assertEqual(out.season_share_of_annual.values.tolist(), [[.3, .05]])                    # fraction, not percent
         self.assertEqual(out.attrs['season'], 'FMAM')
         self.assertIn('>= 100 mm', out.attrs['domain_definition'])
-        self.assertIn('>= 20%', out.attrs['view_label'])
+        self.assertEqual(out.attrs['view_label'], 'FMAM rainfall contribution domain')       # short selector label
+        self.assertIn('>= 100 mm and >= 20% of annual', out.attrs['view_criteria'])          # thresholds shown under it
+        self.assertIn('not an independently established official share', out.attrs['domain_definition'])
         recs = [dict(domain_definition=out.attrs['domain_definition'])] * 3
         self.assertEqual(pl.gallery_definition(recs)[0], out.attrs['domain_definition'])
         with self.assertRaises(ValueError):                                     # products from two masks never share one caption
