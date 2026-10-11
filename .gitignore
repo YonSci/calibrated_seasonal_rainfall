@@ -27,3 +27,9 @@ data/shapefiles/
 
 # Forecast NetCDF files published with the site (download package)
 !site/downloads/data/**/*.nc
+
+# CHIRPS v2.0 working data, kept locally after the switch to CHIRPS v3.0 (2026-10-11)
+outputs_chirps_v2/
+models_chirps_v2/
+data/interim_chirps_v2/
+data/processed_chirps_v2/

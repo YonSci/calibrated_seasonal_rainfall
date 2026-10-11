@@ -97,8 +97,8 @@
   "reference_cache": "data/climatology_references",
   "output_root": "outputs/rainfall_domain_review/jjas_v1",
   "export": {
-    "mask": "data/masks/jjas_coverage_chirps_v2_1993_2025_v1.nc",
-    "boundary": "data/boundaries/jjas_coverage_v1/jjas_coverage_chirps_v2_1993_2025_v1"
+    "mask": "data/masks/jjas_coverage_chirps_v3_1993_2025_v1.nc",
+    "boundary": "data/boundaries/jjas_coverage_v1/jjas_coverage_chirps_v3_1993_2025_v1"
   },
   "note": "Evidence for the JJAS rainfall domain. No candidate is selected: the operational JJAS domain (R1+R2) is unchanged unless a candidate is explicitly selected and exported. EMI references: Kiremt 2026 Seasonal Climate Forecast maps 2(e) and 3(e)."
 }

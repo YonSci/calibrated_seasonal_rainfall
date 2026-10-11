@@ -4,8 +4,8 @@
   "label": "ONDJ 2026/27",
   "target_start": "2026-10-01",
   "target_end": "2027-01-31",
-  "native_forecast": "outputs/final_shared_blend/init09_ONDJ/2026/forecast_2026.nc",
-  "native_sha256": "db0578a6365ebfd6f055a2efddd886d8a91c7675bbd05484119b189978cfe32c",
+  "native_forecast": "outputs/verification_2026_ondj/frozen_forecasts/init09_ONDJ/forecast_2026.nc",
+  "native_sha256": "e7d2e17738e206cc32eb032259fcafbaf981bee867c64a25325b7dec0605825c",
   "minimum_leading_probability": 0.4,
   "areas": {
    "all_ethiopia": "All Ethiopia",
@@ -191,9 +191,9 @@
    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": {
     "mean_local_probabilities": [
-     0.46816532384438975,
-     0.2548217453593507,
-     0.27701293079625966
+     0.4812277987773143,
+     0.24468136918087557,
+     0.2740908320418102
     ],
     "cells": 200,
     "region_name": "Southwest",
@@ -246,9 +246,9 @@
    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": {
     "mean_local_probabilities": [
-     0.21046931199266988,
-     0.2400291779508487,
-     0.5495015100564813
+     0.18645391149131174,
+     0.2544467254438628,
+     0.5590993630648253
     ],
     "cells": 143,
     "region_name": "South Highland",
@@ -301,9 +301,9 @@
    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": {
     "mean_local_probabilities": [
-     0.23957669244167873,
-     0.2602742768088418,
-     0.5001490307494795
+     0.21786686073696238,
+     0.26280019230109514,
+     0.5193329469619424
     ],
     "cells": 58,
     "region_name": "South",
@@ -356,9 +356,9 @@
    "basis": "EMI homogeneous rainfall regions as published in 2013 (digitized)",
    "value": {
     "mean_local_probabilities": [
-     0.18456165892459828,
-     0.23904272577869706,
-     0.5763956152967045
+     0.15640853102925645,
+     0.2535109093179616,
+     0.5900805596527818
     ],
     "cells": 430,
     "region_name": "South-Southeast lowlands",
@@ -388,53 +388,53 @@
    "reason": null,
    "basis": "reviewed_digitization",
    "value": {
-    "area_share_official_forecast_shown": 0.45743178559016606,
-    "area_share_official_no_forecast": 0.5425682144098339,
-    "area_share_both_favoured": 0.4547253409135862,
-    "agreement_share_where_both_favoured": 0.9447805785027835,
-    "opposing_share_where_both_favoured": 0.0537600725367427,
+    "area_share_official_forecast_shown": 0.45693641033562105,
+    "area_share_official_no_forecast": 0.5430635896643788,
+    "area_share_both_favoured": 0.45693641033562105,
+    "agreement_share_where_both_favoured": 0.936470677892434,
+    "opposing_share_where_both_favoured": 0.05625462949486755,
     "official_category_shares": {
-     "below": 0.004432769306102842,
+     "below": 0.00441993805963071,
      "near": 0.0,
-     "above": 0.9955672306938971
+     "above": 0.9955800619403692
     },
     "official_interval_shares": {
-     "below 40-50%": 0.004432769306102842,
-     "above 40-50%": 0.025164742300949,
-     "above 50-60%": 0.09518175337734913,
-     "above 60-70%": 0.2234566057746819,
-     "above 70-80%": 0.3654959317038363,
-     "above 80-90%": 0.23253773387139937,
-     "above 90-100%": 0.053730463665681336
+     "below 40-50%": 0.00441993805963071,
+     "above 40-50%": 0.027986533961534707,
+     "above 50-60%": 0.09490623700081381,
+     "above 60-70%": 0.22280978059914805,
+     "above 70-80%": 0.36443795461087175,
+     "above 80-90%": 0.23186462215018547,
+     "above 90-100%": 0.05357493361781552
     },
     "platform_category_shares": {
-     "below": 0.17319739850679292,
-     "near": 0.03363210999163094,
-     "above": 0.7058395181864204,
-     "weak": 0.08733097331515577
+     "below": 0.16196333769935997,
+     "near": 0.04746704543058617,
+     "above": 0.6943319120265263,
+     "weak": 0.09623770484352752
     },
     "platform_mean_local_probabilities": [
-     0.282586884221246,
-     0.26604846989416736,
-     0.45136464588458663
+     0.26622194117883785,
+     0.2701462791127706,
+     0.4636317797083914
     ],
-    "cells": 1478,
+    "cells": 1484,
     "registration_sensitivity": {
      "shifts_px": 8,
      "agreement_range": [
-      0.9461913881341288,
-      0.9501516372603094
+      0.9378567084677996,
+      0.9416942200084182
      ],
      "compared_area_range": [
-      0.4479451427128222,
-      0.4615127169971195
+      0.4501831596838321,
+      0.4636968103420534
      ]
     },
     "overlap_majority": {
      "official": "above",
      "platform": "above",
-     "official_share": 0.9955408476362323,
-     "platform_share": 0.940321426139016
+     "official_share": 0.9955800619403692,
+     "platform_share": 0.9320507398328034
     }
    }
   },
@@ -449,7 +449,7 @@
     "area_share_official_forecast_shown": 0.9965414370419713,
     "area_share_official_no_forecast": 0.0034585629580288248,
     "area_share_both_favoured": 0.9965414370419713,
-    "agreement_share_where_both_favoured": 1.0,
+    "agreement_share_where_both_favoured": 0.9982535006586253,
     "opposing_share_where_both_favoured": 0.0,
     "official_category_shares": {
      "below": 0.0,
@@ -465,21 +465,21 @@
     },
     "platform_category_shares": {
      "below": 0.0,
-     "near": 0.0,
-     "above": 1.0,
+     "near": 0.0017404589634462606,
+     "above": 0.9982595410365536,
      "weak": 0.0
     },
     "platform_mean_local_probabilities": [
-     0.18828947885164968,
-     0.24094057516295533,
-     0.5707699459853951
+     0.1605383759410027,
+     0.2554195654948821,
+     0.5840420585641152
     ],
     "cells": 575,
     "registration_sensitivity": {
      "shifts_px": 8,
      "agreement_range": [
-      1.0,
-      1.0
+      0.9982443559836661,
+      0.9982595410365536
      ],
      "compared_area_range": [
       0.9913507221587236,
@@ -490,7 +490,7 @@
      "official": "above",
      "platform": "above",
      "official_share": 1.0,
-     "platform_share": 1.0
+     "platform_share": 0.9982535006586253
     }
    }
   },
@@ -529,14 +529,14 @@
    "source_id": "icpac_ond_2026_update_rainfall",
    "status": "validated",
    "title": "ICPAC — All Ethiopia",
-   "text": "Category agreement of 94.5% within the compared area, which covers 45% of the analysed national area. Predominant category in both: above normal. Periods differ (Oct 2026–Dec 2026 vs Oct 2026–Jan 2027).",
+   "text": "Category agreement of 93.6% within the compared area, which covers 46% of the analysed national area. Predominant category in both: above normal. Periods differ (Oct 2026–Dec 2026 vs Oct 2026–Jan 2027).",
    "evidence_ids": [
     "platform_forecast_ondj",
     "icpac_ond_2026_update_rainfall_map",
     "icpac_ond_2026_update_rainfall_comparison_map"
    ],
    "scope": {
-    "compared_area_share": 0.4547253409135862,
+    "compared_area_share": 0.45693641033562105,
     "period": "Oct 2026–Dec 2026 vs Oct 2026–Jan 2027"
    }
   },
@@ -546,7 +546,7 @@
    "source_id": "icpac_ond_2026_update_rainfall",
    "status": "validated",
    "title": "ICPAC — ONDJ R3 (Deyr) rainfall domain",
-   "text": "Category agreement of 100% within the compared area, which covers >99% of the analysed domain. Predominant category in both: above normal. Periods differ (Oct 2026–Dec 2026 vs Oct 2026–Jan 2027).",
+   "text": "Category agreement of 99.8% within the compared area, which covers >99% of the analysed domain. Predominant category in both: above normal. Periods differ (Oct 2026–Dec 2026 vs Oct 2026–Jan 2027).",
    "evidence_ids": [
     "platform_forecast_ondj",
     "icpac_ond_2026_update_rainfall_map",
@@ -605,7 +605,7 @@
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — whole zones (rainfall regions)",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone III (Southwest): opposing: platform below normal, EMI above normal, platform 47% / 25% / 28%; zone VI (South Highland): both favour above normal, platform 21% / 24% / 55%; zone VII (South): both favour above normal, platform 24% / 26% / 50%; zone VIII (South-Southeast lowlands): both favour above normal, platform 18% / 24% / 58%. Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged.",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone III (Southwest): opposing: platform below normal, EMI above normal, platform 48% / 25% / 27%; zone VI (South Highland): both favour above normal, platform 19% / 25% / 56%; zone VII (South): both favour above normal, platform 22% / 26% / 52%; zone VIII (South-Southeast lowlands): both favour above normal, platform 16% / 25% / 59%. Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged.",
    "evidence_ids": [
     "emi_bega_2026_27_outlook_page21",
     "platform_forecast_ondj"
@@ -626,7 +626,7 @@
    "source_id": "emi_bega_2026_27_outlook",
    "status": "validated",
    "title": "EMI — whole zones (rainfall regions)",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone VI (South Highland): both favour above normal, platform 21% / 24% / 55% over the whole zone (66% of it in the domain); zone VII (South): both favour above normal, platform 24% / 26% / 50% over the whole zone (71% of it in the domain); zone VIII (South-Southeast lowlands): both favour above normal, platform 18% / 24% / 58% over the whole zone (99% of it in the domain). Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged.",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone VI (South Highland): both favour above normal, platform 19% / 25% / 56% over the whole zone (66% of it in the domain); zone VII (South): both favour above normal, platform 22% / 26% / 52% over the whole zone (71% of it in the domain); zone VIII (South-Southeast lowlands): both favour above normal, platform 16% / 25% / 59% over the whole zone (99% of it in the domain). Zone boundaries: EMI homogeneous rainfall regions as published in 2013 (Korecha and Sorteberg), assumed unchanged.",
    "evidence_ids": [
     "emi_bega_2026_27_outlook_page21",
     "platform_forecast_ondj"
@@ -645,7 +645,7 @@
    "source_id": null,
    "status": "validated",
    "title": "Robustness of the extraction",
-   "text": "The EMI category relationships are stable under the tested location and neighbourhood changes (100 variants per zone: half-widths 0.25–1.0°, arrow-tip shifts up to ±0.5°). With the ICPAC map as digitized and shifted by one source pixel in each direction, the All Ethiopia category agreement stays between 94.5% and 95.0%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the ONDJ R3 (Deyr) rainfall domain category agreement stays at 100%. These are bounded sensitivity checks of the extraction, not statistical confidence intervals; exact EMI zone comparisons remain unavailable.",
+   "text": "The EMI category relationships are stable under the tested location and neighbourhood changes (100 variants per zone: half-widths 0.25–1.0°, arrow-tip shifts up to ±0.5°). With the ICPAC map as digitized and shifted by one source pixel in each direction, the All Ethiopia category agreement stays between 93.6% and 94.2%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the ONDJ R3 (Deyr) rainfall domain category agreement stays at 99.8%. These are bounded sensitivity checks of the extraction, not statistical confidence intervals; exact EMI zone comparisons remain unavailable.",
    "evidence_ids": [],
    "scope": {}
   }
@@ -656,7 +656,7 @@
    "status": "validated",
    "zone": "III",
    "official": "20% / 25% / 55%",
-   "platform": "50% / 31% / 19%",
+   "platform": "53% / 29% / 18%",
    "relationship": "Opposing categories",
    "relationship_code": "opposing_favoured_categories",
    "domain_share": 0.0,
@@ -678,7 +678,7 @@
     "season_domain": 0.0
    },
    "zone_cells": 200,
-   "zone_mean": "47% / 25% / 28%",
+   "zone_mean": "48% / 25% / 27%",
    "zone_relationship": "Opposing categories",
    "zone_relationship_code": "opposing_favoured_categories"
   },
@@ -687,7 +687,7 @@
    "status": "validated",
    "zone": "VI",
    "official": "15% / 25% / 60%",
-   "platform": "22% / 24% / 54%",
+   "platform": "19% / 24% / 57%",
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.4375,
@@ -709,7 +709,7 @@
     "season_domain": 0.6643356643356644
    },
    "zone_cells": 143,
-   "zone_mean": "21% / 24% / 55%",
+   "zone_mean": "19% / 25% / 56%",
    "zone_relationship": "Same category",
    "zone_relationship_code": "same_favoured_category"
   },
@@ -718,7 +718,7 @@
    "status": "validated",
    "zone": "VII",
    "official": "25% / 15% / 60%",
-   "platform": "24% / 21% / 55%",
+   "platform": "20% / 22% / 58%",
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.6875,
@@ -740,7 +740,7 @@
     "season_domain": 0.7068965517241379
    },
    "zone_cells": 58,
-   "zone_mean": "24% / 26% / 50%",
+   "zone_mean": "22% / 26% / 52%",
    "zone_relationship": "Same category",
    "zone_relationship_code": "same_favoured_category"
   },
@@ -749,7 +749,7 @@
    "status": "validated",
    "zone": "VIII",
    "official": "10% / 15% / 75%",
-   "platform": "19% / 24% / 57%",
+   "platform": "16% / 30% / 54%",
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 1.0,
@@ -771,7 +771,7 @@
     "season_domain": 0.986046511627907
    },
    "zone_cells": 430,
-   "zone_mean": "18% / 24% / 58%",
+   "zone_mean": "16% / 25% / 59%",
    "zone_relationship": "Same category",
    "zone_relationship_code": "same_favoured_category"
   }
@@ -785,7 +785,7 @@
    "zone": "III",
    "official": "no forecast category shown",
    "official_note": "100% of the sample grey (no forecast category shown)",
-   "platform": "50% / 31% / 19%",
+   "platform": "53% / 29% / 18%",
    "relationship": "Not comparable: ICPAC shows no forecast category here",
    "relationship_code": "unknown",
    "domain_share": 0.0,
@@ -807,7 +807,7 @@
    "zone": "VI",
    "official": "Above normal 70–80%",
    "official_note": "31% of the sample grey (no forecast category shown)",
-   "platform": "22% / 24% / 54%",
+   "platform": "19% / 24% / 57%",
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.4375,
@@ -829,7 +829,7 @@
    "zone": "VII",
    "official": "Above normal 60–70%",
    "official_note": "",
-   "platform": "24% / 21% / 55%",
+   "platform": "20% / 22% / 58%",
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 0.6875,
@@ -851,7 +851,7 @@
    "zone": "VIII",
    "official": "Above normal 70–80%",
    "official_note": "75% of shown cells; also Above normal 80–90% (25%)",
-   "platform": "19% / 24% / 57%",
+   "platform": "16% / 30% / 54%",
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
    "domain_share": 1.0,
@@ -873,7 +873,7 @@
    "zone": null,
    "official": "Above normal (most often 70–80%)",
    "official_note": "shown on 46% of the area; 54% grey (no forecast category shown)",
-   "platform": "28% / 27% / 45%",
+   "platform": "27% / 27% / 46%",
    "relationship": "Same category (where both show a category)",
    "relationship_code": "same_favoured_category",
    "domain_share": null,
@@ -892,7 +892,7 @@
    "zone": null,
    "official": "Above normal (most often 70–80%)",
    "official_note": "shown on >99% of the area; <1% grey (no forecast category shown)",
-   "platform": "19% / 24% / 57%",
+   "platform": "16% / 26% / 58%",
    "relationship": "Same category (where both show a category)",
    "relationship_code": "same_favoured_category",
    "domain_share": null,
@@ -913,7 +913,7 @@
    "area_key": "zone",
    "status": "validated",
    "relationship": "opposing_favoured_categories",
-   "text": "The platform favours below-normal rainfall near the arrow of EMI zone III, while the EMI outlook favours above-normal rainfall. This indicates disagreement in the favoured rainfall category. EMI prints 20% / 25% / 55% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 50% / 31% / 19%. Over the whole zone (the EMI Southwest rainfall region), the platform area mean is 47% / 25% / 28%: opposing categories.",
+   "text": "The platform favours below-normal rainfall near the arrow of EMI zone III, while the EMI outlook favours above-normal rainfall. This indicates disagreement in the favoured rainfall category. EMI prints 20% / 25% / 55% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 53% / 29% / 18%. Over the whole zone (the EMI Southwest rainfall region), the platform area mean is 48% / 25% / 27%: opposing categories.",
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
@@ -927,7 +927,7 @@
    "area_key": "zone",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "Both outlooks favour wetter-than-normal conditions near the arrow of EMI zone VI. EMI prints 15% / 25% / 60% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 22% / 24% / 54%. Over the whole zone (the EMI South Highland rainfall region), the platform area mean is 21% / 24% / 55%: same category.",
+   "text": "Both outlooks favour wetter-than-normal conditions near the arrow of EMI zone VI. EMI prints 15% / 25% / 60% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 19% / 24% / 57%. Over the whole zone (the EMI South Highland rainfall region), the platform area mean is 19% / 25% / 56%: same category.",
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
@@ -941,7 +941,7 @@
    "area_key": "zone",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "Both outlooks favour wetter-than-normal conditions near the arrow of EMI zone VII. EMI prints 25% / 15% / 60% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 24% / 21% / 55%. Over the whole zone (the EMI South rainfall region), the platform area mean is 24% / 26% / 50%: same category.",
+   "text": "Both outlooks favour wetter-than-normal conditions near the arrow of EMI zone VII. EMI prints 25% / 15% / 60% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 20% / 22% / 58%. Over the whole zone (the EMI South rainfall region), the platform area mean is 22% / 26% / 52%: same category.",
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
@@ -955,7 +955,7 @@
    "area_key": "zone",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "Both outlooks favour wetter-than-normal conditions near the arrow of EMI zone VIII. EMI prints 10% / 15% / 75% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 19% / 24% / 57%. Over the whole zone (the EMI South-Southeast lowlands rainfall region), the platform area mean is 18% / 24% / 58%: same category.",
+   "text": "Both outlooks favour wetter-than-normal conditions near the arrow of EMI zone VIII. EMI prints 10% / 15% / 75% (below / near / above); the platform's area mean of local probabilities in the sampled neighbourhood is 16% / 30% / 54%. Over the whole zone (the EMI South-Southeast lowlands rainfall region), the platform area mean is 16% / 25% / 59%: same category.",
    "evidence_ids": [
     "platform_forecast_ondj",
     "emi_bega_2026_27_outlook_page21"
@@ -980,7 +980,7 @@
    "area_key": "all_ethiopia",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "Above-normal rainfall is the predominant tendency in both outlooks over their shared displayed area in Ethiopia, with localized disagreement. ICPAC shows a favoured category on 46% of Ethiopia and no forecast category shown (the legend does not explain the grey areas) on 54%; where it shows one it favours above normal on >99%, most often at 70-80% and 80-90%. The platform favours above normal on 71% and below normal on 17% of Ethiopia. There is category agreement of 94.5% within the compared area, which covers 45% of the analysed national area; opposite categories (above vs below) on 5% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Oct 2026–Dec 2026 and the platform Oct 2026–Jan 2027 (Jan 2027 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "text": "Above-normal rainfall is the predominant tendency in both outlooks over their shared displayed area in Ethiopia, with localized disagreement. ICPAC shows a favoured category on 46% of Ethiopia and no forecast category shown (the legend does not explain the grey areas) on 54%; where it shows one it favours above normal on >99%, most often at 70-80% and 80-90%. The platform favours above normal on 69% and below normal on 16% of Ethiopia. There is category agreement of 93.6% within the compared area, which covers 46% of the analysed national area; opposite categories (above vs below) on 6% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Oct 2026–Dec 2026 and the platform Oct 2026–Jan 2027 (Jan 2027 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
    "evidence_ids": [
     "platform_forecast_ondj",
     "icpac_ond_2026_update_rainfall_map",
@@ -995,7 +995,7 @@
    "area_key": "season_domain",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "Both outlooks favour above normal rainfall throughout the part of the ONDJ R3 (Deyr) rainfall domain where both show a favoured category. ICPAC shows a favoured category on >99% of the ONDJ R3 (Deyr) rainfall domain and no forecast category shown (the legend does not explain the grey areas) on <1%; where it shows one it favours above normal on 100%, most often at 70-80% and 80-90%. The platform favours above normal on 100% and below normal on 0% of the ONDJ R3 (Deyr) rainfall domain. There is category agreement of 100% within the compared area, which covers >99% of the analysed domain. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Oct 2026–Dec 2026 and the platform Oct 2026–Jan 2027 (Jan 2027 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "text": "Above-normal rainfall is the predominant tendency in both outlooks over their shared displayed area in the ONDJ R3 (Deyr) rainfall domain, with localized disagreement. ICPAC shows a favoured category on >99% of the ONDJ R3 (Deyr) rainfall domain and no forecast category shown (the legend does not explain the grey areas) on <1%; where it shows one it favours above normal on 100%, most often at 70-80% and 80-90%. The platform favours above normal on >99% and below normal on 0% of the ONDJ R3 (Deyr) rainfall domain. There is category agreement of 99.8% within the compared area, which covers >99% of the analysed domain. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Oct 2026–Dec 2026 and the platform Oct 2026–Jan 2027 (Jan 2027 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
    "evidence_ids": [
     "platform_forecast_ondj",
     "icpac_ond_2026_update_rainfall_map",
@@ -1105,7 +1105,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-10T19:40:44+00:00",
+ "created_utc": "2026-10-10T23:59:05+00:00",
  "engine": "rules v2",
  "reference_layers": [
   {

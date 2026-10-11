@@ -33,7 +33,7 @@
     "dpi": 180,
     "pdf": true
   },
-  "season_domain_mask": "data/masks/fmam_coverage_chirps_v2_1993_2025_v1.nc",
+  "season_domain_mask": "data/masks/fmam_coverage_chirps_v3_1993_2025_v1.nc",
   "extra_domain_masks": [
     {
       "view": "fmam_main_season_domain",

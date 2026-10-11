@@ -99,8 +99,8 @@
   "reference_cache": "data/climatology_references",
   "output_root": "outputs/rainfall_domain_review/ondj_v1",
   "export": {
-    "mask": "data/masks/ondj_coverage_chirps_v2_1993_2024_v1.nc",
-    "boundary": "data/boundaries/ondj_coverage_v1/ondj_coverage_chirps_v2_1993_2024_v1"
+    "mask": "data/masks/ondj_coverage_chirps_v3_1993_2024_v1.nc",
+    "boundary": "data/boundaries/ondj_coverage_v1/ondj_coverage_chirps_v3_1993_2024_v1"
   },
   "note": "Evidence for the ONDJ rainfall domain. No candidate is selected: the operational ONDJ domain (R3 Deyr) is unchanged. No EMI long-term Bega maps are registered: the Bega 2026/27 Seasonal Climate Forecast had no document when checked (2026-10-10). ONDJ months are summed within each calendar year (January of the same year); the climatological mean is unaffected by the pairing."
 }

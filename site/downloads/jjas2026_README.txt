@@ -2,24 +2,24 @@ JJAS 2026 — May initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-10 20:19 UTC (site release 2026-10-10.2) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-11 00:15 UTC (site release 2026-10-11.1) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
 The forecast leans toward below normal rainfall in the JJAS R1+R2 rainfall domain:
-averaged over the area, the local probability of below normal is 55%, against about 33%
-for climatology. Mean forecast rainfall is 614 mm against a 1993–2025 average of 715 mm
-(−101 mm, −14%).
+averaged over the area, the local probability of below normal is 51%, against about 33%
+for climatology. Mean forecast rainfall is 700 mm against a 1993–2025 average of 831 mm
+(−131 mm, −16%).
 
 Model initialization: 1 May 2026 · ECMWF SEAS5 (system 51), 51 members
 Target period: 1 Jun 2026 – 30 Sep 2026
-Forecast record: Frozen 4 Oct 2026 (after the target period ended, before this project downloaded its observations; SHA-256 manifest)
+Forecast record: Frozen 10 Oct 2026. Recalibrated with CHIRPS v3.0 when its observations for Jun 2026–Aug 2026 were already available (the fit itself uses 1993–2025 only): a retrospective reconstruction, not a forecast frozen before its outcome (SHA-256 manifest)
 Publication status: Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast
-Reference period: CHIRPS v2.0 JJAS 1993–2025 (33 seasons)
+Reference period: CHIRPS v3.0 JJAS 1993–2025 (33 seasons)
 Observations processed through: August 2026 (Jun, Jul, Aug)
-CHIRPS archive: Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found
-Verification last run: 5 Oct 2026
-Method / version: Shared climatology blend (λ = 0.50 for JJAS) · code 39e6509
+CHIRPS archive: Official CHIRPS v3.0 monthly listing checked 11 Oct 2026: monthly files through Aug 2026
+Verification last run: 10 Oct 2026
+Method / version: Shared climatology blend (λ = 0.59 for JJAS) · code 1287490
 Rainfall domain: Fixed 1993-2025 descriptive domain: cleaned GitHub-refined R1/R2; JJAS climatological rainfall >=120 mm and >=20% of annual rainfall. The same domain is used for Jun, Jul, Aug, Sep and JJAS. No onset gate.
 
 Contents
@@ -44,4 +44,4 @@ the amount-corrected ensemble.
 Sources and attribution
 -----------------------
 Contains modified Copernicus Climate Change Service information (ECMWF SEAS5, system 51).
-CHIRPS v2.0: Climate Hazards Center, UC Santa Barbara.
+CHIRPS v3.0: Climate Hazards Center, UC Santa Barbara. Funk et al. (2026), The Climate Hazards Center Infrared Precipitation with Stations, Version 3, Scientific Data 13, 718, doi:10.1038/s41597-026-07096-4

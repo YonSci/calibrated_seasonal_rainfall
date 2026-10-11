@@ -671,7 +671,7 @@
       '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(x => '<td>' + x + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
     let h = (R.selected ? '' : '<p class="notice">Evidence only: no candidate has been selected for ' + esc(R.season) + ', so the forecast products keep their current domain (' +
         esc(c.views.filter(v => v[0] !== 'all_ethiopia').map(v => v[1]).join('; ')) + ').</p>') +
-      '<p class="caveat">' + esc(R.season) + ' climatology from CHIRPS v2.0 ' + esc(R.period) + ' · built ' + esc(R.built.slice(0, 10)) +
+      '<p class="caveat">' + esc(R.season) + ' climatology from ' + esc(R.dataset || 'CHIRPS') + ' ' + esc(R.period) + ' · built ' + esc(R.built.slice(0, 10)) +
       ' · <a href="' + siteURL(R.report) + '">Full review report</a></p>';
     if (R.stale.length) h += '<p class="notice">This review was built before a change to ' + esc(R.stale.join(', ')) + '; its numbers describe the earlier inputs.</p>';
     h += '<p>' + (R.selected ? 'Selected domain: <strong>' + esc(R.selected) + '</strong>' + (R.rationale ? ' — ' + esc(R.rationale) : '')

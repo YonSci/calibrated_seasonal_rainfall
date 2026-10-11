@@ -2,25 +2,25 @@ FMAM 2026 — February initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-10 20:19 UTC (site release 2026-10-10.2) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-11 00:15 UTC (site release 2026-10-11.1) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
 The forecast leans toward above normal rainfall in the FMAM rainfall contribution domain:
-averaged over the area, the local probability of above normal is 43%, against about 33%
-for climatology. Mean forecast rainfall is 316 mm against a 1993–2025 average of 287 mm
-(+29 mm, +10%).
+averaged over the area, the local probability of above normal is 44%, against about 33%
+for climatology. Mean forecast rainfall is 347 mm against a 1993–2025 average of 310 mm
+(+37 mm, +12%).
 
 Model initialization: 1 February 2026 · ECMWF SEAS5 (system 51), 51 members
 Target period: 1 Feb 2026 – 31 May 2026
-Forecast record: Frozen 9 Oct 2026 (after the target period ended, before this project downloaded its observations; SHA-256 manifest)
+Forecast record: Frozen 10 Oct 2026. Recalibrated with CHIRPS v3.0 when its observations for Feb 2026–May 2026 were already available (the fit itself uses 1993–2025 only): a retrospective reconstruction, not a forecast frozen before its outcome (SHA-256 manifest)
 Publication status: Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast
-Reference period: CHIRPS v2.0 FMAM 1993–2025 (33 seasons)
+Reference period: CHIRPS v3.0 FMAM 1993–2025 (33 seasons)
 Observations processed through: May 2026 (Feb, Mar, Apr, May)
-CHIRPS archive: Official CHIRPS v2.0 p25 by_month listing checked 10 Oct 2026: monthly files through Aug 2026; Feb 2026 file not found
-Verification last run: 10 Oct 2026
-Method / version: Shared climatology blend (λ = 0.44 for FMAM) · code 39e6509
-Rainfall domain: Fixed 1993-2025 CHIRPS v2.0 domain: cells where mean FMAM rainfall (actual-calendar monthly totals, February 29 included) is >= 100 mm and FMAM brings >= 20% of the mean annual rainfall (ratio of climatological means); complete baseline required; no patch removal or smoothing. Selected in assessment fmam_chirps_domain_review_v1. The same domain is used for the season and each of its months. The included share of Ethiopia describes this rule; it is not an independently established official share of FMAM-dependent area.
+CHIRPS archive: Official CHIRPS v3.0 monthly listing checked 11 Oct 2026: monthly files through Aug 2026
+Verification last run: 11 Oct 2026
+Method / version: Shared climatology blend (λ = 0.40 for FMAM) · code 1287490
+Rainfall domain: Fixed 1993-2025 CHIRPS v3.0 domain: cells where mean FMAM rainfall (actual-calendar monthly totals, February 29 included) is >= 100 mm and FMAM brings >= 20% of the mean annual rainfall (ratio of climatological means); complete baseline required; no patch removal or smoothing. Selected in assessment fmam_chirps_domain_review_v1. The same domain is used for the season and each of its months. The included share of Ethiopia describes this rule; it is not an independently established official share of FMAM-dependent area.
 
 Contents
 --------
@@ -44,4 +44,4 @@ the amount-corrected ensemble.
 Sources and attribution
 -----------------------
 Contains modified Copernicus Climate Change Service information (ECMWF SEAS5, system 51).
-CHIRPS v2.0: Climate Hazards Center, UC Santa Barbara.
+CHIRPS v3.0: Climate Hazards Center, UC Santa Barbara. Funk et al. (2026), The Climate Hazards Center Infrared Precipitation with Stations, Version 3, Scientific Data 13, 718, doi:10.1038/s41597-026-07096-4

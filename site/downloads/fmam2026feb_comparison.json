@@ -5,7 +5,7 @@
   "target_start": "2026-02-01",
   "target_end": "2026-05-31",
   "native_forecast": "outputs/verification_2026_fmam_feb/frozen_forecasts/init02_FMAM/forecast_2026.nc",
-  "native_sha256": "0bbeeff048ee36bdf52cd5f88cda5a2b29c698721c75e042c8f834ceabc29216",
+  "native_sha256": "8dccc5619d4f712a0bbaa93003b5b2dc8e2a4566b85eabd77c864c56dddfc92f",
   "minimum_leading_probability": 0.4,
   "areas": {
    "all_ethiopia": "All Ethiopia",
@@ -173,16 +173,16 @@
    "basis": "zone polygons digitized from the EMI figure",
    "value": {
     "mean_local_probabilities": [
-     0.3153669435487847,
-     0.3303948847220045,
-     0.3542381717292106
+     0.31032407575288407,
+     0.3388683341464735,
+     0.3508075901006422
     ],
     "cells": 309,
     "region_name": null,
     "basis": "zone polygons digitized from the EMI figure",
-    "domain_share": 0.7928802588996764,
+    "domain_share": 0.7637540453074434,
     "area_shares": {
-     "season_domain": 0.7928802588996764,
+     "season_domain": 0.7637540453074434,
      "fmam_main_season_domain": 0.012944983818770227
     },
     "relationship": "weak_signal",
@@ -229,19 +229,19 @@
    "basis": "zone polygons digitized from the EMI figure",
    "value": {
     "mean_local_probabilities": [
-     0.2570657807674874,
-     0.34912671691154523,
-     0.3938075023209674
+     0.2502201782508811,
+     0.3384944861357286,
+     0.41128533561339015
     ],
-    "cells": 402,
+    "cells": 408,
     "region_name": null,
     "basis": "zone polygons digitized from the EMI figure",
-    "domain_share": 0.6840796019900498,
+    "domain_share": 0.7328431372549019,
     "area_shares": {
-     "season_domain": 0.6840796019900498,
-     "fmam_main_season_domain": 0.16666666666666666
+     "season_domain": 0.7328431372549019,
+     "fmam_main_season_domain": 0.1642156862745098
     },
-    "relationship": "weak_signal",
+    "relationship": "same_favoured_category",
     "status": "validated"
    }
   },
@@ -285,9 +285,9 @@
    "basis": "zone polygons digitized from the EMI figure",
    "value": {
     "mean_local_probabilities": [
-     0.2254893605910239,
-     0.32646209707281704,
-     0.44804854233615915
+     0.21896340919001964,
+     0.33427176938370756,
+     0.4467648214262728
     ],
     "cells": 253,
     "region_name": null,
@@ -341,16 +341,16 @@
    "basis": "zone polygons digitized from the EMI figure",
    "value": {
     "mean_local_probabilities": [
-     0.19571460988521672,
-     0.31872908979959697,
-     0.4855563003151862
+     0.19191724229151205,
+     0.28910994608716717,
+     0.5189728116213207
     ],
     "cells": 331,
     "region_name": null,
     "basis": "zone polygons digitized from the EMI figure",
-    "domain_share": 0.9093655589123867,
+    "domain_share": 0.9939577039274925,
     "area_shares": {
-     "season_domain": 0.9093655589123867,
+     "season_domain": 0.9939577039274925,
      "fmam_main_season_domain": 0.9305135951661632
     },
     "relationship": "same_favoured_category",
@@ -374,51 +374,51 @@
    "reason": null,
    "basis": "reviewed_digitization",
    "value": {
-    "area_share_official_forecast_shown": 0.8883462213591926,
-    "area_share_official_no_forecast": 0.11165377864080737,
-    "area_share_both_favoured": 0.5922145412383907,
-    "agreement_share_where_both_favoured": 0.54802740322772,
-    "opposing_share_where_both_favoured": 0.11345235261567567,
+    "area_share_official_forecast_shown": 0.8887899835589228,
+    "area_share_official_no_forecast": 0.11121001644107704,
+    "area_share_both_favoured": 0.6824949097785944,
+    "agreement_share_where_both_favoured": 0.5422665979515584,
+    "opposing_share_where_both_favoured": 0.10400017215172697,
     "official_category_shares": {
-     "below": 0.061926674539698794,
-     "near": 0.2503467789772973,
-     "above": 0.6877265464830039
+     "below": 0.06164975379689254,
+     "near": 0.2536990424139466,
+     "above": 0.684651203789161
     },
     "official_interval_shares": {
-     "below 40-50%": 0.061926674539698794,
-     "near 33-40%": 0.2503467789772973,
-     "above 33-40%": 0.000747009372706041,
-     "above 40-50%": 0.5730307798957781,
-     "above 50-60%": 0.11394875721451977
+     "below 40-50%": 0.06164975379689254,
+     "near 33-40%": 0.2536990424139466,
+     "above 33-40%": 0.0007436689319039053,
+     "above 40-50%": 0.5704683282479368,
+     "above 50-60%": 0.1134392066093203
     },
     "platform_category_shares": {
-     "below": 0.0744852142195819,
-     "near": 0.06288568131327789,
-     "above": 0.5022879800942501,
-     "weak": 0.36034112437289
+     "below": 0.07884075551875933,
+     "near": 0.098986817114521,
+     "above": 0.5652159429439726,
+     "weak": 0.256956484422747
     },
     "platform_mean_local_probabilities": [
-     0.2657686995282153,
-     0.33018207952520684,
-     0.4040492209465779
+     0.260256118628429,
+     0.32322288895872764,
+     0.4165209924128432
     ],
-    "cells": 1478,
+    "cells": 1484,
     "registration_sensitivity": {
      "shifts_px": 8,
      "agreement_range": [
-      0.53657809459729,
-      0.5556581852642235
+      0.5380589846649526,
+      0.546865698006757
      ],
      "compared_area_range": [
-      0.5895065630975006,
-      0.5928872893101791
+      0.677804785671852,
+      0.6831649840477777
      ]
     },
     "overlap_majority": {
      "official": "above",
      "platform": "above",
-     "official_share": 0.6382404292379437,
-     "platform_share": 0.8447690193515167
+     "official_share": 0.6490636927031869,
+     "platform_share": 0.8164692575203067
     }
    }
   },
@@ -430,50 +430,50 @@
    "reason": null,
    "basis": "reviewed_digitization",
    "value": {
-    "area_share_official_forecast_shown": 1.0,
-    "area_share_official_no_forecast": 0.0,
-    "area_share_both_favoured": 0.7211278753561928,
-    "agreement_share_where_both_favoured": 0.5501125037583954,
-    "opposing_share_where_both_favoured": 0.09438712527089106,
+    "area_share_official_forecast_shown": 0.9973692739839995,
+    "area_share_official_no_forecast": 0.002630726016000486,
+    "area_share_both_favoured": 0.8221555886529757,
+    "agreement_share_where_both_favoured": 0.5507173217111235,
+    "opposing_share_where_both_favoured": 0.09249512527770298,
     "official_category_shares": {
-     "below": 0.06808869185348652,
-     "near": 0.2597442094559439,
-     "above": 0.6721670986905696
+     "below": 0.06907003270508957,
+     "near": 0.2721746481924132,
+     "above": 0.6587553191024972
     },
     "official_interval_shares": {
-     "below 40-50%": 0.06808869185348652,
-     "near 33-40%": 0.2597442094559439,
-     "above 40-50%": 0.5933804278230398,
-     "above 50-60%": 0.07878667086752988
+     "below 40-50%": 0.06907003270508957,
+     "near 33-40%": 0.2721746481924132,
+     "above 40-50%": 0.5838127882087936,
+     "above 50-60%": 0.07494253089370365
     },
     "platform_category_shares": {
-     "below": 0.01205134274004666,
-     "near": 0.06778915168746467,
-     "above": 0.6412873809286815,
-     "weak": 0.2788721246438071
+     "below": 0.01602608589204904,
+     "near": 0.10605158459588142,
+     "above": 0.700954214544331,
+     "weak": 0.17696811496773848
     },
     "platform_mean_local_probabilities": [
-     0.23809093711304907,
-     0.3325022633599537,
-     0.42940679952699723
+     0.23369961570565054,
+     0.322426717969348,
+     0.44387366632500147
     ],
-    "cells": 1075,
+    "cells": 1120,
     "registration_sensitivity": {
      "shifts_px": 8,
      "agreement_range": [
-      0.5372324577940164,
-      0.5560141292429703
+      0.5480203533817705,
+      0.5539972780444294
      ],
      "compared_area_range": [
-      0.7201928676283895,
-      0.7211278753561928
+      0.8212578824362726,
+      0.8221555886529757
      ]
     },
     "overlap_majority": {
      "official": "above",
      "platform": "above",
-     "official_share": 0.6145040318736709,
-     "platform_share": 0.8892838605246329
+     "official_share": 0.6290337688020022,
+     "platform_share": 0.8515151241774769
     }
    }
   },
@@ -487,9 +487,9 @@
    "value": {
     "area_share_official_forecast_shown": 1.0,
     "area_share_official_no_forecast": 0.0,
-    "area_share_both_favoured": 0.9359937046137238,
-    "agreement_share_where_both_favoured": 0.5221965849667065,
-    "opposing_share_where_both_favoured": 0.11197536660063188,
+    "area_share_both_favoured": 0.9671645464795047,
+    "agreement_share_where_both_favoured": 0.5267882136311428,
+    "opposing_share_where_both_favoured": 0.11739280546267171,
     "official_category_shares": {
      "below": 0.1239670778527791,
      "near": 0.3680745009745998,
@@ -503,32 +503,32 @@
     },
     "platform_category_shares": {
      "below": 0.0,
-     "near": 0.02790587761536192,
-     "above": 0.9080878269983617,
-     "weak": 0.06400629538627634
+     "near": 0.03642872245746459,
+     "above": 0.9307358240220401,
+     "weak": 0.03283545352049531
     },
     "platform_mean_local_probabilities": [
-     0.20896034354729984,
-     0.32367260057518255,
-     0.4673670558775176
+     0.20337775001506045,
+     0.30814285056155744,
+     0.48847939942338203
     ],
     "cells": 573,
     "registration_sensitivity": {
      "shifts_px": 8,
      "agreement_range": [
-      0.5128904490419545,
-      0.5315419565558412
+      0.5213555976682831,
+      0.5358507080966158
      ],
      "compared_area_range": [
-      0.9359937046137238,
-      0.9359937046137238
+      0.9671645464795047,
+      0.9671645464795047
      ]
     },
     "overlap_majority": {
      "official": "above",
      "platform": "above",
-     "official_share": 0.5259483449698136,
-     "platform_share": 0.9701858276633617
+     "official_share": 0.5216333996521961,
+     "platform_share": 0.9623345142353845
     }
    }
   },
@@ -567,14 +567,14 @@
    "source_id": "icpac_mam_2026_rainfall",
    "status": "validated",
    "title": "ICPAC — All Ethiopia",
-   "text": "Category agreement of 54.8% within the compared area, which covers 59% of the analysed national area. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
+   "text": "Category agreement of 54.2% within the compared area, which covers 68% of the analysed national area. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
     "icpac_mam_2026_rainfall_comparison_map"
    ],
    "scope": {
-    "compared_area_share": 0.5922145412383907,
+    "compared_area_share": 0.6824949097785944,
     "period": "Mar 2026–May 2026 vs Feb 2026–May 2026"
    }
   },
@@ -584,14 +584,14 @@
    "source_id": "icpac_mam_2026_rainfall",
    "status": "validated",
    "title": "ICPAC — FMAM rainfall contribution domain",
-   "text": "Category agreement of 55.0% within the compared area, which covers 72% of the analysed domain. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
+   "text": "Category agreement of 55.1% within the compared area, which covers 82% of the analysed domain. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
     "icpac_mam_2026_rainfall_comparison_map"
    ],
    "scope": {
-    "compared_area_share": 0.7211278753561928,
+    "compared_area_share": 0.8221555886529757,
     "period": "Mar 2026–May 2026 vs Feb 2026–May 2026"
    }
   },
@@ -601,14 +601,14 @@
    "source_id": "icpac_mam_2026_rainfall",
    "status": "validated",
    "title": "ICPAC — FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual)",
-   "text": "Category agreement of 52.2% within the compared area, which covers 94% of the analysed domain. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
+   "text": "Category agreement of 52.7% within the compared area, which covers 97% of the analysed domain. Predominant category in both: above normal. Periods differ (Mar 2026–May 2026 vs Feb 2026–May 2026).",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
     "icpac_mam_2026_rainfall_comparison_map"
    ],
    "scope": {
-    "compared_area_share": 0.9359937046137238,
+    "compared_area_share": 0.9671645464795047,
     "period": "Mar 2026–May 2026 vs Feb 2026–May 2026"
    }
   },
@@ -619,7 +619,7 @@
    "source_id": "emi_belg_2026_outlook",
    "status": "validated",
    "title": "EMI — whole zones",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 32% / 33% / 35%; zone North-central: no clear category in one source, platform 26% / 35% / 39%; zone South-central: both favour above normal, platform 22% / 33% / 45%; zone Southeast: both favour above normal, platform 20% / 32% / 48%. Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 31% / 34% / 35%; zone North-central: both favour above normal, platform 25% / 34% / 41%; zone South-central: both favour above normal, platform 22% / 33% / 45%; zone Southeast: both favour above normal, platform 19% / 29% / 52%. Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
    "evidence_ids": [
     "emi_belg_2026_outlook_page22",
     "platform_forecast_fmam"
@@ -640,7 +640,7 @@
    "source_id": "emi_belg_2026_outlook",
    "status": "validated",
    "title": "EMI — whole zones",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 32% / 33% / 35% over the whole zone (79% of it in the domain); zone North-central: no clear category in one source, platform 26% / 35% / 39% over the whole zone (68% of it in the domain); zone South-central: both favour above normal, platform 22% / 33% / 45%; zone Southeast: both favour above normal, platform 20% / 32% / 48% over the whole zone (91% of it in the domain). Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 31% / 34% / 35% over the whole zone (76% of it in the domain); zone North-central: both favour above normal, platform 25% / 34% / 41% over the whole zone (73% of it in the domain); zone South-central: both favour above normal, platform 22% / 33% / 45%; zone Southeast: both favour above normal, platform 19% / 29% / 52% over the whole zone (99% of it in the domain). Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
    "evidence_ids": [
     "emi_belg_2026_outlook_page22",
     "platform_forecast_fmam"
@@ -661,7 +661,7 @@
    "source_id": "emi_belg_2026_outlook",
    "status": "validated",
    "title": "EMI — whole zones",
-   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 32% / 33% / 35% over the whole zone (1% of it in the domain); zone North-central: no clear category in one source, platform 26% / 35% / 39% over the whole zone (17% of it in the domain); zone South-central: both favour above normal, platform 22% / 33% / 45% over the whole zone (77% of it in the domain); zone Southeast: both favour above normal, platform 20% / 32% / 48% over the whole zone (93% of it in the domain). Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
+   "text": "Platform area mean of local probabilities over each EMI zone, below / near / above: zone West: no clear category in one source, platform 31% / 34% / 35% over the whole zone (1% of it in the domain); zone North-central: both favour above normal, platform 25% / 34% / 41% over the whole zone (16% of it in the domain); zone South-central: both favour above normal, platform 22% / 33% / 45% over the whole zone (77% of it in the domain); zone Southeast: both favour above normal, platform 19% / 29% / 52% over the whole zone (93% of it in the domain). Zone boundaries: the zone polygons digitized from the EMI figure (georeferenced by fitting the country outline).",
    "evidence_ids": [
     "emi_belg_2026_outlook_page22",
     "platform_forecast_fmam"
@@ -681,7 +681,7 @@
    "source_id": null,
    "status": "validated",
    "title": "Robustness of the extraction",
-   "text": "With the ICPAC map as digitized and shifted by one source pixel in each direction, the All Ethiopia category agreement stays between 53.7% and 55.6%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the FMAM rainfall contribution domain category agreement stays between 53.7% and 55.6%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual) category agreement stays between 51.3% and 53.2%. These are bounded sensitivity checks of the extraction, not statistical confidence intervals; exact EMI zone comparisons remain unavailable.",
+   "text": "With the ICPAC map as digitized and shifted by one source pixel in each direction, the All Ethiopia category agreement stays between 53.8% and 54.7%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the FMAM rainfall contribution domain category agreement stays between 54.8% and 55.4%. With the ICPAC map as digitized and shifted by one source pixel in each direction, the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual) category agreement stays between 52.1% and 53.6%. These are bounded sensitivity checks of the extraction, not statistical confidence intervals; exact EMI zone comparisons remain unavailable.",
    "evidence_ids": [],
    "scope": {}
   }
@@ -704,13 +704,13 @@
     "emi_belg_2026_outlook_page22"
    ],
    "zone_name": null,
-   "zone_domain_share": 0.7928802588996764,
+   "zone_domain_share": 0.7637540453074434,
    "zone_area_shares": {
-    "season_domain": 0.7928802588996764,
+    "season_domain": 0.7637540453074434,
     "fmam_main_season_domain": 0.012944983818770227
    },
    "zone_cells": 309,
-   "zone_mean": "32% / 33% / 35%",
+   "zone_mean": "31% / 34% / 35%",
    "zone_relationship": "No clear category in one source",
    "zone_relationship_code": "weak_signal"
   },
@@ -731,15 +731,15 @@
     "emi_belg_2026_outlook_page22"
    ],
    "zone_name": null,
-   "zone_domain_share": 0.6840796019900498,
+   "zone_domain_share": 0.7328431372549019,
    "zone_area_shares": {
-    "season_domain": 0.6840796019900498,
-    "fmam_main_season_domain": 0.16666666666666666
+    "season_domain": 0.7328431372549019,
+    "fmam_main_season_domain": 0.1642156862745098
    },
-   "zone_cells": 402,
-   "zone_mean": "26% / 35% / 39%",
-   "zone_relationship": "No clear category in one source",
-   "zone_relationship_code": "weak_signal"
+   "zone_cells": 408,
+   "zone_mean": "25% / 34% / 41%",
+   "zone_relationship": "Same category",
+   "zone_relationship_code": "same_favoured_category"
   },
   {
    "id": "emi_belg_2026_outlook_zone_South-central_finding",
@@ -785,13 +785,13 @@
     "emi_belg_2026_outlook_page22"
    ],
    "zone_name": null,
-   "zone_domain_share": 0.9093655589123867,
+   "zone_domain_share": 0.9939577039274925,
    "zone_area_shares": {
-    "season_domain": 0.9093655589123867,
+    "season_domain": 0.9939577039274925,
     "fmam_main_season_domain": 0.9305135951661632
    },
    "zone_cells": 331,
-   "zone_mean": "20% / 32% / 48%",
+   "zone_mean": "19% / 29% / 52%",
    "zone_relationship": "Same category",
    "zone_relationship_code": "same_favoured_category"
   }
@@ -805,12 +805,12 @@
    "zone": "West",
    "official": "Above normal 40–50%",
    "official_note": "60% of shown cells; also Above normal 50–60% (36%), Near normal 33–40% (5%)",
-   "platform": "32% / 33% / 35%",
+   "platform": "31% / 34% / 35%",
    "relationship": "No clear category in one source",
    "relationship_code": "weak_signal",
-   "domain_share": 0.7928802588996764,
+   "domain_share": 0.7637540453074434,
    "area_shares": {
-    "season_domain": 0.7928802588996764,
+    "season_domain": 0.7637540453074434,
     "fmam_main_season_domain": 0.012944983818770227
    },
    "area_key": null,
@@ -827,14 +827,14 @@
    "location": "Within zone North-central",
    "zone": "North-central",
    "official": "Above normal 40–50%",
-   "official_note": "58% of shown cells; also Near normal 33–40% (32%), Below normal 40–50% (5%), Above normal 50–60% (5%), Above normal 33–40% (<1%); 4% of the sample grey (no forecast category shown)",
-   "platform": "26% / 35% / 39%",
-   "relationship": "No clear category in one source",
-   "relationship_code": "weak_signal",
-   "domain_share": 0.6840796019900498,
+   "official_note": "57% of shown cells; also Near normal 33–40% (33%), Below normal 40–50% (5%), Above normal 50–60% (5%), Above normal 33–40% (<1%); 4% of the sample grey (no forecast category shown)",
+   "platform": "25% / 34% / 41%",
+   "relationship": "Same category",
+   "relationship_code": "same_favoured_category",
+   "domain_share": 0.7328431372549019,
    "area_shares": {
-    "season_domain": 0.6840796019900498,
-    "fmam_main_season_domain": 0.16666666666666666
+    "season_domain": 0.7328431372549019,
+    "fmam_main_season_domain": 0.1642156862745098
    },
    "area_key": null,
    "evidence_ids": [
@@ -874,12 +874,12 @@
    "zone": "Southeast",
    "official": "Above normal 40–50%",
    "official_note": "77% of shown cells; also Near normal 33–40% (19%), Below normal 40–50% (4%)",
-   "platform": "20% / 32% / 48%",
+   "platform": "19% / 29% / 52%",
    "relationship": "Same category",
    "relationship_code": "same_favoured_category",
-   "domain_share": 0.9093655589123867,
+   "domain_share": 0.9939577039274925,
    "area_shares": {
-    "season_domain": 0.9093655589123867,
+    "season_domain": 0.9939577039274925,
     "fmam_main_season_domain": 0.9305135951661632
    },
    "area_key": null,
@@ -897,7 +897,7 @@
    "zone": null,
    "official": "Above normal (most often 40–50%)",
    "official_note": "shown on 89% of the area; 11% grey (no forecast category shown)",
-   "platform": "27% / 33% / 40%",
+   "platform": "26% / 32% / 42%",
    "relationship": "Same category (where both show a category)",
    "relationship_code": "same_favoured_category",
    "domain_share": null,
@@ -915,8 +915,8 @@
    "location": "FMAM rainfall contribution domain",
    "zone": null,
    "official": "Above normal (most often 40–50%)",
-   "official_note": "shown on 100% of the area; 0% grey (no forecast category shown)",
-   "platform": "24% / 33% / 43%",
+   "official_note": "shown on >99% of the area; <1% grey (no forecast category shown)",
+   "platform": "23% / 32% / 45%",
    "relationship": "Same category (where both show a category)",
    "relationship_code": "same_favoured_category",
    "domain_share": null,
@@ -935,7 +935,7 @@
    "zone": null,
    "official": "Above normal (most often 40–50%)",
    "official_note": "shown on 100% of the area; 0% grey (no forecast category shown)",
-   "platform": "21% / 32% / 47%",
+   "platform": "20% / 31% / 49%",
    "relationship": "Same category (where both show a category)",
    "relationship_code": "same_favoured_category",
    "domain_share": null,
@@ -956,7 +956,7 @@
    "area_key": "zone",
    "status": "validated",
    "relationship": "weak_signal",
-   "text": "The platform does not show a unique favoured category over EMI zone West under its applicable rule. EMI prints 25% / 30% / 45% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 32% / 33% / 35%: no clear category in one source.",
+   "text": "The platform does not show a unique favoured category over EMI zone West under its applicable rule. EMI prints 25% / 30% / 45% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 31% / 34% / 35%: no clear category in one source.",
    "evidence_ids": [
     "platform_forecast_fmam",
     "emi_belg_2026_outlook_page22"
@@ -969,8 +969,8 @@
    "area": "EMI zone North-central",
    "area_key": "zone",
    "status": "validated",
-   "relationship": "weak_signal",
-   "text": "The platform does not show a unique favoured category over EMI zone North-central under its applicable rule. EMI prints 10% / 30% / 60% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 26% / 35% / 39%: no clear category in one source.",
+   "relationship": "same_favoured_category",
+   "text": "Both outlooks favour wetter-than-normal conditions over EMI zone North-central. EMI prints 10% / 30% / 60% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 25% / 34% / 41%: same category.",
    "evidence_ids": [
     "platform_forecast_fmam",
     "emi_belg_2026_outlook_page22"
@@ -998,7 +998,7 @@
    "area_key": "zone",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "Both outlooks favour wetter-than-normal conditions over EMI zone Southeast. EMI prints 20% / 35% / 45% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 20% / 32% / 48%: same category.",
+   "text": "Both outlooks favour wetter-than-normal conditions over EMI zone Southeast. EMI prints 20% / 35% / 45% (below / near / above). Over the whole zone (as digitized from the EMI figure), the platform area mean is 19% / 29% / 52%: same category.",
    "evidence_ids": [
     "platform_forecast_fmam",
     "emi_belg_2026_outlook_page22"
@@ -1023,7 +1023,7 @@
    "area_key": "all_ethiopia",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "The outlooks favour different categories over much of their shared displayed area in Ethiopia. ICPAC shows a favoured category on 89% of Ethiopia and no forecast category shown (the legend does not explain the grey areas) on 11%; where it shows one it favours above normal on 69%, most often at 40-50% and 33-40%. The platform favours above normal on 50% and below normal on 7% of Ethiopia. There is category agreement of 54.8% within the compared area, which covers 59% of the analysed national area; opposite categories (above vs below) on 11% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "text": "The outlooks favour different categories over much of their shared displayed area in Ethiopia. ICPAC shows a favoured category on 89% of Ethiopia and no forecast category shown (the legend does not explain the grey areas) on 11%; where it shows one it favours above normal on 68%, most often at 40-50% and 33-40%. The platform favours above normal on 57% and below normal on 8% of Ethiopia. There is category agreement of 54.2% within the compared area, which covers 68% of the analysed national area; opposite categories (above vs below) on 10% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
@@ -1038,7 +1038,7 @@
    "area_key": "season_domain",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "The outlooks favour different categories over much of their shared displayed area in the FMAM rainfall contribution domain. ICPAC shows a favoured category on 100% of the FMAM rainfall contribution domain and no forecast category shown (the legend does not explain the grey areas) on 0%; where it shows one it favours above normal on 67%, most often at 40-50% and 33-40%. The platform favours above normal on 64% and below normal on 1% of the FMAM rainfall contribution domain. There is category agreement of 55.0% within the compared area, which covers 72% of the analysed domain; opposite categories (above vs below) on 9% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "text": "The outlooks favour different categories over much of their shared displayed area in the FMAM rainfall contribution domain. ICPAC shows a favoured category on >99% of the FMAM rainfall contribution domain and no forecast category shown (the legend does not explain the grey areas) on <1%; where it shows one it favours above normal on 66%, most often at 40-50% and 33-40%. The platform favours above normal on 70% and below normal on 2% of the FMAM rainfall contribution domain. There is category agreement of 55.1% within the compared area, which covers 82% of the analysed domain; opposite categories (above vs below) on 9% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
@@ -1053,7 +1053,7 @@
    "area_key": "fmam_main_season_domain",
    "status": "validated",
    "relationship": "same_favoured_category",
-   "text": "The outlooks favour different categories over much of their shared displayed area in the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual). ICPAC shows a favoured category on 100% of the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual) and no forecast category shown (the legend does not explain the grey areas) on 0%; where it shows one it favours above normal on 51%, most often at 40-50% and 33-40%. The platform favours above normal on 91% and below normal on 0% of the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual). There is category agreement of 52.2% within the compared area, which covers 94% of the analysed domain; opposite categories (above vs below) on 11% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
+   "text": "The outlooks favour different categories over much of their shared displayed area in the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual). ICPAC shows a favoured category on 100% of the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual) and no forecast category shown (the legend does not explain the grey areas) on 0%; where it shows one it favours above normal on 51%, most often at 40-50% and 33-40%. The platform favours above normal on 93% and below normal on 0% of the FMAM main-season rainfall domain (Belg / Gu / Ganna, >=40% of annual). There is category agreement of 52.7% within the compared area, which covers 97% of the analysed domain; opposite categories (above vs below) on 12% of the compared area. ICPAC publishes only the favoured category and its probability interval, so probabilities are not differenced. The official outlook covers Mar 2026–May 2026 and the platform Feb 2026–May 2026 (Feb 2026 only in the platform), so this compares spatial tendencies, not probabilities for the same seasonal event.",
    "evidence_ids": [
     "platform_forecast_fmam",
     "icpac_mam_2026_rainfall_map",
@@ -1174,7 +1174,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\feb_2026_fmam.json --workflow products --compare-external",
- "created_utc": "2026-10-10T19:40:22+00:00",
+ "created_utc": "2026-10-11T00:04:59+00:00",
  "engine": "rules v2",
  "reference_layers": [],
  "observed": {
@@ -1191,27 +1191,27 @@
     "area_key": "all_ethiopia",
     "area": "All Ethiopia",
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 1478,
-    "observation_coverage": 0.9960255514400644,
+    "cells": 1484,
+    "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.63965887562711,
+    "favoured_coverage": 0.7430435155772529,
     "observed_fractions": {
-     "below": 0.043502140475761855,
-     "near": 0.3796538979232377,
-     "above": 0.5768439616010004
+     "below": 0.10629419261528017,
+     "near": 0.3705353217530385,
+     "above": 0.5231704856316812
     },
-    "hit_share": 0.3624272424109288,
-    "near_other_share": 0.47630036864160075,
-    "opposite_share": 0.1612723889474704,
-    "chance_of_favoured": 0.33333333333333326,
+    "hit_share": 0.3252865791211671,
+    "near_other_share": 0.45347006122763706,
+    "opposite_share": 0.22124335965119588,
+    "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "below": 0.11644521331242054,
-     "near": 0.09831127763470163,
-     "above": 0.7852435090528777
+     "below": 0.10610516593703102,
+     "near": 0.1332180619833826,
+     "above": 0.7606767720795864
     },
-    "rps": 0.40308711245065665,
-    "climatology_rps": 0.42900425624780963,
-    "rpss": 0.060412323233880016
+    "rps": 0.43765504436628516,
+    "climatology_rps": 0.4320437816378761,
+    "rpss": -0.012987717835300838
    },
    {
     "source_id": "platform",
@@ -1224,27 +1224,27 @@
     "area_key": "season_domain",
     "area": "FMAM rainfall contribution domain",
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 1075,
+    "cells": 1120,
     "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.7211278753561928,
+    "favoured_coverage": 0.8230318850322615,
     "observed_fractions": {
-     "below": 0.03172165361783494,
-     "near": 0.4467951569666733,
-     "above": 0.5214831894154918
+     "below": 0.1316005850045176,
+     "near": 0.40059050924154066,
+     "above": 0.46780890575394174
     },
-    "hit_share": 0.4100565688843162,
-    "near_other_share": 0.5382694275250194,
-    "opposite_share": 0.05167400359066448,
+    "hit_share": 0.3536984933179321,
+    "near_other_share": 0.471234706096272,
+    "opposite_share": 0.17506680058579596,
     "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "below": 0.01671179710546349,
-     "near": 0.09400434236990353,
-     "above": 0.8892838605246329
+     "below": 0.019472010967619857,
+     "near": 0.1288547704220771,
+     "above": 0.851673218610303
     },
-    "rps": 0.35378822052695635,
-    "climatology_rps": 0.4066238365666645,
-    "rpss": 0.12993733098833216
+    "rps": 0.41959522142499256,
+    "climatology_rps": 0.4220253858083754,
+    "rpss": 0.005758336974748479
    },
    {
     "source_id": "platform",
@@ -1260,23 +1260,23 @@
     "cells": 573,
     "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.9359937046137238,
+    "favoured_coverage": 0.9671645464795047,
     "observed_fractions": {
-     "below": 0.0698383195567127,
-     "near": 0.5210712389827056,
-     "above": 0.40909044146058154
+     "below": 0.2094705588708335,
+     "near": 0.4933865946070185,
+     "above": 0.29714284652214784
     },
-    "hit_share": 0.39991430174393194,
-    "near_other_share": 0.5329329051233435,
-    "opposite_share": 0.06715279313272444,
-    "chance_of_favoured": 0.33333333333333326,
+    "hit_share": 0.29260615551427366,
+    "near_other_share": 0.496187139293134,
+    "opposite_share": 0.21120670519259235,
+    "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "near": 0.029814172336638127,
-     "above": 0.9701858276633617
+     "near": 0.03766548576461551,
+     "above": 0.9623345142353845
     },
-    "rps": 0.33274143741466516,
-    "climatology_rps": 0.3818651425613203,
-    "rpss": 0.12864150107329264
+    "rps": 0.4285266419345576,
+    "climatology_rps": 0.39109335735321604,
+    "rpss": -0.09571444740119595
    },
    {
     "source_id": "emi",
@@ -1289,25 +1289,25 @@
     "area_key": "all_ethiopia",
     "area": "All Ethiopia",
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 1295,
-    "observation_coverage": 0.9960255514400644,
-    "outlook_coverage": 0.8774901941216255,
-    "favoured_coverage": 0.8774901941216255,
+    "cells": 1301,
+    "observation_coverage": 1.0,
+    "outlook_coverage": 0.877977103043177,
+    "favoured_coverage": 0.877977103043177,
     "observed_fractions": {
-     "below": 0.048808969821988624,
-     "near": 0.4020842039207774,
-     "above": 0.549106826257234
+     "below": 0.11725180730718973,
+     "near": 0.3878230805802486,
+     "above": 0.49492511211256146
     },
-    "hit_share": 0.549106826257234,
-    "near_other_share": 0.4020842039207774,
-    "opposite_share": 0.048808969821988624,
-    "chance_of_favoured": 0.33333333333333337,
+    "hit_share": 0.49492511211256146,
+    "near_other_share": 0.3878230805802486,
+    "opposite_share": 0.11725180730718973,
+    "chance_of_favoured": 0.33333333333333326,
     "favoured_categories": {
      "above": 1.0
     },
-    "rps": 0.32427581595098787,
-    "climatology_rps": 0.4215274875819631,
-    "rpss": 0.23071252645668883
+    "rps": 0.36565725541956434,
+    "climatology_rps": 0.4262811953621393,
+    "rpss": 0.1422158439127793
    },
    {
     "source_id": "emi",
@@ -1320,25 +1320,25 @@
     "area_key": "season_domain",
     "area": "FMAM rainfall contribution domain",
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 1074,
+    "cells": 1117,
     "observation_coverage": 1.0,
-    "outlook_coverage": 0.9990769643372114,
-    "favoured_coverage": 0.9990769643372114,
+    "outlook_coverage": 0.9973683722458337,
+    "favoured_coverage": 0.9973683722458337,
     "observed_fractions": {
-     "below": 0.0317509608870615,
-     "near": 0.4472079458493748,
-     "above": 0.5210410932635635
+     "below": 0.13194782255645898,
+     "near": 0.39988935797694536,
+     "above": 0.4681628194665957
     },
-    "hit_share": 0.5210410932635635,
-    "near_other_share": 0.4472079458493748,
-    "opposite_share": 0.0317509608870615,
+    "hit_share": 0.4681628194665957,
+    "near_other_share": 0.39988935797694536,
+    "opposite_share": 0.13194782255645898,
     "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
      "above": 1.0
     },
-    "rps": 0.3189525144894954,
-    "climatology_rps": 0.40648624027243063,
-    "rpss": 0.2153424079601547
+    "rps": 0.3716091574768891,
+    "climatology_rps": 0.4222591028965738,
+    "rpss": 0.11994991954522927
    },
    {
     "source_id": "emi",
@@ -1356,20 +1356,20 @@
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.0698383195567127,
-     "near": 0.5210712389827056,
-     "above": 0.40909044146058154
+     "below": 0.2094705588708335,
+     "near": 0.4933865946070185,
+     "above": 0.29714284652214784
     },
-    "hit_share": 0.40909044146058154,
-    "near_other_share": 0.5210712389827056,
-    "opposite_share": 0.0698383195567127,
+    "hit_share": 0.29714284652214784,
+    "near_other_share": 0.4933865946070185,
+    "opposite_share": 0.2094705588708335,
     "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
      "above": 1.0
     },
-    "rps": 0.3126878357094037,
-    "climatology_rps": 0.3818651425613203,
-    "rpss": 0.1811563799406174
+    "rps": 0.4083342995478243,
+    "climatology_rps": 0.39109335735321604,
+    "rpss": -0.04408395558362055
    },
    {
     "source_id": "platform_on_emi_zones",
@@ -1382,27 +1382,27 @@
     "area_key": "all_ethiopia",
     "area": "All Ethiopia",
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 1295,
-    "observation_coverage": 0.9960255514400644,
-    "outlook_coverage": 0.8774901941216255,
-    "favoured_coverage": 0.5854638345522107,
+    "cells": 1301,
+    "observation_coverage": 1.0,
+    "outlook_coverage": 0.877977103043177,
+    "favoured_coverage": 0.6737561826987861,
     "observed_fractions": {
-     "below": 0.048808969821988624,
-     "near": 0.4020842039207774,
-     "above": 0.549106826257234
+     "below": 0.11725180730718973,
+     "near": 0.3878230805802486,
+     "above": 0.49492511211256146
     },
-    "hit_share": 0.3913953767372936,
-    "near_other_share": 0.5066392814354681,
-    "opposite_share": 0.1019653418272385,
+    "hit_share": 0.35080820489758696,
+    "near_other_share": 0.4703944777320195,
+    "opposite_share": 0.17879731737039348,
     "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "below": 0.04037191800429554,
-     "near": 0.10283706797451714,
-     "above": 0.8567910140211874
+     "below": 0.03296164084276062,
+     "near": 0.14198664250727214,
+     "above": 0.825051716649967
     },
-    "rps": 0.3819373853122481,
-    "climatology_rps": 0.4215274875819631,
-    "rpss": 0.09392057086672678
+    "rps": 0.4241771675155465,
+    "climatology_rps": 0.4262811953621393,
+    "rpss": 0.004935774482863087
    },
    {
     "source_id": "platform_on_emi_zones",
@@ -1415,27 +1415,27 @@
     "area_key": "season_domain",
     "area": "FMAM rainfall contribution domain",
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 1074,
+    "cells": 1117,
     "observation_coverage": 1.0,
-    "outlook_coverage": 0.9990769643372114,
-    "favoured_coverage": 0.720204839693404,
+    "outlook_coverage": 0.9973683722458337,
+    "favoured_coverage": 0.8212774720964524,
     "observed_fractions": {
-     "below": 0.0317509608870615,
-     "near": 0.4472079458493748,
-     "above": 0.5210410932635635
+     "below": 0.13194782255645898,
+     "near": 0.39988935797694536,
+     "above": 0.4681628194665957
     },
-    "hit_share": 0.41058210941942586,
-    "near_other_share": 0.5376776600701162,
-    "opposite_share": 0.05174023051045797,
-    "chance_of_favoured": 0.33333333333333337,
+    "hit_share": 0.35338485590156365,
+    "near_other_share": 0.47117436581324695,
+    "opposite_share": 0.17544077828518959,
+    "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "below": 0.016733215435176745,
-     "near": 0.0928431917413124,
-     "above": 0.8904235928235109
+     "below": 0.019513607077446912,
+     "near": 0.12913002998263967,
+     "above": 0.8513563629399136
     },
-    "rps": 0.3535859045856381,
-    "climatology_rps": 0.40648624027243063,
-    "rpss": 0.13014053231257783
+    "rps": 0.41987600071699954,
+    "climatology_rps": 0.4222591028965738,
+    "rpss": 0.0056436964016332025
    },
    {
     "source_id": "platform_on_emi_zones",
@@ -1451,23 +1451,23 @@
     "cells": 573,
     "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.9359937046137238,
+    "favoured_coverage": 0.9671645464795047,
     "observed_fractions": {
-     "below": 0.0698383195567127,
-     "near": 0.5210712389827056,
-     "above": 0.40909044146058154
+     "below": 0.2094705588708335,
+     "near": 0.4933865946070185,
+     "above": 0.29714284652214784
     },
-    "hit_share": 0.39991430174393194,
-    "near_other_share": 0.5329329051233435,
-    "opposite_share": 0.06715279313272444,
-    "chance_of_favoured": 0.33333333333333326,
+    "hit_share": 0.29260615551427366,
+    "near_other_share": 0.496187139293134,
+    "opposite_share": 0.21120670519259235,
+    "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "near": 0.029814172336638127,
-     "above": 0.9701858276633617
+     "near": 0.03766548576461551,
+     "above": 0.9623345142353845
     },
-    "rps": 0.33274143741466516,
-    "climatology_rps": 0.3818651425613203,
-    "rpss": 0.12864150107329264
+    "rps": 0.4285266419345576,
+    "climatology_rps": 0.39109335735321604,
+    "rpss": -0.09571444740119595
    },
    {
     "source_id": "emi",
@@ -1491,20 +1491,20 @@
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.0,
-     "near": 0.03878422813385363,
-     "above": 0.9612157718661463
+     "below": 0.003244367771375785,
+     "near": 0.11666267660195635,
+     "above": 0.8800929556266677
     },
-    "hit_share": 0.9612157718661463,
-    "near_other_share": 0.03878422813385363,
-    "opposite_share": 0.0,
+    "hit_share": 0.8800929556266677,
+    "near_other_share": 0.11666267660195635,
+    "opposite_share": 0.003244367771375785,
     "chance_of_favoured": 0.33333333333333326,
     "favoured_categories": {
      "above": 1.0
     },
-    "rps": 0.36112157718661464,
-    "climatology_rps": 0.5426274795109376,
-    "rpss": 0.33449449056268143
+    "rps": 0.3546314794483547,
+    "climatology_rps": 0.5166679966882367,
+    "rpss": 0.31361825829838785
    },
    {
     "source_id": "platform",
@@ -1522,24 +1522,24 @@
     "cells": 309,
     "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.34639120873927914,
+    "favoured_coverage": 0.4469982178437178,
     "observed_fractions": {
-     "below": 0.0,
-     "near": 0.03878422813385363,
-     "above": 0.9612157718661463
+     "below": 0.003244367771375785,
+     "near": 0.11666267660195635,
+     "above": 0.8800929556266677
     },
-    "hit_share": 0.36510040157174467,
-    "near_other_share": 0.3369333690413889,
-    "opposite_share": 0.29796622938686645,
-    "chance_of_favoured": 0.33333333333333326,
+    "hit_share": 0.2903166242991038,
+    "near_other_share": 0.4714195462629908,
+    "opposite_share": 0.23826382943790547,
+    "chance_of_favoured": 0.33333333333333337,
     "favoured_categories": {
-     "below": 0.32585743442781767,
-     "near": 0.30904216400043766,
-     "above": 0.36510040157174467
+     "below": 0.2382047156643158,
+     "near": 0.4714177732408579,
+     "above": 0.2903775110948264
     },
-    "rps": 0.5106718069294808,
-    "climatology_rps": 0.5426274795109376,
-    "rpss": 0.05889062715780269
+    "rps": 0.49820562275345,
+    "climatology_rps": 0.5166679966882367,
+    "rpss": 0.03573353498402787
    },
    {
     "source_id": "emi",
@@ -1558,25 +1558,25 @@
      "above": 0.6
     },
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 402,
-    "observation_coverage": 0.9854602862609723,
+    "cells": 408,
+    "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.00997916042350276,
-     "near": 0.6130474416976812,
-     "above": 0.3769733978788161
+     "below": 0.01958297949507671,
+     "near": 0.5242034755320609,
+     "above": 0.45621354497286215
     },
-    "hit_share": 0.3769733978788161,
-    "near_other_share": 0.6130474416976812,
-    "opposite_share": 0.00997916042350276,
-    "chance_of_favoured": 0.33333333333333337,
+    "hit_share": 0.45621354497286215,
+    "near_other_share": 0.5242034755320609,
+    "opposite_share": 0.01958297949507671,
+    "chance_of_favoured": 0.33333333333333326,
     "favoured_categories": {
      "above": 1.0
     },
-    "rps": 0.30258864876303904,
-    "climatology_rps": 0.35120640832299516,
-    "rpss": 0.13843073021390795
+    "rps": 0.2944236746014889,
+    "climatology_rps": 0.3808210637115351,
+    "rpss": 0.2268713507283585
    },
    {
     "source_id": "platform",
@@ -1591,26 +1591,26 @@
     "zone": "North-central",
     "official": null,
     "favoured_rule": "untied leading tercile probability of at least 40%",
-    "cells": 402,
-    "observation_coverage": 0.9854602862609723,
+    "cells": 408,
+    "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.5118558624299532,
+    "favoured_coverage": 0.7195007507137301,
     "observed_fractions": {
-     "below": 0.00997916042350276,
-     "near": 0.6130474416976812,
-     "above": 0.3769733978788161
+     "below": 0.01958297949507671,
+     "near": 0.5242034755320609,
+     "above": 0.45621354497286215
     },
-    "hit_share": 0.2968561818701026,
-    "near_other_share": 0.6982612802969497,
-    "opposite_share": 0.0048825378329478385,
+    "hit_share": 0.4774436936377897,
+    "near_other_share": 0.5088523188315959,
+    "opposite_share": 0.013703987530614534,
     "chance_of_favoured": 0.33333333333333337,
     "favoured_categories": {
-     "near": 0.1943040214113723,
-     "above": 0.8056959785886277
+     "near": 0.19397784613402277,
+     "above": 0.8060221538659772
     },
-    "rps": 0.3213039528305342,
-    "climatology_rps": 0.35120640832299516,
-    "rpss": 0.08514211239836056
+    "rps": 0.3279666577256952,
+    "climatology_rps": 0.3808210637115351,
+    "rpss": 0.13879065792924772
    },
    {
     "source_id": "emi",
@@ -1634,20 +1634,20 @@
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.0,
-     "near": 0.2606709034134962,
-     "above": 0.7393290965865039
+     "below": 0.15800014983446642,
+     "near": 0.34389720781717176,
+     "above": 0.4981026423483619
     },
-    "hit_share": 0.7393290965865039,
-    "near_other_share": 0.2606709034134962,
-    "opposite_share": 0.0,
+    "hit_share": 0.4981026423483619,
+    "near_other_share": 0.34389720781717176,
+    "opposite_share": 0.15800014983446642,
     "chance_of_favoured": 0.33333333333333337,
     "favoured_categories": {
      "above": 1.0
     },
-    "rps": 0.2510670903413496,
-    "climatology_rps": 0.46866525441772355,
-    "rpss": 0.4642933565594083
+    "rps": 0.3857898406492902,
+    "climatology_rps": 0.44092315294983175,
+    "rpss": 0.12504063787916941
    },
    {
     "source_id": "platform",
@@ -1665,23 +1665,23 @@
     "cells": 253,
     "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.8815954568238439,
+    "favoured_coverage": 0.9328917797144675,
     "observed_fractions": {
-     "below": 0.0,
-     "near": 0.2606709034134962,
-     "above": 0.7393290965865039
+     "below": 0.15800014983446642,
+     "near": 0.34389720781717176,
+     "above": 0.4981026423483619
     },
-    "hit_share": 0.7176626124416178,
-    "near_other_share": 0.2823373875583823,
-    "opposite_share": 0.0,
-    "chance_of_favoured": 0.3333333333333333,
+    "hit_share": 0.45341690731451245,
+    "near_other_share": 0.38145121740346016,
+    "opposite_share": 0.16513187528202752,
+    "chance_of_favoured": 0.3333333333333335,
     "favoured_categories": {
-     "near": 0.04033608944643392,
-     "above": 0.959663910553566
+     "near": 0.07198779790049153,
+     "above": 0.9280122020995084
     },
-    "rps": 0.33054548795430067,
-    "climatology_rps": 0.46866525441772355,
-    "rpss": 0.2947087823590099
+    "rps": 0.40856219803206223,
+    "climatology_rps": 0.44092315294983175,
+    "rpss": 0.0733936394613679
    },
    {
     "source_id": "emi",
@@ -1705,20 +1705,20 @@
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.17820486189774581,
-     "near": 0.5948370219443023,
-     "above": 0.22695811615795192
+     "below": 0.3110913687409886,
+     "near": 0.5074013452719549,
+     "above": 0.18150728598705665
     },
-    "hit_share": 0.22695811615795192,
-    "near_other_share": 0.5948370219443023,
-    "opposite_share": 0.17820486189774581,
+    "hit_share": 0.18150728598705665,
+    "near_other_share": 0.5074013452719549,
+    "opposite_share": 0.3110913687409886,
     "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
      "above": 1.0
     },
-    "rps": 0.37211872875444263,
-    "climatology_rps": 0.3572765482407882,
-    "rpss": -0.041542554602972404
+    "rps": 0.4473055498432988,
+    "climatology_rps": 0.3864217737982373,
+    "rpss": -0.15755782974292432
    },
    {
     "source_id": "platform",
@@ -1736,23 +1736,23 @@
     "cells": 331,
     "observation_coverage": 1.0,
     "outlook_coverage": 1.0,
-    "favoured_coverage": 0.9879178124898497,
+    "favoured_coverage": 0.9969713171195389,
     "observed_fractions": {
-     "below": 0.17820486189774581,
-     "near": 0.5948370219443023,
-     "above": 0.22695811615795192
+     "below": 0.3110913687409886,
+     "near": 0.5074013452719549,
+     "above": 0.18150728598705665
     },
-    "hit_share": 0.23584477287248498,
-    "near_other_share": 0.5960087764126077,
-    "opposite_share": 0.16814645071490716,
-    "chance_of_favoured": 0.33333333333333326,
+    "hit_share": 0.19112805338147798,
+    "near_other_share": 0.49987340215629456,
+    "opposite_share": 0.3089985444622277,
+    "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "near": 0.021399565247846777,
-     "above": 0.9786004347521529
+     "near": 0.009069369374931403,
+     "above": 0.9909306306250687
     },
-    "rps": 0.3744016383075058,
-    "climatology_rps": 0.3572765482407882,
-    "rpss": -0.047932309442197285
+    "rps": 0.4845476385969417,
+    "climatology_rps": 0.3864217737982373,
+    "rpss": -0.2539346161428755
    },
    {
     "source_id": "icpac_mam_2026_rainfall",
@@ -1765,25 +1765,25 @@
     "area_key": "all_ethiopia",
     "area": "All Ethiopia",
     "favoured_rule": "the dominant category ICPAC printed, including its 33–40% intervals",
-    "cells": 1311,
-    "observation_coverage": 0.9960255514400644,
-    "outlook_coverage": 0.8883462213591926,
-    "favoured_coverage": 0.8883462213591926,
+    "cells": 1317,
+    "observation_coverage": 1.0,
+    "outlook_coverage": 0.8887899835589228,
+    "favoured_coverage": 0.8887899835589228,
     "observed_fractions": {
-     "below": 0.050541195125152996,
-     "near": 0.34389053819532983,
-     "above": 0.6055682666795171
+     "below": 0.11050169150610659,
+     "near": 0.33171462225193743,
+     "above": 0.5577836862419562
     },
-    "hit_share": 0.5433222877144014,
-    "near_other_share": 0.37939577356766796,
-    "opposite_share": 0.07728193871793068,
-    "chance_of_favoured": 0.3333333333333333,
+    "hit_share": 0.5274683849551832,
+    "near_other_share": 0.3987186641249588,
+    "opposite_share": 0.07381295091985807,
+    "chance_of_favoured": 0.33333333333333337,
     "favoured_categories": {
-     "below": 0.061926674539698794,
-     "near": 0.2503467789772973,
-     "above": 0.6877265464830039
+     "below": 0.06164975379689254,
+     "near": 0.2536990424139466,
+     "above": 0.684651203789161
     },
-    "favoured_below_40_share": 0.25109378835000334
+    "favoured_below_40_share": 0.25444271134585045
    },
    {
     "source_id": "icpac_mam_2026_rainfall",
@@ -1796,25 +1796,25 @@
     "area_key": "season_domain",
     "area": "FMAM rainfall contribution domain",
     "favoured_rule": "the dominant category ICPAC printed, including its 33–40% intervals",
-    "cells": 1075,
+    "cells": 1117,
     "observation_coverage": 1.0,
-    "outlook_coverage": 1.0,
-    "favoured_coverage": 1.0,
+    "outlook_coverage": 0.9973692739839995,
+    "favoured_coverage": 0.9973692739839995,
     "observed_fractions": {
-     "below": 0.035472964783260105,
-     "near": 0.39116358093535886,
-     "above": 0.573363454281381
+     "below": 0.12655995378399382,
+     "near": 0.3526096443017911,
+     "above": 0.5208304019142151
     },
-    "hit_share": 0.5279416215994014,
-    "near_other_share": 0.40765543870181603,
-    "opposite_share": 0.06440293969878262,
-    "chance_of_favoured": 0.3333333333333333,
+    "hit_share": 0.5019986856561162,
+    "near_other_share": 0.4172862349911513,
+    "opposite_share": 0.08071507935273257,
+    "chance_of_favoured": 0.33333333333333337,
     "favoured_categories": {
-     "below": 0.06808869185348652,
-     "near": 0.2597442094559439,
-     "above": 0.6721670986905696
+     "below": 0.06907003270508957,
+     "near": 0.2721746481924132,
+     "above": 0.6587553191024972
     },
-    "favoured_below_40_share": 0.2597442094559439
+    "favoured_below_40_share": 0.2721746481924132
    },
    {
     "source_id": "icpac_mam_2026_rainfall",
@@ -1832,13 +1832,13 @@
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.08032496926968903,
-     "near": 0.48787787181007686,
-     "above": 0.431797158920234
+     "below": 0.20074089791014785,
+     "near": 0.47070702129066283,
+     "above": 0.3285520807991892
     },
-    "hit_share": 0.3471052289659167,
-    "near_other_share": 0.521897960624941,
-    "opposite_share": 0.13099681040914227,
+    "hit_share": 0.37511011232621116,
+    "near_other_share": 0.5079590237974868,
+    "opposite_share": 0.11693086387630199,
     "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
      "below": 0.1239670778527791,
@@ -1865,11 +1865,11 @@
     "favoured_coverage": 1.0,
     "observed_fractions": {
      "below": 0.0,
-     "near": 0.02587148088608129,
-     "above": 0.9741285191139187
+     "near": 0.11678432736634801,
+     "above": 0.8832156726336519
     },
-    "hit_share": 0.9351110075365738,
-    "near_other_share": 0.06488899246342586,
+    "hit_share": 0.8701474796954809,
+    "near_other_share": 0.1298525203045191,
     "opposite_share": 0.0,
     "chance_of_favoured": 0.33333333333333326,
     "favoured_categories": {
@@ -1890,25 +1890,25 @@
     "area": "EMI zone North-central",
     "zone": "North-central",
     "favoured_rule": "the dominant category ICPAC printed, including its 33–40% intervals",
-    "cells": 386,
-    "observation_coverage": 0.9854602862609723,
-    "outlook_coverage": 0.9605801115487711,
-    "favoured_coverage": 0.9605801115487711,
+    "cells": 392,
+    "observation_coverage": 1.0,
+    "outlook_coverage": 0.9611532654424763,
+    "favoured_coverage": 0.9611532654424763,
     "observed_fractions": {
-     "below": 0.0,
-     "near": 0.5215872238762433,
-     "above": 0.4784127761237566
+     "below": 0.015290012742379384,
+     "near": 0.3999751096523012,
+     "above": 0.5847348776053194
     },
-    "hit_share": 0.5202766342588101,
-    "near_other_share": 0.4591431639432993,
-    "opposite_share": 0.020580201797890624,
-    "chance_of_favoured": 0.33333333333333337,
+    "hit_share": 0.48237788111294205,
+    "near_other_share": 0.48713088642946406,
+    "opposite_share": 0.03049123245759375,
+    "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
-     "below": 0.04655250545458995,
-     "near": 0.32114143657270217,
-     "above": 0.6323060579727078
+     "below": 0.04584828883536777,
+     "near": 0.33141077605934116,
+     "above": 0.6227409351052909
     },
-    "favoured_below_40_share": 0.3236958138849875
+    "favoured_below_40_share": 0.333926512380395
    },
    {
     "source_id": "icpac_mam_2026_rainfall",
@@ -1927,13 +1927,13 @@
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.0,
-     "near": 0.20145652469194186,
-     "above": 0.7985434753080581
+     "below": 0.1501051751442906,
+     "near": 0.30052485148074626,
+     "above": 0.5493699733749633
     },
-    "hit_share": 0.34757694770506964,
-    "near_other_share": 0.5298354161349345,
-    "opposite_share": 0.12258763615999597,
+    "hit_share": 0.44638279975445705,
+    "near_other_share": 0.5021354202547698,
+    "opposite_share": 0.05148177999077317,
     "chance_of_favoured": 0.33333333333333337,
     "favoured_categories": {
      "below": 0.197606350936116,
@@ -1959,13 +1959,13 @@
     "outlook_coverage": 1.0,
     "favoured_coverage": 1.0,
     "observed_fractions": {
-     "below": 0.19937587985875654,
-     "near": 0.5646111194400905,
-     "above": 0.23601300070115303
+     "below": 0.3020244497851608,
+     "near": 0.4952933844651297,
+     "above": 0.20268216574970954
     },
-    "hit_share": 0.33273912841596165,
-    "near_other_share": 0.48001096027044593,
-    "opposite_share": 0.18724991131359242,
+    "hit_share": 0.29943907806079617,
+    "near_other_share": 0.48321237581761556,
+    "opposite_share": 0.2173485461215882,
     "chance_of_favoured": 0.3333333333333333,
     "favoured_categories": {
      "below": 0.03926813579362519,
@@ -1995,6 +1995,6 @@
    1993,
    2025
   ],
-  "created_utc": "2026-10-10T19:40:24+00:00"
+  "created_utc": "2026-10-11T00:05:02+00:00"
  }
 }

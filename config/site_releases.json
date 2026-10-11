@@ -238,7 +238,7 @@
   {
     "id": "2026-10-10.2",
     "date": "2026-10-10",
-    "commit": null,
+    "commit": "da807aa",
     "title": "Climatology and domain reviews for JJAS and ONDJ; historical rainfall-amount skill for FMAM and ONDJ",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -258,6 +258,36 @@
       {
         "type": "display",
         "text": "The Rainfall climatology and domains section shows the selected season's review; comparison notes and map captions name each cycle's own periods and seasons."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-11.1",
+    "date": "2026-10-11",
+    "commit": null,
+    "title": "CHIRPS v3.0 adopted: every cycle recalibrated and re-verified (2026 forecasts retrospective)",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "method",
+        "text": "Observations changed from CHIRPS v2.0 (daily p25) to CHIRPS v3.0 (official monthly 0.05 degree product averaged onto the 0.25 degree grid; Funk et al. 2026). The whole chain was refitted with the same method: amount correction, terciles, blend weights, historical evaluation, development runs and decision gates (which give the same outcome as with v2.0)."
+      },
+      {
+        "type": "verification",
+        "text": "The 2026 forecasts of all four cycles were recalibrated with CHIRPS v3.0 after their outcomes were known and are verified against CHIRPS v3.0 (FMAM Feb-May and season, JJAS Jun-Aug). They are retrospective reconstructions; the CHIRPS v2.0 versions are release 2026-10-10.2."
+      },
+      {
+        "type": "domain",
+        "text": "The FMAM rainfall contribution domain keeps its rule (FMAM >= 100 mm and >= 20% of annual) on the CHIRPS v3.0 climatology: 75.6% of Ethiopia (72.6% with v2.0). The JJAS R1+R2 and ONDJ R3 regime domains are unchanged; the regimes come from the CHIRPS v2.0 daily climatology."
+      },
+      {
+        "type": "analysis",
+        "text": "The v2.0 vs v3.0 comparison (climatology about 15% wetter with v3.0, seasonal shares and year rankings closely agreeing; calibration skill similar overall) is in Methods and docs/45."
       }
     ]
   }

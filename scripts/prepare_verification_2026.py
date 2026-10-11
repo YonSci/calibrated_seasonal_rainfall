@@ -221,7 +221,7 @@ def main():
             for name in MONTHS:
                 with xr.open_dataset(root/'observations'/name/f'chirps_{YEAR}_common.nc') as f:datasets.append(f.load())
             z=sum(d.precip_season.values.astype(float) for d in datasets);count=sum(d.valid_day_count.values.astype('int16') for d in datasets)
-            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count)},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':SEASON,'season_start':window_iso(SEASON)[0],'season_end':window_iso(SEASON)[1],'expected_days':window_days(SEASON),'product':'CHIRPS Version 2.0 daily p25','processing_utc':now(),'forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
+            ds=xr.Dataset({'precip_season':(('lat','lon'),z),'valid_day_count':(('lat','lon'),count)},coords={'lat':grid.lat,'lon':grid.lon},attrs={'year':YEAR,'target':SEASON,'season_start':window_iso(SEASON)[0],'season_end':window_iso(SEASON)[1],'expected_days':window_days(SEASON),'product':src['product'],'processing_utc':now(),'forecast_freeze_sha256':sha(root/'frozen_forecasts/freeze_manifest.json')})
             ds.precip_season.attrs['units']='mm'
             with staged_output(root/'observations'/SEASON,a.regenerate) as stage:
                 ds.to_netcdf(stage/f'chirps_{YEAR}_common.nc')

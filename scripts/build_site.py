@@ -255,6 +255,16 @@ def target_status(window, verified, processed, published, today):
     return dict(code='ready', text='Observations processed; verification not yet run')
 
 
+def archive_months_in(c, start, end):
+    """Months of [start, end] present in the cycle's monthly CHIRPS archive (e.g. 'Feb 2026'), in order."""
+    path = ROOT / c.project['chirps_file']
+    if not path.is_file():
+        return []
+    with xr.open_dataset(path) as d:
+        have = {(int(t.dt.year), int(t.dt.month)) for t in d.time}
+    return [f'{calendar.month_abbr[m]} {y}' for y, m in months_between(start, end) if (y, m) in have]
+
+
 def build_cycle(cfg_path, published, today, sha):
     """Everything the page shows for one cycle, plus the files to copy. `published`: {CHIRPS label: listing}."""
     c = load_cycle(ROOT / cfg_path)
@@ -334,6 +344,13 @@ def build_cycle(cfg_path, published, today, sha):
         when = ('after the target period ended, ' if datetime.fromisoformat(stamp).date() > s_end
                 else 'after the target period began, ' if datetime.fromisoformat(stamp).date() >= s_start else '')
         frozen = f'Frozen {iso_day(stamp)} ({when}before this project downloaded its observations; SHA-256 manifest)'
+        # A monthly archive (CHIRPS v3.0) that already held months of the target period when the forecast was fitted:
+        # the forecast is a retrospective recalibration, not one frozen before its observations were seen.
+        known = archive_months_in(c, s_start, s_end) if src['temporal'] == 'monthly' else []
+        if known:
+            frozen = (f'Frozen {iso_day(stamp)}. Recalibrated with {src["label"]} when its observations for '
+                      f'{known[0]}–{known[-1]} were already available (the fit itself uses {c.reference_dash} only): a '
+                      'retrospective reconstruction, not a forecast frozen before its outcome (SHA-256 manifest)')
     else:
         made = iso_day(ej['created_utc']) if 'created_utc' in ej else 'date not recorded'
         frozen = f'Generated {made}; not yet frozen for verification (freeze before observations are used)'
@@ -487,12 +504,52 @@ def jjas_evidence():
                 raw=load('outputs/verification/init05_JJAS/Ethiopia/verification_summary.json')['summary'])
 
 
+def chirps_versions_block():
+    """Methods: CHIRPS v2.0 vs v3.0 (outputs/chirps_v3_comparison), the evidence behind the switch."""
+    base = ROOT / 'outputs/chirps_v3_comparison'
+    if not (base / 'comparison.json').is_file() or not (base / 'calibration_comparison.json').is_file():
+        return ''
+    clim = json.loads((base / 'comparison.json').read_text(encoding='utf-8'))
+    cal = json.loads((base / 'calibration_comparison.json').read_text(encoding='utf-8'))
+    pct = lambda a, b: f'{100 * (b / a - 1):+.0f}%'
+    sg = lambda x: '—' if x is None else f'{x:+.3f}'
+    rows = []
+    for name, (label, season) in [('jjas', ('May · JJAS', 'JJAS')), ('fmam_jan', ('January · FMAM', 'FMAM')),
+                                  ('fmam_feb', ('February · FMAM', 'FMAM')), ('ondj', ('September · ONDJ', 'ONDJ'))]:
+        r = cal['cycles'][name]['targets'][season]
+        cv = lambda side: (r[side]['cross_validated'] or {}).get('rpss')
+        am = lambda side: (r[side].get('amount') or {}).get('crpss')
+        rows.append([label, f'{sg(cv("v2"))} → {sg(cv("v3"))}', f'{sg(am("v2"))} → {sg(am("v3"))}'])
+    seasons = clim['seasons']
+    clim_rows = [[k, f'{v["mean_mm"]["v2"]:.0f} → {v["mean_mm"]["v3"]:.0f} mm ({pct(v["mean_mm"]["v2"], v["mean_mm"]["v3"])})',
+                  f'{v["national_series_correlation"]:.3f}', f'{100 * v["same_category_share"]:.0f}%'] for k, v in seasons.items()]
+    gates_same = all(g['adopt'] == cal['decision_gates']['v3'][fam][t]['adopt']
+                     for fam, tg in cal['decision_gates']['v2'].items() for t, g in tg.items())
+    return (f'''<details><summary>CHIRPS v2.0 vs v3.0 (why and what changed, 11 October 2026)</summary>
+  <p>CHIRPS v3.0 (Funk et al. 2026) replaced v2.0 for calibration and verification. Over Ethiopia, 1993–2025, v3.0 is about
+  15% wetter (consistent with its gauge-undercatch correction) while each season's share of annual rainfall and the ranking of
+  years agree closely, so tercile limits move up. The same method was refitted on v3.0: the decision gates give the
+  {"same" if gates_same else "different"} outcome, and skill is similar overall. Each version is scored against its own
+  observations.</p>
+  {table(['Season', 'Mean rainfall v2.0 → v3.0', 'National series correlation', 'Same tercile category'], clim_rows, 'Climatology, 1993–2025', 'compact')}
+  {table(['Cycle', 'Cross-validated RPSS 1993–2016, v2.0 → v3.0', 'Rainfall-amount CRPSS (development run), v2.0 → v3.0'], rows, 'Calibration with each version', 'compact')}
+  <figure class="map-figure"><img loading="lazy" src="assets/chirps/climatology_v2_v3.png" alt="CHIRPS v2.0 and v3.0 climatology over Ethiopia" style="max-width:100%;height:auto"><figcaption class="caveat">Annual and seasonal mean rainfall, CHIRPS v2.0 and v3.0, and the difference.</figcaption></figure>
+</details>''')
+
+
 def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None):
     gates, ens, mono, clip, raw = (ev[k] for k in ('gates', 'ens', 'mono', 'clip', 'raw'))
     raw_rpss = raw.get('raw_rps_skill')
     obs_labels = sorted({c['obs'] for c in cycles})                 # e.g. ['CHIRPS v3.0']
     obs = ' and '.join(obs_labels)
     srcs = [s_ for s_ in (obs_source.V2, obs_source.V3) if s_['label'] in obs_labels]
+    # The switch to CHIRPS v3.0 (2026-10-11): the 2026 cycles were recalibrated and re-verified after their outcomes
+    # were known, so they are retrospective; the CHIRPS v2.0 versions stay in the release archive.
+    obs_notice = ('<p class="notice"><strong>Observations: CHIRPS v3.0 since 11 October 2026.</strong> Every cycle is calibrated '
+                  'and verified with CHIRPS v3.0. The 2026 forecasts shown here were recalibrated with v3.0 after their outcomes '
+                  'were known, so they are retrospective reconstructions, not forecasts issued in advance. The versions calibrated '
+                  'with CHIRPS v2.0 are in the <a href="releases/index.html">release archive</a> (release 2026-10-10.2); the v2.0 '
+                  'vs v3.0 comparison is in the Methods section.</p>' if obs_labels == ['CHIRPS v3.0'] else '')
     # Areas, from each season's active domain configuration (the views offered in the area selector).
     seen, area_parts = set(), []
     for c in cycles:
@@ -592,6 +649,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
   <p class="eyebrow" id="ol-eyebrow"></p>
   <h1 id="ol-title">Seasonal rainfall outlook</h1>
   <p class="research-inline">Research reconstruction · not an official forecast</p>
+  {obs_notice}
   <div id="ol-live" aria-live="polite" class="sr-only"></div>
   <div class="targets" role="group" aria-label="Target period" id="ol-targets"></div>
   <div class="glance">
@@ -696,6 +754,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
       ], 'Data sources', 'compact')}
     </div>
   </div>
+  {chirps_versions_block()}
   <details><summary>Workflow (eight scripted stages)</summary><ol class="flow">{flow}</ol>
     <p class="caveat">Every stage is a script in <a href="{REPO}/tree/main/scripts"><code>scripts/</code></a>; documents in <a href="{REPO}/tree/main/docs"><code>docs/</code></a> record each step, issue and decision (runbook: docs/38; per-season guides: docs/40).</p></details>
   <details><summary>Equations</summary>
@@ -1674,6 +1733,9 @@ def main():
     for sub in ('assets', 'downloads', 'data', 'releases'):
         if (OUT / sub).exists():
             shutil.rmtree(OUT / sub)
+    fig_v3 = ROOT / 'outputs/chirps_v3_comparison/climatology_v2_v3.png'
+    if fig_v3.is_file():
+        copies.append((fig_v3, OUT / 'assets/chirps/climatology_v2_v3.png'))
     for src, dest in copies:
         if src.suffix == '.png' and dest.suffix == '':
             crop_panels(src, dest)

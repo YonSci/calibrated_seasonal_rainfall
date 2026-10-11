@@ -68,7 +68,7 @@ class CycleTests(unittest.TestCase):
         import xarray as xr
         for name in ('jan_2026_fmam.json', 'feb_2026_fmam.json'):
             c = load_cycle(ROOT / 'config/cycles' / name)
-            self.assertEqual(c.raw['season_domain_mask'], 'data/masks/fmam_coverage_chirps_v2_1993_2025_v1.nc')
+            self.assertEqual(c.raw['season_domain_mask'], 'data/masks/fmam_coverage_chirps_v3_1993_2025_v1.nc')   # CHIRPS v3.0 since 2026-10-11
             self.assertEqual([v for v, _ in c.extra_domains()], ['fmam_main_season_domain'])
             self.assertNotIn('default_view', c.raw)                 # the adopted domain is the default view
         with xr.open_dataset(c.root('season_domain_mask')) as d:     # main working domain: >= 100 mm and >= 20 % of annual

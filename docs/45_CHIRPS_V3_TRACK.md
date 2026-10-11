@@ -1,7 +1,10 @@
 # 45 — CHIRPS v3.0: a parallel track before any switch
 
-**Decision (2026-10-11, Option A):** the 2026 forecasts and their verification stay on CHIRPS v2.0. CHIRPS v3.0 is
-evaluated in a parallel track and, if adopted, used from the next forecast cycle. Nothing published is changed.
+**Adopted 2026-10-11 (release 2026-10-11.1).** CHIRPS v3.0 replaced v2.0 for calibration and verification, and the 2026
+cycles were republished on v3.0 (retrospective: recalibrated after their outcomes were known). The CHIRPS v2.0 versions
+are release 2026-10-10.2 in the site's release archive; locally their working data are in `outputs_chirps_v2/`,
+`models_chirps_v2/`, `data/interim_chirps_v2/` and `data/processed_chirps_v2/` (git-ignored). The first decision was
+Option A (keep 2026 on v2.0); it was replaced the same day by republishing on v3.0.
 
 ## Steps
 
@@ -10,7 +13,7 @@ evaluated in a parallel track and, if adopted, used from the next forecast cycle
 | 1 | v3 archive on the project's 0.25° grid | done (`prepare_chirps_v3.py`) |
 | 2 | v2 vs v3 comparison over Ethiopia | done (`compare_chirps_versions.py`) |
 | 3 | v3 calibration in separate configs and outputs (development + final), decision gates, domain reviews | done (worktree `chirps-v3`, `compare_v3_calibration.py`) |
-| 4 | Decision: adopt v3 from the next cycle, as a method release | after step 3 |
+| 4 | Adopt v3 and republish every cycle on it (method release 2026-10-11.1) | done |
 
 ## Step 1 — the v3 archive
 
@@ -106,9 +109,20 @@ so the numbers say how well the method works with each dataset, not which datase
   percent. The regime-based domains (R1+R2, R3) are fixed masks and do not change; the regimes themselves are a v2 daily
   product and are not rebuilt (v3 has no observed daily product).
 
-## Step 4 — decision (open)
+## Step 4 — adoption (2026-10-11)
 
-The evidence does not force a choice: v3 is wetter and better documented, the method holds, and skill is similar. If v3 is
-adopted for the next cycle: merge the `chirps-v3` configs, rebuild the domain masks from the v3 reviews (explicit selection),
-make the verification downloads and the site text read the observation source from the configuration (they still name
-CHIRPS v2.0 and its p25 URLs), and publish it as a method release. Until then the v2 chain is the published one.
+* **Configuration.** The `chirps-v3` branch was merged: every project and monthly config reads
+  `data/raw/chirps/et/et_chirps3_monthly_r25.nc` (`"chirps_temporal": "monthly"`). `scripts/obs_source.py` gives every script
+  the observation facts (label, product, official listing, monthly file names, citation), so verification downloads,
+  availability checks, reports, maps, the bulletin, the README and the site name CHIRPS v3.0 from the configuration.
+* **Verification.** Months come from the official v3 monthly files (`chirps-v3.0.YYYY.MM.tif`), averaged onto the grid
+  exactly as the archive is and checked against the archive in the overlap year (2025).
+* **Recalibration.** `run_chirps_v3_track.py` (the full chain) was rerun in the main folder; its forecasts equal those of the
+  worktree bit for bit. Evidence scripts (`ensemble_checks.py`, `monthly_consistency.py`, `clipping_analysis.py`) and the
+  JJAS decision gates were rerun on v3.0.
+* **Domains.** FMAM keeps its rule on the v3.0 climatology: `data/masks/fmam_coverage_chirps_v3_1993_2025_v1.nc` (1,196
+  cells, 75.6 % of Ethiopia). The FMAM main-season view, JJAS R1+R2 and ONDJ R3 masks are unchanged (regime/descriptive
+  masks from the CHIRPS v2.0 daily climatology; CHIRPS v3 has no observed daily product).
+* **Republication.** Every 2026 cycle was frozen anew and verified against v3.0 (FMAM February–May and the season; JJAS
+  June–August; ONDJ pending). The site says these forecasts are retrospective.
+* **Not carried over:** the original JJAS forecast bulletin and the historical blend review (both v2.0 artefacts).
