@@ -294,7 +294,7 @@
   {
     "id": "2026-10-11.2",
     "date": "2026-10-11",
-    "commit": null,
+    "commit": "92db6af",
     "title": "Smoother maps (display only)",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -306,6 +306,24 @@
       {
         "type": "display",
         "text": "Map display smoothing raised from 0.6 to 1.5 native cells (about 0.38 degrees), which softens the 1-degree steps the forecasts inherit from the ECMWF model grid; rainfall-domain edges are smoothed within the country instead of following the 0.25-degree mask cells. Forecast values, statistics, verification and exported files are unchanged (native 0.25-degree grid)."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-11.3",
+    "date": "2026-10-11",
+    "commit": null,
+    "title": "Grid-cell map style (0.25°)",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Forecast maps can be shown as Smoothed (default) or Grid cells (0.25°): every cell drawn exactly as computed, without interpolation or smoothing, with the same colours, classes and legend. Both styles are in the download package. Forecast values and statistics are unchanged."
       }
     ]
   }

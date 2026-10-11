@@ -230,6 +230,78 @@ def save_figure(fig, path, settings):
     gc.collect()        # closed figures hold reference cycles; collect now so peak memory does not grow with each view
 
 
+CELLS_NOTE = ("Grid cells (0.25°): every cell drawn as computed, no interpolation or smoothing. The model's 1° grid "
+               "(4 × 4 cells) and member-count steps are visible.")
+
+
+def cell_axes(fig, forecast, country, domain, valid):
+    """Axis with native-cell background: outside focus, ineligible in view, and the extent of the grid cells."""
+    lat, lon = np.asarray(forecast.lat, float), np.asarray(forecast.lon, float)
+    ext = [lon[0] - .125, lon[-1] + .125, lat[0] - .125, lat[-1] + .125]
+    return ext
+
+
+def cell_background(ax, ext, country, domain, valid):
+    for mask, color in [(country, "#edf0f3"), (country & domain, "#c3c9cf"), (country & domain & valid, "#ffffff")]:
+        if mask.any():
+            ax.imshow(np.where(mask, 1., np.nan), origin="lower", extent=ext, cmap=ListedColormap([color]),
+                      interpolation="nearest", zorder=0)
+
+
+def cell_finish(ax, ext, lines):
+    for x, y in lines:
+        ax.plot(x, y, color="#35414b", linewidth=.65, zorder=7)
+    ax.set(xlim=(ext[0], ext[1]), ylim=(ext[2], ext[3]), xlabel="Longitude (°E)", ylabel="Latitude (°N)", aspect="equal")
+    ax.grid(alpha=.12, linewidth=.4)
+
+
+def tercile_cells(forecast, fields, country, domain, lines, target, view, path, settings):
+    """Leading tercile on the native grid: same classes and colours as the smoothed map."""
+    p = fields.blend_probability.values
+    pv = (fields.probability_valid.values == 1) & country
+    _, shown, peak, _ = base.classify(p, pv, settings["minimum_leading_probability"])
+    ext = cell_axes(None, forecast, country, domain, pv)
+    fig = plt.figure(figsize=(10.6, 8.5))
+    gs = fig.add_gridspec(3, 2, width_ratios=[17, 1], left=.08, right=.86, bottom=.19, top=.83, hspace=.45, wspace=.14)
+    ax = fig.add_subplot(gs[:, 0])
+    cell_background(ax, ext, country, domain, pv)
+    norm = BoundaryNorm(base.PROB_BOUNDS, 7)
+    for row, k in enumerate([2, 1, 0]):
+        cmap = ListedColormap(base.COLORS[k])
+        ax.imshow(np.where(domain & pv & (shown == k), 100 * peak, np.nan), origin="lower", extent=ext, cmap=cmap, norm=norm,
+                  interpolation="nearest", zorder=2)
+        cb = fig.colorbar(ScalarMappable(norm=norm, cmap=cmap), cax=fig.add_subplot(gs[row, 1]), ticks=[40, 50, 60, 70, 80, 90, 100])
+        cb.set_label(["Below normal (%)", "Near normal (%)", "Above normal (%)"][k])
+    cell_finish(ax, ext, lines)
+    fig.suptitle(f"{CYCLE.target_label(target)} | rainfall tercile outlook", fontsize=18, y=.965)
+    fig.text(.5, .918, f"{CYCLE.init_month_name} initialization · shared probability blend · CHIRPS reference {REF_DASH}", ha="center", fontsize=10)
+    fig.text(.5, .883, VIEWS[view] + " · grid cells (0.25°)", ha="center", fontsize=11, color="#176d62")
+    fig.legend(handles=[Patch(facecolor="white", edgecolor="gray", label=f"Weak (<{100*settings['minimum_leading_probability']:g}%) or tied"),
+                        Patch(facecolor="#c3c9cf", label="Ineligible in view"), Patch(facecolor="#edf0f3", label="Outside focus")],
+               loc="lower center", bbox_to_anchor=(.5, .09), ncol=3, frameon=False, fontsize=9)
+    fig.text(.5, .018, CELLS_NOTE + f"\nResearch reconstruction of a {CYCLE.init_month_name}-initialized forecast; not an official EMI/ICPAC product.",
+             ha="center", va="bottom", fontsize=8, color="#48535d")
+    save_figure(fig, path, settings)
+
+
+def continuous_cells(forecast, values, valid, country, domain, lines, target, view, path, settings, levels, cmap, norm, extend, ticks,
+                     title, label, message):
+    ext = cell_axes(None, forecast, country, domain, valid)
+    fig, ax = plt.subplots(figsize=(9.4, 8.1))
+    fig.subplots_adjust(left=.09, right=.87, bottom=.22, top=.83)
+    cell_background(ax, ext, country, domain, valid)
+    im = ax.imshow(np.where(domain & valid & country, values, np.nan), origin="lower", extent=ext, cmap=cmap, norm=norm,
+                   interpolation="nearest", zorder=2)
+    fig.colorbar(ScalarMappable(norm=norm, cmap=cmap), ax=ax, shrink=.9, ticks=ticks, label=label, extend=extend)
+    cell_finish(ax, ext, lines)
+    fig.suptitle(title, fontsize=17, y=.965)
+    fig.text(.5, .918, f"{CYCLE.init_month_name} initialization · corrected ensemble mean · CHIRPS reference {REF_DASH}", ha="center", fontsize=10)
+    fig.text(.5, .883, VIEWS[view] + " · grid cells (0.25°)", ha="center", fontsize=11, color="#176d62")
+    fig.text(.5, .125, message + "\nLight gray: outside focus. Dark gray: ineligible or excluded by the display threshold.", ha="center", fontsize=9)
+    fig.text(.5, .018, CELLS_NOTE, ha="center", va="bottom", fontsize=8, color="#48535d")
+    save_figure(fig, path, settings)
+
+
 def forecast_maps(forecast, fields, domains, lines, target, out, settings):
     grid = DisplayGrid(forecast, settings)
     country = grid.support(domains["all_ethiopia"])
@@ -273,6 +345,9 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
                    loc="lower center",bbox_to_anchor=(.5,.09),ncol=3,frameon=False,fontsize=9)
         footer(fig,settings)
         save_figure(fig,folder/"tercile_outlook",settings)
+        native_country = np.asarray(domains["all_ethiopia"], bool)
+        native_domain = np.asarray(domain, bool)
+        tercile_cells(forecast, fields, native_country, native_domain, lines, target, view, folder/"tercile_outlook_cells", settings)
         for key, values in continuous.items():
             percent = key.endswith("percent")
             amount = key == "rainfall_total_mm"
@@ -299,6 +374,12 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
             fig.text(.5,.125,message+"\nLight gray: outside focus. Dark gray: ineligible or excluded by the display threshold.",ha="center",fontsize=9)
             footer(fig,settings)
             save_figure(fig,folder/key,settings)
+            native = {"rainfall_anomaly_mm": fields.rainfall_anomaly_mm.values, "rainfall_anomaly_percent": fields.rainfall_anomaly_percent.values,
+                      "rainfall_total_mm": forecast.corrected_ensemble_mean.values}[key]
+            continuous_cells(forecast, native, av & np.isfinite(native), native_country, native_domain, lines, target, view,
+                             folder/(key + "_cells"), settings, levels, cmap, norm, "max" if amount else "both", ticks,
+                             f"{CYCLE.target_label(target)} | {'corrected mean rainfall' if amount else 'rainfall anomaly'} ({units})",
+                             f"Rainfall {'total' if amount else 'anomaly'} ({units})", message)
 
 
 def verification_maps(fields, domains, lines, target, out, settings):
@@ -439,8 +520,9 @@ def build_gallery(output, forecast_targets, verified_targets, pending, details):
             record = read(folder/"presentation_summary.json")
             summary["forecasts" if kind=="forecast" else "verification"].append(record)
             for view,label in VIEWS.items():
-                images = ([('tercile_outlook','Leading tercile probability'),('rainfall_total_mm','Corrected mean rainfall'),
-                           ('rainfall_anomaly_mm','Rainfall anomaly (mm)'),('rainfall_anomaly_percent','Rainfall anomaly (%)')]
+                products = [('tercile_outlook','Leading tercile probability'),('rainfall_total_mm','Corrected mean rainfall'),
+                            ('rainfall_anomaly_mm','Rainfall anomaly (mm)'),('rainfall_anomaly_percent','Rainfall anomaly (%)')]
+                images = ([*products, *[(n + '_cells', l + ' (grid cells 0.25°)') for n, l in products]]
                           if kind=="forecast" else [('verification_maps','Verification maps')])
                 entries.append({"kind":kind,"target":target,"view":view,"label":label,
                                 "folder":f"presentation/{kind}/{target}/{view}","images":images,

@@ -43,9 +43,10 @@
     S.kind = q.get('kind') === 'verification' ? 'verification' : 'forecast';
     S.product = q.get('product') || 'tercile_outlook';
     S.period = q.get('period') === 'operational' ? 'operational' : 'training';
+    S.style = q.get('style') === 'cells' ? 'cells' : 'smooth';       // forecast map style: smoothed or native 0.25° cells
   }
   function sync() {
-    const q = new URLSearchParams({cycle: S.cycle, target: S.target, view: S.view, kind: S.kind, product: S.product, period: S.period});
+    const q = new URLSearchParams({cycle: S.cycle, target: S.target, view: S.view, kind: S.kind, product: S.product, period: S.period, style: S.style});
     history.replaceState(null, '', location.pathname + '?' + q + location.hash);
   }
 
@@ -144,8 +145,12 @@
     const cmp = S.product === 'verification_comparison' || S.product === 'verification_comparison_error';
     $('mp-tabs').innerHTML = prods.filter(p => p[0] !== 'verification_comparison_error').map(p => '<button type="button" class="tab" data-p="' + p[0] + '" aria-pressed="' +
       (p[0] === S.product || (cmp && p[0] === 'verification_comparison')) + '">' + esc(p[1]) + '</button>').join('');
+    const hasCells = S.kind === 'forecast' && e && e.images.some(i => i[0] === S.product + '_cells');
     $('mp-toggle').innerHTML = cmp && prods.some(p => p[0] === 'verification_comparison_error')
-      ? '<label class="check"><input type="checkbox" id="mp-error"' + (S.product === 'verification_comparison_error' ? ' checked' : '') + '> Show error map (forecast minus observed)</label>' : '';
+      ? '<label class="check"><input type="checkbox" id="mp-error"' + (S.product === 'verification_comparison_error' ? ' checked' : '') + '> Show error map (forecast minus observed)</label>'
+      : hasCells ? '<div class="seg" role="group" aria-label="Map style"><span class="caveat">Map style</span> ' +
+          [['smooth', 'Smoothed'], ['cells', 'Grid cells (0.25°)']].map(([k, l]) => '<button type="button" data-style="' + k + '" aria-pressed="' + (S.style === k) + '">' + l + '</button>').join('') + '</div>' : '';
+    const shownName = hasCells && S.style === 'cells' ? S.product + '_cells' : S.product;
     const fig = $('mp-figure');
     fig.classList.toggle('wide', S.kind === 'verification' && (S.product === 'verification_maps' || cmp));
     $('mp-actions').hidden = !e;
@@ -157,15 +162,19 @@
     }
     const pname = prods.find(p => p[0] === S.product)[1];
     const cap = t.label + ' · ' + viewLabel(S.view) + ' · ' + pname + ' · ' + c.init + ' initialization';
-    fig.innerHTML = img(e, S.product, cap, (S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + cap);
-    const src = e.folder + '/' + S.product + '.png';
+    const capStyled = cap + (shownName !== S.product ? ' · grid cells (0.25°)' : '');
+    fig.innerHTML = img(e, shownName, capStyled, (S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + capStyled);
+    const src = e.folder + '/' + shownName + '.png';
     const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     $('mp-open').href = src;
     $('mp-download').href = src;
     $('mp-open').textContent = cmp ? 'Open full-size comparison' : 'Open full-size';
     $('mp-download').textContent = cmp ? 'Download comparison figure' : 'Download PNG';
-    $('mp-download').setAttribute('download', ['ethiopia-rainfall', slug(t.label), slug(c.init) + '-init', slug(viewLabel(S.view)), slug(pname)].join('_') + '.png');
-    $('mp-help').innerHTML = (HELP[S.product] || '') + '<p class="caveat">Reference period: CHIRPS ' + c.reference + '.</p>';
+    $('mp-download').setAttribute('download', ['ethiopia-rainfall', slug(t.label), slug(c.init) + '-init', slug(viewLabel(S.view)), slug(pname)].join('_') + (shownName !== S.product ? '_grid-cells' : '') + '.png');
+    $('mp-help').innerHTML = (HELP[S.product] || '') + (hasCells ? (S.style === 'cells'
+        ? '<p><strong>Grid cells (0.25°)</strong>: every cell is drawn exactly as computed, without interpolation or smoothing. The 4 × 4-cell blocks come from the 1° model grid, and neighbouring cells can flip category because probabilities come from counting 51 members.</p>'
+        : '<p><strong>Smoothed</strong> (display only): values are smoothed over about 0.4° and interpolated, which softens the 1° model grid. Switch to Grid cells to see the values exactly as computed.</p>') : '') +
+      '<p class="caveat">Reference period: CHIRPS ' + c.reference + '.</p>';
   }
 
   // ---------- verification
@@ -758,8 +767,9 @@
   document.addEventListener('change', e => { if (e.target.id === 'mp-error') { S.product = e.target.checked ? 'verification_comparison_error' : 'verification_comparison'; renderAll(); } });
   $('dl-package').addEventListener('click', downloadPackage);
   document.addEventListener('click', e => {
-    const b = e.target.closest('[data-t],[data-k],[data-p],[data-period]');
+    const b = e.target.closest('[data-t],[data-k],[data-p],[data-period],[data-style]');
     if (!b) return;
+    if (b.dataset.style) S.style = b.dataset.style;
     if (b.dataset.period) S.period = b.dataset.period;
     if (b.dataset.t) S.target = b.dataset.t;
     if (b.dataset.k) S.kind = b.dataset.k;
