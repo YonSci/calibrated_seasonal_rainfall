@@ -330,7 +330,7 @@
   {
     "id": "2026-10-11.4",
     "date": "2026-10-11",
-    "commit": null,
+    "commit": "64c5532",
     "title": "Method and references",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -342,6 +342,24 @@
       {
         "type": "display",
         "text": "Methods section: new 'Method and references' panel naming the bias-correction method (per-cell mean–variance scaling), the probability and blending steps, the scores, and the scientific references with DOIs (checked on Crossref). Full text in docs/46. Forecasts and scores are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-11.5",
+    "date": "2026-10-11",
+    "commit": null,
+    "title": "Bias correction section",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "New 'Bias correction' section: benchmark of 13 rainfall-amount bias-correction methods against the operational mean-variance scaling for the September-initialized ONDJ cycle (data, method definitions, steps, results by target and region, gate statistics, figures, interpretation, downloads and references; docs/47). The published forecasts are unchanged."
       }
     ]
   }

@@ -782,5 +782,31 @@
     if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, () => { $('mp-copied').textContent = url; });
     else $('mp-copied').textContent = url;
   });
+  // Bias correction: region switch for the result tables, the figure browser and (with several benchmarks) the benchmark picker
+  document.addEventListener('click', e => {
+    const r = e.target.closest('[data-bc-region]');
+    if (!r) return;
+    const box = r.closest('.bc');
+    box.querySelectorAll('[data-bc-region]').forEach(b => b.setAttribute('aria-pressed', String(b === r)));
+    box.querySelectorAll('[data-region]').forEach(t => { t.hidden = t.dataset.region !== r.dataset.bcRegion; });
+  });
+  const bcFigure = fig => {
+    const kind = fig.querySelector('.bc-kind'), target = fig.querySelector('.bc-target');
+    const opt = kind.options[kind.selectedIndex], per = opt.dataset.perTarget === 'true';
+    target.disabled = !per;
+    const src = fig.dataset.figs + '/' + opt.value.replace('{t}', target.value) + '.png';
+    const cap = opt.textContent + (per ? ' — ' + target.value : '');
+    const img = fig.querySelector('.bc-img');
+    img.src = src; img.alt = cap;
+    fig.querySelector('.bc-cap').textContent = cap;
+    fig.querySelector('.bc-open').href = src;
+  };
+  document.querySelectorAll('.bc-figs').forEach(fig => {
+    fig.querySelectorAll('select').forEach(s => s.addEventListener('change', () => bcFigure(fig)));
+    bcFigure(fig);
+  });
+  if ($('bc-bench')) $('bc-bench').addEventListener('change', e => {
+    document.querySelectorAll('.bc').forEach(b => { b.hidden = b.dataset.bench !== e.target.value; });
+  });
   renderAll();
 })();

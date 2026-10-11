@@ -30,6 +30,7 @@ from cycle import load_cycle, target_window          # noqa: E402
 from significance import paired_summary              # noqa: E402
 import site_extras as extras                          # noqa: E402
 import obs_source                                     # noqa: E402
+import site_bias                                      # noqa: E402
 
 OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
@@ -589,7 +590,7 @@ def references_block():
   </details>'''
 
 
-def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None):
+def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None, bias=''):
     gates, ens, mono, clip, raw = (ev[k] for k in ('gates', 'ens', 'mono', 'clip', 'raw'))
     raw_rpss = raw.get('raw_rps_skill')
     obs_labels = sorted({c['obs'] for c in cycles})                 # e.g. ['CHIRPS v3.0']
@@ -683,7 +684,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top">Ethiopia Seasonal Rainfall</a>
-    <nav aria-label="Sections"><a href="#outlooks">Outlooks</a><a href="#official">Compare outlooks</a><a href="#maps">Maps</a><a href="#verification">Verification</a><a href="#history">Historical performance</a><a href="#domains">Rainfall domains</a><a href="#methods">Methods &amp; data</a><a href="#downloads">Downloads</a></nav>
+    <nav aria-label="Sections"><a href="#outlooks">Outlooks</a><a href="#official">Compare outlooks</a><a href="#maps">Maps</a><a href="#verification">Verification</a><a href="#history">Historical performance</a><a href="#bias">Bias correction</a><a href="#domains">Rainfall domains</a><a href="#methods">Methods &amp; data</a><a href="#downloads">Downloads</a></nav>
   </div>
   <div class="cyclebar">
     <div class="wrap pickers">
@@ -778,6 +779,8 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
   <h3>Historical performance by rainfall region</h3>
   <div id="hs-regions"></div>
 </section>
+
+{bias}
 
 <section id="domains" class="wrap">
   <h2>Rainfall climatology and domains</h2>
@@ -1759,6 +1762,32 @@ JS = r'''
     if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, () => { $('mp-copied').textContent = url; });
     else $('mp-copied').textContent = url;
   });
+  // Bias correction: region switch for the result tables, the figure browser and (with several benchmarks) the benchmark picker
+  document.addEventListener('click', e => {
+    const r = e.target.closest('[data-bc-region]');
+    if (!r) return;
+    const box = r.closest('.bc');
+    box.querySelectorAll('[data-bc-region]').forEach(b => b.setAttribute('aria-pressed', String(b === r)));
+    box.querySelectorAll('[data-region]').forEach(t => { t.hidden = t.dataset.region !== r.dataset.bcRegion; });
+  });
+  const bcFigure = fig => {
+    const kind = fig.querySelector('.bc-kind'), target = fig.querySelector('.bc-target');
+    const opt = kind.options[kind.selectedIndex], per = opt.dataset.perTarget === 'true';
+    target.disabled = !per;
+    const src = fig.dataset.figs + '/' + opt.value.replace('{t}', target.value) + '.png';
+    const cap = opt.textContent + (per ? ' — ' + target.value : '');
+    const img = fig.querySelector('.bc-img');
+    img.src = src; img.alt = cap;
+    fig.querySelector('.bc-cap').textContent = cap;
+    fig.querySelector('.bc-open').href = src;
+  };
+  document.querySelectorAll('.bc-figs').forEach(fig => {
+    fig.querySelectorAll('select').forEach(s => s.addEventListener('change', () => bcFigure(fig)));
+    bcFigure(fig);
+  });
+  if ($('bc-bench')) $('bc-bench').addEventListener('change', e => {
+    document.querySelectorAll('.bc').forEach(b => { b.hidden = b.dataset.bench !== e.target.value; });
+  });
   renderAll();
 })();
 '''
@@ -1838,7 +1867,8 @@ def main():
     (OUT / 'assets/style.css').write_text(CSS.strip() + '\n', encoding='utf-8', newline='')
     extras.build_releases(OUT, dict(cycles=cycles), esc)
     reviews = extras.export_domain_review(OUT)
-    (OUT / 'index.html').write_text(page(cycles, default, jjas_evidence(), built, sha, release_id, reviews), encoding='utf-8', newline='')
+    bias = site_bias.section(site_bias.export(OUT))          # Bias correction: the bias-correction benchmark (docs/47)
+    (OUT / 'index.html').write_text(page(cycles, default, jjas_evidence(), built, sha, release_id, reviews, bias), encoding='utf-8', newline='')
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())
     print(f'Site written to {OUT}: {len(cycles)} cycles ({", ".join(c["label"] for c in cycles)}), default {default}, '

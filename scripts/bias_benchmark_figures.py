@@ -30,7 +30,7 @@ def outline(ax, lat, lon, mask, **kw):
     ax.contour(lon, lat, mask.astype(float), levels=[.5], **kw)
 
 
-def heatmaps(path, results, gates, methods, targets, region, ref):
+def heatmaps(path, results, gates, methods, targets, region, ref, region_label):
     panels = [('training', 'crpss', 'CRPSS amounts, leave-one-year-out 1993-2016'),
               ('training', 'rpss', 'RPSS terciles (smoothed counts, no blend), 1993-2016'),
               ('operational', 'crpss', 'CRPSS amounts, fit 1993-2016, scored 2017-2024')]
@@ -50,7 +50,7 @@ def heatmaps(path, results, gates, methods, targets, region, ref):
         ax.set_xticks(range(len(targets)), targets)
         ax.set_title(title, fontsize=10)
     axes[0].set_yticks(range(len(methods)), [label(m) for m in methods])
-    fig.suptitle(f'Bias-correction benchmark, September initialization ({region.replace("_", " ")}; area-weighted, equal years)', fontsize=12)
+    fig.suptitle(f'Bias-correction benchmark ({region_label}; area-weighted, equal years)', fontsize=12)
     fig.text(.5, .005, '* passes the gate against MVS (Holm-adjusted p < 0.05 on 1993-2016 and no harm 2017-2024); '
              '+ significant on 1993-2016 only. Skill is against the CHIRPS training climatology. *MVS = operational.',
              ha='center', fontsize=8)
@@ -163,7 +163,7 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
     ref = cfg['reference_method']
     fig_dir = out / 'figures'
     fig_dir.mkdir(parents=True, exist_ok=True)
-    heatmaps(fig_dir / 'skill_summary.png', results, gates, methods, targets, region, ref)
+    heatmaps(fig_dir / 'skill_summary.png', results, gates, methods, targets, region, ref, cfg['regions'][region]['label'])
     distribution_panel(fig_dir / 'distribution.png', results, methods, targets, region)
     spec = cfg['regions']['ondj_domain'] if 'ondj_domain' in cfg['regions'] else cfg['cells']
     with xr.open_dataset(source_path(spec['path'])) as d:
