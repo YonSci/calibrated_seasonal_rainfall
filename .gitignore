@@ -27,6 +27,8 @@ data/shapefiles/
 
 # Forecast NetCDF files published with the site (download package)
 !site/downloads/data/**/*.nc
+# Bias-correction benchmark NetCDF downloads (per-cell scores, corrected forecast members)
+!site/downloads/bias/**/*.nc
 
 # CHIRPS v2.0 working data, kept locally after the switch to CHIRPS v3.0 (2026-10-11)
 outputs_chirps_v2/

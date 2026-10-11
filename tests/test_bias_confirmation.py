@@ -34,6 +34,36 @@ class Confirmation(unittest.TestCase):
         a = pipe.fit_apply(frozenset((1993, 1994)), [1993, 1994])
         self.assertIs(pipe.fit_apply(frozenset((1994, 1993)), [1994])[0], a[1])
 
+    def test_configured_smoothing_is_used(self):
+        """A nondefault alpha follows the explicit formula (count + alpha) / (members + 3 alpha)."""
+        from calibration_core import fit_amount, categories
+        models, obs = synthetic()
+        train = sorted(obs)
+        y, alpha = 2016, 2.0
+        rec = bc.Pipeline('raw', {}, models, obs, train, alpha).fit_apply(frozenset((y,)), [y])[0]
+        T = [z for z in train if z != y]
+        pars = fit_amount([models[z] for z in T], np.stack([obs[z] for z in T]), np.ones(40, bool))
+        c = categories(models[y], pars['q1'], pars['q2'])
+        n = len(models[y])
+        expected = np.stack([((c == k).sum(0) + alpha) / (n + 3 * alpha) for k in range(3)], -1)
+        ok = pars['probability_eligible']
+        np.testing.assert_allclose(rec['s'][ok], expected[ok], rtol=1e-6)
+        default = bc.Pipeline('raw', {}, models, obs, train, .5).fit_apply(frozenset((y,)), [y])[0]
+        self.assertGreater(np.nanmax(np.abs(rec['s'] - default['s'])), .01)
+
+    def test_checkpoint_fingerprint_covers_the_calculation(self):
+        """Inputs, masks, configurations and every calculation file (CRPS, smoothing, blend) enter the key."""
+        import bias_benchmark as bb
+        for f in ('scripts/bias_benchmark.py', 'scripts/compare_calibration.py', 'scripts/local_blend.py',
+                  'scripts/bias_methods.py', 'scripts/bias_confirmation.py', 'scripts/calibration_core.py'):
+            self.assertIn(f, bb.CODE_FILES)
+        dep = dict(code_sha256={'a': '1'}, config={}, project_config={}, cycle_config={}, masks={}, scoring_version=3,
+                   inputs={'Oct': {'sha256': 'x'}, 'Nov': {'sha256': 'y'}})
+        k = bb.dependency_key(dep, 'Oct')
+        self.assertEqual(k, bb.dependency_key(dict(dep, inputs={'Oct': {'sha256': 'x'}, 'Nov': {'sha256': 'changed'}}), 'Oct'))
+        self.assertNotEqual(k, bb.dependency_key(dict(dep, inputs={'Oct': {'sha256': 'changed'}, 'Nov': {'sha256': 'y'}}), 'Oct'))
+        self.assertNotEqual(k, bb.dependency_key(dict(dep, code_sha256={'a': '2'}), 'Oct'))
+
     def test_scores_of_a_perfect_forecast(self):
         cells = 30
         y = np.array([0, 1, 2] * 10)

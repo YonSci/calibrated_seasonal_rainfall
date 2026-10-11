@@ -147,7 +147,11 @@ class View:
         self.months = self.targets[:-1]
         self.methods = list(data['targets'][self.targets[0]]['methods'])
         self.ref = self.cfg['reference_method']
-        self.candidates = [m for m in self.methods if m != self.ref and m in data['gates']]
+        self.candidates = [m for m in self.methods if m != self.ref and m in data['gates']
+                           and data['methods'][m]['family'] != 'variant']            # the declared family
+        self.variants = [m for m in self.methods if data['methods'].get(m, {}).get('family') == 'variant'] if data.get('methods') else []
+        self.family = (confirmation or {}).get('family', (confirmation or {}).get('methods', []))
+        self.commit = (data.get('provenance') or {}).get('commit') or 'main'
         self.primary = self.cfg['primary_region']
         self.year = self.cfg['forecast_year']
         self.tr, self.te = years(self.cfg['training_years']), years(self.cfg['test_years'])
@@ -224,8 +228,8 @@ def data_table(V):
                   'is complete in every training year'],
         ['Regions scored', regions],
         ['Score coverage (amounts / probabilities, share of the national area)',
-         coverage + '. Tercile scores need three distinct tercile limits (standard deviation ≥ 1 mm and a lower limit above 0), '
-                    'so dry months have fewer probability cells.'],
+         coverage + '. Tercile scores need two distinct tercile boundaries defining three categories, a CHIRPS standard deviation '
+                    'of at least 1 mm and a lower boundary above 0 mm, so dry months have fewer probability cells.'],
         ['Dry totals', f'≤ {cfg.get("dry_threshold_mm", 1.0):g} mm in a month or season (not a dry day); exactly 0 mm is reported separately'],
         ['Weighting', 'Every member is used; each training year has total weight 1/Y (each member of year y weighs 1/(Y·M<sub>y</sub>)), '
                       'so years with 25 and 51 members count equally. Each observed year weighs 1/Y.'],
@@ -371,6 +375,29 @@ def results_html(V):
             f'aria-label="Region for the result tables">{seg}</div></div>' + ''.join(out))
 
 
+GROUP_KEYS = ['all training years exactly 0 mm', 'all training years <= threshold', 'mixed dry and wet years', 'always wet']
+GROUP_SHORT = ['all 0 mm', 'all ≤ 1 mm', 'mixed', 'always wet']
+
+
+def groups_html(V):
+    """Contribution of each climate group to the CRPS difference from the reference, per target (national, 1993–2016)."""
+    out = [f'<p class="caveat">Each cell is grouped by its CHIRPS totals in the fold’s training years only: every year exactly 0 mm; '
+           f'every year ≤ 1 mm (not all 0); some years dry and some wet; never dry. Contributions are area-weighted CRPS differences '
+           f'from {esc(V.short(V.ref))} (mm; negative favours the method) and add up to the national difference. Leave-one-year-out '
+           f'{V.tr}, {esc(V.national)}.</p>']
+    for t in V.targets:
+        g = V.d['targets'][t].get('dry_groups', {}).get('training', {}).get(V.primary)
+        if not g:
+            continue
+        share = next(iter(g.values()))
+        head = ['Method', 'Total Δ CRPS'] + [f'{GROUP_SHORT[i]}<br><span class="caveat">{pct(share[k]["area_share"], 1)} of area</span>'
+                                             for i, k in enumerate(GROUP_KEYS)]
+        rows = [[esc(V.label(m)), signed(x['total_delta_crps_mm'])] + [signed(x[k]['delta_crps_mm']) for k in GROUP_KEYS]
+                for m, x in g.items() if m != 'raw']
+        out.append(tbl(head, rows, f'{esc(t)}: contributions to the CRPS difference from {esc(V.short(V.ref))} (mm)'))
+    return ''.join(out)
+
+
 def diagnostics_html(V):
     rows = []
     for m in V.methods:
@@ -388,13 +415,13 @@ def gates_html(V):
     parts = []
     for score, unit, d in [('crps', 'mm', 2), ('crps_fair', 'mm', 2), ('rps', '', 4)]:
         rows = []
-        for m in V.candidates:
+        for m in V.candidates + V.variants:
             for t in V.targets:
                 g = V.gate(m, score, t)
                 a, b, dc = g['training'], g['operational'], g['decision']
                 rows.append([esc(V.label(m)), esc(t), f'{a["mean_difference"]:+.{d}f}',
                              f'{a["bootstrap_95"][0]:+.{d}f} to {a["bootstrap_95"][1]:+.{d}f}', f'{a["years_better"]}/{a["years"]}',
-                             f'{a["p_improvement"]:.4f}', f'{dc["holm_p"]:.4f}', f'{dc["holm_p_family"]:.4f}',
+                             f'{a["p_improvement"]:.4f}', f'{dc["holm_p"]:.4f}', '— (variant)' if dc.get('holm_p_family') is None else f'{dc["holm_p_family"]:.4f}',
                              f'{b["mean_difference"]:+.{d}f}', '✓✓' if dc['screen_pass_family'] else ('✓' if dc['screen_pass'] else '—')])
         label = {'crps': 'CRPS', 'crps_fair': 'fair CRPS', 'rps': 'RPS (no blend)'}[score]
         parts.append(tbl(['Method', 'Target', f'Δ {label} {V.tr}' + (f' ({unit})' if unit else ''), '95% interval', 'Years better',
@@ -601,19 +628,22 @@ def findings(V):
             C = V.c
             p_ok = [t for t in V.targets if C['tests']['SEL-P']['rps'][t]['decision']['confirmed']]
             a_ok = [t for t in V.targets if C['tests']['SEL-A']['crps'][t]['decision']['confirmed']]
-            meth = {sc: [f'{L(m)} ({", ".join(t for t in V.targets if V.confirmed(m, sc, t))})' for m in C['methods']
+            meth = {sc: [f'{L(m)} ({", ".join(t for t in V.targets if V.confirmed(m, sc, t))})' for m in V.family
                          if m != ref and any(V.confirmed(m, sc, t) for t in V.targets)] for sc in ('rps', 'crps')}
             sp, sa = V.cv('SEL-P', 'training', 'rpss', s), V.cv('SEL-A', 'training', 'crpss', s)
-            return (f'<strong>Confirmation through the full pipeline.</strong> Choosing the method each year from training-only scores, the '
-                    f'probability procedure (SEL-P) scores {esc(s)} blended RPSS {signed(sp)} against {signed(V.cv(ref, "training", "rpss", s))} '
-                    f'for {esc(L(ref))}, and is confirmed better for {esc(listing(p_ok))}; the amount procedure (SEL-A) scores CRPSS '
-                    f'{signed(sa)} against {signed(V.cv(ref, "training", "crpss", s))}, confirmed for {esc(listing(a_ok))}. Individual methods '
-                    f'confirmed against the family of all methods and targets — blended RPS: {esc(listing(meth["rps"]))}; amount CRPS: '
-                    f'{esc(listing(meth["crps"]))}.')
+            probs = ('<strong>No tested method demonstrates a statistically significant improvement over '
+                     f'{esc(L(ref))} for the published tercile probabilities under this validation protocol</strong>, although several '
+                     'have slightly higher point estimates' if not meth['rps'] and not p_ok else
+                     f'<strong>Published probabilities:</strong> confirmed better than {esc(L(ref))}: {esc(listing(meth["rps"]))}')
+            return (f'{probs}. Choosing the method each year from training-only scores, the probability procedure (SEL-P) scores '
+                    f'{esc(s)} blended RPSS {signed(sp)} against {signed(V.cv(ref, "training", "rpss", s))}, confirmed for '
+                    f'{esc(listing(p_ok))}. Amounts: the amount procedure (SEL-A) scores CRPSS {signed(sa)} against '
+                    f'{signed(V.cv(ref, "training", "crpss", s))}, confirmed for {esc(listing(a_ok))}; fixed methods confirmed against the '
+                    f'family of all declared methods and targets: {esc(listing(meth["crps"]))}.')
         add(lambda: True, conf_text)
 
         def ranges():
-            ms = V.c['methods']
+            ms = V.family
             after = [V.cv(m, 'training', 'rpss', s) for m in ms]
             before = [V.v(m, 'training', 'rpss', s) for m in ms]
             return max(after) - min(after), max(before) - min(before)
@@ -629,18 +659,65 @@ def findings(V):
 
         def risky():
             out_ = []
-            for name, sc in (('SEL-P', 'rps'), ('SEL-A', 'crps')):
+            for name, sc in (('SEL-A', 'crps'), ('SEL-P', 'rps')):
                 for t in V.targets:
-                    test = V.c['tests'][name][sc][t]
+                    test = V.c['tests'][name][sc][t]['test']
                     chosen = V.c['targets'][t]['selection'][name]['chosen_test']
-                    if test['test']['mean_difference'] > 0 and chosen != ref:
-                        out_.append((name, t, chosen, test['test']['mean_difference'], sc))
+                    if test['mean_difference'] > 0 and chosen != ref:
+                        a = V.c['targets'][t]['selection'][name]['test'][V.primary]
+                        b = V.c['targets'][t]['methods'][ref]['test'][V.primary]
+                        d = np.array(a['per_year'][sc]) - np.array(b['per_year'][sc])
+                        worst = [str(a['years'][i]) for i in np.argsort(d)[::-1][:2] if d[i] > 0]
+                        out_.append((name, t, chosen, test, sc, worst))
             return out_
-        add(lambda: bool(risky()), lambda: (
-            '<strong>Choosing by training scores can backfire.</strong> For ' + '; for '.join(
-                f'{esc(t)}, {name} chose {esc(L(m))} from the {tr} scores, and over {te} it is worse than {esc(L(ref))} '
-                f'(Δ {sc.upper()} {d:+.3f}{" mm" if sc == "crps" else ""})' for name, t, m, d, sc in risky()) +
-            '. This is why a method that ranks first on the training years is not, on that alone, a replacement.'))
+        def risky_text():
+            parts = []
+            for name, t, m, test, sc, worst in risky():
+                unit = ' mm' if sc == 'crps' else ''
+                lo, hi = test['bootstrap_95']
+                parts.append(f'for {esc(t)}, {name} chose {esc(L(m))} from the {tr} scores; over {te} it has a worse mean {sc.upper()} '
+                             f'(Δ {test["mean_difference"]:+.3f}{unit}, 95% interval {lo:+.3f} to {hi:+.3f}{unit}; better than '
+                             f'{esc(L(ref))} in {test["years_better"]} of {test["years"]} years'
+                             + (f', with the largest losses in {listing(worst)}' if worst else '') + ')')
+            return ('<strong>Choosing by training scores can backfire.</strong> ' + '; '.join(parts)[0].upper() + '; '.join(parts)[1:] +
+                    '. These choices fail the no-harm rule; where the interval includes 0 they do not establish a significant '
+                    'deterioration. A method that ranks first on the training years is not, on that alone, a replacement.')
+        add(lambda: bool(risky()), risky_text)
+
+        def dry_part():
+            out_ = []
+            for m in V.family:
+                for t in V.months:
+                    if m != ref and V.confirmed(m, 'crps', t) and 'dry_groups' in V.d['targets'][t]:
+                        out_.append((m, t, V.d['targets'][t]['dry_groups']['training'][V.primary][m]))
+            return out_
+        def dry_text():
+            parts = []
+            for m, t, g in dry_part():
+                tot = g['total_delta_crps_mm']
+                vals = [g[k]['delta_crps_mm'] for k in GROUP_KEYS]
+                shares = [g[k]['area_share'] for k in GROUP_KEYS]
+                parts.append(f'{esc(L(m))} in {esc(t)} (Δ CRPS {tot:+.3f} mm): ' + ', '.join(
+                    f'{GROUP_SHORT[i]} {vals[i]:+.3f} mm ({pct(vals[i] / tot if tot else np.nan)}; {pct(shares[i])} of the area)'
+                    for i in range(4)))
+            return ('<strong>Where the confirmed amount gains come from</strong> (climate groups from each fold’s training years; '
+                    'contributions add up to the national difference from ' + esc(L(ref)) + '): ' + '; '.join(parts) + '.')
+        add(lambda: bool(dry_part()), dry_text)
+
+        if 'mvs_zero_guard' in V.c.get('methods', []):
+            def guard_text():
+                hits = [t for t in V.targets if V.confirmed('mvs_zero_guard', 'crps', t)]
+                g = {t: V.d['targets'][t]['dry_groups']['training'][V.primary].get('mvs_zero_guard') for t in V.targets
+                     if 'dry_groups' in V.d['targets'][t]}
+                where = [t for t, x in g.items() if x and x[GROUP_KEYS[0]]['area_share'] > 0]
+                areas = [t + ' ' + pct(g[t][GROUP_KEYS[0]]['area_share'], 1) + ' of the area' for t in where]
+                deltas = [esc(t) + ' ' + format(g[t]['total_delta_crps_mm'], '+.3f') + ' mm' for t in where]
+                return (f'<strong>The all-zero guard</strong> (a separate MVS variant, outside the declared family) changes MVS only where '
+                        f'every training year has exactly 0 mm: {esc(listing(areas))}. '
+                        f'Its amount CRPS difference from {esc(L(ref))}: ' + ', '.join(deltas) +
+                        f'; confirmed better for {esc(listing(hits))} (Holm across the targets). A finite history of zero rainfall '
+                        'does not make rain impossible, so the guard is a documented modelling choice, not a correction.')
+            add(lambda: True, guard_text)
     return out
 
 
@@ -655,15 +732,21 @@ def decision_html(V):
             sel = [t for t in V.targets if C['tests'][proc][sc][t]['decision']['confirmed']]
             if conf:
                 txt = '; '.join(f'{V.short(m)} for {listing(t)}' for m, t in conf.items())
+                same = any(sum(t in v for v in conf.values()) > 1 for t in V.targets)
                 items.append(f'<li><strong>{esc(product.capitalize())}:</strong> confirmed against {esc(V.short(ref))} (family-wide, '
-                             f'full pipeline): {esc(txt)}. The selection-aware procedure is confirmed for {esc(listing(sel))}.</li>')
+                             f'full pipeline): {esc(txt)}. The selection-aware procedure is confirmed for {esc(listing(sel))}.'
+                             + (' These comparisons establish improvement against the reference, not that one candidate is better '
+                                'than another.' if same else '') + '</li>')
             else:
-                items.append(f'<li><strong>{esc(product.capitalize())}:</strong> no method is confirmed better than {esc(V.short(ref))} '
-                             f'after accounting for the whole search; the selection-aware procedure is confirmed for {esc(listing(sel))}.</li>')
+                items.append(f'<li><strong>{esc(product.capitalize())}:</strong> no tested method demonstrates a statistically significant '
+                             f'improvement over {esc(V.short(ref))} under this validation protocol (several have slightly higher point '
+                             f'estimates); the selection-aware procedure is confirmed for {esc(listing(sel))}.</li>')
     else:
         items.append('<li>The confirmation run is pending; the screening alone does not support a change.</li>')
     items.append(f'<li>The operational method stays {esc(V.short(V.ref))} until a change is decided by initialization, target and product, '
                  'and recorded in the docs, on this evidence; confirmed improvements limited to some months may justify a per-target choice.</li>')
+    items.append('<li>If amounts and probabilities come to use different correction paths, the product metadata must record both '
+                 'methods so that every output can be traced.</li>')
     items.append('<li>The same screening and confirmation run for the other cycles with one configuration file each '
                  '(<code>config/bias_correction/</code>).</li>')
     return '<ul class="findings">' + ''.join(items) + '</ul>'
@@ -724,8 +807,9 @@ def block(bench, files):
   </ul></details>
   <details><summary>Dry totals and tied values</summary><p>A total at or below 1 mm in the month or season is “dry” (not a dry day).
   For the quantile-mapping methods (EQM, Gamma QM, DQM, QDM) the dry shares of the model climatology and of CHIRPS are estimated with
-  the equal-year weights; a forecast’s dry members are spread evenly over the model’s dry probability by rank (ties by member order, the
-  expected value of random tie-breaking), and a probability within the CHIRPS dry share maps to 0 mm. Without this, tied zeros share one
+  the equal-year weights; a forecast’s dry members are spread evenly over the model’s dry probability by rank (deterministic stratified
+  tie-breaking, with ties resolved by member index), and a probability within the CHIRPS dry share maps to 0 mm, also after any
+  extrapolation of the upper tail. Without this, tied zeros share one
   probability and the corrected dry share does not follow CHIRPS. Tests cover repeated zeros, all-dry samples and very few wet values;
   the dry-month table under Results compares the shares. CDF-t, LOCI and the scaling methods have no occurrence adjustment; SDM uses its
   own rain-member rule (Switanek et al. 2017).</p></details>
@@ -738,6 +822,7 @@ def block(bench, files):
   {results_html(V)}
   <details><summary>Screening statistics for every method, target and score (within-method and family-wide Holm)</summary>{gates_html(V)}</details>
   <details><summary>How often limits, caps and fallbacks act</summary>{diagnostics_html(V)}</details>
+  <details><summary>Where the amount differences come from: cells grouped by their training-year climate</summary>{groups_html(V)}</details>
 
   <h3>Confirmation: full pipeline and method selection</h3>
   {confirmation_html(V)}
@@ -759,14 +844,35 @@ def block(bench, files):
 
   <h3>Downloads, provenance and code</h3>
   <ul class="dl">{dl}
-    <li><a href="{REPO}/blob/main/{REPO_DOC}">Full write-up (docs/47)</a><span>Definitions, design, all result tables and the references</span></li>
-    <li><a href="{REPO}/blob/main/scripts/bias_methods.py">Code</a><span><code>scripts/bias_methods.py</code> (methods), <code>scripts/bias_benchmark.py</code> (screening), <code>scripts/bias_confirmation.py</code> (confirmation), <code>config/bias_correction/{esc(name)}.json</code> (settings)</span></li>
+    <li><a href="{REPO}/blob/{V.commit}/{REPO_DOC}">Full write-up (docs/47) at commit {esc(V.commit[:7])}</a><span>Definitions, design, all result tables and the references, as of the code that produced these results</span></li>
+    <li><a href="{REPO}/tree/{V.commit}/scripts">Code at commit {esc(V.commit[:7])}</a><span><code>scripts/bias_methods.py</code> (methods), <code>scripts/bias_benchmark.py</code> (screening), <code>scripts/bias_confirmation.py</code> (confirmation), <code>config/bias_correction/{esc(name)}.json</code> (settings)</span></li>
   </ul>
   <details><summary>Run provenance</summary>{provenance_html(V)}</details>
 
   <details><summary>References</summary><ol class="findings">{refs}</ol>
   <p class="caveat">DOIs checked against Crossref, 11 October 2026.</p></details>
 </div>'''
+
+
+def check_published(out_dir):
+    """Every local link of the page must exist in the site and be publishable (not ignored by git); raises otherwise.
+
+    A file that exists locally but is git-ignored is missing from the deployed site (an advertised download would 404).
+    """
+    import re
+    import subprocess
+    page = (out_dir / 'index.html').read_text(encoding='utf-8')
+    links = sorted({m for m in re.findall(r'(?:href|src)(?:=|": ?)"((?:downloads|assets)/[^"#?]+)"', page)})   # HTML and page data
+    missing = [l for l in links if not (out_dir / l).is_file()]
+    rel = [(out_dir / l).resolve().relative_to(ROOT).as_posix() for l in links if (out_dir / l).is_file()]
+    ignored = []
+    if rel and out_dir.resolve().is_relative_to(ROOT):
+        r = subprocess.run(['git', 'check-ignore', '--stdin'], cwd=ROOT, input='\n'.join(rel), capture_output=True, text=True)
+        ignored = [l for l in r.stdout.splitlines() if l.strip()]
+    if missing or ignored:
+        raise RuntimeError('Site links that would not be published: ' + '; '.join(
+            [f'missing {m}' for m in missing] + [f'git-ignored {i}' for i in ignored]))
+    return len(links)
 
 
 def section(blocks):

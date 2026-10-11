@@ -16,7 +16,9 @@ each method's limits, caps and fallbacks act.
 Screening: each method against the reference (operational MVS) per target and score (CRPS, fair CRPS, RPS):
 one-sided sign-flip test on the training-design per-year scores and no harm over the test years. Two
 multiplicity families are reported: within one method across the targets ("screen_pass") and across every
-method and target of the benchmark ("screen_pass_family"). A screening pass is not an adoption decision.
+declared method and target ("screen_pass_family"; sensitivity variants such as the MVS all-zero guard are screened
+within method only). A screening pass is not an adoption decision. For the reference comparison, each cell's
+contribution is also split by its climate group in the fold's training years (all 0 mm, all dry, mixed, always wet).
 """
 import argparse
 import hashlib
@@ -56,7 +58,7 @@ from significance import paired_summary, holm, ALPHA                        # no
 
 MONTHS = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9,
           'Oct': 10, 'Nov': 11, 'Dec': 12}
-SCORING_VERSION = 2          # 2: ordinary CRPS primary, fair CRPS diagnostic, coverage, dry shares, diagnostics
+SCORING_VERSION = 3          # 3: + dry-cell group contributions; variants outside the family; complete fingerprint
 GATE_SCORES = ('crps', 'crps_fair', 'rps')
 
 
@@ -175,20 +177,37 @@ def git(*args):
         return None
 
 
-def provenance(cfg, project, targets, config_path):
-    code = ['scripts/bias_methods.py', 'scripts/bias_benchmark.py', 'scripts/significance.py', 'scripts/calibration_core.py',
-            'scripts/run_calibration.py']
+CODE_FILES = ['scripts/bias_methods.py', 'scripts/bias_benchmark.py', 'scripts/bias_confirmation.py', 'scripts/significance.py',
+              'scripts/calibration_core.py', 'scripts/compare_calibration.py', 'scripts/local_blend.py', 'scripts/run_calibration.py',
+              'scripts/run_monthly.py', 'scripts/cycle.py', 'scripts/common.py']
+
+
+def dependencies(cfg, project, targets, config_path):
+    """Everything a result depends on, hashed: configuration contents (benchmark, project, cycle), masks, every input file
+    and the calculation code. The same fingerprint validates checkpoints and is recorded as provenance."""
     return dict(
-        commit=git('rev-parse', 'HEAD'),
-        uncommitted_changes=bool(git('status', '--porcelain', '--', 'scripts', 'config')),
-        code_sha256={c: sha256(ROOT / c) for c in code},
+        code_sha256={c: sha256(ROOT / c) for c in CODE_FILES},
         config=dict(path=config_path, sha256=sha256(ROOT / config_path)),
         project_config=dict(path=cfg['project_config'], sha256=sha256(ROOT / cfg['project_config'])),
+        cycle_config=dict(path=cfg['cycle'], sha256=sha256(ROOT / cfg['cycle'])),
         masks={k: dict(path=v['path'], sha256=sha256(source_path(v['path'])))
                for k, v in [('cells', cfg['cells']), *cfg['regions'].items()]},
         inputs={t: input_fingerprint(cfg, project, t) for t in targets},
-        scoring_version=SCORING_VERSION,
-        python=sys.version.split()[0], numpy=np.__version__)
+        scoring_version=SCORING_VERSION)
+
+
+def dependency_key(dep, target=None):
+    """One digest of the dependencies; with a target, only that target's inputs count (other targets may change)."""
+    d = dict(dep)
+    if target is not None:
+        d['inputs'] = {target: dep['inputs'][target]}
+    return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()
+
+
+def provenance(cfg, project, targets, config_path, dep=None):
+    dep = dep or dependencies(cfg, project, targets, config_path)
+    return dict(commit=git('rev-parse', 'HEAD'), uncommitted_changes=bool(git('status', '--porcelain', '--', 'scripts', 'config')),
+                **dep, dependency_sha256=dependency_key(dep), python=sys.version.split()[0], numpy=np.__version__)
 
 
 # ---------------------------------------------------------------- one method, one design
@@ -202,6 +221,7 @@ def run_design(method, params, models, obs, folds, alpha, threshold, area):
     for train, scored in folds:
         state = m.fit([models[y] for y in train], np.stack([obs[y] for y in train]), **p)
         train_obs = np.stack([obs[y] for y in train])
+        group = dry_group(np.where(state['ok'][None, :], train_obs, 1e9), threshold)
         for y in scored:
             ens = np.asarray(m.apply(models[y], state, **p), float)
             ens[:, ~state['ok']] = np.nan
@@ -209,6 +229,7 @@ def run_design(method, params, models, obs, folds, alpha, threshold, area):
             s = score_cells(np.where(ok, ens, 0.), np.where(ok, obs[y], 0.), np.where(ok, train_obs, 0.), alpha, threshold)
             s['ok'] = ok
             s['prob_ok'] = s['prob_ok'] & ok
+            s['group'] = group
             scores[y], ensembles[y] = s, ens
         ok = state['ok']
         w = area[ok] / area[ok].sum()
@@ -221,6 +242,35 @@ def run_design(method, params, models, obs, folds, alpha, threshold, area):
     diagnostics = dict(cell_area_share={k: float(np.mean(v)) for k, v in flags.items()},
                        event_share={k: (e / n if n else None) for k, (e, n) in counts.items()})
     return scores, ensembles, diagnostics
+
+
+DRY_GROUPS = ['all training years exactly 0 mm', 'all training years <= threshold', 'mixed dry and wet years', 'always wet']
+
+
+def dry_group(train_obs, threshold):
+    """Climate group of every cell from one fold's training observations only (0-3, see DRY_GROUPS)."""
+    dry = train_obs <= threshold
+    return np.where((train_obs == 0).all(0), 0, np.where(dry.all(0), 1, np.where(dry.any(0), 2, 3))).astype('int8')
+
+
+def group_contributions(kept, ref, area, region):
+    """Each group's contribution to the mean CRPS difference from the reference (mm); contributions add up to the
+    area-weighted national difference. Groups come from each fold's training years."""
+    out = {}
+    for m, by_year in kept.items():
+        if m == ref:
+            continue
+        contrib, share = np.zeros(4), np.zeros(4)
+        for y, (crps, group, ok) in by_year.items():
+            a = region & ok & kept[ref][y][2]
+            w = np.where(a, area, 0.) / area[a].sum()
+            d = np.where(a, crps - kept[ref][y][0], 0.)
+            contrib += np.bincount(group, w * d, 4)
+            share += np.bincount(group, w, 4)
+        n = len(by_year)
+        out[m] = {g: dict(delta_crps_mm=float(contrib[i] / n), area_share=float(share[i] / n)) for i, g in enumerate(DRY_GROUPS)}
+        out[m]['total_delta_crps_mm'] = float(contrib.sum() / n)
+    return out
 
 
 def summarise(scores, area, region, bins):
@@ -354,12 +404,15 @@ def run_target(config_path, target, methods):
     regions = {k: load_mask(v, lat, lon)[idx] for k, v in cfg['regions'].items()}
     result = dict(tag=tag, cells=int(len(idx)), methods={})
     maps_t, forecast_t = {}, {}
+    kept = {'training': {}, 'operational': {}}            # per-cell CRPS and dry groups, for the group contributions
     for method in methods:
         params = cfg['methods'].get(method, {})
         row = {}
         for design, folds in designs.items():
             scores, ens, diag = run_design(method, params, models, obs, folds, alpha, THRESHOLD, area)
             row[design] = {r: summarise(scores, area, mask, bins) for r, mask in regions.items()}
+            if design in kept:
+                kept[design][method] = {y: (scores[y]['crps'], scores[y]['group'], scores[y]['ok']) for y in scores}
             if design == 'training':
                 row['diagnostics_training'] = diag
             if design == 'full':
@@ -388,6 +441,9 @@ def run_target(config_path, target, methods):
         print(f"{target:4s} {method:9s} train CRPSS {tr['crpss']:+.4f} (fair {tr['crpss_fair']:+.4f}) RPSS {tr['rpss']:+.4f} "
               f"spread/err {tr['spread_error_ratio']:.2f} dry {tr['dry_fraction']:.3f} (CHIRPS {tr['observed_dry_fraction']:.3f})",
               flush=True)
+    ref = cfg['reference_method']
+    if ref in methods:
+        result['dry_groups'] = {d: {r: group_contributions(kept[d], ref, area, mask) for r, mask in regions.items()} for d in kept}
     forecast_t['_raw'] = models[cfg['forecast_year']]
     forecast_t['_clim'] = np.mean([obs[y] for y in all_years], 0)
     forecast_t['_terciles'] = np.quantile(np.stack([obs[y] for y in all_years]), [1 / 3, 2 / 3], axis=0)
@@ -411,6 +467,7 @@ def make_gates(results, methods, ref, region, targets):
     """Within-method and family-wide Holm screening, per score."""
     gates = {}
     cand = [m for m in methods if m != ref and METHODS[m].family != 'baseline']
+    declared = [m for m in cand if METHODS[m].family != 'variant']     # variants stay outside the family-wide correction
     for score in GATE_SCORES:
         stats = {}
         for method in cand:
@@ -418,17 +475,18 @@ def make_gates(results, methods, ref, region, targets):
                 rows = results[t]['methods']
                 stats[method, t] = {d: paired_summary(rows[method][d][region]['per_year'][score],
                                                       rows[ref][d][region]['per_year'][score]) for d in ('training', 'operational')}
-        family = holm({f'{m}|{t}': s['training']['p_improvement'] for (m, t), s in stats.items()})
+        family = holm({f'{m}|{t}': s['training']['p_improvement'] for (m, t), s in stats.items() if m in declared})
         for method in cand:
             within = holm({t: stats[method, t]['training']['p_improvement'] for t in targets})
             for t in targets:
                 s = stats[method, t]
                 better = s['training']['mean_difference'] < 0
                 no_harm = s['operational']['mean_difference'] <= 0
+                fam = family.get(f'{method}|{t}')
                 s['decision'] = dict(
-                    holm_p=float(within[t]), holm_p_family=float(family[f'{method}|{t}']), no_harm=bool(no_harm),
-                    screen_pass=bool(better and within[t] < ALPHA and no_harm),
-                    screen_pass_family=bool(better and family[f'{method}|{t}'] < ALPHA and no_harm))
+                    holm_p=float(within[t]), holm_p_family=None if fam is None else float(fam), no_harm=bool(no_harm),
+                    in_family=method in declared, screen_pass=bool(better and within[t] < ALPHA and no_harm),
+                    screen_pass_family=bool(fam is not None and better and fam < ALPHA and no_harm))
                 gates.setdefault(method, {}).setdefault(score, {})[t] = s
     return gates
 

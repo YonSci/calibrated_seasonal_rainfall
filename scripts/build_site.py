@@ -1870,9 +1870,10 @@ def main():
     bias = site_bias.section(site_bias.export(OUT))          # Bias correction: the bias-correction benchmark (docs/47)
     (OUT / 'index.html').write_text(page(cycles, default, jjas_evidence(), built, sha, release_id, reviews, bias), encoding='utf-8', newline='')
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
+    checked = site_bias.check_published(OUT)                 # every advertised download and asset must be deployable
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())
     print(f'Site written to {OUT}: {len(cycles)} cycles ({", ".join(c["label"] for c in cycles)}), default {default}, '
-          f'CHIRPS listing {"checked" if published else "not checked"}, {size / 1e6:.1f} MB')
+          f'CHIRPS listing {"checked" if published else "not checked"}, {checked} local links publishable, {size / 1e6:.1f} MB')
 
 
 if __name__ == '__main__':

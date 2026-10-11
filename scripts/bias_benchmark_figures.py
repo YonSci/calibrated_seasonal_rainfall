@@ -239,8 +239,9 @@ def confirmation_figures(out, data, cfg):
     axes[0].set_yticks(range(len(rows)), [lab(m) for m in rows])
     fig.suptitle(f'Confirmation through the full probability pipeline ({cfg["regions"][region]["label"]}; '
                  'blend weight fitted inside the folds)', fontsize=12)
-    fig.text(.5, .005, '* better than MVS with Holm-adjusted p < 0.05 (methods: across all methods and targets; SEL-P/SEL-A: across '
-             'the targets) and not worse over the test years. SEL-P / SEL-A: method chosen each year from training-only scores.',
+    fig.text(.5, .005, '* better than MVS with Holm-adjusted p < 0.05 (methods: across all declared methods and targets; variants, '
+             'SEL-P and SEL-A: across the targets) and not worse over the test years. SEL-P / SEL-A: method chosen each year from '
+             'training-only scores among the declared methods.',
              ha='center', fontsize=8)
     fig.tight_layout(rect=(0, .03, 1, .95))
     fig.savefig(fig_dir / 'confirmation_summary.png', dpi=DPI)
@@ -266,6 +267,7 @@ def confirmation_figures(out, data, cfg):
     fig.savefig(fig_dir / 'confirmation_reliability.png', dpi=DPI)
     plt.close(fig)
 
+    methods = data.get('family', methods)                  # only the declared family can be chosen
     fig, axes = plt.subplots(1, 2, figsize=(13, 0.32 * len(methods) + 2))
     for ax, name in zip(axes, ['SEL-P', 'SEL-A']):
         freq = np.array([[data['targets'][t]['selection'][name]['frequency'].get(m, 0) for t in targets] for m in methods])

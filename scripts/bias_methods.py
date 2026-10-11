@@ -15,8 +15,8 @@ corrected individually. Cells with missing observations in any training year are
 Dry totals and ties (quantile-mapping methods EQM, GQM, DQM, QDM): a total at or below `wet_threshold` (1 mm
 by default: a dry month or season, not a dry day) is "dry". The dry share of the model climatology, p0_model,
 and of CHIRPS, p0_obs, are estimated with the equal-year weights. Dry members of a forecast are spread evenly
-over the probability interval (0, p0_model) by their rank (ties broken by member order) — the expected value of
-random tie-breaking — and a probability at or below p0_obs maps to 0 mm. So the corrected dry share follows
+over the probability interval (0, p0_model) by their rank — deterministic stratified tie-breaking, with ties resolved
+by member index — and a probability at or below p0_obs maps to 0 mm, also after any tail extrapolation. So the corrected dry share follows
 CHIRPS instead of collapsing all tied zeros onto one probability.
 
 Diagnostics: every fit returns `flags` (per-cell booleans, e.g. a ratio limit or a fallback that is active) and
@@ -149,7 +149,8 @@ def eqm_map(x, j, s, extrapolation, threshold):
     """Empirical quantile mapping of values x in cell j with the dry policy; constant-ratio extrapolation."""
     model, obs, p0m, p0o = s['model'], s['obs'], s['p0_model'][j], s['p0_obs'][j]
     u = dry_positions(x, model.cdf(x, j), p0m, threshold)
-    out = np.where((p0o > 0) & (u <= p0o), 0., obs.quantile(u, j))
+    dry = (p0o > 0) & (u <= p0o)
+    out = obs.quantile(u, j)
     if extrapolation == 'constant_ratio':
         lo, hi, plo, phi = model.ends(j)
         top = x > hi
@@ -158,8 +159,8 @@ def eqm_map(x, j, s, extrapolation, threshold):
         bottom = (x < lo) & (x > threshold)
         if bottom.any() and lo > EPS:
             out[bottom] = x[bottom] * obs.quantile(plo, j) / lo
-        count(s, 'extrapolated', top.sum() + bottom.sum(), len(x))
-    return out
+        count(s, 'extrapolated', (top & ~dry).sum() + (bottom & ~dry).sum(), len(x))
+    return np.where(dry, 0., out)                  # the dry rule last: extrapolation never overrides it
 
 
 # ---------------------------------------------------------------- methods
@@ -184,11 +185,16 @@ def apply_ls(members, s, **_):
     return members * s['ratio']
 
 
-def fit_mvs(models, obs, ratio_bounds=(0.5, 2.0), min_model_sd=1.0, space='linear', **_):
-    """Mean-variance scaling in linear or square-root space; ratio_bounds None means unbounded."""
+def fit_mvs(models, obs, ratio_bounds=(0.5, 2.0), min_model_sd=1.0, space='linear', zero_guard=False, **_):
+    """Mean-variance scaling in linear or square-root space; ratio_bounds None means unbounded.
+
+    zero_guard: corrected totals are 0 mm in cells where every training year has exactly 0 mm (a modelling choice:
+    a finite history of zero rainfall does not make rain impossible).
+    """
     f = np.sqrt if space == 'sqrt' else (lambda a: a)
     x, w = pooled([f(np.asarray(m, float)) for m in models])
     o, ok = clean_obs(obs)
+    all_zero = (o == 0).all(0) & ok
     o = f(o)
     mu_m, sd_m, mu_o, sd_o = wmean(x, w), wstd(x, w), o.mean(0), o.std(0)
     r = np.ones_like(mu_m)
@@ -197,7 +203,9 @@ def fit_mvs(models, obs, ratio_bounds=(0.5, 2.0), min_model_sd=1.0, space='linea
     if ratio_bounds is not None:
         flags.update(ratio_lower_limit=r < ratio_bounds[0], ratio_upper_limit=r > ratio_bounds[1])
         r = np.clip(r, *ratio_bounds)
-    return dict(ok=ok, mu_model=mu_m, mu_obs=mu_o, ratio=r, space=space, flags=flags)
+    if zero_guard:
+        flags['zero_guard'] = all_zero
+    return dict(ok=ok, mu_model=mu_m, mu_obs=mu_o, ratio=r, space=space, flags=flags, guard=all_zero if zero_guard else None)
 
 
 def apply_mvs(members, s, **_):
@@ -207,7 +215,10 @@ def apply_mvs(members, s, **_):
         raw = s['mu_obs'] + s['ratio'] * (members - s['mu_model'])
     count(s, 'clipped_at_zero', ((raw < 0) & s['ok']).sum(), members.shape[0] * s['ok'].sum())
     out = np.maximum(raw, 0)
-    return out ** 2 if s['space'] == 'sqrt' else out
+    out = out ** 2 if s['space'] == 'sqrt' else out
+    if s.get('guard') is not None:
+        out[:, s['guard']] = 0.
+    return out
 
 
 def fit_pt(models, obs, b_bounds=(0.1, 3.0), iterations=40, **_):
@@ -448,7 +459,7 @@ def sdm_cell(x, k_o, t_o, k_m, t_m, fr_o, fr_m, ri_obs, ri_mod, threshold):
     if rd_bc > 0:
         if rd_bc < n_f:                                      # step 6: interpolate to the corrected number of rain members
             bc = np.interp(np.linspace(0, 1, rd_bc), grid, bc) if rd_bc > 1 else bc[-1:]
-        y[order[-rd_bc:]] = bc                               # step 7: largest values back to the largest members
+        y[order[-rd_bc:]] = np.sort(bc)                      # step 7: largest corrected value to the largest raw member
     return y
 
 
@@ -528,7 +539,15 @@ METHODS = {m.key: m for m in [
            "forecast first scaled to the CHIRPS mean, values stay within the scaled forecast range",
            ('Michelangeli et al. 2009', 'Vrac et al. 2012'), uses_forecast_distribution=True),
 ]}
-ALL = {'raw': BASELINE, **METHODS}       # benchmark rows: the baseline and the 13 methods
+# Sensitivity variants: scored and screened against the reference, but outside the declared family of 13 methods
+# (not in the family-wide multiplicity correction and never chosen by the selection-aware procedures).
+VARIANTS = {m.key: m for m in [
+    Method('mvs_zero_guard', 'MVS with all-zero guard (variant)', fit_mvs, apply_mvs, 'variant',
+           "Operational MVS, but corrected totals are 0 mm where every training year has exactly 0 mm (a documented modelling "
+           "choice, not a physical rule)", ('Torralba et al. 2017', 'Manzanas et al. 2019'),
+           defaults=dict(ratio_bounds=(0.5, 2.0), min_model_sd=1.0, zero_guard=True)),
+]}
+ALL = {'raw': BASELINE, **METHODS, **VARIANTS}       # benchmark rows: the baseline, the 13 methods and the variants
 
 
 def correct(key, models, obs, members, params=None):

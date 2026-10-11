@@ -17,7 +17,10 @@ Design:
 Scores per year (area-weighted over a region, equal years): blended RPS and RPSS, category Brier scores and skill
 (below and above normal), reliability tables; ensemble CRPS of the amounts (and the fair CRPS).
 Tests against the operational method: paired whole-year sign-flip, Holm across the declared family
-(every method and target for the method comparisons; the targets for SEL-P and SEL-A).
+(every method and target for the method comparisons; the targets for SEL-P, SEL-A and each sensitivity variant).
+Variants (e.g. the MVS all-zero guard) run through the same pipeline but are never chosen by SEL-P / SEL-A.
+Checkpoints (one per target and method) are reused only when the complete dependency fingerprint of the target
+(configuration contents, masks, input files, calculation code; bias_benchmark.dependencies) is unchanged.
 """
 import argparse
 import json
@@ -36,6 +39,7 @@ def parse():
     p.add_argument('--targets', nargs='+')
     p.add_argument('--workers', type=int, default=3, help='parallel targets (memory: about 1 GB each)')
     p.add_argument('--no-figures', action='store_true')
+    p.add_argument('--no-resume', action='store_true', help='ignore and overwrite the checkpoints')
     return p.parse_args()
 
 
@@ -90,7 +94,7 @@ class Pipeline:
                     sel = mask & a
                     w = self.area[sel] / self.area[sel].sum()
                     amount[name] = {k: float(w @ v[sel]) for k, v in cells.items()}
-                self.cache[exclude, y] = dict(s=smooth(prob, len(ens)).astype('float32'), clim=clim.astype('float32'),
+                self.cache[exclude, y] = dict(s=smooth(prob, len(ens), alpha=self.alpha).astype('float32'), clim=clim.astype('float32'),
                                               y=labels(y_obs, pars).astype('int8'), amount=amount)
         return [self.cache[exclude, y] for y in years]
 
@@ -117,7 +121,7 @@ def prob_scores(p, r, area, region, bins):
     return out, rel
 
 
-def run_target(config_path, target, methods):
+def run_target(config_path, target, methods, family, key, resume=True):
     cfg = json.loads((ROOT / config_path).read_text(encoding='utf-8'))
     conf = cfg['confirmation']
     project = load_config(cfg['project_config'])
@@ -133,10 +137,9 @@ def run_target(config_path, target, methods):
     inner = {}
     parts = ROOT / conf['output_root'] / 'parts'
     parts.mkdir(parents=True, exist_ok=True)
-    key = checkpoint_key(config_path)
     for method in methods:
         part = parts / f'{target}__{method}.json'
-        if part.is_file():                                   # checkpoint of a completed (target, method)
+        if resume and part.is_file():                        # checkpoint of a completed (target, method), same dependencies
             saved = json.loads(part.read_text(encoding='utf-8'))
             if saved.get('key') == key:
                 out['methods'][method] = saved['result']
@@ -172,8 +175,8 @@ def run_target(config_path, target, methods):
               f"CRPSS {tr['crpss']:+.4f}  lambda {np.mean(lambdas):.2f}", flush=True)
     # Selection-aware procedures: the method is chosen for each outer year from training-only scores
     for name, key in [('SEL-P', 'rps'), ('SEL-A', 'crps')]:
-        chosen = {y: min(methods, key=lambda m: inner[m]['training'][y][key]) for y in train}
-        chosen_test = min(methods, key=lambda m: inner[m]['test'][key])
+        chosen = {y: min(family, key=lambda m: inner[m]['training'][y][key]) for y in train}      # declared family only
+        chosen_test = min(family, key=lambda m: inner[m]['test'][key])
         sel = {}
         for design, years, pick in [('training', train, chosen), ('test', test, {y: chosen_test for y in test})]:
             sel[design] = {}
@@ -183,15 +186,9 @@ def run_target(config_path, target, methods):
                             for k in out['methods'][methods[0]][design][r]['per_year']}
                 sel[design][r] = summary_from(per_year, years)
         out['selection'][name] = dict(criterion=f'inner {key.upper()} (training years only)', chosen_training=chosen,
-                                      chosen_test=chosen_test, frequency={m: sum(v == m for v in chosen.values()) for m in methods},
+                                      chosen_test=chosen_test, frequency={m: sum(v == m for v in chosen.values()) for m in family},
                                       **sel)
     return target, out
-
-
-def checkpoint_key(config_path):
-    """Checkpoints are reused only for the same configuration, method code and confirmation code."""
-    return '|'.join(bb.sha256(ROOT / f) for f in (config_path, 'scripts/bias_methods.py', 'scripts/bias_confirmation.py',
-                                                    'scripts/calibration_core.py', 'scripts/local_blend.py'))
 
 
 def score_into(res, y, p, r, area, regions, bins):
@@ -231,8 +228,9 @@ def finish(res, regions, lam):
     return out
 
 
-def comparisons(results, methods, ref, region, targets):
-    """Method vs reference (family: every method and target) and SEL-P / SEL-A vs reference (family: the targets)."""
+def comparisons(results, methods, family, ref, region, targets):
+    """Methods vs reference (Holm across every declared method and target), each variant vs reference (Holm across the
+    targets), and SEL-P / SEL-A vs reference (Holm across the targets; the search is inside the procedure)."""
     out = {}
     for score in ('rps', 'brier_below', 'brier_above', 'crps'):
         stats = {}
@@ -242,11 +240,14 @@ def comparisons(results, methods, ref, region, targets):
             for t in targets:
                 a, b = results[t]['methods'][m], results[t]['methods'][ref]
                 stats[m, t] = {d: paired_summary(a[d][region]['per_year'][score], b[d][region]['per_year'][score]) for d in ('training', 'test')}
-        family = holm({f'{m}|{t}': s['training']['p_improvement'] for (m, t), s in stats.items()})
+        adj = holm({f'{m}|{t}': s['training']['p_improvement'] for (m, t), s in stats.items() if m in family})
+        for m in {m for m, _ in stats if m not in family}:
+            adj.update({f'{m}|{t}': v for t, v in holm({t: stats[m, t]['training']['p_improvement'] for t in targets}).items()})
         for (m, t), s in stats.items():
-            s['decision'] = dict(holm_p_family=float(family[f'{m}|{t}']), no_harm=s['test']['mean_difference'] <= 0,
-                                 confirmed=bool(s['training']['mean_difference'] < 0 and family[f'{m}|{t}'] < ALPHA
-                                                and s['test']['mean_difference'] <= 0))
+            p_adj = adj[f'{m}|{t}']
+            s['decision'] = dict(holm_p_family=float(p_adj), family='declared methods x targets' if m in family else 'targets (variant)',
+                                 no_harm=s['test']['mean_difference'] <= 0,
+                                 confirmed=bool(s['training']['mean_difference'] < 0 and p_adj < ALPHA and s['test']['mean_difference'] <= 0))
             out.setdefault(m, {}).setdefault(score, {})[t] = s
     for name, score in [('SEL-P', 'rps'), ('SEL-A', 'crps')]:
         stats = {}
@@ -265,22 +266,26 @@ def main(args):
     cfg = json.loads((ROOT / args.config).read_text(encoding='utf-8'))
     conf = cfg['confirmation']
     project = load_config(cfg['project_config'])
-    methods = args.methods or conf['methods']
+    family = args.methods or conf['methods']
     ref = cfg['reference_method']
-    if ref not in methods:
-        methods = [ref] + methods
+    if ref not in family:
+        family = [ref] + family
+    variants = [v for v in conf.get('variants', []) if not args.methods]
+    methods = family + variants
     targets = args.targets or cfg['targets']
+    dep = bb.dependencies(cfg, project, targets, args.config)          # one fingerprint: checkpoints and provenance
+    keys = {t: bb.dependency_key(dep, t) for t in targets}
     results = {}
     workers = args.workers or min(len(targets), max(1, (os.cpu_count() or 2) - 1))
     with ProcessPoolExecutor(max_workers=workers) as pool:
-        for job in [pool.submit(run_target, args.config, t, methods) for t in targets]:
+        for job in [pool.submit(run_target, args.config, t, methods, family, keys[t], not args.no_resume) for t in targets]:
             t, res = job.result()
             results[t] = res
-    tests = comparisons(results, methods, ref, cfg['primary_region'], targets)
+    tests = comparisons(results, methods, family, ref, cfg['primary_region'], targets)
     out_root = ROOT / conf['output_root']
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, protocol=__doc__.strip(),
-                provenance=bb.provenance(cfg, project, targets, args.config) | dict(code_sha256_confirmation=bb.sha256(Path(__file__))),
-                methods=methods, reference=ref, targets=results, tests=tests)
+                provenance=bb.provenance(cfg, project, targets, args.config, dep) | dict(checkpoint_keys=keys),
+                methods=methods, family=family, variants=variants, reference=ref, targets=results, tests=tests)
     save_json(out_root / 'confirmation.json', data)
     if not args.no_figures:
         import bias_benchmark_figures as figs

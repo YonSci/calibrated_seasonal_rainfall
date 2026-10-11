@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from bias_methods import METHODS, ALL, correct, pooled, Ecdf          # noqa: E402
+from bias_methods import METHODS, VARIANTS, ALL, correct, pooled, Ecdf          # noqa: E402
 from calibration_core import fit_amount, correct_amount          # noqa: E402
 
 
@@ -27,7 +27,7 @@ class BiasMethods(unittest.TestCase):
         target = rng.gamma(3., 60., (51, obs.shape[1]))
         self.assertNotIn('raw', METHODS)
         np.testing.assert_array_equal(correct('raw', models, obs, target), target)
-        self.assertEqual(set(ALL) - set(METHODS), {'raw'})
+        self.assertEqual(set(ALL) - set(METHODS), {'raw'} | set(VARIANTS))
 
     def test_operational_mvs_matches_calibration_core(self):
         models, obs, rng = synthetic()
@@ -109,7 +109,7 @@ class BiasMethods(unittest.TestCase):
             bc = go.ppf(np.sort(1 - 1 / ri_s)) * sfr                                                         # Eqs. (6)-(7)
             bc = np.interp(np.linspace(1, len(fw), rd_bc), np.arange(1, len(fw) + 1), bc)                   # step 6
             ref = np.zeros(n)
-            ref[np.argsort(np.where(f > thr, f, -np.inf), kind='stable')[-rd_bc:]] = bc                     # step 7
+            ref[np.argsort(np.where(f > thr, f, -np.inf), kind='stable')[-rd_bc:]] = np.sort(bc)            # step 7: by rank
             np.testing.assert_allclose(got[:, j], ref, rtol=2e-3, atol=.05, err_msg=f'cell {j}')
 
     def test_dry_share_follows_observations(self):
@@ -125,6 +125,35 @@ class BiasMethods(unittest.TestCase):
                 shares[key].append((correct(key, models, obs, target) <= 1.0).mean())
         for key, v in shares.items():
             self.assertAlmostEqual(np.mean(v), .25, delta=.06, msg=key)
+
+    def test_sdm_keeps_the_rank_order_of_the_members(self):
+        """Step 7: the largest corrected value goes to the largest raw member, and so on."""
+        for seed in range(20):
+            rng = np.random.default_rng(seed)
+            obs = rng.gamma(2., 40., (30, 1))
+            models = [rng.gamma(1.2, 90., (25, 1)) for _ in range(30)]
+            f = rng.gamma(3., 50., (25, 1))
+            y = correct('sdm', models, obs, f)[:, 0]
+            self.assertTrue((np.diff(y[np.argsort(f[:, 0], kind='stable')]) >= -1e-9).all(), seed)
+
+    def test_dry_rule_survives_extrapolation(self):
+        """Review case: every CHIRPS year 0.5 mm (dry), model 2-5 mm, a 100 mm forecast member: still 0 mm."""
+        obs = np.full((24, 1), .5)
+        models = [np.array([[2.], [3.], [4.], [5.]]) for _ in range(24)]
+        fc = np.array([[2.], [3.], [4.], [5.], [100.]])
+        for key in ('eqm', 'dqm', 'gqm'):
+            np.testing.assert_array_equal(correct(key, models, obs, fc).ravel(), 0., err_msg=key)
+
+    def test_zero_guard_variant(self):
+        """Review case: CHIRPS always 0 mm, model members 0, 0, 20, 40 mm: MVS gives 0, 0, 2.5, 12.5; the guard gives 0."""
+        obs = np.zeros((24, 1))
+        models = [np.array([[0.], [0.], [20.], [40.]]) for _ in range(24)]
+        fc = np.array([[0.], [0.], [20.], [40.]])
+        np.testing.assert_allclose(correct('mvs', models, obs, fc).ravel(), [0, 0, 2.5, 12.5])
+        np.testing.assert_array_equal(correct('mvs_zero_guard', models, obs, fc).ravel(), 0.)
+        wet_models, wet_obs, rng = synthetic()
+        target = rng.gamma(3., 60., (51, wet_obs.shape[1]))
+        np.testing.assert_array_equal(correct('mvs_zero_guard', wet_models, wet_obs, target), correct('mvs', wet_models, wet_obs, target))
 
     def test_all_dry_and_few_wet_samples(self):
         rng = np.random.default_rng(3)

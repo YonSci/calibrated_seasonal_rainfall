@@ -33,11 +33,13 @@
     "dqm": {"extrapolation": "constant_ratio", "ratio_bounds": [0.2, 5.0], "min_model_mean": 0.1, "wet_threshold": 1.0},
     "qdm": {"max_ratio": 5.0, "wet_threshold": 1.0},
     "sdm": {"wet_threshold": 1.0},
-    "cdft": {"min_model_mean": 0.1}
+    "cdft": {"min_model_mean": 0.1},
+    "mvs_zero_guard": {"ratio_bounds": [0.5, 2.0], "min_model_sd": 1.0, "zero_guard": true}
   },
   "example_cell_quantiles": [0.1, 0.5, 0.9],
   "confirmation": {
     "methods": ["mvs", "ls", "vs", "sqrt_mvs", "pt", "dc", "loci", "eqm", "gqm", "dqm", "qdm", "sdm", "cdft"],
+    "variants": ["mvs_zero_guard"],
     "selection_region": "ethiopia",
     "reliability_bins": 10,
     "reliability_methods": ["mvs", "sqrt_mvs", "gqm", "eqm"],
