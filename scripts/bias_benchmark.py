@@ -21,12 +21,13 @@ within method only). A screening pass is not an adoption decision. For the refer
 contribution is also split by its climate group in the fold's training years (all 0 mm, all dry, mixed, always wet).
 """
 import argparse
+import pickle
 import hashlib
 import json
 import os
 import subprocess
 import sys
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -40,6 +41,7 @@ def parse():
     p.add_argument('--targets', nargs='+', help='subset of configured targets (default: all)')
     p.add_argument('--workers', type=int, default=0, help='parallel targets (default: one per target, at most cores - 1)')
     p.add_argument('--no-figures', action='store_true')
+    p.add_argument('--no-resume', action='store_true', help='ignore and overwrite the per-target checkpoints')
     return p.parse_args()
 
 
@@ -501,16 +503,43 @@ def main(args):
         methods = [ref] + methods
     out_root = ROOT / cfg['output_root']
     results, cell_maps, forecasts = {}, {}, {}
-    workers = args.workers or min(len(targets), max(1, (os.cpu_count() or 2) - 1))
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        jobs = [pool.submit(run_target, args.config, t, methods) for t in targets]
-        for job in jobs:
-            t, result, maps_t, forecast_t, lat, lon, cells = job.result()
-            results[t], cell_maps[t], forecasts[t] = result, maps_t, forecast_t
+    dep = dependencies(cfg, project, targets, args.config)       # one fingerprint: checkpoints and provenance
+    parts = out_root / 'parts'
+    parts.mkdir(parents=True, exist_ok=True)
+    done = {}
+    for t in targets:                                            # per-target checkpoints, valid for the same dependencies
+        f = parts / f'screening_{t}.pkl'
+        key = dependency_key(dep, t) + '|' + ','.join(methods)
+        if not args.no_resume and f.is_file():
+            saved = pickle.loads(f.read_bytes())
+            if saved['key'] == key:
+                done[t] = saved['value']
+                print(f'{t}: loaded from checkpoint', flush=True)
+    todo = [t for t in targets if t not in done]
+    workers = args.workers or min(max(len(todo), 1), max(1, (os.cpu_count() or 2) - 1))
+    if todo:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            jobs = {pool.submit(run_target, args.config, t, methods): t for t in todo}
+            failed = []
+            for job in as_completed(jobs):                    # save each target as soon as it finishes
+                t = jobs[job]
+                try:
+                    value = job.result()
+                except Exception as exc:                      # keep the other targets; rerun resumes from the checkpoints
+                    failed.append(f'{t}: {exc!r}')
+                    continue
+                (parts / f'screening_{t}.pkl').write_bytes(pickle.dumps(dict(key=dependency_key(dep, t) + '|' + ','.join(methods),
+                                                                             value=value)))
+                done[t] = value
+            if failed:
+                raise RuntimeError('Targets failed (completed targets are checkpointed): ' + '; '.join(failed))
+    for t in targets:
+        _, result, maps_t, forecast_t, lat, lon, cells = done[t]
+        results[t], cell_maps[t], forecasts[t] = result, maps_t, forecast_t
     gates = make_gates(results, methods, ref, cfg['primary_region'], targets)
     out_root.mkdir(parents=True, exist_ok=True)
     meta = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=cfg,
-                provenance=provenance(cfg, project, targets, args.config),
+                provenance=provenance(cfg, project, targets, args.config, dep),
                 protocol=__doc__.strip(), gate_rule=gate_rule(cfg),
                 methods={k: dict(label=METHODS[k].label, family=METHODS[k].family, definition=METHODS[k].definition,
                                  references=METHODS[k].references, member_wise=METHODS[k].member_wise,
@@ -522,7 +551,8 @@ def main(args):
     if not args.no_figures:
         import bias_benchmark_figures as figs
         figs.make_all(out_root, results, gates, cell_maps, forecasts, lat, lon, methods, targets, cfg)
-    outputs = sorted(p for p in out_root.rglob('*') if p.is_file() and p.name != 'manifest.json' and 'confirmation' not in p.parts)
+    outputs = sorted(p for p in out_root.rglob('*') if p.is_file() and p.name != 'manifest.json'
+                     and 'confirmation' not in p.parts and 'parts' not in p.parts)
     save_json(out_root / 'manifest.json', dict(created_utc=meta['created_utc'], commit=meta['provenance']['commit'],
                                                files={str(p.relative_to(out_root)).replace('\\', '/'): sha256(p) for p in outputs}))
     print('Saved:', out_root)
