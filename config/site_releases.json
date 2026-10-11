@@ -348,7 +348,7 @@
   {
     "id": "2026-10-11.5",
     "date": "2026-10-11",
-    "commit": null,
+    "commit": "e252baa",
     "title": "Bias correction section",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -360,6 +360,32 @@
       {
         "type": "analysis",
         "text": "New 'Bias correction' section: benchmark of 13 rainfall-amount bias-correction methods against the operational mean-variance scaling for the September-initialized ONDJ cycle (data, method definitions, steps, results by target and region, gate statistics, figures, interpretation, downloads and references; docs/47). The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-11.6",
+    "date": "2026-10-11",
+    "commit": null,
+    "title": "Bias correction: review revision (screening, confirmation, method fixes)",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "Bias correction section revised after an external review: screening marks distinguish within-method and family-wide Holm adjustment ('screen_pass', not 'adopt'); a new selection-aware confirmation runs every method through the full probability pipeline with the blend weight fitted inside the folds; the test-period shortlist rule was removed."
+      },
+      {
+        "type": "analysis",
+        "text": "Method fixes: Scaled Distribution Mapping follows the published steps (checked against an independent implementation); a documented dry-total and tie policy for the quantile-mapping methods; Variance Scaling uses the same fallback as MVS; DQM and QDM descriptions corrected; activation of limits and fallbacks reported."
+      },
+      {
+        "type": "display",
+        "text": "Ordinary CRPS is the primary amount score (fair CRPS as a diagnostic); coverage, dry shares and run provenance added; the region switch is labelled as applying to the result tables, and the summary, interpretation and figures as national. The published forecasts are unchanged."
       }
     ]
   }

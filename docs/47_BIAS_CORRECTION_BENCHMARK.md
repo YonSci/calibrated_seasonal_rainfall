@@ -1,148 +1,197 @@
 # 47 — Rainfall bias-correction benchmark (September initialization, ONDJ)
 
-Purpose: compare 13 rainfall-amount bias-correction methods member by member, for every 0.25° cell of Ethiopia and every
-target (October, November, December, January and the ONDJ season), under one protocol, so a method can be chosen for
-the operational tool on evidence. This is a read-only experiment: the operational forecasts are unchanged.
+Purpose: compare 13 rainfall-amount bias-correction methods with the operational one, member by member, for every 0.25° cell of
+Ethiopia and every target (October, November, December, January and the ONDJ season), in two stages:
 
-* Methods: `scripts/bias_methods.py` (one `fit` / `apply` pair per method; tests: `tests/test_bias_methods.py`)
-* Runner: `scripts/bias_benchmark.py`, figures: `scripts/bias_benchmark_figures.py`
-* Configuration: `config/bias_correction/sep_ondj.json` (targets, years, regions, methods and their parameters)
-* Outputs: `outputs/bias_correction_benchmark/sep_ondj/` — `benchmark.json`, `cell_scores_full_loyo.nc`,
-  `forecast_2026_members.nc`, `figures/`
+1. **Screening** — the amount correction alone, under one protocol (`scripts/bias_benchmark.py`).
+2. **Confirmation** — every method through the full probability pipeline, with the blend weight fitted inside the folds, and
+   selection-aware procedures that choose the method from training-only scores (`scripts/bias_confirmation.py`).
+
+This is a read-only experiment: the operational forecasts still use mean–variance scaling (MVS). The site shows it under
+**Bias correction** (`scripts/site_bias.py`).
+
+* Methods: `scripts/bias_methods.py` (one `fit` / `apply` pair per method); tests: `tests/test_bias_methods.py`,
+  `tests/test_bias_confirmation.py`
+* Configuration: `config/bias_correction/sep_ondj.json` (targets, years, regions, methods and parameters, confirmation family)
+* Outputs: `outputs/bias_correction_benchmark/sep_ondj/` — `benchmark.json`, `manifest.json`, `cell_scores_full_loyo.nc`,
+  `forecast_2026_members.nc`, `figures/`, `confirmation/confirmation.json`, `confirmation/figures/`, `confirmation/parts/`
+  (checkpoints)
 
 ```
-python scripts\bias_benchmark.py --config config\bias_correction\sep_ondj.json
-python scripts\bias_benchmark.py --methods mvs eqm qdm --targets ONDJ --no-figures     (a subset)
+python scripts\bias_benchmark.py --config config\bias_correction\sep_ondj.json        (screening; targets in parallel)
+python scripts\bias_confirmation.py --config config\bias_correction\sep_ondj.json     (confirmation; resumes from checkpoints)
 ```
+
+Revision 2 (11 October 2026) answers an external review of revision 1 (commit e252baa); the changes are listed in section 7.
 
 ## 1. Common rules
 
-* **Inputs:** the same per-member totals as the operational tool (`data/processed/init09_<target>/`): ECMWF SEAS5 remapped
-  to 0.25°, CHIRPS v3.0, one value per member, cell and year. Each calendar month and the season are corrected separately.
+* **Inputs:** the per-member totals the operational tool uses (`data/processed/init09_<target>/`): ECMWF SEAS5 remapped to
+  0.25°, CHIRPS v3.0, one value per member, cell and year. Each calendar month and the season are corrected separately.
 * **All members, equal years:** 25 members 1993–2016 and 51 from 2017 are all used. A training year has total weight 1/Y
-  whatever its member count (each member of year y weighs 1/(Y·M<sub>y</sub>)); every observed year weighs 1/Y. This is the
-  operational rule (`calibration_core.fit_amount`), applied to means, variances, empirical CDFs and gamma fits alike. A
-  test checks that repeating one year's members changes no method's result.
-* **Member-wise:** each member is corrected individually and keeps its identity, so corrected members can be compared
-  one by one. Delta Change is the only exception (see its definition).
-* **Cells:** the 1,484 Ethiopia cells; a cell is corrected only if CHIRPS is complete in every training year.
-* **"Future" period.** DC, DQM, QDM, SDM and CDF-t were designed for climate change: they keep the model's change between a
-  reference period and a future period. In seasonal forecasting the "future" is the forecast itself: the target year's
-  ensemble, compared with the model climatology of the training years. Its distribution is estimated from 25 or 51
-  members only.
+  (each member of year y weighs 1/(Y·M<sub>y</sub>)); every observed year weighs 1/Y — in means, variances, empirical CDFs
+  and gamma fits. A test checks that repeating one year's members changes no method's result.
+* **Member-wise:** every member is corrected individually. Delta Change is the exception (historical scenarios).
+* **Dry totals and ties:** a total ≤ 1 mm in the month or season is "dry" (not a dry day); exactly 0 mm is reported
+  separately. For the quantile-mapping methods (EQM, Gamma QM, DQM, QDM) the dry shares of the model climatology and of
+  CHIRPS are estimated with the equal-year weights; a forecast's dry members are spread evenly over the model's dry
+  probability by rank (ties by member order — the expected value of random tie-breaking), and a probability within the
+  CHIRPS dry share maps to 0 mm. Without this, tied zeros share one probability and the corrected dry share does not follow
+  CHIRPS (in the review's example, 25 % CHIRPS zeros and 50 % model zeros gave 0 % corrected zeros). CDF-t, LOCI and the
+  scaling methods have no occurrence adjustment; SDM uses its own rain-member rule.
+* **Diagnostics:** every method reports how often its limits, caps and fallbacks act (share of the corrected area for
+  per-cell limits; share of members or cells for events).
+* **"Future" period:** DC, DQM, QDM, SDM and CDF-t were designed for climate change. Here the "future" is the forecast
+  itself: the target year's ensemble against the model climatology of the training years.
 
-## 2. Methods (13; the list's two "Delta Change" entries are one method)
+## 2. Methods (13; the requested list's two "Delta Change" entries are one method)
 
 | Key | Method | Definition (per cell and target; μ, σ: equal-year weighted mean and standard deviation) | References |
 | --- | --- | --- | --- |
-| `ls` | Linear Scaling | x′ = x · μ<sub>obs</sub>/μ<sub>model</sub> (multiplicative, the precipitation form). Mean only. | Lenderink et al. 2007; Teutschbein & Seibert 2012 |
+| `ls` | Linear Scaling | x′ = x · μ<sub>obs</sub>/μ<sub>model</sub> (ratio 1 where μ<sub>model</sub> < 0.1 mm) | Lenderink et al. 2007; Teutschbein & Seibert 2012 |
 | `mvs` | Mean–Variance Scaling — **operational reference** | x′ = max(0, μ<sub>obs</sub> + r(x − μ<sub>model</sub>)), r = clip(σ<sub>obs</sub>/σ<sub>model</sub>, 0.5, 2); r = 1 where σ<sub>model</sub> < 1 mm | Torralba et al. 2017; Manzanas et al. 2019 |
-| `vs` | Variance Scaling | The textbook form: the same algebra as MVS **without the project's limits** (r = σ<sub>obs</sub>/σ<sub>model</sub>, unbounded; clipped at 0). Kept separate only to test those limits. | Teutschbein & Seibert 2012 |
-| `sqrt_mvs` | Square-root-space MVS | MVS on √x (r limits 0.5–2, r = 1 where σ<sub>model</sub> < 0.1 √mm), clipped at 0, squared back (docs/36) | Manzanas et al. 2019 |
-| `pt` | Power Transformation | x′ = a·x<sup>b</sup>: b (0.1–3) makes the model's coefficient of variation equal CHIRPS's, then a matches the mean | Leander & Buishand 2007; Teutschbein & Seibert 2012 |
-| `dc` | Delta Change | The CHIRPS totals of the training years, each multiplied by the forecast signal a = (forecast ensemble mean)/μ<sub>model</sub> (a limited to 0.2–5). **Not member-wise**: its ensemble has one value per training year. (Applied to each member instead, x·μ<sub>obs</sub>/μ<sub>model</sub>, it would be Linear Scaling.) | Hay et al. 2000; Teutschbein & Seibert 2012 |
-| `loci` | Local Intensity Scaling | Model threshold with the observed frequency of totals above 1 mm; above it x′ = 1 + s(x − thr<sub>model</sub>), with s matching the mean wet intensity; below it 0. Designed for daily rainfall; for totals that are always wet it reduces to a scaling anchored at 0. | Schmidli et al. 2006 |
-| `eqm` | Empirical Quantile Mapping | x′ = Q<sub>obs</sub>(F<sub>model</sub>(x)), weighted empirical CDFs (mid-point plotting positions, linear between values); outside the training range the end correction is kept as a ratio | Boé et al. 2007; Themeßl et al. 2011; Gudmundsson et al. 2012 |
-| `gqm` | Gamma Quantile Mapping | x′ = G<sub>obs</sub><sup>−1</sup>(G<sub>model</sub>(x)), G = dry mass (≤ 1 mm) + gamma fitted by weighted maximum likelihood; Linear Scaling where fewer than 3 wet values | Piani et al. 2010 |
-| `dqm` | Detrended Quantile Mapping | x′ = a · EQM(x/a), a = forecast ensemble mean / μ<sub>model</sub> (0.2–5): the forecast's relative anomaly is kept exactly, the distribution is mapped | Cannon et al. 2015 |
-| `qdm` | Quantile Delta Mapping | τ = rank of x in the forecast ensemble; x′ = Q<sub>obs</sub>(τ) · x / Q<sub>model</sub>(τ) (ratio ≤ 5; x′ = Q<sub>obs</sub>(τ) where Q<sub>model</sub>(τ) ≤ 1 mm): each quantile's relative change is kept | Cannon et al. 2015 |
-| `sdm` | Scaled Distribution Mapping | Relative form: gamma fits to CHIRPS, model climatology and the forecast ensemble; scaled relative change in recurrence intervals and rain frequency (1 mm threshold) | Switanek et al. 2017 |
-| `cdft` | CDF-transform | F<sub>obs,f</sub> = F<sub>obs</sub>(F<sub>model</sub><sup>−1</sup>(F<sub>fc</sub>)), x′ = F<sub>obs,f</sub><sup>−1</sup>(F<sub>fc</sub>(x)) = Q<sub>fc</sub>(F<sub>model</sub>(Q<sub>obs</sub>(F<sub>fc</sub>(x)))); model and forecast first scaled to the CHIRPS mean (multiplicative form of the CDFt convention). Values stay within the scaled forecast ensemble's range. | Michelangeli et al. 2009; Vrac et al. 2012 |
+| `vs` | Variance Scaling | Same algebra **and the same r = 1 fallback** as MVS, without the 0.5–2 limits — the comparison isolates the limits | Teutschbein & Seibert 2012 |
+| `sqrt_mvs` | Square-root-space MVS | MVS on √x (limits 0.5–2; r = 1 where the √-space σ < 0.1), clipped at 0, squared back (docs/36) | Manzanas et al. 2019 |
+| `pt` | Power Transformation | x′ = a·x<sup>b</sup>: b (0.1–3) matches the coefficient of variation where reachable (bound hits reported), a the mean | Leander & Buishand 2007; Teutschbein & Seibert 2012 |
+| `dc` | Delta Change | CHIRPS totals of the training years × a, a = forecast ensemble mean / μ<sub>model</sub> (0.2–5): **historical scenarios, not corrected members** (one value per training year). Member-wise it would be Linear Scaling. | Hay et al. 2000; Teutschbein & Seibert 2012 |
+| `loci` | Local Intensity Scaling | Model threshold with the observed frequency of totals above 1 mm; intensity scaling above it. Designed for daily rainfall; here monthly or seasonal totals, where most cells are always "wet" and it acts like a scaling anchored at 0. | Schmidli et al. 2006 |
+| `eqm` | Empirical Quantile Mapping | x′ = Q<sub>obs</sub>(F<sub>model</sub>(x)) with the dry policy; weighted empirical CDFs (mid-point positions); constant-ratio extrapolation outside the training range | Boé et al. 2007; Themeßl et al. 2011; Gudmundsson et al. 2012 |
+| `gqm` | Gamma Quantile Mapping | x′ = G<sub>obs</sub><sup>−1</sup>(G<sub>model</sub>(x)), G = dry mass (≤ 1 mm) + gamma by weighted maximum likelihood, with the dry policy; linear scaling where fewer than 3 wet values; 0 mm where CHIRPS is never wet | Piani et al. 2010 |
+| `dqm` | Detrended Quantile Mapping | x′ = a · EQM(x/a), a = forecast ensemble mean / μ<sub>model</sub> (0.2–5): removes and reapplies the bounded ratio while quantile-mapping the normalized forecast. **Exact preservation of the final mean anomaly is not guaranteed** (the mapping changes the normalized mean). | Cannon et al. 2015 |
+| `qdm` | Quantile Delta Mapping | τ = rank of x in the forecast ensemble; x′ = Q<sub>obs</sub>(τ) · x / Q<sub>model</sub>(τ). The relative change is capped at 5 and replaced by Q<sub>obs</sub>(τ) where Q<sub>model</sub>(τ) ≤ 1 mm (both counted), so the quantile changes are only partly preserved there. | Cannon et al. 2015 |
+| `sdm` | Scaled Distribution Mapping | Switanek et al. (2017), precipitation steps 1–7: gamma fits to the wet CHIRPS, model-climatology and forecast values; recurrence intervals RI = 1/(1 − CDF) computed first and then linearly interpolated to the forecast's length (keeping their range); RI<sub>scaled</sub> = max(1, RI<sub>obs</sub>·RI<sub>fc</sub>/RI<sub>model</sub>); x = ICDF<sub>obs</sub>(CDF<sub>scaled</sub>)·SF; number of rain members from Eq. (1), never increased. Model climatology with equal-year weights (positions by cumulative weight). Checked numerically against an independent implementation of the steps. | Switanek et al. 2017 |
+| `cdft` | CDF-transform | F<sub>obs,f</sub> = F<sub>obs</sub>(F<sub>model</sub><sup>−1</sup>(F<sub>fc</sub>)); x′ = F<sub>obs,f</sub><sup>−1</sup>(F<sub>fc</sub>(x)) = Q<sub>fc</sub>(F<sub>model</sub>(Q<sub>obs</sub>(F<sub>fc</sub>(x)))). Implementation choices: model and forecast first scaled to the CHIRPS mean; values stay within the scaled forecast range (members at its edge counted). | Michelangeli et al. 2009; Vrac et al. 2012 |
 
-Baseline (`raw`): the uncorrected ECMWF members, scored with the same rules but not gated.
+Baseline (`raw`): the uncorrected ECMWF members, scored with the same rules but not screened.
 
-Families: scaling (LS, MVS, VS, sqrt-MVS, PT, LOCI) and quantile mapping (EQM, GQM) use only the training statistics; the
-change-preserving methods (DC, DQM, QDM, SDM, CDF-t) also use the forecast ensemble's own distribution.
-
-## 3. Evaluation
+## 3. Screening (`bias_benchmark.py`)
 
 | Design | Fits | Scored | Role |
 | --- | --- | --- | --- |
-| training | leave-one-year-out within 1993–2016 | each 1993–2016 year | clean evidence, gated |
-| operational | 1993–2016 | 2017–2024 | exploratory (years seen before) |
+| training | leave-one-year-out within 1993–2016 | each 1993–2016 year | clean screening evidence |
+| test ("operational") | 1993–2016 | 2017–2024 | exploratory (years seen before) |
 | full | leave-one-year-out within 1993–2024 | each year | per-cell maps and distribution checks (descriptive) |
-| forecast | 1993–2024 | 2026 members | member-by-member comparison (`forecast_2026_members.nc`) |
+| forecast | 1993–2024 | 2026 members | member-by-member comparison |
 
-No method has a parameter tuned on scores, so plain leave-one-year-out is out-of-sample.
+* **Amounts:** CRPS of the corrected ensemble's empirical distribution as delivered (primary) and CRPSS against the CHIRPS
+  training climatology, scored the same way. The **fair CRPS** (Ferro 2014) is reported and screened separately as a
+  diagnostic under the sampling interpretation, which DC's rescaled years and the methods tied to the forecast mean or ranks
+  only approximate. Revision 1 used the fair CRPS as primary.
+* **Ensemble:** ensemble-mean bias, MAE, RMSE, correlation; spread–error ratio; rank histograms (each rank interval shared
+  among the bins it overlaps) and the reliability index Σ|f<sub>i</sub> − 1/10| (Delle Monache et al. 2006).
+* **Probabilities:** tercile RPS/RPSS of α = 0.5 smoothed member counts **without** the climatology blend (isolates the
+  amount correction).
+* **Distribution and dry shares:** pooled out-of-fold corrected members (equal-year weights) against CHIRPS of the same
+  years — mean, standard deviation, 10th/50th/90th percentiles (area-weighted medians of cell ratios), shares at exactly
+  0 mm and ≤ 1 mm.
+* **Coverage:** cells and area share scored for amounts and for probabilities (tercile scores need three distinct limits).
+* **Screening rule:** per target and score (CRPS, fair CRPS, RPS), one-sided sign-flip test on the 1993–2016 per-year scores
+  against MVS and no harm over 2017–2024. Two multiplicity families: **within one method** across its 5 targets
+  (`screen_pass`, ✓) and **across all 12 methods × 5 targets** (`screen_pass_family`, ✓✓). A pass is screening evidence, not
+  an adoption decision; the field is no longer called `adopt`.
+* **Provenance:** `benchmark.json` records the commit (and whether the working tree had changes), SHA-256 of the code, the
+  configuration, the masks and every input file (one digest per target), the scoring version and the software versions;
+  `manifest.json` lists the SHA-256 of every output file.
 
-* **Amounts:** fair ensemble CRPS (Ferro 2014; fair for any ensemble size, so DC's 31-value ensembles compare with 25/51
-  members) and CRPSS against the CHIRPS training climatology (the training years as an ensemble). The development run
-  (`verify_calibration.py`) reports the ordinary CRPS, so its CRPSS is a little higher for the same members (ONDJ MVS
-  2017–2024: 0.178 there, 0.164 here; ensemble-mean bias −25.46 mm in both).
-* **Ensemble mean:** bias, MAE, RMSE and correlation over years.
-* **Ensemble reliability:** spread–error ratio (√(mean ensemble variance·(K+1)/K) / RMSE of the ensemble mean; 1 is ideal)
-  and rank (PIT) histograms of CHIRPS within the ensemble (10 bins), with the reliability index Σ|f<sub>i</sub> − 1/10|
-  (Delle Monache et al. 2006).
-* **Probabilities:** tercile RPS/RPSS of α = 0.5 smoothed member counts against the training CHIRPS terciles,
-  **without** the climatology blend (the blend would partly hide differences between methods).
-* **Distribution:** the pooled out-of-fold corrected members (equal-year weights) against CHIRPS of the same years: mean,
-  standard deviation, 10th/50th/90th percentile ratios and the zero-fraction difference.
-* **Regions:** all Ethiopia (primary) and the ONDJ R3 (Deyr) domain; area weights, then equal weight per year.
-* **Gate (docs/36 rule):** each method against MVS, per target, for CRPS and for RPS: one-sided paired sign-flip test on the
-  1993–2016 per-year scores, Holm-adjusted over the five targets, p < 0.05, and not worse over 2017–2024. With 12
-  candidates this is a **screening**: a method that passes is a candidate, and adoption needs a confirmation run with the
-  climatology blend (the `decision_gates.py` protocol) before it can replace MVS.
+## 4. Confirmation (`bias_confirmation.py`)
 
-## 4. Results (September initialization, all Ethiopia)
+* **Pipeline** for each method (the operational one with the amount correction swapped): corrected members → tercile counts
+  against the training CHIRPS terciles → α smoothing → blend with climatology, one λ per target from leave-one-year-out
+  within the training years (`local_blend.fit_weights`, over the full rectangle as operationally). A test checks that with
+  MVS the pipeline reproduces the operational records (`compare_calibration.make_record`) exactly, and the ONDJ MVS score
+  reproduces the operational nested cross-validated RPSS (+0.039).
+* **Design:** outer leave-one-year-out over 1993–2016. For outer year y every fit — amount correction, terciles,
+  climatology and λ (inner leave-one-year-out within the other 23 years) — uses only the other training years. Each pair
+  of excluded years is fitted once and reused.
+* **Selection-aware procedures:** for each outer year, **SEL-P** chooses the method with the lowest inner blended RPS
+  (probability product) and **SEL-A** the lowest inner CRPS (amount product), from training-only scores; their outer
+  scores therefore include the choice among the declared family (all 13 methods). Test years: fits, λ and the choice on
+  1993–2016, scored on 2017–2024 (exploratory).
+* **Scores:** blended RPS/RPSS, category Brier scores and skill (below and above normal), reliability tables, amount CRPS
+  (and fair CRPS).
+* **Tests:** each method against MVS with Holm across the whole family (12 methods × 5 targets); SEL-P and SEL-A against MVS
+  with Holm across the 5 targets (the search is inside the procedure). "Confirmed" = better with adjusted p < 0.05 and not
+  worse over 2017–2024.
 
-Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores and every gate statistic: `benchmark.json`.
-✓ = passes the gate against MVS (Holm-adjusted p < 0.05 on 1993–2016 and not worse 2017–2024).
+## 5. Screening results (national aggregate, all Ethiopia)
 
-**Amount skill, CRPSS, leave-one-year-out 1993–2016 (gated: CRPS)**
+Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics and every screening statistic:
+`benchmark.json`. ✓ = screening pass within the method; ✓✓ = also across all 60 method–target comparisons.
+
+**Amount skill, CRPSS (ensemble CRPS), leave-one-year-out 1993–2016**
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Raw ECMWF (no correction) | -0.203 | -0.033 | -0.118 | -0.551 | -0.180 |
+| Linear Scaling | -0.016 | +0.073 | -0.008 | -0.132 | +0.070 |
+| Mean-Variance Scaling (operational) | -0.002 | +0.084 | +0.028 | -0.048 | +0.070 |
+| Variance Scaling (unbounded) | -0.004 | +0.082 | +0.031 | -0.007 ✓ | +0.063 |
+| Square-root-space Mean-Variance Scaling | +0.006 | +0.089 | +0.037 ✓ | +0.034 ✓✓ | +0.080 ✓ |
+| Power Transformation | +0.001 | +0.082 | +0.020 | -0.025 | +0.071 |
+| Delta Change | +0.021 | +0.085 | +0.026 | -0.047 | +0.093 |
+| Local Intensity Scaling | -0.016 | +0.079 | +0.010 | -0.104 | +0.070 |
+| Empirical Quantile Mapping | -0.012 | +0.075 | +0.033 | +0.010 | +0.053 |
+| Gamma Quantile Mapping | +0.007 | +0.088 | +0.030 | +0.015 ✓✓ | +0.082 ✓ |
+| Detrended Quantile Mapping | +0.005 | +0.075 | -0.001 | -0.065 | +0.072 |
+| Quantile Delta Mapping | +0.010 | +0.076 | +0.014 | -0.027 | +0.075 |
+| Scaled Distribution Mapping | -0.002 | +0.068 | -0.021 | -0.216 | +0.061 |
+| CDF-transform | +0.002 | +0.073 | -0.019 | -0.108 | +0.074 |
+
+**Amount skill, CRPSS, fit 1993–2016, scored 2017–2024 (exploratory)**
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Raw ECMWF (no correction) | -0.120 | +0.031 | -0.183 | -0.573 | -0.116 |
+| Linear Scaling | +0.054 | +0.125 | -0.114 | -0.182 | +0.131 |
+| Mean-Variance Scaling (operational) | +0.059 | +0.158 | -0.033 | -0.078 | +0.178 |
+| Variance Scaling (unbounded) | +0.056 | +0.159 | -0.032 | +0.007 | +0.182 |
+| Square-root-space Mean-Variance Scaling | +0.060 | +0.162 | -0.026 | +0.093 | +0.189 |
+| Power Transformation | +0.049 | +0.165 | -0.062 | +0.007 | +0.188 |
+| Delta Change | +0.028 | +0.117 | -0.019 | -0.030 | +0.114 |
+| Local Intensity Scaling | +0.052 | +0.134 | -0.079 | -0.115 | +0.131 |
+| Empirical Quantile Mapping | +0.033 | +0.158 | -0.015 | +0.105 | +0.168 |
+| Gamma Quantile Mapping | +0.059 | +0.165 | -0.037 | +0.053 | +0.192 |
+| Detrended Quantile Mapping | +0.034 | +0.116 | -0.042 | -0.063 | +0.115 |
+| Quantile Delta Mapping | +0.036 | +0.123 | -0.043 | +0.032 | +0.118 |
+| Scaled Distribution Mapping | +0.025 | +0.103 | -0.055 | -0.184 | +0.108 |
+| CDF-transform | +0.030 | +0.120 | -0.097 | -0.151 | +0.118 |
+
+**Fair CRPSS (diagnostic), 1993–2016**
 
 | Method | Oct | Nov | Dec | Jan | ONDJ |
 | --- | --- | --- | --- | --- | --- |
 | Raw ECMWF (no correction) | -0.226 | -0.048 | -0.136 | -0.599 | -0.205 |
 | Linear Scaling | -0.031 | +0.068 | -0.007 | -0.119 | +0.060 |
 | Mean-Variance Scaling (operational) | -0.009 | +0.082 | +0.023 | -0.066 | +0.066 |
-| Variance Scaling (unbounded) | -0.011 | +0.080 | +0.026 | -0.019 ✓ | +0.060 |
-| Square-root-space Mean-Variance Scaling | -0.002 | +0.085 | +0.032 ✓ | +0.030 ✓ | +0.075 ✓ |
+| Variance Scaling (unbounded) | -0.011 | +0.080 | +0.026 | -0.019 ✓✓ | +0.060 |
+| Square-root-space Mean-Variance Scaling | -0.002 | +0.085 | +0.032 ✓ | +0.030 ✓✓ | +0.075 ✓ |
 | Power Transformation | -0.006 | +0.079 | +0.016 | -0.029 | +0.067 |
 | Delta Change | +0.022 | +0.089 | +0.027 | -0.049 | +0.097 |
 | Local Intensity Scaling | -0.031 | +0.075 | +0.009 | -0.099 | +0.059 |
-| Empirical Quantile Mapping | -0.020 | +0.071 | +0.033 | +0.011 ✓ | +0.046 |
-| Gamma Quantile Mapping | -0.001 | +0.083 | +0.022 | +0.000 ✓ | +0.076 |
-| Detrended Quantile Mapping | -0.002 | +0.072 | -0.004 | -0.071 | +0.066 |
-| Quantile Delta Mapping | +0.005 | +0.074 | +0.016 | -0.022 | +0.071 |
-| Scaled Distribution Mapping | +0.001 | +0.071 | -0.018 | -0.193 | +0.066 |
+| Empirical Quantile Mapping | -0.020 | +0.071 | +0.027 | +0.004 ✓ | +0.046 |
+| Gamma Quantile Mapping | -0.001 | +0.083 | +0.024 | +0.008 ✓✓ | +0.076 |
+| Detrended Quantile Mapping | -0.002 | +0.072 | -0.007 | -0.073 | +0.066 |
+| Quantile Delta Mapping | +0.005 | +0.074 | +0.010 | -0.030 | +0.071 |
+| Scaled Distribution Mapping | -0.013 | +0.059 | -0.035 | -0.240 | +0.052 |
 | CDF-transform | -0.009 | +0.067 | -0.026 | -0.117 | +0.065 |
 
-**Amount skill, CRPSS, fit 1993–2016, scored 2017–2024 (exploratory)**
-
-| Method | Oct | Nov | Dec | Jan | ONDJ |
-| --- | --- | --- | --- | --- | --- |
-| Raw ECMWF (no correction) | -0.152 | +0.009 | -0.239 | -0.656 | -0.146 |
-| Linear Scaling | +0.029 | +0.109 | -0.155 | -0.214 | +0.112 |
-| Mean-Variance Scaling (operational) | +0.038 | +0.144 | -0.075 | -0.125 | +0.164 |
-| Variance Scaling (unbounded) | +0.036 | +0.145 | -0.073 | -0.032 | +0.168 |
-| Square-root-space Mean-Variance Scaling | +0.038 | +0.148 | -0.067 | +0.063 | +0.175 |
-| Power Transformation | +0.028 | +0.152 | -0.103 | -0.026 | +0.174 |
-| Delta Change | +0.028 | +0.121 | -0.026 | -0.038 | +0.117 |
-| Local Intensity Scaling | +0.027 | +0.118 | -0.120 | -0.148 | +0.112 |
-| Empirical Quantile Mapping | +0.010 | +0.144 | -0.045 | +0.089 | +0.153 |
-| Gamma Quantile Mapping | +0.038 | +0.150 | -0.081 | +0.021 | +0.178 |
-| Detrended Quantile Mapping | +0.013 | +0.101 | -0.078 | -0.106 | +0.098 |
-| Quantile Delta Mapping | +0.015 | +0.108 | -0.076 | +0.010 | +0.101 |
-| Scaled Distribution Mapping | +0.012 | +0.098 | -0.107 | -0.226 | +0.098 |
-| CDF-transform | +0.008 | +0.104 | -0.143 | -0.197 | +0.100 |
-
-**Tercile skill, RPSS of smoothed member counts (no blend), 1993–2016 (gated: RPS)**
+**Tercile skill, RPSS of smoothed member counts (no blend), 1993–2016**
 
 | Method | Oct | Nov | Dec | Jan | ONDJ |
 | --- | --- | --- | --- | --- | --- |
 | Raw ECMWF (no correction) | -0.165 | -0.043 | -0.175 | -0.516 | -0.149 |
 | Linear Scaling | -0.033 | +0.035 | -0.080 | -0.144 | +0.025 |
 | Mean-Variance Scaling (operational) | -0.009 | +0.044 | -0.068 | -0.213 | +0.035 |
-| Variance Scaling (unbounded) | -0.009 | +0.045 | -0.060 | -0.175 ✓ | +0.036 |
-| Square-root-space Mean-Variance Scaling | -0.005 | +0.060 ✓ | -0.030 ✓ | -0.017 ✓ | +0.038 |
-| Power Transformation | -0.013 | +0.044 | -0.049 | -0.046 ✓ | +0.036 |
+| Variance Scaling (unbounded) | -0.009 | +0.045 | -0.060 | -0.176 ✓ | +0.036 |
+| Square-root-space Mean-Variance Scaling | -0.005 | +0.060 ✓✓ | -0.030 ✓ | -0.017 ✓✓ | +0.038 |
+| Power Transformation | -0.013 | +0.044 | -0.049 | -0.046 ✓✓ | +0.036 |
 | Delta Change | -0.003 | +0.044 | -0.154 | -0.214 | +0.028 |
 | Local Intensity Scaling | -0.028 | +0.047 | -0.109 | -0.153 | +0.024 |
-| Empirical Quantile Mapping | -0.021 | +0.049 | -0.005 ✓ | -0.006 ✓ | +0.025 |
-| Gamma Quantile Mapping | -0.006 | +0.051 | -0.113 | -0.161 | +0.039 |
-| Detrended Quantile Mapping | -0.019 | +0.035 | -0.170 | -0.219 | +0.010 |
-| Quantile Delta Mapping | -0.014 | +0.025 | -0.054 | -0.070 | +0.009 |
-| Scaled Distribution Mapping | -0.018 | +0.022 | -0.163 | -0.275 | +0.001 |
+| Empirical Quantile Mapping | -0.023 | +0.046 | -0.065 | -0.010 ✓ | +0.025 |
+| Gamma Quantile Mapping | -0.006 | +0.052 | -0.111 | -0.038 ✓✓ | +0.039 |
+| Detrended Quantile Mapping | -0.020 | +0.031 | -0.189 | -0.211 | +0.010 |
+| Quantile Delta Mapping | -0.015 | +0.020 | -0.116 | -0.074 | +0.009 |
+| Scaled Distribution Mapping | -0.025 | +0.018 | -0.192 | -0.321 | -0.005 |
 | CDF-transform | -0.026 | +0.010 | -0.241 | -0.254 | +0.011 |
 
 **Spread–error ratio, 1993–2016 (1 = spread matches the error)**
@@ -157,52 +206,71 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores and every gat
 | Power Transformation | 0.95 | 1.04 | 1.01 | 0.98 | 1.01 |
 | Delta Change | 1.04 | 1.15 | 1.18 | 1.16 | 1.16 |
 | Local Intensity Scaling | 0.72 | 0.95 | 1.10 | 1.59 | 0.77 |
-| Empirical Quantile Mapping | 0.93 | 1.02 | 0.99 | 0.97 | 0.97 |
+| Empirical Quantile Mapping | 0.93 | 1.02 | 0.99 | 0.98 | 0.97 |
 | Gamma Quantile Mapping | 0.90 | 0.96 | 0.94 | 0.98 | 0.93 |
 | Detrended Quantile Mapping | 0.96 | 1.04 | 1.04 | 1.06 | 0.98 |
-| Quantile Delta Mapping | 0.99 | 1.06 | 1.08 | 1.20 | 1.04 |
-| Scaled Distribution Mapping | 1.00 | 1.07 | 1.05 | 1.00 | 1.05 |
+| Quantile Delta Mapping | 0.99 | 1.07 | 1.08 | 1.20 | 1.04 |
+| Scaled Distribution Mapping | 0.81 | 0.87 | 0.81 | 0.75 | 0.86 |
 | CDF-transform | 0.83 | 0.96 | 1.03 | 1.13 | 0.83 |
 
-**Rank-histogram reliability index, 1993–2016 (0 = flat histogram; each rank interval shared among the bins it overlaps)**
+**Rank-histogram reliability index, 1993–2016 (0 = flat)**
 
 | Method | Oct | Nov | Dec | Jan | ONDJ |
 | --- | --- | --- | --- | --- | --- |
 | Raw ECMWF (no correction) | 0.45 | 0.14 | 0.38 | 1.02 | 0.37 |
 | Linear Scaling | 0.38 | 0.13 | 0.38 | 0.66 | 0.16 |
 | Mean-Variance Scaling (operational) | 0.10 | 0.11 | 0.22 | 0.68 | 0.09 |
-| Variance Scaling (unbounded) | 0.10 | 0.11 | 0.22 | 0.71 | 0.10 |
+| Variance Scaling (unbounded) | 0.10 | 0.11 | 0.21 | 0.69 | 0.10 |
 | Square-root-space Mean-Variance Scaling | 0.15 | 0.15 | 0.26 | 0.11 | 0.07 |
 | Power Transformation | 0.18 | 0.11 | 0.28 | 0.26 | 0.05 |
 | Delta Change | 0.05 | 0.13 | 0.42 | 0.50 | 0.05 |
 | Local Intensity Scaling | 0.33 | 0.13 | 0.40 | 0.65 | 0.17 |
-| Empirical Quantile Mapping | 0.11 | 0.07 | 0.10 | 0.16 | 0.10 |
-| Gamma Quantile Mapping | 0.13 | 0.12 | 0.13 | 0.51 | 0.08 |
-| Detrended Quantile Mapping | 0.10 | 0.10 | 0.41 | 0.51 | 0.08 |
-| Quantile Delta Mapping | 0.11 | 0.05 | 0.12 | 0.13 | 0.09 |
-| Scaled Distribution Mapping | 0.08 | 0.15 | 0.50 | 0.73 | 0.09 |
+| Empirical Quantile Mapping | 0.09 | 0.07 | 0.25 | 0.23 | 0.10 |
+| Gamma Quantile Mapping | 0.13 | 0.13 | 0.23 | 0.42 | 0.08 |
+| Detrended Quantile Mapping | 0.08 | 0.10 | 0.45 | 0.52 | 0.08 |
+| Quantile Delta Mapping | 0.09 | 0.08 | 0.33 | 0.27 | 0.09 |
+| Scaled Distribution Mapping | 0.17 | 0.15 | 0.53 | 0.78 | 0.18 |
 | CDF-transform | 0.22 | 0.19 | 0.53 | 0.59 | 0.12 |
 
-**Share of corrected member values at 0 mm, 1993–2016**
+**Share of corrected totals ≤ 1 mm (%), pooled leave-one-year-out 1993–2024.** CHIRPS: Oct 2.3% / Nov 5.2% / Dec 18.9% / Jan 16.6% / ONDJ 0.0%
 
 | Method | Oct | Nov | Dec | Jan | ONDJ |
 | --- | --- | --- | --- | --- | --- |
-| Raw ECMWF (no correction) | 0.000 | 0.004 | 0.062 | 0.195 | 0.000 |
-| Linear Scaling | 0.000 | 0.004 | 0.062 | 0.195 | 0.000 |
-| Mean-Variance Scaling (operational) | 0.065 | 0.080 | 0.122 | 0.045 | 0.017 |
-| Variance Scaling (unbounded) | 0.068 | 0.082 | 0.081 | 0.000 | 0.022 |
-| Square-root-space Mean-Variance Scaling | 0.015 | 0.023 | 0.029 | 0.010 | 0.000 |
-| Power Transformation | 0.000 | 0.004 | 0.062 | 0.195 | 0.000 |
-| Delta Change | 0.005 | 0.008 | 0.006 | 0.010 | 0.000 |
-| Local Intensity Scaling | 0.029 | 0.060 | 0.214 | 0.279 | 0.000 |
-| Empirical Quantile Mapping | 0.003 | 0.004 | 0.003 | 0.004 | 0.000 |
-| Gamma Quantile Mapping | 0.032 | 0.061 | 0.159 | 0.104 | 0.000 |
-| Detrended Quantile Mapping | 0.002 | 0.004 | 0.003 | 0.004 | 0.000 |
-| Quantile Delta Mapping | 0.003 | 0.004 | 0.003 | 0.004 | 0.000 |
-| Scaled Distribution Mapping | 0.031 | 0.120 | 0.334 | 0.444 | 0.000 |
-| CDF-transform | 0.000 | 0.003 | 0.003 | 0.002 | 0.000 |
+| Raw ECMWF (no correction) | 0.8 | 8.5 | 32.5 | 55.3 | 0.0 |
+| Linear Scaling | 0.9 | 7.7 | 32.2 | 43.1 | 0.0 |
+| Mean-Variance Scaling (operational) | 5.0 | 9.4 | 22.2 | 16.8 | 1.6 |
+| Variance Scaling (unbounded) | 5.2 | 10.0 | 21.3 | 16.1 | 2.1 |
+| Square-root-space Mean-Variance Scaling | 2.7 | 6.3 | 19.6 | 17.2 | 0.1 |
+| Power Transformation | 1.5 | 6.5 | 26.1 | 27.2 | 0.0 |
+| Delta Change | 2.4 | 5.7 | 20.4 | 20.6 | 0.0 |
+| Local Intensity Scaling | 2.3 | 5.5 | 21.5 | 28.1 | 0.0 |
+| Empirical Quantile Mapping | 2.4 | 5.3 | 19.0 | 16.7 | 0.0 |
+| Gamma Quantile Mapping | 3.2 | 7.9 | 23.4 | 18.7 | 0.0 |
+| Detrended Quantile Mapping | 2.4 | 5.6 | 21.4 | 21.6 | 0.0 |
+| Quantile Delta Mapping | 2.6 | 6.1 | 20.7 | 17.2 | 0.0 |
+| Scaled Distribution Mapping | 3.7 | 12.8 | 39.8 | 56.4 | 0.7 |
+| CDF-transform | 2.0 | 4.9 | 20.0 | 19.3 | 0.0 |
 
-**Standard deviation of the pooled corrected members / CHIRPS (area-weighted median of cell ratios, 1993–2024)**
+**Share of corrected totals at exactly 0 mm (%).** CHIRPS: Oct 0.4% / Nov 0.7% / Dec 0.6% / Jan 1.0% / ONDJ 0.0%
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Raw ECMWF (no correction) | 0.0 | 0.5 | 6.5 | 20.0 | 0.0 |
+| Linear Scaling | 0.0 | 0.5 | 6.5 | 20.0 | 0.0 |
+| Mean-Variance Scaling (operational) | 4.3 | 7.6 | 12.0 | 4.6 | 1.5 |
+| Variance Scaling (unbounded) | 4.4 | 8.2 | 8.9 | 1.5 | 2.0 |
+| Square-root-space Mean-Variance Scaling | 0.9 | 2.2 | 2.7 | 0.8 | 0.0 |
+| Power Transformation | 0.0 | 0.5 | 6.5 | 20.0 | 0.0 |
+| Delta Change | 0.4 | 0.7 | 0.6 | 1.0 | 0.0 |
+| Local Intensity Scaling | 2.3 | 5.5 | 21.5 | 28.1 | 0.0 |
+| Empirical Quantile Mapping | 2.3 | 5.2 | 18.9 | 16.6 | 0.0 |
+| Gamma Quantile Mapping | 2.5 | 5.5 | 18.2 | 14.9 | 0.0 |
+| Detrended Quantile Mapping | 2.2 | 4.9 | 18.6 | 16.5 | 0.0 |
+| Quantile Delta Mapping | 2.3 | 5.2 | 18.9 | 16.6 | 0.0 |
+| Scaled Distribution Mapping | 3.6 | 12.4 | 36.0 | 48.1 | 0.7 |
+| CDF-transform | 0.0 | 0.3 | 0.3 | 0.2 | 0.0 |
+
+**Standard deviation of the pooled corrected members / CHIRPS (area-weighted median of cell ratios)**
 
 | Method | Oct | Nov | Dec | Jan | ONDJ |
 | --- | --- | --- | --- | --- | --- |
@@ -214,84 +282,269 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores and every gat
 | Power Transformation | 1.00 | 1.00 | 1.01 | 1.00 | 1.00 |
 | Delta Change | 1.06 | 1.09 | 1.17 | 1.34 | 1.07 |
 | Local Intensity Scaling | 0.81 | 0.96 | 1.16 | 1.70 | 0.83 |
-| Empirical Quantile Mapping | 1.00 | 0.99 | 0.99 | 1.00 | 0.98 |
-| Gamma Quantile Mapping | 0.98 | 0.91 | 0.88 | 0.93 | 0.92 |
-| Detrended Quantile Mapping | 0.99 | 1.00 | 1.09 | 1.34 | 0.96 |
-| Quantile Delta Mapping | 1.01 | 1.03 | 1.16 | 1.41 | 0.99 |
-| Scaled Distribution Mapping | 1.02 | 1.02 | 1.07 | 1.16 | 1.00 |
+| Empirical Quantile Mapping | 1.00 | 0.99 | 1.00 | 1.00 | 0.98 |
+| Gamma Quantile Mapping | 0.98 | 0.91 | 0.88 | 0.91 | 0.92 |
+| Detrended Quantile Mapping | 0.99 | 1.00 | 1.09 | 1.30 | 0.96 |
+| Quantile Delta Mapping | 1.01 | 1.03 | 1.16 | 1.37 | 0.99 |
+| Scaled Distribution Mapping | 0.88 | 0.85 | 0.87 | 0.97 | 0.86 |
 | CDF-transform | 0.93 | 0.98 | 1.13 | 1.53 | 0.89 |
 
-**10th percentile of the pooled corrected members / CHIRPS (same)**
+**Score coverage (share of the national area, mean per year, 1993–2016)**
+
+| Target | Amount area | Probability area |
+| --- | --- | --- |
+| Oct | 100% | 100% |
+| Nov | 100% | 100% |
+| Dec | 100% | 93% |
+| Jan | 100% | 77% |
+| ONDJ | 100% | 100% |
+
+**Limits, caps and fallbacks (December, January and ONDJ; 1993–2016, mean over folds)**
+
+| Method | Target | Activated |
+| --- | --- | --- |
+| Linear Scaling | Dec | mean fallback 0.4% of area |
+| Linear Scaling | Jan | mean fallback 2.8% of area |
+| Mean-Variance Scaling (operational) | Dec | sd fallback 1.3% of area; ratio lower limit 17.3% of area; ratio upper limit 5.8% of area; clipped at zero 12.2% |
+| Mean-Variance Scaling (operational) | Jan | sd fallback 3.9% of area; ratio lower limit 25.8% of area; ratio upper limit 28.2% of area; clipped at zero 4.5% |
+| Mean-Variance Scaling (operational) | ONDJ | ratio lower limit 2.2% of area; ratio upper limit 22.3% of area; clipped at zero 1.7% |
+| Variance Scaling (unbounded) | Dec | sd fallback 1.3% of area; clipped at zero 8.9% |
+| Variance Scaling (unbounded) | Jan | sd fallback 3.9% of area; clipped at zero 1.8% |
+| Variance Scaling (unbounded) | ONDJ | clipped at zero 2.2% |
+| Square-root-space Mean-Variance Scaling | Dec | ratio lower limit 14.0% of area; clipped at zero 2.9% |
+| Square-root-space Mean-Variance Scaling | Jan | ratio lower limit 30.9% of area; ratio upper limit 0.3% of area; clipped at zero 1.0% |
+| Square-root-space Mean-Variance Scaling | ONDJ | ratio lower limit 0.0% of area; ratio upper limit 1.8% of area; clipped at zero 0.0% |
+| Power Transformation | Dec | b at bound 1.7% of area |
+| Power Transformation | Jan | b at bound 23.3% of area |
+| Delta Change | Dec | mean fallback 0.4% of area; ratio capped 0.1% |
+| Delta Change | Jan | mean fallback 2.8% of area; ratio capped 1.1% |
+| Local Intensity Scaling | Dec | always wet 73.6% of area; never wet 2.9% of area |
+| Local Intensity Scaling | Jan | always wet 80.2% of area; never wet 9.2% of area |
+| Local Intensity Scaling | ONDJ | always wet 100.0% of area |
+| Empirical Quantile Mapping | Dec | model has dry 98.9% of area; obs has dry 26.4% of area; extrapolated 0.2% |
+| Empirical Quantile Mapping | Jan | model has dry 100.0% of area; obs has dry 19.8% of area; extrapolated 0.2% |
+| Empirical Quantile Mapping | ONDJ | model has dry 1.6% of area; extrapolated 0.4% |
+| Gamma Quantile Mapping | Dec | gamma fallback 2.7% of area; model has dry 98.9% of area; obs has dry 26.4% of area |
+| Gamma Quantile Mapping | Jan | gamma fallback 4.5% of area; model has dry 100.0% of area; obs has dry 19.8% of area |
+| Gamma Quantile Mapping | ONDJ | model has dry 1.6% of area |
+| Detrended Quantile Mapping | Dec | model has dry 98.9% of area; obs has dry 26.4% of area; ratio capped 0.1%; extrapolated 0.1% |
+| Detrended Quantile Mapping | Jan | model has dry 100.0% of area; obs has dry 19.8% of area; ratio capped 1.1%; extrapolated 0.1% |
+| Detrended Quantile Mapping | ONDJ | model has dry 1.6% of area; extrapolated 0.2% |
+| Quantile Delta Mapping | Dec | model has dry 98.9% of area; obs has dry 26.4% of area; low denominator 31.5%; ratio capped 0.4% |
+| Quantile Delta Mapping | Jan | model has dry 100.0% of area; obs has dry 19.8% of area; low denominator 54.4%; ratio capped 0.2% |
+| Quantile Delta Mapping | ONDJ | model has dry 1.6% of area; ratio capped 0.0% |
+| Scaled Distribution Mapping | Dec | gamma fallback 5.5% of area; linear scaling fallback 5.9% |
+| Scaled Distribution Mapping | Jan | gamma fallback 13.7% of area; linear scaling fallback 23.4% |
+| CDF-transform | Dec | mean fallback 0.4% of area; at forecast range edge 2.2% |
+| CDF-transform | Jan | mean fallback 2.8% of area; at forecast range edge 0.6% |
+| CDF-transform | ONDJ | at forecast range edge 9.5% |
+
+## 6. Confirmation results (national aggregate)
+
+Full numbers: `confirmation/confirmation.json`. ✓ = better than MVS with Holm-adjusted p < 0.05 (methods: across all 60
+method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not worse over 2017–2024.
+
+**Blended tercile RPSS (the published product), outer leave-one-year-out 1993–2016**
 
 | Method | Oct | Nov | Dec | Jan | ONDJ |
 | --- | --- | --- | --- | --- | --- |
-| Raw ECMWF (no correction) | 1.27 | 0.52 | 0.06 | 0.00 | 0.93 |
-| Linear Scaling | 1.25 | 0.73 | 0.07 | 0.00 | 1.03 |
-| Mean-Variance Scaling (operational) | 0.88 | 0.61 | 0.62 | 1.16 | 0.86 |
-| Variance Scaling (unbounded) | 0.85 | 0.58 | 0.72 | 1.17 | 0.82 |
-| Square-root-space Mean-Variance Scaling | 0.95 | 0.75 | 0.57 | 0.86 | 0.91 |
-| Power Transformation | 1.00 | 0.64 | 0.24 | 0.00 | 0.89 |
-| Delta Change | 0.92 | 0.86 | 0.71 | 0.62 | 0.91 |
-| Local Intensity Scaling | 1.20 | 0.65 | 0.26 | 0.00 | 1.04 |
-| Empirical Quantile Mapping | 0.97 | 0.98 | 0.99 | 1.00 | 0.97 |
-| Gamma Quantile Mapping | 0.97 | 0.80 | 0.68 | 1.02 | 0.94 |
-| Detrended Quantile Mapping | 0.96 | 0.88 | 0.71 | 0.64 | 0.96 |
-| Quantile Delta Mapping | 0.97 | 0.91 | 0.84 | 0.98 | 0.97 |
-| Scaled Distribution Mapping | 0.95 | 0.68 | 0.00 | 0.00 | 0.96 |
-| CDF-transform | 1.01 | 0.87 | 0.61 | 0.58 | 0.98 |
+| Mean-Variance Scaling (operational) | +0.013 | +0.040 | +0.003 | +0.001 | +0.039 |
+| Linear Scaling | +0.013 | +0.038 | +0.006 | -0.000 | +0.037 |
+| Variance Scaling (unbounded) | +0.013 | +0.041 | +0.004 | +0.001 | +0.039 |
+| Square-root-space Mean-Variance Scaling | +0.014 | +0.050 | +0.007 | +0.007 | +0.040 |
+| Power Transformation | +0.012 | +0.039 | +0.005 | +0.003 | +0.038 |
+| Delta Change | +0.004 | +0.035 | -0.000 | -0.006 | +0.026 |
+| Local Intensity Scaling | +0.012 | +0.043 | +0.006 | +0.001 | +0.037 |
+| Empirical Quantile Mapping | +0.002 | +0.034 | +0.005 | -0.003 | +0.028 |
+| Gamma Quantile Mapping | +0.014 | +0.044 | +0.006 | +0.005 | +0.041 |
+| Detrended Quantile Mapping | +0.003 | +0.028 | +0.001 | -0.006 | +0.020 |
+| Quantile Delta Mapping | +0.004 | +0.021 | +0.006 | -0.005 | +0.018 |
+| Scaled Distribution Mapping | +0.004 | +0.028 | +0.006 | -0.002 | +0.015 |
+| CDF-transform | +0.005 | +0.023 | -0.001 | -0.003 | +0.022 |
+| SEL-P | +0.014 | +0.050 | +0.007 | +0.007 | +0.040 |
+| SEL-A | +0.004 | +0.050 | +0.002 | +0.007 | +0.026 |
 
-### Findings
+**Blended tercile RPSS, fit 1993–2016, scored 2017–2024 (exploratory)**
 
-1. **Every method is far better than the raw model.** Raw ECMWF scores CRPSS −0.205 for ONDJ (1993–2016): it is too
-   dry (ensemble mean 14 % below CHIRPS for the season, 66 % below in January) and too narrow (spread–error ratio 0.54).
-2. **Square-root-space MVS is the one consistent improvement.** It passes the amount gate for December, January and
-   ONDJ and the tercile gate for November, December and January, and it is at least as good as MVS for every target in
-   both periods (ONDJ CRPSS +0.075 vs +0.066 in 1993–2016 and +0.175 vs +0.164 in 2017–2024; January +0.030 vs −0.066).
-   It cuts the members clipped to 0 mm from 6.5–12 % to 1.5–3 % in October–December (issue I-08). This repeats the
-   May-initialized JJAS result (docs/36), where it passed the gate for amounts.
-3. **Gamma QM is second.** Best ONDJ amount skill over Ethiopia in 2017–2024 (+0.178; in the ONDJ domain +0.382, after
-   Power Transformation's +0.388), but it passes the gate only for January amounts and its tercile skill is lower than MVS
-   in December.
-4. **Empirical QM matches the CHIRPS distribution best** (standard deviation and percentile ratios ≈ 1 by construction) and
-   passes in the dry months (January amounts; December and January terciles), but it is worse than MVS for October and
-   the ONDJ season (CRPSS +0.046 vs +0.066): with 23 training years the CHIRPS quantile function has 23 points, and the
-   mapping follows their noise.
-5. **The project's ratio limits matter mainly in January.** Unbounded Variance Scaling is close to MVS elsewhere (slightly
-   lower ONDJ amount skill, +0.060 vs +0.066). In January the raw model is far too narrow (spread–error 0.39), the upper
-   limit r ≤ 2 binds and MVS stays too narrow (0.83), while unbounded scaling reaches 1.00 and passes both gates.
-6. **Delta Change** has the highest 1993–2016 ONDJ CRPSS (+0.097) but the gain is not significant (Holm p = 0.18), it is
-   worse in 2017–2024 (+0.117 vs +0.164), its ensemble is too wide (spread–error 1.16) and its tercile skill is low: it
-   is essentially the CHIRPS climatology shifted by the forecast's mean.
-7. **The change-preserving methods (DQM, QDM, SDM, CDF-t) do not help here.** Their tercile skill is lower (ONDJ RPSS
-   +0.001 to +0.011 vs +0.035), and they are clearly worse than MVS in the south-east, where the ONDJ signal is
-   (`figures/crpss_minus_mvs_ONDJ.png`). They rely on the distribution of one forecast's 25–51 members, which is too
-   noisy; they were built for 30-year future periods. SDM sets 33–44 % of December–January members to 0 mm and is 37 %
-   too dry in January; CDF-t stays too narrow (0.83) because its values cannot leave the forecast ensemble's range.
-8. **Linear Scaling and LOCI** correct only the mean (LOCI, for always-wet totals, nearly so): too narrow in the wet
-   months (spread–error 0.72–0.78) and too wide in January (1.6–1.8).
-9. **Reliability of the ensemble (rank histograms).** MVS is reliable for October, November and ONDJ (index 0.09–0.11)
-   but not for January (0.68). Empirical QM and QDM give the flattest histograms in the dry months (December 0.10–0.12,
-   January 0.13–0.16), and square-root MVS is among the best for January (0.11) and ONDJ (0.07).
-10. **December and January remain hard.** In 2017–2024 every method has negative December CRPSS; January is positive only
-   for EQM (+0.089), square-root MVS (+0.063), Gamma QM (+0.021) and QDM (+0.010).
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Mean-Variance Scaling (operational) | +0.027 | +0.053 | +0.015 | -0.005 | +0.075 |
+| Linear Scaling | +0.056 | +0.038 | +0.025 | +0.044 | +0.071 |
+| Variance Scaling (unbounded) | +0.025 | +0.055 | +0.017 | -0.001 | +0.074 |
+| Square-root-space Mean-Variance Scaling | +0.031 | +0.062 | +0.014 | +0.043 | +0.080 |
+| Power Transformation | +0.026 | +0.057 | +0.019 | +0.027 | +0.075 |
+| Delta Change | -0.001 | +0.006 | +0.024 | +0.021 | +0.029 |
+| Local Intensity Scaling | +0.045 | +0.031 | +0.027 | +0.043 | +0.071 |
+| Empirical Quantile Mapping | +0.000 | +0.036 | +0.023 | +0.053 | +0.062 |
+| Gamma Quantile Mapping | +0.021 | +0.057 | +0.003 | +0.016 | +0.082 |
+| Detrended Quantile Mapping | +0.003 | +0.020 | +0.021 | +0.031 | +0.045 |
+| Quantile Delta Mapping | +0.007 | +0.024 | +0.029 | +0.038 | +0.041 |
+| Scaled Distribution Mapping | +0.004 | +0.005 | +0.029 | +0.028 | +0.040 |
+| CDF-transform | +0.013 | +0.031 | +0.026 | +0.044 | +0.049 |
+| SEL-P | +0.021 | +0.062 | +0.014 | +0.043 | +0.082 |
+| SEL-A | -0.001 | +0.062 | +0.014 | +0.043 | +0.029 |
 
-### Recommendation
+**Brier skill, below normal, 1993–2016**
 
-* Shortlist **square-root-space MVS** (first) and **Gamma QM** (second) for the September cycle. Before either replaces
-  MVS, run the confirmation with the climatology blend (nested λ, the `decision_gates.py` protocol): this screening
-  compares 12 candidates, and the probabilities on the site are blended.
-* Do not pursue DC, DQM, QDM, SDM or CDF-t for single-forecast seasonal ensembles; keep them in the benchmark for
-  completeness.
-* Scale to the other cycles with one configuration file each (`config/bias_correction/may_jjas.json`,
-  `jan_fmam.json`, `feb_fmam.json`): only `cycle`, `project_config`, `targets`, the region masks and `output_root` change.
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Mean-Variance Scaling (operational) | +0.013 | +0.003 | -0.013 | -0.002 | +0.028 |
+| Linear Scaling | +0.007 | +0.008 | -0.002 | -0.007 | +0.018 |
+| Variance Scaling (unbounded) | +0.013 | +0.005 | -0.012 | -0.001 | +0.029 |
+| Square-root-space Mean-Variance Scaling | +0.016 | +0.017 | -0.004 | +0.004 | +0.030 |
+| Power Transformation | +0.013 | +0.008 | -0.006 | +0.004 | +0.028 |
+| Delta Change | +0.003 | +0.019 | -0.009 | -0.009 | +0.016 |
+| Local Intensity Scaling | +0.008 | +0.015 | -0.004 | -0.006 | +0.018 |
+| Empirical Quantile Mapping | +0.004 | +0.013 | -0.006 | -0.004 | +0.016 |
+| Gamma Quantile Mapping | +0.017 | +0.016 | -0.006 | +0.003 | +0.031 |
+| Detrended Quantile Mapping | +0.003 | +0.011 | -0.006 | -0.009 | +0.007 |
+| Quantile Delta Mapping | +0.004 | -0.001 | -0.005 | -0.005 | +0.003 |
+| Scaled Distribution Mapping | +0.004 | +0.005 | -0.004 | -0.005 | -0.000 |
+| CDF-transform | +0.003 | +0.002 | -0.009 | -0.004 | +0.009 |
+| SEL-P | +0.017 | +0.017 | -0.004 | +0.004 | +0.030 |
+| SEL-A | +0.003 | +0.017 | -0.007 | +0.004 | +0.016 |
 
-### Figures (`outputs/bias_correction_benchmark/sep_ondj/figures/`)
+**Brier skill, above normal, 1993–2016**
 
-* `skill_summary.png` — CRPSS and RPSS by method and target, with gate marks
-* `crpss_maps_<target>.png`, `crpss_minus_mvs_<target>.png` — per-cell skill and difference from MVS
-* `pit_<target>.png` — rank histograms; `distribution.png` — distribution ratios
-* `members_2026_<target>.png` — every 2026 member after each correction at three cells;
-  `forecast_2026_percent_<target>.png` — 2026 corrected ensemble mean, % of normal, by method
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Mean-Variance Scaling (operational) | +0.013 | +0.078 | +0.019 | +0.003 | +0.051 |
+| Linear Scaling | +0.019 | +0.068 | +0.015 | +0.007 | +0.056 |
+| Variance Scaling (unbounded) | +0.012 | +0.078 | +0.021 | +0.003 | +0.050 |
+| Square-root-space Mean-Variance Scaling | +0.011 | +0.082 | +0.019 | +0.010 | +0.050 |
+| Power Transformation | +0.011 | +0.070 | +0.016 | +0.002 | +0.049 |
+| Delta Change | +0.005 | +0.051 | +0.008 | -0.004 | +0.035 |
+| Local Intensity Scaling | +0.017 | +0.070 | +0.016 | +0.007 | +0.056 |
+| Empirical Quantile Mapping | +0.000 | +0.055 | +0.015 | -0.002 | +0.040 |
+| Gamma Quantile Mapping | +0.012 | +0.071 | +0.018 | +0.006 | +0.050 |
+| Detrended Quantile Mapping | +0.004 | +0.045 | +0.008 | -0.004 | +0.032 |
+| Quantile Delta Mapping | +0.003 | +0.042 | +0.017 | -0.004 | +0.033 |
+| Scaled Distribution Mapping | +0.005 | +0.051 | +0.016 | +0.000 | +0.030 |
+| CDF-transform | +0.007 | +0.045 | +0.008 | -0.002 | +0.036 |
+| SEL-P | +0.011 | +0.082 | +0.019 | +0.010 | +0.050 |
+| SEL-A | +0.005 | +0.082 | +0.011 | +0.010 | +0.035 |
+
+**Amount CRPSS in the confirmation design, 1993–2016**
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Mean-Variance Scaling (operational) | -0.002 | +0.084 | +0.028 | -0.048 | +0.070 |
+| Linear Scaling | -0.016 | +0.073 | -0.008 | -0.132 | +0.070 |
+| Variance Scaling (unbounded) | -0.004 | +0.082 | +0.031 | -0.007 | +0.063 |
+| Square-root-space Mean-Variance Scaling | +0.006 | +0.089 | +0.037 | +0.034 ✓ | +0.080 |
+| Power Transformation | +0.001 | +0.082 | +0.020 | -0.025 | +0.071 |
+| Delta Change | +0.021 | +0.085 | +0.026 | -0.047 | +0.093 |
+| Local Intensity Scaling | -0.016 | +0.079 | +0.010 | -0.104 | +0.070 |
+| Empirical Quantile Mapping | -0.012 | +0.075 | +0.033 | +0.010 | +0.053 |
+| Gamma Quantile Mapping | +0.007 | +0.088 | +0.030 | +0.015 ✓ | +0.082 |
+| Detrended Quantile Mapping | +0.005 | +0.075 | -0.001 | -0.065 | +0.072 |
+| Quantile Delta Mapping | +0.010 | +0.076 | +0.014 | -0.027 | +0.075 |
+| Scaled Distribution Mapping | -0.002 | +0.068 | -0.021 | -0.216 | +0.061 |
+| CDF-transform | +0.002 | +0.073 | -0.019 | -0.108 | +0.074 |
+| SEL-P | +0.007 | +0.089 | +0.037 | +0.034 | +0.081 |
+| SEL-A | +0.021 | +0.089 | +0.034 | +0.034 ✓ | +0.093 |
+
+**Mean blend weight on climatology (λ), 1993–2016**
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Mean-Variance Scaling (operational) | 0.43 | 0.30 | 0.68 | 0.91 | 0.20 |
+| Linear Scaling | 0.52 | 0.43 | 0.75 | 0.78 | 0.28 |
+| Variance Scaling (unbounded) | 0.43 | 0.30 | 0.65 | 0.90 | 0.21 |
+| Square-root-space Mean-Variance Scaling | 0.38 | 0.14 | 0.58 | 0.60 | 0.18 |
+| Power Transformation | 0.44 | 0.29 | 0.66 | 0.67 | 0.19 |
+| Delta Change | 0.34 | 0.37 | 0.77 | 0.87 | 0.23 |
+| Local Intensity Scaling | 0.50 | 0.39 | 0.77 | 0.79 | 0.29 |
+| Empirical Quantile Mapping | 0.47 | 0.30 | 0.73 | 0.60 | 0.22 |
+| Gamma Quantile Mapping | 0.41 | 0.33 | 0.73 | 0.68 | 0.18 |
+| Detrended Quantile Mapping | 0.46 | 0.46 | 0.83 | 0.84 | 0.32 |
+| Quantile Delta Mapping | 0.43 | 0.44 | 0.77 | 0.80 | 0.31 |
+| Scaled Distribution Mapping | 0.49 | 0.50 | 0.80 | 0.89 | 0.38 |
+| CDF-transform | 0.50 | 0.52 | 0.81 | 0.83 | 0.32 |
+
+**Selection-aware procedures against MVS** (Δ: RPS for SEL-P, CRPS in mm for SEL-A; negative favours the procedure)
+
+| Procedure | Target | Chosen (years) | Δ vs MVS | Holm p (targets) | Δ test | Confirmed |
+| --- | --- | --- | --- | --- | --- | --- |
+| SEL-P | Oct | Gamma Quantile Mapping 23, Square-root-space Mean-Variance Scaling 1 | -0.0007 | 1.0000 | +0.0025 | no |
+| SEL-P | Nov | Square-root-space Mean-Variance Scaling 24 | -0.0043 | 0.7338 | -0.0037 | no |
+| SEL-P | Dec | Square-root-space Mean-Variance Scaling 24 | -0.0021 | 1.0000 | +0.0009 | no |
+| SEL-P | Jan | Square-root-space Mean-Variance Scaling 24 | -0.0028 | 1.0000 | -0.0212 | no |
+| SEL-P | ONDJ | Gamma Quantile Mapping 18, Square-root-space Mean-Variance Scaling 6 | -0.0003 | 1.0000 | -0.0033 | no |
+| SEL-A | Oct | Delta Change 24 | -0.6772 | 0.2275 | +0.9372 | no |
+| SEL-A | Nov | Square-root-space Mean-Variance Scaling 24 | -0.0931 | 0.2275 | -0.1049 | no |
+| SEL-A | Dec | Square-root-space Mean-Variance Scaling 23, Empirical Quantile Mapping 1 | -0.0424 | 0.2022 | -0.0334 | no |
+| SEL-A | Jan | Square-root-space Mean-Variance Scaling 24 | -0.4787 | 0.0018 | -0.6902 | yes |
+| SEL-A | ONDJ | Delta Change 24 | -1.0435 | 0.2275 | +3.2167 | no |
+
+### Findings (national aggregate)
+
+1. **All tested corrections improve national ONDJ rainfall-amount CRPSS over raw ECMWF in 1993–2016** (raw −0.180;
+   corrected +0.053 to +0.093). Performance varies for monthly tercile probabilities: DQM, SDM and CDF-t score below the raw
+   model on December RPSS.
+2. **Accounting for the whole search** (Holm across all 60 comparisons), the amount screening passes are square-root MVS
+   (January) and Gamma QM (January); the tercile passes are square-root MVS (November, January), Power Transformation
+   (January) and Gamma QM (January). Square-root MVS's December and ONDJ passes, Gamma QM's ONDJ pass and the January passes
+   of EQM and VS hold only within their method.
+3. **Square-root MVS is at least as good as MVS in the national aggregate for every tested target and period**, on amounts
+   and unblended terciles (ONDJ CRPSS +0.080 vs +0.070 in 1993–2016, +0.189 vs +0.178 in 2017–2024), and clips fewer members
+   at 0 mm (1.0–2.9 % vs 4.5–12.2 % in the months). This need not hold in each region: in the ONDJ R3 domain it is slightly
+   below MVS on 2017–2024 RPSS for October and December (−0.006 each).
+4. **The ratio limits of MVS matter most in January**, where the raw model is far too narrow (spread–error 0.39): with the
+   same fallback in both, the upper limit is active over 28 % of the area and MVS stays too narrow (0.83) while unbounded
+   scaling reaches 1.00.
+5. **EQM reproduces the CHIRPS distribution and, with the dry policy, its dry share** (≤ 1 mm: December 19.0 % vs 18.9 %,
+   January 16.7 % vs 16.6 %) but its ONDJ amount skill is lower than MVS (+0.053 vs +0.070). A possible explanation is
+   sampling noise in an empirical quantile function of 23 values per fold; the results do not isolate it.
+6. **SDM follows the published algorithm** (checked against an independent implementation of the steps). Where the model is
+   drier than CHIRPS it cannot add rain: in January 46 % of model members exceed 1 mm against 83 % of CHIRPS years, and SDM
+   keeps the model's number of rain members, so its corrected dry share is 55 % (CHIRPS 17 %).
+7. **Delta Change** has a high 1993–2016 ONDJ CRPSS (+0.093) that does not pass the screening, is lower in 2017–2024 (+0.114 vs
+   +0.178) and is too wide (spread–error 1.16): historical scenarios rescaled by the forecast mean.
+8. **The methods that use the forecast's own distribution (DQM, QDM, SDM, CDF-t)** score lower on ONDJ terciles (−0.005 to
+   +0.011 vs +0.035); a possible explanation is that one forecast's 25–51 members estimate the "future" distribution these
+   methods need poorly. QDM falls back to the CHIRPS quantile for 32 % (December) and 54 % (January) of members.
+9. **Linear Scaling and LOCI** stay too narrow (ONDJ spread–error 0.78 and 0.77). **December** remains hard: every method has
+   negative amount skill over 2017–2024.
+10. **Confirmation, published probabilities: no method is confirmed better than MVS.** After the blend (fitted inside the
+    folds) the methods' ONDJ RPSS spans 0.025 against 0.044 unblended, and the selection-aware SEL-P — which picks square-root
+    MVS in nearly every year for November–January and Gamma QM for October and ONDJ — is confirmed for no target (ONDJ
+    +0.040 vs +0.039). A better amount correction is trusted more by the blend (January λ 0.60 with square-root MVS against
+    0.91 with MVS), which absorbs much of the difference.
+11. **Confirmation, rainfall amounts: square-root MVS and Gamma QM are confirmed for January** against the whole family, and
+    the selection-aware SEL-A is confirmed for January.
+12. **Choosing by training scores can backfire:** SEL-A chooses Delta Change for October and ONDJ from the 1993–2016 scores,
+    and over 2017–2024 that choice is worse than MVS (ONDJ +3.2 mm CRPS); SEL-P's October choice (Gamma QM) is slightly worse
+    too.
+
+### What the evidence supports
+
+* **Keep MVS for the published tercile probabilities** of the September cycle: no candidate is confirmed once the blend and
+  the method search are accounted for.
+* **January rainfall amounts**: square-root MVS (or Gamma QM) is confirmed better than MVS; a per-target change of the amount
+  correction for January could be considered; the blended January probabilities are not confirmed better.
+* **Do not select by training-period rank alone** (finding 12).
+* Run the same screening and confirmation for JJAS (May) and FMAM (January, February) before any cross-cycle decision; one
+  configuration file each.
+
+## 7. Changes in revision 2 (response to the review of e252baa)
+
+| Review point | Change |
+| --- | --- |
+| Checkmarks ignore the method search | Two families reported (within method ✓, across all methods ✓✓); `adopt` renamed `screen_pass`; selection-aware confirmation added |
+| Shortlist used the test years | Removed; the decision now comes from the confirmation (SEL-P / SEL-A and family-wide tests) |
+| Blend not evaluated; runner JJAS-specific | New cycle-aware `bias_confirmation.py` using the method registry, full pipeline with nested λ |
+| SDM differs from the published algorithm | Rewritten after Switanek et al. (2017) steps 1–7 (RIs computed, then interpolated); test against an independent implementation |
+| DQM "exact" claim; QDM qualification | Definitions corrected; QDM cap and low-denominator fallback counted and reported |
+| Tied zeros and dry occurrence | Dry policy for the quantile-mapping methods; exactly-0 and ≤ 1 mm shares reported; tests for repeated zeros, all-dry and few-wet samples. The operational MVS keeps r ≥ 0.5 and so produces non-zero totals where CHIRPS is never wet (unchanged; noted) |
+| VS changed two things | VS uses the same 1 mm fallback as MVS; activation shares of the limits reported |
+| PT bound hits | Reported as the share of the area where b reaches a bound |
+| Fair vs ordinary CRPS | Ordinary CRPS primary; fair CRPS reported and screened as a diagnostic |
+| Region switch | Labelled "Region for the result tables"; summary, interpretation and figures labelled as national; regional differences noted |
+| Presentation | Distribution plot shows out-of-range values at the edge; map titles give the evaluation period; at-a-glance table groups columns by period; coverage table |
+| Provenance; gate description | Commit, hashes and manifest; gate description generated from the configuration |
+| Wording | "All tested corrections improve national ONDJ CRPSS over raw" with the monthly RPSS exceptions; "national aggregate"; mechanisms stated as possible explanations |
+| CI error (missing local cache in a domain test) | The test builds a small temporary NetCDF fixture |
 
 ## References
 

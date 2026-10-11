@@ -30,10 +30,11 @@ def outline(ax, lat, lon, mask, **kw):
     ax.contour(lon, lat, mask.astype(float), levels=[.5], **kw)
 
 
-def heatmaps(path, results, gates, methods, targets, region, ref, region_label):
-    panels = [('training', 'crpss', 'CRPSS amounts, leave-one-year-out 1993-2016'),
-              ('training', 'rpss', 'RPSS terciles (smoothed counts, no blend), 1993-2016'),
-              ('operational', 'crpss', 'CRPSS amounts, fit 1993-2016, scored 2017-2024')]
+def heatmaps(path, results, gates, methods, targets, region, ref, region_label, cfg):
+    tr, te = cfg['training_years'], cfg['test_years']
+    panels = [('training', 'crpss', f'CRPSS amounts, leave-one-year-out {tr[0]}-{tr[1]}'),
+              ('training', 'rpss', f'RPSS terciles (smoothed counts, no blend), {tr[0]}-{tr[1]}'),
+              ('operational', 'crpss', f'CRPSS amounts, fit {tr[0]}-{tr[1]}, scored {te[0]}-{te[1]}')]
     fig, axes = plt.subplots(1, 3, figsize=(17, 0.42 * len(methods) + 2.4), sharey=True)
     for ax, (design, key, title) in zip(axes, panels):
         v = np.array([[results[t]['methods'][m][design][region][key] for t in targets] for m in methods])
@@ -44,16 +45,17 @@ def heatmaps(path, results, gates, methods, targets, region, ref, region_label):
                 mark = ''
                 if m != ref and m in gates and design == 'training':
                     g = gates[m]['crps' if key == 'crpss' else 'rps'][t]['decision']
-                    mark = ' *' if g['adopt'] else (' +' if g['training_significant'] else '')
+                    mark = ' **' if g['screen_pass_family'] else (' *' if g['screen_pass'] else '')
                 ax.text(j, i, f'{v[i, j]:+.3f}{mark}', ha='center', va='center', fontsize=8,
                         fontweight='bold' if m == ref else 'normal')
         ax.set_xticks(range(len(targets)), targets)
         ax.set_title(title, fontsize=10)
     axes[0].set_yticks(range(len(methods)), [label(m) for m in methods])
     fig.suptitle(f'Bias-correction benchmark ({region_label}; area-weighted, equal years)', fontsize=12)
-    fig.text(.5, .005, '* passes the gate against MVS (Holm-adjusted p < 0.05 on 1993-2016 and no harm 2017-2024); '
-             '+ significant on 1993-2016 only. Skill is against the CHIRPS training climatology. *MVS = operational.',
-             ha='center', fontsize=8)
+    tr, te = cfg['training_years'], cfg['test_years']
+    fig.text(.5, .005, f'Screening against MVS ({tr[0]}-{tr[1]} leave-one-year-out, no harm {te[0]}-{te[1]}): * passes with Holm across '
+             f'the targets of one method; ** also passes with Holm across all methods and targets. A screening pass is not an '
+             f'adoption decision. Skill is against the CHIRPS training climatology. *MVS = operational.', ha='center', fontsize=8)
     fig.tight_layout(rect=(0, .03, 1, .95))
     fig.savefig(path, dpi=DPI)
     plt.close(fig)
@@ -107,19 +109,27 @@ def distribution_panel(path, results, methods, targets, region):
             ('q90_ratio', '90th percentile')]
     fig, axes = plt.subplots(1, len(targets), figsize=(3.6 * len(targets), 0.32 * len(methods) + 2.2), sharey=True)
     y = np.arange(len(methods))
+    lo, hi = 0., 2.
     for ax, t in zip(np.atleast_1d(axes), targets):
-        for (k, lab), mk in zip(keys, ['o', 's', 'v', '^']):
-            v = [results[t]['methods'][m]['distribution_full'][region][k]['area_median'] for m in methods]
-            ax.scatter(v, y, marker=mk, s=22, label=lab)
+        for (k, lab), mk, off in zip(keys, ['o', 's', 'v', '^'], [-.24, -.08, .08, .24]):
+            v = np.array([results[t]['methods'][m]['distribution_full'][region][k]['area_median'] for m in methods], float)
+            inside = (v >= lo) & (v <= hi)
+            sc = ax.scatter(v[inside], y[inside] + off, marker=mk, s=22, label=lab)
+            for i in np.flatnonzero(~inside & np.isfinite(v)):    # beyond the axis: arrow at the edge with the value
+                edge = hi if v[i] > hi else lo
+                ax.annotate(f'{v[i]:.2f}', (edge, y[i] + off), xytext=(-24 if edge == hi else 4, -3), textcoords='offset points',
+                            fontsize=6.5, color=sc.get_facecolor()[0])
+                ax.scatter([edge], [y[i] + off], marker='>' if edge == hi else '<', s=26, color=sc.get_facecolor()[0])
         ax.axvline(1, color='k', lw=.8)
-        ax.set_xlim(.2, 1.8)
+        ax.set_xlim(lo, hi)
         ax.set_title(t)
         ax.grid(alpha=.3)
     np.atleast_1d(axes)[0].set_yticks(y, [label(m) for m in methods])
     np.atleast_1d(axes)[0].invert_yaxis()
     np.atleast_1d(axes)[-1].legend(fontsize=7, loc='lower right')
-    fig.suptitle('Distribution of the corrected members against CHIRPS (pooled 1993-2024 leave-one-year-out, equal years; '
-                 'area-weighted median of cell ratios; 1 = same)', fontsize=10)
+    fig.suptitle('Distribution of the corrected members against CHIRPS (pooled leave-one-year-out over all observed years, '
+                 'equal years; area-weighted median of cell ratios; 1 = same; values beyond 0-2 shown at the edge with their value)',
+                 fontsize=9.5)
     fig.tight_layout(rect=(0, 0, 1, .93))
     fig.savefig(path, dpi=DPI)
     plt.close(fig)
@@ -163,7 +173,7 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
     ref = cfg['reference_method']
     fig_dir = out / 'figures'
     fig_dir.mkdir(parents=True, exist_ok=True)
-    heatmaps(fig_dir / 'skill_summary.png', results, gates, methods, targets, region, ref, cfg['regions'][region]['label'])
+    heatmaps(fig_dir / 'skill_summary.png', results, gates, methods, targets, region, ref, cfg['regions'][region]['label'], cfg)
     distribution_panel(fig_dir / 'distribution.png', results, methods, targets, region)
     spec = cfg['regions']['ondj_domain'] if 'ondj_domain' in cfg['regions'] else cfg['cells']
     with xr.open_dataset(source_path(spec['path'])) as d:
@@ -173,10 +183,11 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
         cells = np.isfinite(to_grid(np.zeros(len(idx)), idx, lat, lon))
         crpss = {m: to_grid(cell_maps[t][m]['crpss'], idx, lat, lon) for m in methods}
         maps(fig_dir / f'crpss_maps_{t}.png', crpss, methods, lat, lon, cells, domain,
-             f'{t}: CRPSS per cell against the CHIRPS climatology (leave-one-year-out 1993-2024)', 'CRPSS', .4)
+             f'{t}: CRPSS per cell against the CHIRPS climatology, leave-one-year-out {cfg["all_years"][0]}-{cfg["all_years"][1]} (descriptive)', 'CRPSS', .4)
         others = [m for m in methods if m not in (ref, 'raw')]
         maps(fig_dir / f'crpss_minus_mvs_{t}.png', {m: crpss[m] - crpss[ref] for m in others}, others, lat, lon, cells, domain,
-             f'{t}: CRPSS minus operational MVS per cell (blue: method better)', 'CRPSS difference', .15)
+             f'{t}: CRPSS minus operational MVS per cell, leave-one-year-out {cfg["all_years"][0]}-{cfg["all_years"][1]} '
+             f'(descriptive; blue: method better)', 'CRPSS difference', .15)
         pit_panel(fig_dir / f'pit_{t}.png', results, methods, t, region, cfg['pit_bins'])
         members_panel(fig_dir / f'members_{cfg["forecast_year"]}_{t}.png', forecasts, methods, t, lat, lon, cfg)
         clim = forecasts[t]['_clim']
@@ -185,5 +196,87 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
                for m in shown}
         pct['_raw'] = to_grid(100 * forecasts[t]['_raw'].mean(0) / np.where(clim > 1, clim, np.nan), idx, lat, lon)
         maps(fig_dir / f'forecast_{cfg["forecast_year"]}_percent_{t}.png', pct, ['_raw'] + shown, lat, lon, cells, domain,
-             f'{t} {cfg["forecast_year"]}: corrected ensemble mean, % of CHIRPS 1993-2024 mean', '% of normal', (40, 160),
+             f'{t} {cfg["forecast_year"]}: corrected ensemble mean, % of CHIRPS {cfg["all_years"][0]}-{cfg["all_years"][1]} mean', '% of normal', (40, 160),
              cmap='BrBG')
+
+
+# ---------------------------------------------------------------- confirmation (scripts/bias_confirmation.py)
+
+def confirmation_figures(out, data, cfg):
+    fig_dir = out / 'figures'
+    fig_dir.mkdir(parents=True, exist_ok=True)
+    targets = list(data['targets'])
+    methods = data['methods']
+    region = cfg['primary_region']
+    tr, te = cfg['training_years'], cfg['test_years']
+    rows = methods + ['SEL-P', 'SEL-A']
+    lab = lambda m: m if m.startswith('SEL') else label(m)
+
+    def value(m, t, design, key):
+        d = data['targets'][t]['selection'][m] if m.startswith('SEL') else data['targets'][t]['methods'][m]
+        return d[design][region][key]
+
+    panels = [('training', 'rpss', 'rps', f'Blended tercile RPSS, outer leave-one-year-out {tr[0]}-{tr[1]}'),
+              ('test', 'rpss', 'rps', f'Blended tercile RPSS, fit {tr[0]}-{tr[1]}, scored {te[0]}-{te[1]}'),
+              ('training', 'crpss', 'crps', f'Amount CRPSS, outer leave-one-year-out {tr[0]}-{tr[1]}')]
+    fig, axes = plt.subplots(1, 3, figsize=(17, 0.42 * len(rows) + 2.4), sharey=True)
+    for ax, (design, key, score, title) in zip(axes, panels):
+        v = np.array([[value(m, t, design, key) for t in targets] for m in rows])
+        lim = max(np.nanmax(np.abs(v)), .05)
+        ax.imshow(v, cmap='RdBu', vmin=-lim, vmax=lim, aspect='auto')
+        for i, m in enumerate(rows):
+            for j, t in enumerate(targets):
+                mark = ''
+                if design == 'training' and m != data['reference']:
+                    tests = data['tests'].get(m, {}).get(score, {})
+                    if t in tests and tests[t]['decision']['confirmed']:
+                        mark = ' *'
+                ax.text(j, i, f'{v[i, j]:+.3f}{mark}', ha='center', va='center', fontsize=8,
+                        fontweight='bold' if m in (data['reference'], 'SEL-P', 'SEL-A') else 'normal')
+        ax.axhline(len(methods) - .5, color='k', lw=1)
+        ax.set_xticks(range(len(targets)), targets)
+        ax.set_title(title, fontsize=10)
+    axes[0].set_yticks(range(len(rows)), [lab(m) for m in rows])
+    fig.suptitle(f'Confirmation through the full probability pipeline ({cfg["regions"][region]["label"]}; '
+                 'blend weight fitted inside the folds)', fontsize=12)
+    fig.text(.5, .005, '* better than MVS with Holm-adjusted p < 0.05 (methods: across all methods and targets; SEL-P/SEL-A: across '
+             'the targets) and not worse over the test years. SEL-P / SEL-A: method chosen each year from training-only scores.',
+             ha='center', fontsize=8)
+    fig.tight_layout(rect=(0, .03, 1, .95))
+    fig.savefig(fig_dir / 'confirmation_summary.png', dpi=DPI)
+    plt.close(fig)
+
+    show = [m for m in cfg['confirmation'].get('reliability_methods', methods[:4]) if m in methods]
+    season = targets[-1]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5.2))
+    for ax, cat in zip(axes, ['below', 'above']):
+        ax.plot([0, 1], [0, 1], color='k', lw=.8)
+        for m in show:
+            r = data['targets'][season]['methods'][m]['training'][region]['reliability'][cat]
+            f, o, w = (np.array(r[k], float) for k in ('mean_forecast', 'observed_frequency', 'weight'))
+            keep = w > .002
+            ax.plot(f[keep], o[keep], marker='o', ms=4, label=label(m))
+        ax.set(xlim=(0, 1), ylim=(0, 1), xlabel='Forecast probability', ylabel='Observed frequency',
+               title=f'{season}: {cat} normal')
+        ax.grid(alpha=.3)
+    axes[1].legend(fontsize=8)
+    fig.suptitle(f'Reliability of the blended probabilities, outer leave-one-year-out {tr[0]}-{tr[1]} '
+                 f'({cfg["regions"][region]["label"]}; bins with at least 0.2% of the area)', fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, .93))
+    fig.savefig(fig_dir / 'confirmation_reliability.png', dpi=DPI)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 0.32 * len(methods) + 2))
+    for ax, name in zip(axes, ['SEL-P', 'SEL-A']):
+        freq = np.array([[data['targets'][t]['selection'][name]['frequency'].get(m, 0) for t in targets] for m in methods])
+        ax.imshow(freq, cmap='Greens', aspect='auto')
+        for i in range(len(methods)):
+            for j in range(len(targets)):
+                if freq[i, j]:
+                    ax.text(j, i, str(freq[i, j]), ha='center', va='center', fontsize=8)
+        ax.set_xticks(range(len(targets)), targets)
+        ax.set_yticks(range(len(methods)), [label(m) for m in methods])
+        ax.set_title(f'{name}: years in which each method was chosen (of {tr[1] - tr[0] + 1})', fontsize=10)
+    fig.tight_layout()
+    fig.savefig(fig_dir / 'confirmation_selection.png', dpi=DPI)
+    plt.close(fig)

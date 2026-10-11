@@ -12,6 +12,17 @@ Equal-year weighting: a training year has total weight 1/Y however many members 
 51 from 2017), so each member of year y weighs 1/(Y M_y). Each observed year weighs 1/Y. Every member is
 corrected individually. Cells with missing observations in any training year are returned as NaN.
 
+Dry totals and ties (quantile-mapping methods EQM, GQM, DQM, QDM): a total at or below `wet_threshold` (1 mm
+by default: a dry month or season, not a dry day) is "dry". The dry share of the model climatology, p0_model,
+and of CHIRPS, p0_obs, are estimated with the equal-year weights. Dry members of a forecast are spread evenly
+over the probability interval (0, p0_model) by their rank (ties broken by member order) — the expected value of
+random tie-breaking — and a probability at or below p0_obs maps to 0 mm. So the corrected dry share follows
+CHIRPS instead of collapsing all tied zeros onto one probability.
+
+Diagnostics: every fit returns `flags` (per-cell booleans, e.g. a ratio limit or a fallback that is active) and
+every apply adds to `counts` ({name: [events, opportunities]}), so a benchmark can report how often each limit,
+cap or fallback acts.
+
 Methods that keep a "change signal" (DC, DQM, QDM, SDM, CDF-t) were built for climate change (reference vs
 future period). Here the "future" is the forecast itself: the target year's ensemble against the model
 climatology of the training years.
@@ -21,6 +32,7 @@ import numpy as np
 from scipy.special import digamma, polygamma, gammainc, gammaincinv
 
 EPS = 1e-9
+SDM_CDF_MAX = 1 - 1e-7          # Switanek et al. (2017), step 2: upper threshold on CDF values
 
 
 # ---------------------------------------------------------------- weighted helpers (equal-year weighting)
@@ -45,7 +57,8 @@ class Ecdf:
     """Weighted empirical CDF for every cell (column).
 
     Distinct values with mid-point (Hazen) plotting positions, linear between them and constant beyond
-    them. Tied values, such as a mass of zeros, share one position in the middle of their probability.
+    them. Tied values share one position in the middle of their probability (dry totals are handled
+    separately by `dry_positions`).
     """
 
     def __init__(self, x, w=None):
@@ -76,6 +89,26 @@ def clean_obs(obs):
     return np.where(ok[None, :], obs, 0.), ok
 
 
+def count(s, name, events, opportunities):
+    c = s.setdefault('counts', {}).setdefault(name, [0, 0])
+    c[0] += int(events)
+    c[1] += int(opportunities)
+
+
+def dry_positions(x, u, p0, threshold):
+    """Non-exceedance probabilities with the dry policy: dry values spread evenly over (0, p0) by rank."""
+    u = np.array(u, float)
+    dry = x <= threshold
+    n = int(dry.sum())
+    if p0 > 0:
+        u[~dry] = np.maximum(u[~dry], p0)
+        if n:
+            rank = np.empty(n)
+            rank[np.argsort(x[dry], kind='stable')] = np.arange(n)
+            u[dry] = p0 * (rank + .5) / n
+    return u
+
+
 def gamma_mle(x, w, wet):
     """Weighted maximum-likelihood gamma (shape k, scale theta) of the wet values of every column.
 
@@ -99,41 +132,40 @@ def gamma_mle(x, w, wet):
     return np.where(bad, np.nan, k), np.where(bad, np.nan, theta), n
 
 
-def mixed_gamma_cdf(x, p0, k, theta, threshold):
-    """Mixed distribution: dry mass p0 at or below the threshold, gamma above it. Dry values get p0/2."""
-    g = gammainc(k, np.maximum(x, 0) / theta)
-    return np.where(x > threshold, p0 + (1 - p0) * g, p0 / 2)
-
-
-def mixed_gamma_ppf(u, p0, k, theta):
-    q = np.clip((u - p0) / np.maximum(1 - p0, EPS), 0, 1 - 1e-9)
-    return np.where(u <= p0, 0., gammaincinv(k, q) * theta)
-
-
-def forecast_ratio(members, mu_model, ratio_bounds, min_model_mean):
+def forecast_ratio(members, mu_model, ratio_bounds, min_model_mean, s=None, name=None):
     """Forecast signal: ensemble-mean total over the model climatological mean, bounded."""
     a = np.divide(members.mean(0), mu_model, out=np.ones(members.shape[1]), where=mu_model >= min_model_mean)
-    return np.clip(a, *ratio_bounds)
+    b = np.clip(a, *ratio_bounds)
+    if s is not None:
+        count(s, name, ((b != a) & s['ok']).sum(), s['ok'].sum())
+    return b
 
 
-def eqm_map(x, j, model, obs, extrapolation):
-    """Empirical quantile mapping of values x in cell j; constant-ratio extrapolation beyond the training range."""
-    out = obs.quantile(model.cdf(x, j), j)
+def dry_shares(x, w, o, threshold):
+    return (w[:, None] * (x <= threshold)).sum(0), (o <= threshold).mean(0)
+
+
+def eqm_map(x, j, s, extrapolation, threshold):
+    """Empirical quantile mapping of values x in cell j with the dry policy; constant-ratio extrapolation."""
+    model, obs, p0m, p0o = s['model'], s['obs'], s['p0_model'][j], s['p0_obs'][j]
+    u = dry_positions(x, model.cdf(x, j), p0m, threshold)
+    out = np.where((p0o > 0) & (u <= p0o), 0., obs.quantile(u, j))
     if extrapolation == 'constant_ratio':
         lo, hi, plo, phi = model.ends(j)
         top = x > hi
         if top.any() and hi > EPS:
             out[top] = x[top] * obs.quantile(phi, j) / hi
-        bottom = x < lo
+        bottom = (x < lo) & (x > threshold)
         if bottom.any() and lo > EPS:
             out[bottom] = x[bottom] * obs.quantile(plo, j) / lo
+        count(s, 'extrapolated', top.sum() + bottom.sum(), len(x))
     return out
 
 
 # ---------------------------------------------------------------- methods
 
 def fit_raw(models, obs, **_):
-    return dict(ok=clean_obs(obs)[1])
+    return dict(ok=clean_obs(obs)[1], flags={})
 
 
 def apply_raw(members, s, **_):
@@ -145,7 +177,7 @@ def fit_ls(models, obs, min_model_mean=0.1, **_):
     o, ok = clean_obs(obs)
     mu_m, mu_o = wmean(x, w), o.mean(0)
     ratio = np.divide(mu_o, mu_m, out=np.ones_like(mu_o), where=mu_m >= min_model_mean)
-    return dict(ok=ok, ratio=ratio)
+    return dict(ok=ok, ratio=ratio, flags=dict(mean_fallback=mu_m < min_model_mean))
 
 
 def apply_ls(members, s, **_):
@@ -161,15 +193,21 @@ def fit_mvs(models, obs, ratio_bounds=(0.5, 2.0), min_model_sd=1.0, space='linea
     mu_m, sd_m, mu_o, sd_o = wmean(x, w), wstd(x, w), o.mean(0), o.std(0)
     r = np.ones_like(mu_m)
     np.divide(sd_o, sd_m, out=r, where=sd_m >= min_model_sd)
+    flags = dict(sd_fallback=sd_m < min_model_sd)
     if ratio_bounds is not None:
+        flags.update(ratio_lower_limit=r < ratio_bounds[0], ratio_upper_limit=r > ratio_bounds[1])
         r = np.clip(r, *ratio_bounds)
-    return dict(ok=ok, mu_model=mu_m, mu_obs=mu_o, ratio=r, space=space)
+    return dict(ok=ok, mu_model=mu_m, mu_obs=mu_o, ratio=r, space=space, flags=flags)
 
 
 def apply_mvs(members, s, **_):
     if s['space'] == 'sqrt':
-        return np.maximum(s['mu_obs'] + s['ratio'] * (np.sqrt(members) - s['mu_model']), 0) ** 2
-    return np.maximum(s['mu_obs'] + s['ratio'] * (members - s['mu_model']), 0)
+        raw = s['mu_obs'] + s['ratio'] * (np.sqrt(members) - s['mu_model'])
+    else:
+        raw = s['mu_obs'] + s['ratio'] * (members - s['mu_model'])
+    count(s, 'clipped_at_zero', ((raw < 0) & s['ok']).sum(), members.shape[0] * s['ok'].sum())
+    out = np.maximum(raw, 0)
+    return out ** 2 if s['space'] == 'sqrt' else out
 
 
 def fit_pt(models, obs, b_bounds=(0.1, 3.0), iterations=40, **_):
@@ -192,7 +230,9 @@ def fit_pt(models, obs, b_bounds=(0.1, 3.0), iterations=40, **_):
     b = (lo + hi) / 2
     mb = wmean(x ** b, w)
     a = np.divide(mu_o, mb, out=np.ones_like(mu_o), where=mb > EPS)
-    return dict(ok=ok, a=a, b=b)
+    span = b_bounds[1] - b_bounds[0]                 # a bound reached: the CV cannot be matched exactly
+    at_bound = (b - b_bounds[0] < 1e-3 * span) | (b_bounds[1] - b < 1e-3 * span)
+    return dict(ok=ok, a=a, b=b, flags=dict(b_at_bound=at_bound))
 
 
 def apply_pt(members, s, **_):
@@ -202,12 +242,13 @@ def apply_pt(members, s, **_):
 def fit_dc(models, obs, min_model_mean=0.1, **_):
     x, w = pooled(models)
     o, ok = clean_obs(obs)
-    return dict(ok=ok, obs=o, mu_model=wmean(x, w))
+    mu_m = wmean(x, w)
+    return dict(ok=ok, obs=o, mu_model=mu_m, flags=dict(mean_fallback=mu_m < min_model_mean))
 
 
 def apply_dc(members, s, ratio_bounds=(0.2, 5.0), min_model_mean=0.1, **_):
     """Delta change: every training-year observation times the forecast's ensemble-mean ratio (not member-wise)."""
-    return s['obs'] * forecast_ratio(members, s['mu_model'], ratio_bounds, min_model_mean)
+    return s['obs'] * forecast_ratio(members, s['mu_model'], ratio_bounds, min_model_mean, s, 'ratio_capped')
 
 
 def fit_loci(models, obs, wet_threshold=1.0, **_):
@@ -225,7 +266,8 @@ def fit_loci(models, obs, wet_threshold=1.0, **_):
         int_o = np.where(wet_o, o, 0).sum(0) / wet_o.sum(0)
         s = (int_o - wet_threshold) / (int_m - thr_m)
     good = np.isfinite(s) & (s > 0) & (f_o > 0)
-    return dict(ok=ok, thr_m=thr_m, s=np.where(good, s, 0.), dry=f_o == 0, wet_threshold=wet_threshold)
+    return dict(ok=ok, thr_m=thr_m, s=np.where(good, s, 0.), dry=f_o == 0, wet_threshold=wet_threshold,
+                flags=dict(always_wet=f_o >= 1, never_wet=f_o == 0, no_scaling=~good & (f_o > 0)))
 
 
 def apply_loci(members, s, **_):
@@ -233,16 +275,18 @@ def apply_loci(members, s, **_):
     return np.where(s['dry'], 0., out)
 
 
-def fit_eqm(models, obs, **_):
+def fit_eqm(models, obs, wet_threshold=1.0, **_):
     x, w = pooled(models)
     o, ok = clean_obs(obs)
-    return dict(ok=ok, model=Ecdf(x, w), obs=Ecdf(o), mu_model=wmean(x, w))
+    p0m, p0o = dry_shares(x, w, o, wet_threshold)
+    return dict(ok=ok, model=Ecdf(x, w), obs=Ecdf(o), mu_model=wmean(x, w), p0_model=p0m, p0_obs=p0o,
+                flags=dict(model_has_dry=p0m > 0, obs_has_dry=p0o > 0))
 
 
-def apply_eqm(members, s, extrapolation='constant_ratio', **_):
+def apply_eqm(members, s, extrapolation='constant_ratio', wet_threshold=1.0, **_):
     out = np.full(members.shape, np.nan)
     for j in np.flatnonzero(s['ok']):
-        out[:, j] = eqm_map(members[:, j], j, s['model'], s['obs'], extrapolation)
+        out[:, j] = eqm_map(members[:, j], j, s, extrapolation, wet_threshold)
     return out
 
 
@@ -253,41 +297,69 @@ def fit_gqm(models, obs, wet_threshold=1.0, **_):
     wet_m, wet_o = x > wet_threshold, o > wet_threshold
     k_m, t_m, _ = gamma_mle(x, w, wet_m)
     k_o, t_o, _ = gamma_mle(o, np.full(len(o), 1. / len(o)), wet_o)
-    p0_m = (w[:, None] * ~wet_m).sum(0)
-    p0_o = (~wet_o).mean(0)
+    p0_m, p0_o = dry_shares(x, w, o, wet_threshold)
     mu_m, mu_o = wmean(x, w), o.mean(0)
-    fallback = ~(np.isfinite(k_m) & np.isfinite(k_o))   # too few wet values: linear scaling
+    all_dry_obs = p0_o >= 1
+    fallback = ~(np.isfinite(k_m) & np.isfinite(k_o)) & ~all_dry_obs     # too few wet values: linear scaling
     ratio = np.divide(mu_o, mu_m, out=np.ones_like(mu_o), where=mu_m > 0.1)
     return dict(ok=ok, k_m=k_m, t_m=t_m, k_o=k_o, t_o=t_o, p0_m=p0_m, p0_o=p0_o, fallback=fallback,
-                ratio=ratio, wet_threshold=wet_threshold)
+                all_dry_obs=all_dry_obs, ratio=ratio, wet_threshold=wet_threshold,
+                flags=dict(gamma_fallback=fallback, model_has_dry=p0_m > 0, obs_has_dry=p0_o > 0))
 
 
 def apply_gqm(members, s, **_):
-    with np.errstate(invalid='ignore'):
-        u = np.clip(mixed_gamma_cdf(members, s['p0_m'], s['k_m'], s['t_m'], s['wet_threshold']), 1e-6, 1 - 1e-6)
-        out = mixed_gamma_ppf(u, s['p0_o'], s['k_o'], s['t_o'])
-    return np.where(s['fallback'], members * s['ratio'], out)
-
-
-def apply_dqm(members, s, extrapolation='constant_ratio', ratio_bounds=(0.2, 5.0), min_model_mean=0.1, **_):
-    """Detrended QM: remove the forecast's ensemble-mean ratio, quantile-map, put the ratio back."""
-    a = forecast_ratio(members, s['mu_model'], ratio_bounds, min_model_mean)
+    thr = s['wet_threshold']
     out = np.full(members.shape, np.nan)
     for j in np.flatnonzero(s['ok']):
-        out[:, j] = eqm_map(members[:, j] / a[j], j, s['model'], s['obs'], extrapolation) * a[j]
+        x = members[:, j]
+        if s['all_dry_obs'][j]:
+            out[:, j] = 0.
+            continue
+        if s['fallback'][j]:
+            out[:, j] = x * s['ratio'][j]
+            continue
+        p0m, p0o = s['p0_m'][j], s['p0_o'][j]
+        g = gammainc(s['k_m'][j], np.maximum(x, 0) / s['t_m'][j])
+        u = np.clip(dry_positions(x, p0m + (1 - p0m) * g, p0m, thr), 1e-9, 1 - 1e-9)
+        q = np.clip((u - p0o) / max(1 - p0o, EPS), 0, 1 - 1e-9)
+        out[:, j] = np.where(u <= p0o, 0., gammaincinv(s['k_o'][j], q) * s['t_o'][j])
+    return out
+
+
+def apply_dqm(members, s, extrapolation='constant_ratio', ratio_bounds=(0.2, 5.0), min_model_mean=0.1, wet_threshold=1.0, **_):
+    """Detrended QM: divide by the bounded forecast ensemble-mean ratio a, quantile-map, multiply by a.
+
+    The ratio is removed and put back, but the mapping in between changes the normalized mean, so the
+    corrected forecast's mean anomaly is not, in general, the raw forecast's.
+    """
+    a = forecast_ratio(members, s['mu_model'], ratio_bounds, min_model_mean, s, 'ratio_capped')
+    out = np.full(members.shape, np.nan)
+    for j in np.flatnonzero(s['ok']):
+        out[:, j] = eqm_map(members[:, j] / a[j], j, s, extrapolation, wet_threshold) * a[j]
     return out
 
 
 def apply_qdm(members, s, max_ratio=5.0, wet_threshold=1.0, **_):
-    """Quantile delta mapping: observed quantile at the member's rank times the member's relative change."""
+    """Quantile delta mapping: observed quantile at the member's rank times the member's relative change.
+
+    The relative change is kept only where the model quantile is above the dry threshold and the change is
+    below `max_ratio`; elsewhere the observed quantile is used, or the change is capped (both counted).
+    """
     fc = Ecdf(members)
     out = np.full(members.shape, np.nan)
+    p0f_all = (members <= wet_threshold).mean(0)
     for j in np.flatnonzero(s['ok']):
         x = members[:, j]
-        tau = fc.cdf(x, j)
+        tau = dry_positions(x, fc.cdf(x, j), p0f_all[j], wet_threshold)
         qm, qo = s['model'].quantile(tau, j), s['obs'].quantile(tau, j)
-        delta = np.minimum(np.divide(x, qm, out=np.ones_like(x), where=qm > wet_threshold), max_ratio)
-        out[:, j] = np.where(qm > wet_threshold, qo * delta, qo)
+        low = qm <= wet_threshold
+        delta = np.divide(x, qm, out=np.ones_like(x), where=~low)
+        capped = delta > max_ratio
+        y = np.where(low, qo, qo * np.minimum(delta, max_ratio))
+        p0o = s['p0_obs'][j]
+        out[:, j] = np.where((p0o > 0) & (tau <= p0o), 0., y)
+        count(s, 'low_denominator', low.sum(), len(x))
+        count(s, 'ratio_capped', (capped & ~low).sum(), len(x))
     return out
 
 
@@ -297,77 +369,97 @@ def fit_cdft(models, obs, min_model_mean=0.1, **_):
     o, ok = clean_obs(obs)
     mu_m, mu_o = wmean(x, w), o.mean(0)
     c = np.divide(mu_o, mu_m, out=np.ones_like(mu_o), where=mu_m >= min_model_mean)
-    return dict(ok=ok, c=c, model=Ecdf(x * c, w), obs=Ecdf(o))
+    return dict(ok=ok, c=c, model=Ecdf(x * c, w), obs=Ecdf(o), flags=dict(mean_fallback=mu_m < min_model_mean))
 
 
 def apply_cdft(members, s, **_):
-    """x' = F_Of^-1(F_Mf(x)) with F_Of = F_Oh(F_Mh^-1(F_Mf)), i.e. x' = Q_Mf(F_Mh(Q_Oh(F_Mf(x))))."""
+    """x' = F_Of^-1(F_Mf(x)) with F_Of = F_Oh(F_Mh^-1(F_Mf)), i.e. x' = Q_Mf(F_Mh(Q_Oh(F_Mf(x)))).
+
+    Implementation choices: the model and forecast are first scaled to the CHIRPS mean, and the result stays
+    within the scaled forecast ensemble's range (counted when a member lands on its minimum or maximum).
+    """
     z = members * s['c']
     fc = Ecdf(z)
     out = np.full(members.shape, np.nan)
     for j in np.flatnonzero(s['ok']):
         u = fc.cdf(z[:, j], j)
-        out[:, j] = fc.quantile(s['model'].cdf(s['obs'].quantile(u, j), j), j)
+        y = fc.quantile(s['model'].cdf(s['obs'].quantile(u, j), j), j)
+        out[:, j] = y
+        count(s, 'at_forecast_range_edge', ((y <= fc.v[j][0]) | (y >= fc.v[j][-1])).sum(), len(y))
     return out
 
 
 def fit_sdm(models, obs, wet_threshold=1.0, **_):
+    """Scaled distribution mapping, precipitation (Switanek et al. 2017, Sect. 4.1.1), steps 1-2 for the training data.
+
+    Wet totals are those above the threshold (step 1). Gamma distributions are fitted by maximum likelihood to the
+    wet CHIRPS totals and, with the equal-year weights, to the wet model totals (step 2). The recurrence intervals
+    of the sorted wet values are kept with their positions, for the interpolation of step 4.
+    """
     x, w = pooled(models)
     o, ok = clean_obs(obs)
     wet_m, wet_o = x > wet_threshold, o > wet_threshold
     k_m, t_m, _ = gamma_mle(x, w, wet_m)
     k_o, t_o, _ = gamma_mle(o, np.full(len(o), 1. / len(o)), wet_o)
-    fr_m = (w[:, None] * wet_m).sum(0)
-    fr_o = wet_o.mean(0)
-    obs_wet =[np.sort(o[wet_o[:, j], j]) for j in range(o.shape[1])]
-    mod_wet = []                                          # weighted wet-value quantile function of every cell
-    for j in range(x.shape[1]):
-        keep = wet_m[:, j]
-        v, inv = np.unique(x[keep, j], return_inverse=True)
-        ww = np.bincount(inv.ravel(), weights=w[keep], minlength=len(v))
-        mod_wet.append((v, (np.cumsum(ww) - ww / 2) / max(ww.sum(), EPS)))
+    fr_m = (w[:, None] * wet_m).sum(0)                       # RD_MODH / TD_MODH (equal-year weights)
+    fr_o = wet_o.mean(0)                                     # RD_OBS / TD_OBS
+    ri_obs, ri_mod = [], []
+    with np.errstate(invalid='ignore', divide='ignore'):
+        for j in range(o.shape[1]):
+            v = np.sort(o[wet_o[:, j], j])
+            cdf = np.minimum(gammainc(k_o[j], v / t_o[j]), SDM_CDF_MAX)
+            ri_obs.append(1 / (1 - cdf))                     # step 4, observations; positions 0..1 (equal weights)
+            keep = wet_m[:, j]
+            vm, inv = np.unique(x[keep, j], return_inverse=True)
+            ww = np.bincount(inv.ravel(), weights=w[keep], minlength=len(vm))
+            c = np.cumsum(ww) - ww / 2                         # weighted positions, rescaled to keep the range 0..1
+            pos = (c - c[0]) / (c[-1] - c[0]) if len(c) > 1 else np.zeros(len(c))
+            cdfm = np.minimum(gammainc(k_m[j], vm / t_m[j]), SDM_CDF_MAX)
+            ri_mod.append((pos, 1 / (1 - cdfm)))
     mu_m, mu_o = wmean(x, w), o.mean(0)
     ratio = np.divide(mu_o, mu_m, out=np.ones_like(mu_o), where=mu_m > 0.1)
-    return dict(ok=ok, k_m=k_m, t_m=t_m, k_o=k_o, t_o=t_o, fr_m=fr_m, fr_o=fr_o, obs_wet=obs_wet,
-                mod_wet=mod_wet, ratio=ratio, wet_threshold=wet_threshold)
+    fallback = ~(np.isfinite(k_m) & np.isfinite(k_o)) | (fr_m <= 0)
+    return dict(ok=ok, k_m=k_m, t_m=t_m, k_o=k_o, t_o=t_o, fr_m=fr_m, fr_o=fr_o, ri_obs=ri_obs, ri_mod=ri_mod,
+                ratio=ratio, fallback=fallback, wet_threshold=wet_threshold, flags=dict(gamma_fallback=fallback))
+
+
+def sdm_cell(x, k_o, t_o, k_m, t_m, fr_o, fr_m, ri_obs, ri_mod, threshold):
+    """Steps 1-7 for one cell's forecast members x; returns the corrected members (None: fewer than 3 wet)."""
+    wet = x > threshold
+    order = np.argsort(np.where(wet, x, -np.inf), kind='stable')
+    xr = np.sort(x[wet])
+    n_f = len(xr)
+    if n_f < 3:
+        return None
+    k_f, t_f, _ = gamma_mle(xr[:, None], np.full(n_f, 1. / n_f), np.ones((n_f, 1), bool))
+    k_f, t_f = k_f[0], t_f[0]
+    rd_bc = int(min(round(n_f * fr_o / fr_m), n_f))         # step 1, Eq. (1); never more rain members (step 7)
+    cdf_f = np.minimum(gammainc(k_f, xr / t_f), SDM_CDF_MAX)  # step 2
+    sfr = gammaincinv(k_f, cdf_f) * t_f / np.maximum(gammaincinv(k_m, cdf_f) * t_m, EPS)   # step 3, Eq. (3)
+    ri_f = 1 / (1 - cdf_f)                                   # step 4, Eq. (4)
+    grid = np.linspace(0, 1, n_f)                            # step 4: interpolate the RI arrays, keeping their range
+    ri_io = np.interp(grid, np.linspace(0, 1, len(ri_obs)), ri_obs) if len(ri_obs) > 1 else np.full(n_f, ri_obs[0])
+    pos_m, ri_m = ri_mod
+    ri_im = np.interp(grid, pos_m, ri_m) if len(ri_m) > 1 else np.full(n_f, ri_m[0])
+    ri_s = np.maximum(1, ri_io * ri_f / ri_im)               # step 5, Eq. (5)
+    cdf_s = np.sort(1 - 1 / ri_s)                            # Eq. (6), ordered like the sorted forecast values
+    bc = gammaincinv(k_o, np.minimum(cdf_s, SDM_CDF_MAX)) * t_o * sfr   # step 6, Eq. (7)
+    y = np.zeros(len(x))
+    if rd_bc > 0:
+        if rd_bc < n_f:                                      # step 6: interpolate to the corrected number of rain members
+            bc = np.interp(np.linspace(0, 1, rd_bc), grid, bc) if rd_bc > 1 else bc[-1:]
+        y[order[-rd_bc:]] = bc                               # step 7: largest values back to the largest members
+    return y
 
 
 def apply_sdm(members, s, **_):
-    """Scaled distribution mapping (relative form, Switanek et al. 2017) for every cell."""
-    thr = s['wet_threshold']
-    lim = lambda p: np.clip(p, 1e-5, 1 - 1e-5)
     out = np.full(members.shape, np.nan)
-    n = len(members)
     for j in np.flatnonzero(s['ok']):
         x = members[:, j]
-        wet = x > thr
-        xr = np.sort(x[wet])
-        k_o, t_o, k_m, t_m = s['k_o'][j], s['t_o'][j], s['k_m'][j], s['t_m'][j]
-        if len(xr) < 3 or not np.isfinite([k_o, t_o, k_m, t_m]).all() or s['fr_m'][j] <= 0:
-            out[:, j] = x * s['ratio'][j]                       # too few wet values: linear scaling
-            continue
-        k_f, t_f, _ = gamma_mle(xr[:, None], np.full(len(xr), 1. / len(xr)), np.ones((len(xr), 1), bool))
-        k_f, t_f = k_f[0], t_f[0]
-        fr_f = wet.mean()
-        expected = int(min(round(n * s['fr_o'][j] * fr_f / s['fr_m'][j]), n))
-        pp = (np.arange(len(xr)) + .5) / len(xr)
-        ow = s['obs_wet'][j]
-        oq = np.interp(pp, (np.arange(len(ow)) + .5) / len(ow), ow) if len(ow) else np.zeros_like(pp)
-        mv, mp = s['mod_wet'][j]
-        mq = np.interp(pp, mp, mv)
-        obs_cdf, mod_cdf = lim(gammainc(k_o, oq / t_o)), lim(gammainc(k_m, mq / t_m))
-        sce_cdf = lim(gammainc(k_f, xr / t_f))
-        adapted = lim(1 - 1 / ((1 / (1 - obs_cdf)) * (1 / (1 - sce_cdf)) / (1 / (1 - mod_cdf))))
-        xv = (gammaincinv(k_o, np.sort(adapted)) * t_o
-              * (gammaincinv(k_f, sce_cdf) * t_f) / np.maximum(gammaincinv(k_m, sce_cdf) * t_m, EPS))
-        if len(xr) > expected:
-            xv = np.interp(np.linspace(1, len(xr), expected), np.linspace(1, len(xr), len(xr)), xv) if expected else xv[:0]
-        else:
-            xv = np.r_[np.zeros(expected - len(xr)), xv]
-        y = np.zeros(n)
-        if expected:
-            y[np.argsort(x, kind='stable')[-expected:]] = xv
-        out[:, j] = y
+        y = None if s['fallback'][j] else sdm_cell(x, s['k_o'][j], s['t_o'][j], s['k_m'][j], s['t_m'][j], s['fr_o'][j],
+                                                    s['fr_m'][j], s['ri_obs'][j], s['ri_mod'][j], s['wet_threshold'])
+        count(s, 'linear_scaling_fallback', y is None, 1)
+        out[:, j] = x * s['ratio'][j] if y is None else y
     return out
 
 
@@ -390,39 +482,50 @@ BASELINE = Method('raw', 'Raw ECMWF (no correction)', fit_raw, apply_raw, 'basel
 
 METHODS = {m.key: m for m in [
     Method('ls', 'Linear Scaling', fit_ls, apply_ls, 'scaling',
-           "x' = x * mu_obs / mu_model (multiplicative mean correction)", ('Lenderink et al. 2007', 'Teutschbein & Seibert 2012')),
+           "x' = x * mu_obs / mu_model (multiplicative mean correction; ratio 1 where mu_model < 0.1 mm)",
+           ('Lenderink et al. 2007', 'Teutschbein & Seibert 2012')),
     Method('mvs', 'Mean-Variance Scaling (operational)', fit_mvs, apply_mvs, 'scaling',
            "x' = max(0, mu_obs + r (x - mu_model)), r = clip(sd_obs/sd_model, 0.5, 2); r = 1 if sd_model < 1 mm",
            ('Torralba et al. 2017', 'Manzanas et al. 2019'), defaults=dict(ratio_bounds=(0.5, 2.0), min_model_sd=1.0)),
     Method('vs', 'Variance Scaling (unbounded)', fit_mvs, apply_mvs, 'scaling',
-           "Same algebra as MVS without the project's ratio limits: r = sd_obs/sd_model", ('Teutschbein & Seibert 2012',),
-           defaults=dict(ratio_bounds=None, min_model_sd=0.1)),
+           "Same algebra and the same r = 1 fallback (sd_model < 1 mm) as MVS, without the 0.5-2 ratio limits",
+           ('Teutschbein & Seibert 2012',), defaults=dict(ratio_bounds=None, min_model_sd=1.0)),
     Method('sqrt_mvs', 'Square-root-space Mean-Variance Scaling', fit_mvs, apply_mvs, 'scaling',
-           "MVS applied to sqrt(x), clipped at 0 and squared back (docs/36)", ('Manzanas et al. 2019',),
-           defaults=dict(ratio_bounds=(0.5, 2.0), min_model_sd=0.1, space='sqrt')),
+           "MVS applied to sqrt(x) (r limits 0.5-2; r = 1 if the sqrt-space sd < 0.1), clipped at 0 and squared back (docs/36)",
+           ('Manzanas et al. 2019',), defaults=dict(ratio_bounds=(0.5, 2.0), min_model_sd=0.1, space='sqrt')),
     Method('pt', 'Power Transformation', fit_pt, apply_pt, 'scaling',
-           "x' = a x^b, b matches the coefficient of variation, a the mean", ('Leander & Buishand 2007', 'Teutschbein & Seibert 2012')),
+           "x' = a x^b: b (0.1-3) matches the coefficient of variation where reachable (bound hits reported), a the mean",
+           ('Leander & Buishand 2007', 'Teutschbein & Seibert 2012')),
     Method('dc', 'Delta Change', fit_dc, apply_dc, 'change-preserving',
-           "Training-year CHIRPS totals times (forecast ensemble mean / model climatological mean)",
+           "Training-year CHIRPS totals times a = forecast ensemble mean / model mean (a in 0.2-5): historical scenarios, "
+           "not corrected members",
            ('Hay et al. 2000', 'Teutschbein & Seibert 2012'), member_wise=False, uses_forecast_distribution=True),
     Method('loci', 'Local Intensity Scaling', fit_loci, apply_loci, 'scaling',
-           "Model wet threshold with the observed wet frequency, then intensity scaling above it",
+           "Model threshold with the observed frequency of totals above 1 mm, then intensity scaling above it "
+           "(designed for daily rainfall; here monthly or seasonal totals)",
            ('Schmidli et al. 2006',)),
     Method('eqm', 'Empirical Quantile Mapping', fit_eqm, apply_eqm, 'quantile mapping',
-           "x' = Q_obs(F_model(x)), constant-ratio extrapolation", ('Boe et al. 2007', 'Themessl et al. 2011', 'Gudmundsson et al. 2012')),
+           "x' = Q_obs(F_model(x)) with the dry policy; constant-ratio extrapolation outside the training range",
+           ('Boe et al. 2007', 'Themessl et al. 2011', 'Gudmundsson et al. 2012')),
     Method('gqm', 'Gamma Quantile Mapping', fit_gqm, apply_gqm, 'quantile mapping',
-           "x' = G_obs^-1(G_model(x)), mixed dry mass + gamma, weighted maximum likelihood", ('Piani et al. 2010',)),
+           "x' = G_obs^-1(G_model(x)), G = dry mass (<= 1 mm) + gamma by weighted maximum likelihood, with the dry "
+           "policy; linear scaling where fewer than 3 wet values",
+           ('Piani et al. 2010',)),
     Method('dqm', 'Detrended Quantile Mapping', fit_eqm, apply_dqm, 'change-preserving',
-           "EQM of x / a, times a, with a = forecast ensemble mean / model mean", ('Cannon et al. 2015',),
-           uses_forecast_distribution=True),
+           "a * EQM(x / a), a = forecast ensemble mean / model mean (0.2-5): removes and reapplies the bounded ratio; "
+           "exact preservation of the final mean anomaly is not guaranteed",
+           ('Cannon et al. 2015',), uses_forecast_distribution=True),
     Method('qdm', 'Quantile Delta Mapping', fit_eqm, apply_qdm, 'change-preserving',
-           "x' = Q_obs(tau) * x / Q_model(tau), tau = rank of x in the forecast ensemble", ('Cannon et al. 2015',),
-           uses_forecast_distribution=True),
+           "x' = Q_obs(tau) * x / Q_model(tau), tau = rank of x in the forecast ensemble; change capped at 5 and replaced "
+           "by Q_obs(tau) where Q_model(tau) <= 1 mm (both reported), so preservation is partial there",
+           ('Cannon et al. 2015',), uses_forecast_distribution=True),
     Method('sdm', 'Scaled Distribution Mapping', fit_sdm, apply_sdm, 'change-preserving',
-           "Gamma fits to observations, model climatology and forecast ensemble; scaled relative change and rain frequency",
+           "Switanek et al. (2017) precipitation steps 1-7: gamma fits, recurrence intervals interpolated to the "
+           "forecast's length, scaled CDF, rain-member count; model climatology with equal-year weights",
            ('Switanek et al. 2017',), uses_forecast_distribution=True),
     Method('cdft', 'CDF-transform', fit_cdft, apply_cdft, 'change-preserving',
-           "F_obs,f = F_obs(F_model^-1(F_forecast)); x' = F_obs,f^-1(F_forecast(x)); model first scaled to the observed mean",
+           "F_obs,f = F_obs(F_model^-1(F_forecast)); x' = F_obs,f^-1(F_forecast(x)); implementation choices: model and "
+           "forecast first scaled to the CHIRPS mean, values stay within the scaled forecast range",
            ('Michelangeli et al. 2009', 'Vrac et al. 2012'), uses_forecast_distribution=True),
 ]}
 ALL = {'raw': BASELINE, **METHODS}       # benchmark rows: the baseline and the 13 methods

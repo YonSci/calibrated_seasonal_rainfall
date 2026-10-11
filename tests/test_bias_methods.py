@@ -86,6 +86,75 @@ class BiasMethods(unittest.TestCase):
             y = correct(key, models, obs, target)
             self.assertGreater(np.median(y.mean(0) / obs.mean(0)), 1.25, key)
 
+    def test_sdm_follows_the_published_steps(self):
+        """Independent implementation of Switanek et al. (2017) Sect. 4.1.1, steps 1-7 (equal member counts)."""
+        from scipy import stats
+        rng = np.random.default_rng(11)
+        thr, years, n = 1.0, 30, 25
+        obs = np.where(rng.random((years, 2)) < .2, 0., rng.gamma(2., 40., (years, 2)))
+        models = [np.where(rng.random((n, 2)) < .1, 0., rng.gamma(2.5, 60., (n, 2))) for _ in range(years)]
+        target = np.where(rng.random((n, 2)) < .1, 0., rng.gamma(2.5, 75., (n, 2)))
+        got = correct('sdm', models, obs, target, dict(wet_threshold=thr))
+        hist = np.concatenate(models)
+        for j in range(2):
+            o, h, f = obs[:, j], hist[:, j], target[:, j]
+            ow, hw, fw = np.sort(o[o > thr]), np.sort(h[h > thr]), np.sort(f[f > thr])
+            rd_bc = min(int(round(len(fw) * (len(ow) / len(o)) / (len(hw) / len(h)))), len(fw))          # Eq. (1)
+            go, gh, gf = (stats.gamma(*stats.gamma.fit(v, floc=0)) for v in (ow, hw, fw))                    # step 2
+            cdf = lambda g, v: np.minimum(g.cdf(v), 1 - 1e-7)
+            sfr = gf.ppf(cdf(gf, fw)) / gh.ppf(cdf(gf, fw))                                                  # Eq. (3)
+            ri = lambda g, v: 1 / (1 - cdf(g, v))                                                          # Eq. (4)
+            stretch = lambda a: np.interp(np.linspace(1, len(a), len(fw)), np.arange(1, len(a) + 1), a)
+            ri_s = np.maximum(1, stretch(ri(go, ow)) * ri(gf, fw) / stretch(ri(gh, hw)))                    # Eq. (5)
+            bc = go.ppf(np.sort(1 - 1 / ri_s)) * sfr                                                         # Eqs. (6)-(7)
+            bc = np.interp(np.linspace(1, len(fw), rd_bc), np.arange(1, len(fw) + 1), bc)                   # step 6
+            ref = np.zeros(n)
+            ref[np.argsort(np.where(f > thr, f, -np.inf), kind='stable')[-rd_bc:]] = bc                     # step 7
+            np.testing.assert_allclose(got[:, j], ref, rtol=2e-3, atol=.05, err_msg=f'cell {j}')
+
+    def test_dry_share_follows_observations(self):
+        """Review case: 25% of CHIRPS totals and 50% of model totals are 0 mm; the corrected dry share is about 25%."""
+        rng = np.random.default_rng(7)
+        years, n, cells = 40, 51, 3
+        obs = np.where(rng.random((years, cells)) < .25, 0., rng.gamma(2., 30., (years, cells)))
+        models = [np.where(rng.random((n, cells)) < .5, 0., rng.gamma(2., 50., (n, cells))) for _ in range(years)]
+        shares = {k: [] for k in ('eqm', 'gqm', 'dqm', 'qdm')}
+        for _ in range(20):
+            target = np.where(rng.random((n, cells)) < .5, 0., rng.gamma(2., 50., (n, cells)))
+            for key in shares:
+                shares[key].append((correct(key, models, obs, target) <= 1.0).mean())
+        for key, v in shares.items():
+            self.assertAlmostEqual(np.mean(v), .25, delta=.06, msg=key)
+
+    def test_all_dry_and_few_wet_samples(self):
+        rng = np.random.default_rng(3)
+        models = [rng.gamma(2., 20., (25, 2)) for _ in range(24)]
+        target = rng.gamma(2., 20., (25, 2))
+        dry_obs = np.zeros((24, 2))
+        for key in ('eqm', 'gqm', 'dqm', 'qdm', 'sdm', 'ls'):        # MVS keeps r >= 0.5, so it does not (as operational)
+            out = correct(key, models, dry_obs, target)
+            self.assertTrue(np.allclose(out, 0), key)                     # never-wet CHIRPS: corrected totals 0 mm
+        dry_models = [np.zeros((25, 2)) for _ in range(24)]
+        obs = rng.gamma(2., 20., (24, 2))
+        for key in METHODS:
+            out = correct(key, dry_models, obs, np.zeros((25, 2)))
+            self.assertTrue(np.isfinite(out).all() and (out >= 0).all(), key)
+        few = np.zeros((24, 2))
+        few[:2] = 50.                                                    # two wet years only: parametric methods fall back
+        for key in ('gqm', 'sdm'):
+            out = correct(key, models, few, target)
+            self.assertTrue(np.isfinite(out).all(), key)
+
+    def test_diagnostics_are_reported(self):
+        models, obs, rng = synthetic()
+        target = rng.gamma(3., 60., (51, obs.shape[1]))
+        m = METHODS['mvs']
+        s = m.fit(models, obs, **m.defaults)
+        self.assertEqual(set(s['flags']), {'sd_fallback', 'ratio_lower_limit', 'ratio_upper_limit'})
+        m.apply(target, s, **m.defaults)
+        self.assertEqual(s['counts']['clipped_at_zero'][1], 51 * obs.shape[1])
+        self.assertEqual(METHODS['vs'].defaults['min_model_sd'], METHODS['mvs'].defaults['min_model_sd'])
+
     def test_rank_histogram_is_flat_for_a_reliable_ensemble(self):
         """25 members give 26 rank positions; they must not alias onto the 10 histogram bins."""
         import bias_benchmark as bb

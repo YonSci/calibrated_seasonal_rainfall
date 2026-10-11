@@ -198,7 +198,14 @@ class Integration(unittest.TestCase):
         codes = np.array([[1, 0]], 'int8')
         spec = dict(seasonal_rainfall_mm=100, annual_share_percent=20)
         row = dict(included_country_percent=50.0, included_area_km2=700.0)
-        out = runner.domain_dataset(cfg, codes, clim, 'mm100_share20', spec, row, {}, 'test', 'v1')
+        with tempfile.TemporaryDirectory() as tmp:          # a tiny cache fixture: the test must not need the local CHIRPS cache
+            cache = Path(tmp) / 'calendar_cache.nc'
+            xr.Dataset({'monthly_total': (('time', 'lat', 'lon'), np.ones((1, 1, 2)))},
+                       coords=dict(time=[np.datetime64('1993-01-01')], lat=[5.0], lon=[40.0, 40.25]),
+                       attrs=dict(dataset='CHIRPS v3.0 (0.05 deg monthly, test fixture)')).to_netcdf(cache)
+            cfg = dict(cfg, monthly_cache=str(cache))
+            out = runner.domain_dataset(cfg, codes, clim, 'mm100_share20', spec, row, {}, 'test', 'v1')
+            out.load()
         self.assertEqual(out.season_domain.values.tolist(), [[1, 0]])
         self.assertEqual(out.season_share_of_annual.values.tolist(), [[.3, .05]])                    # fraction, not percent
         self.assertEqual(out.attrs['season'], 'FMAM')
