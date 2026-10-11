@@ -135,7 +135,7 @@ class DisplayGrid:
         self.lat = lat[0] + yi*(lat[1]-lat[0])
         self.lon = lon[0] + xi*(lon[1]-lon[0])
 
-    def support(self, mask):
+    def support(self, mask, smooth=False, within=None):
         mask = np.asarray(mask, bool)
         if not mask.any():
             return np.zeros(self.points.shape[1:], bool)
@@ -144,6 +144,18 @@ class DisplayGrid:
         # Padding bounds the signed distance for masks touching a grid edge.
         padded = np.pad(mask, 1, constant_values=False)
         signed = (distance_transform_edt(padded) - distance_transform_edt(~padded))[1:-1, 1:-1]
+        # Display only, for rainfall-domain edges (smooth=True): the same Gaussian as the values rounds the 0.25°
+        # staircase of the mask (a straight edge stays where it is; corners are rounded). The country edge is not
+        # smoothed, because the vector boundary clips it. Statistics use the native mask.
+        sigma = self.settings.get("gaussian_sigma_cells", 0)
+        if smooth and sigma:
+            if within is None:
+                signed = gaussian_filter(signed, sigma, mode="nearest")
+            else:   # average over `within` (the country) only, so the border does not pull the edge inward
+                w = np.asarray(within, float)
+                num = gaussian_filter(signed * w, sigma, mode="nearest")
+                den = gaussian_filter(w, sigma, mode="nearest")
+                signed = np.where(den > 1e-6, num / np.maximum(den, 1e-6), signed)
         return map_coordinates(signed, self.points, order=1, mode="nearest") > 0
 
     def continuous(self, values, valid):
@@ -203,8 +215,8 @@ def finish_axis(ax, grid, lines, domain=None):
 
 
 def footer(fig, settings, verification=False):
-    text = (f"Display interpolation: {settings['interpolation_factor']}×; Gaussian σ={settings['gaussian_sigma_cells']:g} native cells. "
-            "Statistics and exported fields use the original 0.25° grid.\n")
+    text = (f"Display only: {settings['interpolation_factor']}× interpolation; Gaussian σ={settings['gaussian_sigma_cells']:g} native cells "
+            f"(≈{0.25 * settings['gaussian_sigma_cells']:.2f}°, softens the 1° model grid). Statistics and exported fields use the original 0.25° grid.\n")
     text += ("Single-year descriptive verification; observed category codes are not smoothed."
              if verification else f"Research reconstruction of a {CYCLE.init_month_name}-initialized forecast; not an official EMI/ICPAC product.")
     fig.text(.5, .018, text, ha="center", va="bottom", fontsize=8, color="#48535d")
@@ -238,7 +250,7 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
     for view, domain in domains.items():
         folder = out / view
         folder.mkdir()
-        focus = grid.support(domain) & country
+        focus = grid.support(domain, smooth=view != "all_ethiopia", within=domains["all_ethiopia"]) & country
         fig = plt.figure(figsize=(10.6, 8.5))
         gs = fig.add_gridspec(3, 2, width_ratios=[17,1], left=.08,right=.86,bottom=.19,top=.83,hspace=.45,wspace=.14)
         ax = fig.add_subplot(gs[:,0])
@@ -309,7 +321,7 @@ def verification_maps(fields, domains, lines, target, out, settings):
     for view, domain in domains.items():
         folder = out/view
         folder.mkdir()
-        focus = grid.support(domain) & country
+        focus = grid.support(domain, smooth=view != "all_ethiopia", within=domains["all_ethiopia"]) & country
         fig, axes = plt.subplots(2,3,figsize=(15.6,10.6))
         fig.subplots_adjust(left=.055,right=.97,top=.84,bottom=.14,hspace=.29,wspace=.24)
         for ax,(title,key,_,cmap,limit) in zip(axes.flat,definitions):

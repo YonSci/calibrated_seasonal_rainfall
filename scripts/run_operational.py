@@ -95,7 +95,7 @@ def configuration(filename, targets=None):
         cfg[key] = str(path(cfg[key]))
     settings = cfg["display"]
     if (not isinstance(settings["interpolation_factor"],int) or not 1<=settings["interpolation_factor"]<=20 or
-        not 0<=settings["gaussian_sigma_cells"]<=1 or not 1/3<=settings["minimum_leading_probability"]<=1 or
+        not 0<=settings["gaussian_sigma_cells"]<=3 or not 1/3<=settings["minimum_leading_probability"]<=1 or
         not 0<=settings["percent_anomaly_minimum_climatology_mm"]<1000 or
         not 1<=settings["monthly_anomaly_limit_mm"]<=5000 or not 1<=settings["jjas_anomaly_limit_mm"]<=10000 or
         not 72<=settings["dpi"]<=300 or type(settings["pdf"]) is not bool):

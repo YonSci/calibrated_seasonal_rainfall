@@ -264,7 +264,7 @@
   {
     "id": "2026-10-11.1",
     "date": "2026-10-11",
-    "commit": null,
+    "commit": "322d777",
     "title": "CHIRPS v3.0 adopted: every cycle recalibrated and re-verified (2026 forecasts retrospective)",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -288,6 +288,24 @@
       {
         "type": "analysis",
         "text": "The v2.0 vs v3.0 comparison (climatology about 15% wetter with v3.0, seasonal shares and year rankings closely agreeing; calibration skill similar overall) is in Methods and docs/45."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-11.2",
+    "date": "2026-10-11",
+    "commit": null,
+    "title": "Smoother maps (display only)",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Map display smoothing raised from 0.6 to 1.5 native cells (about 0.38 degrees), which softens the 1-degree steps the forecasts inherit from the ECMWF model grid; rainfall-domain edges are smoothed within the country instead of following the 0.25-degree mask cells. Forecast values, statistics, verification and exported files are unchanged (native 0.25-degree grid)."
       }
     ]
   }

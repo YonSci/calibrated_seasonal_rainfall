@@ -16,7 +16,7 @@
   "output_root": "outputs/operational_2026",
   "display": {
     "interpolation_factor": 12,
-    "gaussian_sigma_cells": 0.6,
+    "gaussian_sigma_cells": 1.5,
     "minimum_leading_probability": 0.4,
     "percent_anomaly_minimum_climatology_mm": 10.0,
     "monthly_anomaly_limit_mm": 100.0,

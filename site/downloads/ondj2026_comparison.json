@@ -1105,7 +1105,7 @@
  ],
  "stale": [],
  "rerun": "python scripts\\run_operational.py --config config\\cycles\\sep_2026_ondj.json --workflow products --compare-external",
- "created_utc": "2026-10-10T23:59:05+00:00",
+ "created_utc": "2026-10-11T00:42:26+00:00",
  "engine": "rules v2",
  "reference_layers": [
   {
