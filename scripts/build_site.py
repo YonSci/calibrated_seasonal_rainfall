@@ -537,6 +537,58 @@ def chirps_versions_block():
 </details>''')
 
 
+REFERENCES = [
+    ('Epstein, E. S. (1969). A scoring system for probability forecasts of ranked categories. <em>Journal of Applied Meteorology</em>, 8(6), 985–987.',
+     '10.1175/1520-0450(1969)008<0985:ASSFPF>2.0.CO;2'),
+    ('Funk, C., et al. (2015). The climate hazards infrared precipitation with stations — a new environmental record for monitoring extremes. <em>Scientific Data</em>, 2, 150066.',
+     '10.1038/sdata.2015.66'),
+    ('Funk, C., et al. (2026). The Climate Hazards Center Infrared Precipitation with Stations, Version 3. <em>Scientific Data</em>, 13, 718.',
+     '10.1038/s41597-026-07096-4'),
+    ('Hersbach, H. (2000). Decomposition of the continuous ranked probability score for ensemble prediction systems. <em>Weather and Forecasting</em>, 15(5), 559–570.',
+     '10.1175/1520-0434(2000)015<0559:DOTCRP>2.0.CO;2'),
+    ('Johnson, S. J., et al. (2019). SEAS5: the new ECMWF seasonal forecast system. <em>Geoscientific Model Development</em>, 12, 1087–1117.',
+     '10.5194/gmd-12-1087-2019'),
+    ('Manzanas, R., et al. (2019). Bias adjustment and ensemble recalibration methods for seasonal forecasting: a comprehensive intercomparison using the C3S dataset. <em>Climate Dynamics</em>, 53, 1287–1305.',
+     '10.1007/s00382-019-04640-4'),
+    ('Rajagopalan, B., Lall, U., &amp; Zebiak, S. E. (2002). Categorical climate forecasts through regularization and optimal combination of multiple GCM ensembles. <em>Monthly Weather Review</em>, 130(7), 1792–1811.',
+     '10.1175/1520-0493(2002)130<1792:CCFTRA>2.0.CO;2'),
+    ('Robertson, A. W., Lall, U., Zebiak, S. E., &amp; Goddard, L. (2004). Improved combination of multiple atmospheric GCM ensembles for seasonal prediction. <em>Monthly Weather Review</em>, 132(12), 2732–2744.',
+     '10.1175/MWR2818.1'),
+    ('Teutschbein, C., &amp; Seibert, J. (2012). Bias correction of regional climate model simulations for hydrological climate-change impact studies: review and evaluation of different methods. <em>Journal of Hydrology</em>, 456–457, 12–29.',
+     '10.1016/j.jhydrol.2012.05.052'),
+    ('Torralba, V., et al. (2017). Seasonal climate prediction: a new source of information for the management of wind energy resources. <em>Journal of Applied Meteorology and Climatology</em>, 56(5), 1231–1247.',
+     '10.1175/JAMC-D-16-0204.1'),
+    ('Wilks, D. S. (2019). <em>Statistical Methods in the Atmospheric Sciences</em> (4th ed.). Elsevier.', None),
+]
+
+
+def references_block():
+    """Methods: which published methods each step follows, and the references (docs/46)."""
+    refs = ''.join(f'<li>{text}' + (f' <a href="https://doi.org/{html.escape(doi)}">doi:{html.escape(doi)}</a>' if doi else '') + '</li>'
+                   for text, doi in REFERENCES)
+    return f'''<details><summary>Method and references</summary>
+    <p><strong>Rainfall amounts</strong> are corrected cell by cell with <em>mean–variance scaling</em> (also called simple bias
+    adjustment or variance scaling; Teutschbein &amp; Seibert 2012; Torralba et al. 2017; Manzanas et al. 2019): each member is
+    shifted to the CHIRPS mean and its anomaly rescaled by the ratio of CHIRPS to model standard deviation (equations above).
+    It corrects the mean and spread, not the shape of the distribution; it is not quantile mapping. The model mean and spread
+    are pooled over all members and years, with equal weight per year (25 members to 2016, 51 from 2017); training years
+    1993–2025.</p>
+    <p><strong>Probabilities</strong> are the share of corrected members in each CHIRPS tercile (ensemble relative frequency;
+    Wilks 2019), smoothed so no category is 0 or 1, then blended with climatology. Weighting a model against climatology
+    follows Rajagopalan et al. (2002) and Robertson et al. (2004); here one weight per target is fitted by minimising the
+    ranked probability score of leave-one-year-out probabilities.</p>
+    <p><strong>Scores</strong>: ranked probability score (Epstein 1969) and continuous ranked probability score (Hersbach 2000),
+    as skill scores against climatology. Forecasts: ECMWF SEAS5 (Johnson et al. 2019); observations: CHIRPS v3.0
+    (Funk et al. 2026), v2.0 before 11 October 2026 (Funk et al. 2015).</p>
+    <p class="caveat">Choices of this project, not taken from a single paper: the 0.5–2 limits on the spread ratio, mean-only
+    correction where the model spread is below 1 mm, clipping at 0 mm (its weakness in dry months, issue I-08), equal
+    weighting of years, the count smoothing and one blend weight shared by all cells. A square-root-space amount correction
+    passed the gate for amounts and is recommended for the next cycle (docs/36). Details: docs/46. DOIs checked on Crossref,
+    11 October 2026.</p>
+    <ol class="refs">{refs}</ol>
+  </details>'''
+
+
 def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None):
     gates, ens, mono, clip, raw = (ev[k] for k in ('gates', 'ens', 'mono', 'clip', 'raw'))
     raw_rpss = raw.get('raw_rps_skill')
@@ -765,6 +817,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None)
         <code>p<sub>climatology</sub></code> is, for each grid cell, the observed frequency of each tercile in the training reference years (about one-third each; it differs slightly because of sample size, category limits and ties).</li>
       <li><strong>Skill score</strong>: <code>RPSS = 1 − RPS<sub>forecast</sub> / RPS<sub>climatology</sub></code>; RPSS +0.05 means a 5% lower ranked probability score than climatology. CRPSS is the same for rainfall amounts.</li>
     </ol></details>
+  {references_block()}
   <details><summary>How the method was chosen</summary>
     <p>A change is adopted only if it improves the cross-validated 1993–2016 scores (Holm-adjusted p &lt; 0.05 over the five JJAS targets) and does not worsen 2017–2025. Also evaluated and not adopted: regularized Dirichlet recalibration and per-cell or regime-specific blend weights.</p>
     {gate}</details>
