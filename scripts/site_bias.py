@@ -839,7 +839,7 @@ def block(bench, files):
 
   <h3>Interpretation <span class="caveat">— national aggregate ({esc(V.national)})</span></h3>
   <ol class="findings">{''.join(f'<li>{t}</li>' for t in shown)}</ol>
-  {f'<p class="caveat">{withheld} statement(s) of the written interpretation no longer hold for the current results and are not shown.</p>' if withheld else ''}
+  {f'<p class="caveat">{withheld} of the {len(found)} interpretation statements do not hold for this cycle’s results and are not shown (each is checked against the numbers before it is displayed).</p>' if withheld else ''}
   <details><summary>Caveats</summary><ul class="findings">
     <li>Screening skill is from {V.tr} leave-one-year-out (clean) and {V.te} (exploratory: these years were seen while the operational method was chosen).</li>
     <li>Screening tercile scores use smoothed member counts <strong>without</strong> the climatology blend; the confirmation scores the blended product.</li>
@@ -890,9 +890,11 @@ def section(blocks):
         import re
         title = lambda h: re.search(r'<h3>(.*?)</h3>', h).group(1)
         picker = ('<div class="map-controls"><label>Forecast cycle <select id="bc-bench">' +
-                  ''.join(f'<option value="{esc(n)}">{title(h)}</option>' for n, h in blocks) + '</select></label>'
+                  ''.join(f'<option value="{esc(n)}"{" selected" if i == len(blocks) - 1 else ""}>{title(h)}</option>'
+                          for i, (n, h) in enumerate(blocks)) + '</select></label>'
                   '<span class="caveat">Each cycle has its own benchmark (initialization, season and months).</span></div>')
-    body = ''.join(h if i == 0 else h.replace('<div class="bc"', '<div class="bc" hidden', 1) for i, (_, h) in enumerate(blocks))
+    last = len(blocks) - 1                                 # the latest initialization is shown first, as the site's default cycle
+    body = ''.join(h if i == last else h.replace('<div class="bc"', '<div class="bc" hidden', 1) for i, (_, h) in enumerate(blocks))
     return f'''<section id="bias" class="wrap">
   <h2>Bias correction</h2>
   <p>How the model’s rainfall amounts are corrected toward CHIRPS, and how alternative bias-correction methods compare with the

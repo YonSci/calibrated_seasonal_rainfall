@@ -1,4 +1,7 @@
-# 47 — Rainfall bias-correction benchmark (September initialization, ONDJ)
+# 47 — Rainfall bias-correction benchmark (all cycles; September ONDJ in detail)
+
+Sections 1–6 describe the protocol and the September-initialized ONDJ results in detail; section 7 gives the results of the
+same benchmark for the May (JJAS), January (FMAM) and February (FMAM) cycles.
 
 Purpose: compare 13 rainfall-amount bias-correction methods with the operational one, member by member, for every 0.25° cell of
 Ethiopia and every target (October, November, December, January and the ONDJ season), in two stages:
@@ -23,7 +26,7 @@ python scripts\bias_confirmation.py --config config\bias_correction\sep_ondj.jso
 ```
 
 Revision 3 (11 October 2026; code at commit 1278483) answers the review of revision 2 (commits 007ce47 / 1e59fea);
-revision 2 answered the review of revision 1 (e252baa). The changes are listed in section 7.
+revision 2 answered the review of revision 1 (e252baa). The changes are listed in section 8.
 
 ## 1. Common rules
 
@@ -611,7 +614,51 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 * Run the same screening and confirmation for JJAS (May) and FMAM (January, February) before any cross-cycle decision; one
   configuration file each.
 
-## 7. Changes
+## 7. All cycles
+
+The same configuration and protocol (`config/bias_correction/may_jjas.json`, `jan_fmam.json`, `feb_fmam.json`; screening and
+confirmation, 13 declared methods plus the all-zero guard variant) for the other cycles: training 1993–2016, test 2017–2025
+(one more test year than ONDJ), forecast 2026; the second region is each season's domain (JJAS R1+R2, FMAM rainfall
+contribution domain). Run at commit 9f39792 (clean tree); ONDJ at bed63b9. National aggregate (all Ethiopia) throughout.
+Full numbers: `outputs/bias_correction_benchmark/<cycle>/` and the site's Bias correction section (cycle picker).
+
+| Cycle | Published tercile probabilities: confirmed better than MVS | Amounts: fixed methods confirmed | Amounts: SEL-A confirmed (method chosen) |
+| --- | --- | --- | --- |
+| January · FMAM | none | none | Feb (square-root MVS in 24/24 folds; Δ CRPS −0.275 mm, Holm p 0.022; 2017–2025 −0.109) |
+| February · FMAM | **Feb: square-root MVS** (blended RPSS +0.207 vs +0.126, better in 18 of 24 years, Holm p 0.026 across all methods and targets; 2017–2025 +0.072 vs +0.056, 6 of 9 years); SEL-P also confirmed for Feb | none | Feb (square-root MVS 24/24; −0.184 mm, p 0.013) and Mar (square-root MVS 24/24; −0.341 mm, p 0.045) |
+| May · JJAS | none | Jul: VS (−0.139 mm). Aug: VS (−0.129), Gamma QM (−0.128), PT (−0.124), square-root MVS (−0.096); Holm p ≤ 0.002 | Jun (Gamma QM 24/24; −0.131 mm, p 0.029), Aug (VS 16, Gamma QM 6, PT 2), Sep (Gamma QM 24/24; −0.072 mm, p 0.007) |
+| September · ONDJ | none | Jan: square-root MVS (−0.479), Gamma QM (−0.365) | Jan (square-root MVS 24/24) |
+
+### Findings across cycles
+
+1. **Published probabilities: MVS is not significantly beaten in any cycle except one month.** For the first month of the
+   February-initialized cycle (February, lead 0, where the forecast has its highest skill), square-root MVS is confirmed
+   better after the blend and the whole method search, and the selection-aware SEL-P (which picks it in every fold) is
+   confirmed too. The blend trusts the better-corrected members more (mean λ 0.30 against 0.48). The 2017–2025 gain is
+   smaller (+0.016 RPSS) than the 1993–2016 gain (+0.081).
+2. **Amount gains are month-specific:** ONDJ January, FMAM February (both initializations) and March (February
+   initialization), and JJAS June to September. They come mostly from cells wet in every training year — e.g. VS in JJAS
+   August, −0.103 of −0.129 mm from the always-wet cells (95 % of the area) — and no cell of Ethiopia has 0 mm in every
+   training year for any target of any cycle, so the MVS all-zero guard never acts.
+3. **The 0.5–2 ratio limits of MVS are the part most worth revisiting.** In JJAS July and August the lower limit (r ≥ 0.5)
+   is active over 32 % and 28 % of the area — where the model is far more variable than CHIRPS — and unbounded VS (same
+   fallback) is confirmed better in both months; in ONDJ January it was the upper limit (r ≤ 2, 28 % of the area).
+4. **Square-root MVS is the most frequent winner but not uniformly better:** it is slightly worse than MVS in May of both
+   FMAM cycles over 2017–2025 (≤ 0.015 blended RPSS) and within ±0.002 in several JJAS comparisons.
+5. **Selection by training scores again picks Delta Change for some season totals** (January FMAM: 21 of 24 folds; ONDJ:
+   24) and JJAS July (14 folds); none of these choices is confirmed.
+
+### What the evidence supports across cycles
+
+* Keep MVS for the published tercile probabilities in every cycle. The one exception supported by the evidence is a
+  **pilot of square-root MVS for the February target of the February-initialized cycle**.
+* Amount-only pilots per target where a method is confirmed: square-root MVS for ONDJ January and FMAM February–March;
+  VS or Gamma QM for JJAS June–September. Confirmations establish improvement against MVS, not a ranking among candidates.
+* Consider revising the MVS ratio limits (a single operational change that addresses both the JJAS and the ONDJ January
+  findings), and evaluate that change with the same screening and confirmation before adoption.
+* Record the correction method per product and target in the metadata if amounts and probabilities diverge.
+
+## 8. Changes
 
 ### Revision 3 (response to the review of 007ce47 / 1e59fea)
 

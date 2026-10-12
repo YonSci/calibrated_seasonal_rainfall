@@ -392,7 +392,7 @@
   {
     "id": "2026-10-12.1",
     "date": "2026-10-12",
-    "commit": null,
+    "commit": "a9ddb40",
     "title": "Bias correction: review revision 3 (downloads, reproducibility, edge cases)",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -412,6 +412,24 @@
       {
         "type": "analysis",
         "text": "January amounts: the gains of square-root MVS and Gamma QM come almost entirely from cells that are wet in every training year; no cell of Ethiopia has 0 mm in every training year, so an all-zero guard for MVS (evaluated as a variant) never acts. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-12.2",
+    "date": "2026-10-12",
+    "commit": null,
+    "title": "Bias correction: all four cycles",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "The bias-correction screening and confirmation now cover all cycles (January and February FMAM, May JJAS, September ONDJ), with a cycle picker in the Bias correction section. Published probabilities: MVS is not significantly beaten except for February in the February-initialized cycle, where square-root MVS is confirmed better. Amount gains are month-specific (ONDJ January, FMAM February-March, JJAS June-September). The published forecasts are unchanged."
       }
     ]
   }
