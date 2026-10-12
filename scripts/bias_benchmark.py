@@ -52,7 +52,7 @@ if ARGS is not None:                       # member counts and cycle settings co
 
 import xarray as xr                                                          # noqa: E402
 from common import ROOT, load_config, save_json, save_netcdf, source_path    # noqa: E402
-from bias_methods import ALL as METHODS                                     # noqa: E402
+from bias_methods import ALL as METHODS, resolve                                     # noqa: E402
 from calibration_core import categories                                     # noqa: E402
 from run_calibration import load_inputs, cell_area                          # noqa: E402
 from run_monthly import monthly_config                                      # noqa: E402
@@ -206,9 +206,16 @@ def dependency_key(dep, target=None):
     return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()
 
 
-def provenance(cfg, project, targets, config_path, dep=None):
+def dependency_files(dep, extra=()):
+    """The tracked files a result depends on (code and configurations), for the uncommitted-changes check."""
+    return sorted({*dep['code_sha256'], dep['config']['path'], dep['project_config']['path'], dep['cycle_config']['path'], *extra})
+
+
+def provenance(cfg, project, targets, config_path, dep=None, extra=()):
     dep = dep or dependencies(cfg, project, targets, config_path)
-    return dict(commit=git('rev-parse', 'HEAD'), uncommitted_changes=bool(git('status', '--porcelain', '--', 'scripts', 'config')),
+    files = dependency_files(dep, extra)
+    return dict(commit=git('rev-parse', 'HEAD'), uncommitted_changes=bool(git('status', '--porcelain', '--', *files)),
+                uncommitted_check='code and configuration files this result depends on',
                 **dep, dependency_sha256=dependency_key(dep), python=sys.version.split()[0], numpy=np.__version__)
 
 
@@ -216,8 +223,7 @@ def provenance(cfg, project, targets, config_path, dep=None):
 
 def run_design(method, params, models, obs, folds, alpha, threshold, area):
     """folds: [(training years, scored years)]. Per-year cell scores, the corrected ensembles and the diagnostics."""
-    m = METHODS[method]
-    p = {**m.defaults, **params}
+    m, p = resolve(method, params)
     scores, ensembles = {}, {}
     flags, counts = {}, {}
     for train, scored in folds:
@@ -432,8 +438,7 @@ def run_target(config_path, target, methods):
                         correlation=cell_correlation(np.array([scores[y]['mean'] for y in all_years]),
                                                      np.array([scores[y]['obs'] for y in all_years])),
                         **{k: np.where(ok, v, np.nan) for k, v in dist.items()})
-        m = METHODS[method]                     # forecast: fit on all observed years, correct the forecast-year members
-        p = {**m.defaults, **params}
+        m, p = resolve(method, params)          # forecast: fit on all observed years, correct the forecast-year members
         state = m.fit([models[y] for y in all_years], np.stack([obs[y] for y in all_years]), **p)
         fc = np.asarray(m.apply(models[cfg['forecast_year']], state, **p), float)
         fc[:, ~state['ok']] = np.nan
@@ -465,11 +470,12 @@ def gate_rule(cfg):
             f"A screening pass is not an operational adoption decision (see the confirmation run).")
 
 
-def make_gates(results, methods, ref, region, targets):
+def make_gates(results, methods, ref, region, targets, cfg_methods=None):
     """Within-method and family-wide Holm screening, per score."""
     gates = {}
-    cand = [m for m in methods if m != ref and METHODS[m].family != 'baseline']
-    declared = [m for m in cand if METHODS[m].family != 'variant']     # variants stay outside the family-wide correction
+    family_of = {m: resolve(m, (cfg_methods or {}).get(m))[0].family for m in methods}
+    cand = [m for m in methods if m != ref and family_of[m] != 'baseline']
+    declared = [m for m in cand if family_of[m] != 'variant']         # variants stay outside the family-wide correction
     for score in GATE_SCORES:
         stats = {}
         for method in cand:
@@ -536,15 +542,15 @@ def main(args):
     for t in targets:
         _, result, maps_t, forecast_t, lat, lon, cells = done[t]
         results[t], cell_maps[t], forecasts[t] = result, maps_t, forecast_t
-    gates = make_gates(results, methods, ref, cfg['primary_region'], targets)
+    gates = make_gates(results, methods, ref, cfg['primary_region'], targets, cfg['methods'])
     out_root.mkdir(parents=True, exist_ok=True)
     meta = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=cfg,
                 provenance=provenance(cfg, project, targets, args.config, dep),
                 protocol=__doc__.strip(), gate_rule=gate_rule(cfg),
-                methods={k: dict(label=METHODS[k].label, family=METHODS[k].family, definition=METHODS[k].definition,
-                                 references=METHODS[k].references, member_wise=METHODS[k].member_wise,
-                                 uses_forecast_distribution=METHODS[k].uses_forecast_distribution,
-                                 parameters={**METHODS[k].defaults, **cfg['methods'].get(k, {})}) for k in methods})
+                methods={k: dict(label=m.label, family=m.family, definition=m.definition, references=m.references,
+                                 member_wise=m.member_wise, uses_forecast_distribution=m.uses_forecast_distribution,
+                                 parameters=p, base=cfg['methods'].get(k, {}).get('base'))
+                         for k in methods for m, p in [resolve(k, cfg['methods'].get(k))]})
     save_json(out_root / 'benchmark.json', dict(**meta, targets=results, gates=gates))
     save_cells(out_root / 'cell_scores_full_loyo.nc', cell_maps, lat, lon, methods, targets, cells)
     save_forecast(out_root / f"forecast_{cfg['forecast_year']}_members.nc", forecasts, lat, lon, methods, targets, cfg)
@@ -579,7 +585,7 @@ def save_cells(path, cell_maps, lat, lon, methods, targets, cells):
 
 def save_forecast(path, forecasts, lat, lon, methods, targets, cfg):
     shape = (len(lat), len(lon))
-    member_wise = [m for m in methods if METHODS[m].member_wise and m != 'raw']
+    member_wise = [m for m in methods if resolve(m, cfg['methods'].get(m))[0].member_wise and m != 'raw']
     n = max(len(forecasts[t]['_raw']) for t in targets)
     d = xr.Dataset(coords=dict(method=member_wise, target=targets, member=np.arange(n), lat=lat, lon=lon),
                    attrs=dict(description=f"{cfg['forecast_year']} forecast members corrected by every method, fitted on "

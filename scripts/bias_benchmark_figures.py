@@ -4,15 +4,18 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt                       # noqa: E402
 from matplotlib.colors import TwoSlopeNorm            # noqa: E402
-from bias_methods import ALL as METHODS                      # noqa: E402
+from bias_methods import ALL as METHODS, resolve                      # noqa: E402
 
 DPI = 150
+
+
+LABELS = {}                                    # labels of configured variants (set from the configuration)
 
 
 def label(m):
     if m in ('_raw', 'raw'):
         return 'Raw ECMWF'
-    return METHODS[m].label.replace(' (operational)', '*').replace('Square-root-space ', 'Sqrt ')
+    return LABELS.get(m, METHODS[m].label if m in METHODS else m).replace(' (operational)', '*').replace('Square-root-space ', 'Sqrt ')
 
 
 def to_grid(values, idx, lat, lon):
@@ -167,6 +170,7 @@ def members_panel(path, forecasts, methods, target, lat, lon, cfg):
 
 
 def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targets, cfg):
+    LABELS.update({k: resolve(k, v)[0].label for k, v in cfg['methods'].items()})
     import xarray as xr
     from common import source_path
     region = cfg['primary_region']
@@ -205,6 +209,7 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
 # ---------------------------------------------------------------- confirmation (scripts/bias_confirmation.py)
 
 def confirmation_figures(out, data, cfg):
+    LABELS.update({k: resolve(k, v)[0].label for k, v in cfg['methods'].items()})
     fig_dir = out / 'figures'
     fig_dir.mkdir(parents=True, exist_ok=True)
     targets = list(data['targets'])

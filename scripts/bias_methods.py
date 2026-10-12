@@ -27,7 +27,7 @@ Methods that keep a "change signal" (DC, DQM, QDM, SDM, CDF-t) were built for cl
 future period). Here the "future" is the forecast itself: the target year's ensemble against the model
 climatology of the training years.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import numpy as np
 from scipy.special import digamma, polygamma, gammainc, gammaincinv
 
@@ -548,6 +548,26 @@ VARIANTS = {m.key: m for m in [
            defaults=dict(ratio_bounds=(0.5, 2.0), min_model_sd=1.0, zero_guard=True)),
 ]}
 ALL = {'raw': BASELINE, **METHODS, **VARIANTS}       # benchmark rows: the baseline, the 13 methods and the variants
+
+
+META_KEYS = ('base', 'label', 'family', 'definition')
+
+
+def resolve(key, entry=None):
+    """The method of a configuration entry and its parameters.
+
+    An entry is either parameters of a registry method, or a configured variant of one:
+    {"base": "mvs", "label": "...", "family": "...", <parameters>} (e.g. MVS with other ratio limits).
+    """
+    entry = dict(entry or {})
+    params = {k: v for k, v in entry.items() if k not in META_KEYS}
+    if 'base' not in entry:
+        m = ALL[key]
+        return m, {**m.defaults, **params}
+    base = ALL[entry['base']]
+    m = replace(base, key=key, label=entry.get('label', f'{base.label} ({key})'), family=entry.get('family', base.family),
+                definition=entry.get('definition', f'{base.definition}; parameters {params}'), defaults={**base.defaults, **params})
+    return m, dict(m.defaults)
 
 
 def correct(key, models, obs, members, params=None):

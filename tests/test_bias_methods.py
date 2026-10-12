@@ -29,6 +29,16 @@ class BiasMethods(unittest.TestCase):
         np.testing.assert_array_equal(correct('raw', models, obs, target), target)
         self.assertEqual(set(ALL) - set(METHODS), {'raw'} | set(VARIANTS))
 
+    def test_configured_variants_resolve_to_their_base(self):
+        from bias_methods import resolve
+        m, p = resolve('mvs_r3', {'base': 'mvs', 'ratio_bounds': [1 / 3, 3.0], 'label': 'MVS, ratio limits 1/3-3', 'family': 'scaling'})
+        self.assertEqual((m.key, m.label, m.family, p['ratio_bounds'], p['min_model_sd']), ('mvs_r3', 'MVS, ratio limits 1/3-3', 'scaling', [1 / 3, 3.0], 1.0))
+        models, obs, rng = synthetic()
+        target = rng.gamma(3., 60., (51, obs.shape[1]))
+        np.testing.assert_allclose(m.apply(target, m.fit(models, obs, **p), **p),
+                                   correct('mvs', models, obs, target, dict(ratio_bounds=(1 / 3, 3.0))))
+        self.assertEqual(resolve('mvs', {'ratio_bounds': [0.5, 2.0]})[0].key, 'mvs')
+
     def test_operational_mvs_matches_calibration_core(self):
         models, obs, rng = synthetic()
         target = rng.gamma(3., 60., (51, obs.shape[1]))

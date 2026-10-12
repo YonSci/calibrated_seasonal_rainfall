@@ -49,7 +49,7 @@ if ARGS is not None:
     os.environ.setdefault('CALIBRATION_CYCLE', json.loads((ROOT_DIR / ARGS.config).read_text(encoding='utf-8'))['cycle'])
 
 from common import ROOT, load_config, save_json                              # noqa: E402
-from bias_methods import ALL as METHODS                                     # noqa: E402
+from bias_methods import resolve                                     # noqa: E402
 from calibration_core import fit_amount, categories, labels                 # noqa: E402
 from compare_calibration import smooth                                      # noqa: E402
 from local_blend import fit_weights                                         # noqa: E402
@@ -62,7 +62,7 @@ class Pipeline:
     """One amount method through the probability pipeline, with every fit cached by its excluded years."""
 
     def __init__(self, method, params, models, obs, train, alpha, regions=None, area=None):
-        self.m, self.p = METHODS[method], {**METHODS[method].defaults, **params}
+        self.m, self.p = resolve(method, params)
         self.models, self.obs, self.train, self.alpha = models, obs, train, alpha
         self.regions, self.area = regions or {}, area
         self.cache = {}

@@ -1,0 +1,7 @@
+{
+  "description": "Shadow pilot of square-root-space MVS for the February target of the February-initialized FMAM cycle (the one target where it is confirmed better for the published probabilities). Not an operational product.",
+  "benchmark_config": "config/bias_correction/feb_fmam.json",
+  "methods": ["mvs", "sqrt_mvs"],
+  "targets": ["Feb"],
+  "output_root": "outputs/bias_correction_benchmark/feb_fmam/pilot"
+}
