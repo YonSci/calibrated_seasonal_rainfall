@@ -699,7 +699,7 @@ def findings(V):
                 shares = [g[k]['area_share'] for k in GROUP_KEYS]
                 parts.append(f'{esc(L(m))} in {esc(t)} (Δ CRPS {tot:+.3f} mm): ' + ', '.join(
                     f'{GROUP_SHORT[i]} {vals[i]:+.3f} mm ({pct(vals[i] / tot if tot else np.nan)}; {pct(shares[i])} of the area)'
-                    for i in range(4)))
+                    for i in range(4) if shares[i] > 0))
             return ('<strong>Where the confirmed amount gains come from</strong> (climate groups from each fold’s training years; '
                     'contributions add up to the national difference from ' + esc(L(ref)) + '): ' + '; '.join(parts) + '.')
         add(lambda: bool(dry_part()), dry_text)
@@ -710,6 +710,12 @@ def findings(V):
                 g = {t: V.d['targets'][t]['dry_groups']['training'][V.primary].get('mvs_zero_guard') for t in V.targets
                      if 'dry_groups' in V.d['targets'][t]}
                 where = [t for t, x in g.items() if x and x[GROUP_KEYS[0]]['area_share'] > 0]
+                if not where:
+                    return (f'<strong>No cell of {esc(V.national)} has exactly 0 mm in every training year</strong>, for any target, '
+                            f'at 0.25° with CHIRPS. The all-zero guard (a separate MVS variant, outside the declared family) therefore '
+                            f'never acts and equals {esc(L(ref))}: the non-zero totals that {esc(L(ref))} gives where every training '
+                            'year is 0 mm (its spread ratio cannot fall below 0.5) do not arise in these data. The guard remains a '
+                            'documented option; a finite history of zero rainfall does not make rain impossible.')
                 areas = [t + ' ' + pct(g[t][GROUP_KEYS[0]]['area_share'], 1) + ' of the area' for t in where]
                 deltas = [esc(t) + ' ' + format(g[t]['total_delta_crps_mm'], '+.3f') + ' mm' for t in where]
                 return (f'<strong>The all-zero guard</strong> (a separate MVS variant, outside the declared family) changes MVS only where '

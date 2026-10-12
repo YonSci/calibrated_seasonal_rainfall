@@ -366,7 +366,7 @@
   {
     "id": "2026-10-11.6",
     "date": "2026-10-11",
-    "commit": null,
+    "commit": "1e59fea",
     "title": "Bias correction: review revision (screening, confirmation, method fixes)",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -386,6 +386,32 @@
       {
         "type": "display",
         "text": "Ordinary CRPS is the primary amount score (fair CRPS as a diagnostic); coverage, dry shares and run provenance added; the region switch is labelled as applying to the result tables, and the summary, interpretation and figures as national. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-12.1",
+    "date": "2026-10-12",
+    "commit": null,
+    "title": "Bias correction: review revision 3 (downloads, reproducibility, edge cases)",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Bias correction downloads: the per-cell scores and corrected forecast members (NetCDF) are now published; the site build checks that every advertised download and asset is deployable."
+      },
+      {
+        "type": "analysis",
+        "text": "Reproducible reruns: one dependency fingerprint (configurations, masks, inputs, calculation code) validates checkpoints and is recorded as provenance. Fixes: configured smoothing in the confirmation, dry rule after EQM/DQM extrapolation, SDM rank order; results unchanged at the reported precision."
+      },
+      {
+        "type": "analysis",
+        "text": "January amounts: the gains of square-root MVS and Gamma QM come almost entirely from cells that are wet in every training year; no cell of Ethiopia has 0 mm in every training year, so an all-zero guard for MVS (evaluated as a variant) never acts. The published forecasts are unchanged."
       }
     ]
   }

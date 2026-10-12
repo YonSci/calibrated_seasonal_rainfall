@@ -22,7 +22,8 @@ python scripts\bias_benchmark.py --config config\bias_correction\sep_ondj.json  
 python scripts\bias_confirmation.py --config config\bias_correction\sep_ondj.json     (confirmation; resumes from checkpoints)
 ```
 
-Revision 2 (11 October 2026) answers an external review of revision 1 (commit e252baa); the changes are listed in section 7.
+Revision 3 (11 October 2026; code at commit 1278483) answers the review of revision 2 (commits 007ce47 / 1e59fea);
+revision 2 answered the review of revision 1 (e252baa). The changes are listed in section 7.
 
 ## 1. Common rules
 
@@ -35,8 +36,8 @@ Revision 2 (11 October 2026) answers an external review of revision 1 (commit e2
 * **Dry totals and ties:** a total ≤ 1 mm in the month or season is "dry" (not a dry day); exactly 0 mm is reported
   separately. For the quantile-mapping methods (EQM, Gamma QM, DQM, QDM) the dry shares of the model climatology and of
   CHIRPS are estimated with the equal-year weights; a forecast's dry members are spread evenly over the model's dry
-  probability by rank (ties by member order — the expected value of random tie-breaking), and a probability within the
-  CHIRPS dry share maps to 0 mm. Without this, tied zeros share one probability and the corrected dry share does not follow
+  probability by rank (deterministic stratified tie-breaking, with ties resolved by member index), and a probability within
+  the CHIRPS dry share maps to 0 mm — also after any extrapolation of the upper tail (revision 3). Without this, tied zeros share one probability and the corrected dry share does not follow
   CHIRPS (in the review's example, 25 % CHIRPS zeros and 50 % model zeros gave 0 % corrected zeros). CDF-t, LOCI and the
   scaling methods have no occurrence adjustment; SDM uses its own rain-member rule.
 * **Diagnostics:** every method reports how often its limits, caps and fallbacks act (share of the corrected area for
@@ -64,6 +65,12 @@ Revision 2 (11 October 2026) answers an external review of revision 1 (commit e2
 
 Baseline (`raw`): the uncorrected ECMWF members, scored with the same rules but not screened.
 
+Variant (`mvs_zero_guard`, revision 3): operational MVS, but corrected totals are 0 mm where every training year has exactly
+0 mm. Without it, MVS returns positive totals there because its spread ratio cannot fall below 0.5 (CHIRPS always 0 mm and
+members 0, 0, 20, 40 mm give 0, 0, 2.5, 12.5 mm). It is a documented modelling choice — a finite history of zero rainfall does
+not make rain impossible — screened against MVS within method, outside the declared family, and never selected by SEL-P or
+SEL-A.
+
 ## 3. Screening (`bias_benchmark.py`)
 
 | Design | Fits | Scored | Role |
@@ -84,11 +91,17 @@ Baseline (`raw`): the uncorrected ECMWF members, scored with the same rules but 
 * **Distribution and dry shares:** pooled out-of-fold corrected members (equal-year weights) against CHIRPS of the same
   years — mean, standard deviation, 10th/50th/90th percentiles (area-weighted medians of cell ratios), shares at exactly
   0 mm and ≤ 1 mm.
-* **Coverage:** cells and area share scored for amounts and for probabilities (tercile scores need three distinct limits).
+* **Coverage:** cells and area share scored for amounts and for probabilities (tercile scores need two distinct tercile
+  boundaries defining three categories, a CHIRPS standard deviation of at least 1 mm and a lower boundary above 0 mm).
+* **Climate groups (revision 3):** each cell is grouped by its CHIRPS totals in the fold's training years only — every year
+  exactly 0 mm; every year ≤ 1 mm; mixed dry and wet years; never dry — and the area-weighted CRPS difference from MVS is
+  split by group (the parts add up to the national difference).
 * **Screening rule:** per target and score (CRPS, fair CRPS, RPS), one-sided sign-flip test on the 1993–2016 per-year scores
   against MVS and no harm over 2017–2024. Two multiplicity families: **within one method** across its 5 targets
   (`screen_pass`, ✓) and **across all 12 methods × 5 targets** (`screen_pass_family`, ✓✓). A pass is screening evidence, not
   an adoption decision; the field is no longer called `adopt`.
+* **Variants:** sensitivity variants (the MVS all-zero guard) are scored and screened within method, outside the declared
+  family: they do not enter the family-wide correction and are never chosen by the selection-aware procedures.
 * **Provenance:** `benchmark.json` records the commit (and whether the working tree had changes), SHA-256 of the code, the
   configuration, the masks and every input file (one digest per target), the scoring version and the software versions;
   `manifest.json` lists the SHA-256 of every output file.
@@ -136,6 +149,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | +0.010 | +0.076 | +0.014 | -0.027 | +0.075 |
 | Scaled Distribution Mapping | -0.002 | +0.068 | -0.021 | -0.216 | +0.061 |
 | CDF-transform | +0.002 | +0.073 | -0.019 | -0.108 | +0.074 |
+| MVS with all-zero guard (variant) | -0.002 | +0.084 | +0.028 | -0.048 | +0.070 |
 
 **Amount skill, CRPSS, fit 1993–2016, scored 2017–2024 (exploratory)**
 
@@ -155,6 +169,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | +0.036 | +0.123 | -0.043 | +0.032 | +0.118 |
 | Scaled Distribution Mapping | +0.025 | +0.103 | -0.055 | -0.184 | +0.108 |
 | CDF-transform | +0.030 | +0.120 | -0.097 | -0.151 | +0.118 |
+| MVS with all-zero guard (variant) | +0.059 | +0.158 | -0.033 | -0.078 | +0.178 |
 
 **Fair CRPSS (diagnostic), 1993–2016**
 
@@ -174,6 +189,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | +0.005 | +0.074 | +0.010 | -0.030 | +0.071 |
 | Scaled Distribution Mapping | -0.013 | +0.059 | -0.035 | -0.240 | +0.052 |
 | CDF-transform | -0.009 | +0.067 | -0.026 | -0.117 | +0.065 |
+| MVS with all-zero guard (variant) | -0.009 | +0.082 | +0.023 | -0.066 | +0.066 |
 
 **Tercile skill, RPSS of smoothed member counts (no blend), 1993–2016**
 
@@ -193,6 +209,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | -0.015 | +0.020 | -0.116 | -0.074 | +0.009 |
 | Scaled Distribution Mapping | -0.025 | +0.018 | -0.192 | -0.321 | -0.005 |
 | CDF-transform | -0.026 | +0.010 | -0.241 | -0.254 | +0.011 |
+| MVS with all-zero guard (variant) | -0.009 | +0.044 | -0.068 | -0.213 | +0.035 |
 
 **Spread–error ratio, 1993–2016 (1 = spread matches the error)**
 
@@ -212,6 +229,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | 0.99 | 1.07 | 1.08 | 1.20 | 1.04 |
 | Scaled Distribution Mapping | 0.81 | 0.87 | 0.81 | 0.75 | 0.86 |
 | CDF-transform | 0.83 | 0.96 | 1.03 | 1.13 | 0.83 |
+| MVS with all-zero guard (variant) | 0.90 | 1.01 | 0.96 | 0.83 | 0.96 |
 
 **Rank-histogram reliability index, 1993–2016 (0 = flat)**
 
@@ -231,6 +249,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | 0.09 | 0.08 | 0.33 | 0.27 | 0.09 |
 | Scaled Distribution Mapping | 0.17 | 0.15 | 0.53 | 0.78 | 0.18 |
 | CDF-transform | 0.22 | 0.19 | 0.53 | 0.59 | 0.12 |
+| MVS with all-zero guard (variant) | 0.10 | 0.11 | 0.22 | 0.68 | 0.09 |
 
 **Share of corrected totals ≤ 1 mm (%), pooled leave-one-year-out 1993–2024.** CHIRPS: Oct 2.3% / Nov 5.2% / Dec 18.9% / Jan 16.6% / ONDJ 0.0%
 
@@ -250,6 +269,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | 2.6 | 6.1 | 20.7 | 17.2 | 0.0 |
 | Scaled Distribution Mapping | 3.7 | 12.8 | 39.8 | 56.4 | 0.7 |
 | CDF-transform | 2.0 | 4.9 | 20.0 | 19.3 | 0.0 |
+| MVS with all-zero guard (variant) | 5.0 | 9.4 | 22.2 | 16.8 | 1.6 |
 
 **Share of corrected totals at exactly 0 mm (%).** CHIRPS: Oct 0.4% / Nov 0.7% / Dec 0.6% / Jan 1.0% / ONDJ 0.0%
 
@@ -269,6 +289,7 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Quantile Delta Mapping | 2.3 | 5.2 | 18.9 | 16.6 | 0.0 |
 | Scaled Distribution Mapping | 3.6 | 12.4 | 36.0 | 48.1 | 0.7 |
 | CDF-transform | 0.0 | 0.3 | 0.3 | 0.2 | 0.0 |
+| MVS with all-zero guard (variant) | 4.3 | 7.6 | 12.0 | 4.6 | 1.5 |
 
 **Standard deviation of the pooled corrected members / CHIRPS (area-weighted median of cell ratios)**
 
@@ -284,10 +305,11 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Local Intensity Scaling | 0.81 | 0.96 | 1.16 | 1.70 | 0.83 |
 | Empirical Quantile Mapping | 1.00 | 0.99 | 1.00 | 1.00 | 0.98 |
 | Gamma Quantile Mapping | 0.98 | 0.91 | 0.88 | 0.91 | 0.92 |
-| Detrended Quantile Mapping | 0.99 | 1.00 | 1.09 | 1.30 | 0.96 |
+| Detrended Quantile Mapping | 0.99 | 1.00 | 1.09 | 1.29 | 0.96 |
 | Quantile Delta Mapping | 1.01 | 1.03 | 1.16 | 1.37 | 0.99 |
 | Scaled Distribution Mapping | 0.88 | 0.85 | 0.87 | 0.97 | 0.86 |
 | CDF-transform | 0.93 | 0.98 | 1.13 | 1.53 | 0.89 |
+| MVS with all-zero guard (variant) | 1.00 | 0.99 | 1.01 | 1.02 | 0.99 |
 
 **Score coverage (share of the national area, mean per year, 1993–2016)**
 
@@ -298,6 +320,46 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | Dec | 100% | 93% |
 | Jan | 100% | 77% |
 | ONDJ | 100% | 100% |
+
+**Where the CRPS differences from MVS come from: cells grouped by their training-year climate (January; mm, negative
+favours the method; the groups add up to the total; groups from each fold's training years only)**
+
+| Method | Total | all 0 mm (0.0% of area) | all ≤ 1 mm (9.2% of area) | mixed (10.6% of area) | always wet (80.2% of area) |
+| --- | --- | --- | --- | --- | --- |
+| Linear Scaling | +0.487 | +0.000 | +0.003 | +0.003 | +0.480 |
+| Variance Scaling (unbounded) | -0.240 | +0.000 | -0.005 | -0.006 | -0.229 |
+| Square-root-space Mean-Variance Scaling | -0.479 | +0.000 | -0.003 | -0.018 | -0.458 |
+| Power Transformation | -0.134 | +0.000 | +0.001 | -0.004 | -0.131 |
+| Delta Change | -0.005 | +0.000 | +0.001 | -0.006 | -0.001 |
+| Local Intensity Scaling | +0.325 | +0.000 | +0.010 | +0.011 | +0.303 |
+| Empirical Quantile Mapping | -0.337 | +0.000 | +0.010 | +0.011 | -0.359 |
+| Gamma Quantile Mapping | -0.365 | +0.000 | +0.010 | +0.003 | -0.378 |
+| Detrended Quantile Mapping | +0.100 | +0.000 | +0.010 | +0.011 | +0.079 |
+| Quantile Delta Mapping | -0.121 | +0.000 | +0.010 | +0.012 | -0.144 |
+| Scaled Distribution Mapping | +0.977 | +0.000 | +0.003 | +0.027 | +0.947 |
+| CDF-transform | +0.350 | +0.000 | +0.004 | +0.003 | +0.343 |
+| MVS with all-zero guard (variant) | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 |
+
+**The same for December**
+
+| Method | Total | all 0 mm (0.0% of area) | all ≤ 1 mm (2.9% of area) | mixed (23.6% of area) | always wet (73.6% of area) |
+| --- | --- | --- | --- | --- | --- |
+| Linear Scaling | +0.266 | +0.000 | -0.001 | +0.002 | +0.264 |
+| Variance Scaling (unbounded) | -0.022 | +0.000 | -0.001 | -0.004 | -0.017 |
+| Square-root-space Mean-Variance Scaling | -0.065 | +0.000 | -0.001 | -0.014 | -0.051 |
+| Power Transformation | +0.063 | +0.000 | -0.001 | -0.013 | +0.077 |
+| Delta Change | +0.019 | +0.000 | -0.001 | -0.028 | +0.048 |
+| Local Intensity Scaling | +0.136 | +0.000 | +0.001 | +0.005 | +0.130 |
+| Empirical Quantile Mapping | -0.033 | +0.000 | +0.001 | +0.011 | -0.044 |
+| Gamma Quantile Mapping | -0.015 | +0.000 | +0.001 | +0.010 | -0.026 |
+| Detrended Quantile Mapping | +0.218 | +0.000 | +0.001 | +0.018 | +0.199 |
+| Quantile Delta Mapping | +0.105 | +0.000 | +0.001 | +0.007 | +0.097 |
+| Scaled Distribution Mapping | +0.360 | +0.000 | -0.001 | +0.006 | +0.354 |
+| CDF-transform | +0.346 | +0.000 | -0.001 | -0.006 | +0.353 |
+| MVS with all-zero guard (variant) | +0.000 | +0.000 | +0.000 | +0.000 | +0.000 |
+
+No cell of Ethiopia has exactly 0 mm in every training year for any target, so the "all 0 mm" group is empty and the MVS
+all-zero guard (variant) is identical to MVS everywhere.
 
 **Limits, caps and fallbacks (December, January and ONDJ; 1993–2016, mean over folds)**
 
@@ -338,6 +400,9 @@ Full numbers, including the ONDJ R3 (Deyr) domain, per-year scores, diagnostics 
 | CDF-transform | Dec | mean fallback 0.4% of area; at forecast range edge 2.2% |
 | CDF-transform | Jan | mean fallback 2.8% of area; at forecast range edge 0.6% |
 | CDF-transform | ONDJ | at forecast range edge 9.5% |
+| MVS with all-zero guard (variant) | Dec | sd fallback 1.3% of area; ratio lower limit 17.3% of area; ratio upper limit 5.8% of area; clipped at zero 12.2% |
+| MVS with all-zero guard (variant) | Jan | sd fallback 3.9% of area; ratio lower limit 25.8% of area; ratio upper limit 28.2% of area; clipped at zero 4.5% |
+| MVS with all-zero guard (variant) | ONDJ | ratio lower limit 2.2% of area; ratio upper limit 22.3% of area; clipped at zero 1.7% |
 
 ## 6. Confirmation results (national aggregate)
 
@@ -361,6 +426,7 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 | Quantile Delta Mapping | +0.004 | +0.021 | +0.006 | -0.005 | +0.018 |
 | Scaled Distribution Mapping | +0.004 | +0.028 | +0.006 | -0.002 | +0.015 |
 | CDF-transform | +0.005 | +0.023 | -0.001 | -0.003 | +0.022 |
+| MVS with all-zero guard (variant) | +0.013 | +0.040 | +0.003 | +0.001 | +0.039 |
 | SEL-P | +0.014 | +0.050 | +0.007 | +0.007 | +0.040 |
 | SEL-A | +0.004 | +0.050 | +0.002 | +0.007 | +0.026 |
 
@@ -381,6 +447,7 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 | Quantile Delta Mapping | +0.007 | +0.024 | +0.029 | +0.038 | +0.041 |
 | Scaled Distribution Mapping | +0.004 | +0.005 | +0.029 | +0.028 | +0.040 |
 | CDF-transform | +0.013 | +0.031 | +0.026 | +0.044 | +0.049 |
+| MVS with all-zero guard (variant) | +0.027 | +0.053 | +0.015 | -0.005 | +0.075 |
 | SEL-P | +0.021 | +0.062 | +0.014 | +0.043 | +0.082 |
 | SEL-A | -0.001 | +0.062 | +0.014 | +0.043 | +0.029 |
 
@@ -401,6 +468,7 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 | Quantile Delta Mapping | +0.004 | -0.001 | -0.005 | -0.005 | +0.003 |
 | Scaled Distribution Mapping | +0.004 | +0.005 | -0.004 | -0.005 | -0.000 |
 | CDF-transform | +0.003 | +0.002 | -0.009 | -0.004 | +0.009 |
+| MVS with all-zero guard (variant) | +0.013 | +0.003 | -0.013 | -0.002 | +0.028 |
 | SEL-P | +0.017 | +0.017 | -0.004 | +0.004 | +0.030 |
 | SEL-A | +0.003 | +0.017 | -0.007 | +0.004 | +0.016 |
 
@@ -421,6 +489,7 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 | Quantile Delta Mapping | +0.003 | +0.042 | +0.017 | -0.004 | +0.033 |
 | Scaled Distribution Mapping | +0.005 | +0.051 | +0.016 | +0.000 | +0.030 |
 | CDF-transform | +0.007 | +0.045 | +0.008 | -0.002 | +0.036 |
+| MVS with all-zero guard (variant) | +0.013 | +0.078 | +0.019 | +0.003 | +0.051 |
 | SEL-P | +0.011 | +0.082 | +0.019 | +0.010 | +0.050 |
 | SEL-A | +0.005 | +0.082 | +0.011 | +0.010 | +0.035 |
 
@@ -441,6 +510,7 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 | Quantile Delta Mapping | +0.010 | +0.076 | +0.014 | -0.027 | +0.075 |
 | Scaled Distribution Mapping | -0.002 | +0.068 | -0.021 | -0.216 | +0.061 |
 | CDF-transform | +0.002 | +0.073 | -0.019 | -0.108 | +0.074 |
+| MVS with all-zero guard (variant) | -0.002 | +0.084 | +0.028 | -0.048 | +0.070 |
 | SEL-P | +0.007 | +0.089 | +0.037 | +0.034 | +0.081 |
 | SEL-A | +0.021 | +0.089 | +0.034 | +0.034 ✓ | +0.093 |
 
@@ -461,6 +531,7 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 | Quantile Delta Mapping | 0.43 | 0.44 | 0.77 | 0.80 | 0.31 |
 | Scaled Distribution Mapping | 0.49 | 0.50 | 0.80 | 0.89 | 0.38 |
 | CDF-transform | 0.50 | 0.52 | 0.81 | 0.83 | 0.32 |
+| MVS with all-zero guard (variant) | 0.43 | 0.30 | 0.68 | 0.91 | 0.20 |
 
 **Selection-aware procedures against MVS** (Δ: RPS for SEL-P, CRPS in mm for SEL-A; negative favours the procedure)
 
@@ -473,7 +544,7 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
 | SEL-P | ONDJ | Gamma Quantile Mapping 18, Square-root-space Mean-Variance Scaling 6 | -0.0003 | 1.0000 | -0.0033 | no |
 | SEL-A | Oct | Delta Change 24 | -0.6772 | 0.2275 | +0.9372 | no |
 | SEL-A | Nov | Square-root-space Mean-Variance Scaling 24 | -0.0931 | 0.2275 | -0.1049 | no |
-| SEL-A | Dec | Square-root-space Mean-Variance Scaling 23, Empirical Quantile Mapping 1 | -0.0424 | 0.2022 | -0.0334 | no |
+| SEL-A | Dec | Square-root-space Mean-Variance Scaling 23, Empirical Quantile Mapping 1 | -0.0424 | 0.2027 | -0.0334 | no |
 | SEL-A | Jan | Square-root-space Mean-Variance Scaling 24 | -0.4787 | 0.0018 | -0.6902 | yes |
 | SEL-A | ONDJ | Delta Change 24 | -1.0435 | 0.2275 | +3.2167 | no |
 
@@ -506,28 +577,55 @@ method–target comparisons; SEL-P and SEL-A: across the 5 targets) and not wors
    methods need poorly. QDM falls back to the CHIRPS quantile for 32 % (December) and 54 % (January) of members.
 9. **Linear Scaling and LOCI** stay too narrow (ONDJ spread–error 0.78 and 0.77). **December** remains hard: every method has
    negative amount skill over 2017–2024.
-10. **Confirmation, published probabilities: no method is confirmed better than MVS.** After the blend (fitted inside the
+10. **Confirmation, published probabilities: no tested method demonstrates a statistically significant improvement over MVS
+    under this validation protocol** (several have slightly higher point estimates). After the blend (fitted inside the
     folds) the methods' ONDJ RPSS spans 0.025 against 0.044 unblended, and the selection-aware SEL-P — which picks square-root
     MVS in nearly every year for November–January and Gamma QM for October and ONDJ — is confirmed for no target (ONDJ
     +0.040 vs +0.039). A better amount correction is trusted more by the blend (January λ 0.60 with square-root MVS against
     0.91 with MVS), which absorbs much of the difference.
-11. **Confirmation, rainfall amounts: square-root MVS and Gamma QM are confirmed for January** against the whole family, and
-    the selection-aware SEL-A is confirmed for January.
-12. **Choosing by training scores can backfire:** SEL-A chooses Delta Change for October and ONDJ from the 1993–2016 scores,
-    and over 2017–2024 that choice is worse than MVS (ONDJ +3.2 mm CRPS); SEL-P's October choice (Gamma QM) is slightly worse
-    too.
+11. **Confirmation, rainfall amounts: square-root MVS and Gamma QM are confirmed for January** against the whole family
+    (Δ CRPS −0.479 and −0.365 mm in 1993–2016, Holm p 0.021 and 0.008; −0.690 and −0.529 mm in 2017–2024), and the
+    selection-aware SEL-A (square-root MVS in all 24 folds) is confirmed for January. These comparisons establish
+    improvement against MVS, not that one candidate is better than the other.
+12. **Choosing by training scores can backfire.** SEL-A chooses Delta Change for October and ONDJ from the 1993–2016 scores.
+    The training-selected Delta Change has a worse mean ONDJ CRPS over 2017–2024 (Δ +3.22 mm, 95 % interval −1.22 to
+    +9.21 mm), with large losses in 2019 (+16.6 mm) and 2023 (+14.9 mm); it is better than MVS in 5 of the 8 years. It
+    fails the no-harm rule, but the interval does not establish a significant deterioration. October is similar (Δ +0.94 mm,
+    −0.23 to +2.40; 4 of 8 years better), and SEL-P's October choice (Gamma QM) is slightly worse in RPS.
+13. **The January gains come from wet cells.** About 96 % of square-root MVS's January improvement (−0.458 of −0.479 mm)
+    comes from cells that are wet in every training year (80 % of the area); cells dry in every year (≤ 1 mm, 9 %) and
+    mixed cells (11 %) contribute −0.003 and −0.018 mm. Gamma QM's gain is entirely from the always-wet cells (−0.378 mm);
+    it is slightly worse than MVS in the dry and mixed cells. No cell has 0 mm in every training year, so the MVS all-zero
+    behaviour does not arise in these data and the all-zero guard never acts.
 
 ### What the evidence supports
 
-* **Keep MVS for the published tercile probabilities** of the September cycle: no candidate is confirmed once the blend and
-  the method search are accounted for.
-* **January rainfall amounts**: square-root MVS (or Gamma QM) is confirmed better than MVS; a per-target change of the amount
-  correction for January could be considered; the blended January probabilities are not confirmed better.
+* **Keep MVS for the published tercile probabilities** of the September cycle: no tested method demonstrates a
+  statistically significant improvement over MVS under this validation protocol.
+* **January rainfall amounts**: square-root MVS and Gamma QM are each confirmed better than MVS (not against each other);
+  an amount-only January pilot is reasonable. The gain is a wet-cell gain (finding 13). The blended January
+  probabilities are not confirmed better.
+* If amounts and probabilities come to use different correction paths, record both methods in the product metadata so
+  every output can be traced.
 * **Do not select by training-period rank alone** (finding 12).
 * Run the same screening and confirmation for JJAS (May) and FMAM (January, February) before any cross-cycle decision; one
   configuration file each.
 
-## 7. Changes in revision 2 (response to the review of e252baa)
+## 7. Changes
+
+### Revision 3 (response to the review of 007ce47 / 1e59fea)
+
+| Review point | Change |
+| --- | --- |
+| Two advertised NetCDF downloads returned 404 (`*.nc` ignored outside `site/downloads/data/`) | `.gitignore` exception for `site/downloads/bias/**/*.nc`; the site build now fails if any local link of the page (HTML or page data) is missing or git-ignored |
+| Checkpoints could pair old scores with new provenance | One complete dependency fingerprint (`bias_benchmark.dependencies`: benchmark, project and cycle configuration contents, masks, every input file, and the calculation code including the CRPS, smoothing and blend helpers) validates the per-target checkpoints and is recorded as provenance; `--no-resume` |
+| The confirmation ignored a nondefault smoothing α | `smooth(..., alpha=self.alpha)`; test with α = 2 against the explicit formula |
+| EQM/DQM extrapolation could override the dry rule | The dry mask is applied after the extrapolation; test with every CHIRPS year at 0.5 mm |
+| SDM assigned corrected values out of rank order | Step 7 assigns the sorted corrected values by raw-member rank; rank-preservation test (per-cell values and scores are unchanged) |
+| All-zero cells under MVS | January (and every target) decomposition of the CRPS differences by training-year climate group; an MVS all-zero guard evaluated as a separate variant |
+| Wording | Links pinned to the producing commit; "deterministic stratified tie-breaking"; "two distinct tercile boundaries"; "no tested method demonstrates a statistically significant improvement"; Delta Change's test-year loss given with its interval; confirmed January candidates are not ranked against each other; metadata note for split correction paths |
+
+### Revision 2 (response to the review of e252baa)
 
 | Review point | Change |
 | --- | --- |
