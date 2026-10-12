@@ -658,6 +658,45 @@ Full numbers: `outputs/bias_correction_benchmark/<cycle>/` and the site's Bias c
   findings), and evaluate that change with the same screening and confirmation before adoption.
 * Record the correction method per product and target in the metadata if amounts and probabilities diverge.
 
+### MVS ratio-limit study (all cycles)
+
+`config/bias_correction/<cycle>_ratio_limits.json`, outputs in `outputs/bias_correction_benchmark/<cycle>/ratio_limits/`; run at
+commit fb7425f (clean). Operational MVS (spread ratio r limited to 0.5–2) against the same correction with limits 1/3–3,
+1/4–4 and none (VS), all with the same r = 1 fallback, through the same screening and confirmation; Holm across the
+3 alternatives × 5 targets of each cycle.
+
+| Cycle | Blended probabilities: confirmed better | Amounts: confirmed better than 0.5–2 |
+| --- | --- | --- |
+| January · FMAM | none | Feb (1/3–3, 1/4–4, none); Mar (1/4–4, none) |
+| February · FMAM | none | none |
+| May · JJAS | none | Jul, Aug, Sep (all three alternatives) |
+| September · ONDJ | none | Jan (all three alternatives) |
+
+* The limits do not matter for the published probabilities: blended RPSS changes by at most 0.002 in any cycle and target.
+* For amounts, wider limits help in the months where the operational limits bind (JJAS July–September, where the lower
+  limit acts over 14–32 % of the area; ONDJ January, upper limit 28 %), but they are **not uniformly better**: the ONDJ
+  season's amount CRPSS falls from +0.070 to +0.063 with any of the wider limits. A change of the limits would therefore be a
+  per-target choice for the amount product, not a single operational replacement.
+
+### Shadow pilot: square-root MVS for February, February-initialized FMAM
+
+`scripts/bias_pilot.py`, `config/bias_correction/feb_fmam_pilot.json`, outputs in `outputs/bias_correction_benchmark/feb_fmam/pilot/`;
+run at commit fb7425f (clean). Not a published forecast. Both methods run through the operational pipeline (reference years
+1993–2025; blend weight from leave-one-year-out) for the 2026 February forecast. With MVS the pilot reproduces the published
+forecast exactly (largest probability difference 1.9 × 10⁻⁸ over 1,945 cells; blend weight 0.497, difference 6 × 10⁻⁹).
+Against CHIRPS for February 2026 (one season, an illustration):
+
+| Method | Region | RPSS | BSS below | BSS above | Amount CRPSS | λ |
+| --- | --- | --- | --- | --- | --- | --- |
+| MVS (published) | All Ethiopia | −0.012 | −0.074 | +0.062 | +0.015 | 0.50 |
+| Square-root MVS | All Ethiopia | +0.003 | −0.059 | +0.077 | +0.028 | 0.35 |
+| MVS (published) | FMAM domain | +0.002 | −0.051 | +0.063 | +0.020 | 0.50 |
+| Square-root MVS | FMAM domain | +0.037 | −0.025 | +0.109 | +0.042 | 0.35 |
+
+In this season the alternative would have done slightly better everywhere it was scored, consistent with — but not evidence
+for — the 24-year confirmation. Running the pilot alongside the published forecast for the next February-initialized
+cycles is the way to accumulate independent evidence before a change.
+
 ## 8. Changes
 
 ### Revision 3 (response to the review of 007ce47 / 1e59fea)

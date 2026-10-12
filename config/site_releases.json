@@ -418,7 +418,7 @@
   {
     "id": "2026-10-12.2",
     "date": "2026-10-12",
-    "commit": null,
+    "commit": "1b16fda",
     "title": "Bias correction: all four cycles",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -430,6 +430,28 @@
       {
         "type": "analysis",
         "text": "The bias-correction screening and confirmation now cover all cycles (January and February FMAM, May JJAS, September ONDJ), with a cycle picker in the Bias correction section. Published probabilities: MVS is not significantly beaten except for February in the February-initialized cycle, where square-root MVS is confirmed better. Amount gains are month-specific (ONDJ January, FMAM February-March, JJAS June-September). The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-13.1",
+    "date": "2026-10-13",
+    "commit": null,
+    "title": "Bias correction: ratio-limit study and a shadow pilot",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "MVS ratio-limit study for all cycles: wider spread-ratio limits do not change the published probabilities (at most 0.002 RPSS) and help rainfall amounts only in some months (JJAS July-September, ONDJ January, FMAM February-March for the January initialization), while lowering the ONDJ season's amount skill."
+      },
+      {
+        "type": "analysis",
+        "text": "Shadow pilot of square-root MVS for February of the February-initialized FMAM cycle: reproduces the published February 2026 forecast with MVS, and scores the alternative against February 2026 (one season, an illustration). Not a published forecast; the published forecasts are unchanged."
       }
     ]
   }

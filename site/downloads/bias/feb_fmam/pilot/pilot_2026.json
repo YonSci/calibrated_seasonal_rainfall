@@ -1,0 +1,136 @@
+{
+  "created_utc": "2026-10-12T20:49:16.291430+00:00",
+  "config": "config/bias_correction/feb_fmam_pilot.json",
+  "protocol": "Shadow pilot: alternative amount corrections through the operational probability pipeline for one forecast year (docs/47).\n\nNot an operational product and never shown as one. For the configured cycle and targets, every pilot method is fitted the\nway the operational forecast is (all reference years; one blend weight per target from leave-one-year-out within them) and\nproduces the forecast-year probabilities. The reference method's probabilities are checked against the published forecast,\nwhich validates the pipeline. When the target period has been observed, every method is scored against CHIRPS: one season,\nan illustration of what the change would have meant, not evidence (the evidence is the benchmark's confirmation).\n\nConfigured by config/bias_correction/<name>_pilot.json: {\"benchmark_config\": ..., \"methods\": [...], \"targets\": [...],\n\"output_root\": ...}; the cycle, years, regions and method parameters come from the benchmark configuration.",
+  "forecast_year": 2026,
+  "reference_years": [
+    1993,
+    2025
+  ],
+  "reference_method": "mvs",
+  "methods": [
+    "mvs",
+    "sqrt_mvs"
+  ],
+  "provenance": {
+    "commit": "fb7425f593b8bc5f2550f0f47d4929e76eb3fb5c",
+    "uncommitted_changes": false,
+    "uncommitted_check": "code and configuration files this result depends on",
+    "code_sha256": {
+      "scripts/bias_methods.py": "f964fac9e23a92ba01fc39368d996aa660561cd8708f7552fbedc0627f6b3706",
+      "scripts/bias_benchmark.py": "bd5d0cce44fa15275cc64fbaa1d9317aaefb43626b0f3a0b9c6a719c3b4fa24f",
+      "scripts/bias_confirmation.py": "bbc95e4cb64256b101b5c0b30e2f351c5cd2b36893d4dfb0505c63577243f558",
+      "scripts/significance.py": "3143761d5d201e4e62df9ad923757b952a3ea768b060c8a722afcd9b3d6a9963",
+      "scripts/calibration_core.py": "f0635cc563e6d6aedb62799847b83fbb0f5cc12ee9f8c48ad48dda15a054fb62",
+      "scripts/compare_calibration.py": "9aa137c9a02672ffacc2541cfd23cdab9b3294bf7cc77580a11e21208560866a",
+      "scripts/local_blend.py": "ada5c571fb7762d2c333f83ad119d35f0784b82aa2cc35449a44cdf00c53c17d",
+      "scripts/run_calibration.py": "1f34e8fc92fdd15983f1633de67fcb6a35882911b6b7072ca865df99d907afd0",
+      "scripts/run_monthly.py": "dc13dfb54b78773afb6d0c25ebac8769552e5c071f5d2aed9ba2a01400e44f79",
+      "scripts/cycle.py": "00e076fc93dc2c8a5caebf6a209fc3de09a5f69e16c2e7cb20bd7b36d2ecdcba",
+      "scripts/common.py": "72b83f5c530017e317ea43af3a0e430e6d03f361bc032de374a0f942435cb0a1"
+    },
+    "config": {
+      "path": "config/bias_correction/feb_fmam.json",
+      "sha256": "5e74d282f6e0f984a3bb2d0527f665d535894be91f139628db7e8deb7d5374c9"
+    },
+    "project_config": {
+      "path": "config/fmam_feb/project.json",
+      "sha256": "9999e9e5e03f95998e3d22396d2d2e5bf2f8c79decfc571c715caf2878daa4a1"
+    },
+    "cycle_config": {
+      "path": "config/cycles/feb_2026_fmam.json",
+      "sha256": "120955984a14d292912b9a8d48f83af060290d40d6b54ed9d627b36280c0652b"
+    },
+    "masks": {
+      "cells": {
+        "path": "data/masks/ethiopia_common.nc",
+        "sha256": "57ad8861c598abb9f175012920e5d0ef058e5b643cd6e4987cad3da6ac0b9e16"
+      },
+      "ethiopia": {
+        "path": "data/masks/ethiopia_common.nc",
+        "sha256": "57ad8861c598abb9f175012920e5d0ef058e5b643cd6e4987cad3da6ac0b9e16"
+      },
+      "fmam_domain": {
+        "path": "data/masks/fmam_coverage_chirps_v3_1993_2025_v1.nc",
+        "sha256": "c386d127f7041ed6b383c5f46b9537e3740bfee6b85f383e3a8b0792cac58fbb"
+      }
+    },
+    "inputs": {
+      "Feb": {
+        "folder": "data/processed/init02_Feb",
+        "files": 67,
+        "sha256": "aa05fc058f64121f726ee7f06608768bafb243ef9702ccd6c154217f2a9a13d5"
+      }
+    },
+    "scoring_version": 3,
+    "dependency_sha256": "fd3af4263a766c5cdf5b69e0b859039849774a491f9f623cdafdf2bc2db191c0",
+    "python": "3.11.9",
+    "numpy": "1.26.4"
+  },
+  "targets": {
+    "Feb": {
+      "tag": "init02_Feb",
+      "observation": "outputs/verification_2026_fmam_feb/observations/Feb/chirps_2026_common.nc",
+      "methods": {
+        "mvs": {
+          "label": "Mean-Variance Scaling (operational)",
+          "blend_weight": 0.4970171107266555,
+          "published_check": {
+            "max_abs_difference": 1.880996292058512e-08,
+            "cells": 1945,
+            "published_blend_weight": 0.4970171050405889,
+            "blend_weight_difference": 5.686066617549557e-09
+          },
+          "scores": {
+            "ethiopia": {
+              "rps": 0.40489301924311805,
+              "rpss": -0.012256031329950234,
+              "bss_below": -0.07361034746084716,
+              "bss_above": 0.06182849842239446,
+              "crps_mm": 4.644235002169232,
+              "crpss": 0.014679889375874056,
+              "favoured_area_share": 0.7921241422708152,
+              "favoured_hit_share": 0.39547385213621217
+            },
+            "fmam_domain": {
+              "rps": 0.4059986727480815,
+              "rpss": 0.002302908922654723,
+              "bss_below": -0.05055636387077622,
+              "bss_above": 0.06287538837660633,
+              "crps_mm": 5.754264052365047,
+              "crpss": 0.019809558455109677,
+              "favoured_area_share": 0.8265097647240421,
+              "favoured_hit_share": 0.42107724170816
+            }
+          }
+        },
+        "sqrt_mvs": {
+          "label": "Square-root-space Mean-Variance Scaling",
+          "blend_weight": 0.34918117561313156,
+          "scores": {
+            "ethiopia": {
+              "rps": 0.3988891000097336,
+              "rpss": 0.002754114972330357,
+              "bss_below": -0.05910473193913979,
+              "bss_above": 0.07744785483802763,
+              "crps_mm": 4.579676765758964,
+              "crpss": 0.028376553866743426,
+              "favoured_area_share": 0.7671077996903884,
+              "favoured_hit_share": 0.40192048800660324
+            },
+            "fmam_domain": {
+              "rps": 0.3917665846878776,
+              "rpss": 0.037276700244461725,
+              "bss_below": -0.02499557620652504,
+              "bss_above": 0.10863571999900279,
+              "crps_mm": 5.626420768917088,
+              "crpss": 0.04158658559725137,
+              "favoured_area_share": 0.7945921713470997,
+              "favoured_hit_share": 0.4353587643577197
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -104,8 +104,15 @@ def load_all():
     out = []
     for path in sorted(BENCH.glob('*/benchmark.json')):
         conf = path.parent / 'confirmation/confirmation.json'
+        rl = path.parent / 'ratio_limits'                  # the MVS ratio-limit study of this cycle, when it has been run
+        ratio = None
+        if (rl / 'benchmark.json').is_file() and (rl / 'confirmation/confirmation.json').is_file():
+            ratio = dict(data=json.loads((rl / 'benchmark.json').read_text(encoding='utf-8')),
+                         confirmation=json.loads((rl / 'confirmation/confirmation.json').read_text(encoding='utf-8')))
+        pilots = sorted((path.parent / 'pilot').glob('pilot_*.json'))
         out.append(dict(name=path.parent.name, folder=path.parent, data=json.loads(path.read_text(encoding='utf-8')),
-                        confirmation=json.loads(conf.read_text(encoding='utf-8')) if conf.is_file() else None))
+                        confirmation=json.loads(conf.read_text(encoding='utf-8')) if conf.is_file() else None, ratio=ratio,
+                        pilot=json.loads(pilots[-1].read_text(encoding='utf-8')) if pilots else None))
     init = lambda b: json.loads((ROOT / b['data']['config_contents']['project_config']).read_text(encoding='utf-8'))['initialization_month']
     return sorted(out, key=init)                         # in calendar order of the initialization month
 
@@ -120,13 +127,19 @@ def export(out_dir):
             shutil.copytree(folder / 'figures', fig_dest, dirs_exist_ok=True)
         if (folder / 'confirmation/figures').is_dir():
             shutil.copytree(folder / 'confirmation/figures', fig_dest / 'confirmation', dirs_exist_ok=True)
+        for png in (folder / 'pilot').glob('*.png'):
+            (fig_dest / 'pilot').mkdir(parents=True, exist_ok=True)
+            shutil.copy2(png, fig_dest / 'pilot' / png.name)
         files = []
         year = bench['data']['config_contents']['forecast_year']
         for fname, label in [('benchmark.json', 'Screening: all scores, per-year values, diagnostics and screening statistics (JSON)'),
                              ('confirmation/confirmation.json', 'Confirmation: full-pipeline scores, selections and tests (JSON)'),
                              ('cell_scores_full_loyo.nc', 'Per-cell scores and distribution ratios (NetCDF)'),
                              (f'forecast_{year}_members.nc', 'Corrected forecast members of every method (NetCDF)'),
-                             ('manifest.json', 'Output manifest: SHA-256 of every screening output file (JSON)')]:
+                             ('manifest.json', 'Output manifest: SHA-256 of every screening output file (JSON)'),
+                             ('ratio_limits/benchmark.json', 'MVS ratio-limit study: screening (JSON)'),
+                             ('ratio_limits/confirmation/confirmation.json', 'MVS ratio-limit study: confirmation (JSON)'),
+                             (f'pilot/pilot_{year}.json', f'Shadow pilot {year}: probabilities check and scores (JSON)')]:
             if (folder / fname).is_file():
                 dest = out_dir / 'downloads/bias' / name / fname
                 dest.parent.mkdir(parents=True, exist_ok=True)
@@ -774,6 +787,76 @@ def provenance_html(V):
     return tbl(['Item', 'Fingerprint'], rows, 'Run provenance (full hashes in benchmark.json and manifest.json)')
 
 
+def ratio_html(bench):
+    """The MVS ratio-limit study of the cycle: operational limits against wider ones and none (screening and confirmation)."""
+    r = bench.get('ratio')
+    if not r:
+        return ''
+    d, c = r['data'], r['confirmation']
+    T = list(c['targets'])
+    ref = c['reference']
+    prim = d['config_contents']['primary_region']
+    labels = {k: v['label'].replace(' (operational)', ' (operational, 0.5–2)') for k, v in d['methods'].items()}
+    conf = lambda m, sc, t: m != ref and c['tests'][m][sc][t]['decision']['confirmed']
+    cv = lambda m, key, t, design='training': c['targets'][t]['methods'][m][design][prim][key]
+    mark = lambda m, sc, t: ' ✓' if conf(m, sc, t) else ''
+    head = ['Method'] + [esc(t) for t in T]
+    rows_p = [[esc(labels[m])] + [signed(cv(m, 'rpss', t)) + mark(m, 'rps', t) for t in T] for m in c['methods']]
+    rows_a = [[esc(labels[m])] + [signed(cv(m, 'crpss', t)) + mark(m, 'crps', t) for t in T] for m in c['methods']]
+    act = [[esc(t), pct(dg.get('ratio_lower_limit', 0)), pct(dg.get('ratio_upper_limit', 0)),
+            num(d['targets'][t]['methods'][ref]['training'][prim]['spread_error_ratio']),
+            num(d['targets'][t]['methods']['vs']['training'][prim]['spread_error_ratio']) if 'vs' in d['targets'][t]['methods'] else '—']
+           for t in T for dg in [d['targets'][t]['methods'][ref]['diagnostics_training']['cell_area_share']]]
+    found = {sc: [f'{labels[m]} ({", ".join(t for t in T if conf(m, sc, t))})' for m in c['methods'] if any(conf(m, sc, t) for t in T)]
+             for sc in ('rps', 'crps')}
+    tr = years(d['config_contents']['training_years'])
+    prov = d.get('provenance', {})
+    return f'''<h3>MVS ratio-limit study</h3>
+  <p>The operational correction limits the spread ratio r = σ<sub>obs</sub>/σ<sub>model</sub> to 0.5–2. This study runs the same
+  screening and confirmation for that correction with wider limits (1/3–3, 1/4–4) and none, all with the same fallback (r = 1 where
+  the model spread is below 1 mm), to see whether the limits are worth changing. ✓ = better than the operational limits with
+  Holm-adjusted p &lt; 0.05 across the {len(c['methods']) - 1} alternatives × {len(T)} targets and not worse over the test years.
+  Run at commit <code>{esc((prov.get('commit') or '')[:7])}</code>{' (with uncommitted changes)' if prov.get('uncommitted_changes') else ''}.</p>
+  <p><strong>Confirmed better than the operational limits — published (blended) probabilities: {esc(listing(found['rps']))};
+  rainfall amounts: {esc(listing(found['crps']))}.</strong></p>
+  {tbl(head, rows_p, f'Blended tercile RPSS through the full pipeline, outer leave-one-year-out {tr}')}
+  {tbl(head, rows_a, f'Amount CRPSS, leave-one-year-out {tr}')}
+  <details><summary>Where the operational limits act</summary>
+  {tbl(['Target', 'Lower limit active (r would be &lt; 0.5)', 'Upper limit active (r would be &gt; 2)', 'Spread–error, operational', 'Spread–error, no limits'],
+       act, f'Share of the corrected area, mean over the leave-one-year-out folds, {tr}')}</details>'''
+
+
+def pilot_html(bench, name):
+    """The shadow pilot of the cycle, when one has been run: never a published forecast."""
+    pl = bench.get('pilot')
+    if not pl:
+        return ''
+    regions = bench['data']['config_contents']['regions']
+    year = pl['forecast_year']
+    parts = []
+    for t, row in pl['targets'].items():
+        chk = row['methods'][pl['reference_method']].get('published_check') or {}
+        rows = []
+        for m in pl['methods']:
+            e = row['methods'][m]
+            for rk, sc in e.get('scores', {}).items():
+                rows.append([esc(e['label']), esc(regions[rk]['label']), signed(sc['rpss']), signed(sc['bss_below']), signed(sc['bss_above']),
+                             signed(sc['crpss']), pct(sc['favoured_hit_share']), num(e['blend_weight'])])
+        check = (f'With the published method the pilot reproduces the published {esc(t)} {year} forecast: largest probability difference '
+                 f'{chk.get("max_abs_difference", float("nan")):.1e} over {chk.get("cells", 0):,} cells, blend weight difference '
+                 f'{chk.get("blend_weight_difference") or float("nan"):.1e}.' if chk else '')
+        parts.append(f'''<p class="caveat">{check}</p>
+  {tbl(['Method', 'Region', 'RPSS', 'BSS below', 'BSS above', 'Amount CRPSS', 'Favoured category observed', 'Blend weight λ'], rows,
+       f'{esc(t)} {year} against CHIRPS (one season)') if rows else '<p class="caveat">The target period has not been observed yet.</p>'}
+  <figure class="map-figure wide"><img loading="lazy" src="assets/bias/{esc(name)}/pilot/pilot_{year}_{esc(t)}.png" alt="Shadow pilot maps, {esc(t)} {year}" style="max-width:100%;height:auto"><figcaption class="caveat">Favoured category of each method’s published-style probabilities, the observed category and the per-cell RPS difference.</figcaption></figure>''')
+    return f'''<h3>Shadow pilot {year}</h3>
+  <p class="notice"><strong>Not a published forecast.</strong> The alternative correction is run through the same probability pipeline
+  as the published forecast (all reference years; blend weight from leave-one-year-out), next to the published method, for
+  {esc(listing(list(pl['targets'])))} {year}. One observed season illustrates what the change would have meant; the evidence for it is
+  the confirmation above.</p>
+  {''.join(parts)}'''
+
+
 def block(bench, files):
     V = View(bench['data'], bench.get('confirmation'))
     name = bench['name']
@@ -833,6 +916,9 @@ def block(bench, files):
 
   <h3>Confirmation: full pipeline and method selection</h3>
   {confirmation_html(V)}
+
+  {ratio_html(bench)}
+  {pilot_html(bench, name)}
 
   <h4>Figures</h4>
   {figures_html(V, name)}
