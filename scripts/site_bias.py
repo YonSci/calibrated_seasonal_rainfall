@@ -106,7 +106,8 @@ def load_all():
         conf = path.parent / 'confirmation/confirmation.json'
         out.append(dict(name=path.parent.name, folder=path.parent, data=json.loads(path.read_text(encoding='utf-8')),
                         confirmation=json.loads(conf.read_text(encoding='utf-8')) if conf.is_file() else None))
-    return out
+    init = lambda b: json.loads((ROOT / b['data']['config_contents']['project_config']).read_text(encoding='utf-8'))['initialization_month']
+    return sorted(out, key=init)                         # in calendar order of the initialization month
 
 
 def export(out_dir):
@@ -886,8 +887,11 @@ def section(blocks):
         return ''
     picker = ''
     if len(blocks) > 1:
-        picker = ('<div class="map-controls"><label>Benchmark <select id="bc-bench">' +
-                  ''.join(f'<option value="{esc(n)}">{esc(n)}</option>' for n, _ in blocks) + '</select></label></div>')
+        import re
+        title = lambda h: re.search(r'<h3>(.*?)</h3>', h).group(1)
+        picker = ('<div class="map-controls"><label>Forecast cycle <select id="bc-bench">' +
+                  ''.join(f'<option value="{esc(n)}">{title(h)}</option>' for n, h in blocks) + '</select></label>'
+                  '<span class="caveat">Each cycle has its own benchmark (initialization, season and months).</span></div>')
     body = ''.join(h if i == 0 else h.replace('<div class="bc"', '<div class="bc" hidden', 1) for i, (_, h) in enumerate(blocks))
     return f'''<section id="bias" class="wrap">
   <h2>Bias correction</h2>

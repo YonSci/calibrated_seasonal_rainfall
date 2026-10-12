@@ -61,7 +61,7 @@ def heatmaps(path, results, gates, methods, targets, region, ref, region_label, 
     plt.close(fig)
 
 
-def maps(path, values_by_method, methods, lat, lon, cells, domain, title, cbar, vlim, cmap='RdBu'):
+def maps(path, values_by_method, methods, lat, lon, cells, domain, title, cbar, vlim, cmap='RdBu', domain_label='season domain'):
     n = len(methods)
     cols = 5
     rows = int(np.ceil(n / cols))
@@ -80,7 +80,7 @@ def maps(path, values_by_method, methods, lat, lon, cells, domain, title, cbar, 
     for ax in list(axes.flat)[n:]:
         ax.axis('off')
     fig.colorbar(im, ax=axes, shrink=.6, label=cbar)
-    fig.suptitle(title + '\nSolid: Ethiopia. Dashed: ONDJ R3 (Deyr) domain.', fontsize=11)
+    fig.suptitle(title + f'\nSolid: Ethiopia. Dashed: {domain_label}.', fontsize=11)
     fig.savefig(path, dpi=DPI, bbox_inches='tight')
     plt.close(fig)
 
@@ -175,7 +175,9 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
     fig_dir.mkdir(parents=True, exist_ok=True)
     heatmaps(fig_dir / 'skill_summary.png', results, gates, methods, targets, region, ref, cfg['regions'][region]['label'], cfg)
     distribution_panel(fig_dir / 'distribution.png', results, methods, targets, region)
-    spec = cfg['regions']['ondj_domain'] if 'ondj_domain' in cfg['regions'] else cfg['cells']
+    dom_key = next((k for k in cfg['regions'] if k != region), None)      # the season domain outlined on the maps
+    spec = cfg['regions'][dom_key] if dom_key else cfg['cells']
+    dom_label = spec.get('label', 'season domain')
     with xr.open_dataset(source_path(spec['path'])) as d:
         domain = d[spec['variable']].transpose('lat', 'lon').values == 1
     for t in targets:
@@ -183,11 +185,11 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
         cells = np.isfinite(to_grid(np.zeros(len(idx)), idx, lat, lon))
         crpss = {m: to_grid(cell_maps[t][m]['crpss'], idx, lat, lon) for m in methods}
         maps(fig_dir / f'crpss_maps_{t}.png', crpss, methods, lat, lon, cells, domain,
-             f'{t}: CRPSS per cell against the CHIRPS climatology, leave-one-year-out {cfg["all_years"][0]}-{cfg["all_years"][1]} (descriptive)', 'CRPSS', .4)
+             f'{t}: CRPSS per cell against the CHIRPS climatology, leave-one-year-out {cfg["all_years"][0]}-{cfg["all_years"][1]} (descriptive)', 'CRPSS', .4, domain_label=dom_label)
         others = [m for m in methods if m not in (ref, 'raw')]
         maps(fig_dir / f'crpss_minus_mvs_{t}.png', {m: crpss[m] - crpss[ref] for m in others}, others, lat, lon, cells, domain,
              f'{t}: CRPSS minus operational MVS per cell, leave-one-year-out {cfg["all_years"][0]}-{cfg["all_years"][1]} '
-             f'(descriptive; blue: method better)', 'CRPSS difference', .15)
+             f'(descriptive; blue: method better)', 'CRPSS difference', .15, domain_label=dom_label)
         pit_panel(fig_dir / f'pit_{t}.png', results, methods, t, region, cfg['pit_bins'])
         members_panel(fig_dir / f'members_{cfg["forecast_year"]}_{t}.png', forecasts, methods, t, lat, lon, cfg)
         clim = forecasts[t]['_clim']
@@ -197,7 +199,7 @@ def make_all(out, results, gates, cell_maps, forecasts, lat, lon, methods, targe
         pct['_raw'] = to_grid(100 * forecasts[t]['_raw'].mean(0) / np.where(clim > 1, clim, np.nan), idx, lat, lon)
         maps(fig_dir / f'forecast_{cfg["forecast_year"]}_percent_{t}.png', pct, ['_raw'] + shown, lat, lon, cells, domain,
              f'{t} {cfg["forecast_year"]}: corrected ensemble mean, % of CHIRPS {cfg["all_years"][0]}-{cfg["all_years"][1]} mean', '% of normal', (40, 160),
-             cmap='BrBG')
+             cmap='BrBG', domain_label=dom_label)
 
 
 # ---------------------------------------------------------------- confirmation (scripts/bias_confirmation.py)
