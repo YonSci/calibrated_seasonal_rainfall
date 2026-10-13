@@ -1,0 +1,22 @@
+{
+  "description": "Rule by which the platform suggests a bias-correction method for each cycle, target and product (scripts/bias_recommend.py, docs/47). Fixed before the independent validation seasons are scored. A suggestion is advice for a decision; it never changes the published forecast.",
+  "benchmarks": ["config/bias_correction/jan_fmam.json", "config/bias_correction/feb_fmam.json",
+                 "config/bias_correction/may_jjas.json", "config/bias_correction/sep_ondj.json"],
+  "products": {
+    "probabilities": {"score": "rps", "selection": "SEL-P", "label": "Published tercile probabilities", "unit": "RPS"},
+    "amounts": {"score": "crps", "selection": "SEL-A", "label": "Rainfall amounts", "unit": "CRPS (mm)"}
+  },
+  "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Holm-adjusted p < 0.05 across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+  "choice": "Among candidates, the method the selection-aware procedure chooses from all training years (training-only information); if that method is not a candidate, the candidate with the best training-period score. Other candidates are listed as alternatives: a confirmation establishes improvement against the operational method, not a ranking among candidates.",
+  "validation": {
+    "minimum_seasons": 3,
+    "region": "ethiopia",
+    "rule": "Independent validation seasons are forecast years scored after the benchmark (bias_validation.py). A candidate is 'recommended' once at least minimum_seasons have been scored for it and the operational method, and its mean score over them is not worse; with fewer seasons it stays a 'candidate'; with enough seasons and a worse mean it is 'not supported by validation'."
+  },
+  "statuses": {
+    "keep": "Keep the operational method: no method is confirmed better on the historical evidence.",
+    "candidate": "Confirmed better on the historical evidence; independent validation seasons are still being collected.",
+    "recommended": "Confirmed better on the historical evidence and not worse over the independent validation seasons.",
+    "not_supported": "Confirmed better on the historical evidence but worse over the independent validation seasons."
+  }
+}

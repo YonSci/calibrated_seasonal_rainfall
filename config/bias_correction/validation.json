@@ -1,0 +1,11 @@
+{
+  "description": "Shadow forecasts and independent validation of the bias-correction methods (scripts/bias_validation.py, docs/47). Cycles are matched by initialization month and season, so future cycle files (e.g. config/cycles/feb_2027_fmam.json) are covered without editing this file. Shadow forecasts are never published as forecasts.",
+  "cycles": [
+    {"initialization_month": 1, "season": "FMAM", "benchmark_config": "config/bias_correction/jan_fmam.json"},
+    {"initialization_month": 2, "season": "FMAM", "benchmark_config": "config/bias_correction/feb_fmam.json",
+     "shadow": [{"method": "sqrt_mvs", "targets": ["Feb"], "since": "2026-10-13",
+                 "reason": "Square-root MVS is confirmed better than MVS for the published February probabilities of this cycle (full pipeline, Holm across all methods and targets); the shadow builds independent evidence before any change."}]},
+    {"initialization_month": 5, "season": "JJAS", "benchmark_config": "config/bias_correction/may_jjas.json"},
+    {"initialization_month": 9, "season": "ONDJ", "benchmark_config": "config/bias_correction/sep_ondj.json"}
+  ]
+}

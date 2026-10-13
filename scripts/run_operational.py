@@ -54,6 +54,8 @@ PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operation
                    "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py","obs_source.py"]
 EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "interpret_external_forecasts.py",
                     "verify_external_forecasts.py", "verify2026_math.py"]
+BIAS_SCRIPTS = ["bias_validation.py", "bias_methods.py", "bias_confirmation.py", "bias_benchmark.py", "calibration_core.py",
+                "compare_calibration.py", "local_blend.py", "run_calibration.py"]
 VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
                   "verification_report_core.py","build_verification_report.py","prepare_chirps_v3.py"]
 
@@ -375,6 +377,47 @@ def external_stages(runner,cfg,info,refresh,verified=()):
     return out
 
 
+def bias_entry(cfg):
+    """The cycle's entry in config/bias_correction/validation.json (matched by initialization month and season), if any."""
+    vpath = ROOT/"config/bias_correction/validation.json"
+    if not vpath.is_file():
+        return None, None
+    project = read(path(cfg["project_config"]))
+    for entry in read(vpath)["cycles"]:
+        if entry["initialization_month"]==project["initialization_month"] and entry["season"]==project["season"]["name"]:
+            return vpath, entry
+    return vpath, None
+
+
+def bias_stages(runner,cfg,config_path,full):
+    """Shadow forecast (automatic when configured) and, on request, validation of every benchmark method.
+
+    Never changes the published forecast. Scores appear once the verification observations of a target exist; rerunning
+    after new observations rescores only what changed (bias_validation.py reuses unchanged files).
+    """
+    vpath,entry = bias_entry(cfg)
+    if entry is None or not (full or entry.get("shadow")):
+        return None
+    from bias_validation import methods_for, targets_for
+    bench = read(path(entry["benchmark_config"]))
+    request = ["all"] if full else ["shadow"]
+    methods = methods_for(request,bench,entry)
+    folder = path(bench["output_root"])/"validation"/str(YEAR)
+    vr = path(cfg["verification_root"])
+    targets = sorted({t for m in methods for t in targets_for(m,request,cfg,entry)},key=cfg["targets"].index)
+    outputs = [folder/f"{m}__{t}.json" for m in methods for t in targets_for(m,request,cfg,entry)]
+    for s in entry.get("shadow",[]):
+        outputs += [folder/f"shadow_{s['method']}_{YEAR}_{t}{ext}" for t in s["targets"] for ext in (".nc",".png")]
+    project = read(path(cfg["project_config"]))
+    inputs = [*[ROOT/"scripts"/f for f in BIAS_SCRIPTS],config_path,vpath,path(entry["benchmark_config"]),path(cfg["project_config"]),
+              *[path(cfg["processed_root"])/f"{TAG}_{t}" for t in targets],
+              *[vr/f"observations/{t}" for t in targets if (vr/f"observations/{t}").is_dir()]]
+    runner.stage("bias_"+("validation" if full else "shadow"),inputs,outputs,
+                 command=[sys.executable,str(ROOT/"scripts/bias_validation.py"),"--cycle",str(config_path),
+                          "--methods",request[0],"--workers","2"])
+    return folder
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config",default="config/operational.json")
@@ -387,6 +430,8 @@ def main():
     ap.add_argument("--resume",action="store_true",help="Content-checked resume is already the default")
     ap.add_argument("--compare-external",action="store_true",help="Compare with official outlooks (cycle external_comparison block)")
     ap.add_argument("--refresh-external",action="store_true",help="Check the official sources online first and keep changed products")
+    ap.add_argument("--bias-validation",action="store_true",
+                    help="Validate every bias-correction method of the cycle's benchmark (shadow forecasts run automatically when configured)")
     a = ap.parse_args()
     runner = None
     try:
@@ -440,6 +485,7 @@ def main():
                 runner.stage("verification_view_"+target,[*common,*verification_files(vr,target)],[dest],
                              action=lambda t=target,o=dest:build_verification(vr,presentation_mask(cfg),path(cfg["boundary"]),t,o,cfg["display"]))
             comparison = external_stages(runner,cfg,info,a.refresh_external,verified) if a.compare_external else None
+            bias_stages(runner,cfg,path(a.config),a.bias_validation)
             pending = [t for t in cfg["targets"] if t not in verified]
             gallery_inputs = [*common]
             if comparison:
