@@ -1,0 +1,10 @@
+# Upload only what the Vercel build needs (CLI deployments): the published site, the data contract and the Astro project.
+/*
+!/site
+!/site_data
+!/web
+!/vercel.json
+/web/node_modules
+/web/dist
+/web/.astro
+/site/next
