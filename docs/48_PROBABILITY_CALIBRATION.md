@@ -22,9 +22,9 @@ The implementation order below is a plan, not a ranking of performance on these 
 | 2 | `emos_csg` | EMOS, censored shifted gamma | rainfall distribution | CDF, quantiles, terciles | implemented |
 | 2 | `extended_logistic` | Extended logistic regression | rainfall distribution | CDF, terciles | implemented |
 | 2 | `quantile_regression` | Regularized quantile regression | rainfall quantiles | quantiles, terciles | implemented |
-| 3 | `bjp` | Bayesian joint probability | rainfall distribution | CDF, quantiles, terciles | planned |
-| 3 | `bma_precipitation` | Bayesian model averaging | rainfall distribution | CDF, quantiles, terciles | planned |
-| 3 | `quantile_regression_forest` | Quantile regression forest | rainfall quantiles | distribution, terciles | planned |
+| 3 | `bjp` | Bayesian joint probability | rainfall distribution | CDF, quantiles, terciles | implemented |
+| 3 | `bma_precipitation` | Bayesian model averaging | rainfall distribution | CDF, quantiles, terciles | implemented |
+| 3 | `quantile_regression_forest` | Quantile regression forest | rainfall quantiles | distribution, terciles | implemented |
 
 Two pathways: **A** — fixed amount correction (MVS), replaced probability calibration (Phase 1 and the binary extensions);
 **B** — raw ensemble or declared predictors → a predictive rainfall distribution → terciles, quantiles and intervals (the
@@ -322,9 +322,78 @@ models × 5 targets, separately for RPS and CRPS). Predictors are computed from 
 | `bma_precipitation` | BMA for precipitation, exchangeable members with equal weights: per member f', P(Y' = 0) = logistic(a<sub>0</sub> + a<sub>1</sub>f'<sup>1/3</sup> + a<sub>2</sub>·1{f' = 0}); given Y' > 0, Y'<sup>1/3</sup> ~ Gamma with mean softplus(b<sub>0</sub> + b<sub>1</sub>f'<sup>1/3</sup>) and variance softplus(c<sub>0</sub>) + softplus(c<sub>1</sub>)·f' | 7, joint weighted maximum likelihood of the mixture (analytic gradient, checked numerically in the tests) | equal weights because SEAS5 members are exchangeable (Fraley et al. 2010); 25 members in training, 51 in the test years (the mixture takes whatever members a year has); quantiles by bisection |
 | `quantile_regression_forest` | Quantile regression forest: 200 trees, ≥ 40 samples per leaf, half the predictors per split, sample weights = equal-year area weights | predictors m', s', md', the ensemble's relative 10 % and 90 % quantiles, log climatological mean, CHIRPS coefficient of variation | predictive distribution = all training amounts weighted by leaf co-membership (Meinshausen 2006), at 39 levels (2.5–97.5 %); piecewise-linear CDF as for quantile regression. scikit-learn 1.5.2 (random seed 0) |
 
-## 8. Phase 3 results
+## 8. Phase 3 results (national aggregate, all Ethiopia)
 
-The benchmark started on 2026-10-13 (code d430a97, failure logging 56a067d) and is running; the results follow in the next release.
+Full numbers: `outputs/probability_calibration/<cycle>/phase3/benchmark.json`; site section "Probability calibration". The runs
+started from commit 56a067d and were saved at 583cc4c (FMAM cycles) and 03feb0f (JJAS, ONDJ), all clean; the benchmark's code
+and configuration files are identical in the three commits. Cells: tercile RPSS / amount CRPSS / share of observations inside
+the 10–90 % interval (80 % is calibrated), outer leave-one-year-out 1993–2016; the first row gives the published probabilities'
+RPSS and the MVS-corrected ensemble's CRPSS and coverage, as in Phase 2. ✓ = confirmed better than that reference (Holm across
+3 models × 5 targets, separately for RPS and CRPS; not worse over the test years).
+
+**January · FMAM**
+
+| Method | Feb | Mar | Apr | May | FMAM |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | +0.033 / +0.074 / 56% | +0.002 / -0.044 / 54% | +0.001 / -0.016 / 68% | +0.028 / +0.007 / 69% | +0.032 / +0.025 / 72% |
+| Bayesian joint probability | +0.026 / +0.085 / 83% | -0.088 / -0.048 / 82% | -0.005 / -0.018 / 81% | +0.019 / -0.016 / 81% | +0.030 / +0.019 / 82% |
+| BMA (precipitation) | +0.014 / +0.084 / 82% | -0.037 / -0.014 / 81% | -0.010 / -0.011 / 82% | +0.030 / +0.008 / 84% | +0.044 / +0.044 / 80% |
+| Quantile regression forest | +0.028 / +0.018 / 74% | -0.107 / -0.100 / 71% | -0.087 / -0.071 / 72% | -0.027 / -0.033 / 73% | -0.025 / -0.022 / 72% |
+
+**February · FMAM**
+
+| Method | Feb | Mar | Apr | May | FMAM |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | +0.137 / +0.250 / 55% | +0.011 / -0.034 / 59% | +0.009 / -0.001 / 68% | +0.008 / -0.005 / 67% | +0.021 / -0.007 / 70% |
+| Bayesian joint probability | +0.124 / +0.222 / 85% | -0.071 / -0.041 / 82% | -0.008 / -0.021 / 80% | -0.011 / -0.029 / 81% | +0.019 / +0.007 / 82% |
+| BMA (precipitation) | +0.123 / +0.237 / 84% | -0.011 / +0.001 / 81% | +0.006 / +0.001 / 82% | +0.015 / -0.003 / 83% | +0.034 / +0.030 / 79% |
+| Quantile regression forest | +0.154 / +0.261 / 76% | -0.120 / -0.121 / 71% | -0.047 / -0.034 / 72% | -0.081 / -0.067 / 71% | -0.050 / -0.051 / 71% |
+
+**May · JJAS**
+
+| Method | Jun | Jul | Aug | Sep | JJAS |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | -0.000 / -0.096 / 65% | +0.015 / -0.005 / 73% | +0.012 / -0.027 / 75% | +0.003 / -0.060 / 71% | +0.027 / -0.028 / 70% |
+| Bayesian joint probability | -0.061 / -0.121 / 86% | -0.016 / -0.034 / 85% | -0.033 / -0.075 / 85% | -0.033 / -0.066 / 85% | -0.020 / -0.101 / 86% |
+| BMA (precipitation) | -0.062 / -0.083 / 85% | -0.024 / -0.046 / 83% | -0.050 / -0.055 / 81% | -0.038 / -0.063 / 82% | +0.001 / -0.002 / 82% |
+| Quantile regression forest | -0.088 / -0.065 / 74% | -0.050 / -0.013 / 74% | -0.042 / -0.021 / 76% | -0.067 / -0.045 / 74% | -0.045 / -0.021 / 73% |
+
+**September · ONDJ**
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | +0.013 / -0.002 / 72% | +0.040 / +0.084 / 75% | +0.003 / +0.029 / 76% | +0.001 / -0.040 / 46% | +0.039 / +0.070 / 75% |
+| Bayesian joint probability | -0.030 / -0.041 / 81% | +0.013 / +0.048 / 81% | -0.126 / +0.014 / 83% | -0.058 / -0.010 / 81% | +0.017 / +0.042 / 79% |
+| BMA (precipitation) | -0.004 / +0.010 / 80% | +0.036 / +0.073 / 80% | -0.152 / +0.021 / 79% | -0.033 / -0.002 / 78% | +0.042 / +0.069 / 80% |
+| Quantile regression forest | -0.046 / -0.056 / 73% | +0.010 / +0.015 / 72% | -0.129 / -0.054 / 75% | -0.119 / -0.085 / 72% | -0.008 / -0.052 / 69% |
+
+### Findings
+
+1. **No Phase 3 model is confirmed better** than the published probabilities (tercile RPS) or the MVS-corrected ensemble
+   (amount CRPS), in any cycle or target.
+2. **BMA for precipitation is the strongest of the three.** Its CRPSS is above the MVS ensemble's in 13 of 20 targets (largest:
+   January-initialized FMAM season +0.044 against +0.025, Holm p 0.12; February-initialized FMAM season +0.030 against −0.007), and
+   its RPSS above the published probabilities' in 5 of 20, but none of these differences is significant, and over the test years
+   its CRPSS is higher in only 7 of 20. In Phase 2, EMOS was confirmed better in CRPS for two targets; BMA is not.
+3. **Bayesian joint probability gives calibrated ranges (79–86 % inside the 10–90 % interval) but not better forecasts**: its RPSS
+   is below the published probabilities' in all 20 targets and its CRPSS above the MVS ensemble's in 3. A likely reason is that it
+   uses only the ensemble mean, so the predicted spread does not follow the forecast's own spread.
+4. **The quantile regression forest is the weakest**: CRPSS above the MVS ensemble's in 5 of 20 targets, RPSS above the published
+   probabilities' in 1, and its ranges are too narrow (69–76 %). Its flexibility does not pay off with 23 training years per
+   fold: its best result (February-initialized February, +0.261 against +0.250) falls below the MVS ensemble over the test years.
+5. **Intervals:** BJP 79–86 %, BMA 78–85 %, the forest 69–76 %, against 46–76 % for the MVS ensemble.
+6. **Fits:** BMA and the forest converged in every fold. BJP's optimizer reached its iteration limit in some folds, on a flat
+   ridge of the log-sinh parameters (where the transform tends to a shifted log); a much more thorough refit of one such case
+   (January-initialized March, fit 1993–2016) improves the objective only in the seventh significant digit, changes the predicted
+   quantiles by less than 0.02 % and leaves the CRPS of 2017–2020 unchanged.
+
+### What this means
+
+* Across Phases 1–3 (15 methods), nothing is confirmed better than the incumbent climatology blend for the published tercile
+  probabilities: keep it.
+* For rainfall amounts and ranges, EMOS (Phase 2) remains the best-supported distribution model and the one in the shadow
+  forecast (section 9); BMA is a close, unconfirmed alternative. Any amount or range product remains a separate decision after
+  the shadow has several scored seasons.
 
 ## 9. Shadow rainfall-amount and range forecast (`scripts/dist_shadow.py`)
 

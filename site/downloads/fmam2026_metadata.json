@@ -2,9 +2,9 @@
  "cycle": "FMAM 2026",
  "initialization": "2026-01-01",
  "initialization_month": "January",
- "built_utc": "2026-10-13 21:25 UTC",
- "release": "2026-10-14.3",
- "code_version": "583cc4c",
+ "built_utc": "2026-10-13 23:53 UTC",
+ "release": "2026-10-14.4",
+ "code_version": "03feb0f",
  "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
  "record": {
   "Model initialization": "1 January 2026 · ECMWF SEAS5 (system 51), 51 members",
@@ -15,7 +15,7 @@
   "Observations processed through": "May 2026 (Feb, Mar, Apr, May)",
   "CHIRPS archive": "Official CHIRPS v3.0 monthly listing checked 14 Oct 2026: monthly files through Aug 2026",
   "Verification last run": "11 Oct 2026",
-  "Method / version": "Shared climatology blend (λ = 0.34 for FMAM) · code 583cc4c"
+  "Method / version": "Shared climatology blend (λ = 0.34 for FMAM) · code 03feb0f"
  },
  "rainfall_domain": {
   "view": "fmam_rainfall_domain",

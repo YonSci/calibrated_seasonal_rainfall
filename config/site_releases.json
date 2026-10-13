@@ -520,7 +520,7 @@
   {
     "id": "2026-10-14.3",
     "date": "2026-10-14",
-    "commit": null,
+    "commit": "03feb0f",
     "title": "Amount and range shadow; downloads as release assets; new site pages",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -540,6 +540,24 @@
       {
         "type": "display",
         "text": "Large download files (NetCDF, JSON, PDF, CSV) are served from the GitHub release 'site-files', named by their content so links never change; the site is half its former size. Every build also writes the site's data as JSON (site_data/), from which new pages are built: overview, probability calibration, bias correction, downloads and releases, under /next/ (docs/49)."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-14.4",
+    "date": "2026-10-14",
+    "commit": null,
+    "title": "Probability calibration, Phase 3",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "Phase 3 of the probability and rainfall-distribution calibration, for all four cycles: Bayesian joint probability, BMA for precipitation and quantile regression forests, scored for terciles, amounts (CRPS), quantiles and interval coverage. No model is confirmed better than the published probabilities or the MVS-corrected ensemble. BMA is the strongest (CRPSS above the MVS ensemble in 13 of 20 targets, none significant); BJP and BMA give near-calibrated 10-90% ranges (78-86%), the forest too narrow ones (69-76%). Across Phases 1-3, the incumbent climatology blend stays; EMOS remains the model of the amount and range shadow. The published forecasts are unchanged."
       }
     ]
   }
