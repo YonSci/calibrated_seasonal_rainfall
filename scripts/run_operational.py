@@ -56,6 +56,8 @@ EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "i
                     "verify_external_forecasts.py", "verify2026_math.py"]
 BIAS_SCRIPTS = ["bias_validation.py", "bias_methods.py", "bias_confirmation.py", "bias_benchmark.py", "calibration_core.py",
                 "compare_calibration.py", "local_blend.py", "run_calibration.py"]
+AMOUNT_SCRIPTS = ["dist_shadow.py", "dist_calibration.py", "dist_benchmark.py", "bias_methods.py", "bias_benchmark.py",
+                  "bias_validation.py", "run_calibration.py", "calibration_core.py"]
 VERIFY_SCRIPTS = ["prepare_verification_2026.py","verify_frozen_2026.py","verify2026_math.py",
                   "verification_report_core.py","build_verification_report.py","prepare_chirps_v3.py"]
 
@@ -418,6 +420,30 @@ def bias_stages(runner,cfg,config_path,full):
     return folder
 
 
+def amount_stages(runner,cfg,config_path):
+    """Shadow rainfall-amount and range forecast (EMOS; config/probability_calibration/amount_shadow.json), automatic when the
+    cycle is configured. Never changes the published forecast; scores appear once a target's verification observations exist."""
+    spath = ROOT/"config/probability_calibration/amount_shadow.json"
+    if not spath.is_file():
+        return None
+    scfg = read(spath)
+    project = read(path(cfg["project_config"]))
+    entry = next((e for e in scfg["cycles"] if e["initialization_month"]==project["initialization_month"]
+                  and e["season"]==project["season"]["name"]),None)
+    if entry is None:
+        return None
+    folder = path(scfg["output_root"].format(name=entry["name"]))/str(YEAR)
+    vr = path(cfg["verification_root"])
+    targets = list(cfg["targets"])
+    outputs = [folder/f"{scfg['model']}__{t}.json" for t in targets]+[folder/f"shadow_{scfg['model']}_{YEAR}_{t}{ext}" for t in targets for ext in (".nc",".png")]
+    inputs = [*[ROOT/"scripts"/f for f in AMOUNT_SCRIPTS],config_path,spath,path(entry["benchmark_config"]),path(cfg["project_config"]),
+              *[path(cfg["processed_root"])/f"{TAG}_{t}" for t in targets],
+              *[vr/f"observations/{t}" for t in targets if (vr/f"observations/{t}").is_dir()]]
+    runner.stage("amount_shadow",inputs,outputs,
+                 command=[sys.executable,str(ROOT/"scripts/dist_shadow.py"),"--cycle",str(config_path)])
+    return folder
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config",default="config/operational.json")
@@ -486,6 +512,7 @@ def main():
                              action=lambda t=target,o=dest:build_verification(vr,presentation_mask(cfg),path(cfg["boundary"]),t,o,cfg["display"]))
             comparison = external_stages(runner,cfg,info,a.refresh_external,verified) if a.compare_external else None
             bias_stages(runner,cfg,path(a.config),a.bias_validation)
+            amount_stages(runner,cfg,path(a.config))
             pending = [t for t in cfg["targets"] if t not in verified]
             gallery_inputs = [*common]
             if comparison:
