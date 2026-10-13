@@ -1,4 +1,4 @@
-"""Rainfall-distribution models (docs/48), Phase 2 of "Probability and rainfall-distribution calibration", Pathway B.
+"""Rainfall-distribution models (docs/48), Phases 2 and 3 of "Probability and rainfall-distribution calibration", Pathway B.
 
 Each model predicts a full rainfall distribution for every grid cell from the raw ensemble; tercile probabilities, quantiles
 and intervals are derived from it. Common interface:
@@ -222,6 +222,228 @@ def qr_predict(F, model):
     return d
 
 
+# ---------------------------------------------------------------- Phase 3
+
+def _logsinh(x, a, b):
+    """Log-sinh transform z = log(sinh(a + b x)) / b (Wang et al. 2012), stable for large arguments; x >= 0, a, b > 0."""
+    v = a + b * np.maximum(x, 0)
+    return (v + np.log1p(-np.exp(-2 * v)) - np.log(2)) / b
+
+
+def _logsinh_inv(z, a, b):
+    w = b * z
+    big = w > 20
+    ash = np.where(big, w + np.log(2), np.arcsinh(np.exp(np.minimum(w, 20))))   # arcsinh(exp(w))
+    return np.maximum((ash - a) / b, 0)
+
+
+def _logsinh_logjac(x, a, b):
+    """log dz/dx = log coth(a + b x)."""
+    return -np.log(np.tanh(a + b * np.maximum(x, 0)))
+
+
+class StudentT(Distribution):
+    """BJP predictive: in log-sinh space Z ~ t_nu(mean, scale); amounts below the transform of zero are zero (censoring)."""
+
+    def __init__(self, mean, sd, nu, a, b, scale, valid):
+        super().__init__(scale, valid)
+        self.mean, self.sd, self.nu, self.a, self.b = mean, sd, nu, a, b
+
+    def cdf(self, x):
+        from scipy.stats import t
+        xr = np.maximum(np.asarray(x, float), 0) / np.where(self.scale > 0, self.scale, 1)
+        return np.where(np.asarray(x) >= 0, t.cdf((_logsinh(xr, self.a, self.b) - self.mean) / self.sd, self.nu), 0.)
+
+    def quantile(self, u):
+        from scipy.stats import t
+        z = self.mean + self.sd * t.ppf(np.clip(u, FLOOR, 1 - FLOOR), self.nu)
+        return self.scale * _logsinh_inv(z, self.a, self.b)
+
+
+def bjp_fit(S, **_):
+    """Bayesian joint probability (Wang et al. 2009; Wang & Robertson 2011), pooled over cells in relative units.
+
+    The ensemble mean m' and the observation y' are each log-sinh transformed; in transformed space they are bivariate
+    normal, i.e. z_y = c0 + c1 (z_m - mean_m) / sd_m + e, e ~ N(0, s^2), with y' = 0 left-censored at the transform of zero.
+    Transformation and normal parameters are fitted by weighted maximum likelihood (the posterior mode under flat priors);
+    the uncertainty of the normal parameters is integrated analytically under the reference prior, with the number of
+    training years as the effective sample size (cells of one year are not independent): a Student-t predictive with
+    nu = years - 2 and scale s * sqrt(1 + 1/years + d^2/years), d the standardized predictor.
+    """
+    from scipy.stats import norm
+    y, m, w, years = S['y'], S['m'], S['w'], int(S['n_years'])
+    mpos = np.maximum(m, 1e-6)
+
+    def nll_m(th):
+        a, b = np.exp(th[0]), np.exp(th[1])
+        z = _logsinh(mpos, a, b)
+        mu, sd = th[2], np.exp(th[3])
+        return float(-w @ (norm.logpdf(z, mu, sd) + _logsinh_logjac(mpos, a, b)))
+    rm = minimize(nll_m, np.array([np.log(.1), 0., 1., np.log(.5)]), method='L-BFGS-B',
+                  bounds=[(-9, 3), (-5, 3), (None, None), (-8, 8)], options={'maxiter': 500})
+    am, bm, mum, sdm = np.exp(rm.x[0]), np.exp(rm.x[1]), rm.x[2], np.exp(rm.x[3])
+    d = (_logsinh(mpos, am, bm) - mum) / sdm
+    zero = y <= 1e-6
+
+    def nll_y(th):
+        a, b = np.exp(th[0]), np.exp(th[1])
+        mean, sd = th[2] + th[3] * d, np.exp(th[4])
+        z = _logsinh(y, a, b)
+        lp = np.where(zero, norm.logcdf((_logsinh(0., a, b) - mean) / sd),
+                      norm.logpdf(z, mean, sd) + _logsinh_logjac(y, a, b))
+        return float(-w @ lp)
+    ry = minimize(nll_y, np.array([np.log(.1), 0., 1., .3, np.log(.5)]), method='L-BFGS-B',
+                  bounds=[(-9, 3), (-5, 3), (None, None), (None, None), (-8, 8)], options={'maxiter': 500})
+    if not (np.isfinite(rm.x).all() and np.isfinite(ry.x).all()):
+        raise RuntimeError('BJP fit failed')
+    return dict(predictor=dict(a=float(am), b=float(bm), mean=float(mum), sd=float(sdm)),
+                observation=dict(a=float(np.exp(ry.x[0])), b=float(np.exp(ry.x[1]))),
+                regression=dict(c0=float(ry.x[2]), c1=float(ry.x[3]), sd=float(np.exp(ry.x[4]))),
+                effective_sample_size=int(years), nu=int(years) - 2, converged=bool(rm.success and ry.success))
+
+
+def bjp_predict(F, model):
+    p, o, r = model['predictor'], model['observation'], model['regression']
+    n = model['effective_sample_size']
+    d = (_logsinh(np.maximum(np.nan_to_num(F['m']), 1e-6), p['a'], p['b']) - p['mean']) / p['sd']
+    sd = r['sd'] * np.sqrt(1 + 1 / n + d ** 2 / n)
+    return StudentT(r['c0'] + r['c1'] * d, sd, model['nu'], o['a'], o['b'], F['scale'], F['valid'])
+
+
+class MemberMixture(Distribution):
+    """BMA predictive: equal-weight mixture over members of a point mass at zero and a gamma for the cube root of the amount."""
+
+    def __init__(self, p0, k, theta, scale, valid):
+        super().__init__(scale, valid)
+        self.p0, self.k, self.theta = p0, k, theta                 # (member, cell); NaN for absent members
+        self.wt = np.isfinite(p0) / np.maximum(np.isfinite(p0).sum(0), 1)
+
+    def _cdf_root(self, r):
+        g = gammainc(np.nan_to_num(self.k, nan=1.), np.maximum(r, 0)[None, :] / np.nan_to_num(self.theta, nan=1.))
+        return np.sum(self.wt * (np.nan_to_num(self.p0) + (1 - np.nan_to_num(self.p0)) * g), 0)
+
+    def cdf(self, x):
+        x = np.asarray(x, float)
+        xr = np.maximum(x, 0) / np.where(self.scale > 0, self.scale, 1)
+        return np.where(x >= 0, self._cdf_root(np.cbrt(xr)), 0.)
+
+    def quantile(self, u, iterations=50):
+        u = np.clip(np.asarray(u, float), FLOOR, 1 - FLOOR)
+        lo = np.zeros(self.p0.shape[1])
+        mean, sd = np.nan_to_num(self.k * self.theta), np.nan_to_num(np.sqrt(self.k) * self.theta)
+        hi = np.max(mean + 12 * sd, 0) + 1e-6
+        for _ in range(iterations):                                # bisection on the cube root
+            mid = (lo + hi) / 2
+            below = self._cdf_root(mid) < u
+            lo, hi = np.where(below, mid, lo), np.where(below, hi, mid)
+        return self.scale * ((lo + hi) / 2) ** 3
+
+
+def _bma_parts(th, f):
+    """Member-level PoP and gamma parameters; f: relative member amounts (sample/cell, member), NaN where absent."""
+    fr = np.cbrt(np.maximum(f, 0))
+    eta = th[0] + th[1] * fr + th[2] * (f <= 0)
+    lin = th[3] + th[4] * fr
+    mu = softplus(lin)
+    v = softplus(th[5]) + softplus(th[6]) * np.maximum(f, 0) + 1e-6
+    return fr, eta, lin, mu, v
+
+
+def bma_fit(S, **_):
+    """BMA for precipitation (Sloughter et al. 2007), exchangeable members with equal weights (Fraley et al. 2010).
+
+    Each member kernel: P(Y' = 0) = logistic(a0 + a1 f^(1/3) + a2 1{f = 0}); given Y' > 0, Y'^(1/3) ~ Gamma with mean
+    softplus(b0 + b1 f^(1/3)) and variance softplus(c0) + softplus(c1) f (relative units). All seven parameters are fitted
+    jointly by weighted maximum likelihood of the mixture (analytic gradient).
+    """
+    from scipy.special import digamma
+    y, w, f = S['y'], S['w'], S['members']
+    ok = np.isfinite(f)
+    f0 = np.where(ok, f, 0.)
+    logpi = np.where(ok, -np.log(np.maximum(ok.sum(1, keepdims=True), 1)), -np.inf)
+    zero = (y <= 1e-6)[:, None]
+    z = np.cbrt(np.maximum(y, 1e-12))[:, None]
+
+    def f_and_g(th):
+        fr, eta, lin, mu, v = _bma_parts(th, f0)
+        k, r = mu ** 2 / v, mu / v
+        lg = k * np.log(r) - gammaln(k) + (k - 1) * np.log(z) - r * z
+        l = np.where(zero, -softplus(-eta), -softplus(eta) + lg) + logpi
+        mx = np.max(l, 1, keepdims=True)
+        tot = mx[:, 0] + np.log(np.sum(np.exp(l - mx), 1))
+        resp = np.exp(l - tot[:, None]) * w[:, None]              # weighted responsibilities
+        p0 = expit(eta)
+        de = np.where(zero, 1 - p0, -p0)
+        dk = np.where(zero, 0., np.log(r) - digamma(k) + np.log(z))
+        dr = np.where(zero, 0., k / r - z)
+        dmu = dk * 2 * mu / v + dr / v
+        dv = -dk * mu ** 2 / v ** 2 - dr * mu / v ** 2
+        dlin = dmu * expit(lin)
+        g = np.array([np.sum(resp * de), np.sum(resp * de * fr), np.sum(resp * de * (f0 <= 0)),
+                      np.sum(resp * dlin), np.sum(resp * dlin * fr),
+                      np.sum(resp * dv) * expit(th[5]), np.sum(resp * dv * np.maximum(f0, 0)) * expit(th[6])])
+        return -float(w @ tot), -g
+    res = minimize(f_and_g, np.array([-4., -1., 1., 0., 1., -3., -3.]), jac=True, method='L-BFGS-B', options={'maxiter': 500})
+    if not np.isfinite(res.x).all():
+        raise RuntimeError('BMA fit failed')
+    return dict(theta=res.x.tolist(), converged=bool(res.success), weights='equal (exchangeable members)',
+                form='logit P0 = a0 + a1 f^(1/3) + a2 1{f=0}; Y^(1/3)|Y>0 ~ Gamma(mean softplus(b0 + b1 f^(1/3)), '
+                     'variance softplus(c0) + softplus(c1) f)')
+
+
+def bma_predict(F, model):
+    th = np.asarray(model['theta'])
+    f = F['members']                                               # (member, cell), relative
+    _, eta, _, mu, v = _bma_parts(th, np.nan_to_num(f))
+    absent = ~np.isfinite(f)
+    p0 = np.where(absent, np.nan, expit(eta))
+    return MemberMixture(p0, np.where(absent, np.nan, mu ** 2 / v), np.where(absent, np.nan, v / mu), F['scale'], F['valid'])
+
+
+QRF_LEVELS = tuple(np.round(np.arange(.025, .976, .025), 3))
+QRF_PREDICTORS = ('m', 's', 'md', 'q10', 'q90', 'logmu', 'cv')
+
+
+def qrf_fit(S, trees=200, min_leaf=40, max_features=.5, seed=0, **_):
+    """Quantile regression forest (Meinshausen 2006): a random forest of the relative amount on ensemble and climatology
+    predictors; the predictive distribution is the leaf-weighted empirical distribution of the training amounts."""
+    from sklearn.ensemble import RandomForestRegressor
+    X = np.column_stack([S[k] for k in QRF_PREDICTORS])
+    forest = RandomForestRegressor(n_estimators=trees, min_samples_leaf=min_leaf, max_features=max_features, random_state=seed,
+                                   n_jobs=1).fit(X, S['y'], sample_weight=S['w'] * len(S['y']))
+    leaves = forest.apply(X)                                       # (sample, tree)
+    return dict(_forest=forest, _leaves=leaves, _y=S['y'].copy(), _w=S['w'].copy(), trees=trees, min_leaf=min_leaf,
+                max_features=max_features, seed=seed, predictors=list(QRF_PREDICTORS), levels=list(QRF_LEVELS),
+                weights='all training samples of each leaf, by sample weight (Meinshausen 2006)')
+
+
+def qrf_predict(F, model, chunk=150):
+    from scipy import sparse
+    forest, L, y, w = model['_forest'], model['_leaves'], model['_y'], model['_w']
+    n, T = L.shape
+    off = np.r_[0, np.cumsum(L.max(0) + 1)[:-1]]                    # leaf ids made unique across trees
+    col = (L + off).ravel()
+    leaf_sum = np.bincount(col, weights=np.repeat(w, T), minlength=off[-1] + L[:, -1].max() + 1)
+    order = np.argsort(y)
+    rank = np.empty(n, int)
+    rank[order] = np.arange(n)
+    A = sparse.csr_matrix((np.repeat(w, T) / leaf_sum[col] / T, (col, np.repeat(rank, T))), shape=(len(leaf_sum), n))
+    X = np.column_stack([np.nan_to_num(F[k]) for k in QRF_PREDICTORS])
+    lt = forest.apply(X) + off                                      # (cell, tree)
+    lt = np.minimum(lt, len(leaf_sum) - 1)
+    levels = np.asarray(model['levels'])
+    q = np.zeros((len(levels), len(X)))
+    ys = y[order]
+    for s in range(0, len(X), chunk):
+        rows = lt[s:s + chunk]
+        Ind = sparse.csr_matrix((np.ones(rows.size), (np.repeat(np.arange(len(rows)), T), rows.ravel())), shape=(len(rows), len(leaf_sum)))
+        C = np.cumsum((Ind @ A).toarray(), 1)                      # weighted CDF at the sorted training amounts
+        C /= C[:, -1:]
+        idx = np.minimum(np.array([np.searchsorted(c, levels) for c in C]), n - 1)      # first amount with CDF >= level
+        q[:, s:s + chunk] = ys[idx].T
+    return Quantiles(levels, q, F['scale'], F['valid'])
+
+
 @dataclass(frozen=True)
 class Model:
     key: str
@@ -245,12 +467,28 @@ MODELS = {m.key: m for m in [
     Model('quantile_regression', 'Regularized quantile regression', qr_fit, qr_predict,
           'conditional quantiles at 19 levels (5–95%), CDF by interpolation', "ensemble mean m' and spread s' (relative)",
           'pinball loss per level (Huber-smoothed), L2 1e-4, pooled', ('Koenker & Bassett 1978',), defaults=dict(l2=1e-4)),
+    Model('bjp', 'Bayesian joint probability', bjp_fit, bjp_predict,
+          'rainfall distribution (log-sinh normal, censored at zero, Student-t predictive)', "ensemble mean m' (relative)",
+          'censored maximum likelihood of the transforms and the joint normal; parameter uncertainty integrated with the '
+          'number of training years as the effective sample', ('Wang et al. 2009', 'Wang & Robertson 2011', 'Wang et al. 2012')),
+    Model('bma_precipitation', 'Bayesian model averaging for precipitation', bma_fit, bma_predict,
+          'mixture over members: probability of zero and a gamma for the cube root of the amount',
+          "each member's amount f' (relative), equal weights for exchangeable members",
+          'maximum likelihood of the mixture, pooled', ('Sloughter et al. 2007', 'Fraley et al. 2010')),
+    Model('quantile_regression_forest', 'Quantile regression forest', qrf_fit, qrf_predict,
+          'conditional distribution as leaf-weighted training amounts; quantiles at 39 levels (2.5–97.5%)',
+          "m', s', md', ensemble 10% and 90% quantiles (relative), log climatological mean, CHIRPS coefficient of variation",
+          '200 trees, at least 40 samples per leaf, half the predictors per split, pooled', ('Meinshausen 2006',),
+          defaults=dict(trees=200, min_leaf=40, max_features=.5, seed=0)),
 ]}
 
 
-def features(members, mu_obs, mu_model, valid):
-    """Relative ensemble predictors of one year's members (member, cell)."""
+def features(members, mu_obs, mu_model, valid, cv=None):
+    """Relative ensemble predictors of one year's members (member, cell); cv: the cell's training CHIRPS coefficient of
+    variation (climatology predictor of the quantile regression forest)."""
     xbar, sd = members.mean(0), members.std(0)
     md = np.abs(members[:, None, :] - members[None, :, :]).mean((0, 1))
     scale = np.where(mu_model > 0, mu_model, np.nan)
-    return dict(m=xbar / scale, s=sd / scale, md=md / scale, scale=mu_obs, valid=valid)
+    q10, q90 = np.quantile(members, [.1, .9], axis=0)
+    return dict(m=xbar / scale, s=sd / scale, md=md / scale, q10=q10 / scale, q90=q90 / scale, members=members / scale,
+                logmu=np.log(np.maximum(mu_obs, 1e-3)), cv=np.zeros_like(xbar) if cv is None else cv, scale=mu_obs, valid=valid)

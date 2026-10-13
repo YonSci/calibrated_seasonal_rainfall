@@ -1,0 +1,20 @@
+{
+  "description": "Phase 3, Pathway B: Bayesian joint probability, BMA for precipitation and quantile regression forests from the raw ensemble against the published pipeline (docs/48).",
+  "benchmark_config": "config/bias_correction/sep_ondj.json",
+  "reference_amount_method": "mvs",
+  "models": [
+    "bjp",
+    "bma_precipitation",
+    "quantile_regression_forest"
+  ],
+  "parameters": {
+    "quantile_regression_forest": {
+      "trees": 200,
+      "min_leaf": 40,
+      "max_features": 0.5,
+      "seed": 0
+    }
+  },
+  "output_root": "outputs/probability_calibration/sep_ondj/phase3",
+  "phase": 3
+}

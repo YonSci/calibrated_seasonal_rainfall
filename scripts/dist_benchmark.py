@@ -1,4 +1,4 @@
-"""Phase 2, Pathway B: rainfall-distribution models against the published pipeline (docs/48).
+"""Pathway B (Phases 2 and 3): rainfall-distribution models against the published pipeline (docs/48).
 
 Each model (dist_calibration.py) predicts a full rainfall distribution from the raw ensemble; terciles, quantiles and intervals
 are derived from it. Design per target (national cells), as in Phase 1:
@@ -76,19 +76,26 @@ def fold(models, obs, T, idx, area_e, valid_min=1.0):
     prob_ok = (O.std(0) >= 1.0) & (q1 > 0) & ((q2 - q1) > 1e-6)
     valid = np.isfinite(O).all(0) & (mu_o >= valid_min) & (mu_m >= valid_min)
     thr = np.quantile(O, dc.THRESHOLD_LEVELS, axis=0).T / np.where(valid, mu_o, 1)[:, None]
-    S = {k: [] for k in ('y', 'm', 's', 'md', 'w', 'thresholds')}
+    cv = np.where(valid, O.std(0) / np.where(valid, mu_o, 1), 0.)
+    M = max(models[z].shape[0] for z in T)
+    keys = ('m', 's', 'md', 'q10', 'q90', 'logmu', 'cv')
+    S = {k: [] for k in ('y', 'w', 'thresholds', 'members') + keys}
     for z in T:
-        F = dc.features(models[z][:, idx], mu_o, mu_m, valid)
+        F = dc.features(models[z][:, idx], mu_o, mu_m, valid, cv)
         w = np.where(valid, area_e, 0.)
         S['y'].append(np.where(valid, obs[z][idx] / np.where(valid, mu_o, 1), 0)[valid])
-        for k in ('m', 's', 'md'):
+        for k in keys:
             S[k].append(F[k][valid])
+        mem = np.full((int(valid.sum()), M), np.nan)              # (sample, member), NaN beyond the year's members
+        mem[:, :F['members'].shape[0]] = F['members'][:, valid].T
+        S['members'].append(mem)
         S['w'].append((w / w.sum())[valid] / len(T))
         S['thresholds'].append(thr[valid])
     S = {k: np.concatenate(v) for k, v in S.items()}
+    S['n_years'] = len(T)
     clim_cat = categories(O, q1, q2)
     p_clim = np.stack([(clim_cat == k).mean(0) for k in range(3)], -1)
-    return S, dict(mu_o=mu_o, mu_m=mu_m, q1=q1, q2=q2, prob_ok=prob_ok, valid=valid, O=O, p_clim=p_clim)
+    return S, dict(mu_o=mu_o, mu_m=mu_m, q1=q1, q2=q2, prob_ok=prob_ok, valid=valid, O=O, p_clim=p_clim, cv=cv)
 
 
 def score_year(name, p, crps, quant, stats, y_obs, area_e, regions, store):
@@ -146,7 +153,7 @@ def run_target(config_path, target):
         crps_ens = np.where(ens_ok, bb.ensemble_crps(e0, np.nan_to_num(y_obs)), np.nan)
         quant = {tau: np.quantile(e0, tau, axis=0) for tau in LEVELS}
         score_year(y, None, crps_ens, quant, st, y_obs, area_e, regions, store['mvs_ensemble'][design])
-        F = dc.features(models[y][:, idx], st['mu_o'], st['mu_m'], st['valid'])
+        F = dc.features(models[y][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'])
         for k in keys:
             m = dc.MODELS[k]
             model = (fitted or {}).get(k) or m.fit(S, **{**m.defaults, **pcfg.get('parameters', {}).get(k, {})})
@@ -183,6 +190,7 @@ def run_target(config_path, target):
                     s.update(crps=m('crps'), crpss=1 - m('crps') / m('crps_clim'), coverage_80=m('coverage_80'),
                              **{f'pinball_{int(t * 100)}': m(f'pinball_{int(t * 100)}') for t in LEVELS})
                 summary[k][design][reg] = s
+    fitted = {k: {kk: vv for kk, vv in v.items() if not kk.startswith('_')} for k, v in fitted.items()}   # no forests
     return target, dict(tag=tag, methods=summary, fitted=fitted,
                         diagnostics={k: dict(mean_crossing_share=float(np.mean(v['crossings'])) if v['crossings'] else None,
                                              all_converged=bool(all(v['converged']))) for k, v in diag.items()})
@@ -246,7 +254,7 @@ def main(args):
     model_keys = pcfg['models']
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=pcfg, protocol=__doc__.strip(),
                 provenance=bb.provenance(cfg, project, targets, pcfg['benchmark_config'], dep, extra=CODE + [args.config]),
-                phase=2, pathway='B: rainfall-distribution models from the raw ensemble', models=model_keys,
+                phase=pcfg.get('phase', 2), pathway='B: rainfall-distribution models from the raw ensemble', models=model_keys,
                 registry={k: dict(name=dc.MODELS[k].name, estimates=dc.MODELS[k].estimates, predictors=dc.MODELS[k].predictors,
                                   fitting=dc.MODELS[k].fitting, references=dc.MODELS[k].references,
                                   outputs='CDF, quantiles, tercile probabilities') for k in model_keys},
@@ -289,7 +297,8 @@ def figure(out, data):
         ax.set_xticks(range(len(T)), T)
         ax.set_title(title, fontsize=10)
     axes[0].set_yticks(range(len(rows)), [n for _, n in rows])
-    fig.suptitle(f'Rainfall-distribution models (Phase 2, Pathway B) against the published pipeline ({data["regions"][reg]})', fontsize=12)
+    fig.suptitle(f'Rainfall-distribution models (Phase {data.get("phase", 2)}, Pathway B) against the published pipeline '
+                 f'({data["regions"][reg]})', fontsize=12)
     fig.text(.5, .005, '* better than the reference (RPS: the published probabilities; CRPS: the MVS-corrected ensemble), Holm across the '
              'models and targets, and not worse over the test years.', ha='center', fontsize=8)
     fig.tight_layout(rect=(0, .03, 1, .95))

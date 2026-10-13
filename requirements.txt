@@ -18,3 +18,7 @@ pypdf==6.19.0
 # CHIRPS v3 (GeoTIFF, LZW): reading the 0.05 degree monthly files (prepare_chirps_v3.py)
 tifffile==2026.3.3
 imagecodecs==2024.12.30
+# Probability calibration Phase 3: quantile regression forest (dist_calibration.py; benchmark only)
+scikit-learn==1.5.2
+joblib==1.6.0
+threadpoolctl==3.7.0

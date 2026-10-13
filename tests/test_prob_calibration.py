@@ -82,6 +82,11 @@ class Distributions(unittest.TestCase):
         q = np.array([np.full(n, .2 + 1.6 * t) for t in levels])
         q[3] -= .5                                                                           # a crossing to be rearranged
         self.check(dc.Quantiles(levels, q, scale, valid), n)
+        self.check(dc.StudentT(np.linspace(-.5, 1.5, n), np.full(n, .4), 20, .05, 1., scale, valid), n)
+        rng = np.random.default_rng(2)
+        p0 = rng.uniform(0, .3, (5, n))
+        p0[4, :3] = np.nan                                                                   # absent members
+        self.check(dc.MemberMixture(p0, rng.uniform(2, 8, (5, n)), rng.uniform(.05, .3, (5, n)), scale, valid), n)
 
     def test_numerical_crps_matches_a_sample_estimate(self):
         rng = np.random.default_rng(1)
@@ -91,14 +96,48 @@ class Distributions(unittest.TestCase):
         mc = np.mean(np.abs(sample - y[0])) - .5 * np.mean(np.abs(sample[:100000] - sample[100000:]))
         self.assertAlmostEqual(float(d.crps(y)[0]), mc, delta=.02 * mc)
 
+    def test_logsinh_transform_inverts(self):
+        x = np.array([0., .01, .5, 1., 3., 40.])
+        for a, b in ((.01, .5), (.3, 2.)):
+            z = dc._logsinh(x, a, b)
+            np.testing.assert_allclose(dc._logsinh_inv(z, a, b), x, atol=1e-9, rtol=1e-9)
+            h = 1e-6
+            np.testing.assert_allclose(np.exp(dc._logsinh_logjac(x[1:], a, b)),
+                                       (dc._logsinh(x[1:] + h, a, b) - dc._logsinh(x[1:] - h, a, b)) / (2 * h), rtol=1e-4)
+
+    def test_bma_gradient_is_exact(self):
+        from scipy.optimize import check_grad
+        rng = np.random.default_rng(4)
+        n, M = 300, 6
+        f = rng.gamma(3., .3, (n, M))
+        f[:20, 4:] = np.nan
+        y = np.where(rng.uniform(size=n) < .1, 0., rng.gamma(3., .3, n))
+        S = dict(y=y, w=np.full(n, 1 / n), members=f)
+        captured = {}
+        orig = dc.minimize
+        dc.minimize = lambda fun, x0, **kw: captured.setdefault('fun', fun) and orig(fun, x0, **kw)
+        try:
+            dc.bma_fit(S)
+        finally:
+            dc.minimize = orig
+        fun = captured['fun']
+        for th in (np.array([-4., -1., 1., 0., 1., -3., -3.]), np.array([-1., .5, .2, .3, .8, -1., -2.])):
+            err = check_grad(lambda t: fun(t)[0], lambda t: fun(t)[1], th, epsilon=1e-6)
+            self.assertLess(err, 1e-4 * max(1., np.abs(fun(th)[1]).max()))
+
     def test_models_recover_a_known_relationship(self):
         rng = np.random.default_rng(3)
         n = 6000
-        m = rng.gamma(4., .25, n)
+        members = rng.gamma(4., .25, (n, 1)) * rng.gamma(20., .05, (n, 8))
+        m = members.mean(1)
         y = np.maximum(0, rng.gamma(4., .25 * m / 1., n) - .05)                    # mean grows with m
         thr = np.tile(np.quantile(y, dc.THRESHOLD_LEVELS), (n, 1))
-        S = dict(y=y, m=m, s=np.full(n, .3), md=np.full(n, .35), w=np.full(n, 1 / n), thresholds=thr)
-        F = dict(m=np.array([.5, 1., 2.]), s=np.full(3, .3), md=np.full(3, .35), scale=np.ones(3), valid=np.ones(3, bool))
+        q10, q90 = np.quantile(members, [.1, .9], axis=1)
+        S = dict(y=y, m=m, s=members.std(1), md=np.full(n, .35), w=np.full(n, 1 / n), thresholds=thr, members=members,
+                 q10=q10, q90=q90, logmu=np.zeros(n), cv=np.full(n, .3), n_years=24)
+        fm = np.array([.5, 1., 2.])[None, :] * np.ones((8, 1))
+        F = dict(m=fm.mean(0), s=np.full(3, .3), md=np.full(3, .35), q10=.8 * fm[0], q90=1.2 * fm[0], members=fm,
+                 logmu=np.zeros(3), cv=np.full(3, .3), scale=np.ones(3), valid=np.ones(3, bool))
         for key, mdl in dc.MODELS.items():
             d = mdl.predict(F, mdl.fit(S))
             med = d.quantile(np.full(3, .5))
