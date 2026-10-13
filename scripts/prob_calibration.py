@@ -178,6 +178,119 @@ def predict_ordinal(r, m):
     return p
 
 
+# ---------------------------------------------------------------- Phase 2: one-vs-rest binary calibrators (Pathway A)
+# Each category k gets its own binary calibration of p_k (event "category k" against the rest); the three calibrated values are
+# then divided by their sum. The normalized vector is the forecast that is fitted, checked and scored.
+
+FLOOR = 1e-4                                              # protects logs and the normalization against exact 0 / 1
+
+
+def logit(p):
+    p = np.clip(p, FLOOR, 1 - FLOOR)
+    return np.log(p / (1 - p))
+
+
+def normalize(q):
+    q = np.clip(q, FLOOR, 1 - FLOOR)
+    return q / q.sum(-1, keepdims=True)
+
+
+def binary_fit(features, t, w, init, bounds=None, l2=0., penalised=()):
+    """Weighted logistic fit of the event t on features (with intercept as features[:, 0])."""
+    def loss(th):
+        z = features @ th
+        p = expit(z)
+        f = float(-w @ (t * np.log(np.maximum(p, EPS)) + (1 - t) * np.log(np.maximum(1 - p, EPS))))
+        g = features.T @ (w * (p - t))
+        for i in penalised:
+            f += l2 * th[i] ** 2
+            g[i] += 2 * l2 * th[i]
+        return f, g
+    res = minimize(loss, np.asarray(init, float), jac=True, method='L-BFGS-B', bounds=bounds, options={'maxiter': 500})
+    if not np.isfinite(res.x).all():
+        raise RuntimeError('Binary calibration fit failed: ' + str(res.message))
+    return res.x
+
+
+def fit_platt(records, area, l2=1e-4, **_):
+    """Platt scaling per category: q_k = logistic(c + a·logit(p_k)), then normalized."""
+    a, w = pack(records, area)
+    check_categories(a['y'])
+    coef = []
+    for k in range(3):
+        X = np.column_stack([np.ones(len(w)), logit(a['s'][:, k])])
+        coef.append(binary_fit(X, (a['y'] == k).astype(float), w, [0., 1.], l2=l2, penalised=(1,)).tolist())
+    return dict(coefficients=coef, features=['intercept', 'logit(p_k)'], normalization='divide by the sum')
+
+
+def predict_platt(r, m):
+    s = np.asarray(r['s'], float)
+    q = np.column_stack([expit(c[0] + c[1] * logit(s[:, k])) for k, c in enumerate(m['coefficients'])])
+    p = normalize(q)
+    p[~np.isfinite(s).all(-1)] = np.nan
+    return p
+
+
+def fit_beta(records, area, **_):
+    """Beta calibration per category: logit q_k = c + a·ln p_k − b·ln(1 − p_k), a, b ≥ 0; then normalized."""
+    a, w = pack(records, area)
+    check_categories(a['y'])
+    coef = []
+    for k in range(3):
+        p = np.clip(a['s'][:, k], FLOOR, 1 - FLOOR)
+        X = np.column_stack([np.ones(len(w)), np.log(p), -np.log(1 - p)])
+        coef.append(binary_fit(X, (a['y'] == k).astype(float), w, [0., 1., 1.],
+                               bounds=[(None, None), (0, None), (0, None)]).tolist())
+    return dict(coefficients=coef, features=['intercept', 'ln p_k', '-ln(1 - p_k)'], constraints='a, b >= 0',
+                normalization='divide by the sum')
+
+
+def predict_beta(r, m):
+    s = np.clip(np.asarray(r['s'], float), FLOOR, 1 - FLOOR)
+    q = np.column_stack([expit(c[0] + c[1] * np.log(s[:, k]) - c[2] * np.log(1 - s[:, k])) for k, c in enumerate(m['coefficients'])])
+    p = normalize(q)
+    p[~np.isfinite(np.asarray(r['s'], float)).all(-1)] = np.nan
+    return p
+
+
+def weighted_pav(x, t, w):
+    """Weighted isotonic (non-decreasing) regression of t on x: block x-means and fitted values (pool adjacent violators)."""
+    order = np.argsort(x, kind='stable')
+    xs, ts, ws = x[order], t[order], w[order]
+    vals, wts, xsum = [], [], []
+    for xi, ti, wi in zip(xs, ts, ws):
+        vals.append(ti)
+        wts.append(wi)
+        xsum.append(xi * wi)
+        while len(vals) > 1 and vals[-2] > vals[-1]:
+            v2, w2, x2 = vals.pop(), wts.pop(), xsum.pop()
+            v1, w1, x1 = vals.pop(), wts.pop(), xsum.pop()
+            vals.append((v1 * w1 + v2 * w2) / (w1 + w2))
+            wts.append(w1 + w2)
+            xsum.append(x1 + x2)
+    centres = np.array(xsum) / np.array(wts)
+    return centres, np.array(vals)
+
+
+def fit_isotonic(records, area, **_):
+    """Isotonic regression per category (pooled over cells and years), then normalized; constant beyond the data."""
+    a, w = pack(records, area)
+    check_categories(a['y'])
+    maps = []
+    for k in range(3):
+        cx, cv = weighted_pav(a['s'][:, k], (a['y'] == k).astype(float), w)
+        maps.append(dict(x=cx.tolist(), y=cv.tolist()))
+    return dict(maps=maps, blocks=[len(m['x']) for m in maps], normalization='divide by the sum', floor=FLOOR)
+
+
+def predict_isotonic(r, m):
+    s = np.asarray(r['s'], float)
+    q = np.column_stack([np.interp(s[:, k], mp['x'], mp['y']) for k, mp in enumerate(m['maps'])])
+    p = normalize(q)
+    p[~np.isfinite(s).all(-1)] = np.nan
+    return p
+
+
 # ---------------------------------------------------------------- registry
 
 @dataclass(frozen=True)
@@ -211,6 +324,16 @@ CALIBRATORS = {c.key: c for c in [
     Calibrator('ordinal_logistic', 'Ordinal (cumulative-logit) logistic regression', fit_ordinal, predict_ordinal,
                'standardized ensemble mean, log spread ratio', 'ordinal (ordered cutpoints)',
                '2 ordered cutpoints + 2 slopes, L2 on slopes, log loss', ('McCullagh 1980',), defaults=dict(l2=1e-3)),
+    Calibrator('platt_ovr', 'Platt (sigmoid) calibration, one-vs-rest + normalization', fit_platt, predict_platt,
+               'logit of each smoothed category probability', 'one-vs-rest, then divided by the sum',
+               '2 per category (intercept, slope), L2 1e-4 on the slope, binary log loss', ('Platt 1999',), defaults=dict(l2=1e-4)),
+    Calibrator('beta_ovr', 'Beta calibration, one-vs-rest + normalization', fit_beta, predict_beta,
+               'ln p_k and ln(1 - p_k) of each smoothed category probability', 'one-vs-rest, then divided by the sum',
+               '3 per category (c, a >= 0, b >= 0), binary log loss', ('Kull et al. 2017',)),
+    Calibrator('isotonic_ovr', 'Isotonic regression, one-vs-rest + normalization', fit_isotonic, predict_isotonic,
+               'each smoothed category probability', 'one-vs-rest, then divided by the sum',
+               'monotone step map per category, pooled over cells and years (weighted pool-adjacent-violators)',
+               ('Zadrozny & Elkan 2002',)),
 ]}
 INCUMBENT = 'climatology_blend'
 

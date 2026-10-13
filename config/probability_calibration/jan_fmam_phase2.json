@@ -1,0 +1,20 @@
+{
+  "description": "Phase 2, Pathway A: one-vs-rest binary calibrators (Platt, beta, isotonic) against the incumbent climatology blend; amount correction fixed (docs/48).",
+  "benchmark_config": "config/bias_correction/jan_fmam.json",
+  "amount_method": "mvs",
+  "methods": [
+    "climatology_blend",
+    "platt_ovr",
+    "beta_ovr",
+    "isotonic_ovr"
+  ],
+  "parameters": {
+    "platt_ovr": {
+      "l2": 0.0001
+    }
+  },
+  "selection": true,
+  "selection_region": "ethiopia",
+  "output_root": "outputs/probability_calibration/jan_fmam/phase2_binary",
+  "selection_folds": 6
+}

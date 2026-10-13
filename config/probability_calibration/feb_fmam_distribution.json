@@ -1,0 +1,16 @@
+{
+  "description": "Phase 2, Pathway B: rainfall-distribution models from the raw ensemble against the published pipeline (docs/48).",
+  "benchmark_config": "config/bias_correction/feb_fmam.json",
+  "reference_amount_method": "mvs",
+  "models": [
+    "emos_csg",
+    "extended_logistic",
+    "quantile_regression"
+  ],
+  "parameters": {
+    "quantile_regression": {
+      "l2": 0.0001
+    }
+  },
+  "output_root": "outputs/probability_calibration/feb_fmam/distribution"
+}
