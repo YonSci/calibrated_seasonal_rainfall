@@ -1,0 +1,25 @@
+{
+  "description": "Phase 1 probability-calibration benchmark (docs/48): Pathway A, the amount correction fixed at the operational MVS; the tercile-probability calibration replaced.",
+  "benchmark_config": "config/bias_correction/feb_fmam.json",
+  "amount_method": "mvs",
+  "methods": [
+    "climatology_blend",
+    "pseudocount",
+    "temperature",
+    "dirichlet",
+    "multinomial_logistic",
+    "ordinal_logistic"
+  ],
+  "parameters": {
+    "multinomial_logistic": {
+      "l2": 0.001
+    },
+    "ordinal_logistic": {
+      "l2": 0.001
+    }
+  },
+  "selection": true,
+  "selection_region": "ethiopia",
+  "output_root": "outputs/probability_calibration/feb_fmam",
+  "selection_folds": 6
+}
