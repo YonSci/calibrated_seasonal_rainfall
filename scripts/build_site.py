@@ -33,6 +33,7 @@ import obs_source                                     # noqa: E402
 import site_bias                                      # noqa: E402
 import site_prob                                      # noqa: E402
 import site_files                                     # noqa: E402
+import site_data                                      # noqa: E402
 
 OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
@@ -1944,6 +1945,11 @@ def main():
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())
     print(f'Site written to {OUT}: {len(cycles)} cycles ({", ".join(c["label"] for c in cycles)}), default {default}, '
           f'CHIRPS listing {"checked" if published else "not checked"}, {checked} local links publishable, {size / 1e6:.1f} MB')
+    sections = [dict(id=i, title=t) for i, t in re.findall(r'<a href="#([a-z]+)">([^<]+)</a>', re.search(r'<nav aria-label="Sections">(.*?)</nav>',
+                (OUT / 'index.html').read_text(encoding='utf-8')).group(1))]
+    sizes = site_data.export(OUT, extras._site_data((OUT / 'index.html').read_text(encoding='utf-8')), built, sha, release_id,
+                             releases, sections)
+    print(f'Data contract: {len(sizes)} files in site_data/ ({sum(sizes.values()) / 1e6:.1f} MB)')
     if files:
         print(f'Release assets: {files["linked"]} download files linked ({files["bytes"] / 1e6:.1f} MB not in the site), '
               f'{files["uploaded"]} uploaded now' + (f'; {len(files["pending"])} not uploaded yet, kept local (use --upload-files)'
