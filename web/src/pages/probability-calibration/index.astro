@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import Table from '../../components/Table.astro';
+import { read, names, href, esc, cycleTitle, REPO } from '../../lib/data.js';
+
+const cycles = names('probcal').map((n) => ({ name: n, d: read(`probcal/${n}.json`) })).sort((a, b) => a.d.initialization_month - b.d.initialization_month);
+const first = cycles[0]?.d;
+const done = new Set([1, 2, ...(cycles.some((c) => c.d.phase3) ? [3] : [])]);
+const plan = {
+  head: ['Phase', 'Identifier', 'Method', 'Family', 'Output', 'Status'],
+  caption: 'Implementation plan (the order is a plan, not a ranking of performance)',
+  rows: (first?.plan ?? []).map((p) => [String(p.phase), `<code>${esc(p.key)}</code>`, esc(p.name), esc(p.family), esc(p.output),
+    done.has(p.phase) ? 'implemented, results on each cycle page' : 'planned']),
+};
+---
+<Base title="Probability calibration" section="probability-calibration/"
+      description="Can a different probability or rainfall-distribution method improve the tercile probabilities and rainfall ranges users receive?">
+  <h1>Probability and rainfall-distribution calibration</h1>
+  <p>Can a different <em>probability</em> method improve the tercile probabilities users receive? The published pipeline is MVS-corrected
+  members → smoothed member counts → climatology blend (the incumbent). <strong>Phase 1</strong> keeps the amount correction fixed
+  (Pathway A) and replaces only the probability stage; <strong>Phase 2</strong> adds one-vs-rest binary calibrators and the first full
+  rainfall-distribution models (Pathway B); <strong>Phase 3</strong> adds Bayesian joint probability, BMA for precipitation and quantile
+  regression forests. Every parameter is fitted only on training years within each left-out year. The published forecasts are unchanged.</p>
+
+  <h2>Cycles</h2>
+  <ul class="cards">
+    {cycles.map(({ name, d }) => (
+      <li><a class="box" href={href(`probability-calibration/${name}/`)}>
+        <strong>{cycleTitle(d.initialization_month, d.season)}</strong>
+        <span class="caveat"><br />Targets: {Object.keys(d.phase1.targets).join(', ')}<br />
+        Phases: 1{d.phase2_binary && ', 2'}{d.phase3 && ', 3'}{Object.keys(d.amount_shadow ?? {}).length > 0 && ' · amount/range shadow'}</span>
+      </a></li>
+    ))}
+  </ul>
+
+  <h2>Plan</h2>
+  <Table {...plan} />
+  <details><summary>Definitions kept distinct</summary><ul class="findings">
+    <li><strong>Pseudocount smoothing</strong> p<sub>k</sub> = (n<sub>k</sub> + α)/(M + 3α) stabilizes count probabilities; the <strong>climatology
+    blend</strong> p = (1 − λ)·p<sub>smooth</sub> + λ·p<sub>clim</sub> learns how much forecast information to keep. Both are kept as references.</li>
+    <li><strong>Dirichlet calibration</strong> (a regularized linear map of the log probabilities, then softmax) is not pseudocount smoothing.</li>
+    <li><strong>Dirichlet</strong> uses only the log probabilities; <strong>multinomial logistic</strong> uses only the ensemble predictors, so
+    they are different models. <strong>Ordinal logistic</strong> uses the same predictors with ordered cutpoints (below → near → above).</li>
+    <li>All methods are pooled over the grid cells of a target with equal weight per year; a method that cannot be fitted falls back to
+    the incumbent and the fallback is counted.</li>
+  </ul></details>
+  <p class="caveat">Full write-up: <a href={`${REPO}/blob/main/docs/48_PROBABILITY_CALIBRATION.md`}>docs/48</a>. Code: <code>scripts/prob_calibration.py</code>,
+  <code>scripts/prob_benchmark.py</code>, <code>scripts/dist_calibration.py</code>, <code>scripts/dist_benchmark.py</code>, <code>scripts/dist_shadow.py</code>.</p>
+  <details><summary>References</summary><ol class="findings">
+    {(first?.references ?? []).map((r) => <li><Fragment set:html={r.html} /> {r.url && <a href={r.url}>{r.url.replace('https://', '')}</a>}</li>)}
+  </ol></details>
+</Base>

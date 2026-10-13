@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, ROOT, REPO } from '../lib/data.js';
+
+const TYPES = SITE.change_types ?? {};
+const releases = [...SITE.releases].reverse();
+---
+<Base title="Releases" section="releases/" description="Every published release of the results site and what changed.">
+  <h1>Releases and change log</h1>
+  <p>Each release is the site as published at one commit. Archived releases open the exact page published then.</p>
+  {releases.map((r, i) => (
+    <section class="box">
+      <h2>Release {r.id} <span class="caveat">· {r.date}</span></h2>
+      <p>{r.title}</p>
+      <ul class="findings">{(r.changes ?? []).map((c) => <li><strong>{TYPES[c.type] ?? c.type}:</strong> {c.text}</li>)}</ul>
+      {r.cycles && <p class="caveat">Cycles: {r.cycles.join(', ')}</p>}
+      <p>{r.commit
+        ? <><a href={`${ROOT}releases/${r.id}/index.html`}>Open this release</a> · <a href={`${REPO}/tree/${r.commit}/site`}>Files at this release (GitHub)</a></>
+        : i === 0 ? <strong>This is the current release.</strong> : null}</p>
+    </section>
+  ))}
+</Base>

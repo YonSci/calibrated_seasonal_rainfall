@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, read, names, href, ROOT, cycleTitle } from '../lib/data.js';
+
+const C = read('cycles.json');
+const current = SITE.releases.at(-1);
+const prob = names('probcal').map((n) => ({ n, d: read(`probcal/${n}.json`) })).sort((a, b) => a.d.initialization_month - b.d.initialization_month);
+const bias = names('bias');
+---
+<Base title="Overview" section="" description="Calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia: results, benchmarks and downloads.">
+  <h1>Ethiopia Seasonal Rainfall</h1>
+  <p>Calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia (FMAM, JJAS, ONDJ), verified against CHIRPS, with the research
+  benchmarks behind the method choices. Research reconstructions; not official EMI or ICPAC forecasts.</p>
+  {current && (
+    <div class="box"><strong>Release {current.id}</strong> <span class="caveat">· {current.date}</span><br />{current.title}
+      <br /><a href={href('releases/')}>Change log</a></div>
+  )}
+
+  <h2>Forecast cycles</h2>
+  <p class="caveat">Outlooks, maps and verification are still on the <a href={ROOT}>current page</a> (choose the cycle there).</p>
+  <ul class="cards">
+    {C.cycles.map((c) => (
+      <li><a class="box" href={ROOT}><strong>{c.option}</strong><span class="caveat"><br />Targets: {c.targets.map((t) => t.label ?? t.id).join(', ')}
+        <br />Observations: {c.obs}; reference {c.reference}</span></a></li>
+    ))}
+  </ul>
+
+  <h2>Research benchmarks</h2>
+  <ul class="cards">
+    <li><a class="box" href={href('probability-calibration/')}><strong>Probability and rainfall-distribution calibration</strong>
+      <span class="caveat"><br />Phases 1–3 against the published pipeline; the EMOS amount and range shadow. {prob.length} cycles.</span></a></li>
+    <li><a class="box" href={href('bias-correction/')}><strong>Bias correction</strong>
+      <span class="caveat"><br />13 rainfall-amount corrections against the operational MVS; suggestions, shadow forecasts, validation. {bias.length} cycles.</span></a></li>
+    <li><a class="box" href={href('downloads/')}><strong>Downloads</strong><span class="caveat"><br />Every data file of the site, with sizes and checksums.</span></a></li>
+  </ul>
+</Base>

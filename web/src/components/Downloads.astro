@@ -1,0 +1,12 @@
+---
+// Download links of a section, from site_data/files.json (release assets or site paths), with their labels and sizes.
+import { downloads, link, mb } from '../lib/data.js';
+const { prefix, extra = [] } = Astro.props;
+const files = downloads(prefix);
+---
+{(files.length || extra.length) ? (
+  <ul class="dl">
+    {files.map((f) => <li><a href={link(f.url)} download>{f.label ?? f.path.split('/').pop()}</a><span>{mb(f.bytes)}{f.sha256 && ` · SHA-256 ${f.sha256.slice(0, 12)}…`}</span></li>)}
+    {extra.map(([u, label, note]) => <li><a href={u}>{label}</a><span>{note}</span></li>)}
+  </ul>
+) : <p class="caveat">No downloads for this section.</p>}

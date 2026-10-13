@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import { read, names, href, cycleTitle, REPO } from '../../lib/data.js';
+import { View, suggestion } from '../../lib/bias.js';
+
+const cycles = names('bias').map((n) => ({ name: n, D: read(`bias/${n}.json`) })).sort((a, b) => a.D.initialization_month - b.D.initialization_month);
+const info = cycles.map(({ name, D }) => {
+  const V = new View(D), S = suggestion(D);
+  return { name, title: cycleTitle(D.initialization_month, D.season), methods: V.candidates.length, ref: V.label(V.ref),
+    candidates: S ? S.n : 0, total: S ? S.total : 0, confirmation: Boolean(V.c), shadow: Object.keys(D.validation ?? {}).length > 0 };
+});
+---
+<Base title="Bias correction" section="bias-correction/" description="Rainfall-amount bias-correction methods against the operational MVS, per cycle.">
+  <h1>Bias correction</h1>
+  <p>The published forecasts correct each SEAS5 member's rainfall amount by mean–variance scaling (MVS) before the tercile probabilities
+  are computed. This benchmark compares 13 other corrections with it, member by member, for every grid cell and target, in two steps: a
+  <em>screening</em> of the amount correction alone, then a <em>confirmation</em> through the full probability pipeline that accounts for how a
+  method is chosen. A suggestion engine combines that evidence with the independent seasons scored since; the published method changes
+  only by an explicit decision.</p>
+  <ul class="cards">
+    {info.map((c) => (
+      <li><a class="box" href={href(`bias-correction/${c.name}/`)}>
+        <strong>{c.title}</strong>
+        <span class="caveat"><br />{c.methods} methods against {c.ref}{c.confirmation ? '; confirmation run' : ''}{c.shadow ? '; shadow and validation' : ''}
+        <br />Candidates: {c.candidates} of {c.total} target–product combinations</span>
+      </a></li>
+    ))}
+  </ul>
+  <p class="caveat">Full write-up: <a href={`${REPO}/blob/main/docs/47_BIAS_CORRECTION_BENCHMARK.md`}>docs/47</a>.</p>
+</Base>

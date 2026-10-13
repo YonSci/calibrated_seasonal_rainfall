@@ -1,0 +1,94 @@
+---
+// Shared page frame: the current site's stylesheet and header style, section navigation, release footer, sortable tables.
+import { SITE, ROOT, href, asset, REPO } from '../lib/data.js';
+const { title, description = '', section = '' } = Astro.props;
+const nav = [
+  ['', 'Overview'],
+  ['probability-calibration/', 'Probability calibration'],
+  ['bias-correction/', 'Bias correction'],
+  ['downloads/', 'Downloads'],
+  ['releases/', 'Releases'],
+];
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{title} · Ethiopia Seasonal Rainfall</title>
+  <meta name="description" content={description}>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href={asset('assets/style.css')}>
+  <style is:global>
+    .top .nav nav a[aria-current="page"]{color:var(--accent);font-weight:600}
+    .preview{background:var(--accent-soft);padding:6px 0;font-size:.85rem}
+    main.wrap{padding-top:18px;padding-bottom:32px}
+    main section{margin:22px 0}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:0;list-style:none}
+    .cards li{margin:0}
+    .cards a.box{display:block;text-decoration:none;color:inherit;height:100%}
+    .cards a.box:hover{border-color:var(--accent)}
+    .toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.9rem;margin:8px 0 4px}
+    figure.map-figure img{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap nav">
+      <a class="brand" href={href('')}>Ethiopia Seasonal Rainfall</a>
+      <nav aria-label="Sections">
+        {nav.map(([p, label]) => <a href={href(p)} aria-current={section === p ? 'page' : undefined}>{label}</a>)}
+        <a href={ROOT}>Outlooks (current page)</a>
+      </nav>
+    </div>
+    <div class="preview"><div class="wrap">New site, being built page by page from the same results. Forecast outlooks, maps and verification are on the <a href={ROOT}>current page</a> until they move here.</div></div>
+  </header>
+  <main class="wrap">
+    <slot />
+  </main>
+  <footer class="wrap foot">
+    Release {SITE.release} · built {SITE.built_utc} from <code>site_data/</code> (code <a href={`${REPO}/tree/${SITE.code_commit}`}>{String(SITE.code_commit).slice(0, 7)}</a>) ·
+    <a href={href('releases/')}>Releases and change log</a> · Research reconstructions; not official EMI or ICPAC forecasts.
+  </footer>
+  <script>
+    // Sortable tables: click a column header (numbers by value, text alphabetically; a third click restores the order).
+    const sortNumber = (s) => {
+      const m = s.replace(/−/g, '-').replace(/,/g, '').match(/[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+      return m ? parseFloat(m[0]) : NaN;
+    };
+    document.addEventListener('click', (e) => {
+      const th = (e.target as HTMLElement).closest('thead th') as HTMLTableCellElement | null;
+      if (!th || th.colSpan > 1) return;
+      const table = th.closest('table') as HTMLTableElement;
+      if (!table || table.classList.contains('nosort') || !table.tBodies[0] || table.tBodies[0].rows.length < 2) return;
+      const col = [...(th.parentElement as HTMLTableRowElement).cells].indexOf(th);
+      const body = table.tBodies[0];
+      const rows = [...body.rows];
+      rows.forEach((r, i) => { if (r.dataset.order === undefined) r.dataset.order = String(i); });
+      const state = th.getAttribute('aria-sort');
+      const next = state === 'ascending' ? 'descending' : state === 'descending' ? 'none' : 'ascending';
+      table.querySelectorAll('thead th[aria-sort]').forEach((h) => h.removeAttribute('aria-sort'));
+      let order;
+      if (next === 'none') {
+        order = rows.sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order));
+      } else {
+        const text = (r) => (r.cells[col] ? r.cells[col].textContent.trim() : '');
+        const items = rows.map((r) => ({ r, t: text(r), n: sortNumber(text(r)) }));
+        const numeric = items.filter((x) => !isNaN(x.n)).length >= items.length / 2;
+        const dir = next === 'ascending' ? 1 : -1;
+        order = items.sort((a, b) => {
+          if (numeric) {
+            if (isNaN(a.n) || isNaN(b.n)) return Number(isNaN(a.n)) - Number(isNaN(b.n));
+            return dir * (a.n - b.n);
+          }
+          if (!a.t || !b.t || a.t === '—' || b.t === '—') return Number(!a.t || a.t === '—') - Number(!b.t || b.t === '—');
+          return dir * a.t.localeCompare(b.t, undefined, { numeric: true });
+        }).map((x) => x.r);
+        th.setAttribute('aria-sort', next);
+      }
+      order.forEach((r) => body.appendChild(r));
+    });
+  </script>
+</body>
+</html>

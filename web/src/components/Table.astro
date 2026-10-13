@@ -1,0 +1,11 @@
+---
+// A results table. Cells are HTML strings built with the escaping helpers of lib/data.js (they may carry <strong> or ✓).
+const { head = [], rows = [], caption = '', cls = 'compact' } = Astro.props;
+---
+<div class="table-wrap">
+  <table class={cls}>
+    {caption && <caption set:html={caption} />}
+    <thead><tr>{head.map((h) => <th scope="col" set:html={h} />)}</tr></thead>
+    <tbody>{rows.map((r) => <tr>{r.map((c) => <td set:html={c} />)}</tr>)}</tbody>
+  </table>
+</div>

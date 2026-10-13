@@ -35,3 +35,6 @@ outputs_chirps_v2/
 models_chirps_v2/
 data/interim_chirps_v2/
 data/processed_chirps_v2/
+
+# Astro pages, built by the Pages workflow from site_data/ (docs/49)
+site/next/

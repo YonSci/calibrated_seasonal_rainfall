@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import Table from '../components/Table.astro';
+import { FILES, read, link, esc, mb } from '../lib/data.js';
+
+const C = read('cycles.json');
+const files = Object.values(FILES);
+const group = (f) => {
+  const p = f.path.replace(/^downloads\//, '').split('/');
+  if (p[0] === 'bias') return `Bias correction · ${p[1]}`;
+  if (p[0] === 'probcal') return `Probability calibration · ${p[1]}`;
+  const c = C.cycles.find((c) => f.path.includes(`/${c.id}`) || f.path.includes(`downloads/${c.id}_`) || f.path.includes(`data/${c.id}/`));
+  return c ? `Forecast · ${c.option}` : 'Other';
+};
+const groups = {};
+for (const f of files) (groups[group(f)] ??= []).push(f);
+const order = Object.keys(groups).sort((a, b) => (a.startsWith('Forecast') ? 0 : 1) - (b.startsWith('Forecast') ? 0 : 1) || a.localeCompare(b));
+const total = files.reduce((a, f) => a + (f.bytes ?? 0), 0);
+---
+<Base title="Downloads" section="downloads/" description="Every data file of the site: forecasts, verification, benchmarks, with sizes and checksums.">
+  <h1>Downloads</h1>
+  <p>{files.length} files, {mb(total)}. Large data files are served from the GitHub release
+  <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/releases/tag/site-files"><code>site-files</code></a>; each is named by its
+  content (SHA-256), so a link never changes once published.</p>
+  {order.map((g) => (
+    <section>
+      <h2>{g}</h2>
+      <Table head={['File', 'Size', 'SHA-256']} caption=""
+             rows={groups[g].map((f) => [`<a href="${esc(link(f.url))}" download>${esc(f.label ?? f.path.split('/').pop())}</a><br><span class="caveat">${esc(f.path.replace(/^downloads\//, ''))}</span>`,
+                                         mb(f.bytes), f.sha256 ? `<code>${f.sha256.slice(0, 16)}…</code>` : '—'])} />
+    </section>
+  ))}
+</Base>

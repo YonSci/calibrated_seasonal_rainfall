@@ -1,0 +1,8 @@
+---
+import { asset } from '../lib/data.js';
+const { src, alt = '', caption = '' } = Astro.props;
+---
+<figure class="map-figure wide">
+  <a href={asset(src)} target="_blank" rel="noopener"><img loading="lazy" src={asset(src)} alt={alt || caption} /></a>
+  {caption && <figcaption class="caveat" set:html={caption} />}
+</figure>

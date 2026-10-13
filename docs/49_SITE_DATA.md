@@ -49,15 +49,42 @@ large `outputs/` folder.
 
 `schema_version` (now 1) is raised whenever a field a page reads is renamed or removed.
 
-## 3. Planned migration
+## 3. The Astro front end (`web/`)
 
-1. ✓ Downloads as release assets.
-2. ✓ Data contract.
-3. **Astro front end** (static site generator; React components only where a page is interactive: cycle selector, maps,
-   sortable tables), one page per topic: each cycle's outlook, verification, bias correction, probability calibration,
-   domains, methods, releases. Built from `site_data/` and `site/assets/`, deployed to GitHub Pages by the existing workflow.
-4. Retire the HTML generation in `build_site.py`, `site_bias.py` and `site_prob.py`; the Python build keeps producing the
-   results, figures, downloads and `site_data/`.
+The new pages are built with [Astro](https://astro.build) 7.3.5 (Node ≥ 22.12) from `site_data/` alone; figures and maps are
+linked from `site/assets/`. They are served under `/next/` next to the current page while the migration runs, and updated
+automatically: every build of the results refreshes `site_data/`, and the Pages workflow (`.github/workflows/pages.yml`)
+rebuilds the Astro pages from it on each push, so new results (a new phase, a new verified season) appear without page edits.
+The built pages are not committed (`site/next/` is ignored). If the Astro build fails, the workflow still publishes the
+current site.
+
+| Page | Content | Source |
+| --- | --- | --- |
+| `/next/` | overview: current release, cycles, research benchmarks | `site.json`, `cycles.json` |
+| `/next/probability-calibration/` and `/<cycle>/` | plan, Phases 1–3, the amount/range shadow, downloads | `probcal/<cycle>.json` |
+| `/next/bias-correction/` and `/<cycle>/` | suggestion, evidence, interpretation, data and methods, screening, confirmation, ratio limits, shadow, validation, figure browser, downloads, provenance | `bias/<cycle>.json` |
+| `/next/downloads/` | every data file with size and SHA-256 | `files.json` |
+| `/next/releases/` | change log, archived releases | `site.json` |
+
+Pages only display what the Python build decided: every ✓, confirmation and interpretation statement comes from the data
+(the bias-correction interpretation statements are computed by `site_bias.findings` and exported as text). When ported, the
+benchmark pages were checked number by number against the current page: every signed score on the eight cycle pages is
+identical (582–641 values per bias-correction page).
+
+Preview locally (Git Bash needs `MSYS_NO_PATHCONV=1` so the base path is not rewritten):
+
+```
+cd web && npm ci
+MSYS_NO_PATHCONV=1 ASTRO_BASE=/next/ ASTRO_OUT=../site/next npm run build
+cd ../site && python -m http.server 8765        # then open http://127.0.0.1:8765/next/
+```
+
+## 4. Next steps
+
+1. Move the forecast outlooks, maps and verification (the cycle selector) to Astro pages, with React components where a
+   page is interactive.
+2. Make the Astro pages the site root, and retire the HTML generation in `build_site.py`, `site_bias.py` and `site_prob.py`;
+   the Python build keeps producing the results, figures, downloads and `site_data/`.
 
 A server back end is not planned: everything shown is precomputed. Should on-demand queries be needed (e.g. a time series at
 a clicked point), FastAPI with xarray over the NetCDF outputs fits the existing stack.
