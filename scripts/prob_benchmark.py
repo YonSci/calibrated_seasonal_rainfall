@@ -258,6 +258,7 @@ def main(args):
                 results[t] = value
             if failed:
                 raise RuntimeError('Targets failed (completed targets are checkpointed): ' + '; '.join(failed))
+    results = {t: results[t] for t in targets}                # calendar order, not the order the workers finished
     methods = pcfg['methods']
     tests = tests_of(results, methods, pc.INCUMBENT, cfg['primary_region'], targets, pcfg.get('selection'))
     prov = bb.provenance(cfg, project, targets, pcfg['benchmark_config'], dep, extra=CODE + [args.config])

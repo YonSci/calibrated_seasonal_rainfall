@@ -458,7 +458,7 @@
   {
     "id": "2026-10-13.2",
     "date": "2026-10-13",
-    "commit": null,
+    "commit": "cc40df0",
     "title": "Shadow forecast, suggested methods and sortable tables",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -478,6 +478,24 @@
       {
         "type": "display",
         "text": "Every table on the site can be sorted by clicking a column header (numbers by value, text alphabetically; a third click restores the original order)."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-14.1",
+    "date": "2026-10-14",
+    "commit": null,
+    "title": "Probability calibration, Phase 1",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "New section 'Probability and rainfall-distribution calibration': Phase 1 benchmark of six tercile-probability methods (pseudocount smoothing, the incumbent climatology blend, temperature scaling, regularized Dirichlet calibration, multinomial and ordinal logistic regression) with the amount correction fixed, nested year-based validation and a selection-aware procedure, for all four cycles. No method is confirmed better than the incumbent blend; the published forecasts are unchanged."
       }
     ]
   }

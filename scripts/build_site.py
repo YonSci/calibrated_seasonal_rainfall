@@ -31,6 +31,7 @@ from significance import paired_summary              # noqa: E402
 import site_extras as extras                          # noqa: E402
 import obs_source                                     # noqa: E402
 import site_bias                                      # noqa: E402
+import site_prob                                      # noqa: E402
 
 OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
@@ -590,7 +591,7 @@ def references_block():
   </details>'''
 
 
-def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None, bias=''):
+def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None, bias='', probcal=''):
     gates, ens, mono, clip, raw = (ev[k] for k in ('gates', 'ens', 'mono', 'clip', 'raw'))
     raw_rpss = raw.get('raw_rps_skill')
     obs_labels = sorted({c['obs'] for c in cycles})                 # e.g. ['CHIRPS v3.0']
@@ -684,7 +685,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None,
 <header class="top">
   <div class="wrap nav">
     <a class="brand" href="#top">Ethiopia Seasonal Rainfall</a>
-    <nav aria-label="Sections"><a href="#outlooks">Outlooks</a><a href="#official">Compare outlooks</a><a href="#maps">Maps</a><a href="#verification">Verification</a><a href="#history">Historical performance</a><a href="#bias">Bias correction</a><a href="#domains">Rainfall domains</a><a href="#methods">Methods &amp; data</a><a href="#downloads">Downloads</a></nav>
+    <nav aria-label="Sections"><a href="#outlooks">Outlooks</a><a href="#official">Compare outlooks</a><a href="#maps">Maps</a><a href="#verification">Verification</a><a href="#history">Historical performance</a><a href="#bias">Bias correction</a><a href="#probcal">Probability calibration</a><a href="#domains">Rainfall domains</a><a href="#methods">Methods &amp; data</a><a href="#downloads">Downloads</a></nav>
   </div>
   <div class="cyclebar">
     <div class="wrap pickers">
@@ -781,6 +782,8 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None,
 </section>
 
 {bias}
+
+{probcal}
 
 <section id="domains" class="wrap">
   <h2>Rainfall climatology and domains</h2>
@@ -1842,6 +1845,9 @@ JS = r'''
     fig.querySelectorAll('select').forEach(s => s.addEventListener('change', () => bcFigure(fig)));
     bcFigure(fig);
   });
+  if ($('pc-bench')) $('pc-bench').addEventListener('change', e => {
+    document.querySelectorAll('.pcb').forEach(b => { b.hidden = b.dataset.bench !== e.target.value; });
+  });
   if ($('bc-bench')) $('bc-bench').addEventListener('change', e => {
     document.querySelectorAll('.bc').forEach(b => { b.hidden = b.dataset.bench !== e.target.value; });
   });
@@ -1925,7 +1931,9 @@ def main():
     extras.build_releases(OUT, dict(cycles=cycles), esc)
     reviews = extras.export_domain_review(OUT)
     bias = site_bias.section(site_bias.export(OUT))          # Bias correction: the bias-correction benchmark (docs/47)
-    (OUT / 'index.html').write_text(page(cycles, default, jjas_evidence(), built, sha, release_id, reviews, bias), encoding='utf-8', newline='')
+    probcal = site_prob.section(site_prob.export(OUT))       # Probability and rainfall-distribution calibration (docs/48)
+    (OUT / 'index.html').write_text(page(cycles, default, jjas_evidence(), built, sha, release_id, reviews, bias, probcal),
+                                    encoding='utf-8', newline='')
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
     checked = site_bias.check_published(OUT)                 # every advertised download and asset must be deployable
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())

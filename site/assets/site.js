@@ -858,6 +858,9 @@
     fig.querySelectorAll('select').forEach(s => s.addEventListener('change', () => bcFigure(fig)));
     bcFigure(fig);
   });
+  if ($('pc-bench')) $('pc-bench').addEventListener('change', e => {
+    document.querySelectorAll('.pcb').forEach(b => { b.hidden = b.dataset.bench !== e.target.value; });
+  });
   if ($('bc-bench')) $('bc-bench').addEventListener('change', e => {
     document.querySelectorAll('.bc').forEach(b => { b.hidden = b.dataset.bench !== e.target.value; });
   });
