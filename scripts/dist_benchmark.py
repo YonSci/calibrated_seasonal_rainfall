@@ -21,6 +21,7 @@ import hashlib
 import json
 import os
 import pickle
+import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -245,6 +246,7 @@ def main(args):
                     _, value = job.result()
                 except Exception as exc:
                     failed.append(f'{t}: {exc!r}')
+                    print(f'{t} FAILED:\n' + ''.join(traceback.format_exception(exc)), flush=True)   # with the worker's traceback
                     continue
                 (parts / f'{t}.pkl').write_bytes(pickle.dumps(dict(key=keys[t], value=value)))
                 results[t] = value
