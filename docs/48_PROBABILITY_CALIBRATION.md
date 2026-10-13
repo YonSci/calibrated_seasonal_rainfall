@@ -16,12 +16,12 @@ The implementation order below is a plan, not a ranking of performance on these 
 | 1 | `dirichlet` | Regularized Dirichlet calibration | tercile calibration | terciles | implemented |
 | 1 | `multinomial_logistic` | Regularized multinomial logistic regression | tercile prediction | terciles | implemented |
 | 1 | `ordinal_logistic` | Ordinal (cumulative-logit) logistic regression | tercile prediction | terciles | implemented |
-| 2 | `platt_ovr` | Platt (sigmoid), one-vs-rest + normalization | binary calibration | terciles | planned |
-| 2 | `beta_ovr` | Beta calibration, one-vs-rest + normalization | binary calibration | terciles | planned |
-| 2 | `isotonic_ovr` | Isotonic regression, one-vs-rest + normalization | binary calibration | terciles | planned |
-| 2 | `emos_csg` | EMOS, censored shifted gamma | rainfall distribution | CDF, quantiles, terciles | planned |
-| 2 | `extended_logistic` | Extended logistic regression | rainfall distribution | CDF, terciles | planned |
-| 2 | `quantile_regression` | Regularized quantile regression | rainfall quantiles | quantiles, terciles | planned |
+| 2 | `platt_ovr` | Platt (sigmoid), one-vs-rest + normalization | binary calibration | terciles | implemented |
+| 2 | `beta_ovr` | Beta calibration, one-vs-rest + normalization | binary calibration | terciles | implemented |
+| 2 | `isotonic_ovr` | Isotonic regression, one-vs-rest + normalization | binary calibration | terciles | implemented |
+| 2 | `emos_csg` | EMOS, censored shifted gamma | rainfall distribution | CDF, quantiles, terciles | implemented |
+| 2 | `extended_logistic` | Extended logistic regression | rainfall distribution | CDF, terciles | implemented |
+| 2 | `quantile_regression` | Regularized quantile regression | rainfall quantiles | quantiles, terciles | implemented |
 | 3 | `bjp` | Bayesian joint probability | rainfall distribution | CDF, quantiles, terciles | planned |
 | 3 | `bma_precipitation` | Bayesian model averaging | rainfall distribution | CDF, quantiles, terciles | planned |
 | 3 | `quantile_regression_forest` | Quantile regression forest | rainfall quantiles | distribution, terciles | planned |
@@ -154,6 +154,163 @@ Keep the climatology blend as the probability stage. Phase 2 adds the one-vs-res
 full rainfall-distribution models (Pathway B), which change what is modelled rather than only how the counts are calibrated.
 
 
+## 5. Phase 2 methods and design
+
+### Pathway A: one-vs-rest binary calibrators (`prob_calibration.py`)
+
+Each category k is calibrated as a binary event (category k against the rest) from the same smoothed, unblended probability
+p<sub>k</sub>; the three calibrated values are then divided by their sum. The normalized vector is the forecast that is fitted, checked
+(non-negative, sums to one) and scored — the normalization is part of the method, inside the validation. Inputs are floored at
+10⁻⁴ before logs and normalization.
+
+| Identifier | Binary map per category | Parameters |
+| --- | --- | --- |
+| `platt_ovr` | q<sub>k</sub> = logistic(c + a·logit p<sub>k</sub>) | 2 per category, L2 10⁻⁴ on a, log loss |
+| `beta_ovr` | logit q<sub>k</sub> = c + a·ln p<sub>k</sub> − b·ln(1 − p<sub>k</sub>), a, b ≥ 0 | 3 per category, log loss |
+| `isotonic_ovr` | monotone step map (weighted pool-adjacent-violators), constant beyond the data | pooled over cells and years (no cell-by-cell fitting) |
+
+Design: as Phase 1 (`config/probability_calibration/<cycle>_phase2.json`), with the incumbent and the three calibrators as their
+own family (Holm across 3 methods × 5 targets) and SEL among the four.
+
+### Pathway B: rainfall-distribution models (`dist_calibration.py`, `dist_benchmark.py`)
+
+Each model predicts a full distribution of the target's rainfall for every cell from the **raw** ensemble (the MVS correction is
+not part of this pathway). One interface: `cdf(x)`, `quantile(u)`, `terciles(q1, q2)` at the training CHIRPS boundaries
+(p<sub>below</sub> = F(q1), p<sub>near</sub> = F(q2) − F(q1), p<sub>above</sub> = 1 − F(q2); with q1 > 0 there is no atom at a boundary) and
+`crps(y)` by numerical integration of (F(x) − 1{x ≥ y})². Pooling over cells: rainfall in units of the cell's training CHIRPS mean
+(y' = y/μ<sub>obs</sub>); predictors relative to the raw ensemble's climatological mean μ<sub>model</sub> (equal-year weights): ensemble
+mean m', standard deviation s', mean absolute difference md'. Cells with μ<sub>obs</sub> or μ<sub>model</sub> below 1 mm are not modelled.
+
+| Identifier | Distribution | Parameters (fitting) | Zeros, tails, monotonicity |
+| --- | --- | --- | --- |
+| `emos_csg` | Y' = max(0, X + δ), X ~ Gamma with mean softplus(a₀ + a₁m') and sd softplus(b₀ + b₁md'), δ = −softplus(d) ≤ 0 | 5, weighted maximum likelihood | probability of 0 = G(−δ); gamma tail |
+| `extended_logistic` | P(Y' ≤ q') = logistic((√q' − (b₀ + b₁√m'))/exp(g₀ + g₁ ln s')) | 4, log loss over each cell's 9 training CHIRPS deciles | coherent, monotone CDF in q by construction; closed-form quantiles |
+| `quantile_regression` | q'<sub>τ</sub> = b₀τ + b₁τ m' + b₂τ s' at τ = 0.05…0.95 | 3 per level, pinball loss (Huber-smoothed, 10⁻³), L2 10⁻⁴ | non-crossing by rearrangement (share of crossing cells reported), clipped at 0; F linear from 0 below q<sub>0.05</sub> and to 1 at q<sub>0.95</sub> + (q<sub>0.95</sub> − q<sub>0.5</sub>) |
+
+Design (`config/probability_calibration/<cycle>_distribution.json`): outer leave-one-year-out over the training years (each model
+fitted on the other training years only, pooled, equal weight per year), test years from a fit on all training years. In the same
+folds: the published probabilities (incumbent, blend weight from the inner out-of-fold years) and the MVS-corrected ensemble.
+Scores: tercile RPS/RPSS (against the incumbent), CRPS/CRPSS (against the MVS-corrected ensemble), pinball loss at 10/50/90 %,
+coverage of the 10–90 % interval. Tests: Holm across the 3 models × 5 targets, separately for RPS and CRPS; no harm over the test
+years.
+
+## 6. Phase 2 results (national aggregate, all Ethiopia)
+
+Full numbers: `outputs/probability_calibration/<cycle>/phase2_binary/benchmark.json` and `.../distribution/benchmark.json`; site section "Probability calibration". Run at commit 6d8236d (clean). ✓ = confirmed better than the reference (Holm-adjusted p < 0.05 across the family, and not worse over the test years).
+
+### Pathway A — binary calibrators: tercile RPSS, outer leave-one-year-out 1993–2016
+
+**January · FMAM**
+
+| Method | Feb | Mar | Apr | May | FMAM |
+| --- | --- | --- | --- | --- | --- |
+| Climatology blend (incumbent) | +0.027 | +0.002 | +0.001 | +0.028 | +0.032 |
+| Platt OvR | +0.032 | +0.001 | +0.003 | +0.026 | +0.032 |
+| Beta OvR | +0.064 | +0.001 | -0.000 | +0.031 | +0.029 |
+| Isotonic OvR | -0.032 | -0.033 | -0.004 | +0.033 | +0.028 |
+| SEL (chosen each year) | +0.064 | +0.005 | +0.001 | +0.028 | +0.032 |
+
+**February · FMAM**
+
+| Method | Feb | Mar | Apr | May | FMAM |
+| --- | --- | --- | --- | --- | --- |
+| Climatology blend (incumbent) | +0.126 | +0.011 | +0.009 | +0.008 | +0.021 |
+| Platt OvR | +0.135 | +0.008 | +0.011 | +0.007 | +0.020 |
+| Beta OvR | +0.143 | +0.015 | +0.008 | +0.007 | +0.017 |
+| Isotonic OvR | +0.061 | +0.017 | +0.002 | +0.010 | +0.018 |
+| SEL (chosen each year) | +0.137 | +0.014 | +0.009 | +0.008 | +0.021 |
+
+**May · JJAS**
+
+| Method | Jun | Jul | Aug | Sep | JJAS |
+| --- | --- | --- | --- | --- | --- |
+| Climatology blend (incumbent) | -0.000 | +0.014 | +0.012 | +0.003 | +0.027 |
+| Platt OvR | -0.001 | +0.012 | +0.009 | +0.003 | +0.026 |
+| Beta OvR | -0.004 | +0.010 | +0.009 | +0.001 | +0.024 |
+| Isotonic OvR | -0.014 | +0.006 | +0.008 | +0.000 | +0.022 |
+| SEL (chosen each year) | -0.000 | +0.014 | +0.012 | +0.003 | +0.027 |
+
+**September · ONDJ**
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Climatology blend (incumbent) | +0.013 | +0.040 | +0.003 | +0.001 | +0.039 |
+| Platt OvR | +0.015 | +0.049 | +0.013 | +0.006 | +0.042 |
+| Beta OvR | +0.013 | +0.050 | +0.010 | +0.008 | +0.039 |
+| Isotonic OvR | +0.009 | +0.049 | +0.008 | -0.039 | +0.039 |
+| SEL (chosen each year) | +0.013 | +0.044 | +0.002 | +0.002 | +0.039 |
+
+### Pathway B — rainfall-distribution models, outer leave-one-year-out 1993–2016
+
+Cells: tercile RPSS / amount CRPSS / share of observations inside the 10–90 % interval (80 % is calibrated). The first row gives the published probabilities' RPSS and the MVS-corrected ensemble's CRPSS and coverage. Pathway B is scored on the cells where the distribution models are defined (non-zero training climatology), so the incumbent's RPSS differs slightly from the Pathway A table.
+
+**January · FMAM**
+
+| Method | Feb | Mar | Apr | May | FMAM |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | +0.033 / +0.074 / 56% | +0.002 / -0.044 / 54% | +0.001 / -0.016 / 68% | +0.028 / +0.007 / 69% | +0.032 / +0.025 / 72% |
+| EMOS (CSG) | +0.043 / +0.074 / 82% | -0.065 / -0.026 / 81% | -0.001 / +0.005 / 77% | +0.026 / +0.014 / 78% | +0.037 / +0.039 ✓ / 78% |
+| Extended logistic | +0.065 / +0.072 / 89% | -0.065 / -0.076 / 92% | -0.000 / -0.005 / 84% | +0.027 / -0.004 / 85% | +0.031 / +0.032 / 83% |
+| Quantile regression | +0.039 / +0.104 / 78% | -0.052 / -0.018 / 77% | -0.001 / +0.004 / 77% | +0.028 / +0.012 / 77% | +0.030 / +0.033 / 77% |
+
+**February · FMAM**
+
+| Method | Feb | Mar | Apr | May | FMAM |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | +0.137 / +0.250 / 55% | +0.011 / -0.034 / 59% | +0.009 / -0.001 / 68% | +0.008 / -0.005 / 67% | +0.021 / -0.007 / 70% |
+| EMOS (CSG) | +0.103 / +0.248 / 83% | -0.043 / -0.013 / 81% | -0.003 / +0.003 / 76% | -0.008 / -0.003 / 78% | +0.028 / +0.026 / 79% |
+| Extended logistic | +0.168 / +0.234 / 90% | -0.038 / -0.067 / 91% | +0.004 / -0.008 / 84% | -0.007 / -0.023 / 84% | +0.021 / +0.017 / 84% |
+| Quantile regression | +0.099 / +0.259 / 78% | -0.021 / -0.010 / 77% | -0.006 / +0.000 / 77% | -0.008 / -0.004 / 77% | +0.023 / +0.020 / 77% |
+
+**May · JJAS**
+
+| Method | Jun | Jul | Aug | Sep | JJAS |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | -0.000 / -0.096 / 65% | +0.015 / -0.005 / 73% | +0.012 / -0.027 / 75% | +0.003 / -0.060 / 71% | +0.027 / -0.028 / 70% |
+| EMOS (CSG) | -0.045 / -0.031 / 84% | -0.004 / +0.018 / 81% | -0.014 / -0.004 / 83% | -0.013 / -0.006 ✓ / 82% | +0.003 / +0.017 / 81% |
+| Extended logistic | -0.052 / -0.054 / 90% | -0.003 / +0.013 / 86% | -0.008 / -0.010 / 88% | -0.018 / -0.017 / 87% | +0.005 / +0.007 / 87% |
+| Quantile regression | -0.052 / -0.015 / 78% | -0.013 / +0.014 / 78% | -0.030 / -0.004 / 78% | -0.020 / -0.001 ✓ / 78% | +0.001 / +0.014 / 78% |
+
+**September · ONDJ**
+
+| Method | Oct | Nov | Dec | Jan | ONDJ |
+| --- | --- | --- | --- | --- | --- |
+| Published pipeline (incumbent / MVS ensemble) | +0.013 / -0.002 / 72% | +0.040 / +0.084 / 75% | +0.003 / +0.029 / 76% | +0.001 / -0.040 / 46% | +0.039 / +0.070 / 75% |
+| EMOS (CSG) | +0.003 / +0.016 / 77% | +0.037 / +0.071 / 78% | -0.113 / +0.015 / 84% | -0.060 / -0.029 / 80% | +0.029 / +0.049 / 79% |
+| Extended logistic | -0.000 / -0.011 / 90% | +0.032 / +0.058 / 89% | -0.076 / -0.017 / 92% | -0.040 / -0.023 / 89% | +0.030 / +0.062 / 83% |
+| Quantile regression | -0.010 / -0.010 / 77% | +0.017 / +0.056 / 77% | -0.143 / +0.033 / 79% | -0.064 / -0.036 / 77% | +0.019 / +0.032 / 76% |
+
+### Findings
+
+1. **Pathway A: no binary calibrator is confirmed better than the incumbent blend** in any cycle or target (Holm across 3 methods
+   × 5 targets; SEL across the targets). The largest point gains are again in February of the FMAM cycles (beta calibration:
+   January-initialized +0.064 against +0.027, February-initialized +0.143 against +0.126) and in ONDJ November and December
+   (Platt +0.049 and +0.013 against +0.040 and +0.003); none is significant. In JJAS no calibrator improves on the blend.
+   Isotonic regression is the weakest (January-initialized February −0.032, ONDJ January −0.039): the step map overfits in the
+   short pooled record, as the plan anticipated.
+2. **Pathway B, tercile probabilities: no distribution model is confirmed better than the published probabilities.** Extended
+   logistic regression comes closest in February (+0.168 against +0.137 February-initialized; +0.065 against +0.033
+   January-initialized), not significant. Elsewhere the models are usually worse for terciles, clearly so in March, JJAS June
+   and ONDJ December (down to −0.14).
+3. **Pathway B, rainfall amounts: three confirmed improvements in CRPS over the MVS-corrected ensemble** — EMOS for the
+   January-initialized FMAM season (+0.039 against +0.025), and EMOS and quantile regression for JJAS September (−0.006 and
+   −0.001 against −0.060). Larger but unconfirmed gains: JJAS June (quantile regression −0.015 against −0.096), the
+   February-initialized FMAM season (EMOS +0.026 against −0.007). The MVS ensemble stays better in ONDJ November and the ONDJ season.
+4. **The distribution models' intervals are close to calibrated; the MVS ensemble's are too narrow.** The 10–90 % interval of the
+   MVS-corrected ensemble contains 46–76 % of observations (80 % is calibrated; lowest in ONDJ January and FMAM February/March);
+   EMOS 76–84 %, quantile regression 76–79 %, extended logistic 83–92 % (somewhat wide).
+5. **Fits are coherent:** every model converged in every fold, and quantile regression needed rearrangement for at most 2.2 % of
+   cells (mean share per target).
+
+### What this means
+
+* Keep the incumbent climatology blend for the published tercile probabilities: neither Phase 1 nor Phase 2 beats it.
+* For **rainfall amounts and ranges**, the distribution models (EMOS in particular) give near-calibrated intervals where the MVS
+  ensemble's are too narrow, and are confirmed better in CRPS for some targets. This makes them candidates for a separate
+  amount/interval product, with the published probabilities unchanged; any such product is your decision.
+* Phase 3 (Bayesian joint probability, precipitation BMA, quantile regression forests) can reuse this distribution interface and
+  benchmark.
+
 ## References
 
 * Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q. (2017). On calibration of modern neural networks. *Proceedings of the 34th
@@ -166,5 +323,18 @@ full rainfall-distribution models (Pathway B), which change what is modelled rat
   combination of multiple GCM ensembles. *Monthly Weather Review*, 130, 1792–1811.
   https://doi.org/10.1175/1520-0493(2002)130<1792:CCFTRA>2.0.CO;2
 * Wilks, D. S. (2019). *Statistical Methods in the Atmospheric Sciences* (4th ed.). Elsevier.
+* Kull, M., Silva Filho, T., & Flach, P. (2017). Beta calibration: a well-founded and easily implemented improvement on logistic
+  calibration for binary classifiers. *Proceedings of AISTATS 2017*, PMLR 54. https://proceedings.mlr.press/v54/kull17a.html
+* Koenker, R., & Bassett, G. (1978). Regression quantiles. *Econometrica*, 46, 33–50. https://doi.org/10.2307/1913643
+* Messner, J. W., Mayr, G. J., Zeileis, A., & Wilks, D. S. (2014). Heteroscedastic extended logistic regression for postprocessing of
+  ensemble guidance. *Monthly Weather Review*, 142, 448–456. https://doi.org/10.1175/MWR-D-13-00271.1
+* Platt, J. C. (1999). Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods. In
+  *Advances in Large Margin Classifiers* (pp. 61–74). MIT Press.
+* Scheuerer, M., & Hamill, T. M. (2015). Statistical postprocessing of ensemble precipitation forecasts by fitting censored, shifted
+  gamma distributions. *Monthly Weather Review*, 143, 4578–4596. https://doi.org/10.1175/MWR-D-15-0061.1
+* Wilks, D. S. (2009). Extending logistic regression to provide full-probability-distribution MOS forecasts. *Meteorological
+  Applications*, 16, 361–368. https://doi.org/10.1002/met.134
+* Zadrozny, B., & Elkan, C. (2002). Transforming classifier scores into accurate multiclass probability estimates. *Proceedings of
+  the 8th ACM SIGKDD*, 694–699. https://doi.org/10.1145/775047.775151
 
-DOI and proceedings links checked on 2026-10-13.
+DOI and proceedings links for the Phase 1 references checked on 2026-10-13; the Phase 2 references were added on 2026-10-13 without a separate online check.

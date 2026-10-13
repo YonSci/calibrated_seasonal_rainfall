@@ -41,6 +41,19 @@ REFERENCES = [
     ('Rajagopalan, B., Lall, U., & Zebiak, S. E. (2002). Categorical climate forecasts through regularization and optimal combination of '
      'multiple GCM ensembles. <em>Monthly Weather Review</em>, 130, 1792–1811.', 'https://doi.org/10.1175/1520-0493(2002)130<1792:CCFTRA>2.0.CO;2'),
     ('Wilks, D. S. (2019). <em>Statistical Methods in the Atmospheric Sciences</em> (4th ed.). Elsevier.', None),
+    ('Platt, J. C. (1999). Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods. In '
+     '<em>Advances in Large Margin Classifiers</em> (pp. 61–74). MIT Press.', None),
+    ('Kull, M., Silva Filho, T., & Flach, P. (2017). Beta calibration: a well-founded and easily implemented improvement on logistic '
+     'calibration for binary classifiers. <em>Proceedings of AISTATS 2017</em>, PMLR 54.', 'https://proceedings.mlr.press/v54/kull17a.html'),
+    ('Zadrozny, B., & Elkan, C. (2002). Transforming classifier scores into accurate multiclass probability estimates. <em>Proceedings of '
+     'the 8th ACM SIGKDD</em>, 694–699.', 'https://doi.org/10.1145/775047.775151'),
+    ('Scheuerer, M., & Hamill, T. M. (2015). Statistical postprocessing of ensemble precipitation forecasts by fitting censored, shifted '
+     'gamma distributions. <em>Monthly Weather Review</em>, 143, 4578–4596.', 'https://doi.org/10.1175/MWR-D-15-0061.1'),
+    ('Wilks, D. S. (2009). Extending logistic regression to provide full-probability-distribution MOS forecasts. <em>Meteorological '
+     'Applications</em>, 16, 361–368.', 'https://doi.org/10.1002/met.134'),
+    ('Messner, J. W., Mayr, G. J., Zeileis, A., & Wilks, D. S. (2014). Heteroscedastic extended logistic regression for postprocessing '
+     'of ensemble guidance. <em>Monthly Weather Review</em>, 142, 448–456.', 'https://doi.org/10.1175/MWR-D-13-00271.1'),
+    ('Koenker, R., & Bassett, G. (1978). Regression quantiles. <em>Econometrica</em>, 46, 33–50.', 'https://doi.org/10.2307/1913643'),
 ]
 
 
@@ -50,7 +63,12 @@ def load_all():
         d = json.loads(p.read_text(encoding='utf-8'))
         bench = json.loads((ROOT / d['config_contents']['benchmark_config']).read_text(encoding='utf-8'))
         project = json.loads((ROOT / bench['project_config']).read_text(encoding='utf-8'))
-        out.append(dict(name=p.parent.name, folder=p.parent, data=d, init=project['initialization_month'], season=project['season']['name']))
+        extra = {}
+        for key, sub in (('binary', 'phase2_binary'), ('distribution', 'distribution')):   # Phase 2 outputs, when run
+            f = p.parent / sub / 'benchmark.json'
+            extra[key] = json.loads(f.read_text(encoding='utf-8')) if f.is_file() else None
+        out.append(dict(name=p.parent.name, folder=p.parent, data=d, init=project['initialization_month'], season=project['season']['name'],
+                        **extra))
     return sorted(out, key=lambda b: b['init'])
 
 
@@ -60,14 +78,23 @@ def export(out_dir):
         dest = out_dir / 'assets/probcal' / b['name']
         if (b['folder'] / 'figures').is_dir():
             shutil.copytree(b['folder'] / 'figures', dest, dirs_exist_ok=True)
-        d = out_dir / 'downloads/probcal' / b['name'] / 'benchmark.json'
-        d.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(b['folder'] / 'benchmark.json', d)
-        blocks.append((b['name'], block(b, (f'downloads/probcal/{b["name"]}/benchmark.json', d.stat().st_size))))
+        for sub in ('phase2_binary', 'distribution'):
+            if (b['folder'] / sub / 'figures').is_dir():
+                shutil.copytree(b['folder'] / sub / 'figures', dest / sub, dirs_exist_ok=True)
+        files = []
+        for rel, label in (('benchmark.json', 'Phase 1: all scores, per-year values, tests and fitted parameters (JSON)'),
+                           ('phase2_binary/benchmark.json', 'Phase 2, binary calibrators (JSON)'),
+                           ('distribution/benchmark.json', 'Phase 2, rainfall-distribution models (JSON)')):
+            if (b['folder'] / rel).is_file():
+                d = out_dir / 'downloads/probcal' / b['name'] / rel
+                d.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(b['folder'] / rel, d)
+                files.append((f'downloads/probcal/{b["name"]}/{rel}', label, d.stat().st_size))
+        blocks.append((b['name'], block(b, files)))
     return blocks
 
 
-def block(b, download):
+def block(b, files):
     d = b['data']
     reg = d['primary_region']
     order = json.loads((ROOT / d['config_contents']['benchmark_config']).read_text(encoding='utf-8'))['targets']
@@ -135,8 +162,76 @@ def block(b, download):
   </details>
   <figure class="map-figure wide"><img loading="lazy" src="assets/probcal/{esc(b["name"])}/probability_summary.png" alt="Probability calibration skill summary" style="max-width:100%;height:auto"><figcaption class="caveat">RPSS and log-loss skill by method and target.</figcaption></figure>
   <figure class="map-figure wide"><img loading="lazy" src="assets/probcal/{esc(b["name"])}/probability_reliability.png" alt="Reliability by method" style="max-width:100%;height:auto"><figcaption class="caveat">Reliability of each method for the season (below and above normal).</figcaption></figure>
-  <ul class="dl"><li><a href="{esc(download[0])}" download>All scores, per-year values, tests and fitted parameters (JSON)</a><span>{download[1] / 1e6:.1f} MB</span></li></ul>
+  {binary_html(b)}
+  {distribution_html(b)}
+  <ul class="dl">{''.join(f'<li><a href="{esc(h)}" download>{esc(l)}</a><span>{n / 1e6:.1f} MB</span></li>' for h, l, n in files)}</ul>
 </div>'''
+
+
+def binary_html(b):
+    """Phase 2, Pathway A: the one-vs-rest binary calibrators against the incumbent (their own family)."""
+    d = b.get('binary')
+    if not d:
+        return ''
+    reg = d['primary_region']
+    order = json.loads((ROOT / d['config_contents']['benchmark_config']).read_text(encoding='utf-8'))['targets']
+    T = [t for t in order if t in d['targets']]
+    rows = d['methods'] + (['SEL'] if 'SEL' in d['targets'][T[0]]['methods'] else [])
+    inc = d['incumbent']
+    name = lambda m: 'SEL (chosen each year)' if m == 'SEL' else d['registry'][m]['name']
+    conf = lambda m, t: m != inc and d['tests'].get(m, {}).get('rps', {}).get(t, {}).get('decision', {}).get('confirmed')
+    cell = lambda m, t, design: (signed(d['targets'][t]['methods'][m][design][reg]['rpss']) + (' ✓' if design == 'training' and conf(m, t) else ''))
+    bold = lambda m, x: f'<strong>{x}</strong>' if m == inc else x
+    tr, te = years(d['training_years']), years(d['test_years'])
+    found = [f'{name(m)} ({", ".join(t for t in T if conf(m, t))})' for m in rows if any(conf(m, t) for t in T)]
+    head = ['Method'] + [esc(t) for t in T]
+    return f'''<h4>Phase 2 · binary calibrators (one-vs-rest, normalized)</h4>
+  <p>Platt, beta and isotonic calibration of each category against the rest, divided by their sum inside the pipeline, against the
+  incumbent (their own family: Holm across these methods and the targets). <strong>Confirmed better: {esc(listing(found))}.</strong></p>
+  {tbl(head, [[bold(m, esc(name(m)))] + [bold(m, cell(m, t, 'training')) for t in T] for m in rows], f'Tercile RPSS, outer leave-one-year-out {tr}')}
+  <details><summary>Test years</summary>{tbl(head, [[bold(m, esc(name(m)))] + [bold(m, cell(m, t, 'test')) for t in T] for m in rows],
+                                             f'Tercile RPSS, fit {tr}, scored {te} (exploratory)')}</details>'''
+
+
+def distribution_html(b):
+    """Phase 2, Pathway B: rainfall-distribution models against the published probabilities and the MVS-corrected ensemble."""
+    d = b.get('distribution')
+    if not d:
+        return ''
+    reg = d['primary_region']
+    order = json.loads((ROOT / d['config_contents']['benchmark_config']).read_text(encoding='utf-8'))['targets']
+    T = [t for t in order if t in d['targets']]
+    head = ['Method'] + [esc(t) for t in T]
+    v = lambda k, design, key, t: d['targets'][t]['methods'][k][design][reg].get(key)
+    conf = lambda k, sc, t: d['tests'][k][sc][t]['decision']['confirmed']
+    name = lambda k: d['registry'][k]['name']
+    tr, te = years(d['training_years']), years(d['test_years'])
+    rps_rows = [['<strong>Published probabilities (incumbent)</strong>'] + [f"<strong>{signed(v('incumbent', 'training', 'rpss', t))}</strong>" for t in T]]
+    rps_rows += [[esc(name(k))] + [signed(v(k, 'training', 'rpss', t)) + (' ✓' if conf(k, 'rps', t) else '') for t in T] for k in d['models']]
+    crps_rows = [['<strong>MVS-corrected ensemble</strong>'] + [f"<strong>{signed(v('mvs_ensemble', 'training', 'crpss', t))}</strong>" for t in T]]
+    crps_rows += [[esc(name(k))] + [signed(v(k, 'training', 'crpss', t)) + (' ✓' if conf(k, 'crps', t) else '') for t in T] for k in d['models']]
+    cov_rows = [[esc('MVS-corrected ensemble')] + [pct(v('mvs_ensemble', 'training', 'coverage_80', t)) for t in T]]
+    cov_rows += [[esc(name(k))] + [pct(v(k, 'training', 'coverage_80', t)) for t in T] for k in d['models']]
+    pin_rows = [[esc('MVS-corrected ensemble')] + [num(v('mvs_ensemble', 'training', 'pinball_50', t)) for t in T]]
+    pin_rows += [[esc(name(k))] + [num(v(k, 'training', 'pinball_50', t)) for t in T] for k in d['models']]
+    test_rows = [[esc(name(k)) + ' (RPSS / CRPSS)'] + [f"{signed(v(k, 'test', 'rpss', t))} / {signed(v(k, 'test', 'crpss', t))}" for t in T] for k in d['models']]
+    test_rows.insert(0, ['Published probabilities / MVS ensemble'] + [f"{signed(v('incumbent', 'test', 'rpss', t))} / {signed(v('mvs_ensemble', 'test', 'crpss', t))}" for t in T])
+    found = {sc: [f'{name(k)} ({", ".join(t for t in T if conf(k, sc, t))})' for k in d['models'] if any(conf(k, sc, t) for t in T)] for sc in ('rps', 'crps')}
+    reg_rows = [[esc(name(k)), esc(r['estimates']), esc(r['predictors']), esc(r['fitting']), esc(r['outputs'])] for k, r in d['registry'].items()]
+    return f'''<h4>Phase 2 · rainfall-distribution models (Pathway B)</h4>
+  <p>Each model predicts a full rainfall distribution from the raw ensemble (pooled over cells in units relative to each cell's
+  climatology); terciles at the training CHIRPS boundaries, quantiles and intervals come from it. References, in the same folds:
+  the published probabilities (tercile RPS) and the MVS-corrected ensemble (CRPS, quantiles). ✓ = better than the reference with
+  Holm-adjusted p &lt; 0.05 across the models and targets, and not worse over {te}. <strong>Confirmed better — tercile probabilities:
+  {esc(listing(found['rps']))}; rainfall amounts (CRPS): {esc(listing(found['crps']))}.</strong></p>
+  {tbl(head, rps_rows, f'Tercile RPSS, outer leave-one-year-out {tr}')}
+  {tbl(head, crps_rows, f'Amount CRPSS against the CHIRPS climatology, {tr}')}
+  <details><summary>Interval coverage, median pinball loss, test years and the model definitions</summary>
+  {tbl(head, cov_rows, f'Share of observations inside the 10–90% interval, {tr} (80% is calibrated)')}
+  {tbl(head, pin_rows, f'Pinball loss of the median (mm), {tr} (lower is better)')}
+  {tbl(head, test_rows, f'Fit {tr}, scored {te} (exploratory)')}
+  {tbl(['Model', 'Estimates', 'Predictors', 'Fitting', 'Outputs'], reg_rows, 'Models')}</details>
+  <figure class="map-figure wide"><img loading="lazy" src="assets/probcal/{esc(b["name"])}/distribution/distribution_summary.png" alt="Distribution models summary" style="max-width:100%;height:auto"><figcaption class="caveat">Tercile RPSS and amount CRPSS of the distribution models against the published pipeline.</figcaption></figure>'''
 
 
 def section(blocks):
@@ -150,7 +245,7 @@ def section(blocks):
               '</select></label></div>')
     body = ''.join(h if i == last else h.replace('<div class="pcb"', '<div class="pcb" hidden', 1) for i, (_, h) in enumerate(blocks))
     plan = tbl(['Phase', 'Identifier', 'Method', 'Family', 'Output', 'Status'],
-               [[str(ph), f'<code>{esc(k)}</code>', esc(m), esc(fam), esc(o), 'implemented, results below' if ph == 1 else 'planned']
+               [[str(ph), f'<code>{esc(k)}</code>', esc(m), esc(fam), esc(o), 'implemented, results below' if ph <= 2 else 'planned']
                 for ph, k, m, fam, o in PLAN], 'Implementation plan (the order is a plan, not a ranking of performance)')
     refs = ''.join(f'<li>{t}' + (f' <a href="{esc(u)}">{esc(u.replace("https://", ""))}</a>' if u else '') + '</li>' for t, u in REFERENCES)
     return f'''<section id="probcal" class="wrap">

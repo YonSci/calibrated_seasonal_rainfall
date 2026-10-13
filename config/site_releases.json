@@ -484,7 +484,7 @@
   {
     "id": "2026-10-14.1",
     "date": "2026-10-14",
-    "commit": null,
+    "commit": "e1b462a",
     "title": "Probability calibration, Phase 1",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -496,6 +496,24 @@
       {
         "type": "analysis",
         "text": "New section 'Probability and rainfall-distribution calibration': Phase 1 benchmark of six tercile-probability methods (pseudocount smoothing, the incumbent climatology blend, temperature scaling, regularized Dirichlet calibration, multinomial and ordinal logistic regression) with the amount correction fixed, nested year-based validation and a selection-aware procedure, for all four cycles. No method is confirmed better than the incumbent blend; the published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-14.2",
+    "date": "2026-10-14",
+    "commit": null,
+    "title": "Probability calibration, Phase 2",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "Phase 2 of the probability and rainfall-distribution calibration, for all four cycles: one-vs-rest binary calibrators (Platt, beta, isotonic) against the incumbent blend, and rainfall-distribution models from the raw ensemble (EMOS with a censored shifted gamma, extended logistic regression, quantile regression) scored for terciles, amounts (CRPS), quantiles and interval coverage. No method is confirmed better than the published probabilities. EMOS (January-initialized FMAM season; JJAS September) and quantile regression (JJAS September) are confirmed better than the MVS-corrected ensemble in CRPS, and the distribution models' 10-90% intervals are close to calibrated where the MVS ensemble's are too narrow. The published forecasts are unchanged."
       }
     ]
   }
