@@ -1,0 +1,538 @@
+{
+  "created_utc": "2026-10-13T09:01:58.212918+00:00",
+  "rule": "config/bias_correction/recommendation_rule.json",
+  "rule_contents": {
+    "description": "Rule by which the platform suggests a bias-correction method for each cycle, target and product (scripts/bias_recommend.py, docs/47). Fixed before the independent validation seasons are scored. A suggestion is advice for a decision; it never changes the published forecast.",
+    "benchmarks": [
+      "config/bias_correction/jan_fmam.json",
+      "config/bias_correction/feb_fmam.json",
+      "config/bias_correction/may_jjas.json",
+      "config/bias_correction/sep_ondj.json"
+    ],
+    "products": {
+      "probabilities": {
+        "score": "rps",
+        "selection": "SEL-P",
+        "label": "Published tercile probabilities",
+        "unit": "RPS"
+      },
+      "amounts": {
+        "score": "crps",
+        "selection": "SEL-A",
+        "label": "Rainfall amounts",
+        "unit": "CRPS (mm)"
+      }
+    },
+    "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Holm-adjusted p < 0.05 across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+    "choice": "Among candidates, the method the selection-aware procedure chooses from all training years (training-only information); if that method is not a candidate, the candidate with the best training-period score. Other candidates are listed as alternatives: a confirmation establishes improvement against the operational method, not a ranking among candidates.",
+    "validation": {
+      "minimum_seasons": 3,
+      "region": "ethiopia",
+      "rule": "Independent validation seasons are forecast years scored after the benchmark (bias_validation.py). A candidate is 'recommended' once at least minimum_seasons have been scored for it and the operational method, and its mean score over them is not worse; with fewer seasons it stays a 'candidate'; with enough seasons and a worse mean it is 'not supported by validation'."
+    },
+    "statuses": {
+      "keep": "Keep the operational method: no method is confirmed better on the historical evidence.",
+      "candidate": "Confirmed better on the historical evidence; independent validation seasons are still being collected.",
+      "recommended": "Confirmed better on the historical evidence and not worse over the independent validation seasons.",
+      "not_supported": "Confirmed better on the historical evidence but worse over the independent validation seasons."
+    }
+  },
+  "cycles": [
+    {
+      "benchmark": "config/bias_correction/jan_fmam.json",
+      "name": "jan_fmam",
+      "reference": "mvs",
+      "reference_label": "Mean-Variance Scaling",
+      "targets": {
+        "Feb": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Feb on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Feb on the historical evidence."
+          }
+        },
+        "Mar": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Mar on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Mar on the historical evidence."
+          }
+        },
+        "Apr": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Apr on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Apr on the historical evidence."
+          }
+        },
+        "May": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for May on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for May on the historical evidence."
+          }
+        },
+        "FMAM": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for FMAM on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for FMAM on the historical evidence."
+          }
+        }
+      },
+      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a"
+    },
+    {
+      "benchmark": "config/bias_correction/feb_fmam.json",
+      "name": "feb_fmam",
+      "reference": "mvs",
+      "reference_label": "Mean-Variance Scaling",
+      "targets": {
+        "Feb": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "candidate",
+            "method": "sqrt_mvs",
+            "method_label": "Square-root-space Mean-Variance Scaling",
+            "chosen_by": "selection-aware procedure (training years only)",
+            "alternatives": [],
+            "historical": {
+              "training_difference": -0.03669166891513275,
+              "holm_p": 0.0264,
+              "years_better": 18,
+              "years": 24,
+              "test_difference": -0.006634972406173217,
+              "test_years_better": 6,
+              "test_years": 9
+            },
+            "validation": {
+              "seasons": [
+                {
+                  "year": 2026,
+                  "method": 0.3988891000097336,
+                  "reference": 0.40489301924311805
+                }
+              ],
+              "mean_difference": -0.006003919233384447,
+              "required": 3
+            },
+            "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Feb (RPS difference -0.03669 over the training years, Holm p 0.0264; -0.006635 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.006004."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Feb on the historical evidence."
+          }
+        },
+        "Mar": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Mar on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Mar on the historical evidence."
+          }
+        },
+        "Apr": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Apr on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Apr on the historical evidence."
+          }
+        },
+        "May": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for May on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for May on the historical evidence."
+          }
+        },
+        "FMAM": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for FMAM on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for FMAM on the historical evidence."
+          }
+        }
+      },
+      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a"
+    },
+    {
+      "benchmark": "config/bias_correction/may_jjas.json",
+      "name": "may_jjas",
+      "reference": "mvs",
+      "reference_label": "Mean-Variance Scaling",
+      "targets": {
+        "Jun": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Jun on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Jun on the historical evidence."
+          }
+        },
+        "Jul": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Jul on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "candidate",
+            "method": "vs",
+            "method_label": "Variance Scaling (unbounded)",
+            "chosen_by": "best training score among candidates",
+            "alternatives": [],
+            "historical": {
+              "training_difference": -0.1385532224164859,
+              "holm_p": 0.0,
+              "years_better": 23,
+              "years": 24,
+              "test_difference": -0.1399016692539045,
+              "test_years_better": 9,
+              "test_years": 9
+            },
+            "validation": {
+              "seasons": [
+                {
+                  "year": 2026,
+                  "method": 25.570328752762315,
+                  "reference": 25.987114563855812
+                }
+              ],
+              "mean_difference": -0.4167858110934972,
+              "required": 3
+            },
+            "why": "Variance Scaling (unbounded) is confirmed better than Mean-Variance Scaling for Jul (CRPS (mm) difference -0.1386 over the training years, Holm p 0; -0.1399 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.4168."
+          }
+        },
+        "Aug": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Aug on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "candidate",
+            "method": "vs",
+            "method_label": "Variance Scaling (unbounded)",
+            "chosen_by": "selection-aware procedure (training years only)",
+            "alternatives": [
+              {
+                "method": "sqrt_mvs",
+                "label": "Square-root-space Mean-Variance Scaling",
+                "holm_p": 0.0
+              },
+              {
+                "method": "pt",
+                "label": "Power Transformation",
+                "holm_p": 0.00168
+              },
+              {
+                "method": "gqm",
+                "label": "Gamma Quantile Mapping",
+                "holm_p": 0.00028500000000000004
+              }
+            ],
+            "historical": {
+              "training_difference": -0.12898291857397526,
+              "holm_p": 0.0,
+              "years_better": 24,
+              "years": 24,
+              "test_difference": -0.08486901377524386,
+              "test_years_better": 8,
+              "test_years": 9
+            },
+            "validation": {
+              "seasons": [
+                {
+                  "year": 2026,
+                  "method": 15.270217703931799,
+                  "reference": 15.456123493019991
+                }
+              ],
+              "mean_difference": -0.1859057890881921,
+              "required": 3
+            },
+            "why": "Variance Scaling (unbounded) is confirmed better than Mean-Variance Scaling for Aug (CRPS (mm) difference -0.129 over the training years, Holm p 0; -0.08487 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.1859."
+          }
+        },
+        "Sep": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Sep on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Sep on the historical evidence."
+          }
+        },
+        "JJAS": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for JJAS on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for JJAS on the historical evidence."
+          }
+        }
+      },
+      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a"
+    },
+    {
+      "benchmark": "config/bias_correction/sep_ondj.json",
+      "name": "sep_ondj",
+      "reference": "mvs",
+      "reference_label": "Mean-Variance Scaling",
+      "targets": {
+        "Oct": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Oct on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Oct on the historical evidence."
+          }
+        },
+        "Nov": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Nov on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Nov on the historical evidence."
+          }
+        },
+        "Dec": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Dec on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Dec on the historical evidence."
+          }
+        },
+        "Jan": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for Jan on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "candidate",
+            "method": "sqrt_mvs",
+            "method_label": "Square-root-space Mean-Variance Scaling",
+            "chosen_by": "selection-aware procedure (training years only)",
+            "alternatives": [
+              {
+                "method": "gqm",
+                "label": "Gamma Quantile Mapping",
+                "holm_p": 0.0084
+              }
+            ],
+            "historical": {
+              "training_difference": -0.4786897475521504,
+              "holm_p": 0.020945000000000002,
+              "years_better": 18,
+              "years": 24,
+              "test_difference": -0.6902295325749415,
+              "test_years_better": 6,
+              "test_years": 8
+            },
+            "validation": {
+              "seasons": [],
+              "mean_difference": null,
+              "required": 3
+            },
+            "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Jan (CRPS (mm) difference -0.4787 over the training years, Holm p 0.0209; -0.6902 over the test years). Independent validation: 0 of 3 season(s)."
+          }
+        },
+        "ONDJ": {
+          "probabilities": {
+            "product": "Published tercile probabilities",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for ONDJ on the historical evidence."
+          },
+          "amounts": {
+            "product": "Rainfall amounts",
+            "status": "keep",
+            "method": "mvs",
+            "method_label": "Mean-Variance Scaling",
+            "alternatives": [],
+            "why": "No method is confirmed better than Mean-Variance Scaling for ONDJ on the historical evidence."
+          }
+        }
+      },
+      "confirmation_commit": "bed63b906c77cfb3450514d7034ec5f68d067bc0"
+    }
+  ]
+}

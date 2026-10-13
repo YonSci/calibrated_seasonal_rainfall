@@ -109,10 +109,13 @@ def load_all():
         if (rl / 'benchmark.json').is_file() and (rl / 'confirmation/confirmation.json').is_file():
             ratio = dict(data=json.loads((rl / 'benchmark.json').read_text(encoding='utf-8')),
                          confirmation=json.loads((rl / 'confirmation/confirmation.json').read_text(encoding='utf-8')))
-        pilots = sorted((path.parent / 'pilot').glob('pilot_*.json'))
+        validation = {}                                    # {year: {target: {method: record}}}, bias_validation.py
+        for f in sorted((path.parent / 'validation').glob('[0-9]*/*__*.json')):
+            v = json.loads(f.read_text(encoding='utf-8'))
+            validation.setdefault(int(f.parent.name), {}).setdefault(v['target'], {})[v['method']] = v
         out.append(dict(name=path.parent.name, folder=path.parent, data=json.loads(path.read_text(encoding='utf-8')),
                         confirmation=json.loads(conf.read_text(encoding='utf-8')) if conf.is_file() else None, ratio=ratio,
-                        pilot=json.loads(pilots[-1].read_text(encoding='utf-8')) if pilots else None))
+                        validation=validation))
     init = lambda b: json.loads((ROOT / b['data']['config_contents']['project_config']).read_text(encoding='utf-8'))['initialization_month']
     return sorted(out, key=init)                         # in calendar order of the initialization month
 
@@ -120,16 +123,20 @@ def load_all():
 def export(out_dir):
     """Copy figures and data files into the site. Returns [(name, html)] for the section."""
     blocks = []
+    rec_path = BENCH / 'recommendations.json'
+    recs = json.loads(rec_path.read_text(encoding='utf-8')) if rec_path.is_file() else None
     for bench in load_all():
         name, folder = bench['name'], bench['folder']
+        bench['recommendation'] = next((c for c in (recs or {}).get('cycles', []) if c['name'] == name), None)
+        bench['recommendation_rule'] = (recs or {}).get('rule_contents')
         fig_dest = out_dir / 'assets/bias' / name
         if (folder / 'figures').is_dir():
             shutil.copytree(folder / 'figures', fig_dest, dirs_exist_ok=True)
         if (folder / 'confirmation/figures').is_dir():
             shutil.copytree(folder / 'confirmation/figures', fig_dest / 'confirmation', dirs_exist_ok=True)
-        for png in (folder / 'pilot').glob('*.png'):
-            (fig_dest / 'pilot').mkdir(parents=True, exist_ok=True)
-            shutil.copy2(png, fig_dest / 'pilot' / png.name)
+        for png in (folder / 'validation').glob('[0-9]*/shadow_*.png'):
+            (fig_dest / 'validation').mkdir(parents=True, exist_ok=True)
+            shutil.copy2(png, fig_dest / 'validation' / png.name)
         files = []
         year = bench['data']['config_contents']['forecast_year']
         for fname, label in [('benchmark.json', 'Screening: all scores, per-year values, diagnostics and screening statistics (JSON)'),
@@ -139,12 +146,25 @@ def export(out_dir):
                              ('manifest.json', 'Output manifest: SHA-256 of every screening output file (JSON)'),
                              ('ratio_limits/benchmark.json', 'MVS ratio-limit study: screening (JSON)'),
                              ('ratio_limits/confirmation/confirmation.json', 'MVS ratio-limit study: confirmation (JSON)'),
-                             (f'pilot/pilot_{year}.json', f'Shadow pilot {year}: probabilities check and scores (JSON)')]:
+                             *[(f'validation/{y}/{f.name}', f'Shadow forecast {f.stem.split("_")[-1]} {y} (NetCDF; not published)')
+                               for y in sorted(bench['validation']) for f in sorted((folder / 'validation' / str(y)).glob('shadow_*.nc'))]]:
             if (folder / fname).is_file():
                 dest = out_dir / 'downloads/bias' / name / fname
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(folder / fname, dest)
                 files.append((f'downloads/bias/{name}/{fname}', label, (folder / fname).stat().st_size))
+        if bench['validation']:                            # the validation record as one file
+            dest = out_dir / 'downloads/bias' / name / 'validation_record.json'
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(json.dumps({str(y): v for y, v in bench['validation'].items()}, indent=1, ensure_ascii=False), encoding='utf-8')
+            files.append((f'downloads/bias/{name}/validation_record.json', 'Independent validation record: every method scored on the '
+                          'seasons after the benchmark (JSON)', dest.stat().st_size))
+        if recs:
+            dest = out_dir / 'downloads/bias/recommendations.json'
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(rec_path, dest)
+            files.append(('downloads/bias/recommendations.json', 'Suggested methods for every cycle, target and product, with the rule '
+                          'and the evidence (JSON)', dest.stat().st_size))
         blocks.append((name, block(bench, files)))
     return blocks
 
@@ -380,7 +400,7 @@ def results_html(V):
   {tbl(head_t, score_rows(V, 'training', 'rpss', region, 'rps'), f'Tercile skill (RPSS of smoothed counts, no blend) by target, {tr}')}
   <details><summary>More scores by target: test years, fair CRPS, bias, correlation, spread, reliability, coverage</summary>{''.join(more)}</details>
   <details><summary>Dry months: shares of totals at exactly 0 mm and at ≤ 1 mm, CHIRPS and corrected</summary>
-    {tbl(['', 'Exactly 0 mm', '≤ 1 mm'], dry, f'Area-weighted mean share over cells, pooled leave-one-year-out {years(cfg["all_years"])}')}</details>
+    {tbl(['', 'Exactly 0 mm', '≤ 1 mm'], dry, f'Area-weighted mean share over cells, pooled leave-one-year-out {years(cfg["all_years"])}', 'compact nosort')}</details>
   <details><summary>Distribution of the corrected members (mean, spread, 10th and 90th percentiles)</summary>{dist}</details>
 </div>''')
     seg = ''.join(f'<button type="button" data-bc-region="{esc(k)}" aria-pressed="{str(k == V.primary).lower()}">{esc(r["label"])}</button>'
@@ -826,35 +846,91 @@ def ratio_html(bench):
        act, f'Share of the corrected area, mean over the leave-one-year-out folds, {tr}')}</details>'''
 
 
-def pilot_html(bench, name):
-    """The shadow pilot of the cycle, when one has been run: never a published forecast."""
-    pl = bench.get('pilot')
-    if not pl:
+STATUS = {'keep': 'Keep the operational method', 'candidate': 'Candidate', 'recommended': 'Recommended',
+          'not_supported': 'Not supported by validation'}
+
+
+def suggestion_html(bench):
+    """The method the platform suggests for each target and product, from the rule in recommendation_rule.json."""
+    rec, rule = bench.get('recommendation'), bench.get('recommendation_rule')
+    if not rec:
+        return ''
+    rows = []
+    for t, prods in rec['targets'].items():
+        for prod, e in prods.items():
+            status = STATUS[e['status']]
+            if e['status'] == 'candidate':
+                status += f" — validation {len(e['validation']['seasons'])} of {e['validation']['required']} seasons"
+            alts = ', '.join(a['label'] for a in e.get('alternatives', []))
+            rows.append([esc(t), esc(e['product']), f"<strong>{esc(e['method_label'])}</strong>", esc(status),
+                         esc(e['why']) + (f' Also confirmed: {esc(alts)}.' if alts else '')])
+    n = sum(1 for prods in rec['targets'].values() for e in prods.values() if e['status'] != 'keep')
+    return f'''<h3>Suggested method</h3>
+  <p>The platform suggests a bias-correction method for every target and product from the historical evidence (the confirmation
+  against CHIRPS, counting every method tried) and the independent validation seasons scored since (the shadow and validation
+  runs), by a rule fixed before those seasons are scored. A suggestion is advice for a decision: <strong>the published forecast
+  always uses {esc(rec['reference_label'])} until a change is decided.</strong> {n} of {len(rows)} target–product combinations have a
+  candidate.</p>
+  <details><summary>The rule</summary><ul class="findings">
+    <li><strong>Candidate</strong>: {esc(rule['historical'])}</li><li><strong>Choice</strong>: {esc(rule['choice'])}</li>
+    <li><strong>Validation</strong>: {esc(rule['validation']['rule'])} Minimum: {rule['validation']['minimum_seasons']} seasons.</li></ul></details>
+  {tbl(['Target', 'Product', 'Suggested method', 'Status', 'Evidence'], rows, 'Suggested methods (national aggregate)')}'''
+
+
+def shadow_html(bench, name):
+    """The ongoing shadow forecasts of the cycle: never published; scored as each season is observed."""
+    val = bench.get('validation') or {}
+    folder = bench['folder'] / 'validation'                 # shadow targets are those with a shadow forecast file
+    items = [(y, t, m, r) for y in sorted(val, reverse=True) for t, ms in val[y].items() for m, r in ms.items()
+             if r.get('shadow') and (folder / str(y) / f'shadow_{m}_{y}_{t}.nc').is_file()]
+    if not items:
         return ''
     regions = bench['data']['config_contents']['regions']
-    year = pl['forecast_year']
     parts = []
-    for t, row in pl['targets'].items():
-        chk = row['methods'][pl['reference_method']].get('published_check') or {}
+    for y, t, m, r in items:
+        ref = val[y][t].get(bench['data']['config_contents']['reference_method'])
+        chk = (ref or {}).get('published_check') or {}
+        check = (f'The published method run alongside reproduces the published forecast: largest probability difference '
+                 f'{chk["max_abs_difference"]:.1e}, blend weight difference {chk.get("blend_weight_difference") or 0:.1e}.' if chk else '')
         rows = []
-        for m in pl['methods']:
-            e = row['methods'][m]
-            for rk, sc in e.get('scores', {}).items():
-                rows.append([esc(e['label']), esc(regions[rk]['label']), signed(sc['rpss']), signed(sc['bss_below']), signed(sc['bss_above']),
-                             signed(sc['crpss']), pct(sc['favoured_hit_share']), num(e['blend_weight'])])
-        check = (f'With the published method the pilot reproduces the published {esc(t)} {year} forecast: largest probability difference '
-                 f'{chk.get("max_abs_difference", float("nan")):.1e} over {chk.get("cells", 0):,} cells, blend weight difference '
-                 f'{chk.get("blend_weight_difference") or float("nan"):.1e}.' if chk else '')
-        parts.append(f'''<p class="caveat">{check}</p>
-  {tbl(['Method', 'Region', 'RPSS', 'BSS below', 'BSS above', 'Amount CRPSS', 'Favoured category observed', 'Blend weight λ'], rows,
-       f'{esc(t)} {year} against CHIRPS (one season)') if rows else '<p class="caveat">The target period has not been observed yet.</p>'}
-  <figure class="map-figure wide"><img loading="lazy" src="assets/bias/{esc(name)}/pilot/pilot_{year}_{esc(t)}.png" alt="Shadow pilot maps, {esc(t)} {year}" style="max-width:100%;height:auto"><figcaption class="caveat">Favoured category of each method’s published-style probabilities, the observed category and the per-cell RPS difference.</figcaption></figure>''')
-    return f'''<h3>Shadow pilot {year}</h3>
-  <p class="notice"><strong>Not a published forecast.</strong> The alternative correction is run through the same probability pipeline
-  as the published forecast (all reference years; blend weight from leave-one-year-out), next to the published method, for
-  {esc(listing(list(pl['targets'])))} {year}. One observed season illustrates what the change would have meant; the evidence for it is
-  the confirmation above.</p>
+        if r.get('observed') and ref and ref.get('observed'):
+            for label_, e in [(ref['label'].replace(' (operational)', '') + ' (published)', ref), (r['label'] + ' (shadow)', r)]:
+                for rk, sc in e['scores'].items():
+                    rows.append([esc(label_), esc(regions[rk]['label']), signed(sc['rpss']), signed(sc['bss_below']),
+                                 signed(sc['bss_above']), signed(sc['crpss']), pct(sc['favoured_hit_share']), num(e['blend_weight'])])
+        status = (tbl(['Method', 'Region', 'RPSS', 'BSS below', 'BSS above', 'Amount CRPSS', 'Favoured category observed', 'λ'], rows,
+                      f'{esc(t)} {y} against CHIRPS (one season)') if rows else
+                  f'<p class="caveat">{esc(t)} {y}: awaiting CHIRPS observations; the shadow forecast is kept and will be scored.</p>')
+        parts.append(f'''<h4>{esc(t)} {y}: {esc(r['label'])}</h4><p class="caveat">{check}</p>{status}
+  <figure class="map-figure wide"><img loading="lazy" src="assets/bias/{esc(name)}/validation/shadow_{esc(m)}_{y}_{esc(t)}.png" alt="Shadow forecast {esc(t)} {y}" style="max-width:100%;height:auto"><figcaption class="caveat">Favoured category of the published method and of the shadow{', the observed category and the per-cell RPS difference' if rows else ''}.</figcaption></figure>''')
+    return f'''<h3>Shadow forecast</h3>
+  <p class="notice"><strong>Not a published forecast.</strong> For each new cycle of this initialization, the shadow method runs through the
+  same probability pipeline as the published forecast (all reference years; blend weight from leave-one-year-out), next to it, and is
+  scored once CHIRPS for the target is available. Each scored season is independent evidence that enters the suggestion above.</p>
   {''.join(parts)}'''
+
+
+def validation_html(bench):
+    """Every validated method's scores on the independent seasons (forecast years after the benchmark)."""
+    val = bench.get('validation') or {}
+    prim = bench['data']['config_contents']['primary_region']
+    out = []
+    for y in sorted(val, reverse=True):
+        observed = [t for t, ms in val[y].items() if any(r.get('observed') for r in ms.values())]
+        methods = sorted({m for t in observed for m in val[y][t]}, key=lambda m: (m != bench['data']['config_contents']['reference_method'], m))
+        if not observed or len(methods) < 2:
+            continue
+        observed = [t for t in bench['data']['targets'] if t in observed]
+        label = lambda m: next(r['label'] for t in observed for mm, r in val[y][t].items() if mm == m)
+        cell = lambda m, t, k: (signed(val[y][t][m]['scores'][prim][k]) if m in val[y][t] and val[y][t][m].get('observed') else '—')
+        out.append(tbl(['Method'] + [esc(t) for t in observed], [[esc(label(m))] + [cell(m, t, 'rpss') for t in observed] for m in methods],
+                       f'{y}: blended tercile RPSS against CHIRPS'))
+        out.append(tbl(['Method'] + [esc(t) for t in observed], [[esc(label(m))] + [cell(m, t, 'crpss') for t in observed] for m in methods],
+                       f'{y}: amount CRPSS against CHIRPS'))
+    if not out:
+        return ''
+    return ('<details><summary>Independent validation seasons: every method scored on the seasons after the benchmark '
+            '(one season each; the suggestions need at least three)</summary>' + ''.join(out) + '</details>')
 
 
 def block(bench, files):
@@ -876,6 +952,8 @@ def block(bench, files):
   compares {len(V.candidates)} other rainfall-amount bias-correction methods with it, member by member, for every grid cell and target:
   a <em>screening</em> of the amount correction alone, then a <em>confirmation</em> through the full probability pipeline that also
   accounts for how a method is chosen.</p>
+
+  {suggestion_html(bench)}
 
   <h3>Summary <span class="caveat">— national aggregate ({esc(V.national)})</span></h3>
   <ul class="findings">{''.join(f'<li>{t}</li>' for t in summary)}</ul>
@@ -918,7 +996,8 @@ def block(bench, files):
   {confirmation_html(V)}
 
   {ratio_html(bench)}
-  {pilot_html(bench, name)}
+  {shadow_html(bench, name)}
+  {validation_html(bench)}
 
   <h4>Figures</h4>
   {figures_html(V, name)}

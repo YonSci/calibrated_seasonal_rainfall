@@ -972,6 +972,10 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:8px}
 .flow{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .step{display:flex;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px}.step>div{min-width:0}.step p{margin:0 0 .4em;color:var(--ink2);font-size:.9rem}
 .step-n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+table:not(.nosort) thead th:not([colspan]){cursor:pointer;user-select:none}
+table:not(.nosort) thead th:not([colspan])::after{content:" \2195";color:var(--muted);font-size:.75em;font-weight:400}
+table:not(.nosort) thead th[aria-sort="ascending"]::after{content:" \25B2";color:var(--accent)}
+table:not(.nosort) thead th[aria-sort="descending"]::after{content:" \25BC";color:var(--accent)}
 .dl{list-style:none;padding:0;margin:0}.dl li{padding:10px 0;border-bottom:1px solid var(--line)}.dl li:last-child{border-bottom:none}.dl li>span:not(.status){display:block;color:var(--muted);font-size:.85rem}
 .foot{color:var(--muted);font-size:.85rem;padding:32px 16px 48px;border-top:1px solid var(--line);margin-top:40px}
 '''
@@ -1762,6 +1766,59 @@ JS = r'''
     if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, () => { $('mp-copied').textContent = url; });
     else $('mp-copied').textContent = url;
   });
+  // Sortable tables: click a column header to sort (numbers by value, text alphabetically; missing values last);
+  // a second click reverses, a third restores the original order. Tables marked .nosort keep their order.
+  const sortNumber = s => {
+    const m = s.replace(/−/g, '-').replace(/,/g, '').match(/[-+]?\d*\.?\d+(?:e[-+]?\d+)?/i);
+    return m ? parseFloat(m[0]) : NaN;
+  };
+  const headerColumn = th => {                      // column of a header cell, allowing for row and column spans
+    const grid = [];
+    let found = 0;
+    [...th.closest('thead').rows].forEach((row, r) => {
+      grid[r] = grid[r] || [];
+      let c = 0;
+      [...row.cells].forEach(cell => {
+        while (grid[r][c]) c++;
+        for (let i = 0; i < (cell.rowSpan || 1); i++)
+          for (let j = 0; j < (cell.colSpan || 1); j++) (grid[r + i] = grid[r + i] || [])[c + j] = cell;
+        if (cell === th) found = c;
+        c += cell.colSpan || 1;
+      });
+    });
+    return found;
+  };
+  document.addEventListener('click', e => {
+    const th = e.target.closest('thead th');
+    if (!th || th.colSpan > 1) return;
+    const table = th.closest('table');
+    if (!table || table.classList.contains('nosort') || !table.tBodies[0] || table.tBodies[0].rows.length < 2) return;
+    const col = headerColumn(th), body = table.tBodies[0], rows = [...body.rows];
+    rows.forEach((r, i) => { if (r.dataset.order === undefined) r.dataset.order = i; });
+    const state = th.getAttribute('aria-sort');
+    const next = state === 'ascending' ? 'descending' : state === 'descending' ? 'none' : 'ascending';
+    table.querySelectorAll('thead th[aria-sort]').forEach(h => h.removeAttribute('aria-sort'));
+    let order;
+    if (next === 'none') {
+      order = rows.sort((a, b) => a.dataset.order - b.dataset.order);
+    } else {
+      const text = r => (r.cells[col] ? r.cells[col].textContent.trim() : '');
+      const items = rows.map(r => ({r, t: text(r), n: sortNumber(text(r))}));
+      const numeric = items.filter(x => !isNaN(x.n)).length >= items.length / 2;
+      const dir = next === 'ascending' ? 1 : -1;
+      order = items.sort((a, b) => {
+        if (numeric) {
+          if (isNaN(a.n) || isNaN(b.n)) return isNaN(a.n) - isNaN(b.n);
+          return dir * (a.n - b.n);
+        }
+        if (!a.t || !b.t || a.t === '—' || b.t === '—') return (!a.t || a.t === '—') - (!b.t || b.t === '—');
+        return dir * a.t.localeCompare(b.t, undefined, {numeric: true});
+      }).map(x => x.r);
+      th.setAttribute('aria-sort', next);
+    }
+    order.forEach(r => body.appendChild(r));
+  });
+
   // Bias correction: region switch for the result tables, the figure browser and (with several benchmarks) the benchmark picker
   document.addEventListener('click', e => {
     const r = e.target.closest('[data-bc-region]');

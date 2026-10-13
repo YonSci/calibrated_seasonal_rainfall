@@ -1,0 +1,1584 @@
+{
+ "2026": {
+  "Dec": {
+   "cdft": {
+    "key": "8a25319f92a2c3f40c8c1e582ba30aac3a5be179c68966163ab9fe6e7d65309e",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:29.491909+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.793049323614514,
+    "observed": false,
+    "observation": null
+   },
+   "dc": {
+    "key": "66f766f3ad35e5f0a2bba150335c0389d01ce4e64006f99dbf7574d6f5d19699",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:28.194748+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.7761765671728339,
+    "observed": false,
+    "observation": null
+   },
+   "dqm": {
+    "key": "b99441a49abe1cedeb465f911bc6c81b23a8332e4439eb3a122afb4c7a4ddfc5",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:50:36.801535+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.8327507184931047,
+    "observed": false,
+    "observation": null
+   },
+   "eqm": {
+    "key": "0a37fc2cbd973046e6769d2a4e5eee00ce1fabed298ad648f06bf82b11f66e43",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:48:03.263263+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.7453163606897256,
+    "observed": false,
+    "observation": null
+   },
+   "gqm": {
+    "key": "6625ebf12f49e5c0e04894e20255ddada6794cf6e69e03bab5f22f9b97460993",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:49:09.500215+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.7837636412247128,
+    "observed": false,
+    "observation": null
+   },
+   "loci": {
+    "key": "065782d7811648d45c9d7f12ef7716801ecff457f667ced2bdf7e37d498abdea",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:46:31.983868+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.7903769874039743,
+    "observed": false,
+    "observation": null
+   },
+   "ls": {
+    "key": "e6235ee40f2f20799f27e14bf60aef909d9757492df06956aea9e0a918dba681",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:54.132411+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.7703613871021744,
+    "observed": false,
+    "observation": null
+   },
+   "mvs": {
+    "key": "7db65a4df630a6e6c26700cf5a610a81af5b29f852bdaa6ee1dc7fd3b3873de4",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:57.500412+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.6970666373110431,
+    "observed": false,
+    "observation": null,
+    "published_check": {
+     "max_abs_difference": 7.305470117735524e-09,
+     "cells": 2272,
+     "published_blend_weight": 0.6970666271461702,
+     "blend_weight_difference": 1.0164872943363434e-08
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "410ce021f4ee249e38201d1f96f8f8f0bee16da01d95b0cf7b8289b372db1f05",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:45.211720+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.6970666373110431,
+    "observed": false,
+    "observation": null
+   },
+   "pt": {
+    "key": "4ea43b3379f33961fef96f39b033a6b698b127d43c068180a1c458bb7535bd53",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:55:47.193400+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.6870202636103114,
+    "observed": false,
+    "observation": null
+   },
+   "qdm": {
+    "key": "233cd9317972d66ecf457314807d59fdf389ce88ab92694420621ac855f0a3d8",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:52:12.703539+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.7840080293390961,
+    "observed": false,
+    "observation": null
+   },
+   "sdm": {
+    "key": "832290d89892c1032761ae9cb53c2e1bbec8540fe4d9b18000c365c743081fd1",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T09:00:39.071786+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.8451661091741156,
+    "observed": false,
+    "observation": null
+   },
+   "sqrt_mvs": {
+    "key": "f8f4ce8eebbf081e9769a347e1701facdc6ca644e9ddb75784d22062ab0125d8",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:17.557036+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.6029023137840067,
+    "observed": false,
+    "observation": null
+   },
+   "vs": {
+    "key": "87597c0125b1fe4d816312404314de69fd142659652354f825af5dbb654bbebd",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "Dec",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:10.384185+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Dec",
+    "blend_weight": 0.6772456411596164,
+    "observed": false,
+    "observation": null
+   }
+  },
+  "Jan": {
+   "cdft": {
+    "key": "69af92ceb85a0f711b0c225e63d5d3ac8542df5f81b044877086c26a3425f511",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:29.492456+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.7829236411275319,
+    "observed": false,
+    "observation": null
+   },
+   "dc": {
+    "key": "d44a95370a17a59786536cec72548bb2c8f999ddb4caeabbb8bfc6252f75c746",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:28.194748+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.8385512835578389,
+    "observed": false,
+    "observation": null
+   },
+   "dqm": {
+    "key": "67a213db976465774d902aa37ae95632d5cfe34a6fdcbcc4c169eb12ee048e74",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:50:36.802982+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.8027884705778323,
+    "observed": false,
+    "observation": null
+   },
+   "eqm": {
+    "key": "d044bd19c70dda38b0481bca75eb297c46f7de6ab67c2df984f39ca35fd10f48",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:48:03.263263+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.4886923518613956,
+    "observed": false,
+    "observation": null
+   },
+   "gqm": {
+    "key": "6a8bc894810eddf24f16355b3643e96728caaebe7ae4f3469af8eeecbf3b5fd3",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:49:09.500215+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.6467358708108986,
+    "observed": false,
+    "observation": null
+   },
+   "loci": {
+    "key": "1cb74671bbd275301c58ca31e8b26151b84f1ec81fa273b1b175e44637c482b7",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:46:31.983868+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.7771656412016815,
+    "observed": false,
+    "observation": null
+   },
+   "ls": {
+    "key": "ca2541488e6ae0c969b5908f1a4d598dbc75b9e367521572a80f4cc56fd9ad20",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:54.132705+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.7770398616368035,
+    "observed": false,
+    "observation": null
+   },
+   "mvs": {
+    "key": "596d0806a1abf1ba0fa01a271a4c0e3e71c2df646490a0a96348427df11bcb1d",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:57.500412+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.9025958182701267,
+    "observed": false,
+    "observation": null,
+    "published_check": {
+     "max_abs_difference": 7.147925112915843e-09,
+     "cells": 1546,
+     "published_blend_weight": 0.9025958267547481,
+     "blend_weight_difference": 8.484621449866836e-09
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "b7ac0742838c4227b5af1e7c1659927499ca365090974eab03272f08006d8cab",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:45.211720+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.9025958182701267,
+    "observed": false,
+    "observation": null
+   },
+   "pt": {
+    "key": "9bf152373fd5068ceef3cb629b5e22f4ecfdeac8058ca41537f05815ec50dbcb",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:55:47.198155+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.6351484394507635,
+    "observed": false,
+    "observation": null
+   },
+   "qdm": {
+    "key": "1ac2eddfc5d12a01acc19692893cbce41cbe20a61eaafaec207909e4e554d658",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:52:12.704750+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.7076609193979071,
+    "observed": false,
+    "observation": null
+   },
+   "sdm": {
+    "key": "74446d505bb558de485896c67bf38a9cea434bec5fbe21002ae82dfbcfacc82b",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T09:00:39.075967+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.8790607175690999,
+    "observed": false,
+    "observation": null
+   },
+   "sqrt_mvs": {
+    "key": "b03ca7f665de506b58feb137d2edf1d30b2cce638ee6daae67006cde7958022d",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:17.610241+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.550137252163556,
+    "observed": false,
+    "observation": null
+   },
+   "vs": {
+    "key": "8e0923c56aed70c8a40ebfbbf1bdc52993758d58a47c030b5787cb2d4c5ef92f",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "Jan",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:10.384914+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Jan",
+    "blend_weight": 0.8848691044708012,
+    "observed": false,
+    "observation": null
+   }
+  },
+  "Nov": {
+   "cdft": {
+    "key": "eb567c3fa036eb53862211177c15b08d80e47c321d9c69c597668a99763a4e31",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:29.491367+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.4947007325128627,
+    "observed": false,
+    "observation": null
+   },
+   "dc": {
+    "key": "8edf430a123e3be57b6e07817e3a9dfba441d0fbbf1996cb49145e3c82733d9d",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:28.194748+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.388390308993799,
+    "observed": false,
+    "observation": null
+   },
+   "dqm": {
+    "key": "e267753437b2b11a6e239387f05a9c1082eaa1332687ec620563b29b1d44e05f",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:50:36.801535+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.4581895986804656,
+    "observed": false,
+    "observation": null
+   },
+   "eqm": {
+    "key": "18572eee9ff784027531f767d48cccef08387ae6d880eb4c0efed039203da1e3",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:48:03.263263+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.27996033654446195,
+    "observed": false,
+    "observation": null
+   },
+   "gqm": {
+    "key": "d9d2f7151d1ecad873ab690984f10c99e34deee062b1d028b6dc6a8df8161579",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:49:09.488139+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.3452735918904377,
+    "observed": false,
+    "observation": null
+   },
+   "loci": {
+    "key": "0cba5c792420bbcb0c7b02ea33ec41cef6bebe6271dd2c01b4c64c4a2819fa61",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:46:31.983868+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.4012017394322709,
+    "observed": false,
+    "observation": null
+   },
+   "ls": {
+    "key": "20b861a93e3b7d0ca783d6c122439cccfc37508952360338350b284e89919b01",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:54.131590+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.44984067607090233,
+    "observed": false,
+    "observation": null
+   },
+   "mvs": {
+    "key": "af54cb3e9c358a9b06d4fb64705ae251cef544f299330e02b0613600d342aa85",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:57.500412+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.32206350424515884,
+    "observed": false,
+    "observation": null,
+    "published_check": {
+     "max_abs_difference": 1.959904527559786e-08,
+     "cells": 2577,
+     "published_blend_weight": 0.322063492787367,
+     "blend_weight_difference": 1.1457791826430253e-08
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "6f632bc3c50029a48c69d3929a318613d7702d00330b470c436bd50b5af42543",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:45.211720+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.32206350424515884,
+    "observed": false,
+    "observation": null
+   },
+   "pt": {
+    "key": "48bceac70f726e5597c1e3693bd375b4405789e2b0a637ec0717f0989d76598b",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:55:47.193400+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.2902252784711797,
+    "observed": false,
+    "observation": null
+   },
+   "qdm": {
+    "key": "ecd34d4d349d05ef448258ca6837a9b69d738ae73dbc5858f65f3b91941171e8",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:52:12.695752+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.4306919938196573,
+    "observed": false,
+    "observation": null
+   },
+   "sdm": {
+    "key": "441dd164aaa3e2fa848c28968c3888a46542059e22bc535e3b628e64fc3ab441",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T09:00:39.063531+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.5053098795505122,
+    "observed": false,
+    "observation": null
+   },
+   "sqrt_mvs": {
+    "key": "e8353f4bb7b557238980547aeab7bdeca545a31e4f61e4129cfd883e629df628",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:17.557036+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.14234725842400656,
+    "observed": false,
+    "observation": null
+   },
+   "vs": {
+    "key": "0152830797846457dec076f93d5292d388deedf1de8abb8db20db89694adf2cf",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "Nov",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:10.383239+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Nov",
+    "blend_weight": 0.3173209151955113,
+    "observed": false,
+    "observation": null
+   }
+  },
+  "Oct": {
+   "cdft": {
+    "key": "55893bd3dc2edd8033542c6975041469a23e4d6669eeb9497dba42f5f3088ae8",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:29.488530+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.4635014337702295,
+    "observed": false,
+    "observation": null
+   },
+   "dc": {
+    "key": "5395c5288f4caac1910854078740981cd50cf281021ed34e8e66b7fb9c9bc668",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:28.194748+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.2690321082576058,
+    "observed": false,
+    "observation": null
+   },
+   "dqm": {
+    "key": "4e35238c838f6d51162873985822545b1dc8e721fa8fba2df254fd97aa0efe40",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:50:36.800530+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.41975210288077214,
+    "observed": false,
+    "observation": null
+   },
+   "eqm": {
+    "key": "c9b2c606274fe11719e88058c6e7b31ec219624359b42b256a228f6e0f4f9a6a",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:48:03.258755+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.4214559084768592,
+    "observed": false,
+    "observation": null
+   },
+   "gqm": {
+    "key": "0bc208d65d6a0dad02f41684e4b06a7bd5d207a975acf9609c1595d15fd7a0cc",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:49:09.488139+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.3908260653222397,
+    "observed": false,
+    "observation": null
+   },
+   "loci": {
+    "key": "7214defa34883fcbc0b31c642bb2e4b1f4c2bb78b488dfe701dd8292821db93a",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:46:31.983868+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.4728238887753557,
+    "observed": false,
+    "observation": null
+   },
+   "ls": {
+    "key": "12eac96de1e456c77f0e7748afd848d686f3d719d58016a659cea29d6aed9138",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:54.129978+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.4938231173026023,
+    "observed": false,
+    "observation": null
+   },
+   "mvs": {
+    "key": "1dc4d998c186f822b0ab8dabc1cc8a0a19bf570a28a2ee537c50115f1a557f0f",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:57.494371+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.41297777836400995,
+    "observed": false,
+    "observation": null,
+    "published_check": {
+     "max_abs_difference": 1.4338422393844752e-08,
+     "cells": 2661,
+     "published_blend_weight": 0.41297775979651596,
+     "blend_weight_difference": 1.856749398676527e-08
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "46ca9268fefab2399ce9fb45b2ca5d3ae07b45f854b9b28d1a987bcca7baa481",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:45.211720+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.41297777836400995,
+    "observed": false,
+    "observation": null
+   },
+   "pt": {
+    "key": "de8e8e13bdbc5f70cf9da25b9635fd19b1d079d1170dafac46db386ffe9081bd",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:55:47.193400+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.4186065848154794,
+    "observed": false,
+    "observation": null
+   },
+   "qdm": {
+    "key": "2ebd745c1d41a426014be2be546606b674d413c5c375f1d093a8879a530201cf",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:52:12.695752+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.40032342625009193,
+    "observed": false,
+    "observation": null
+   },
+   "sdm": {
+    "key": "5c926454976f58bd9b45ce128f55891ea21d1f85b5822bdd450c4b4bae6d318b",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T09:00:39.063531+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.4571427079020781,
+    "observed": false,
+    "observation": null
+   },
+   "sqrt_mvs": {
+    "key": "aa8fb44bae9511d3aa194b05767ce7d5444d283b502f744f4000e22f8e139e2c",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:17.557036+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.36769379996882434,
+    "observed": false,
+    "observation": null
+   },
+   "vs": {
+    "key": "1ca4fac6c5be409344f6186cc8b27019ea44d720b7aa73261c850c052aab3319",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "Oct",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:10.380994+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_Oct",
+    "blend_weight": 0.4140698615118087,
+    "observed": false,
+    "observation": null
+   }
+  },
+  "ONDJ": {
+   "cdft": {
+    "key": "25a7d1b7342313bf1de31eaf4003aed45dd8606fe57443ebcca01142371de2a1",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:29.492456+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.2767356798511142,
+    "observed": false,
+    "observation": null
+   },
+   "dc": {
+    "key": "ad4cf4c5bb6606f378ce23a2c5ac2e7a8e5b648806ed3528d35a642ae9bedba0",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:28.199873+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.19437847193790894,
+    "observed": false,
+    "observation": null
+   },
+   "dqm": {
+    "key": "ff7ee4aa225a45a20c17bfcf2634e95ecc1d4dc5cf15e66d389321f193e73b16",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:50:36.802982+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.27229698175347106,
+    "observed": false,
+    "observation": null
+   },
+   "eqm": {
+    "key": "aedc75e43d2946c724c2c46f58956e18036dbe9ef88680e50b0912a332b64cb9",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:48:03.263263+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.17263288136473096,
+    "observed": false,
+    "observation": null
+   },
+   "gqm": {
+    "key": "c11cf139867aacf2936f589d85f3d97cc91f6903d842c795e05e8d6c50ab821b",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:49:09.562623+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.15488293555999239,
+    "observed": false,
+    "observation": null
+   },
+   "loci": {
+    "key": "1b77ad550f4fa3a2750ee2480e0a38af5c477e5f1f7223f6005c1b53f4222849",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:46:31.983868+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.28287874234252636,
+    "observed": false,
+    "observation": null
+   },
+   "ls": {
+    "key": "cfff7aafbf70190570a92dd508841eca61120fa4d76b721ca6f5a77ed6f22b89",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:54.134076+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.28033286838525495,
+    "observed": false,
+    "observation": null
+   },
+   "mvs": {
+    "key": "9c11d76d9b7881c645efd58264c585841acd2c24af38cd09c573542b27e29c61",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:44:57.500412+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.18412617784026747,
+    "observed": false,
+    "observation": null,
+    "published_check": {
+     "max_abs_difference": 2.2105745012268585e-08,
+     "cells": 2672,
+     "published_blend_weight": 0.18412616555782843,
+     "blend_weight_difference": 1.2282439038058257e-08
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "4b172abef3277e086363846628e7effac2817b458e28dfa1c8d83e5838685cea",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:59:45.211720+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.18412617784026747,
+    "observed": false,
+    "observation": null
+   },
+   "pt": {
+    "key": "e301d2c4f31ef94491678aeebbd1053d583eeb3c51844e016e2854d8e3abb744",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:55:47.198155+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.15836852543502414,
+    "observed": false,
+    "observation": null
+   },
+   "qdm": {
+    "key": "e783d859f34f0d24f19e93c5f3c4f84e6e270ec51365b6b2da72a1ea59e0e516",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:52:12.705797+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.279519637673075,
+    "observed": false,
+    "observation": null
+   },
+   "sdm": {
+    "key": "1caa1409e736dc73c83c10d9fa40d01eb6805262e4e583ab8a6469f0315f3b73",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T09:00:39.075967+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.3399178573182415,
+    "observed": false,
+    "observation": null
+   },
+   "sqrt_mvs": {
+    "key": "00eec8b0d25389b37187639b6c3fc3c8338780cea19c0cf5bfec1898835288ea",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:17.610241+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.15423721144315622,
+    "observed": false,
+    "observation": null
+   },
+   "vs": {
+    "key": "ebd09e44068505d62e4080f0fd9e8d4a43745d92f3f9b8e6eeb51402a469a4d6",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "ONDJ",
+    "cycle": "config/cycles/sep_2026_ondj.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2024
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:45:10.384914+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init09_ONDJ",
+    "blend_weight": 0.18953874911187982,
+    "observed": false,
+    "observation": null
+   }
+  }
+ }
+}

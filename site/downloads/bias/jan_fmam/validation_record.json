@@ -1,0 +1,3264 @@
+{
+ "2026": {
+  "Apr": {
+   "cdft": {
+    "key": "ed256983176f78ed43de874a9d9809a28bdbf0a16eb5651f7b15a22aebf95b2a",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:08:51.295871+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.8292808206637607,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44391147322813057,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.006955966706533645,
+      "bss_below": 0.0021718340985503737,
+      "bss_above": 0.011986041556590665,
+      "crps": 25.395140672185036,
+      "crps_clim": 25.291071205124013,
+      "crpss": -0.004114869877078986,
+      "favoured_hit_share": 0.0
+     },
+     "fmam_domain": {
+      "rps": 0.422074733398361,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.006225719716372202,
+      "bss_below": 0.0027001726697805095,
+      "bss_above": 0.011787691849277637,
+      "crps": 25.060735863360527,
+      "crps_clim": 24.563438062298385,
+      "crpss": -0.020245447717900156,
+      "favoured_hit_share": 0.0
+     }
+    }
+   },
+   "dc": {
+    "key": "f5b9e87498f60ace8b0f97287b725373422f7000c59f1ecf18a5bc3c9ebed15f",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:57:10.462073+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.689257854081638,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4414912574712636,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.01237006605197788,
+      "bss_below": 0.0015339087740506852,
+      "bss_above": 0.023763286787611304,
+      "crps": 24.35038645628058,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.03719434187717785,
+      "favoured_hit_share": 0.24983439554631823
+     },
+     "fmam_domain": {
+      "rps": 0.41930060782256,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.012757393918499949,
+      "bss_below": 0.002704025023073209,
+      "bss_above": 0.028617802116977842,
+      "crps": 23.630221445127344,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.037992100894190584,
+      "favoured_hit_share": 0.24983439554631823
+     }
+    }
+   },
+   "dqm": {
+    "key": "aae29797fd99ad633d6410b2faa7bece44085399effe81ce380452a4e1d8efe9",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:01:57.567643+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.8255085693269587,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4423603149397632,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.010425956954263405,
+      "bss_below": 0.010632953411966795,
+      "bss_above": 0.010208320219641576,
+      "crps": 24.868869394441266,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.016693710094699665,
+      "favoured_hit_share": null
+     },
+     "fmam_domain": {
+      "rps": 0.42083761028844163,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.009138524087019095,
+      "bss_below": 0.008952320981046258,
+      "bss_above": 0.009432283644697614,
+      "crps": 24.465950718868708,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.003968798796912143,
+      "favoured_hit_share": null
+     }
+    }
+   },
+   "eqm": {
+    "key": "1be58972b93a5cfa611abc034d23e11601be0b6312f64bfdff2503c59647fdd9",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:59:32.184631+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.8464657696783052,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44340603890024594,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.00808663931537068,
+      "bss_below": 0.010237860076768301,
+      "bss_above": 0.00582483020819935,
+      "crps": 24.83617208802394,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.017986550012476732,
+      "favoured_hit_share": null
+     },
+     "fmam_domain": {
+      "rps": 0.4218129096893017,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.00684218321783947,
+      "bss_below": 0.008149271386799328,
+      "bss_above": 0.004780097772605574,
+      "crps": 24.37868599005914,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.007521425615203858,
+      "favoured_hit_share": null
+     }
+    }
+   },
+   "gqm": {
+    "key": "1d6d20c878321e3f7e62da86533aef71bc7c9662b5d8eff6df4963776e8e1567",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:00:37.930898+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.7058202307717654,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4407048403955914,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.014129305972039652,
+      "bss_below": 0.01654878237094959,
+      "bss_above": 0.011585450365520833,
+      "crps": 24.78104568582373,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.020166228435470557,
+      "favoured_hit_share": 0.10518238602599492
+     },
+     "fmam_domain": {
+      "rps": 0.41820084947340486,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.015346773181072582,
+      "bss_below": 0.015932276126692124,
+      "bss_above": 0.014423074320709217,
+      "crps": 24.164549954481707,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.016239099217503994,
+      "favoured_hit_share": 0.12250999891799785
+     }
+    }
+   },
+   "loci": {
+    "key": "fc3d21d5a301061017eef12dfec921d04ea5a3fa55a0cb02b9e7a1c0fe8c945c",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:58:13.960191+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.7318986619909841,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44650421120180267,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.0011559296948178144,
+      "bss_below": -0.0036959846486483983,
+      "bss_above": 0.006257270063020015,
+      "crps": 26.647782966542884,
+      "crps_clim": 25.291071205124013,
+      "crpss": -0.053643902641181906,
+      "favoured_hit_share": 0.1484876522203944
+     },
+     "fmam_domain": {
+      "rps": 0.4204800630920827,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.009980368385226979,
+      "bss_below": 0.00950172170475616,
+      "bss_above": 0.010735492214185571,
+      "crps": 25.991660097413906,
+      "crps_clim": 24.563438062298385,
+      "crpss": -0.058144223601485745,
+      "favoured_hit_share": 0.17902847817917225
+     }
+    }
+   },
+   "ls": {
+    "key": "22ea686cc017d3e3a627924bca740951fe1ad79419a1b12283cbdadb3f557605",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:31.891394+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.7080249210190229,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4465890381929072,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.0009661690275253321,
+      "bss_below": -0.004734679817460119,
+      "bss_above": 0.006960085681629202,
+      "crps": 26.746532782689727,
+      "crps_clim": 25.291071205124013,
+      "crpss": -0.05754843540477772,
+      "favoured_hit_share": 0.15700404066840498
+     },
+     "fmam_domain": {
+      "rps": 0.4204330052118401,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.010091166088499137,
+      "bss_below": 0.009340056896758098,
+      "bss_above": 0.011276132082691737,
+      "crps": 26.108857117615216,
+      "crps_clim": 24.563438062298385,
+      "crpss": -0.06291542134278205,
+      "favoured_hit_share": 0.1688219334180275
+     }
+    }
+   },
+   "mvs": {
+    "key": "42fbd0bf9213e20b36bcad53a6ff95f1354b014a1c945e177ce70ff580d76fdd",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:35.133435+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.7588196695199498,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "published_check": {
+     "max_abs_difference": 1.4444068163754764e-08,
+     "cells": 2644,
+     "published_blend_weight": 0.7588196484638534,
+     "blend_weight_difference": 2.1056096422000792e-08
+    },
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44240854165551924,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.010318072262798572,
+      "bss_below": 0.015920746979707356,
+      "bss_above": 0.004427379064369186,
+      "crps": 24.948166972361907,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.013558311942620804,
+      "favoured_hit_share": 0.5134098009995071
+     },
+     "fmam_domain": {
+      "rps": 0.4193005688262213,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.012757485735316654,
+      "bss_below": 0.011202967622752191,
+      "bss_above": 0.015209925812723624,
+      "crps": 24.178742824385793,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.015661294519802915,
+      "favoured_hit_share": 0.5306440711823355
+     }
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "94b0b73c82e79d132fc4108e06652fa93cffdf0e958a083a2ff1e64e59af94b7",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:05.549364+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.7588196695199498,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44240854165551924,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.010318072262798572,
+      "bss_below": 0.015920746979707356,
+      "bss_above": 0.004427379064369186,
+      "crps": 24.948166972361907,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.013558311942620804,
+      "favoured_hit_share": 0.5134098009995071
+     },
+     "fmam_domain": {
+      "rps": 0.4193005688262213,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.012757485735316654,
+      "bss_below": 0.011202967622752191,
+      "bss_above": 0.015209925812723624,
+      "crps": 24.178742824385793,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.015661294519802915,
+      "favoured_hit_share": 0.5306440711823355
+     }
+    }
+   },
+   "pt": {
+    "key": "a57478c2f38662ad3f1620f9c5d02450625bb9dd86ac5ef0ccb8183cf629fb9f",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:07:20.570333+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.702066221501998,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4393428615468968,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.017176095818070558,
+      "bss_below": 0.01959725121638689,
+      "bss_above": 0.01463047404876805,
+      "crps": 24.850074756569636,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.01743684342105012,
+      "favoured_hit_share": 0.19876562314095333
+     },
+     "fmam_domain": {
+      "rps": 0.4187580345839362,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.014034881735345062,
+      "bss_below": 0.01557620904514978,
+      "bss_above": 0.011603255721053585,
+      "crps": 24.35032584511491,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.008675993020316408,
+      "favoured_hit_share": 0.10461828247717919
+     }
+    }
+   },
+   "qdm": {
+    "key": "db92e1361e8fa04717201c3defd2a1e8c0803a566a536d499e8cb3eab4343499",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:03:42.177509+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.8449345953398693,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44372135588944234,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.00738126521805238,
+      "bss_below": 0.005495528213017131,
+      "bss_above": 0.009363944128191859,
+      "crps": 25.41138088975995,
+      "crps_clim": 25.291071205124013,
+      "crpss": -0.00475700232940568,
+      "favoured_hit_share": null
+     },
+     "fmam_domain": {
+      "rps": 0.4220600185020733,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.006260365915991883,
+      "bss_below": 0.0046244149192151696,
+      "bss_above": 0.008841274700399637,
+      "crps": 25.030622605554406,
+      "crps_clim": 24.563438062298385,
+      "crpss": -0.0190195094868697,
+      "favoured_hit_share": null
+     }
+    }
+   },
+   "sdm": {
+    "key": "c0527dbf6c7cf07477549c14c2d6bd1cb74ba5a7eb96322359c13c3ab2af5fa4",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:47.287361+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.8529005942452696,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44516732918866037,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.004146577124392259,
+      "bss_below": 0.002678017820397227,
+      "bss_above": 0.005690632904421955,
+      "crps": 25.59635653528449,
+      "crps_clim": 25.291071205124013,
+      "crpss": -0.01207087385443062,
+      "favoured_hit_share": null
+     },
+     "fmam_domain": {
+      "rps": 0.4215291179914533,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.007510370313544068,
+      "bss_below": 0.00461411408270096,
+      "bss_above": 0.012079561098143232,
+      "crps": 24.630052151631087,
+      "crps_clim": 24.563438062298385,
+      "crpss": -0.0027119204226930815,
+      "favoured_hit_share": null
+     }
+    }
+   },
+   "sqrt_mvs": {
+    "key": "4b2c14b6d0d3de2d1c0495b9b079ee990e90c4e83fd483efa2ba43a6e15b6bc5",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:59.953409+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.6771359776473852,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44160554537983576,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.012114400378685275,
+      "bss_below": 0.013198035309209932,
+      "bss_above": 0.010975059083168093,
+      "crps": 24.939743706110445,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.013891364907564263,
+      "favoured_hit_share": 0.11955270930951253
+     },
+     "fmam_domain": {
+      "rps": 0.41811961472806075,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.0155380402582046,
+      "bss_below": 0.015382506828229059,
+      "bss_above": 0.015783414770385917,
+      "crps": 24.288605225444623,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.011188695823309613,
+      "favoured_hit_share": 0.15218568811058977
+     }
+    }
+   },
+   "vs": {
+    "key": "885332d3995f0e7f0a2f76909359eba77023a53080c6f43464e31b2d1cd4e059",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "Apr",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:47.266139+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Apr",
+    "blend_weight": 0.7661247987626114,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Apr/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44273498136397116,
+      "rps_clim": 0.4470209359759025,
+      "rpss": 0.009587816290023476,
+      "bss_below": 0.014875295187479987,
+      "bss_above": 0.004028522210758112,
+      "crps": 25.042586691898702,
+      "crps_clim": 25.291071205124013,
+      "crpss": 0.009824989665719097,
+      "favoured_hit_share": 0.3563497855325217
+     },
+     "fmam_domain": {
+      "rps": 0.4193468722490606,
+      "rps_clim": 0.4247189143171414,
+      "rpss": 0.012648464400786041,
+      "bss_below": 0.011629527779793092,
+      "bss_above": 0.014255960588088645,
+      "crps": 24.291650216110103,
+      "crps_clim": 24.563438062298385,
+      "crpss": 0.011064731471993716,
+      "favoured_hit_share": 0.2984400215941446
+     }
+    }
+   }
+  },
+  "Feb": {
+   "cdft": {
+    "key": "0ff585081db9ff7701a8432d1ecea77579e9461088f9897c558554fd79b87678",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:08:51.291868+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.6897746838977661,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.45072091728872554,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.12682843439720504,
+      "bss_below": -0.1106912508146114,
+      "bss_above": -0.14631387133845974,
+      "crps": 7.613513355002331,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.615281702516181,
+      "favoured_hit_share": 0.2640818548039851
+     },
+     "fmam_domain": {
+      "rps": 0.45084107328289696,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.10789235912510775,
+      "bss_below": -0.12519657684262553,
+      "bss_above": -0.08806312402498473,
+      "crps": 8.538976188658555,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.45454271207148933,
+      "favoured_hit_share": 0.295227991815103
+     }
+    }
+   },
+   "dc": {
+    "key": "c8fbb9f370414d11031b30c4aa5e5bc6248df225d8c8441ef0c1fa4d9e623b72",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:57:10.462073+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.6546396643061795,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44604242309418857,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.11513192756481971,
+      "bss_below": -0.11600296869950388,
+      "bss_above": -0.11408014316130322,
+      "crps": 6.249535408795123,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.32590037271309846,
+      "favoured_hit_share": 0.19287354104093857
+     },
+     "fmam_domain": {
+      "rps": 0.447901226300339,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.10066800845701929,
+      "bss_below": -0.13256297712010245,
+      "bss_above": -0.06411893485030196,
+      "crps": 7.299216508078366,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.24336008686366783,
+      "favoured_hit_share": 0.18707311110503583
+     }
+    }
+   },
+   "dqm": {
+    "key": "198d30fee0f9ddfb840e0c306e4a5b5d4767f5c62af88c4a3e7e2df9c7c3ddf2",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:01:57.556722+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.6556648869169276,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.45723996975229186,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.1431264436519386,
+      "bss_below": -0.13457466233946502,
+      "bss_above": -0.15345260729529486,
+      "crps": 6.582312377922873,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.3965022780604732,
+      "favoured_hit_share": 0.15448394130138396
+     },
+     "fmam_domain": {
+      "rps": 0.46124909228675354,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.13346892126936027,
+      "bss_below": -0.15929360199377607,
+      "bss_above": -0.1038759208329112,
+      "crps": 7.594516627862687,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.29366197641298153,
+      "favoured_hit_share": 0.12778041556931502
+     }
+    }
+   },
+   "eqm": {
+    "key": "09a76a28bd84f77883275419c32a3a3f17137cbe938f696b2c429bf662edb752",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:59:32.184631+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.4263411951222803,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4394863570633204,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.09874138224509688,
+      "bss_below": -0.08933993909606297,
+      "bss_above": -0.11009350130620099,
+      "crps": 5.4873344447437375,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.16419194541212367,
+      "favoured_hit_share": 0.1823434385983494
+     },
+     "fmam_domain": {
+      "rps": 0.4501723339949331,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.10624900586541686,
+      "bss_below": -0.11771204147888681,
+      "bss_above": -0.09311329230282328,
+      "crps": 6.644317127686559,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.13180349040023587,
+      "favoured_hit_share": 0.14863462095875965
+     }
+    }
+   },
+   "gqm": {
+    "key": "8f05bb59e2f787d02dce5f06862db1ec77cd9f971d531a7d167e76b07a8f4152",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:00:37.926967+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.5921075157963348,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.45325564425018366,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.1331653988114272,
+      "bss_below": -0.06827344165783256,
+      "bss_above": -0.2115215810973632,
+      "crps": 5.955274066200198,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.2634699361605535,
+      "favoured_hit_share": 0.130242359289674
+     },
+     "fmam_domain": {
+      "rps": 0.46297615012963056,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.13771297599569166,
+      "bss_below": -0.08923646356023629,
+      "bss_above": -0.1932631606627626,
+      "crps": 7.18949086054376,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.22466924648390818,
+      "favoured_hit_share": 0.12368580507625544
+     }
+    }
+   },
+   "loci": {
+    "key": "b224b45f086c16f4ff04993a02393826dddab1dc191410db264a904173c673d0",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:58:13.960191+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.7295189279766412,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4147824022271365,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.03698006236021523,
+      "bss_below": -0.04547109582885689,
+      "bss_above": -0.026727249171624168,
+      "crps": 6.962408464479608,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.477143399338563,
+      "favoured_hit_share": 0.2668613833431392
+     },
+     "fmam_domain": {
+      "rps": 0.4239672435320232,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.04185287779608582,
+      "bss_below": -0.06139042992553878,
+      "bss_above": -0.01946441355461026,
+      "crps": 8.403382116546142,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.43144540332700965,
+      "favoured_hit_share": 0.24974736226020278
+     }
+    }
+   },
+   "ls": {
+    "key": "17d559771e4701bbd495d176f8ac4d78b94d5c7868890365d85ac69ad0561cde",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:31.887980+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.716223339236532,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.413470230684716,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.033699557400071134,
+      "bss_below": -0.04549554633583619,
+      "bss_above": -0.019456055189544852,
+      "crps": 7.246051320933637,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.5373210196718337,
+      "favoured_hit_share": 0.27331310047817836
+     },
+     "fmam_domain": {
+      "rps": 0.4218772511628375,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.03671695138283804,
+      "bss_below": -0.05904209764514068,
+      "bss_above": -0.011134129441611629,
+      "crps": 8.661817844375252,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.4754677540336436,
+      "favoured_hit_share": 0.26516034210483
+     }
+    }
+   },
+   "mvs": {
+    "key": "691c4f43394d955c03eb985e2b3c722af0e88ab4edce581e8e33c4a9e327c012",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:35.129092+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.7595846480494883,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "published_check": {
+     "max_abs_difference": 1.664739601725529e-08,
+     "cells": 1945,
+     "published_blend_weight": 0.7595846445823538,
+     "blend_weight_difference": 3.467134579437925e-09
+    },
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4148106155244567,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.03705059723984694,
+      "bss_below": -0.022486057437310025,
+      "bss_above": -0.0546370845385975,
+      "crps": 5.698727800455631,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.20904112391793994,
+      "favoured_hit_share": 0.4162145014006665
+     },
+     "fmam_domain": {
+      "rps": 0.4198534313478837,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.03174363674469638,
+      "bss_below": -0.016966920426975562,
+      "bss_above": -0.04867656203137338,
+      "crps": 6.9434720092620745,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.18276200617103977,
+      "favoured_hit_share": 0.42207078772482054
+     }
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "12227c0cc29909f92ccf2f90242f1986944e9fa7d16a0de3c6148fe48d95702b",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:05.549364+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.7595846480494883,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4148106155244567,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.03705059723984694,
+      "bss_below": -0.022486057437310025,
+      "bss_above": -0.0546370845385975,
+      "crps": 5.698727800455631,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.20904112391793994,
+      "favoured_hit_share": 0.4162145014006665
+     },
+     "fmam_domain": {
+      "rps": 0.4198534313478837,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.03174363674469638,
+      "bss_below": -0.016966920426975562,
+      "bss_above": -0.04867656203137338,
+      "crps": 6.9434720092620745,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.18276200617103977,
+      "favoured_hit_share": 0.42207078772482054
+     }
+    }
+   },
+   "pt": {
+    "key": "2e807e0fd4a07746a96ac24a3395028abdf9beb3bd69d316e2534ce5608061f3",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:07:20.570333+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.5133260655446064,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44458307381790274,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.11148346973391221,
+      "bss_below": -0.0426538248925139,
+      "bss_above": -0.19459435805795966,
+      "crps": 6.127490617172614,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.30000737041532055,
+      "favoured_hit_share": 0.13489902656121952
+     },
+     "fmam_domain": {
+      "rps": 0.445417094818025,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.0945635285162778,
+      "bss_below": -0.04277990717951874,
+      "bss_above": -0.1539033932945244,
+      "crps": 7.30053981922454,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.24358550177769778,
+      "favoured_hit_share": 0.12873306982233035
+     }
+    }
+   },
+   "qdm": {
+    "key": "a867aa7c42098eb48649dae1e97428ac8af463ee19631410f8b23221ef77a5fc",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:03:42.174506+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.569483228707514,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4469046170033088,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.11728746234364684,
+      "bss_below": -0.07051951525408806,
+      "bss_above": -0.17375913866424453,
+      "crps": 6.645058246531868,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.40981443090591374,
+      "favoured_hit_share": 0.10189330737710423
+     },
+     "fmam_domain": {
+      "rps": 0.4551013300400101,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.11836147161024058,
+      "bss_below": -0.08679332413077745,
+      "bss_above": -0.1545360277414798,
+      "crps": 7.766221419388608,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.32291044222712717,
+      "favoured_hit_share": 0.08229209077428286
+     }
+    }
+   },
+   "sdm": {
+    "key": "9a141657f993f094afb7a4cb5ee221d7638b9f9b61fe4ef0f5ff912c155c3383",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:47.284968+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.7647154838100827,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.41621140723623373,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.040552657763226474,
+      "bss_below": -0.06817275338023276,
+      "bss_above": -0.007201754270727445,
+      "crps": 6.809267242153549,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.44465298357516025,
+      "favoured_hit_share": 0.2421133626107416
+     },
+     "fmam_domain": {
+      "rps": 0.4275576858827506,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.05067599503623588,
+      "bss_below": -0.08894896166759758,
+      "bss_above": -0.0068182534393046446,
+      "crps": 8.390168010910722,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.4291944916692314,
+      "favoured_hit_share": 0.22818025474329215
+     }
+    }
+   },
+   "sqrt_mvs": {
+    "key": "8905f8302158fe75b8c9651ee33175aa704651e2b30a03729f20d4edbbfd03e3",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:59.949955+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.4425991201089643,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4360933701362109,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.09025871813888275,
+      "bss_below": -0.044300063059030004,
+      "bss_above": -0.14575318258020786,
+      "crps": 5.703296235028938,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.21001036222242853,
+      "favoured_hit_share": 0.21565071639174466
+     },
+     "fmam_domain": {
+      "rps": 0.4385404627675819,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.07766496146752933,
+      "bss_below": -0.046890375392505845,
+      "bss_above": -0.11293015641324011,
+      "crps": 6.888907663216855,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.17346742914851165,
+      "favoured_hit_share": 0.24286163399852348
+     }
+    }
+   },
+   "vs": {
+    "key": "7d6dea3a8e40751ba4ddcd4e8b049358ebaab4a0d1f06844afa81045c69df343",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "Feb",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:47.258902+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Feb",
+    "blend_weight": 0.7554394135037639,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Feb/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4136735772778715,
+      "rps_clim": 0.39999072044169526,
+      "rpss": -0.0342079356767746,
+      "bss_below": -0.018915237198907642,
+      "bss_above": -0.05267366569187826,
+      "crps": 5.649230807101311,
+      "crps_clim": 4.713427597887411,
+      "crpss": -0.19853985020016718,
+      "favoured_hit_share": 0.4224600792028669
+     },
+     "fmam_domain": {
+      "rps": 0.41830324313371986,
+      "rps_clim": 0.4069358088532373,
+      "rpss": -0.027934219680780803,
+      "bss_below": -0.012840872341045584,
+      "bss_above": -0.04522997948946217,
+      "crps": 6.886868914515521,
+      "crps_clim": 5.870557198349823,
+      "crpss": -0.17312014546956078,
+      "favoured_hit_share": 0.4306398934718894
+     }
+    }
+   }
+  },
+  "FMAM": {
+   "cdft": {
+    "key": "e5bb4ed9e842c13048cda091ae43c2cc96150888705220d708ff7fc0db527789",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:08:51.297867+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.47764759298781895,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4479002588120646,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.03670105982629157,
+      "bss_below": -0.05777957825029678,
+      "bss_above": -0.025881850269590334,
+      "crps": 49.32204476455153,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.09915803970342463,
+      "favoured_hit_share": 0.28873031839037483
+     },
+     "fmam_domain": {
+      "rps": 0.45419107267512243,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.0653018915857968,
+      "bss_below": -0.09057930305010387,
+      "bss_above": -0.050368859525002474,
+      "crps": 55.576021452587185,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.13243398085256453,
+      "favoured_hit_share": 0.23231058186472558
+     }
+    }
+   },
+   "dc": {
+    "key": "80c7a0fa5b61eb434e14bd3316764b19e4f20b403dacadaf91dbfb19df35dbf2",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:57:10.474204+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.3614391375675107,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4430382324542104,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.025447510003705487,
+      "bss_below": -0.03400000523838087,
+      "bss_above": -0.021057703344299572,
+      "crps": 47.88233003444492,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.06707352195825855,
+      "favoured_hit_share": 0.3315807446451895
+     },
+     "fmam_domain": {
+      "rps": 0.4473757932136275,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.049316702666837964,
+      "bss_below": -0.05697329003100182,
+      "bss_above": -0.04479347773756648,
+      "crps": 53.48816794756579,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.0898912403984744,
+      "favoured_hit_share": 0.24069918521762498
+     }
+    }
+   },
+   "dqm": {
+    "key": "12242a3ef419ba1796d0617e1bc489a588f120617d1663d9da9a25df3f0d0e1f",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:01:57.571654+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.4550429696910794,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44359760187010805,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.02674221536474608,
+      "bss_below": -0.046649800019705534,
+      "bss_above": -0.01652402349399118,
+      "crps": 48.60897088687514,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.0832669530850163,
+      "favoured_hit_share": 0.2979428925951888
+     },
+     "fmam_domain": {
+      "rps": 0.44934952007607226,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.05394606481535402,
+      "bss_below": -0.0784545979909741,
+      "bss_above": -0.03946725941274143,
+      "crps": 54.6396978419544,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.11335516509638954,
+      "favoured_hit_share": 0.1888097070965093
+     }
+    }
+   },
+   "eqm": {
+    "key": "7d78549822eb40e547da2d1ce56ad1ef0ae55a803eaa3d27e50fdad0d5816d17",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:59:32.189896+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.40647617708042283,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.44591468941062756,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.03210530025185432,
+      "bss_below": -0.05125703491371292,
+      "bss_above": -0.02227507235044235,
+      "crps": 48.35531994802054,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.07761425822917078,
+      "favoured_hit_share": 0.31476503694394276
+     },
+     "fmam_domain": {
+      "rps": 0.45124344109894,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.05838824294160316,
+      "bss_below": -0.07902191094670719,
+      "bss_above": -0.04619857629483426,
+      "crps": 54.20768538009859,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.10455234727729357,
+      "favoured_hit_share": 0.19852930721685902
+     }
+    }
+   },
+   "gqm": {
+    "key": "8360557f8b4d89de162fd80b319ee7b823a0f8114880b853cc90990431de52ae",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:00:37.933980+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.31997622218067523,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.43979269528913556,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.017935454021280828,
+      "bss_below": -0.03501164342230134,
+      "bss_above": -0.009170568492633757,
+      "crps": 47.52050444704173,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.059010119370974445,
+      "favoured_hit_share": 0.35213594159484823
+     },
+     "fmam_domain": {
+      "rps": 0.4473638040001578,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.04928858205294584,
+      "bss_below": -0.06948767129104194,
+      "bss_above": -0.037355652810151074,
+      "crps": 53.46246389530959,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.08936748678208128,
+      "favoured_hit_share": 0.29254177635981055
+     }
+    }
+   },
+   "loci": {
+    "key": "3e786583ad04f76eb8bfbf81a58ad4f2fa32f617c126931dd3b2ad073e02b4fb",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:58:13.960191+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.36375633937852486,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4501404769217798,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.04188622425272759,
+      "bss_below": -0.11814723691436657,
+      "bss_above": -0.0027428643664781927,
+      "crps": 49.48472068037952,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.1027833261570179,
+      "favoured_hit_share": 0.32146324304348634
+     },
+     "fmam_domain": {
+      "rps": 0.454286659518997,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.06552608984004804,
+      "bss_below": -0.12685750390692618,
+      "bss_above": -0.029293582551086716,
+      "crps": 55.10645506661513,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.1228659528102094,
+      "favoured_hit_share": 0.2768181135851831
+     }
+    }
+   },
+   "ls": {
+    "key": "7a1d6bf7c79cd50c025e76af7932fb8740c5099829d8382ff49a91b07a6a16ce",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:31.895405+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.36295548315444526,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4502193154172119,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.0420687022713524,
+      "bss_below": -0.11926522904302783,
+      "bss_above": -0.0024451603509507702,
+      "crps": 49.54859477561637,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.10420678144244899,
+      "favoured_hit_share": 0.3215229730525721
+     },
+     "fmam_domain": {
+      "rps": 0.45425923261280493,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.06546176022899974,
+      "bss_below": -0.12703953219848851,
+      "bss_above": -0.029083713172680214,
+      "crps": 55.165429155546335,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.12406762685145911,
+      "favoured_hit_share": 0.27791216316920997
+     }
+    }
+   },
+   "mvs": {
+    "key": "b4e44859b21c3b223ba28a940bba32290f2b6fd5e9d273d33609e6fbddc52c58",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:35.136447+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.337845052246256,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "published_check": {
+     "max_abs_difference": 1.653577036409004e-08,
+     "cells": 2672,
+     "published_blend_weight": 0.33784501510989434,
+     "blend_weight_difference": 3.713636165247891e-08
+    },
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4434231167792033,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.02633835563234821,
+      "bss_below": -0.04673695802486,
+      "bss_above": -0.015868135917957327,
+      "crps": 47.843790922453294,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.06621466513286056,
+      "favoured_hit_share": 0.3596377930251114
+     },
+     "fmam_domain": {
+      "rps": 0.44857499647749444,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.0521294252900919,
+      "bss_below": -0.0723835052805446,
+      "bss_above": -0.04016400854176805,
+      "crps": 53.63620931851525,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.09290777657097071,
+      "favoured_hit_share": 0.318840875431509
+     }
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "5506bae954834cf79e2250e2d2497502c1eac2b6cd7ac4e81eed161e9f401202",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:05.549364+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.337845052246256,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4434231167792033,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.02633835563234821,
+      "bss_below": -0.04673695802486,
+      "bss_above": -0.015868135917957327,
+      "crps": 47.843790922453294,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.06621466513286056,
+      "favoured_hit_share": 0.3596377930251114
+     },
+     "fmam_domain": {
+      "rps": 0.44857499647749444,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.0521294252900919,
+      "bss_below": -0.0723835052805446,
+      "bss_above": -0.04016400854176805,
+      "crps": 53.63620931851525,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.09290777657097071,
+      "favoured_hit_share": 0.318840875431509
+     }
+    }
+   },
+   "pt": {
+    "key": "bc4e55b80da55020cc5634f726c819e9895fe6c2454ecbf18f71f62b2dcb0d9d",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:07:20.587187+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.3228505702364487,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4386944511837129,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.015393479986571812,
+      "bss_below": -0.03852078888677424,
+      "bss_above": -0.0035226670764849644,
+      "crps": 47.62501071935184,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.0613390761276833,
+      "favoured_hit_share": 0.3826250143963469
+     },
+     "fmam_domain": {
+      "rps": 0.4464630799512817,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.04717594027992966,
+      "bss_below": -0.07109205849783451,
+      "bss_above": -0.03304711692731832,
+      "crps": 53.57609245472685,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.09168281700033387,
+      "favoured_hit_share": 0.3153153948560932
+     }
+    }
+   },
+   "qdm": {
+    "key": "bdd12632480500f56f43db02fcadb7e6ec263d2226db272574a0ccada522dd58",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:03:42.180684+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.4909725317901512,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4428205925148321,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.024943764914536537,
+      "bss_below": -0.042637630541400684,
+      "bss_above": -0.015861834587027834,
+      "crps": 48.73419155943903,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.08605753708538999,
+      "favoured_hit_share": 0.29694745106357967
+     },
+     "fmam_domain": {
+      "rps": 0.44912409346834764,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.053417328329609326,
+      "bss_below": -0.0805368661704382,
+      "bss_above": -0.0373960310935213,
+      "crps": 54.8536022652418,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.1177137469317584,
+      "favoured_hit_share": 0.2415819167449789
+     }
+    }
+   },
+   "sdm": {
+    "key": "0dbc0cf29da4f0ad2599f11e8c7f7c496558d8b25376857f81ea5ed438421f91",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:47.288893+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.4841805574660932,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4436218137761562,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.02679825576250594,
+      "bss_below": -0.03395042567018991,
+      "bss_above": -0.023127182473546615,
+      "crps": 48.74128314840601,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.0862155754851468,
+      "favoured_hit_share": 0.27883346396981534
+     },
+     "fmam_domain": {
+      "rps": 0.44970136772224883,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.05477132093677928,
+      "bss_below": -0.07528942544811135,
+      "bss_above": -0.04264992517220323,
+      "crps": 54.88446424827034,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.11834260012031983,
+      "favoured_hit_share": 0.2244452896091944
+     }
+    }
+   },
+   "sqrt_mvs": {
+    "key": "e651e6406b0184f764d1756724c34648cd285160e193640aa14dbebc830d2d31",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:59.957425+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.3171171018976715,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4420921610845352,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.023257751966469842,
+      "bss_below": -0.04588216448766058,
+      "bss_above": -0.011645066205007604,
+      "crps": 47.732000464817574,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.0637233779030022,
+      "favoured_hit_share": 0.34842096278718715
+     },
+     "fmam_domain": {
+      "rps": 0.4491891991264767,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.05357003318210518,
+      "bss_below": -0.07724015718470811,
+      "bss_above": -0.03958653470810436,
+      "crps": 53.637794266662354,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.09294007195831155,
+      "favoured_hit_share": 0.2919715977510698
+     }
+    }
+   },
+   "vs": {
+    "key": "c43f209af8b24f8cc6d447accc9d0c0cae32ea2ade3190e3a2d8e1475f7476c1",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "FMAM",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:47.270220+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_FMAM",
+    "blend_weight": 0.3236408405004822,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/FMAM/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4458368745657234,
+      "rps_clim": 0.4320437936921896,
+      "rpss": -0.03192519155444851,
+      "bss_below": -0.05960470137574947,
+      "bss_above": -0.017717816984605506,
+      "crps": 48.09293746270506,
+      "crps_clim": 44.87256880535544,
+      "crpss": -0.07176697797976916,
+      "favoured_hit_share": 0.33297871205310603
+     },
+     "fmam_domain": {
+      "rps": 0.4516941641781451,
+      "rps_clim": 0.42634963503070344,
+      "rpss": -0.0594454106794684,
+      "bss_below": -0.08729912285806907,
+      "bss_above": -0.04299039006634797,
+      "crps": 53.927034820437285,
+      "crps_clim": 49.07661055061789,
+      "crpss": -0.09883372578912386,
+      "favoured_hit_share": 0.28335297790175573
+     }
+    }
+   }
+  },
+  "Mar": {
+   "cdft": {
+    "key": "5174568f598b49ce812cab87fcbc56737fa3fe60bf3575ebf7d41f74af05bc58",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:08:51.293869+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.7455558323660114,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4617249337022653,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.13061957401666213,
+      "bss_below": 0.25098961852812063,
+      "bss_above": 0.09852572570726714,
+      "crps": 37.07072486573085,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.1978044256715037,
+      "favoured_hit_share": 0.6287216634848645
+     },
+     "fmam_domain": {
+      "rps": 0.4685717988755065,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.13269523474872802,
+      "bss_below": 0.24916705169472908,
+      "bss_above": 0.10215512857962217,
+      "crps": 44.2300417718414,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.19701352657547455,
+      "favoured_hit_share": 0.6573005794577688
+     }
+    }
+   },
+   "dc": {
+    "key": "9dd9891e2e1a1c2294de9b51f12ccdb74f94af5d063a6b1e13c8074ba7442814",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:57:10.462073+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.817413245104297,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4947289805295597,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.06847635801180707,
+      "bss_below": 0.11389498716478408,
+      "bss_above": 0.05636652936381881,
+      "crps": 37.55633482072305,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.18729602158295244,
+      "favoured_hit_share": 0.6420691172080252
+     },
+     "fmam_domain": {
+      "rps": 0.5015497809151387,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.07165451262250588,
+      "bss_below": 0.1219390421064469,
+      "bss_above": 0.058469375524036415,
+      "crps": 44.675356582353245,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.18892893621715678,
+      "favoured_hit_share": 0.5874733454760723
+     }
+    }
+   },
+   "dqm": {
+    "key": "1c64e6c01a15bca91574d92a2f26d6590cacd0fa894d8648d0dc2399cb4eb7ef",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:01:57.556722+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.7758197665463542,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.47522111010042867,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.10520766590916641,
+      "bss_below": 0.18435540798174055,
+      "bss_above": 0.08410477635075608,
+      "crps": 36.773054744828656,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.20424588734948435,
+      "favoured_hit_share": 0.7679931384156501
+     },
+     "fmam_domain": {
+      "rps": 0.48071792041783984,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.11021332457345157,
+      "bss_below": 0.19721130367182715,
+      "bss_above": 0.08740156034938151,
+      "crps": 43.8406897019377,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.20408212594839104,
+      "favoured_hit_share": 0.8088421509546319
+     }
+    }
+   },
+   "eqm": {
+    "key": "25059b492a628802ce3be872c34fa4e6ab0067b69585b15e2bde45ade26abc93",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:59:32.184631+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.6395683706862851,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4760320417969286,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.10368076516743363,
+      "bss_below": 0.1846749648612369,
+      "bss_above": 0.08208555632777437,
+      "crps": 40.17095120617167,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.13071677473599974,
+      "favoured_hit_share": 0.35933475103978235
+     },
+     "fmam_domain": {
+      "rps": 0.4820522144398701,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.10774360794447324,
+      "bss_below": 0.18725654152378568,
+      "bss_above": 0.086894494883343,
+      "crps": 47.913308187623926,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.13014465213151827,
+      "favoured_hit_share": 0.5998353394370476
+     }
+    }
+   },
+   "gqm": {
+    "key": "04d5f496d944e9a3c755a1c28dd2f1204787e4e673a3823c9f06118b80e42e09",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:00:37.928989+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.6902772097131189,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4756258105842653,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.10444565664054761,
+      "bss_below": 0.17690068528044023,
+      "bss_above": 0.08512722149157714,
+      "crps": 39.72615442777122,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.14034199810027936,
+      "favoured_hit_share": 0.7202437865778926
+     },
+     "fmam_domain": {
+      "rps": 0.4803717536900749,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.11085406320365188,
+      "bss_below": 0.18075047205954486,
+      "bss_above": 0.09252650574641719,
+      "crps": 47.33447524718264,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.140653234147889,
+      "favoured_hit_share": 0.7852810544679902
+     }
+    }
+   },
+   "loci": {
+    "key": "7d9886fd87e7b5aa63e95a34c017ce323900d577402e0705fce3ebcf07156935",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:58:13.960191+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.7427089211493012,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.5184423753740114,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.023826481415204936,
+      "bss_below": -0.05548985507997317,
+      "bss_above": 0.044974319615893266,
+      "crps": 39.905746729704305,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.1364556929277747,
+      "favoured_hit_share": 0.1911946015646315
+     },
+     "fmam_domain": {
+      "rps": 0.5249968957582152,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.02825498562665052,
+      "bss_below": -0.055042647828765556,
+      "bss_above": 0.05009647875776113,
+      "crps": 47.31125350338476,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.14107481969047586,
+      "favoured_hit_share": 0.31257929068307155
+     }
+    }
+   },
+   "ls": {
+    "key": "7072122a926e4c3979e3c53fc2afd57b9ff32a1af1349a424a879df08a4f1127",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:31.890396+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.7594479669130011,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.5175909098777128,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.025429703121138347,
+      "bss_below": -0.04768746397145596,
+      "bss_above": 0.04492467834796998,
+      "crps": 39.85944959795265,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.13745754423577594,
+      "favoured_hit_share": 0.5682771821245424
+     },
+     "fmam_domain": {
+      "rps": 0.5248033354775162,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.02861325676933646,
+      "bss_below": -0.05165971678200676,
+      "bss_above": 0.0496616529056112,
+      "crps": 47.23420742044838,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.14247357402010996,
+      "favoured_hit_share": 0.6504586924586238
+     }
+    }
+   },
+   "mvs": {
+    "key": "782639dc97eb2183166fdf85a5ed7795d0ea52392da86fa4f03854659f00d8c0",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:35.131360+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.857883156153414,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "published_check": {
+     "max_abs_difference": 1.7736855539851604e-08,
+     "cells": 2440,
+     "published_blend_weight": 0.8578831629591648,
+     "blend_weight_difference": 6.805750740745964e-09
+    },
+    "scores": {
+     "ethiopia": {
+      "rps": 0.505266632413338,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.04863504641070837,
+      "bss_below": 0.12592098441508648,
+      "bss_above": 0.02802856242672458,
+      "crps": 41.55436204056742,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.10078032075917831,
+      "favoured_hit_share": 0.5802828155354198
+     },
+     "fmam_domain": {
+      "rps": 0.5131793830963295,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.05012865593644611,
+      "bss_below": 0.11849963763452753,
+      "bss_above": 0.032201080613315836,
+      "crps": 49.47306051354923,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.10182769900560407,
+      "favoured_hit_share": 0.6291744105551311
+     }
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "932a5ec7e6edb8fe900271ae1d013d3da41cc82edaf1deb9fb6863737578c9a3",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:05.549364+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.857883156153414,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.505266632413338,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.04863504641070837,
+      "bss_below": 0.12592098441508648,
+      "bss_above": 0.02802856242672458,
+      "crps": 41.55436204056742,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.10078032075917831,
+      "favoured_hit_share": 0.5802828155354198
+     },
+     "fmam_domain": {
+      "rps": 0.5131793830963295,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.05012865593644611,
+      "bss_below": 0.11849963763452753,
+      "bss_above": 0.032201080613315836,
+      "crps": 49.47306051354923,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.10182769900560407,
+      "favoured_hit_share": 0.6291744105551311
+     }
+    }
+   },
+   "pt": {
+    "key": "ede69c9adc1e8277906dc19f2960b2ca7fb25af009c8760f5353a9d0a74e17e3",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:07:20.570333+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.6812021901535704,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.46426790583941413,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.12583141977484724,
+      "bss_below": 0.20159794122899977,
+      "bss_above": 0.10563005344016385,
+      "crps": 38.97871202984877,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.15651635093126892,
+      "favoured_hit_share": 0.8049336114757258
+     },
+     "fmam_domain": {
+      "rps": 0.47239341542885777,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.12562159895664893,
+      "bss_below": 0.18392625133055196,
+      "bss_above": 0.1103335200223472,
+      "crps": 46.518219543927565,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.15547217309328987,
+      "favoured_hit_share": 0.861772501393622
+     }
+    }
+   },
+   "qdm": {
+    "key": "d63dc85feb1ed64ebe946f2c8928be75ea7649a684b16e1c00491bb552291851",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:03:42.175506+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.730532471192321,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.4585154652202231,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.13666267213078132,
+      "bss_below": 0.16588213321593315,
+      "bss_above": 0.12887198992988902,
+      "crps": 35.42209843344567,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.23348003850319998,
+      "favoured_hit_share": 0.8435219008993771
+     },
+     "fmam_domain": {
+      "rps": 0.46361332863863297,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.14187313421924141,
+      "bss_below": 0.1768649879564016,
+      "bss_above": 0.13269791326591984,
+      "crps": 42.24594587288989,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.23303434195370987,
+      "favoured_hit_share": 0.8845618456488665
+     }
+    }
+   },
+   "sdm": {
+    "key": "739bd40f52b26f1b2568850f00c7844c2e379105e5582629b9d104d5629cb2fb",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:47.285896+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.8629660011218736,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.5196736614466635,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.02150809674022891,
+      "bss_below": 0.03158917461746469,
+      "bss_above": 0.018820212698967054,
+      "crps": 41.72533347841313,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.0970805676177664,
+      "favoured_hit_share": 0.12769738489754803
+     },
+     "fmam_domain": {
+      "rps": 0.5275401664347982,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.02354750902985614,
+      "bss_below": 0.039309811926966254,
+      "bss_above": 0.019414470325200273,
+      "crps": 49.5832495240987,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.09982724226971229,
+      "favoured_hit_share": 1.0
+     }
+    }
+   },
+   "sqrt_mvs": {
+    "key": "8d0549d3c1f5370f2010d925e87dc3345d4a8c5f418c17c174ce066a6b4e91d1",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:59.951968+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.5675379370273311,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.46040687509456973,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.13310134242505456,
+      "bss_below": 0.25012770618079716,
+      "bss_above": 0.10189900543057273,
+      "crps": 39.991248420290304,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.13460547073670293,
+      "favoured_hit_share": 0.6703861571880166
+     },
+     "fmam_domain": {
+      "rps": 0.46804051651718626,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.13367861386409707,
+      "bss_below": 0.22553339115443705,
+      "bss_above": 0.10959334579355251,
+      "crps": 47.64717464375059,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.13497624684167453,
+      "favoured_hit_share": 0.7453285211969126
+     }
+    }
+   },
+   "vs": {
+    "key": "82f2eee4e2cc26fd53f76f4d98f3dd4816471a8eefec5617ed3f1a0f0ad589bb",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "Mar",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:47.263803+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_Mar",
+    "blend_weight": 0.849824879395726,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/Mar/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.5042033177032457,
+      "rps_clim": 0.5310965371460002,
+      "rpss": 0.050637158335230414,
+      "bss_below": 0.13012154776307183,
+      "bss_above": 0.029444508854844953,
+      "crps": 41.54802504194893,
+      "crps_clim": 46.211579884072655,
+      "crpss": 0.10091745086021331,
+      "favoured_hit_share": 0.5821948811817029
+     },
+     "fmam_domain": {
+      "rps": 0.5123182001170805,
+      "rps_clim": 0.540261990535419,
+      "rpss": 0.05172266586928542,
+      "bss_below": 0.12053817540463418,
+      "bss_above": 0.03367853077680372,
+      "crps": 49.46497449743904,
+      "crps_clim": 55.08192632836259,
+      "crpss": 0.1019744988118052,
+      "favoured_hit_share": 0.646011191574428
+     }
+    }
+   }
+  },
+  "May": {
+   "cdft": {
+    "key": "fb65e944a7e2e2546e5dfc5b141dcff12f21f2922b0769977aace9561810cd7e",
+    "method": "cdft",
+    "label": "CDF-transform",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:08:51.295871+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5947171969304892,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.3881926463279441,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.02550240828516004,
+      "bss_below": 0.015779857673061226,
+      "bss_above": 0.03912283312115705,
+      "crps": 17.814038344443198,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.019296178112908624,
+      "favoured_hit_share": 0.4989065000525349
+     },
+     "fmam_domain": {
+      "rps": 0.3908210188683736,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.03334066692488791,
+      "bss_below": 0.01912071999496534,
+      "bss_above": 0.05345159207170036,
+      "crps": 17.812712785785052,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.031228472901813742,
+      "favoured_hit_share": 0.4879025898056431
+     }
+    }
+   },
+   "dc": {
+    "key": "56baea87a42e998afff127ec2ed93a28326d6ad989221b9bed9b98ff60b3e9fa",
+    "method": "dc",
+    "label": "Delta Change",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:57:10.462073+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.4218807243128517,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.3904698273948473,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.019785897458416746,
+      "bss_below": 0.00636758003811444,
+      "bss_above": 0.03858378320972433,
+      "crps": 17.838796957404895,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.01793315947071883,
+      "favoured_hit_share": 0.42425009014740866
+     },
+     "fmam_domain": {
+      "rps": 0.3920183530216783,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.030379172588035463,
+      "bss_below": 0.013999775391798752,
+      "bss_above": 0.0535441802397546,
+      "crps": 17.89603914657626,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.02669664180107012,
+      "favoured_hit_share": 0.4483360067438099
+     }
+    }
+   },
+   "dqm": {
+    "key": "9e6f306095e7744bc623dfbe400999fd10c896b7bb3a477b0110c5295199c3e0",
+    "method": "dqm",
+    "label": "Detrended Quantile Mapping",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:01:57.568657+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5626437145254465,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.38820077982562273,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.02548199039735355,
+      "bss_below": 0.014097495990992304,
+      "bss_above": 0.04143064929935769,
+      "crps": 17.80912463519398,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.019566689119294267,
+      "favoured_hit_share": 0.4789537157895662
+     },
+     "fmam_domain": {
+      "rps": 0.39026786912826644,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.03470883120737944,
+      "bss_below": 0.019122028586846973,
+      "bss_above": 0.05675286711936811,
+      "crps": 17.89633824411192,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.02668037492584141,
+      "favoured_hit_share": 0.47634120908810057
+     }
+    }
+   },
+   "eqm": {
+    "key": "156efdfcd6aa337fbdb51e356acb05942fb8f63255ab5ad090af80521cf26d87",
+    "method": "eqm",
+    "label": "Empirical Quantile Mapping",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:59:32.184631+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5734589901193037,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.3898252256418125,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.021404070450330992,
+      "bss_below": 0.013279688419919555,
+      "bss_above": 0.032785604830612436,
+      "crps": 17.828918094619798,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.018477013609904724,
+      "favoured_hit_share": 0.10405106305859275
+     },
+     "fmam_domain": {
+      "rps": 0.39342285457193893,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.0269052690200825,
+      "bss_below": 0.014817515973751472,
+      "bss_above": 0.04400068556494274,
+      "crps": 17.95424395317517,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.023531084704215277,
+      "favoured_hit_share": 0.10405106305859275
+     }
+    }
+   },
+   "gqm": {
+    "key": "d417679840a760a736db3d7bcd0e64702f3e4dc238e3d0cf41722cc5dfe58b0c",
+    "method": "gqm",
+    "label": "Gamma Quantile Mapping",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:00:37.932974+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.503042095034557,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.3875532670410318,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.027107471083701595,
+      "bss_below": 0.014489118693772451,
+      "bss_above": 0.0447846537283767,
+      "crps": 17.923600003857455,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.013264556532091132,
+      "favoured_hit_share": 0.5004560902244709
+     },
+     "fmam_domain": {
+      "rps": 0.39141221503500273,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.031878398355492665,
+      "bss_below": 0.01893259697274341,
+      "bss_above": 0.050187333281392466,
+      "crps": 18.047322022931002,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.01846889205219715,
+      "favoured_hit_share": 0.5048421472497484
+     }
+    }
+   },
+   "loci": {
+    "key": "773ef239f543308f8dffe86fb2b9a3997a7cb1d04e487d0bddbf591188a58088",
+    "method": "loci",
+    "label": "Local Intensity Scaling",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:58:13.960191+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5560709329008138,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.38905697894204,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.023332634955230747,
+      "bss_below": 0.00920859963918319,
+      "bss_above": 0.04311913949565371,
+      "crps": 18.62395926749581,
+      "crps_clim": 18.164544633021865,
+      "crpss": -0.02529183328046436,
+      "favoured_hit_share": 0.45895183494427
+     },
+     "fmam_domain": {
+      "rps": 0.39267897246396516,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.02874519202233694,
+      "bss_below": 0.013806871397411546,
+      "bss_above": 0.04987209220824507,
+      "crps": 18.6366864817057,
+      "crps_clim": 18.386907838982875,
+      "crpss": -0.013584592086400615,
+      "favoured_hit_share": 0.4649708685367247
+     }
+    }
+   },
+   "ls": {
+    "key": "defd67a29412d5acb8fb1746861c2f9dd5664f1d8b815646c2f0fd813bd64ac5",
+    "method": "ls",
+    "label": "Linear Scaling",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:31.893394+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5688475478438206,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.3891804721831569,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.023022624275739978,
+      "bss_below": 0.009361251507197799,
+      "bss_above": 0.04216097972371613,
+      "crps": 18.647284784703096,
+      "crps_clim": 18.164544633021865,
+      "crpss": -0.026575956702137304,
+      "favoured_hit_share": 0.4419256041875516
+     },
+     "fmam_domain": {
+      "rps": 0.3928133623377972,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.028412791205751686,
+      "bss_below": 0.013789489764426066,
+      "bss_above": 0.049094167011119794,
+      "crps": 18.65205094268783,
+      "crps_clim": 18.386907838982875,
+      "crpss": -0.014420211708616515,
+      "favoured_hit_share": 0.4586996864093679
+     }
+    }
+   },
+   "mvs": {
+    "key": "0531eef020ea8c7f2ef277e6136ea669b32869c554758b8e9702220ddf2be3f1",
+    "method": "mvs",
+    "label": "Mean-Variance Scaling (operational)",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:35.135448+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.590765016345747,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "published_check": {
+     "max_abs_difference": 1.4885509491691096e-08,
+     "cells": 2661,
+     "published_blend_weight": 0.5907649928096033,
+     "blend_weight_difference": 2.3536143700653156e-08
+    },
+    "scores": {
+     "ethiopia": {
+      "rps": 0.38704202160014267,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.028390873681958917,
+      "bss_below": 0.016972403268935343,
+      "bss_above": 0.04438713028680574,
+      "crps": 17.57620081657466,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.032389681565572426,
+      "favoured_hit_share": 0.5203020102498241
+     },
+     "fmam_domain": {
+      "rps": 0.39085363282881985,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.03325999933606383,
+      "bss_below": 0.02188523439040735,
+      "bss_above": 0.04934705655782534,
+      "crps": 17.79279862203753,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.03231153504156625,
+      "favoured_hit_share": 0.5050357313751141
+     }
+    }
+   },
+   "mvs_zero_guard": {
+    "key": "6cc7c621709e7372ab6752333a62a43a740a9f8b740531bcfad9fe3691251ba9",
+    "method": "mvs_zero_guard",
+    "label": "MVS with all-zero guard (variant)",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:05.549364+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.590765016345747,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.38704202160014267,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.028390873681958917,
+      "bss_below": 0.016972403268935343,
+      "bss_above": 0.04438713028680574,
+      "crps": 17.57620081657466,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.032389681565572426,
+      "favoured_hit_share": 0.5203020102498241
+     },
+     "fmam_domain": {
+      "rps": 0.39085363282881985,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.03325999933606383,
+      "bss_below": 0.02188523439040735,
+      "bss_above": 0.04934705655782534,
+      "crps": 17.79279862203753,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.03231153504156625,
+      "favoured_hit_share": 0.5050357313751141
+     }
+    }
+   },
+   "pt": {
+    "key": "df36e4fda7cae15b8d83173cdc5036f9fedbb8aafb7fc7080e533d4388e1eb4b",
+    "method": "pt",
+    "label": "Power Transformation",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:07:20.585917+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5194060647316817,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.3873090685645637,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.027720493585466244,
+      "bss_below": 0.015242805605172993,
+      "bss_above": 0.045200617823742406,
+      "crps": 17.71886317840835,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.024535790112970912,
+      "favoured_hit_share": 0.5198419354488483
+     },
+     "fmam_domain": {
+      "rps": 0.39177724550843046,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.030975529530736345,
+      "bss_below": 0.01823018501791185,
+      "bss_above": 0.04900096356583006,
+      "crps": 17.90357064066665,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.026287030018798507,
+      "favoured_hit_share": 0.4944593287689081
+     }
+    }
+   },
+   "qdm": {
+    "key": "34b6123cdf796896bdb0754378d0d332b1734af18cce574262c463465515ee43",
+    "method": "qdm",
+    "label": "Quantile Delta Mapping",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:03:42.179577+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.588026270605764,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.38755518389296606,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.027102659123425465,
+      "bss_below": 0.01861926871840791,
+      "bss_above": 0.0389871322040507,
+      "crps": 17.8267572285897,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.018595974259552506,
+      "favoured_hit_share": 0.534668090642754
+     },
+     "fmam_domain": {
+      "rps": 0.390655665470049,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.03374965313092415,
+      "bss_below": 0.020324407430143188,
+      "bss_above": 0.05273665200911071,
+      "crps": 17.84872363355226,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.029269968074217778,
+      "favoured_hit_share": 0.5441350991752025
+     }
+    }
+   },
+   "sdm": {
+    "key": "be233c73169d5764f2e25c002dc60f4f559e37690f7d6296863fd83f7c9fc0d7",
+    "method": "sdm",
+    "label": "Scaled Distribution Mapping",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T08:09:47.288383+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.6163523176520984,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.3868286445292805,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.02892652381250438,
+      "bss_below": 0.01370298161622674,
+      "bss_above": 0.05025334139308901,
+      "crps": 17.611091227244245,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.030468884134396745,
+      "favoured_hit_share": 0.4290429171245
+     },
+     "fmam_domain": {
+      "rps": 0.3907993936087211,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.033394154987361535,
+      "bss_below": 0.013518889931116718,
+      "bss_above": 0.06150325572471338,
+      "crps": 17.809872427232445,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.03138295012971304,
+      "favoured_hit_share": 0.40101675708684303
+     }
+    }
+   },
+   "sqrt_mvs": {
+    "key": "e4bd7d8024f35ad9ad3affec8660616c31670517a67e3da197106377621fef3b",
+    "method": "sqrt_mvs",
+    "label": "Square-root-space Mean-Variance Scaling",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:59.955422+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5024669935824456,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.38739271976379924,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.027510500189222964,
+      "bss_below": 0.013676061306325149,
+      "bss_above": 0.04689131038964023,
+      "crps": 17.853238868469656,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.01713809901880381,
+      "favoured_hit_share": 0.476925113638077
+     },
+     "fmam_domain": {
+      "rps": 0.3909912159694405,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.032919700271955565,
+      "bss_below": 0.019306200283718877,
+      "bss_above": 0.05217294510567949,
+      "crps": 17.995797968628505,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.021271106255569605,
+      "favoured_hit_share": 0.4942723511306133
+     }
+    }
+   },
+   "vs": {
+    "key": "c75975e3525d278d70d072ba0ec1e54fd8fc687f9336d8b822914062b8971784",
+    "method": "vs",
+    "label": "Variance Scaling (unbounded)",
+    "target": "May",
+    "cycle": "config/cycles/jan_2026_fmam.json",
+    "forecast_year": 2026,
+    "reference_years": [
+     1993,
+     2025
+    ],
+    "shadow": false,
+    "created_utc": "2026-10-13T07:56:47.267818+00:00",
+    "provenance": {
+     "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+     "uncommitted_changes": false
+    },
+    "tag": "init01_May",
+    "blend_weight": 0.5823689576914819,
+    "observed": true,
+    "observation": "outputs/verification_2026_fmam/observations/May/chirps_2026_common.nc",
+    "scores": {
+     "ethiopia": {
+      "rps": 0.38667690148968686,
+      "rps_clim": 0.39835157072562377,
+      "rpss": 0.029307451241301075,
+      "bss_below": 0.01829017040637393,
+      "bss_above": 0.04474167777525018,
+      "crps": 17.584115723023665,
+      "crps_clim": 18.164544633021865,
+      "crpss": 0.031953947744058575,
+      "favoured_hit_share": 0.5239669445392784
+     },
+     "fmam_domain": {
+      "rps": 0.390597940505713,
+      "rps_clim": 0.4043006729424561,
+      "rpss": 0.03389243044543089,
+      "bss_below": 0.02268074132059983,
+      "bss_above": 0.04974885391857009,
+      "crps": 17.804441564939737,
+      "crps_clim": 18.386907838982875,
+      "crpss": 0.03167831585081571,
+      "favoured_hit_share": 0.5049806114429418
+     }
+    }
+   }
+  }
+ }
+}

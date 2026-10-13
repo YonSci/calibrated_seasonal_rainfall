@@ -436,7 +436,7 @@
   {
     "id": "2026-10-13.1",
     "date": "2026-10-13",
-    "commit": null,
+    "commit": "c0a0ec7",
     "title": "Bias correction: ratio-limit study and a shadow pilot",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -452,6 +452,32 @@
       {
         "type": "analysis",
         "text": "Shadow pilot of square-root MVS for February of the February-initialized FMAM cycle: reproduces the published February 2026 forecast with MVS, and scores the alternative against February 2026 (one season, an illustration). Not a published forecast; the published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-13.2",
+    "date": "2026-10-13",
+    "commit": null,
+    "title": "Shadow forecast, suggested methods and sortable tables",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "Ongoing shadow forecast: square-root MVS for February of the February-initialized FMAM cycle runs automatically next to the published forecast in every such cycle and is scored once observed (never published as a forecast)."
+      },
+      {
+        "type": "analysis",
+        "text": "Suggested method for every cycle, target and product, from the historical CHIRPS confirmation and the independent validation seasons, by a rule fixed in advance. After 2026: candidates for February FMAM probabilities (square-root MVS), JJAS July-August amounts (VS) and ONDJ January amounts (square-root MVS); keep MVS elsewhere. The published forecasts are unchanged."
+      },
+      {
+        "type": "display",
+        "text": "Every table on the site can be sorted by clicking a column header (numbers by value, text alphabetically; a third click restores the original order)."
       }
     ]
   }

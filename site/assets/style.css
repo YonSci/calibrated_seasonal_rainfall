@@ -100,5 +100,9 @@ summary{cursor:pointer;font-weight:600}details[open] summary{margin-bottom:8px}
 .flow{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .step{display:flex;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px}.step>div{min-width:0}.step p{margin:0 0 .4em;color:var(--ink2);font-size:.9rem}
 .step-n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+table:not(.nosort) thead th:not([colspan]){cursor:pointer;user-select:none}
+table:not(.nosort) thead th:not([colspan])::after{content:" \2195";color:var(--muted);font-size:.75em;font-weight:400}
+table:not(.nosort) thead th[aria-sort="ascending"]::after{content:" \25B2";color:var(--accent)}
+table:not(.nosort) thead th[aria-sort="descending"]::after{content:" \25BC";color:var(--accent)}
 .dl{list-style:none;padding:0;margin:0}.dl li{padding:10px 0;border-bottom:1px solid var(--line)}.dl li:last-child{border-bottom:none}.dl li>span:not(.status){display:block;color:var(--muted);font-size:.85rem}
 .foot{color:var(--muted);font-size:.85rem;padding:32px 16px 48px;border-top:1px solid var(--line);margin-top:40px}

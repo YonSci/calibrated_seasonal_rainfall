@@ -697,6 +697,36 @@ In this season the alternative would have done slightly better everywhere it was
 for — the 24-year confirmation. Running the pilot alongside the published forecast for the next February-initialized
 cycles is the way to accumulate independent evidence before a change.
 
+### Ongoing shadow forecast, independent validation and suggested methods
+
+* **Shadow forecast** (`scripts/bias_validation.py`, `config/bias_correction/validation.json`): for every cycle of a configured
+  initialization, the shadow method runs through the operational probability pipeline next to the published forecast — now
+  square-root MVS for February of the February-initialized FMAM cycle. `run_operational.py` runs it automatically (stage
+  `bias_shadow`; cycles are matched by initialization month and season, so future cycle files are covered) and scores it
+  once the cycle's CHIRPS observations are prepared. It is never published as a forecast.
+* **Validation record** (`run_operational.py --bias-validation`, or `bias_validation.py --methods all`): every benchmark method
+  through the same pipeline for the forecast year, scored once observed. These seasons were not used to build or choose
+  anything, so they are independent evidence. In every run the published method must reproduce the published forecast:
+  for the 2026 cycles all 20 targets reproduce within 3.5 × 10⁻⁸ in probability. One file per method and target, reused while
+  its dependency fingerprint (code, configurations, masks, model and observation inputs) is unchanged.
+* **Suggested method** (`scripts/bias_recommend.py`, rule fixed in `config/bias_correction/recommendation_rule.json` before the
+  validation seasons are scored): for each cycle, target and product, *keep* the operational method unless a method is
+  confirmed better on the historical evidence (section 6/7 confirmation: Holm across all declared methods and targets, no
+  harm in the test years); among confirmed methods, the one the selection-aware procedure picks from training years only.
+  A confirmed method is a *candidate* until at least 3 independent seasons are scored; then *recommended* if its mean score
+  over them is not worse than the operational method, otherwise *not supported by validation*. A suggestion informs a
+  decision; it never changes the published forecast.
+
+Status after the 2026 seasons (national aggregate):
+
+| Cycle | Target | Product | Suggested | Status | Validation so far |
+| --- | --- | --- | --- | --- | --- |
+| February · FMAM | Feb | Published probabilities | Square-root MVS | Candidate | 2026: RPS 0.399 vs 0.405 (1 of 3 seasons) |
+| May · JJAS | Jul | Amounts | VS (no ratio limits) | Candidate | 2026: CRPS 25.57 vs 25.99 mm (1 of 3) |
+| May · JJAS | Aug | Amounts | VS (no ratio limits) | Candidate | 2026: CRPS 15.27 vs 15.46 mm (1 of 3) |
+| September · ONDJ | Jan | Amounts | Square-root MVS | Candidate | awaiting January 2027 (0 of 3) |
+| all others | | | MVS (operational) | Keep | — |
+
 ## 8. Changes
 
 ### Revision 3 (response to the review of 007ce47 / 1e59fea)
