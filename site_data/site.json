@@ -1,0 +1,602 @@
+{
+ "schema_version": 1,
+ "built_utc": "2026-10-13 21:25 UTC",
+ "code_commit": "583cc4c",
+ "release": "2026-10-14.3",
+ "releases": [
+  {
+   "id": "2026-10-08.0",
+   "date": "2026-10-08",
+   "commit": "e6304a3",
+   "title": "Results site before the review-driven redesign",
+   "cycles": [
+    "FMAM 2026",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "verification",
+     "text": "FMAM 2026 March, April and May verified against official CHIRPS v2.0 observations."
+    },
+    {
+     "type": "domain",
+     "text": "ONDJ shown on the ONDJ R3 (Deyr) rainfall domain (575 cells) instead of the earlier >=120 mm / 20% rule."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-08.1",
+   "date": "2026-10-08",
+   "commit": "a473e73",
+   "title": "Redesign around the reader: one cycle selector, outlook first, verification narrative",
+   "cycles": [
+    "FMAM 2026",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Cycle and area selectors drive every section; shareable view links; outlook and map first; status panel with precise target statuses; verification narrative and paired anomaly chart; per-cycle CSV downloads."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-08.2",
+   "date": "2026-10-08",
+   "commit": "385448c",
+   "title": "Area-specific historical skill and clearer uncertainty",
+   "cycles": [
+    "FMAM 2026",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Historical skill computed for each cycle's rainfall domain and the R0-R3 regions from stored cross-validated probabilities (no refitting)."
+    },
+    {
+     "type": "display",
+     "text": "Skill labels reflect intervals and Holm-adjusted p-values; verification narrative always reports the rainfall error; climatology defined as observed tercile frequencies; unavailable verification explained; separate verification panels."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-08.3",
+   "date": "2026-10-08",
+   "commit": "61942f8",
+   "title": "Historical verification explorer, forecast-and-evidence package, map comparison and release archive",
+   "cycles": [
+    "FMAM 2026",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Historical diagnostics per cycle, target and area: performance by year, reliability diagrams, probability histograms and category Brier skill (cross-validated and exploratory)."
+    },
+    {
+     "type": "display",
+     "text": "PDF bulletin and one-click ZIP package per cycle; side-by-side forecast vs observed anomaly maps; release archive and change log; research label on phones; keyboard focus kept when leaving an unavailable view."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.4",
+   "date": "2026-10-09",
+   "commit": "d932d97",
+   "title": "Comparison with official outlooks (ICPAC OND 2026 update, EMI Bega 2026/27)",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "New pipeline: ICPAC and EMI products discovered, downloaded and versioned by content hash; standardized records; comparison with the native ONDJ forecast; rule-based interpretation. Comparison numbers are published only after a person reviews the extracted values."
+    },
+    {
+     "type": "display",
+     "text": "Outlooks section shows the official figures, the providers' own text, source records and the status of each comparison; ONDJ gallery links the review report."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.5",
+   "date": "2026-10-09",
+   "commit": "f477821",
+   "title": "Reviewed comparison with official outlooks published",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "EMI zone values and the digitized ICPAC map were reviewed by the project team; the comparison findings, numbers and maps are now published (agreement in the south and south-east, disagreement in EMI zone III)."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.6",
+   "date": "2026-10-09",
+   "commit": "3b83be4",
+   "title": "Clearer, scoped comparison with official outlooks; review and publication safeguards",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Comparison follows the selected area (season scope stated for monthly targets); key findings, maps and compact tables first; agreement shares always with their compared area; clickable evidence; comparison downloads and package files; 'Compare outlooks' in the navigation; archived comparison pages repaired."
+    },
+    {
+     "type": "analysis",
+     "text": "Bounded sensitivity checks (EMI neighbourhood size and arrow position, ICPAC registration by one pixel); tie-aware favoured category; reviews bound to the extracted contents; publication withheld when the saved comparison no longer matches its inputs."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.7",
+   "date": "2026-10-09",
+   "commit": "112ece8",
+   "title": "Comparison reports and scope details corrected",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Public and packaged comparison reports generated from the published (reviewed, current) data only; report figures resolve inside the ZIP; EMI samples labelled by their overlap with the domain; evidence maps follow each finding's scope; publication check includes the favoured-category threshold and the saved source manifest."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.8",
+   "date": "2026-10-09",
+   "commit": "6f1ff6d",
+   "title": "EMI figure beside the platform map; ICPAC comparison table",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "The platform map with EMI zone values is shown next to EMI's official ONDJ 2026/27 figure; a new ICPAC table gives ICPAC's printed favoured category and interval against the platform's below/near/above probabilities at the sampled locations and for each area."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.9",
+   "date": "2026-10-09",
+   "commit": "4714a93",
+   "title": "EMI zones as homogeneous rainfall regions (digitized, pending review)",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "EMI homogeneous rainfall regions I-VIII digitized from Korecha and Sorteberg (2013, doi:10.1002/2013WR013760) as a reviewable reference layer; once reviewed, the comparison adds platform means over each whole EMI zone and a redrawn region map with EMI's 2026/27 values beside the platform map. Region boundaries drawn on the platform map."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.10",
+   "date": "2026-10-09",
+   "commit": "c5c825d",
+   "title": "Reviewed EMI rainfall regions published",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "The digitized EMI homogeneous rainfall regions were reviewed by the project team; the site now shows the redrawn region map with EMI's 2026/27 values beside the platform map, region lines on the platform map, and platform means over each whole EMI zone (zone III opposing, VI-VIII agreeing on above normal)."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-09.11",
+   "date": "2026-10-09",
+   "commit": "b7a480a",
+   "title": "Comparison pipeline ready for other seasons",
+   "cycles": [
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Map titles and table notes use each season's own labels and months; zone tables hide arrow columns for seasons whose EMI zones have no arrows. ONDJ results unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-10.1",
+   "date": "2026-10-10",
+   "commit": "39e6509",
+   "title": "FMAM 2026 verified; February initialization; FMAM rainfall contribution domain; outlooks scored against CHIRPS",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)"
+   ],
+   "changes": [
+    {
+     "type": "verification",
+     "text": "February 2026 and the full FMAM 2026 season verified for both initializations. CHIRPS never published the February by_month file; February is taken from the official annual p25 file after checking it is identical to the published by_month files of January and March 2026."
+    },
+    {
+     "type": "domain",
+     "text": "Main FMAM area: the FMAM rainfall contribution domain (FMAM >= 100 mm and >= 20% of annual rainfall, CHIRPS 1993-2025), replacing the earlier R2-based domain; the FMAM main-season domain (>= 40% of annual) is a second view. The earlier R2-based verification report is archived as superseded."
+    },
+    {
+     "type": "analysis",
+     "text": "The platform, EMI and ICPAC are scored against CHIRPS for each one's own period (single season): favoured-category matches with observation, outlook and favoured-category coverage, and RPSS for the platform and EMI. Observed CHIRPS terciles are shown alongside the three outlooks. Comparison results are computed separately for every domain view."
+    },
+    {
+     "type": "display",
+     "text": "Verification reports state the cycle's own initialization and season; one current report per cycle. Comparison maps draw the national border once. Historical performance opens with a takeaway; technical detail is expandable."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-10.2",
+   "date": "2026-10-10",
+   "commit": "da807aa",
+   "title": "Climatology and domain reviews for JJAS and ONDJ; historical rainfall-amount skill for FMAM and ONDJ",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Rainfall climatology and domain reviews for JJAS (with EMI's Kiremt 2026 long-term maps 2(e) and 3(e), digitization in draft) and ONDJ (no EMI long-term Bega maps published yet). Evidence only: the JJAS R1+R2 and ONDJ R3 domains are unchanged."
+    },
+    {
+     "type": "analysis",
+     "text": "Calibration development runs (fit 1993-2016, evaluate 2017 onwards) for both FMAM initializations and ONDJ, so Historical performance now shows rainfall-amount skill for every cycle (all of Ethiopia): FMAM CRPSS -0.001 (January) and +0.053 (February), ONDJ +0.18 (2017-2024), JJAS +0.017."
+    },
+    {
+     "type": "display",
+     "text": "The Rainfall climatology and domains section shows the selected season's review; comparison notes and map captions name each cycle's own periods and seasons."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-11.1",
+   "date": "2026-10-11",
+   "commit": "322d777",
+   "title": "CHIRPS v3.0 adopted: every cycle recalibrated and re-verified (2026 forecasts retrospective)",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "method",
+     "text": "Observations changed from CHIRPS v2.0 (daily p25) to CHIRPS v3.0 (official monthly 0.05 degree product averaged onto the 0.25 degree grid; Funk et al. 2026). The whole chain was refitted with the same method: amount correction, terciles, blend weights, historical evaluation, development runs and decision gates (which give the same outcome as with v2.0)."
+    },
+    {
+     "type": "verification",
+     "text": "The 2026 forecasts of all four cycles were recalibrated with CHIRPS v3.0 after their outcomes were known and are verified against CHIRPS v3.0 (FMAM Feb-May and season, JJAS Jun-Aug). They are retrospective reconstructions; the CHIRPS v2.0 versions are release 2026-10-10.2."
+    },
+    {
+     "type": "domain",
+     "text": "The FMAM rainfall contribution domain keeps its rule (FMAM >= 100 mm and >= 20% of annual) on the CHIRPS v3.0 climatology: 75.6% of Ethiopia (72.6% with v2.0). The JJAS R1+R2 and ONDJ R3 regime domains are unchanged; the regimes come from the CHIRPS v2.0 daily climatology."
+    },
+    {
+     "type": "analysis",
+     "text": "The v2.0 vs v3.0 comparison (climatology about 15% wetter with v3.0, seasonal shares and year rankings closely agreeing; calibration skill similar overall) is in Methods and docs/45."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-11.2",
+   "date": "2026-10-11",
+   "commit": "92db6af",
+   "title": "Smoother maps (display only)",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Map display smoothing raised from 0.6 to 1.5 native cells (about 0.38 degrees), which softens the 1-degree steps the forecasts inherit from the ECMWF model grid; rainfall-domain edges are smoothed within the country instead of following the 0.25-degree mask cells. Forecast values, statistics, verification and exported files are unchanged (native 0.25-degree grid)."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-11.3",
+   "date": "2026-10-11",
+   "commit": "a314fe6",
+   "title": "Grid-cell map style (0.25°)",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Forecast maps can be shown as Smoothed (default) or Grid cells (0.25°): every cell drawn exactly as computed, without interpolation or smoothing, with the same colours, classes and legend. Both styles are in the download package. Forecast values and statistics are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-11.4",
+   "date": "2026-10-11",
+   "commit": "64c5532",
+   "title": "Method and references",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Methods section: new 'Method and references' panel naming the bias-correction method (per-cell mean–variance scaling), the probability and blending steps, the scores, and the scientific references with DOIs (checked on Crossref). Full text in docs/46. Forecasts and scores are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-11.5",
+   "date": "2026-10-11",
+   "commit": "e252baa",
+   "title": "Bias correction section",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "New 'Bias correction' section: benchmark of 13 rainfall-amount bias-correction methods against the operational mean-variance scaling for the September-initialized ONDJ cycle (data, method definitions, steps, results by target and region, gate statistics, figures, interpretation, downloads and references; docs/47). The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-11.6",
+   "date": "2026-10-11",
+   "commit": "1e59fea",
+   "title": "Bias correction: review revision (screening, confirmation, method fixes)",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Bias correction section revised after an external review: screening marks distinguish within-method and family-wide Holm adjustment ('screen_pass', not 'adopt'); a new selection-aware confirmation runs every method through the full probability pipeline with the blend weight fitted inside the folds; the test-period shortlist rule was removed."
+    },
+    {
+     "type": "analysis",
+     "text": "Method fixes: Scaled Distribution Mapping follows the published steps (checked against an independent implementation); a documented dry-total and tie policy for the quantile-mapping methods; Variance Scaling uses the same fallback as MVS; DQM and QDM descriptions corrected; activation of limits and fallbacks reported."
+    },
+    {
+     "type": "display",
+     "text": "Ordinary CRPS is the primary amount score (fair CRPS as a diagnostic); coverage, dry shares and run provenance added; the region switch is labelled as applying to the result tables, and the summary, interpretation and figures as national. The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-12.1",
+   "date": "2026-10-12",
+   "commit": "a9ddb40",
+   "title": "Bias correction: review revision 3 (downloads, reproducibility, edge cases)",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Bias correction downloads: the per-cell scores and corrected forecast members (NetCDF) are now published; the site build checks that every advertised download and asset is deployable."
+    },
+    {
+     "type": "analysis",
+     "text": "Reproducible reruns: one dependency fingerprint (configurations, masks, inputs, calculation code) validates checkpoints and is recorded as provenance. Fixes: configured smoothing in the confirmation, dry rule after EQM/DQM extrapolation, SDM rank order; results unchanged at the reported precision."
+    },
+    {
+     "type": "analysis",
+     "text": "January amounts: the gains of square-root MVS and Gamma QM come almost entirely from cells that are wet in every training year; no cell of Ethiopia has 0 mm in every training year, so an all-zero guard for MVS (evaluated as a variant) never acts. The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-12.2",
+   "date": "2026-10-12",
+   "commit": "1b16fda",
+   "title": "Bias correction: all four cycles",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "The bias-correction screening and confirmation now cover all cycles (January and February FMAM, May JJAS, September ONDJ), with a cycle picker in the Bias correction section. Published probabilities: MVS is not significantly beaten except for February in the February-initialized cycle, where square-root MVS is confirmed better. Amount gains are month-specific (ONDJ January, FMAM February-March, JJAS June-September). The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-13.1",
+   "date": "2026-10-13",
+   "commit": "c0a0ec7",
+   "title": "Bias correction: ratio-limit study and a shadow pilot",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "MVS ratio-limit study for all cycles: wider spread-ratio limits do not change the published probabilities (at most 0.002 RPSS) and help rainfall amounts only in some months (JJAS July-September, ONDJ January, FMAM February-March for the January initialization), while lowering the ONDJ season's amount skill."
+    },
+    {
+     "type": "analysis",
+     "text": "Shadow pilot of square-root MVS for February of the February-initialized FMAM cycle: reproduces the published February 2026 forecast with MVS, and scores the alternative against February 2026 (one season, an illustration). Not a published forecast; the published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-13.2",
+   "date": "2026-10-13",
+   "commit": "cc40df0",
+   "title": "Shadow forecast, suggested methods and sortable tables",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Ongoing shadow forecast: square-root MVS for February of the February-initialized FMAM cycle runs automatically next to the published forecast in every such cycle and is scored once observed (never published as a forecast)."
+    },
+    {
+     "type": "analysis",
+     "text": "Suggested method for every cycle, target and product, from the historical CHIRPS confirmation and the independent validation seasons, by a rule fixed in advance. After 2026: candidates for February FMAM probabilities (square-root MVS), JJAS July-August amounts (VS) and ONDJ January amounts (square-root MVS); keep MVS elsewhere. The published forecasts are unchanged."
+    },
+    {
+     "type": "display",
+     "text": "Every table on the site can be sorted by clicking a column header (numbers by value, text alphabetically; a third click restores the original order)."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-14.1",
+   "date": "2026-10-14",
+   "commit": "e1b462a",
+   "title": "Probability calibration, Phase 1",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "New section 'Probability and rainfall-distribution calibration': Phase 1 benchmark of six tercile-probability methods (pseudocount smoothing, the incumbent climatology blend, temperature scaling, regularized Dirichlet calibration, multinomial and ordinal logistic regression) with the amount correction fixed, nested year-based validation and a selection-aware procedure, for all four cycles. No method is confirmed better than the incumbent blend; the published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-14.2",
+   "date": "2026-10-14",
+   "commit": "c99305a",
+   "title": "Probability calibration, Phase 2",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Phase 2 of the probability and rainfall-distribution calibration, for all four cycles: one-vs-rest binary calibrators (Platt, beta, isotonic) against the incumbent blend, and rainfall-distribution models from the raw ensemble (EMOS with a censored shifted gamma, extended logistic regression, quantile regression) scored for terciles, amounts (CRPS), quantiles and interval coverage. No method is confirmed better than the published probabilities. EMOS (January-initialized FMAM season; JJAS September) and quantile regression (JJAS September) are confirmed better than the MVS-corrected ensemble in CRPS, and the distribution models' 10-90% intervals are close to calibrated where the MVS ensemble's are too narrow. The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-14.3",
+   "date": "2026-10-14",
+   "commit": null,
+   "title": "Amount and range shadow; downloads as release assets; new site pages",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Shadow rainfall-amount and range forecast (not published): every cycle also runs the EMOS distribution model and records each target's median and 10-90% range next to the MVS-corrected ensemble, scored once CHIRPS is available. 2026 so far (13 targets observed): the EMOS range is closer to calibrated coverage in 9 and has the higher CRPSS in 5; the MVS ensemble is clearly better in CRPS for JJAS June-August. The published forecasts are unchanged."
+    },
+    {
+     "type": "analysis",
+     "text": "Probability calibration Phase 3 (Bayesian joint probability, BMA for precipitation, quantile regression forests) is implemented; its benchmark is running and the results follow in the next release."
+    },
+    {
+     "type": "display",
+     "text": "Large download files (NetCDF, JSON, PDF, CSV) are served from the GitHub release 'site-files', named by their content so links never change; the site is half its former size. Every build also writes the site's data as JSON (site_data/), from which new pages are built: overview, probability calibration, bias correction, downloads and releases, under /next/ (docs/49)."
+    }
+   ]
+  }
+ ],
+ "change_types": {
+  "verification": "New verification observations",
+  "display": "Display or explanatory-text change",
+  "domain": "Rainfall-domain presentation update",
+  "analysis": "New evidence or diagnostics (method unchanged)",
+  "method": "Change to the scientific method"
+ },
+ "sections": [
+  {
+   "id": "outlooks",
+   "title": "Outlooks"
+  },
+  {
+   "id": "official",
+   "title": "Compare outlooks"
+  },
+  {
+   "id": "maps",
+   "title": "Maps"
+  },
+  {
+   "id": "verification",
+   "title": "Verification"
+  },
+  {
+   "id": "history",
+   "title": "Historical performance"
+  },
+  {
+   "id": "bias",
+   "title": "Bias correction"
+  },
+  {
+   "id": "probcal",
+   "title": "Probability calibration"
+  },
+  {
+   "id": "domains",
+   "title": "Rainfall domains"
+  },
+  {
+   "id": "methods",
+   "title": "Methods &amp; data"
+  },
+  {
+   "id": "downloads",
+   "title": "Downloads"
+  }
+ ],
+ "assets": "site/assets (figures and maps, paths relative to the site root)"
+}

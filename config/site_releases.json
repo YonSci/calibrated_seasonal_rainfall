@@ -502,7 +502,7 @@
   {
     "id": "2026-10-14.2",
     "date": "2026-10-14",
-    "commit": null,
+    "commit": "c99305a",
     "title": "Probability calibration, Phase 2",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -514,6 +514,32 @@
       {
         "type": "analysis",
         "text": "Phase 2 of the probability and rainfall-distribution calibration, for all four cycles: one-vs-rest binary calibrators (Platt, beta, isotonic) against the incumbent blend, and rainfall-distribution models from the raw ensemble (EMOS with a censored shifted gamma, extended logistic regression, quantile regression) scored for terciles, amounts (CRPS), quantiles and interval coverage. No method is confirmed better than the published probabilities. EMOS (January-initialized FMAM season; JJAS September) and quantile regression (JJAS September) are confirmed better than the MVS-corrected ensemble in CRPS, and the distribution models' 10-90% intervals are close to calibrated where the MVS ensemble's are too narrow. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-14.3",
+    "date": "2026-10-14",
+    "commit": null,
+    "title": "Amount and range shadow; downloads as release assets; new site pages",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "Shadow rainfall-amount and range forecast (not published): every cycle also runs the EMOS distribution model and records each target's median and 10-90% range next to the MVS-corrected ensemble, scored once CHIRPS is available. 2026 so far (13 targets observed): the EMOS range is closer to calibrated coverage in 9 and has the higher CRPSS in 5; the MVS ensemble is clearly better in CRPS for JJAS June-August. The published forecasts are unchanged."
+      },
+      {
+        "type": "analysis",
+        "text": "Probability calibration Phase 3 (Bayesian joint probability, BMA for precipitation, quantile regression forests) is implemented; its benchmark is running and the results follow in the next release."
+      },
+      {
+        "type": "display",
+        "text": "Large download files (NetCDF, JSON, PDF, CSV) are served from the GitHub release 'site-files', named by their content so links never change; the site is half its former size. Every build also writes the site's data as JSON (site_data/), from which new pages are built: overview, probability calibration, bias correction, downloads and releases, under /next/ (docs/49)."
       }
     ]
   }

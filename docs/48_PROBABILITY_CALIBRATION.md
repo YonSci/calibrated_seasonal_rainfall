@@ -307,9 +307,69 @@ Cells: tercile RPSS / amount CRPSS / share of observations inside the 10–90 % 
 * Keep the incumbent climatology blend for the published tercile probabilities: neither Phase 1 nor Phase 2 beats it.
 * For **rainfall amounts and ranges**, the distribution models (EMOS in particular) give near-calibrated intervals where the MVS
   ensemble's are too narrow, and are confirmed better in CRPS for some targets. This makes them candidates for a separate
-  amount/interval product, with the published probabilities unchanged; any such product is your decision.
-* Phase 3 (Bayesian joint probability, precipitation BMA, quantile regression forests) can reuse this distribution interface and
-  benchmark.
+  amount/interval product, with the published probabilities unchanged; any such product is a separate decision.
+* Phase 3 (Bayesian joint probability, precipitation BMA, quantile regression forests) reuses this distribution interface and
+  benchmark (sections 7–8); the shadow amount and range forecast (section 9) collects independent seasons for EMOS.
+
+## 7. Phase 3 methods and design (`dist_calibration.py`)
+
+Same interface, pooling and benchmark as Phase 2 (`config/probability_calibration/<cycle>_phase3.json`, Holm across these three
+models × 5 targets, separately for RPS and CRPS). Predictors are computed from the training years of each fold only.
+
+| Identifier | Model | Parameters (fitting) | Notes |
+| --- | --- | --- | --- |
+| `bjp` | Bayesian joint probability: m' and y' each log-sinh transformed, z = log(sinh(a + b·x))/b; in transformed space z<sub>y</sub> = c<sub>0</sub> + c<sub>1</sub>·d + e, d the standardized transformed ensemble mean, e ~ N(0, s²); y' = 0 left-censored at the transform of zero | 4 (predictor) + 5 (observation), weighted censored maximum likelihood with the Jacobian (posterior mode under flat priors) | parameter uncertainty of the normal model integrated analytically under the reference prior with the number of training years as the effective sample (cells of one year are not independent): Student-t predictive, ν = years − 2, scale s·√(1 + 1/years + d²/years). b is bounded below at e⁻⁵, where the log-sinh approaches a shifted log transform |
+| `bma_precipitation` | BMA for precipitation, exchangeable members with equal weights: per member f', P(Y' = 0) = logistic(a<sub>0</sub> + a<sub>1</sub>f'<sup>1/3</sup> + a<sub>2</sub>·1{f' = 0}); given Y' > 0, Y'<sup>1/3</sup> ~ Gamma with mean softplus(b<sub>0</sub> + b<sub>1</sub>f'<sup>1/3</sup>) and variance softplus(c<sub>0</sub>) + softplus(c<sub>1</sub>)·f' | 7, joint weighted maximum likelihood of the mixture (analytic gradient, checked numerically in the tests) | equal weights because SEAS5 members are exchangeable (Fraley et al. 2010); 25 members in training, 51 in the test years (the mixture takes whatever members a year has); quantiles by bisection |
+| `quantile_regression_forest` | Quantile regression forest: 200 trees, ≥ 40 samples per leaf, half the predictors per split, sample weights = equal-year area weights | predictors m', s', md', the ensemble's relative 10 % and 90 % quantiles, log climatological mean, CHIRPS coefficient of variation | predictive distribution = all training amounts weighted by leaf co-membership (Meinshausen 2006), at 39 levels (2.5–97.5 %); piecewise-linear CDF as for quantile regression. scikit-learn 1.5.2 (random seed 0) |
+
+## 8. Phase 3 results
+
+The benchmark started on 2026-10-13 (code d430a97, failure logging 56a067d) and is running; the results follow in the next release.
+
+## 9. Shadow rainfall-amount and range forecast (`scripts/dist_shadow.py`)
+
+**Not a published forecast.** Phase 2 showed that the distribution models' 10–90 % ranges are close to calibrated where the
+MVS-corrected ensemble's are too narrow. To build independent evidence before any amount or range product is considered, every
+cycle also runs EMOS (configured in `config/probability_calibration/amount_shadow.json`; automatic stage `amount_shadow` in
+`run_operational.py`):
+
+* EMOS is fitted on the cycle's reference years (as the published forecast), pooled over the national cells exactly as in the
+  benchmark, and predicts each target's 10 %, 50 % and 90 % quantiles (mm) and tercile probabilities for the forecast year; the
+  MVS-corrected ensemble's quantiles are stored next to them.
+* Once CHIRPS is prepared for a target, both are scored (CRPS, coverage of the 10–90 % range, pinball losses), and the shadow's
+  tercile probabilities are scored against the published probabilities (RPS). These seasons were not used to build or select
+  anything.
+* Files: `outputs/probability_calibration/<cycle>/amount_shadow/<year>/` — `emos_csg__<target>.json` (scores, fitted parameters,
+  provenance; reused while the dependency fingerprint is unchanged), `shadow_emos_csg_<year>_<target>.nc` and `.png`.
+
+### Results so far: 2026 forecasts (national area-weighted means over the modelled cells)
+
+Forecast: median (10–90 % range) in mm, shadow EMOS / MVS-corrected ensemble. Scored targets: share of observations inside the 10–90 % range (80 % is calibrated) and amount CRPSS against the CHIRPS climatology, shadow / MVS. One season each.
+
+| Cycle | Target | Shadow (EMOS) | MVS ensemble | Coverage | CRPSS |
+| --- | --- | --- | --- | --- | --- |
+| January · FMAM | Feb | 18 (6–40) | 15 (10–39) | 89 % / 63 % | -0.319 / -0.207 |
+| January · FMAM | Mar | 50 (13–131) | 47 (26–116) | 78 % / 60 % | +0.164 / +0.101 |
+| January · FMAM | Apr | 86 (33–176) | 85 (38–171) | 82 % / 81 % | +0.010 / +0.014 |
+| January · FMAM | May | 98 (47–170) | 98 (57–158) | 94 % / 87 % | +0.017 / +0.032 |
+| January · FMAM | FMAM | 266 (165–402) | 267 (170–396) | 88 % / 84 % | -0.027 / -0.066 |
+| February · FMAM | Feb | 14 (5–31) | 14 (10–27) | 92 % / 58 % | -0.002 / +0.018 |
+| February · FMAM | Mar | 45 (12–118) | 48 (22–106) | 64 % / 52 % | +0.078 / +0.067 |
+| February · FMAM | Apr | 101 (44–197) | 119 (59–197) | 76 % / 65 % | -0.185 / -0.486 |
+| February · FMAM | May | 100 (45–182) | 99 (52–172) | 95 % / 89 % | -0.051 / -0.032 |
+| February · FMAM | FMAM | 286 (186–420) | 301 (206–413) | 88 % / 72 % | -0.017 / -0.091 |
+| May · JJAS | Jun | 81 (45–132) | 71 (49–100) | 70 % / 68 % | +0.225 / +0.404 |
+| May · JJAS | Jul | 151 (101–212) | 138 (96–184) | 63 % / 62 % | +0.151 / +0.228 |
+| May · JJAS | Aug | 149 (104–206) | 137 (102–180) | 75 % / 73 % | +0.269 / +0.431 |
+| May · JJAS | Sep | 103 (61–161) | 93 (58–141) | awaiting CHIRPS | awaiting CHIRPS |
+| May · JJAS | JJAS | 473 (373–593) | 430 (345–515) | awaiting CHIRPS | awaiting CHIRPS |
+| September · ONDJ | Oct | 78 (30–170) | 87 (38–160) | awaiting CHIRPS | awaiting CHIRPS |
+| September · ONDJ | Nov | 55 (18–127) | 55 (17–133) | awaiting CHIRPS | awaiting CHIRPS |
+| September · ONDJ | Dec | 12 (3–37) | 12 (5–39) | awaiting CHIRPS | awaiting CHIRPS |
+| September · ONDJ | Jan | 17 (6–41) | 15 (9–40) | awaiting CHIRPS | awaiting CHIRPS |
+| September · ONDJ | ONDJ | 176 (90–306) | 181 (94–313) | awaiting CHIRPS | awaiting CHIRPS |
+
+Of the 13 targets observed so far, the EMOS range is closer to calibrated coverage in 9 and EMOS has the higher CRPSS in 5; the MVS ensemble is clearly better in CRPS for JJAS June–August 2026. One season per target is not evidence for a change; the record grows with each cycle.
 
 ## References
 
@@ -334,7 +394,19 @@ Cells: tercile RPSS / amount CRPSS / share of observations inside the 10–90 % 
   gamma distributions. *Monthly Weather Review*, 143, 4578–4596. https://doi.org/10.1175/MWR-D-15-0061.1
 * Wilks, D. S. (2009). Extending logistic regression to provide full-probability-distribution MOS forecasts. *Meteorological
   Applications*, 16, 361–368. https://doi.org/10.1002/met.134
+* Fraley, C., Raftery, A. E., & Gneiting, T. (2010). Calibrating multimodel forecast ensembles with exchangeable and missing
+  members using Bayesian model averaging. *Monthly Weather Review*, 138, 190–202. https://doi.org/10.1175/2009MWR3046.1
+* Meinshausen, N. (2006). Quantile regression forests. *Journal of Machine Learning Research*, 7, 983–999.
+  https://jmlr.org/papers/v7/meinshausen06a.html
+* Sloughter, J. M., Raftery, A. E., Gneiting, T., & Fraley, C. (2007). Probabilistic quantitative precipitation forecasting using
+  Bayesian model averaging. *Monthly Weather Review*, 135, 3209–3220. https://doi.org/10.1175/MWR3441.1
+* Wang, Q. J., & Robertson, D. E. (2011). Multisite probabilistic forecasting of seasonal flows for streams with zero value
+  occurrences. *Water Resources Research*, 47, W02546. https://doi.org/10.1029/2010WR009333
+* Wang, Q. J., Robertson, D. E., & Chiew, F. H. S. (2009). A Bayesian joint probability modeling approach for seasonal forecasting
+  of streamflows at multiple sites. *Water Resources Research*, 45, W05407. https://doi.org/10.1029/2008WR007355
+* Wang, Q. J., Shrestha, D. L., Robertson, D. E., & Pokhrel, P. (2012). A log-sinh transformation for data normalization and
+  variance stabilization. *Water Resources Research*, 48, W05514. https://doi.org/10.1029/2011WR010973
 * Zadrozny, B., & Elkan, C. (2002). Transforming classifier scores into accurate multiclass probability estimates. *Proceedings of
   the 8th ACM SIGKDD*, 694–699. https://doi.org/10.1145/775047.775151
 
-DOI and proceedings links for the Phase 1 references checked on 2026-10-13; the Phase 2 references were added on 2026-10-13 without a separate online check.
+DOI and proceedings links for the Phase 1 references checked on 2026-10-13; the Phase 2 and 3 references were added on 2026-10-13 and 2026-10-14 without a separate online check.

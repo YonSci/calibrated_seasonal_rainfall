@@ -54,7 +54,20 @@ REFERENCES = [
     ('Messner, J. W., Mayr, G. J., Zeileis, A., & Wilks, D. S. (2014). Heteroscedastic extended logistic regression for postprocessing '
      'of ensemble guidance. <em>Monthly Weather Review</em>, 142, 448–456.', 'https://doi.org/10.1175/MWR-D-13-00271.1'),
     ('Koenker, R., & Bassett, G. (1978). Regression quantiles. <em>Econometrica</em>, 46, 33–50.', 'https://doi.org/10.2307/1913643'),
+    ('Wang, Q. J., Robertson, D. E., & Chiew, F. H. S. (2009). A Bayesian joint probability modeling approach for seasonal forecasting of '
+     'streamflows at multiple sites. <em>Water Resources Research</em>, 45, W05407.', 'https://doi.org/10.1029/2008WR007355'),
+    ('Wang, Q. J., & Robertson, D. E. (2011). Multisite probabilistic forecasting of seasonal flows for streams with zero value '
+     'occurrences. <em>Water Resources Research</em>, 47, W02546.', 'https://doi.org/10.1029/2010WR009333'),
+    ('Wang, Q. J., Shrestha, D. L., Robertson, D. E., & Pokhrel, P. (2012). A log-sinh transformation for data normalization and '
+     'variance stabilization. <em>Water Resources Research</em>, 48, W05514.', 'https://doi.org/10.1029/2011WR010973'),
+    ('Sloughter, J. M., Raftery, A. E., Gneiting, T., & Fraley, C. (2007). Probabilistic quantitative precipitation forecasting using '
+     'Bayesian model averaging. <em>Monthly Weather Review</em>, 135, 3209–3220.', 'https://doi.org/10.1175/MWR3441.1'),
+    ('Fraley, C., Raftery, A. E., & Gneiting, T. (2010). Calibrating multimodel forecast ensembles with exchangeable and missing members '
+     'using Bayesian model averaging. <em>Monthly Weather Review</em>, 138, 190–202.', 'https://doi.org/10.1175/2009MWR3046.1'),
+    ('Meinshausen, N. (2006). Quantile regression forests. <em>Journal of Machine Learning Research</em>, 7, 983–999.',
+     'https://jmlr.org/papers/v7/meinshausen06a.html'),
 ]
+SHADOW_CONFIG = 'config/probability_calibration/amount_shadow.json'
 
 
 def load_all():
@@ -64,9 +77,13 @@ def load_all():
         bench = json.loads((ROOT / d['config_contents']['benchmark_config']).read_text(encoding='utf-8'))
         project = json.loads((ROOT / bench['project_config']).read_text(encoding='utf-8'))
         extra = {}
-        for key, sub in (('binary', 'phase2_binary'), ('distribution', 'distribution')):   # Phase 2 outputs, when run
+        for key, sub in (('binary', 'phase2_binary'), ('distribution', 'distribution'), ('phase3', 'phase3')):   # later phases, when run
             f = p.parent / sub / 'benchmark.json'
             extra[key] = json.loads(f.read_text(encoding='utf-8')) if f.is_file() else None
+        extra['shadow'] = {}                                   # amount/range shadow: {year: {target: record}}
+        for f in sorted(p.parent.glob('amount_shadow/*/*__*.json')):
+            r = json.loads(f.read_text(encoding='utf-8'))
+            extra['shadow'].setdefault(int(f.parent.name), {})[r['target']] = dict(r, folder=f.parent)
         out.append(dict(name=p.parent.name, folder=p.parent, data=d, init=project['initialization_month'], season=project['season']['name'],
                         **extra))
     return sorted(out, key=lambda b: b['init'])
@@ -78,13 +95,25 @@ def export(out_dir):
         dest = out_dir / 'assets/probcal' / b['name']
         if (b['folder'] / 'figures').is_dir():
             shutil.copytree(b['folder'] / 'figures', dest, dirs_exist_ok=True)
-        for sub in ('phase2_binary', 'distribution'):
+        for sub in ('phase2_binary', 'distribution', 'phase3'):
             if (b['folder'] / sub / 'figures').is_dir():
                 shutil.copytree(b['folder'] / sub / 'figures', dest / sub, dirs_exist_ok=True)
         files = []
+        for year, rows in b['shadow'].items():                 # shadow maps and NetCDF files
+            for t, r in rows.items():
+                for ext, kind in (('png', 'assets'), ('nc', 'downloads')):
+                    src = r['folder'] / f"shadow_{r['model']}_{year}_{t}.{ext}"
+                    if src.is_file():
+                        d = out_dir / f'{kind}/probcal' / b['name'] / f'amount_shadow/{year}' / src.name
+                        d.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(src, d)
+                        if ext == 'nc':
+                            files.append((f'downloads/probcal/{b["name"]}/amount_shadow/{year}/{src.name}',
+                                          f'Shadow amounts and ranges, {t} {year} (NetCDF; not a published forecast)', d.stat().st_size))
         for rel, label in (('benchmark.json', 'Phase 1: all scores, per-year values, tests and fitted parameters (JSON)'),
                            ('phase2_binary/benchmark.json', 'Phase 2, binary calibrators (JSON)'),
-                           ('distribution/benchmark.json', 'Phase 2, rainfall-distribution models (JSON)')):
+                           ('distribution/benchmark.json', 'Phase 2, rainfall-distribution models (JSON)'),
+                           ('phase3/benchmark.json', 'Phase 3, rainfall-distribution models (JSON)')):
             if (b['folder'] / rel).is_file():
                 d = out_dir / 'downloads/probcal' / b['name'] / rel
                 d.parent.mkdir(parents=True, exist_ok=True)
@@ -164,6 +193,8 @@ def block(b, files):
   <figure class="map-figure wide"><img loading="lazy" src="assets/probcal/{esc(b["name"])}/probability_reliability.png" alt="Reliability by method" style="max-width:100%;height:auto"><figcaption class="caveat">Reliability of each method for the season (below and above normal).</figcaption></figure>
   {binary_html(b)}
   {distribution_html(b)}
+  {distribution_html(b, 'phase3')}
+  {shadow_html(b)}
   <ul class="dl">{''.join(f'<li><a href="{esc(h)}" download>{esc(l)}</a><span>{n / 1e6:.1f} MB</span></li>' for h, l, n in files)}</ul>
 </div>'''
 
@@ -193,11 +224,12 @@ def binary_html(b):
                                              f'Tercile RPSS, fit {tr}, scored {te} (exploratory)')}</details>'''
 
 
-def distribution_html(b):
-    """Phase 2, Pathway B: rainfall-distribution models against the published probabilities and the MVS-corrected ensemble."""
-    d = b.get('distribution')
+def distribution_html(b, key='distribution'):
+    """Pathway B (Phase 2 or 3): rainfall-distribution models against the published probabilities and the MVS-corrected ensemble."""
+    d = b.get(key)
     if not d:
         return ''
+    phase = d.get('phase', 2)
     reg = d['primary_region']
     order = json.loads((ROOT / d['config_contents']['benchmark_config']).read_text(encoding='utf-8'))['targets']
     T = [t for t in order if t in d['targets']]
@@ -218,7 +250,7 @@ def distribution_html(b):
     test_rows.insert(0, ['Published probabilities / MVS ensemble'] + [f"{signed(v('incumbent', 'test', 'rpss', t))} / {signed(v('mvs_ensemble', 'test', 'crpss', t))}" for t in T])
     found = {sc: [f'{name(k)} ({", ".join(t for t in T if conf(k, sc, t))})' for k in d['models'] if any(conf(k, sc, t) for t in T)] for sc in ('rps', 'crps')}
     reg_rows = [[esc(name(k)), esc(r['estimates']), esc(r['predictors']), esc(r['fitting']), esc(r['outputs'])] for k, r in d['registry'].items()]
-    return f'''<h4>Phase 2 · rainfall-distribution models (Pathway B)</h4>
+    return f'''<h4>Phase {phase} · rainfall-distribution models (Pathway B)</h4>
   <p>Each model predicts a full rainfall distribution from the raw ensemble (pooled over cells in units relative to each cell's
   climatology); terciles at the training CHIRPS boundaries, quantiles and intervals come from it. References, in the same folds:
   the published probabilities (tercile RPS) and the MVS-corrected ensemble (CRPS, quantiles). ✓ = better than the reference with
@@ -231,12 +263,58 @@ def distribution_html(b):
   {tbl(head, pin_rows, f'Pinball loss of the median (mm), {tr} (lower is better)')}
   {tbl(head, test_rows, f'Fit {tr}, scored {te} (exploratory)')}
   {tbl(['Model', 'Estimates', 'Predictors', 'Fitting', 'Outputs'], reg_rows, 'Models')}</details>
-  <figure class="map-figure wide"><img loading="lazy" src="assets/probcal/{esc(b["name"])}/distribution/distribution_summary.png" alt="Distribution models summary" style="max-width:100%;height:auto"><figcaption class="caveat">Tercile RPSS and amount CRPSS of the distribution models against the published pipeline.</figcaption></figure>'''
+  <figure class="map-figure wide"><img loading="lazy" src="assets/probcal/{esc(b["name"])}/{key}/distribution_summary.png" alt="Distribution models summary, Phase {phase}" style="max-width:100%;height:auto"><figcaption class="caveat">Tercile RPSS and amount CRPSS of the Phase {phase} distribution models against the published pipeline.</figcaption></figure>'''
+
+
+def shadow_html(b):
+    """The ongoing shadow rainfall-amount and range forecast (never published) and its season-by-season scores."""
+    if not b.get('shadow'):
+        return ''
+    cfg = json.loads((ROOT / SHADOW_CONFIG).read_text(encoding='utf-8'))
+    parts = []
+    for year in sorted(b['shadow'], reverse=True):
+        rows = b['shadow'][year]
+        order = json.loads((ROOT / next(iter(rows.values()))['cycle']).read_text(encoding='utf-8'))['targets']
+        T = [t for t in order if t in rows]
+        fc, sc = [], []
+        for t in T:
+            r = rows[t]
+            f = r['forecast']
+            rng = lambda k: f"{f[k]['q50_mm']:.0f} ({f[k]['q10_mm']:.0f}–{f[k]['q90_mm']:.0f})"
+            fc.append([esc(t), f"{f['climatology_mm']:.0f}", rng('shadow'), rng('mvs_ensemble'),
+                       f"{f['shadow']['width_relative']:.2f} / {f['mvs_ensemble']['width_relative']:.2f}"])
+            if r['observed']:
+                s = r['scores'][r['primary_region']]
+                sh, mv, pu = s['shadow'], s['mvs_ensemble'], s.get('published', {})
+                sc.append([esc(t), pct(sh['coverage_80']), pct(mv['coverage_80']), signed(sh['crpss']), signed(mv['crpss']),
+                           f"{sh['pinball_50']:.1f}", f"{mv['pinball_50']:.1f}",
+                           signed(sh['rpss']) if 'rpss' in sh else '–', signed(pu['rpss']) if 'rpss' in pu else '–'])
+        observed = [t for t in T if rows[t]['observed']]
+        prov = next(iter(rows.values()))['provenance']
+        figs = ''.join(f'''<details><summary>{esc(t)} {year}: maps</summary><figure class="map-figure wide"><img loading="lazy" src="assets/probcal/{esc(b["name"])}/amount_shadow/{year}/shadow_{esc(rows[t]["model"])}_{year}_{esc(t)}.png" alt="Shadow amounts and ranges {esc(t)} {year}" style="max-width:100%;height:auto"></figure></details>'''
+                       for t in T)
+        scored = (tbl(['Target', 'Coverage, shadow', 'Coverage, MVS', 'CRPSS, shadow', 'CRPSS, MVS', 'Median pinball, shadow (mm)',
+                       'Median pinball, MVS (mm)', 'RPSS, shadow terciles', 'RPSS, published'], sc,
+                      f'Scored against CHIRPS {year} (one season each; 80% coverage is calibrated)')
+                  if sc else '<p class="caveat">Awaiting CHIRPS observations.</p>')
+        parts.append(f'''<h5>{year} forecast · {len(observed)} of {len(T)} targets observed so far</h5>
+  {tbl(['Target', 'Climatology (mm)', 'Shadow: median (10–90%), mm', 'MVS ensemble: median (10–90%), mm', 'Range width / climatology (shadow / MVS)'],
+       fc, f'Forecast {year}: national area-weighted means over the modelled cells (fitted on {years(rows[T[0]]["reference_years"])})')}
+  {scored}
+  {figs}
+  <p class="caveat">Run at commit <code>{esc((prov.get('commit') or '')[:7])}</code>{' (with uncommitted changes)' if prov.get('uncommitted_changes') else ''}.</p>''')
+    return f'''<h4>Shadow forecast · rainfall amounts and ranges (EMOS), not published</h4>
+  <p><strong>Not a published forecast.</strong> Since {esc(cfg['since'])}, each cycle also runs the EMOS distribution model (censored
+  shifted gamma, fitted on the cycle's reference years) and records its median and 10–90% range for every target next to the
+  MVS-corrected ensemble. {esc(cfg['reason'])} Each season is scored once its CHIRPS observations exist; any change to what is
+  published is a separate decision after several seasons.</p>
+  {''.join(parts)}'''
 
 
 def section(blocks):
     if not blocks:
         return ''
+    done = {1, 2} | ({3} if any(OUT.glob('*/phase3/benchmark.json')) else set())
     import re
     title = lambda h: re.search(r'<h3>(.*?)</h3>', h).group(1)
     last = len(blocks) - 1
@@ -245,7 +323,7 @@ def section(blocks):
               '</select></label></div>')
     body = ''.join(h if i == last else h.replace('<div class="pcb"', '<div class="pcb" hidden', 1) for i, (_, h) in enumerate(blocks))
     plan = tbl(['Phase', 'Identifier', 'Method', 'Family', 'Output', 'Status'],
-               [[str(ph), f'<code>{esc(k)}</code>', esc(m), esc(fam), esc(o), 'implemented, results below' if ph <= 2 else 'planned']
+               [[str(ph), f'<code>{esc(k)}</code>', esc(m), esc(fam), esc(o), 'implemented, results below' if ph in done else 'planned']
                 for ph, k, m, fam, o in PLAN], 'Implementation plan (the order is a plan, not a ranking of performance)')
     refs = ''.join(f'<li>{t}' + (f' <a href="{esc(u)}">{esc(u.replace("https://", ""))}</a>' if u else '') + '</li>' for t, u in REFERENCES)
     return f'''<section id="probcal" class="wrap">
