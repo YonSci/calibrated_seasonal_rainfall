@@ -32,6 +32,7 @@ import site_extras as extras                          # noqa: E402
 import obs_source                                     # noqa: E402
 import site_bias                                      # noqa: E402
 import site_prob                                      # noqa: E402
+import site_files                                     # noqa: E402
 
 OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
@@ -1861,7 +1862,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--out', help='Write the site elsewhere (default: site/)')
     ap.add_argument('--include-backtests', action='store_true', help='Also show backtest cycles (scratch builds only)')
-    ap.add_argument('--offline', action='store_true', help='Do not query the CHIRPS archive listing')
+    ap.add_argument('--offline', action='store_true', help='Do not query the CHIRPS archive listing or GitHub')
+    ap.add_argument('--upload-files', action='store_true',
+                    help='Upload new large download files as GitHub release assets and link them (scripts/site_files.py)')
+    ap.add_argument('--keep-downloads', action='store_true', help='Keep every download file in site/downloads (no release assets)')
     a = ap.parse_args()
     if a.out:
         OUT = Path(a.out).resolve()
@@ -1935,10 +1939,15 @@ def main():
     (OUT / 'index.html').write_text(page(cycles, default, jjas_evidence(), built, sha, release_id, reviews, bias, probcal),
                                     encoding='utf-8', newline='')
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
+    files = None if a.keep_downloads else site_files.offload(OUT, upload_new=a.upload_files, offline=a.offline)
     checked = site_bias.check_published(OUT)                 # every advertised download and asset must be deployable
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())
     print(f'Site written to {OUT}: {len(cycles)} cycles ({", ".join(c["label"] for c in cycles)}), default {default}, '
           f'CHIRPS listing {"checked" if published else "not checked"}, {checked} local links publishable, {size / 1e6:.1f} MB')
+    if files:
+        print(f'Release assets: {files["linked"]} download files linked ({files["bytes"] / 1e6:.1f} MB not in the site), '
+              f'{files["uploaded"]} uploaded now' + (f'; {len(files["pending"])} not uploaded yet, kept local (use --upload-files)'
+                                                     if files['pending'] else ''))
 
 
 if __name__ == '__main__':
