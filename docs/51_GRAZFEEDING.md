@@ -77,7 +77,43 @@ and not worse over the test years.
 
 ## 4. Results (Ethiopia)
 
-RESULTS
+Skill against the observed climatology (RPSS for probabilities, CRPSS for amounts); training = leave-one-year-out
+1993–2016, test = fitted on 1993–2016 and scored 2017–2024.
+
+| Target | Published probabilities | GrazFeediNG as uploaded | Leung + counts (no Dirichlet) | MVS + counts + IAD | Leung + published blend | MVS ensemble (CRPSS) | Leung ensemble (CRPSS) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Oct | +0.013 / +0.027 | +0.004 / +0.001 | −0.021 / +0.004 | +0.003 / +0.006 | +0.009 / +0.024 | −0.002 / +0.059 | −0.006 / +0.055 |
+| Nov | +0.040 / +0.053 | +0.035 / +0.014 | +0.046 / +0.041 | +0.035 / +0.015 | +0.041 / +0.053 | +0.084 / +0.158 | +0.088 / +0.162 |
+| Dec | +0.003 / +0.016 | +0.008 / +0.008 | −0.064 / −0.040 | +0.008 / +0.001 | +0.002 / +0.017 | +0.029 / −0.033 | +0.032 / −0.040 |
+| Jan | +0.001 / −0.004 | −0.004 / +0.021 | −0.132 / −0.213 | +0.000 / +0.006 | +0.002 / −0.005 | −0.040 / −0.066 | **−0.022 / −0.050** |
+| ONDJ | +0.039 / +0.075 | +0.026 / +0.041 | +0.025 / +0.058 | +0.031 / +0.049 | +0.034 / +0.071 | +0.070 / +0.178 | +0.070 / +0.175 |
+
+(training / test). Tests against the reference:
+
+- **Tercile probabilities: no GrazFeediNG method is confirmed better than the published probabilities** for any target
+  (Holm p = 1 for all 20). The uploaded pipeline (`gf_full`) is slightly worse than the published probabilities over the
+  training years for Oct, Nov, Jan and ONDJ (ΔRPS +0.002 to +0.006) and over the test years for all targets but Jan.
+- **The raw member counts are overconfident**, most of all for the drier months (Jan RPSS −0.13 training, −0.21 test):
+  without the Dirichlet the uploaded pipeline is the worst method.
+- **The IAD repairs that overconfidence, but by flattening.** Fitted on all training years, A has diagonal elements of
+  0.05–0.35 (identity: 1) for most targets; with ~35 000 pooled cell-years the identity penalty is weak, so the
+  probabilities are pulled most of the way towards equal thirds plus a fixed shift b. Only the upper tercile of Nov (A₃₃
+  ≈ 1.18) and Dec (≈ 0.65) keeps much of the ensemble's signal. The result is close to, but not better than, the
+  published climatology blend, which weights the ensemble per target with a weight fitted in inner years.
+- **The bias correction alone changes little for probabilities**: the Leung affine through the published probability
+  stage (`leung_blend`) is within ±0.003 RPS of the published probabilities everywhere.
+- **Amounts: the Leung ensemble is confirmed better than the MVS ensemble for January** (CRPS −0.15 mm, 21 of 24 years
+  better, Holm p < 0.001; test years −0.09 mm, 80% coverage 0.54 against 0.46). It is not confirmed for Oct, Nov, Dec
+  or ONDJ (worse for Oct). Jan amounts already have a candidate from the bias-correction benchmark (square-root MVS).
+
+The forecast year 2026 (`forecast/`; not published): the published and Leung + counts maps favour the same terciles
+(below normal in the west, above normal elsewhere); after the IAD most of the central and northern highlands no longer
+reach 40% in any tercile.
+
+**Conclusion.** For ONDJ the uploaded calibration does not improve the published tercile probabilities; its probability
+stage (IAD) mostly reproduces what the climatology blend already does, slightly less well. Its bias correction gives a
+confirmed amount improvement for January, which enters the method selection as an alternative: square-root MVS stays
+selected for January amounts because its confirmed improvement is larger (−0.48 mm against −0.15 mm over the training years).
 
 ## 5. Place in the method selection
 
