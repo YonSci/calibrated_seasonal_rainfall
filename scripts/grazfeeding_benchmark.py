@@ -51,6 +51,8 @@ import bias_methods as bm                                               # noqa: 
 import prob_calibration as pc                                           # noqa: E402
 import dist_benchmark as db                                             # noqa: E402
 from prob_benchmark import Records                                      # noqa: E402
+from calibration_core import fit_amount, categories, labels             # noqa: E402
+from compare_calibration import smooth                                  # noqa: E402
 from grazfeeding import IADDirichlet, member_probabilities, observed_category   # noqa: E402
 
 CODE = ['scripts/grazfeeding_benchmark.py', 'scripts/grazfeeding.py', 'scripts/bias_methods.py', 'scripts/dist_benchmark.py',
@@ -58,8 +60,10 @@ CODE = ['scripts/grazfeeding_benchmark.py', 'scripts/grazfeeding.py', 'scripts/b
 PROB = ['gf_full', 'gf_no_dirichlet', 'iad_on_mvs', 'leung_blend']
 AMOUNT = ['leung_affine']
 LEVELS = (.1, .5, .9)
+BINS = np.linspace(0, 1, 11)                         # reliability: forecast-probability bins of 0.1
+PANELS = ['incumbent'] + PROB                        # probability pipelines in the plots, published first
 SHORT = dict(gf_full='GrazFeediNG as uploaded', gf_no_dirichlet='Leung + counts (no Dirichlet)', iad_on_mvs='MVS + counts + IAD',
-             leung_blend='Leung + published blend')
+             leung_blend='Leung + published blend', incumbent='Published (MVS + blend)')
 
 
 def read(p):
@@ -114,6 +118,8 @@ def run_target(config_path, target):
     rec_leung = Records('leung_affine', leung, models, obs, train, cfg['smoothing_alpha'])
     keys = PROB + AMOUNT + ['incumbent', 'mvs_ensemble']
     store = {k: {'training': {}, 'test': {}} for k in keys}
+    rel = {k: {'training': {}, 'test': {}} for k in PANELS}
+    primary = regions[cfg['primary_region']]
     iad_params = {}
 
     def evaluate(design, y, T, inner_mvs, outer_mvs, inner_leung, outer_leung):
@@ -124,7 +130,11 @@ def run_target(config_path, target):
         O = np.stack([obs[z][idx] for z in T])
         # references
         score = lambda k, p=None, crps=None, quant=None: db.score_year(y, p, crps, quant, st, y_obs, area_e, regions, store[k][design])
-        score('incumbent', p=pc.predict(pc.fit(pc.INCUMBENT, inner_mvs, area_all), outer_mvs)[idx])
+
+        def prob(k, p):
+            score(k, p=p)
+            reliability_add(rel[k][design], p, categories(y_obs, q1, q2), primary & st['prob_ok'] & st['valid'] & np.isfinite(y_obs), area_e)
+        prob('incumbent', pc.predict(pc.fit(pc.INCUMBENT, inner_mvs, area_all), outer_mvs)[idx])
         ens_mvs, _, _, _ = corrected('mvs', mvs_params, tr, O, models[y][:, idx])
         ens_leung, st_l, _, _ = corrected('leung_affine', leung, tr, O, models[y][:, idx])
         for k, ens in (('mvs_ensemble', ens_mvs), ('leung_affine', ens_leung)):
@@ -136,10 +146,10 @@ def run_target(config_path, target):
         p_leung, p_mvs = member_probabilities(ens_leung, q1, q2), member_probabilities(ens_mvs, q1, q2)
         cal_l = fit_iad('leung_affine', leung, tr, O, T, obs, idx, q1, q2, gcfg['iad'])
         cal_m = fit_iad('mvs', mvs_params, tr, O, T, obs, idx, q1, q2, gcfg['iad'])
-        score('gf_full', p=calibrated(cal_l, p_leung))
-        score('gf_no_dirichlet', p=p_leung)
-        score('iad_on_mvs', p=calibrated(cal_m, p_mvs))
-        score('leung_blend', p=pc.predict(pc.fit(pc.INCUMBENT, inner_leung, area_all), outer_leung)[idx])
+        prob('gf_full', calibrated(cal_l, p_leung))
+        prob('gf_no_dirichlet', p_leung)
+        prob('iad_on_mvs', calibrated(cal_m, p_mvs))
+        prob('leung_blend', pc.predict(pc.fit(pc.INCUMBENT, inner_leung, area_all), outer_leung)[idx])
         if design == 'test' and 'test' not in iad_params:
             pooled = st_l.get('counts', {}).get('pooled_climatology_members', [0, 1])
             iad_params['test'] = dict(gf_full=cal_l.params(), iad_on_mvs=cal_m.params(), leung_pooled_member_share=pooled[0] / max(pooled[1], 1))
@@ -168,7 +178,8 @@ def run_target(config_path, target):
                     s.update(crps=m('crps'), crpss=1 - m('crps') / m('crps_clim'), coverage_80=m('coverage_80'),
                              **{f'pinball_{int(t * 100)}': m(f'pinball_{int(t * 100)}') for t in LEVELS})
                 summary[k][design][reg] = s
-    return target, dict(tag=tag, methods=summary, iad=dict(test=iad_params.get('test'),
+    rel = {k: {d: {c: {q: v.tolist() for q, v in a.items()} for c, a in r.items()} for d, r in dd.items()} for k, dd in rel.items()}
+    return target, dict(tag=tag, methods=summary, reliability=rel, iad=dict(test=iad_params.get('test'),
                                                           all_converged=bool(all(iad_params.get('training_converged', []) + iad_params.get('test_converged', [])))),
                         forecast=forecast_year(gcfg, cfg, project, target, models, obs, lat, lon, idx))
 
@@ -184,13 +195,59 @@ def forecast_year(gcfg, cfg, project, target, models, obs, lat, lon, idx):
     q1, q2 = np.quantile(O, [1 / 3, 2 / 3], axis=0, method='linear')
     tr = [models[z][:, idx] for z in ref]
     leung = dict(gcfg['leung'], ratio_bounds=tuple(gcfg['leung']['ratio_bounds']))
+    mvs_params = dict(cfg['methods'].get('mvs', {}))
     ens_l, _, _, _ = corrected('leung_affine', leung, tr, O, models[year][:, idx])
-    p_nod = member_probabilities(ens_l, q1, q2)
+    ens_m, _, _, _ = corrected('mvs', mvs_params, tr, O, models[year][:, idx])
+    p_nod, p_mvs = member_probabilities(ens_l, q1, q2), member_probabilities(ens_m, q1, q2)
     cal = fit_iad('leung_affine', leung, tr, O, ref, obs, idx, q1, q2, gcfg['iad'])
+    cal_m = fit_iad('mvs', mvs_params, tr, O, ref, obs, idx, q1, q2, gcfg['iad'])
+    area_all = cell_area(lat, lon)
+
+    def blend(method, params):                       # the published probability stage, fitted as for the published forecast
+        rec = Records(method, params, models, obs, ref, cfg['smoothing_alpha'])
+        fit = pc.fit(pc.INCUMBENT, [rec.get(frozenset((z,)), [z])[0] for z in ref], area_all)
+        return pc.predict(fit, forecast_record(method, params, models, obs, ref, year, cfg['smoothing_alpha']))[idx]
     full = lambda v: (lambda z: (z.__setitem__(idx, v), z)[1])(np.full(len(lat) * len(lon), np.nan))
+    probs = dict(gf_full=calibrated(cal, p_nod), gf_no_dirichlet=p_nod, iad_on_mvs=calibrated(cal_m, p_mvs),
+                 leung_blend=blend('leung_affine', leung), incumbent_recomputed=blend('mvs', mvs_params))
     return dict(year=int(year), reference_years=cycle['reference_years'], iad=cal.params(),
-                p_full=[full(c) for c in calibrated(cal, p_nod).T], p_no_dirichlet=[full(c) for c in p_nod.T],
-                mean_mm=full(np.nanmean(ens_l, 0)), lat=lat, lon=lon)
+                p={k: [full(c) for c in v.T] for k, v in probs.items()}, mean_mm=full(np.nanmean(ens_l, 0)), lat=lat, lon=lon)
+
+
+def forecast_record(method, params, models, obs, ref, year, alpha):
+    """The forecast year's record for the probability stage (as prob_benchmark.Records, without an observation)."""
+    m, p = bm.resolve(method, params)
+    O = np.stack([obs[z] for z in ref])
+    pars = fit_amount([models[z] for z in ref], O, np.ones(O.shape[1], bool))
+    state = m.fit([models[z] for z in ref], O, **p)
+    lab = np.stack([labels(obs[z], pars) for z in ref])
+    clim = np.stack([(lab == k).mean(0) for k in range(3)], -1)
+    elig = state['ok'] & pars['probability_eligible']
+    clim[~elig] = np.nan
+    mu, sd = O.mean(0), O.std(0)
+    ens = np.asarray(m.apply(models[year], state, **p), float)
+    c = categories(np.where(state['ok'], ens, 0.), pars['q1'], pars['q2'])
+    prob = np.stack([(c == k).mean(0) for k in range(3)], -1)
+    prob[~elig] = np.nan
+    with np.errstate(divide='ignore', invalid='ignore'):
+        zmean = np.where(elig & (sd > 0), (ens.mean(0) - mu) / sd, np.nan)
+        lspread = np.where(elig & (sd > 0) & (ens.std(0) > 0), np.log(ens.std(0) / sd), np.nan)
+    return dict(s=smooth(prob, len(ens), alpha=alpha), clim=clim, y=np.full(len(mu), -1, 'int8'), zmean=zmean, lspread=lspread)
+
+
+def reliability_add(acc, p, y_cat, mask, area):
+    """Area-weighted reliability sums of one year (below and above normal), each year weighted equally."""
+    ok = mask & np.isfinite(p).all(-1)
+    if not ok.any():
+        return
+    w = area[ok] / area[ok].sum()
+    for c, cat in ((0, 'below'), (2, 'above')):
+        f = p[ok, c]
+        b = np.clip(np.digitize(f, BINS) - 1, 0, len(BINS) - 2)
+        a = acc.setdefault(cat, dict(w=np.zeros(len(BINS) - 1), f=np.zeros(len(BINS) - 1), o=np.zeros(len(BINS) - 1)))
+        np.add.at(a['w'], b, w)
+        np.add.at(a['f'], b, w * f)
+        np.add.at(a['o'], b, w * (y_cat[ok] == c))
 
 
 def tests_of(results, region, targets):
@@ -252,11 +309,13 @@ def main(args):
     save_json(out_root / 'benchmark.json', data)
     save_forecast(out_root, cfg, forecasts)
     figure(out_root, data)
+    reliability_figure(out_root, data)
     print('Saved:', out_root)
 
 
 def save_forecast(out_root, cfg, forecasts):
-    """Forecast-year probabilities of the uploaded pipeline (never published), with the published ones for comparison."""
+    """Forecast-year probabilities of every pipeline (never published) next to the published ones: NetCDF, favoured-tercile
+    maps and tercile-probability maps (rows: pipelines; columns: below, near, above normal)."""
     import xarray as xr
     import matplotlib
     matplotlib.use('Agg')
@@ -273,35 +332,103 @@ def save_forecast(out_root, cfg, forecasts):
         shape = (len(lat), len(lon))
         if country is None:
             country = bb.load_mask(cfg['regions'][cfg['primary_region']], lat, lon).reshape(shape)
+        grid = lambda k: np.stack(f['p'][k], -1).reshape(*shape, 3)
         pub = None
         path = ROOT / cycle['forecast_root'] / f'init{cycle["initialization_month"]:02d}_{t}/{f["year"]}/forecast_{f["year"]}.nc'
         if path.is_file():
             with xr.open_dataset(path) as d:
                 pub = d.blend_probability.sel(category=['below', 'near', 'above']).transpose('lat', 'lon', 'category').values
+        # the published stage recomputed here should match the published file (else the Leung + blend panel is not comparable)
+        rec = grid('incumbent_recomputed')
+        both = country & np.isfinite(rec).all(-1) & (np.isfinite(pub).all(-1) if pub is not None else False)
+        check = float(np.abs(rec[both] - pub[both]).max()) if pub is not None and both.any() else None
         ds = xr.Dataset(coords=dict(lat=lat, lon=lon, category=['below', 'near', 'above']),
                         attrs=dict(description=f'NOT PUBLISHED: GrazFeediNG calibration (docs/51), {t} {f["year"]}, fitted on '
-                                               f'{f["reference_years"][0]}-{f["reference_years"][1]}.'))
-        ds['gf_full_probability'] = (('lat', 'lon', 'category'), np.stack(f['p_full'], -1).reshape(*shape, 3))
-        ds['gf_no_dirichlet_probability'] = (('lat', 'lon', 'category'), np.stack(f['p_no_dirichlet'], -1).reshape(*shape, 3))
+                                               f'{f["reference_years"][0]}-{f["reference_years"][1]}.',
+                                   published_recomputed_max_abs_difference=check if check is not None else 'n/a'))
+        for k in PROB:
+            ds[f'{k}_probability'] = (('lat', 'lon', 'category'), grid(k))
+            ds[f'{k}_probability'].attrs['long_name'] = SHORT[k]
         ds['leung_mean_mm'] = (('lat', 'lon'), np.asarray(f['mean_mm']).reshape(shape))
         if pub is not None:
             ds['published_probability'] = (('lat', 'lon', 'category'), pub)
         ds.to_netcdf(folder / f'gf_{f["year"]}_{t}.nc')
-        fav = lambda p: np.where(np.isfinite(p).all(-1) & (np.nanmax(p, -1) >= 0.4), np.nanargmax(np.nan_to_num(p, nan=-1), -1), np.nan)
-        panels = [('Published (MVS + climatology blend)', pub), ('GrazFeediNG as uploaded (Leung + IAD)', ds['gf_full_probability'].values),
-                  ('Leung + member counts (no Dirichlet)', ds['gf_no_dirichlet_probability'].values)]
-        panels = [p for p in panels if p[1] is not None]
+        print(f'{t} {f["year"]}: published stage recomputed vs published file, max |difference| {check}', flush=True)
+
+        panels = [(SHORT[k], pub if k == 'incumbent' else grid(k)) for k in PANELS]
+        panels = [(n, np.where(country[..., None], p, np.nan)) for n, p in panels if p is not None]
         edges = lambda c: np.r_[c[0] - (c[1] - c[0]) / 2, (c[:-1] + c[1:]) / 2, c[-1] + (c[-1] - c[-2]) / 2]
-        fig, axes = plt.subplots(1, len(panels), figsize=(4.2 * len(panels), 4.4), squeeze=False, layout='constrained')
-        for ax, (name, p) in zip(axes[0], panels):
-            v = fav(p)
-            v[~country] = np.nan
-            ax.pcolormesh(edges(lon), edges(lat), v, cmap=ListedColormap(['#a6611a', '#bdbdbd', '#1a9641']), vmin=-.5, vmax=2.5)
+        E = (edges(lon), edges(lat))
+
+        def frame(ax, title):
             ax.contour(lon, lat, country.astype(float), levels=[.5], colors='#333', linewidths=.6)
-            ax.set_title(name, fontsize=9)
+            ax.set_title(title, fontsize=9)
             ax.set_aspect('equal'); ax.set_xticks([]); ax.set_yticks([])
-        fig.suptitle(f'NOT PUBLISHED · {t} {f["year"]}: favoured tercile (≥ 40%); brown below, grey near, green above normal; white: no tercile reaches 40%', fontsize=10)
+        # favoured tercile
+        fav = lambda p: np.where(np.isfinite(p).all(-1) & (np.nanmax(p, -1) >= 0.4), np.nanargmax(np.nan_to_num(p, nan=-1), -1), np.nan)
+        fig, axes = plt.subplots(1, len(panels), figsize=(3.4 * len(panels), 3.9), squeeze=False, layout='constrained')
+        for ax, (name, p) in zip(axes[0], panels):
+            ax.pcolormesh(*E, fav(p), cmap=ListedColormap(['#a6611a', '#bdbdbd', '#1a9641']), vmin=-.5, vmax=2.5)
+            frame(ax, name)
+        fig.suptitle(f'NOT PUBLISHED · {t} {f["year"]}: favoured tercile (≥ 40%); brown below, grey near, green above normal; '
+                     'white: no tercile reaches 40%', fontsize=10)
         fig.savefig(folder / f'gf_{f["year"]}_{t}.png', dpi=130)
+        plt.close(fig)
+        # tercile probabilities
+        cats = [('Below normal', 'YlOrBr'), ('Near normal', 'Greys'), ('Above normal', 'YlGn')]
+        fig, axes = plt.subplots(len(panels), 3, figsize=(10.5, 3.1 * len(panels)), squeeze=False, layout='constrained')
+        for i, (name, p) in enumerate(panels):
+            for j, (cat, cmap) in enumerate(cats):
+                ax = axes[i, j]
+                im = ax.pcolormesh(*E, p[..., j], cmap=cmap, vmin=0, vmax=.8)
+                frame(ax, f'{name}\n{cat}: national mean {np.nanmean(p[..., j]):.0%}')
+                if i == len(panels) - 1:
+                    fig.colorbar(im, ax=axes[:, j], orientation='horizontal', fraction=.025, pad=.01, label=f'{cat} probability',
+                                 ticks=[0, .2, 1 / 3, .6, .8], format=lambda x, _: f'{x:.0%}')
+        fig.suptitle(f'NOT PUBLISHED · {t} {f["year"]}: tercile probabilities of each pipeline (climatology 33%)', fontsize=11)
+        fig.savefig(folder / f'gf_{f["year"]}_{t}_probabilities.png', dpi=110)
+        plt.close(fig)
+
+
+def reliability_figure(out, data):
+    """Reliability diagrams of every probability pipeline (below and above normal), per target and design."""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    T = list(data['targets'])
+    colours = dict(incumbent='#000000', gf_full='#d95f02', gf_no_dirichlet='#7570b3', iad_on_mvs='#1b9e77', leung_blend='#e7298a')
+    for design in ('training', 'test'):
+        fig, axes = plt.subplots(2, len(T), figsize=(3.3 * len(T), 6.9), sharex=True, sharey=True, squeeze=False, layout='constrained')
+        for j, t in enumerate(T):
+            for i, cat in enumerate(('below', 'above')):
+                ax = axes[i, j]
+                ax.plot([0, 1], [0, 1], color='#999', lw=.8, ls='--')
+                ax.axhline(1 / 3, color='#ccc', lw=.6)
+                ax.axvline(1 / 3, color='#ccc', lw=.6)
+                for k in PANELS:
+                    a = data['targets'][t].get('reliability', {}).get(k, {}).get(design, {}).get(cat)
+                    if not a:
+                        continue
+                    w, fs, ob = (np.asarray(a[q]) for q in ('w', 'f', 'o'))
+                    ok = w > 0
+                    share = w[ok] / w.sum()
+                    ax.plot(fs[ok] / w[ok], ob[ok] / w[ok], '-', color=colours[k], lw=1.2, label=SHORT[k], zorder=2)
+                    ax.scatter(fs[ok] / w[ok], ob[ok] / w[ok], s=6 + 400 * share, color=colours[k], alpha=.75, zorder=3)
+                ax.set_xlim(0, 1)
+                ax.set_ylim(0, 1)
+                ax.set_aspect('equal')
+                ax.set_title(f'{t}: {cat} normal', fontsize=9)
+                if i == 1:
+                    ax.set_xlabel('Forecast probability')
+                if j == 0:
+                    ax.set_ylabel('Observed frequency')
+        axes[0, 0].legend(fontsize=7, loc='upper left')
+        yrs = data['training_years' if design == 'training' else 'test_years']
+        how = 'leave-one-year-out ' if design == 'training' else 'fitted on the training years, scored '
+        fig.suptitle(f'Reliability of the tercile probabilities, {data["regions"][data["primary_region"]]}, {how}{yrs[0]}–{yrs[1]}. '
+                     'Marker area: share of forecasts in the bin; on the diagonal = reliable', fontsize=10)
+        (out / 'figures').mkdir(parents=True, exist_ok=True)
+        fig.savefig(out / f'figures/grazfeeding_reliability_{design}.png', dpi=120)
         plt.close(fig)
 
 
