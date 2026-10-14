@@ -12,6 +12,7 @@ figures in site/assets/ alone, without the large outputs/ folder:
   site_data/bias/<cycle>.json    bias-correction benchmark: screening, confirmation, ratio-limit study, validation record,
                                  suggestion (docs/47)
   site_data/probcal/<cycle>.json probability and rainfall-distribution calibration: Phases 1-3 and the amount/range shadow (docs/48)
+  site_data/grazfeeding/<cycle>.json  GrazFeediNG calibration (process_calib.py) against the published pipeline (docs/51)
 
 Benchmark files keep their structure (documented in docs/47 and docs/48) but are slimmed: per-year series, per-cell values
 and other long arrays are dropped (they remain in the full JSON downloads), leaving every summary score, test and decision.
@@ -103,6 +104,18 @@ def probcal_files(site):
     return out
 
 
+def grazfeeding_files(site):
+    """GrazFeediNG calibration compared with the published pipeline (scripts/grazfeeding_benchmark.py, docs/51)."""
+    out = {}
+    for f in sorted((ROOT / 'outputs/grazfeeding').glob('*/benchmark.json')):
+        name = f.parent.name
+        d = read(f)
+        d.pop('protocol', None)
+        out[name] = dict(slim(d), assets=assets(site, f'assets/grazfeeding/{name}'),
+                         downloads=sorted(p.relative_to(site).as_posix() for p in (site / 'downloads/grazfeeding' / name).glob('*')))
+    return out
+
+
 def downloads(site):
     """Every download link of the page: site path or release-asset URL, with its size when known."""
     import re
@@ -148,4 +161,6 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         sizes[f'bias/{name}.json'] = write(OUT / 'bias' / f'{name}.json', obj)
     for name, obj in probcal_files(site).items():
         sizes[f'probcal/{name}.json'] = write(OUT / 'probcal' / f'{name}.json', obj)
+    for name, obj in grazfeeding_files(site).items():
+        sizes[f'grazfeeding/{name}.json'] = write(OUT / 'grazfeeding' / f'{name}.json', obj)
     return sizes

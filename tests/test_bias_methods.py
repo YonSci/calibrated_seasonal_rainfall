@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from bias_methods import METHODS, VARIANTS, ALL, correct, pooled, Ecdf          # noqa: E402
+from bias_methods import METHODS, VARIANTS, EXTERNAL, ALL, correct, pooled, Ecdf          # noqa: E402
 from calibration_core import fit_amount, correct_amount          # noqa: E402
 
 
@@ -27,7 +27,7 @@ class BiasMethods(unittest.TestCase):
         target = rng.gamma(3., 60., (51, obs.shape[1]))
         self.assertNotIn('raw', METHODS)
         np.testing.assert_array_equal(correct('raw', models, obs, target), target)
-        self.assertEqual(set(ALL) - set(METHODS), {'raw'} | set(VARIANTS))
+        self.assertEqual(set(ALL) - set(METHODS), {'raw'} | set(VARIANTS) | set(EXTERNAL))
 
     def test_configured_variants_resolve_to_their_base(self):
         from bias_methods import resolve

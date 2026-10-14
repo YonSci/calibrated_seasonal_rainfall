@@ -121,7 +121,22 @@ def export(out_dir):
                 shutil.copy2(b['folder'] / rel, d)
                 files.append((f'downloads/probcal/{b["name"]}/{rel}', label, d.stat().st_size))
         blocks.append((b['name'], block(b, files)))
+    export_grazfeeding(out_dir)
     return blocks
+
+
+def export_grazfeeding(out_dir):
+    """GrazFeediNG comparison (docs/51): figures and forecast-year maps to assets/, results and NetCDF files to downloads/."""
+    for folder in sorted((ROOT / 'outputs/grazfeeding').glob('*/benchmark.json')):
+        name, src = folder.parent.name, folder.parent
+        for sub, kind, pattern in (('figures', 'assets', '*.png'), ('forecast', 'assets', '*.png'), ('forecast', 'downloads', '*.nc')):
+            for f in sorted((src / sub).glob(pattern)):
+                d = out_dir / kind / 'grazfeeding' / name / f.name
+                d.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, d)
+        d = out_dir / 'downloads/grazfeeding' / name / 'benchmark.json'
+        d.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(folder, d)
 
 
 def block(b, files):

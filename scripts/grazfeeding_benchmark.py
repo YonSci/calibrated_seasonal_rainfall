@@ -58,6 +58,8 @@ CODE = ['scripts/grazfeeding_benchmark.py', 'scripts/grazfeeding.py', 'scripts/b
 PROB = ['gf_full', 'gf_no_dirichlet', 'iad_on_mvs', 'leung_blend']
 AMOUNT = ['leung_affine']
 LEVELS = (.1, .5, .9)
+SHORT = dict(gf_full='GrazFeediNG as uploaded', gf_no_dirichlet='Leung + counts (no Dirichlet)', iad_on_mvs='MVS + counts + IAD',
+             leung_blend='Leung + published blend')
 
 
 def read(p):
@@ -298,7 +300,7 @@ def save_forecast(out_root, cfg, forecasts):
             ax.contour(lon, lat, country.astype(float), levels=[.5], colors='#333', linewidths=.6)
             ax.set_title(name, fontsize=9)
             ax.set_aspect('equal'); ax.set_xticks([]); ax.set_yticks([])
-        fig.suptitle(f'NOT PUBLISHED · {t} {f["year"]}: favoured tercile (≥ 40%); brown below, grey near, green above normal', fontsize=10)
+        fig.suptitle(f'NOT PUBLISHED · {t} {f["year"]}: favoured tercile (≥ 40%); brown below, grey near, green above normal; white: no tercile reaches 40%', fontsize=10)
         fig.savefig(folder / f'gf_{f["year"]}_{t}.png', dpi=130)
         plt.close(fig)
 
@@ -309,7 +311,7 @@ def figure(out, data):
     import matplotlib.pyplot as plt
     reg = data['primary_region']
     T = list(data['targets'])
-    rows = [('incumbent', 'rpss', 'Published probabilities')] + [(k, 'rpss', data['labels'][k].split(':')[0]) for k in PROB] + \
+    rows = [('incumbent', 'rpss', 'Published probabilities')] + [(k, 'rpss', SHORT[k]) for k in PROB] + \
            [('mvs_ensemble', 'crpss', 'MVS ensemble (CRPSS)'), ('leung_affine', 'crpss', 'Modified-Leung ensemble (CRPSS)')]
     fig, axes = plt.subplots(1, 2, figsize=(15, 0.5 * len(rows) + 2.2), sharey=True, layout='constrained')
     for ax, design in zip(axes, ('training', 'test')):

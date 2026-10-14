@@ -6,6 +6,7 @@ Brings the benchmarks together under one rule (config/method_selection_rule.json
   probability stage     outputs/probability_calibration/<cycle>/benchmark.json (Phase 1) and phase2_binary/
   distribution models   outputs/probability_calibration/<cycle>/distribution/ (Phase 2) and phase3/; their independent
                         seasons from amount_shadow/<year>/ (dist_shadow.py runs a shadow for every candidate model)
+  GrazFeediNG           outputs/grazfeeding/<cycle>/benchmark.json (grazfeeding_benchmark.py; no validation route yet)
 Products: the published tercile probabilities (RPS against MVS + climatology blend) and rainfall amounts (CRPS against the
 MVS ensemble). A method is a candidate only if its benchmark confirms it better than the published reference (Holm across
 its family, not worse over the test years); validation seasons then decide between candidate, recommended and not
@@ -27,9 +28,9 @@ OUT = ROOT / 'outputs/method_selection/selection.json'
 CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'probability_phase1': 'Probability stage, Phase 1',
                 'probability_phase2_binary': 'Probability stage, Phase 2 binary calibrators', 'distribution_phase2': 'Distribution model, Phase 2',
-                'distribution_phase3': 'Distribution model, Phase 3'}
+                'distribution_phase3': 'Distribution model, Phase 3', 'grazfeeding': 'GrazFeediNG calibration (docs/51)'}
 STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probability stage', 'probability_phase2_binary': 'probability stage',
-         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model'}
+         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'grazfeeding': 'GrazFeediNG calibration'}
 
 
 def read(p):
@@ -130,6 +131,7 @@ def main():
     for cy in CYCLES:
         base = f'outputs/probability_calibration/{cy}'
         p1, p2b, d2, d3 = read(f'{base}/benchmark.json'), read(f'{base}/phase2_binary/benchmark.json'), read(f'{base}/distribution/benchmark.json'), read(f'{base}/phase3/benchmark.json')
+        gf = read(f'outputs/grazfeeding/{cy}/benchmark.json')
         rec = recs.get(cy)
         if not (p1 or rec):
             continue
@@ -151,6 +153,9 @@ def main():
                     if d:
                         cands += confirmed(d, fam, t, score, d['models'], lambda k, d=d: d['registry'][k]['name'],
                                            reference='incumbent' if score == 'rps' else 'mvs_ensemble')
+                if gf:
+                    cands += confirmed(gf, 'grazfeeding', t, score, [k for k in gf['methods'] if score in gf['tests'].get(k, {})],
+                                       lambda k: gf['labels'][k].split(':')[0], reference='incumbent' if score == 'rps' else 'mvs_ensemble')
                 for c in cands:
                     if c['family'].startswith('distribution') and product == 'amounts':
                         c['validation'] = shadow_validation(cy, c['method'], t, minimum)

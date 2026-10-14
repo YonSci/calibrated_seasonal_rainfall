@@ -1,0 +1,108 @@
+---
+// GrazFeediNG calibration (process_calib.py; scripts/grazfeeding_benchmark.py, docs/51) against the published pipeline.
+import Base from '../../layouts/Base.astro';
+import OnThisPage from '../../components/OnThisPage.astro';
+import Table from '../../components/Table.astro';
+import Figure from '../../components/Figure.astro';
+import { read, names, href, link, esc, signed, num, pct, years, cycleTitle, REPO } from '../../lib/data.js';
+
+const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
+const cycles = names('grazfeeding').map((n) => ({ name: n, d: read(`grazfeeding/${n}.json`) }))
+  .map((x) => ({ ...x, title: cycleTitle(INIT[x.name.split('_')[0]], x.name.split('_')[1].toUpperCase()) }));
+const STAGE = {
+  gf_full: 'both stages (the uploaded pipeline)', gf_no_dirichlet: 'both stages, without the Dirichlet', iad_on_mvs: 'probability stage',
+  leung_blend: 'amount correction', leung_affine: 'amount correction',
+};
+const verdict = (dec) => (dec.confirmed ? '<strong>✓ confirmed better</strong>' : dec.no_harm ? 'not confirmed' : 'not confirmed; worse over the test years');
+function evidence(d, score) {
+  const reg = d.primary_region;
+  const T = Object.keys(d.targets);
+  const keys = score === 'rps' ? ['incumbent', ...d.methods.filter((k) => k !== 'leung_affine')] : ['mvs_ensemble', 'leung_affine'];
+  const skill = score === 'rps' ? 'rpss' : 'crpss';
+  const rows = [];
+  for (const t of T) for (const k of keys) {
+    const m = d.targets[t].methods[k];
+    const tst = d.tests[k]?.[score]?.[t];
+    const ref = d.references[k];
+    rows.push([
+      `<strong>${esc(t)}</strong>`, ref ? `<em>${esc(ref)}</em>` : esc(d.labels[k]),
+      signed(m.training[reg][skill]), signed(m.test[reg][skill]),
+      tst ? signed(tst.training.mean_difference, 4) : '—', tst ? num(tst.decision.holm_p_family, 3) : '—',
+      tst ? `${tst.training.years_better} of ${tst.training.years}` : '—', tst ? signed(tst.test.mean_difference, 4) : '—',
+      tst ? verdict(tst.decision) : 'reference',
+    ]);
+  }
+  return {
+    head: ['Target', 'Method', `${skill.toUpperCase()} ${years(d.training_years)} (LOYO)`, `${skill.toUpperCase()} ${years(d.test_years)}`,
+      `Δ${score.toUpperCase()} vs reference (training)`, 'Holm p', 'Years better', `Δ${score.toUpperCase()} (test years)`, 'Decision'],
+    rows,
+  };
+}
+const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.entries(s).flatMap(([sc, ts]) =>
+  Object.entries(ts).filter(([, x]) => x.decision.confirmed).map(([t]) => `${d.labels[k].split(':')[0]} for ${t} (${sc.toUpperCase()})`)));
+const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' / ') : '—');
+---
+<Base title="GrazFeediNG calibration" section="research" description="The GrazFeediNG calibration (modified-Leung member-wise affine correction and Identity-Anchored Dirichlet recalibration) tested stage by stage against the published pipeline.">
+  <OnThisPage>
+    <h1>GrazFeediNG calibration</h1>
+    <p>The calibration of the GrazFeediNG forage-outlook system (<code>process_calib.py</code>, Á. G. Muñoz and T. Demissie, ILRI)
+    implemented here as separate methods and tested, as the uploaded code and stage by stage, against the published pipeline with
+    the same data, cross-validation and tests as the other benchmarks.</p>
+    <p class="notice"><strong>A comparison, not a published forecast.</strong> The published forecasts keep the published approach
+    (Mean-Variance Scaling, smoothed member counts and the climatology blend). A method confirmed here becomes a candidate in the
+    <a href={href('research/method-selection/')}>method selection</a> and needs validation seasons before any change is decided.</p>
+
+    <h2 id="what">What the uploaded code does</h2>
+    <ol class="findings">
+      <li><strong>Regridding.</strong> SEAS5 seasonal totals put on the CHIRPS grid (nearest neighbour). The project's own 0.25° SEAS5 totals are used here.</li>
+      <li><strong>Bias correction: modified-Leung member-wise affine.</strong> For every member index <em>m</em> its own climatology over the training years (mean μ<sub>m</sub>, SD σ<sub>m</sub>);
+        the corrected value is μ<sub>obs</sub> + r<sub>m</sub>(x − μ<sub>m</sub>), with r<sub>m</sub> = σ<sub>obs</sub> / σ<sub>eff,m</sub> limited to 0.5–2,
+        σ<sub>eff,m</sub> = 0.7 σ<sub>m</sub> + 0.3 σ<sub>pool</sub>, r = 1 where both SDs are below 1 mm, and totals clipped at 0.</li>
+      <li><strong>Tercile probabilities.</strong> The fraction of corrected members below the lower and above the upper CHIRPS tercile (no smoothing, no climatology blend).</li>
+      <li><strong>Probability calibration: Identity-Anchored Dirichlet (IAD).</strong> p′ = softmax(A log p + b), fitted by penalised log-likelihood on the hindcast probabilities and observed categories pooled over the cells;
+        the penalties pull A towards the identity (off-diagonal 0.01, diagonal and b 0.001), so with little evidence the probabilities are left as they are.</li>
+      <li><strong>SPBI</strong> (a pasture index from NDVI and the calibrated rainfall): not part of rainfall calibration, not implemented.</li>
+    </ol>
+
+    {cycles.map(({ name, d, title }) => (
+      <section id={name}>
+        <h2>{title}</h2>
+        <h3>Methods compared</h3>
+        <Table head={['Method', 'What it is', 'Changes']} rows={d.methods.map((k) => [`<code>${esc(k)}</code>`, esc(d.labels[k]), esc(STAGE[k] ?? '')])} />
+        <p class="caveat">References: {Object.values(d.references).join('; ')}. Every method is fitted inside the folds: outer
+        leave-one-year-out over {years(d.training_years)}, and fitted on all of {years(d.training_years)} for the test years {years(d.test_years)}.
+        The Dirichlet is fitted, as in the uploaded code, on the training years' probabilities from the affine correction fitted on those years.
+        Confirmed better: better over the training years with Holm-adjusted p &lt; 0.05 across all methods and targets of the comparison, and not worse over the test years.</p>
+        <p><strong>Confirmed better than the published approach:</strong> {confirmedOf(d).length ? confirmedOf(d).join('; ') : 'none'}.</p>
+
+        <h3>Tercile probabilities (RPS)</h3>
+        <Table {...evidence(d, 'rps')} />
+        <h3>Rainfall amounts (CRPS)</h3>
+        <Table {...evidence(d, 'crps')} />
+        <p class="caveat">Negative Δ favours the method. Skill scores against the observed climatology over {d.regions[d.primary_region]}.</p>
+        <Figure src={`assets/grazfeeding/${name}/grazfeeding_summary.png`} caption="Skill of each method and target; * confirmed better than the reference." />
+
+        <h3>Fitted Dirichlet (on all training years)</h3>
+        <Table head={['Target', 'Pipeline', 'A (rows: below / near / above)', 'b', 'Converged']}
+          rows={Object.entries(d.targets).flatMap(([t, r]) => ['gf_full', 'iad_on_mvs'].map((k) => [esc(t), `<code>${k}</code>`,
+            mat(r.iad?.test?.[k]?.A), (r.iad?.test?.[k]?.b ?? []).map((v) => num(v, 2)).join(' '), r.iad?.test?.[k]?.converged ? 'yes' : 'no']))} />
+        <p class="caveat">A equal to the identity and b equal to 0 leave the probabilities unchanged. Share of 2017+ forecast members using the pooled climatology
+        (members beyond the 25 of the hindcast): {Object.values(d.targets).map((r) => pct(r.iad?.test?.leung_pooled_member_share)).filter((x) => x !== '—')[0] ?? '—'}.</p>
+
+        {d.assets.some((a) => a.includes('/gf_')) && (
+          <>
+            <h3>The forecast year with the GrazFeediNG calibration (not published)</h3>
+            <p class="caveat">Each method fitted on the cycle's reference years and applied to this year's forecast, next to the published probabilities.</p>
+            {d.assets.filter((a) => a.includes('/gf_')).map((a) => (
+              <details><summary>{a.split('/').at(-1).replace(/^gf_|\.png$/g, '').replace('_', ' ')}</summary><Figure src={a} caption="Favoured tercile: published, GrazFeediNG as uploaded, and without the Dirichlet." /></details>
+            ))}
+          </>
+        )}
+        <p class="caveat">Downloads: {d.downloads.map((f) => <><a href={link(f)}>{f.split('/').at(-1)}</a>{' '}</>)}</p>
+      </section>
+    ))}
+    <p class="caveat">Code: <a href={`${REPO}/blob/main/scripts/grazfeeding.py`}><code>scripts/grazfeeding.py</code></a>,
+    <a href={`${REPO}/blob/main/scripts/grazfeeding_benchmark.py`}><code>scripts/grazfeeding_benchmark.py</code></a>, <code>leung_affine</code> in
+    <a href={`${REPO}/blob/main/scripts/bias_methods.py`}><code>scripts/bias_methods.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/51_GRAZFEEDING.md`}>docs/51</a>.</p>
+  </OnThisPage>
+</Base>
