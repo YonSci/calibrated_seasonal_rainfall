@@ -1,0 +1,160 @@
+---
+// Probability and rainfall-distribution calibration of one cycle: a short summary and one sub-page per phase (docs/48, docs/49).
+import Base from '../../../layouts/Base.astro';
+import Table from '../../../components/Table.astro';
+import Figure from '../../../components/Figure.astro';
+import Downloads from '../../../components/Downloads.astro';
+import ResearchBar from '../../../components/ResearchBar.astro';
+import OnThisPage from '../../../components/OnThisPage.astro';
+import { read, names, href, esc, cycleTitle, REPO } from '../../../lib/data.js';
+import { phase1, binary, distribution, shadow, parts as partsOf } from '../../../lib/probcal.js';
+
+export function getStaticPaths() {
+  return names('probcal').flatMap((cycle) => partsOf(read(`probcal/${cycle}.json`)).map(([k]) => ({ params: { cycle, part: k || undefined } })));
+}
+const { cycle } = Astro.params;
+const part = Astro.params.part ?? '';
+const D = read(`probcal/${cycle}.json`);
+const title = cycleTitle(D.initialization_month, D.season);
+const P = partsOf(D);
+const cycles = names('probcal').map((n) => { const d = read(`probcal/${n}.json`); return { name: n, title: cycleTitle(d.initialization_month, d.season), parts: partsOf(d), init: d.initialization_month }; })
+  .sort((a, b) => a.init - b.init);
+const label = (P.find(([k]) => k === part) || ['', 'Summary'])[1];
+const at = (k) => href(`probability-calibration/${cycle}/${k ? k + '/' : ''}`);
+const P1 = phase1(D.phase1);
+const B = binary(D.phase2_binary);
+const d2 = distribution(D.phase2_distribution), d3 = distribution(D.phase3);
+const S = shadow(D.amount_shadow, Object.keys(D.phase1.targets));
+const fig = (f) => `${D.figures}/${f}`;
+const has = (f) => D.assets.includes(fig(f));
+const sub = (phase) => (phase === 2 ? 'distribution' : 'phase3');
+const commit = (p) => (p.commit ?? '').slice(0, 7) + (p.uncommitted_changes ? ' (with uncommitted changes)' : '');
+const names_ = (d, keys) => keys.map((k) => d.registry[k].name).join(', ');
+const summary = {
+  head: ['Phase', 'Methods', 'Compared with', 'Confirmed better'], caption: `What each phase tested and what was confirmed better (${P1.region}; Holm-adjusted p < 0.05 and not worse over the test years)`,
+  rows: [
+    [`<a href="${at('phase-1')}">Phase 1</a> · tercile probabilities`, esc(names_(D.phase1, D.phase1.methods.filter((m) => m !== D.phase1.incumbent))), 'Published probabilities (climatology blend), RPS', `<strong>${esc(P1.confirmed)}</strong>`],
+    ...(B ? [[`<a href="${at('phase-2')}#binary">Phase 2</a> · binary calibrators`, esc(names_(D.phase2_binary, D.phase2_binary.methods.filter((m) => m !== D.phase2_binary.incumbent))), 'Published probabilities, RPS', `<strong>${esc(B.confirmed)}</strong>`]] : []),
+    ...[[d2, D.phase2_distribution, 'phase-2', 'dist2'], [d3, D.phase3, 'phase-3', 'dist3']].filter(([x]) => x).flatMap(([x, d, k, anchor]) => [
+      [`<a href="${at(k)}#${anchor}">Phase ${x.phase}</a> · distribution models, terciles`, esc(names_(d, d.models)), 'Published probabilities, RPS', `<strong>${esc(x.foundRps)}</strong>`],
+      [`<a href="${at(k)}#${anchor}">Phase ${x.phase}</a> · distribution models, amounts`, esc(names_(d, d.models)), 'MVS-corrected ensemble, CRPS', `<strong>${esc(x.foundCrps)}</strong>`]]),
+  ] };
+const DESCR = {
+  'phase-1': 'Six tercile-probability methods with the amount correction fixed, and the selection-aware procedure.',
+  'phase-2': 'One-vs-rest binary calibrators, and the first rainfall-distribution models (EMOS, extended logistic, quantile regression).',
+  'phase-3': 'Bayesian joint probability, BMA for precipitation and quantile regression forests.',
+  shadow: 'EMOS medians and 10–90% ranges for the forecast year, never published, scored season by season.',
+  downloads: 'Every result file and the full write-up.',
+};
+const idx = P.findIndex(([k]) => k === part);
+const prev = P[idx - 1], next = P[idx + 1];
+---
+<Base title={`${label} · Probability calibration · ${title}`} section="research"
+      description={`Probability and rainfall-distribution calibration, ${title}: ${part ? DESCR[part] : 'what each phase tested and what was confirmed better.'}`}>
+  <ResearchBar slot="context" area="probability-calibration" areaLabel="Probability calibration" cycles={cycles} cycle={cycle} parts={P} part={part} />
+  <OnThisPage>
+    <h1>{part ? `${label} · ${title}` : title}</h1>
+
+    {!part && (
+      <>
+        <p>Can a different method improve the tercile probabilities, or give better rainfall amounts and ranges, than the published
+        pipeline (MVS-corrected members → smoothed counts → climatology blend)? Every parameter is fitted only on training years within
+        each left-out year; the published forecasts are unchanged.</p>
+        <Table {...summary} />
+        {S.length > 0 && <p class="box">Amount and range shadow (EMOS, not published): {S.map((y) => `${y.year}: ${y.observed.length} of ${y.targets.length} targets observed`).join('; ')}. <a href={at('shadow')}>Scores and maps →</a></p>}
+        <section>
+          <h2>Explore the evidence</h2>
+          <ul class="cards">{P.filter(([k]) => k).map(([k, l]) => <li><a class="box" href={at(k)}><strong>{l}</strong><span class="caveat"><br />{DESCR[k]}</span></a></li>)}</ul>
+        </section>
+      </>
+    )}
+
+    {part === 'phase-1' && (
+      <section id="phase1">
+        <p><strong>Confirmed better than the incumbent climatology blend for the published tercile probabilities (RPS): {P1.confirmed}.</strong>
+        ✓ = better than the incumbent with Holm-adjusted p &lt; 0.05 across every method and target (SEL: across the targets) and not worse
+        over {P1.te}. Amount correction fixed: {String(P1.amount).toUpperCase()}. National aggregate ({P1.region}). Run at commit <code>{commit(P1.provenance)}</code>.</p>
+        <h2>Tercile skill</h2>
+        <Table {...P1.rpss} />
+        <Table {...P1.test} />
+        <h2>Log loss and Brier skill</h2>
+        <Table {...P1.logloss} /><Table {...P1.below} /><Table {...P1.above} />
+        <h2>Tests</h2>
+        <Table {...P1.tests} />
+        <h2>Fitted parameters and the selection</h2>
+        <Table {...P1.fits} />
+        <h2>Figures</h2>
+        {has('probability_summary.png') && <Figure src={fig('probability_summary.png')} caption="RPSS and log-loss skill by method and target." />}
+        {has('probability_reliability.png') && <Figure src={fig('probability_reliability.png')} caption="Reliability of each method for the season (below and above normal)." />}
+      </section>
+    )}
+
+    {((part === 'phase-2' && [d2]) || (part === 'phase-3' && [d3]) || []).filter(Boolean).map((x) => (
+      <>
+        {part === 'phase-2' && B && (
+          <section id="binary">
+            <h2>Binary calibrators (one-vs-rest, normalized)</h2>
+            <p>Platt, beta and isotonic calibration of each category against the rest, divided by their sum inside the pipeline, against the
+            incumbent (their own family: Holm across these methods and the targets). <strong>Confirmed better: {B.confirmed}.</strong></p>
+            <Table {...B.training} />
+            <Table {...B.test} />
+          </section>
+        )}
+        <section id={`dist${x.phase}`}>
+          <h2>Rainfall-distribution models (Pathway B)</h2>
+          <p>Each model predicts a full rainfall distribution from the raw ensemble (pooled over cells in units relative to each cell's
+          climatology); terciles at the training CHIRPS boundaries, quantiles and intervals come from it. References, in the same folds:
+          the published probabilities (tercile RPS) and the MVS-corrected ensemble (CRPS, quantiles). ✓ = better than the reference with
+          Holm-adjusted p &lt; 0.05 across the models and targets, and not worse over {x.te}. <strong>Confirmed better — tercile probabilities:
+          {x.foundRps}; rainfall amounts (CRPS): {x.foundCrps}.</strong></p>
+          <h3>Tercile probabilities</h3>
+          <Table {...x.rps} />
+          <h3>Rainfall amounts</h3>
+          <Table {...x.crps} />
+          <h3>Intervals and quantiles</h3>
+          <Table {...x.coverage} /><Table {...x.pinball} />
+          <h3>Test years</h3>
+          <Table {...x.test} />
+          <h3>Fits and model definitions</h3>
+          <ul class="findings">{x.diagnostics.map((g) => <li>{g.name}: {g.converged ? 'converged in every fold' : 'did not converge in every fold'}{g.crossing !== null && `; quantile rearrangement needed for at most ${(100 * g.crossing).toFixed(1)}% of cells`}.</li>)}</ul>
+          <Table {...x.models} />
+          {has(`${sub(x.phase)}/distribution_summary.png`) && <Figure src={fig(`${sub(x.phase)}/distribution_summary.png`)}
+            caption={`Tercile RPSS and amount CRPSS of the Phase ${x.phase} distribution models against the published pipeline.`} />}
+        </section>
+      </>
+    ))}
+
+    {part === 'shadow' && (
+      <section id="shadow">
+        <p class="notice"><strong>Not a published forecast.</strong> Since {D.shadow_config.since}, each cycle also runs the EMOS distribution model
+        (censored shifted gamma, fitted on the cycle's reference years) and records its median and 10–90% range for every target next to the
+        MVS-corrected ensemble. {D.shadow_config.reason} Each season is scored once its CHIRPS observations exist; any change to what is
+        published is a separate decision after several seasons.</p>
+        {S.map((y) => (
+          <>
+            <h2>{y.year} forecast · {y.observed.length} of {y.targets.length} targets observed so far</h2>
+            <Table {...y.forecast} />
+            {y.scores ? <Table {...y.scores} /> : <p class="caveat">Awaiting CHIRPS observations.</p>}
+            {y.targets.map((t) => (
+              <details><summary>{t} {y.year}: maps</summary>
+                <Figure src={`assets/probcal/${cycle}/amount_shadow/${y.year}/shadow_${y.model}_${y.year}_${t}.png`} caption={`Shadow amounts and ranges, ${t} ${y.year}.`} />
+              </details>
+            ))}
+            <p class="caveat">Run at commit <code>{commit(y.provenance)}</code>.</p>
+          </>
+        ))}
+        <p class="caveat">All cycles together: <a href={href('research/amount-shadow/')}>Amount and range shadow</a>.</p>
+      </section>
+    )}
+
+    {part === 'downloads' && (
+      <section id="downloads">
+        <Downloads prefix={`downloads/probcal/${cycle}/`}
+          extra={[[`${REPO}/blob/main/docs/48_PROBABILITY_CALIBRATION.md`, 'Full write-up (docs/48)', 'Methods, design, all result tables and the references']]} />
+      </section>
+    )}
+
+    <p class="pager">{prev ? <a href={at(prev[0])}>← {prev[1]}</a> : <span></span>}{next && <a href={at(next[0])}>{next[1]} →</a>}</p>
+  </OnThisPage>
+  <style is:global>.pager{display:flex;justify-content:space-between;font-size:.92rem;margin-top:24px}</style>
+</Base>

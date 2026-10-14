@@ -29,7 +29,7 @@ const cfg = cycles[0]?.d.shadow_config;
           {y.targets.map((t) => <details><summary>{t} {y.year}: maps</summary><Figure src={`assets/probcal/${x.name}/amount_shadow/${y.year}/shadow_${y.model}_${y.year}_${t}.png`} caption={`Shadow amounts and ranges, ${t} ${y.year}.`} /></details>)}
         </>
       ))}
-      <p class="caveat">Benchmark evidence for this cycle: <a href={href(`probability-calibration/${x.name}/#dist2`)}>Phase 2 distribution models</a>.</p>
+      <p class="caveat">Benchmark evidence for this cycle: <a href={href(`probability-calibration/${x.name}/phase-2/#dist2`)}>Phase 2 distribution models</a>.</p>
     </section>
   ))}
 </Base>

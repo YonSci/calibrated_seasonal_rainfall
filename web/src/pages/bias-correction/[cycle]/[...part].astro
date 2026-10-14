@@ -1,0 +1,283 @@
+---
+// Bias-correction benchmark of one cycle: a short summary and one sub-page per part (docs/47, docs/49).
+import Base from '../../../layouts/Base.astro';
+import Table from '../../../components/Table.astro';
+import Figure from '../../../components/Figure.astro';
+import Downloads from '../../../components/Downloads.astro';
+import ResearchBar from '../../../components/ResearchBar.astro';
+import OnThisPage from '../../../components/OnThisPage.astro';
+import { read, names, href, asset, years, cycleTitle, REPO } from '../../../lib/data.js';
+import { View, suggestion, decision, dataTable, methodsTable, screening, gates, confirmation, ratio, shadows, validation, provenance,
+  groups, diagnostics, parts as partsOf } from '../../../lib/bias.js';
+
+export function getStaticPaths() {
+  return names('bias').flatMap((cycle) => partsOf(read(`bias/${cycle}.json`)).map(([k]) => ({ params: { cycle, part: k || undefined } })));
+}
+const { cycle } = Astro.params;
+const part = Astro.params.part ?? '';
+const D = read(`bias/${cycle}.json`);
+const V = new View(D);
+const title = cycleTitle(D.initialization_month, D.season);
+const P = partsOf(D);
+const cycles = names('bias').map((n) => { const d = read(`bias/${n}.json`); return { name: n, title: cycleTitle(d.initialization_month, d.season), parts: partsOf(d), init: d.initialization_month }; })
+  .sort((a, b) => a.init - b.init);
+const label = (P.find(([k]) => k === part) || ['', 'Summary'])[1];
+const at = (k) => href(`bias-correction/${cycle}/${k ? k + '/' : ''}`);
+const S = suggestion(D);
+const commit = (p) => (p?.commit ?? '').slice(0, 7) + (p?.uncommitted_changes ? ' (with uncommitted changes)' : '');
+const DESCR = {
+  interpretation: 'What the results mean, statement by statement (each checked against the numbers), and the caveats.',
+  methods: 'The data, the 13 methods and the reference, and the evaluation designs.',
+  screening: 'The amount correction alone: skill by method and target, every region, statistics, diagnostics.',
+  confirmation: 'Every method through the full probability pipeline, and the selection-aware procedures.',
+  'ratio-limits': 'The operational MVS limits (0.5–2) against wider limits and none.',
+  shadow: 'The shadow forecast of this initialization and every method scored on the seasons after the benchmark.',
+  figures: 'Summary figures, per-cell maps, rank histograms and the forecast members.',
+  downloads: 'Result files, provenance, code and references.',
+};
+const designs = {
+  head: ['Design', 'Fits', 'Scored', 'Role'], caption: 'Evaluation designs (no amount method has a parameter tuned on scores)', rows: [
+    ['Screening: training', `leave-one-year-out within ${V.tr}`, `each ${V.tr} year`, 'clean evidence for the screening'],
+    ['Screening: test', V.tr, V.te, 'exploratory (these years were seen before)'],
+    ['Screening: full', `leave-one-year-out within ${years(V.cfg.all_years)}`, 'each year', 'per-cell maps and distribution checks (descriptive)'],
+    ['Confirmation', `outer leave-one-year-out within ${V.tr}; inside each fold the blend weight (inner leave-one-year-out) and, for SEL-P/SEL-A, the method choice`, `each ${V.tr} year`, 'full pipeline; accounts for the method choice'],
+    ['Confirmation: test', `${V.tr} (fits, blend weight and method choice)`, V.te, 'exploratory'],
+    ['Forecast', years(V.cfg.all_years), `${V.year} members`, 'member-by-member comparison'],
+  ] };
+const regions = part === 'screening' ? Object.keys(V.cfg.regions).map((r) => ({ key: r, ...screening(V, r) })) : [];
+const C = part === 'confirmation' ? confirmation(V) : null;
+const R = part === 'ratio-limits' ? ratio(D) : null;
+const SH = part === 'shadow' ? shadows(D, V) : [];
+const VAL = part === 'shadow' ? validation(D, V) : [];
+const kinds = D.figure_kinds.filter((k) => V.c || !k.pattern.startsWith('confirmation'));
+const refs = Object.keys(D.references).sort().map((k) => D.references[k]);
+const idx = P.findIndex(([k]) => k === part);
+const prev = P[idx - 1], next = P[idx + 1];
+---
+<Base title={`${label} · Bias correction · ${title}`} section="research"
+      description={`Bias-correction benchmark, ${title}: ${part ? DESCR[part] : 'the suggested method and what the evidence supports.'}`}>
+  <ResearchBar slot="context" area="bias-correction" areaLabel="Bias correction" cycles={cycles} cycle={cycle} parts={P} part={part} />
+  <OnThisPage>
+    <h1>{part ? `${label} · ${title}` : title}</h1>
+    {!part && (
+      <>
+        <p class="notice"><strong>Research benchmark.</strong> The published forecasts still use {V.label(V.ref)}. This benchmark compares
+        {V.candidates.length} other rainfall-amount bias-correction methods with it, member by member, for every grid cell and target: a
+        <em>screening</em> of the amount correction alone, then a <em>confirmation</em> through the full probability pipeline that also accounts
+        for how a method is chosen.</p>
+        <section id="evidence" class="box">
+          <h2>What the evidence supports</h2>
+          <ul class="findings">{decision(V).map((t) => <li set:html={t} />)}</ul>
+        </section>
+        {S && (
+          <section id="suggestion">
+            <h2>Suggested method</h2>
+            <p>The platform suggests a bias-correction method for every target and product from the historical evidence (the confirmation
+            against CHIRPS, counting every method tried) and the independent validation seasons scored since (the shadow and validation
+            runs), by a rule fixed before those seasons are scored. A suggestion is advice for a decision: <strong>the published forecast
+            always uses {S.reference} until a change is decided.</strong> {S.n} of {S.total} target–product combinations have a candidate.</p>
+            {S.rule && <details><summary>The rule</summary><ul class="findings">
+              <li><strong>Candidate</strong>: {S.rule.historical}</li><li><strong>Choice</strong>: {S.rule.choice}</li>
+              <li><strong>Validation</strong>: {S.rule.validation.rule} Minimum: {S.rule.validation.minimum_seasons} seasons.</li></ul></details>}
+            <Table {...S.table} />
+          </section>
+        )}
+        <section>
+          <h2>Explore the evidence</h2>
+          <ul class="cards">{P.filter(([k]) => k).map(([k, l]) => <li><a class="box" href={at(k)}><strong>{l}</strong><span class="caveat"><br />{DESCR[k]}</span></a></li>)}</ul>
+        </section>
+      </>
+    )}
+
+    {part === 'interpretation' && (
+      <section id="interpretation">
+        <h2>Interpretation <span class="caveat">— national aggregate ({V.national})</span></h2>
+        <ol class="findings">{D.findings.map((t) => <li set:html={t} />)}</ol>
+        {D.findings_withheld > 0 && <p class="caveat">{D.findings_withheld} of the {D.findings_checked} interpretation statements do not hold for this
+        cycle’s results and are not shown (each is checked against the numbers before it is displayed).</p>}
+        <h2>Caveats</h2>
+        <ul class="findings">
+          <li>Screening skill is from {V.tr} leave-one-year-out (clean) and {V.te} (exploratory: these years were seen while the operational method was chosen).</li>
+          <li>Screening tercile scores use smoothed member counts <strong>without</strong> the climatology blend; the confirmation scores the blended product.</li>
+          <li>Two multiplicity families are shown: within one method across its targets (✓) and across all methods and targets (✓✓). The confirmation’s selection-aware procedures include the method choice in the evaluation itself.</li>
+          <li>Scores are area-weighted over many correlated cells but tested year by year, so each year counts once.</li>
+          <li>The ordinary CRPS scores the delivered ensemble; the fair CRPS is a diagnostic under a sampling interpretation that DC’s rescaled years and methods tied to the forecast mean or ranks only approximate.</li>
+          <li>Results are national aggregates unless a table says otherwise; a method can rank differently in a region (see the regional tables).</li>
+        </ul>
+      </section>
+    )}
+
+    {part === 'methods' && (
+      <section id="data">
+        <h2>Data</h2>
+        <Table {...dataTable(V, D)} />
+        <h2>Methods</h2>
+        <p>Each method is fitted per grid cell and target from the training years only and applied to each member of the scored year.
+        Methods that keep a “change signal” (DC, DQM, QDM, SDM, CDF-t) were designed for climate change, where a model’s reference period is
+        compared with a future period; here the “future” is the forecast itself: the target year’s ensemble against the model climatology.</p>
+        <Table {...methodsTable(V)} />
+        <h2>Evaluation designs</h2>
+        <Table {...designs} />
+      </section>
+    )}
+
+    {part === 'screening' && (
+      <section id="screening">
+        <p class="caveat">✓ = screening pass within the method (Holm across its targets); ✓✓ = also passes with Holm across all methods and
+        targets (national aggregate only). A pass is screening evidence, not an adoption decision. Bold: the operational method. Skill is
+        against the CHIRPS training climatology (0 = no better than climatology).</p>
+        {regions.length > 1 && (
+          <div class="map-controls"><span class="caveat">Region for the result tables</span><div class="seg" role="group" aria-label="Region" id="bc-region">
+            {regions.map((r) => <button type="button" data-region={r.key} aria-pressed={String(r.primary)}>{r.label}</button>)}</div></div>
+        )}
+        {regions.map((r) => (
+          <div class="region-block" data-region={r.key} hidden={!r.primary}>
+            <h2>{r.label}{r.primary && ' (national aggregate)'}</h2>
+            <Table {...r.glance} /><Table {...r.crpss} /><Table {...r.rpss} />
+            <details><summary>More scores by target: test years, fair CRPS, bias, correlation, spread, reliability, coverage</summary>
+              {r.more.map((t) => <Table {...t} />)}</details>
+            <details><summary>Dry months: shares of totals at exactly 0 mm and at ≤ 1 mm, CHIRPS and corrected</summary><Table {...r.dry} /></details>
+            <details><summary>Distribution of the corrected members (mean, spread, 10th and 90th percentiles)</summary>{r.dist.map((t) => <Table {...t} />)}</details>
+          </div>
+        ))}
+        <h2>Screening statistics</h2>
+        <details><summary>Every method, target and score (within-method and family-wide Holm)</summary>
+          <p class="caveat">{V.d.gate_rule}</p>{gates(V).map((t) => <Table {...t} />)}</details>
+        <h2>Diagnostics</h2>
+        <details><summary>How often limits, caps and fallbacks act</summary><Table {...diagnostics(V)} /></details>
+        <details><summary>Where the amount differences come from: cells grouped by their training-year climate</summary>
+          <p class="caveat">Each cell is grouped by its CHIRPS totals in the fold’s training years only: every year exactly 0 mm; every year
+          ≤ 1 mm (not all 0); some years dry and some wet; never dry. Contributions are area-weighted CRPS differences from {V.short(V.ref)}
+          (mm; negative favours the method) and add up to the national difference. Leave-one-year-out {V.tr}, {V.national}.</p>
+          {groups(V).map((t) => <Table {...t} />)}</details>
+      </section>
+    )}
+
+    {part === 'confirmation' && (
+      <section id="confirmation">
+        {C ? (
+          <>
+            <p>The screening isolates the amount correction. The confirmation evaluates what the site publishes: each method’s corrected
+            members go through the full probability pipeline (tercile counts, smoothing and the climatology blend), with every fit and the
+            blend weight inside the cross-validation folds. Two <strong>selection-aware procedures</strong> then choose a method for each
+            left-out year using only the other training years — <strong>SEL-P</strong> by the lowest inner blended RPS (probabilities),
+            <strong>SEL-A</strong> by the lowest inner CRPS (amounts) — so their scores include the effect of choosing among the {C.n}
+            declared methods. ✓ = better than {V.short(V.ref)} with Holm-adjusted p &lt; 0.05 (methods: across all methods and targets;
+            SEL-P/SEL-A: across the targets) and not worse over {V.te}. Scope: {V.national}.</p>
+            <h2>The season at a glance</h2>
+            <Table {...C.glance} />
+            <h2>Probabilities by target</h2>
+            <Table {...C.rpss} />
+            <h2>Amounts by target and the selection-aware procedures</h2>
+            <Table {...C.crpss} /><Table {...C.selection} />
+          </>
+        ) : <p class="notice">The confirmation run has not been produced for this benchmark yet.</p>}
+      </section>
+    )}
+
+    {part === 'ratio-limits' && R && (
+      <section id="ratio">
+        <p>The operational correction limits the spread ratio r = σ<sub>obs</sub>/σ<sub>model</sub> to 0.5–2. This study runs the same
+        screening and confirmation for that correction with wider limits (1/3–3, 1/4–4) and none, all with the same fallback (r = 1 where
+        the model spread is below 1 mm), to see whether the limits are worth changing. ✓ = better than the operational limits with
+        Holm-adjusted p &lt; 0.05 across the {R.alternatives} alternatives × {R.targets} targets and not worse over the test years. Run at
+        commit <code>{commit(R.commit)}</code>.</p>
+        <p><strong>Confirmed better than the operational limits — published (blended) probabilities: {R.foundRps}; rainfall amounts: {R.foundCrps}.</strong></p>
+        <h2>Probabilities</h2><Table {...R.rpss} />
+        <h2>Amounts</h2><Table {...R.crpss} />
+        <h2>Where the operational limits act</h2><Table {...R.acting} />
+      </section>
+    )}
+
+    {part === 'shadow' && (
+      <section id="shadow">
+        {SH.length > 0 && (
+          <>
+            <h2>Shadow forecast</h2>
+            <p class="notice"><strong>Not a published forecast.</strong> For each new cycle of this initialization, the shadow method runs through
+            the same probability pipeline as the published forecast (all reference years; blend weight from leave-one-year-out), next to it, and
+            is scored once CHIRPS for the target is available. Each scored season is independent evidence that enters the suggestion.</p>
+            {SH.map((s) => (
+              <>
+                <h3>{s.target} {s.year}: {s.label}</h3>
+                <p class="caveat">{s.check}</p>
+                {s.table ? <Table {...s.table} /> : <p class="caveat">{s.target} {s.year}: awaiting CHIRPS observations; the shadow forecast is kept and will be scored.</p>}
+                <Figure src={s.png} caption={`Favoured category of the published method and of the shadow${s.observed ? ', the observed category and the per-cell RPS difference' : ''}.`} />
+              </>
+            ))}
+          </>
+        )}
+        {VAL.length > 0 && (
+          <>
+            <h2>Independent validation seasons</h2>
+            <p class="caveat">Every method scored on the seasons after the benchmark (one season each; the suggestions need at least three).</p>
+            {VAL.map((t) => <Table {...t} />)}
+          </>
+        )}
+      </section>
+    )}
+
+    {part === 'figures' && (
+      <section id="figures">
+        <p class="caveat">Figures show the national aggregate ({V.national}) or per-cell maps of the whole country.</p>
+        <div class="bc-figs" data-root={asset(D.figures)} data-season={V.season}>
+          <div class="map-controls">
+            <label>Figure <select class="bc-kind">{kinds.map((k) => <option value={k.pattern} data-per-target={String(k.per_target)}>{k.label}</option>)}</select></label>
+            <label>Target <select class="bc-target">{V.targets.map((t) => <option selected={t === V.season}>{t}</option>)}</select></label>
+            <a class="bc-open" href="#" target="_blank" rel="noopener">Open full size</a>
+          </div>
+          <figure class="map-figure wide"><img class="bc-img" loading="lazy" alt="" /><figcaption class="caveat bc-cap"></figcaption></figure>
+        </div>
+      </section>
+    )}
+
+    {part === 'downloads' && (
+      <section id="downloads">
+        <h2>Files and code</h2>
+        <Downloads prefix={`downloads/bias/${cycle}/`} extra={[
+          [`${REPO}/blob/${V.commit}/docs/47_BIAS_CORRECTION_BENCHMARK.md`, `Full write-up (docs/47) at commit ${V.commit.slice(0, 7)}`, 'Definitions, design, all result tables and the references, as of the code that produced these results'],
+          [`${REPO}/tree/${V.commit}/scripts`, `Code at commit ${V.commit.slice(0, 7)}`, `scripts/bias_methods.py (methods), scripts/bias_benchmark.py (screening), scripts/bias_confirmation.py (confirmation), config/bias_correction/${cycle}.json (settings)`],
+        ]} />
+        {(() => { const PROV = provenance(V); return PROV && <><h2>Run provenance</h2><Table {...PROV} /></>; })()}
+        <h2>References</h2>
+        <ol class="findings">{refs.map((r) => <li><Fragment set:html={r.text} /> <a href={`https://doi.org/${r.doi}`}>doi:{r.doi}</a></li>)}</ol>
+      </section>
+    )}
+
+    <p class="pager">{prev ? <a href={at(prev[0])}>← {prev[1]}</a> : <span></span>}{next && <a href={at(next[0])}>{next[1]} →</a>}</p>
+  </OnThisPage>
+
+  {part === 'screening' && (
+    <script>
+      // Region switch: one region's tables at a time.
+      document.getElementById('bc-region')?.addEventListener('click', (e) => {
+        const b = (e.target as HTMLElement).closest('button') as HTMLElement | null;
+        if (!b) return;
+        document.querySelectorAll<HTMLElement>('#bc-region button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        document.querySelectorAll<HTMLElement>('.region-block').forEach((x) => { x.hidden = x.dataset.region !== b.dataset.region; });
+      });
+    </script>
+  )}
+  {part === 'figures' && (
+    <script>
+      // Figure browser: figure kind and target select one PNG of the cycle.
+      document.querySelectorAll('.bc-figs').forEach((fig) => {
+        const el = fig as HTMLElement;
+        const kind = el.querySelector('.bc-kind') as HTMLSelectElement, target = el.querySelector('.bc-target') as HTMLSelectElement;
+        const show = () => {
+          const opt = kind.options[kind.selectedIndex], per = opt.dataset.perTarget === 'true';
+          target.disabled = !per;
+          const src = `${el.dataset.root}/${opt.value.replace('{t}', target.value)}.png`;
+          const cap = opt.textContent + (per ? ' — ' + target.value : '');
+          const img = el.querySelector('.bc-img') as HTMLImageElement;
+          img.src = src; img.alt = cap;
+          (el.querySelector('.bc-cap') as HTMLElement).textContent = cap;
+          (el.querySelector('.bc-open') as HTMLAnchorElement).href = src;
+        };
+        el.querySelectorAll('select').forEach((s) => s.addEventListener('change', show));
+        show();
+      });
+    </script>
+  )}
+  <style is:global>.pager{display:flex;justify-content:space-between;font-size:.92rem;margin-top:24px}</style>
+</Base>

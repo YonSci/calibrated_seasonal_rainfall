@@ -6,8 +6,10 @@ import path from 'node:path';
 
 const DATA_DIR = process.env.SITE_DATA ?? path.resolve(process.cwd(), '..', 'site_data');
 
+const CACHE = new Map();                                              // each file is parsed once per build
 export function read(rel) {
-  return JSON.parse(fs.readFileSync(path.join(DATA_DIR, rel), 'utf-8'));
+  if (!CACHE.has(rel)) CACHE.set(rel, JSON.parse(fs.readFileSync(path.join(DATA_DIR, rel), 'utf-8')));
+  return CACHE.get(rel);
 }
 
 export function names(folder) {

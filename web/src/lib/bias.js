@@ -306,3 +306,12 @@ export function diagnostics(V) {
   return { head: ['Method', 'Target', 'Activated (share of the corrected area, or of members / cells for events)'], rows,
     caption: `How often limits, caps and fallbacks act, leave-one-year-out ${V.tr} (mean over folds)` };
 }
+
+// Sub-pages of a cycle ('' = summary), only those with content.
+export function parts(D) {
+  const V = new View(D);
+  return [['', 'Summary'], ['interpretation', 'Interpretation'], ['methods', 'Data and methods'], ['screening', 'Screening'],
+    ['confirmation', 'Confirmation'], ...(D.ratio_limits ? [['ratio-limits', 'Ratio limits']] : []),
+    ...(shadows(D, V).length || validation(D, V).length ? [['shadow', 'Shadow and validation']] : []),
+    ['figures', 'Figures'], ['downloads', 'Downloads']];
+}

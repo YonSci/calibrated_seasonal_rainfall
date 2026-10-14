@@ -586,7 +586,7 @@
   {
     "id": "2026-10-14.6",
     "date": "2026-10-14",
-    "commit": null,
+    "commit": "e8c31f1",
     "title": "New site layout and navigation",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -598,6 +598,24 @@
       {
         "type": "display",
         "text": "The new pages (/next/) put the forecast first: the home page opens on the current outlook (headline, probabilities, map, amount, signal and skill) with every target as a small map; the menu is Outlook, Verification, Skill, Research, About and Downloads. Forecast pages carry a context bar with breadcrumbs, the cycle, area and target, and the sections Outlook and maps, Official outlooks, Verification and Historical skill, which keeps the selection when the section changes. The official-outlook comparison has its own page, verification and skill have one page per target, and the amount and range shadow of every cycle is on one research page. Content and numbers are unchanged and were rechecked against the current page for every cycle, area and target."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-14.7",
+    "date": "2026-10-14",
+    "commit": null,
+    "title": "Research pages: summaries and sub-pages",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "On the new pages, each cycle's bias-correction and probability-calibration benchmark opens on a short summary (what the evidence supports and the suggested method; what each phase tested and what was confirmed better), with the detail on sub-pages: interpretation, data and methods, screening (one region at a time), confirmation, ratio limits, shadow and validation, figures and downloads; Phase 1, 2 and 3, the amount and range shadow and downloads. A sub-menu keeps the sub-page when the cycle changes, long pages list their headings beside the text, and previous/next links lead through the sub-pages. Every score is unchanged (rechecked against the current page)."
       }
     ]
   }

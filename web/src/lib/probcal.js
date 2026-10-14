@@ -131,3 +131,10 @@ export function shadow(rec, targetsOrder) {
   }
   return out;
 }
+
+// Sub-pages of a cycle ('' = summary), only those with content.
+export function parts(D) {
+  return [['', 'Summary'], ['phase-1', 'Phase 1'], ...(D.phase2_binary || D.phase2_distribution ? [['phase-2', 'Phase 2']] : []),
+    ...(D.phase3 ? [['phase-3', 'Phase 3']] : []), ...(Object.keys(D.amount_shadow ?? {}).length ? [['shadow', 'Amount and range shadow']] : []),
+    ['downloads', 'Downloads']];
+}

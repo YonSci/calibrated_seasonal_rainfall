@@ -1,0 +1,35 @@
+---
+// Sub-menu of a research benchmark, sticky under the site menu: breadcrumbs, the cycle (staying on the same sub-page when that
+// cycle has it) and the sub-pages of this cycle.
+import { href } from '../lib/data.js';
+const { area, areaLabel, cycles, cycle, parts, part = '' } = Astro.props;
+// cycles: [{name, title, parts: [[key, label], ...]}]; parts: this cycle's [[key, label]]; part: '' for the summary
+const at = (name, key) => href(`${area}/${name}/${key ? key + '/' : ''}`);
+const current = cycles.find((c) => c.name === cycle);
+const label = (parts.find(([k]) => k === part) || ['', 'Summary'])[1];
+---
+<div class="wrap ctx">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <span>Research</span><span aria-hidden="true"> › </span><a href={href(`${area}/`)}>{areaLabel}</a><span aria-hidden="true"> › </span>
+    <a href={at(cycle, '')}>{current.title}</a>{part && <><span aria-hidden="true"> › </span><span>{label}</span></>}
+  </nav>
+  <div class="ctx-row">
+    <label>Cycle <select data-go>{cycles.map((c) => <option value={at(c.name, c.parts.some(([k]) => k === part) ? part : '')} selected={c.name === cycle}>{c.title}</option>)}</select></label>
+    <nav class="ctx-tabs" aria-label="Sub-pages">
+      {parts.map(([k, l]) => <a href={at(cycle, k)} aria-current={k === part ? 'page' : undefined}>{l}</a>)}
+    </nav>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('select[data-go]').forEach((s) => s.addEventListener('change', () => { location.href = (s as HTMLSelectElement).value; }));
+</script>
+<style>
+  .ctx{padding:6px 16px 8px}
+  .crumbs{font-size:.82rem;color:var(--muted);margin-bottom:4px}
+  .crumbs a{color:var(--muted)}
+  .ctx-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:.9rem}
+  .ctx-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
+  .ctx-tabs a{padding:5px 12px;border-radius:999px;text-decoration:none;color:var(--ink2);border:1px solid var(--line);background:var(--bg)}
+  .ctx-tabs a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+  @media (max-width:860px){ .ctx-tabs{margin-left:0} }
+</style>
