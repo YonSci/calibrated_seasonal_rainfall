@@ -115,6 +115,24 @@ stage (IAD) mostly reproduces what the climatology blend already does, slightly 
 confirmed amount improvement for January, which enters the method selection as an alternative: square-root MVS stays
 selected for January amounts because its confirmed improvement is larger (−0.48 mm against −0.15 mm over the training years).
 
+### Tercile-probability plots
+
+- **Reliability diagrams** (`figures/grazfeeding_reliability_training.png`, `_test.png`): for every pipeline, below and
+  above normal, the observed frequency against the forecast probability in bins of 10% (area-weighted, each year equal;
+  bins with under 1% of the forecasts not drawn; marker area = share of forecasts). The member counts without the
+  Dirichlet spread their probabilities from 0 to 80% but verify close to 33% for Oct, Dec and Jan (a line much flatter
+  than the diagonal): overconfident, which is why their RPS is the worst. The pipelines with the IAD and the published
+  blend keep almost all probabilities between 25% and 45%; where they go further (Nov, ONDJ) the outcomes roughly follow
+  the diagonal. The IAD gains reliability by giving up sharpness, as the published blend does.
+- **Forecast-year maps** (`forecast/gf_<year>_<target>_probabilities.png`): the below-, near- and above-normal
+  probabilities of every pipeline for each 2026 target, next to the published ones (rows: published, GrazFeediNG as
+  uploaded, without the Dirichlet, MVS + IAD, Leung + published blend), and the favoured tercile (`gf_<year>_<target>.png`).
+  The published probability stage recomputed by the benchmark matches the published files (largest difference below
+  10⁻⁸), so the panels are directly comparable. ONDJ 2026, national means below / near / above: published 27 / 27 / 46%,
+  GrazFeediNG as uploaded 32 / 30 / 38%, without the Dirichlet 25 / 26 / 50%, MVS + IAD 31 / 30 / 39%, Leung + published
+  blend 27 / 27 / 46%: the uploaded pipeline keeps the published pattern (below normal in the west, above normal in the
+  south and east) with weaker probabilities.
+
 ## 5. Place in the method selection
 
 The comparison is a family of its own (`grazfeeding`) in `scripts/method_selection.py` (docs/50). A method confirmed
@@ -126,9 +144,10 @@ independent seasons), so a candidate stays a candidate until one is added; the p
     python scripts/grazfeeding_benchmark.py --config config/grazfeeding/sep_ondj.json --workers 2
 
 Checkpoints per target in `outputs/grazfeeding/sep_ondj/parts/` (keyed on inputs, code and configuration). Outputs:
-`benchmark.json` (scores per year, tests, fitted IAD parameters, provenance), `figures/grazfeeding_summary.png`, and for
-the forecast year `forecast/gf_<year>_<target>.nc|png` (GrazFeediNG probabilities next to the published ones; not
-published). Other cycles need only a configuration file pointing at their bias-correction benchmark configuration.
+`benchmark.json` (scores per year, reliability sums, tests, fitted IAD parameters, provenance), `figures/grazfeeding_summary.png`,
+`figures/grazfeeding_reliability_{training,test}.png`, and for the forecast year `forecast/gf_<year>_<target>.nc` (every
+pipeline's probabilities and the published ones; not published) with `gf_<year>_<target>.png` (favoured tercile) and
+`gf_<year>_<target>_probabilities.png` (tercile probabilities). Other cycles need only a configuration file pointing at their bias-correction benchmark configuration.
 
 Tests: `tests/test_grazfeeding.py` (the IAD stays near the identity on calibrated input and softens overconfident
 input; the Leung affine reproduces each member's climatology and handles extra members; counts and categories).
