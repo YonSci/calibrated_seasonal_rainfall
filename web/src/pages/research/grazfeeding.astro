@@ -119,7 +119,9 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
             <h3 id={`${name}-forecast`}>The forecast year: tercile probabilities of each pipeline (not published)</h3>
             <p class="caveat">Every pipeline fitted on the cycle's reference years and applied to this year's forecast, next to the published
             probabilities (the published stage recomputed here matches the published file). Rows: published, GrazFeediNG as uploaded,
-            without the Dirichlet, MVS + IAD, Leung + published blend; columns: below, near and above normal.</p>
+            without the Dirichlet, MVS + IAD, Leung + published blend; columns: below, near and above normal. Where the published map is
+            blank the cells are too dry for terciles (mostly January); the GrazFeediNG pipelines give values there, but those cells are
+            excluded from the scores of every pipeline, so the comparison above is on the same cells.</p>
             {forecastMaps(d.assets).map(({ label, prob, fav }, i) => (
               <details open={i === forecastMaps(d.assets).length - 1}><summary>{label}</summary>
                 {prob && <Figure src={prob} caption={`Tercile probabilities, ${label}.`} />}

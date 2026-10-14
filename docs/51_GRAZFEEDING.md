@@ -131,7 +131,9 @@ selected for January amounts because its confirmed improvement is larger (−0.4
   10⁻⁸), so the panels are directly comparable. ONDJ 2026, national means below / near / above: published 27 / 27 / 46%,
   GrazFeediNG as uploaded 32 / 30 / 38%, without the Dirichlet 25 / 26 / 50%, MVS + IAD 31 / 30 / 39%, Leung + published
   blend 27 / 27 / 46%: the uploaded pipeline keeps the published pattern (below normal in the west, above normal in the
-  south and east) with weaker probabilities.
+  south and east) with weaker probabilities. Where the published maps are blank the cells are too dry for terciles
+  (mostly January: 1 029 of 1 484 cells are scored); the GrazFeediNG pipelines give values there, but every pipeline is
+  scored on the same cells.
 
 ## 5. Place in the method selection
 
