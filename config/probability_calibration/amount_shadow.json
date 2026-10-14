@@ -1,15 +1,40 @@
 {
-  "description": "Shadow rainfall-amount and range forecast from a rainfall-distribution model (scripts/dist_shadow.py, docs/48). Cycles are matched by initialization month and season, so future cycle files are covered without editing this file. Shadow forecasts are never published as forecasts; the published probabilities and amounts are unchanged.",
+  "description": "Shadow rainfall-amount and range forecast from a rainfall-distribution model (scripts/dist_shadow.py, docs/48). Cycles are matched by initialization month and season, so future cycle files are covered without editing this file. Shadow forecasts are never published as forecasts; the published probabilities and amounts are unchanged. Besides the configured model (EMOS), every distribution model the method selection (scripts/method_selection.py) lists as a candidate for a cycle gets its own shadow, so its independent validation seasons accumulate.",
   "model": "emos_csg",
-  "levels": [0.1, 0.5, 0.9],
+  "levels": [
+    0.1,
+    0.5,
+    0.9
+  ],
   "since": "2026-10-14",
   "reason": "In Phase 2 the EMOS 10-90% intervals held 76-84% of observed totals where the MVS-corrected ensemble's held 46-76% (80% is calibrated), and EMOS was confirmed better in CRPS for the January-initialized FMAM season and JJAS September. The shadow builds independent evidence season by season before any amount or range product is considered.",
   "cycles": [
-    {"initialization_month": 1, "season": "FMAM", "benchmark_config": "config/bias_correction/jan_fmam.json", "name": "jan_fmam"},
-    {"initialization_month": 2, "season": "FMAM", "benchmark_config": "config/bias_correction/feb_fmam.json", "name": "feb_fmam"},
-    {"initialization_month": 5, "season": "JJAS", "benchmark_config": "config/bias_correction/may_jjas.json", "name": "may_jjas"},
-    {"initialization_month": 9, "season": "ONDJ", "benchmark_config": "config/bias_correction/sep_ondj.json", "name": "sep_ondj"}
+    {
+      "initialization_month": 1,
+      "season": "FMAM",
+      "benchmark_config": "config/bias_correction/jan_fmam.json",
+      "name": "jan_fmam"
+    },
+    {
+      "initialization_month": 2,
+      "season": "FMAM",
+      "benchmark_config": "config/bias_correction/feb_fmam.json",
+      "name": "feb_fmam"
+    },
+    {
+      "initialization_month": 5,
+      "season": "JJAS",
+      "benchmark_config": "config/bias_correction/may_jjas.json",
+      "name": "may_jjas"
+    },
+    {
+      "initialization_month": 9,
+      "season": "ONDJ",
+      "benchmark_config": "config/bias_correction/sep_ondj.json",
+      "name": "sep_ondj"
+    }
   ],
   "reference_amount_method": "mvs",
-  "output_root": "outputs/probability_calibration/{name}/amount_shadow"
+  "output_root": "outputs/probability_calibration/{name}/amount_shadow",
+  "models_from_selection": true
 }

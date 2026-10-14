@@ -1,0 +1,29 @@
+{
+  "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
+  "products": {
+    "probabilities": {
+      "label": "Published tercile probabilities",
+      "score": "RPS of the tercile probabilities (lower is better)",
+      "reference": {"amount": "mvs", "probability": "climatology_blend", "label": "Mean-Variance Scaling + climatology blend (published)"},
+      "families": ["bias_correction", "probability_phase1", "probability_phase2_binary", "distribution_phase2", "distribution_phase3"]
+    },
+    "amounts": {
+      "label": "Rainfall amounts (and ranges)",
+      "score": "CRPS of the rainfall-amount forecast in mm (lower is better)",
+      "reference": {"amount": "mvs", "label": "Mean-Variance Scaling ensemble (published)"},
+      "families": ["bias_correction", "distribution_phase2", "distribution_phase3"]
+    }
+  },
+  "historical": "A method is a candidate for a target and product only if its benchmark confirms it better than the published reference: outer leave-one-year-out over the training years (1993-2016), Holm-adjusted p < 0.05 across every method and target of its family, and not worse over the test years (2017 onward).",
+  "validation": {
+    "minimum_seasons": 3,
+    "rule": "Independent validation seasons are forecast years scored after the benchmark (bias_validation.py for bias correction; dist_shadow.py for the EMOS amount model). A candidate becomes 'recommended' once at least minimum_seasons have been scored for it and the reference and its mean score over them is not worse; with fewer it stays a 'candidate'; with enough and a worse mean it is 'not supported by validation'. A candidate with no validation record yet needs a shadow forecast before it can be recommended."
+  },
+  "choice": "Among candidates, a recommended one first; then the candidate with the largest training-period improvement over the reference. One change at a time: candidates from different families (e.g. an amount correction and a probability calibration) were each tested against the published approach, not together, so the selection changes one stage only; the others are listed as alternatives.",
+  "statuses": {
+    "keep": "Keep the published approach: no method is confirmed better on the historical evidence.",
+    "candidate": "Confirmed better on the historical evidence; independent validation seasons are still being collected.",
+    "recommended": "Confirmed better on the historical evidence and not worse over the independent validation seasons.",
+    "not_supported": "Confirmed better on the historical evidence but worse over the independent validation seasons."
+  }
+}

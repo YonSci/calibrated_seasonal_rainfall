@@ -8,6 +8,7 @@ figures in site/assets/ alone, without the large outputs/ folder:
   site_data/data/*.json          per cycle: the official-outlook comparison and the historical diagnostics (paths as in cycles.json)
   site_data/files.json           every download linked from the site: path -> URL (release asset or site path), size
   site_data/sections.json        prose sections written by the build as HTML (methods and data)
+  site_data/selection.json       the approach selected for each season, target and product, with its evidence (docs/50)
   site_data/bias/<cycle>.json    bias-correction benchmark: screening, confirmation, ratio-limit study, validation record,
                                  suggestion (docs/47)
   site_data/probcal/<cycle>.json probability and rainfall-distribution calibration: Phases 1-3 and the amount/range shadow (docs/48)
@@ -140,6 +141,9 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         sizes[f'data/{f.name}'] = write(OUT / 'data' / f.name, json.loads(f.read_text(encoding='utf-8')))
     sizes['files.json'] = write(OUT / 'files.json', downloads(site))
     sizes['sections.json'] = write(OUT / 'sections.json', sections_html(site))
+    sel = read(ROOT / 'outputs/method_selection/selection.json')               # method selection (scripts/method_selection.py)
+    if sel:
+        sizes['selection.json'] = write(OUT / 'selection.json', sel)
     for name, obj in bias_files(site).items():
         sizes[f'bias/{name}.json'] = write(OUT / 'bias' / f'{name}.json', obj)
     for name, obj in probcal_files(site).items():

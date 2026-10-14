@@ -5,6 +5,8 @@ import OutlookHero from '../../../../../components/OutlookHero.astro';
 import TargetStrip from '../../../../../components/TargetStrip.astro';
 import { C, cycleOf, dataFile, pagesFor, url } from '../../../../../lib/cycles.js';
 import { renderer } from '../../../../../lib/outlook.js';
+import { selectionFor, STATUS_LABEL } from '../../../../../lib/selection.js';
+import { href } from '../../../../../lib/data.js';
 
 export function getStaticPaths() {
   return C.cycles.flatMap((c) => c.views.flatMap(([view]) => c.targets.map((t) => ({ params: { cycle: c.id, view, target: t.id } }))));
@@ -21,6 +23,8 @@ const X = c.comparison ? dataFile(c.comparison) : null;
 const findings = X ? X.summary.length : 0;
 const verified = c.targets.filter((x) => x.verification[view]).length;
 const obsNotice = C.cycles.every((x) => x.obs === 'CHIRPS v3.0');
+const SEL = selectionFor(c);
+const selT = SEL?.targets[target];
 ---
 <Base title={`${t.label} outlook · ${c.option} · ${R.viewLabel(view)}`} section="outlook"
       description={`${t.label} rainfall outlook for Ethiopia (${c.init} initialization), ${R.viewLabel(view)}: tercile probabilities, amounts and maps.`}>
@@ -60,6 +64,18 @@ const obsNotice = C.cycles.every((x) => x.obs === 'CHIRPS v3.0');
           {X && <li><a href={url.official(c, view)}>Official outlooks</a> <span class="caveat">— ICPAC and EMI compared with this forecast ({findings} findings)</span></li>}
         </ul>
       </div>
+      {selT && (
+        <div class="box">
+          <h3>Approach for {t.label}</h3>
+          <p class="caveat">Published: Mean-Variance Scaling and the climatology blend. What the evidence supports:</p>
+          <ul class="findings">
+            {[['probabilities', 'Probabilities'], ['amounts', 'Amounts']].map(([p, l]) => (
+              <li><strong>{l}:</strong> {selT[p].status === 'keep' ? 'the published approach' : selT[p].selected.label} <span class={`sel sel-${selT[p].status}`}>{STATUS_LABEL[selT[p].status]}</span></li>
+            ))}
+          </ul>
+          <p class="caveat"><a href={href(`research/method-selection/#${SEL.name}`)}>Method selection and evidence →</a></p>
+        </div>
+      )}
       {obsNotice && <p class="notice small"><strong>Retrospective reconstruction.</strong> Calibrated and verified with CHIRPS v3.0 since 11 October 2026; the 2026 forecasts were recalibrated after their outcomes were known. The CHIRPS v2.0 versions are in the release archive (release 2026-10-10.2).</p>}
       <details class="panel-details" open><summary>Cycle status and record</summary><div id="ol-meta" set:html={O['ol-meta']} /></details>
     </aside>

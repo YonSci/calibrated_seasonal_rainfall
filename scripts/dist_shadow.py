@@ -46,6 +46,8 @@ CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/dist_b
         'scripts/bias_benchmark.py', 'scripts/bias_validation.py', 'scripts/run_calibration.py', 'scripts/calibration_core.py',
         'scripts/common.py', 'scripts/cycle.py']
 LEVELS = (.1, .5, .9)
+SHORT = {'emos_csg': 'EMOS', 'extended_logistic': 'extended logistic', 'quantile_regression': 'quantile regression', 'bjp': 'BJP',
+         'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF'}
 POSITION_COLOURS = ['#a6611a', '#d9d9d9', '#1a9641']                    # below the interval, inside, above
 
 
@@ -57,7 +59,23 @@ def folder_of(scfg, entry, year):
     return ROOT / scfg['output_root'].format(name=entry['name']) / str(year)
 
 
-def fingerprint(cycle_path, config_path, cycle, project, entry, target):
+def selection_models(entry):
+    """Distribution models the method selection lists as candidates for this cycle (outputs/method_selection/selection.json):
+    each gets its own shadow, so its independent validation seasons accumulate."""
+    sel = ROOT / 'outputs/method_selection/selection.json'
+    if not sel.is_file():
+        return []
+    c = next((c for c in json.loads(sel.read_text(encoding='utf-8'))['cycles'] if c['name'] == entry['name']), None)
+    found = []
+    for prods in (c or {}).get('targets', {}).values():
+        for e in prods.values():
+            for x in [e['selected'], *e['alternatives']]:
+                if str(x.get('family', '')).startswith('distribution') and x['method'] not in found:
+                    found.append(x['method'])
+    return found
+
+
+def fingerprint(cycle_path, config_path, cycle, project, entry, target, model):
     """Everything a target's shadow file depends on: code, configurations, masks, model and observation inputs."""
     from bias_benchmark import target_config, sha256
     from bias_validation import observation_path
@@ -65,7 +83,7 @@ def fingerprint(cycle_path, config_path, cycle, project, entry, target):
     year, ref = cycle['forecast_year'], list(range(cycle['reference_years'][0], cycle['reference_years'][1] + 1))
     files = [*CODE, cycle_path, config_path, entry['benchmark_config'], cycle['project_config'], bench['cells']['path'],
              *[v['path'] for v in bench['regions'].values()]]
-    h = hashlib.sha256(json.dumps(dict(target=target, entry=entry), sort_keys=True).encode())
+    h = hashlib.sha256(json.dumps(dict(target=target, entry=entry, model=model), sort_keys=True).encode())
     for f in files:
         h.update(f.encode() + sha256(ROOT / f).encode())
     tc = target_config(project, target)
@@ -196,7 +214,8 @@ def figure(path, a, label, target, year, row):
     shape = (len(lat), len(lon))
     edges = lambda c: np.r_[c[0] - (c[1] - c[0]) / 2, (c[:-1] + c[1:]) / 2, c[-1] + (c[-1] - c[-2]) / 2]
     observed = a['observed'] is not None
-    rows = [('shadow', 'Shadow (EMOS)', a['q']), ('mvs_ensemble', 'MVS-corrected ensemble', a['eq'])]
+    short = SHORT.get(row['model'], row['model'])
+    rows = [('shadow', f'Shadow ({short})', a['q']), ('mvs_ensemble', 'MVS-corrected ensemble', a['eq'])]
     fig, axes = plt.subplots(2 + observed, 3, figsize=(10.5, 3.5 * (2 + observed)), squeeze=False, layout='constrained')
     vmax = np.nanpercentile(np.r_[a['q'][.9][country], a['eq'][.9][country]], 95)
     mask = lambda v: np.where(country, v, np.nan).reshape(shape)
@@ -219,7 +238,7 @@ def figure(path, a, label, target, year, row):
             pos = np.where(a['observed'] < qq[.1], 0., np.where(a['observed'] > qq[.9], 2., 1.))
             pos[~np.isfinite(qq[.1]) | ~np.isfinite(a['observed'])] = np.nan
             ax.pcolormesh(edges(lon), edges(lat), mask(pos), cmap=cmap, vmin=-.5, vmax=2.5)
-            ax.set_title(f"Observed vs the {'EMOS' if key == 'shadow' else 'MVS'} 10–90% range", fontsize=8.5)
+            ax.set_title(f"Observed vs the {short if key == 'shadow' else 'MVS'} 10–90% range", fontsize=8.5)
         fig.text(.5, 0, 'Bottom row, right: brown below the range, grey inside, green above. White: not modelled '
                  '(training mean below 1 mm) or outside Ethiopia.', ha='center', va='top', fontsize=8)
     for ax in axes.ravel():
@@ -246,25 +265,25 @@ def main(args):
     year = cycle['forecast_year']
     folder = folder_of(scfg, entry, year)
     folder.mkdir(parents=True, exist_ok=True)
-    model = scfg['model']
-    label = dc.MODELS[model].name
+    models = [scfg['model']] + ([m for m in selection_models(entry) if m != scfg['model']] if scfg.get('models_from_selection') else [])
     targets = args.targets or cycle['targets']
     prov = dict(commit=git('rev-parse', 'HEAD'),
                 uncommitted_changes=bool(git('status', '--porcelain', '--', *CODE, args.cycle, args.config, entry['benchmark_config'])))
     done = 0
-    for t in targets:
-        key = fingerprint(args.cycle, args.config, cycle, project, entry, t)
+    for model, t in [(m, t) for m in models for t in targets]:
+        label = dc.MODELS[model].name
+        key = fingerprint(args.cycle, args.config, cycle, project, entry, t, model)
         f = folder / f'{model}__{t}.json'
         if not args.no_resume and f.is_file() and json.loads(f.read_text(encoding='utf-8')).get('key') == key \
                 and (folder / f'shadow_{model}_{year}_{t}.png').is_file():
             continue
-        row, arrays = run_target(args.cycle, scfg, entry, t)
+        row, arrays = run_target(args.cycle, dict(scfg, model=model), entry, t)
         save_json(f, dict(key=key, label=label, target=t, cycle=Path(args.cycle).as_posix(), forecast_year=year,
                           reference_years=cycle['reference_years'], shadow=True, since=scfg['since'],
                           created_utc=datetime.now(timezone.utc).isoformat(), provenance=prov, **row))
         save_shadow(folder, model, label, year, t, row, arrays, Path(args.cycle).as_posix())
         fc = row['forecast']
-        line = (f"{t}: median {fc['shadow']['q50_mm']:.0f} mm, 10-90% {fc['shadow']['q10_mm']:.0f}-{fc['shadow']['q90_mm']:.0f} mm "
+        line = (f"{SHORT.get(model, model)} {t}: median {fc['shadow']['q50_mm']:.0f} mm, 10-90% {fc['shadow']['q10_mm']:.0f}-{fc['shadow']['q90_mm']:.0f} mm "
                 f"(MVS {fc['mvs_ensemble']['q10_mm']:.0f}-{fc['mvs_ensemble']['q90_mm']:.0f})")
         if row['observed']:
             s = row['scores'][row['primary_region']]

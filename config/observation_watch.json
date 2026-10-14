@@ -4,6 +4,9 @@
     "config/operational.json",
     "config/cycles/sep_2026_ondj.json"
   ],
-  "after_scoring": ["scripts/bias_recommend.py"],
+  "after_scoring": [
+    "scripts/bias_recommend.py",
+    "scripts/method_selection.py"
+  ],
   "status": "outputs/observation_watch/status.json"
 }

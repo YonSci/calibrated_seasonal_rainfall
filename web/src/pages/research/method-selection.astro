@@ -1,0 +1,72 @@
+---
+// The approach the platform selects for each season, target and product, from the historical and validation evidence.
+import Base from '../../layouts/Base.astro';
+import OnThisPage from '../../components/OnThisPage.astro';
+import { href, esc, cycleTitle, REPO } from '../../lib/data.js';
+import { C, url, defaultTarget } from '../../lib/cycles.js';
+import { SELECTION, STATUS_LABEL, selectionFor, fmt } from '../../lib/selection.js';
+
+const rule = SELECTION?.rule_contents;
+const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
+const seasons = (SELECTION?.cycles ?? []).map((s) => {
+  const [m, season] = s.name.split('_');
+  const cyc = [...C.cycles].reverse().find((c) => selectionFor(c)?.name === s.name);
+  const rows = Object.entries(s.targets);
+  const changes = rows.flatMap(([, p]) => Object.values(p)).filter((e) => e.status !== 'keep').length;
+  return { s, title: cycleTitle(INIT[m], season.toUpperCase()), cyc, rows, changes };
+});
+const total = seasons.reduce((a, x) => a + x.changes, 0);
+const recommended = (SELECTION?.cycles ?? []).flatMap((s) => Object.values(s.targets).flatMap((p) => Object.values(p))).filter((e) => e.status === 'recommended').length;
+const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainfall amounts']];
+const val = (e) => (e.validation && e.validation.seasons ? `${e.validation.seasons.length} of ${e.validation.required}` : e.status === 'keep' ? '—' : '0 of 3');
+---
+<Base title="Method selection" section="research" description="The bias-correction and probability-calibration approach the evidence supports for each season, target and product.">
+  <OnThisPage>
+    <h1>Method selection</h1>
+    <p>For each season, target and product the platform selects the approach the evidence supports, from every benchmark together:
+    the 13 rainfall-amount corrections (<a href={href('bias-correction/')}>bias correction</a>), the probability-stage methods and the
+    rainfall-distribution models (<a href={href('probability-calibration/')}>probability calibration</a>). It uses the
+    <strong>historical period</strong> (cross-validated 1993–2016, with the 2017 onward test years as a no-harm check) and the
+    <strong>independent validation seasons</strong> scored since. It is updated automatically each time a new season is scored.</p>
+    <p class="notice"><strong>A selection is advice for a decision.</strong> The published forecasts use the published approach
+    (Mean-Variance Scaling and the climatology blend) until a change is decided. {total} target–product combination{total === 1 ? '' : 's'} currently {total === 1 ? 'has' : 'have'} a selected change; {recommended === 0 ? 'none is recommended yet' : `${recommended} ${recommended === 1 ? 'is' : 'are'} recommended`}.</p>
+
+    <h2>How the selection works</h2>
+    <ol class="findings">
+      <li><strong>Candidate</strong>: a method is a candidate only if its benchmark confirms it better than the published approach — better over the training years with Holm-adjusted p &lt; 0.05 across every method and target of its family, and not worse over the test years.</li>
+      <li><strong>Choice</strong>: a recommended candidate first, then the largest improvement over the training years. One change at a time: an amount correction and a probability or distribution method were each tested against the published approach, not together.</li>
+      <li><strong>Validation</strong>: every candidate is scored on the seasons after the benchmark (every bias correction through the validation runs; every distribution-model candidate through its own shadow forecast). It becomes <em>recommended</em> after {rule?.validation.minimum_seasons ?? 3} seasons that are not worse, or <em>not supported</em> if worse.</li>
+    </ol>
+    <p class="caveat">{STATUS_LABEL.keep}: no method is confirmed better. {STATUS_LABEL.candidate}: confirmed historically, validation seasons being collected. {STATUS_LABEL.recommended}: confirmed and not worse over the validation seasons. {STATUS_LABEL.not_supported}: confirmed historically but worse over the validation seasons.</p>
+
+    {seasons.map(({ s, title, cyc, rows, changes }) => (
+      <section id={s.name}>
+        <h2>{title}</h2>
+        <p class="caveat">{changes} change{changes === 1 ? '' : 's'} selected · {cyc && <a href={url.target(cyc, cyc.default_view, defaultTarget(cyc))}>outlook</a>} · <a href={href(`bias-correction/${s.name}/`)}>bias-correction evidence</a> · <a href={href(`probability-calibration/${s.name}/`)}>probability-calibration evidence</a></p>
+        <div class="table-wrap"><table class="compact nosort">
+          <thead><tr><th scope="col">Target</th>{PRODUCTS.map(([, label]) => <th scope="col">{label}</th>)}</tr></thead>
+          <tbody>
+            {rows.map(([t, prods]) => (
+              <tr>
+                <td><strong>{t}</strong></td>
+                {PRODUCTS.map(([p]) => { const e = prods[p]; return (
+                  <td>{e.status !== 'keep' && <><strong>{e.selected.label}</strong>{' '}</>}<span class={`sel sel-${e.status}`}>{STATUS_LABEL[e.status]}</span>
+                    {e.status !== 'keep' && <><br /><span class="caveat">changes the {e.selected.stage} · validation {val(e)} seasons</span></>}</td>); })}
+              </tr>
+            ))}
+          </tbody>
+        </table></div>
+        {changes > 0 && (
+          <>
+            <h3>Evidence for the selected changes</h3>
+            <ul class="findings">
+              {rows.flatMap(([t, prods]) => PRODUCTS.filter(([p]) => prods[p].status !== 'keep').map(([p, label]) => (
+                <li><strong>{t}, {label.toLowerCase()}:</strong> {prods[p].why}</li>)))}
+            </ul>
+          </>
+        )}
+      </section>
+    ))}
+    <p class="caveat">Rule: <code>config/method_selection_rule.json</code> (fixed before further validation seasons are scored) · code: <a href={`${REPO}/blob/main/scripts/method_selection.py`}><code>scripts/method_selection.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/50_METHOD_SELECTION.md`}>docs/50</a>.</p>
+  </OnThisPage>
+</Base>

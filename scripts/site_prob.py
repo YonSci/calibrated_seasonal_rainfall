@@ -81,7 +81,8 @@ def load_all():
             f = p.parent / sub / 'benchmark.json'
             extra[key] = json.loads(f.read_text(encoding='utf-8')) if f.is_file() else None
         extra['shadow'] = {}                                   # amount/range shadow: {year: {target: record}}
-        for f in sorted(p.parent.glob('amount_shadow/*/*__*.json')):
+        shadow_model = json.loads((ROOT / SHADOW_CONFIG).read_text(encoding='utf-8'))['model']   # the configured model (EMOS)
+        for f in sorted(p.parent.glob(f'amount_shadow/*/{shadow_model}__*.json')):
             r = json.loads(f.read_text(encoding='utf-8'))
             extra['shadow'].setdefault(int(f.parent.name), {})[r['target']] = dict(r, folder=f.parent)
         out.append(dict(name=p.parent.name, folder=p.parent, data=d, init=project['initialization_month'], season=project['season']['name'],
