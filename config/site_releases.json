@@ -670,7 +670,7 @@
   {
     "id": "2026-10-15.2",
     "date": "2026-10-15",
-    "commit": null,
+    "commit": "16b2013",
     "title": "GrazFeediNG calibration (modified-Leung affine + Dirichlet) tested for ONDJ",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -686,6 +686,24 @@
       {
         "type": "display",
         "text": "Research > GrazFeediNG calibration: what the uploaded code does, the comparison, the fitted Dirichlet and the 2026 maps."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-15.3",
+    "date": "2026-10-15",
+    "commit": null,
+    "title": "GrazFeediNG: tercile-probability maps and reliability diagrams",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Research > GrazFeediNG calibration: maps of the below-, near- and above-normal probabilities of every pipeline for each ONDJ 2026 target next to the published ones (not published as a forecast), and reliability diagrams of every pipeline from the 1993-2016 cross-validated hindcasts and the 2017-2024 test years. The published forecasts are unchanged."
       }
     ]
   }
