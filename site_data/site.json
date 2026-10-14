@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-14 22:45 UTC",
- "code_commit": "87faf65",
- "release": "2026-10-15.3",
+ "built_utc": "2026-10-14 23:11 UTC",
+ "code_commit": "181c52a",
+ "release": "2026-10-15.4",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -697,7 +697,7 @@
   {
    "id": "2026-10-15.3",
    "date": "2026-10-15",
-   "commit": null,
+   "commit": "f57b5c0",
    "title": "GrazFeediNG: tercile-probability maps and reliability diagrams",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -709,6 +709,24 @@
     {
      "type": "display",
      "text": "Research > GrazFeediNG calibration: maps of the below-, near- and above-normal probabilities of every pipeline for each ONDJ 2026 target next to the published ones (not published as a forecast), and reliability diagrams of every pipeline from the 1993-2016 cross-validated hindcasts and the 2017-2024 test years. The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-15.4",
+   "date": "2026-10-15",
+   "commit": null,
+   "title": "GrazFeediNG: tercile outlook maps, ONDJ 2026/27",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Research > GrazFeediNG calibration: the rainfall tercile outlook of each GrazFeediNG pipeline for Oct, Nov, Dec, Jan and ONDJ 2026/27, drawn exactly as the published outlook map and shown next to it (not published as a forecast). The published forecasts are unchanged."
     }
    ]
   }
