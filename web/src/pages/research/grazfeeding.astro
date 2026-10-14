@@ -4,7 +4,9 @@ import Base from '../../layouts/Base.astro';
 import OnThisPage from '../../components/OnThisPage.astro';
 import Table from '../../components/Table.astro';
 import Figure from '../../components/Figure.astro';
-import { read, names, href, link, esc, signed, num, pct, years, cycleTitle, REPO } from '../../lib/data.js';
+import { read, names, href, link, asset, esc, signed, num, pct, years, cycleTitle, REPO } from '../../lib/data.js';
+import { C } from '../../lib/cycles.js';
+import { selectionFor } from '../../lib/selection.js';
 
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
 const cycles = names('grazfeeding').map((n) => ({ name: n, d: read(`grazfeeding/${n}.json`) }))
@@ -54,6 +56,19 @@ const forecastMaps = (assets) => {
   const order = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
   const rank = (l) => { const i = order.indexOf(l.split(' ')[0]); return i < 0 ? 99 : i; };
   return [...byKey.values()].sort((x, y) => rank(x.label) - rank(y.label));
+};
+// Tercile-outlook maps (scripts/grazfeeding_maps.py) next to the published outlook map of the same target
+const OUTLOOK = [['gf_full', 'GrazFeediNG as uploaded'], ['gf_no_dirichlet', 'Leung + counts (no Dirichlet)'],
+  ['iad_on_mvs', 'MVS + counts + IAD'], ['leung_blend', 'Leung + published blend']];
+const outlooks = (name, assets) => {
+  const cyc = [...C.cycles].reverse().find((c) => selectionFor(c)?.name === name);
+  if (!cyc) return [];
+  return cyc.targets.map((t) => ({
+    id: t.id, label: t.label,
+    maps: [['Published (MVS + climatology blend)', t.forecast?.all_ethiopia?.folder ? `${t.forecast.all_ethiopia.folder}/tercile_outlook.png` : null],
+      ...OUTLOOK.map(([k, l]) => [l, `assets/grazfeeding/${name}/outlook/${k}/${t.id}.png`])].filter(([, a]) => a && (a.startsWith('assets/maps/') || assets.includes(a))),
+  })).filter((x) => x.maps.length > 1)
+    .sort((a, b) => (a.id.length > 3) - (b.id.length > 3));
 };
 const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' / ') : '—');
 ---
@@ -114,6 +129,22 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
         <p class="caveat">A equal to the identity and b equal to 0 leave the probabilities unchanged. Share of 2017+ forecast members using the pooled climatology
         (members beyond the 25 of the hindcast): {Object.values(d.targets).map((r) => pct(r.iad?.test?.leung_pooled_member_share)).filter((x) => x !== '—')[0] ?? '—'}.</p>
 
+        {outlooks(name, d.assets).length > 0 && (
+          <>
+            <h3 id={`${name}-outlook`}>Tercile outlook maps, {outlooks(name, d.assets).at(-1).label} (not published)</h3>
+            <p class="caveat">The rainfall tercile outlook of each pipeline, drawn exactly as the published outlook map (same smoothing, classes and
+            colours): the favoured tercile where it reaches 40%, white where no tercile reaches 40%. The published map comes first.</p>
+            {outlooks(name, d.assets).map((x, i, all) => (
+              <details open={i === all.length - 1}><summary>{x.label}</summary>
+                <div class="outlook-grid">
+                  {x.maps.map(([l, a]) => (
+                    <figure><a href={asset(a)} target="_blank" rel="noopener"><img loading="lazy" src={asset(a)} alt={`${x.label} tercile outlook: ${l}`} /></a>
+                      <figcaption class="caveat">{l}</figcaption></figure>))}
+                </div>
+              </details>
+            ))}
+          </>
+        )}
         {forecastMaps(d.assets).length > 0 && (
           <>
             <h3 id={`${name}-forecast`}>The forecast year: tercile probabilities of each pipeline (not published)</h3>
@@ -137,4 +168,9 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
     <a href={`${REPO}/blob/main/scripts/grazfeeding_benchmark.py`}><code>scripts/grazfeeding_benchmark.py</code></a>, <code>leung_affine</code> in
     <a href={`${REPO}/blob/main/scripts/bias_methods.py`}><code>scripts/bias_methods.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/51_GRAZFEEDING.md`}>docs/51</a>.</p>
   </OnThisPage>
+  <style>
+    .outlook-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;margin:8px 0 16px}
+    .outlook-grid figure{margin:0}
+    .outlook-grid img{width:100%;height:auto;border:1px solid var(--line, #ddd)}
+  </style>
 </Base>

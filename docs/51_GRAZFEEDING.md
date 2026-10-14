@@ -134,6 +134,11 @@ selected for January amounts because its confirmed improvement is larger (−0.4
   south and east) with weaker probabilities. Where the published maps are blank the cells are too dry for terciles
   (mostly January: 1 029 of 1 484 cells are scored); the GrazFeediNG pipelines give values there, but every pipeline is
   scored on the same cells.
+- **Tercile outlook maps** (`forecast/outlook/<pipeline>/<target>.png`, `scripts/grazfeeding_maps.py`): the published
+  "rainfall tercile outlook" figure (same interpolation, smoothing, classes, colours and legend as
+  `presentation_layers.py`) drawn for each pipeline, All Ethiopia, shown on the site next to the published map of the same
+  target. For ONDJ 2026/27 the uploaded pipeline keeps below normal in the west (40–50%) and above normal in the south and
+  east (mostly 40–50%, 50–60% in the far south), and leaves the central highlands and the north without a favoured tercile.
 
 ## 5. Place in the method selection
 
@@ -144,6 +149,11 @@ independent seasons), so a candidate stays a candidate until one is added; the p
 ## 6. Running
 
     python scripts/grazfeeding_benchmark.py --config config/grazfeeding/sep_ondj.json --workers 2
+
+The outlook maps are drawn afterwards from the forecast files:
+
+    set CALIBRATION_CYCLE=config\cycles\sep_2026_ondj.json
+    python scripts/grazfeeding_maps.py --name sep_ondj
 
 Checkpoints per target in `outputs/grazfeeding/sep_ondj/parts/` (keyed on inputs, code and configuration). Outputs:
 `benchmark.json` (scores per year, reliability sums, tests, fitted IAD parameters, provenance), `figures/grazfeeding_summary.png`,

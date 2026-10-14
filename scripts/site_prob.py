@@ -134,6 +134,10 @@ def export_grazfeeding(out_dir):
                 d = out_dir / kind / 'grazfeeding' / name / f.name
                 d.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(f, d)
+        for f in sorted((src / 'forecast/outlook').glob('*/*.png')):       # tercile-outlook maps (grazfeeding_maps.py)
+            d = out_dir / 'assets/grazfeeding' / name / 'outlook' / f.parent.name / f.name
+            d.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, d)
         d = out_dir / 'downloads/grazfeeding' / name / 'benchmark.json'
         d.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(folder, d)
