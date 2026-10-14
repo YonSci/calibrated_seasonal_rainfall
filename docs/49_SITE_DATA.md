@@ -61,6 +61,9 @@ current site.
 | Page | Content | Source |
 | --- | --- | --- |
 | `/next/` | overview: current release, cycles, research benchmarks | `site.json`, `cycles.json` |
+| `/next/outlooks/<cycle>/<area>/<target>/` | outlook (probabilities, amounts, signal, historical skill), all targets, map viewer (forecast and verification maps), official-outlook comparison, cycle record | `cycles.json`, `data/<cycle>_comparison.json` |
+| `/next/outlooks/<cycle>/<area>/verification/` | forecast vs observed chart and the per-target verification narratives | `cycles.json` |
+| `/next/outlooks/<cycle>/<area>/history/` | historical skill, the verification explorer (by year, reliability, signal strength, Brier, amounts; both periods), regions | `cycles.json`, `data/<cycle>_diagnostics.json` |
 | `/next/probability-calibration/` and `/<cycle>/` | plan, Phases 1–3, the amount/range shadow, downloads | `probcal/<cycle>.json` |
 | `/next/bias-correction/` and `/<cycle>/` | suggestion, evidence, interpretation, data and methods, screening, confirmation, ratio limits, shadow, validation, figure browser, downloads, provenance | `bias/<cycle>.json` |
 | `/next/downloads/` | every data file with size and SHA-256 | `files.json` |
@@ -69,7 +72,9 @@ current site.
 Pages only display what the Python build decided: every ✓, confirmation and interpretation statement comes from the data
 (the bias-correction interpretation statements are computed by `site_bias.findings` and exported as text). When ported, the
 benchmark pages were checked number by number against the current page: every signed score on the eight cycle pages is
-identical (582–641 values per bias-correction page).
+identical (582–641 values per bias-correction page). The outlook pages carry the current page's rendering code, ported to
+build time; for every cycle, area and target the text of each section (outlook, targets, comparison, record, verification,
+historical skill, regions and the explorer in both periods) was compared with the current page rendered in a browser.
 
 Preview locally (Git Bash needs `MSYS_NO_PATHCONV=1` so the base path is not rewritten):
 
@@ -81,9 +86,9 @@ cd ../site && python -m http.server 8765        # then open http://127.0.0.1:876
 
 ## 4. Next steps
 
-1. Move the forecast outlooks, maps and verification (the cycle selector) to Astro pages, with React components where a
-   page is interactive.
-2. Make the Astro pages the site root, and retire the HTML generation in `build_site.py`, `site_bias.py` and `site_prob.py`;
+1. ✓ Forecast outlooks, maps, verification and historical performance (one page per cycle, area and target).
+2. Rainfall domains, methods and the cycle download packages.
+3. Make the Astro pages the site root, and retire the HTML generation in `build_site.py`, `site_bias.py` and `site_prob.py`;
    the Python build keeps producing the results, figures, downloads and `site_data/`.
 
 A server back end is not planned: everything shown is precomputed. Should on-demand queries be needed (e.g. a time series at

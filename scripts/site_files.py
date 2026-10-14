@@ -59,14 +59,27 @@ def gh(*args, check=True):
     return subprocess.run(['gh', *args], cwd=ROOT, capture_output=True, text=True, check=check)
 
 
+def release_view():
+    """(state, asset names): state 'ok', 'missing' (GitHub says the release does not exist) or 'unreachable'."""
+    for _ in range(3):
+        r = gh('release', 'view', TAG, '--repo', REPO, '--json', 'assets', '--jq', '.assets[].name', check=False)
+        if r.returncode == 0:
+            return 'ok', set(r.stdout.split())
+        if 'not found' in (r.stderr or '').lower():
+            return 'missing', None
+    return 'unreachable', None
+
+
 def remote_assets():
     """Names of the assets of the release, or None when the release does not exist or GitHub cannot be reached."""
-    r = gh('release', 'view', TAG, '--repo', REPO, '--json', 'assets', '--jq', '.assets[].name', check=False)
-    return set(r.stdout.split()) if r.returncode == 0 else None
+    return release_view()[1]
 
 
 def ensure_release():
-    if remote_assets() is None:
+    state, _ = release_view()
+    if state == 'unreachable':
+        raise RuntimeError('GitHub could not be reached to check the release "site-files"; nothing was uploaded')
+    if state == 'missing':
         gh('release', 'create', TAG, '--repo', REPO, '--title', 'Site download files',
            '--notes', 'Data downloads of the results site (NetCDF, JSON, PDF, CSV), content-addressed: an asset never changes once '
                       'uploaded. Linked from the site; see scripts/site_files.py and config/site_files.json.',

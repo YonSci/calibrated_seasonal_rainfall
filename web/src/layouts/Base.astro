@@ -4,6 +4,7 @@ import { SITE, ROOT, href, asset, REPO } from '../lib/data.js';
 const { title, description = '', section = '' } = Astro.props;
 const nav = [
   ['', 'Overview'],
+  ['outlooks/', 'Outlooks'],
   ['probability-calibration/', 'Probability calibration'],
   ['bias-correction/', 'Bias correction'],
   ['downloads/', 'Downloads'],
@@ -20,6 +21,7 @@ const nav = [
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href={asset('assets/style.css')}>
+  <slot name="head" />
   <style is:global>
     .top .nav nav a[aria-current="page"]{color:var(--accent);font-weight:600}
     .preview{background:var(--accent-soft);padding:6px 0;font-size:.85rem}
@@ -31,6 +33,8 @@ const nav = [
     .cards a.box:hover{border-color:var(--accent)}
     .toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.9rem;margin:8px 0 4px}
     figure.map-figure img{max-width:100%;height:auto}
+    a.chip{text-decoration:none;display:inline-block;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+    a.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
   </style>
 </head>
 <body>
@@ -39,10 +43,10 @@ const nav = [
       <a class="brand" href={href('')}>Ethiopia Seasonal Rainfall</a>
       <nav aria-label="Sections">
         {nav.map(([p, label]) => <a href={href(p)} aria-current={section === p ? 'page' : undefined}>{label}</a>)}
-        <a href={ROOT}>Outlooks (current page)</a>
+        <a href={ROOT}>Current page</a>
       </nav>
     </div>
-    <div class="preview"><div class="wrap">New site, being built page by page from the same results. Forecast outlooks, maps and verification are on the <a href={ROOT}>current page</a> until they move here.</div></div>
+    <div class="preview"><div class="wrap">New site, built page by page from the same results. Still only on the <a href={ROOT}>current page</a>: rainfall domains, methods and the cycle download packages.</div></div>
   </header>
   <main class="wrap">
     <slot />

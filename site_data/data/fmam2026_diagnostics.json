@@ -1,0 +1,9231 @@
+{
+ "created_utc": "2026-10-10T23:43:12.876894+00:00",
+ "areas": [
+  "all_ethiopia",
+  "fmam_rainfall_domain",
+  "fmam_main_season_domain"
+ ],
+ "targets": {
+  "Feb": {
+   "training": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1265,
+       "rps_blend": 0.4697,
+       "rps_climatology": 0.529,
+       "rpss": 0.1121,
+       "coverage": 0.853
+      },
+      {
+       "year": 1994,
+       "cells": 1267,
+       "rps_blend": 0.522,
+       "rps_climatology": 0.4799,
+       "rpss": -0.0878,
+       "coverage": 0.8543
+      },
+      {
+       "year": 1995,
+       "cells": 1268,
+       "rps_blend": 0.4532,
+       "rps_climatology": 0.4849,
+       "rpss": 0.0655,
+       "coverage": 0.855
+      },
+      {
+       "year": 1996,
+       "cells": 1268,
+       "rps_blend": 0.4218,
+       "rps_climatology": 0.4124,
+       "rpss": -0.0227,
+       "coverage": 0.855
+      },
+      {
+       "year": 1997,
+       "cells": 1268,
+       "rps_blend": 0.4928,
+       "rps_climatology": 0.503,
+       "rpss": 0.0202,
+       "coverage": 0.855
+      },
+      {
+       "year": 1998,
+       "cells": 1266,
+       "rps_blend": 0.4443,
+       "rps_climatology": 0.503,
+       "rpss": 0.1167,
+       "coverage": 0.8536
+      },
+      {
+       "year": 1999,
+       "cells": 1267,
+       "rps_blend": 0.4492,
+       "rps_climatology": 0.4591,
+       "rpss": 0.0215,
+       "coverage": 0.8543
+      },
+      {
+       "year": 2000,
+       "cells": 1264,
+       "rps_blend": 0.5147,
+       "rps_climatology": 0.5226,
+       "rpss": 0.0151,
+       "coverage": 0.8523
+      },
+      {
+       "year": 2001,
+       "cells": 1268,
+       "rps_blend": 0.3727,
+       "rps_climatology": 0.3821,
+       "rpss": 0.0245,
+       "coverage": 0.855
+      },
+      {
+       "year": 2002,
+       "cells": 1267,
+       "rps_blend": 0.4588,
+       "rps_climatology": 0.4437,
+       "rpss": -0.0341,
+       "coverage": 0.8543
+      },
+      {
+       "year": 2003,
+       "cells": 1259,
+       "rps_blend": 0.4688,
+       "rps_climatology": 0.4802,
+       "rpss": 0.0237,
+       "coverage": 0.849
+      },
+      {
+       "year": 2004,
+       "cells": 1267,
+       "rps_blend": 0.3902,
+       "rps_climatology": 0.3809,
+       "rpss": -0.0243,
+       "coverage": 0.8543
+      },
+      {
+       "year": 2005,
+       "cells": 1267,
+       "rps_blend": 0.4289,
+       "rps_climatology": 0.4015,
+       "rpss": -0.0681,
+       "coverage": 0.8543
+      },
+      {
+       "year": 2006,
+       "cells": 1259,
+       "rps_blend": 0.4257,
+       "rps_climatology": 0.4701,
+       "rpss": 0.0945,
+       "coverage": 0.8489
+      },
+      {
+       "year": 2007,
+       "cells": 1263,
+       "rps_blend": 0.4277,
+       "rps_climatology": 0.4661,
+       "rpss": 0.0825,
+       "coverage": 0.8516
+      },
+      {
+       "year": 2008,
+       "cells": 1267,
+       "rps_blend": 0.4728,
+       "rps_climatology": 0.4707,
+       "rpss": -0.0044,
+       "coverage": 0.8543
+      },
+      {
+       "year": 2009,
+       "cells": 1265,
+       "rps_blend": 0.399,
+       "rps_climatology": 0.4009,
+       "rpss": 0.0048,
+       "coverage": 0.8529
+      },
+      {
+       "year": 2010,
+       "cells": 1206,
+       "rps_blend": 0.4268,
+       "rps_climatology": 0.5161,
+       "rpss": 0.1731,
+       "coverage": 0.813
+      },
+      {
+       "year": 2011,
+       "cells": 1267,
+       "rps_blend": 0.3749,
+       "rps_climatology": 0.3869,
+       "rpss": 0.0311,
+       "coverage": 0.8543
+      },
+      {
+       "year": 2012,
+       "cells": 1268,
+       "rps_blend": 0.4314,
+       "rps_climatology": 0.4662,
+       "rpss": 0.0748,
+       "coverage": 0.855
+      },
+      {
+       "year": 2013,
+       "cells": 1267,
+       "rps_blend": 0.4924,
+       "rps_climatology": 0.4384,
+       "rpss": -0.1231,
+       "coverage": 0.8543
+      },
+      {
+       "year": 2014,
+       "cells": 1266,
+       "rps_blend": 0.3893,
+       "rps_climatology": 0.414,
+       "rpss": 0.0596,
+       "coverage": 0.8536
+      },
+      {
+       "year": 2015,
+       "cells": 1268,
+       "rps_blend": 0.4253,
+       "rps_climatology": 0.4167,
+       "rpss": -0.0205,
+       "coverage": 0.855
+      },
+      {
+       "year": 2016,
+       "cells": 1259,
+       "rps_blend": 0.4265,
+       "rps_climatology": 0.4416,
+       "rpss": 0.0343,
+       "coverage": 0.8489
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1951,
+        "observed": 1.0,
+        "count": 7
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2631,
+        "observed": 0.3187,
+        "count": 16105
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3463,
+        "observed": 0.3309,
+        "count": 10574
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4292,
+        "observed": 0.532,
+        "count": 3616
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5099,
+        "observed": 0.4971,
+        "count": 14
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2612,
+        "observed": 0.2745,
+        "count": 12036
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3483,
+        "observed": 0.3019,
+        "count": 11515
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4357,
+        "observed": 0.3734,
+        "count": 6758
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5038,
+        "observed": 0.1429,
+        "count": 7
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2862,
+        "observed": 0.1199,
+        "count": 5880
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3457,
+        "observed": 0.3782,
+        "count": 19000
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4237,
+        "observed": 0.5321,
+        "count": 3210
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5139,
+        "observed": 0.3778,
+        "count": 2226
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.4773,
+       "count": 14485
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.4483,
+       "count": 13584
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0744,
+       "count": 2247
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2251,
+       0.2139,
+       0.2157
+      ],
+      "climatology": [
+       0.2271,
+       0.2127,
+       0.2258
+      ],
+      "bss": [
+       0.0089,
+       -0.0053,
+       0.0448
+      ]
+     },
+     "cell_years": 30316,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 0.8517
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1021,
+       "rps_blend": 0.4774,
+       "rps_climatology": 0.5367,
+       "rpss": 0.1105,
+       "coverage": 0.9114
+      },
+      {
+       "year": 1994,
+       "cells": 1022,
+       "rps_blend": 0.54,
+       "rps_climatology": 0.4934,
+       "rpss": -0.0944,
+       "coverage": 0.9123
+      },
+      {
+       "year": 1995,
+       "cells": 1022,
+       "rps_blend": 0.4621,
+       "rps_climatology": 0.4989,
+       "rpss": 0.0736,
+       "coverage": 0.9123
+      },
+      {
+       "year": 1996,
+       "cells": 1022,
+       "rps_blend": 0.4354,
+       "rps_climatology": 0.4239,
+       "rpss": -0.0271,
+       "coverage": 0.9123
+      },
+      {
+       "year": 1997,
+       "cells": 1022,
+       "rps_blend": 0.4962,
+       "rps_climatology": 0.5062,
+       "rpss": 0.0197,
+       "coverage": 0.9123
+      },
+      {
+       "year": 1998,
+       "cells": 1022,
+       "rps_blend": 0.437,
+       "rps_climatology": 0.5055,
+       "rpss": 0.1354,
+       "coverage": 0.9123
+      },
+      {
+       "year": 1999,
+       "cells": 1021,
+       "rps_blend": 0.4475,
+       "rps_climatology": 0.4503,
+       "rpss": 0.0062,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2000,
+       "cells": 1018,
+       "rps_blend": 0.5254,
+       "rps_climatology": 0.5282,
+       "rpss": 0.0052,
+       "coverage": 0.9087
+      },
+      {
+       "year": 2001,
+       "cells": 1022,
+       "rps_blend": 0.3702,
+       "rps_climatology": 0.3783,
+       "rpss": 0.0212,
+       "coverage": 0.9123
+      },
+      {
+       "year": 2002,
+       "cells": 1021,
+       "rps_blend": 0.473,
+       "rps_climatology": 0.4552,
+       "rpss": -0.039,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2003,
+       "cells": 1021,
+       "rps_blend": 0.462,
+       "rps_climatology": 0.4682,
+       "rpss": 0.0132,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2004,
+       "cells": 1021,
+       "rps_blend": 0.3883,
+       "rps_climatology": 0.3701,
+       "rpss": -0.0492,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2005,
+       "cells": 1022,
+       "rps_blend": 0.4133,
+       "rps_climatology": 0.3857,
+       "rpss": -0.0716,
+       "coverage": 0.9123
+      },
+      {
+       "year": 2006,
+       "cells": 1013,
+       "rps_blend": 0.4233,
+       "rps_climatology": 0.4768,
+       "rpss": 0.1121,
+       "coverage": 0.9042
+      },
+      {
+       "year": 2007,
+       "cells": 1021,
+       "rps_blend": 0.4095,
+       "rps_climatology": 0.4558,
+       "rpss": 0.1016,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2008,
+       "cells": 1021,
+       "rps_blend": 0.4639,
+       "rps_climatology": 0.4563,
+       "rpss": -0.0168,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2009,
+       "cells": 1019,
+       "rps_blend": 0.3816,
+       "rps_climatology": 0.3924,
+       "rpss": 0.0276,
+       "coverage": 0.9096
+      },
+      {
+       "year": 2010,
+       "cells": 961,
+       "rps_blend": 0.4342,
+       "rps_climatology": 0.5369,
+       "rpss": 0.1914,
+       "coverage": 0.8577
+      },
+      {
+       "year": 2011,
+       "cells": 1021,
+       "rps_blend": 0.3567,
+       "rps_climatology": 0.3671,
+       "rpss": 0.0286,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2012,
+       "cells": 1022,
+       "rps_blend": 0.4271,
+       "rps_climatology": 0.4584,
+       "rpss": 0.0683,
+       "coverage": 0.9123
+      },
+      {
+       "year": 2013,
+       "cells": 1021,
+       "rps_blend": 0.5003,
+       "rps_climatology": 0.4345,
+       "rpss": -0.1515,
+       "coverage": 0.9114
+      },
+      {
+       "year": 2014,
+       "cells": 1020,
+       "rps_blend": 0.3911,
+       "rps_climatology": 0.4197,
+       "rpss": 0.068,
+       "coverage": 0.9105
+      },
+      {
+       "year": 2015,
+       "cells": 1022,
+       "rps_blend": 0.4233,
+       "rps_climatology": 0.4136,
+       "rpss": -0.0234,
+       "coverage": 0.9123
+      },
+      {
+       "year": 2016,
+       "cells": 1013,
+       "rps_blend": 0.4461,
+       "rps_climatology": 0.4581,
+       "rpss": 0.0262,
+       "coverage": 0.9042
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1951,
+        "observed": 1.0,
+        "count": 7
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2626,
+        "observed": 0.3207,
+        "count": 14232
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3444,
+        "observed": 0.3326,
+        "count": 7577
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4304,
+        "observed": 0.5463,
+        "count": 2609
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.508,
+        "observed": 0.0,
+        "count": 6
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2597,
+        "observed": 0.2736,
+        "count": 9090
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3488,
+        "observed": 0.2983,
+        "count": 9416
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4357,
+        "observed": 0.3722,
+        "count": 5918
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5038,
+        "observed": 0.1429,
+        "count": 7
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2861,
+        "observed": 0.1085,
+        "count": 4882
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3456,
+        "observed": 0.3812,
+        "count": 14705
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4242,
+        "observed": 0.5443,
+        "count": 2668
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5139,
+        "observed": 0.3784,
+        "count": 2176
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.4516,
+       "count": 11047
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.4586,
+       "count": 11195
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0898,
+       "count": 2189
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2256,
+       0.2143,
+       0.2154
+      ],
+      "climatology": [
+       0.2271,
+       0.2127,
+       0.2258
+      ],
+      "bss": [
+       0.0067,
+       -0.0071,
+       0.0458
+      ]
+     },
+     "cell_years": 24431,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 0.9087
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 500,
+       "rps_blend": 0.4696,
+       "rps_climatology": 0.5304,
+       "rpss": 0.1146,
+       "coverage": 0.8726
+      },
+      {
+       "year": 1994,
+       "cells": 500,
+       "rps_blend": 0.5698,
+       "rps_climatology": 0.5042,
+       "rpss": -0.1301,
+       "coverage": 0.8726
+      },
+      {
+       "year": 1995,
+       "cells": 500,
+       "rps_blend": 0.462,
+       "rps_climatology": 0.5012,
+       "rpss": 0.0782,
+       "coverage": 0.8726
+      },
+      {
+       "year": 1996,
+       "cells": 500,
+       "rps_blend": 0.4532,
+       "rps_climatology": 0.4256,
+       "rpss": -0.0648,
+       "coverage": 0.8726
+      },
+      {
+       "year": 1997,
+       "cells": 500,
+       "rps_blend": 0.4976,
+       "rps_climatology": 0.4995,
+       "rpss": 0.0036,
+       "coverage": 0.8726
+      },
+      {
+       "year": 1998,
+       "cells": 500,
+       "rps_blend": 0.4606,
+       "rps_climatology": 0.5176,
+       "rpss": 0.1102,
+       "coverage": 0.8726
+      },
+      {
+       "year": 1999,
+       "cells": 500,
+       "rps_blend": 0.4446,
+       "rps_climatology": 0.4192,
+       "rpss": -0.0606,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2000,
+       "cells": 498,
+       "rps_blend": 0.553,
+       "rps_climatology": 0.5274,
+       "rpss": -0.0486,
+       "coverage": 0.8691
+      },
+      {
+       "year": 2001,
+       "cells": 500,
+       "rps_blend": 0.3829,
+       "rps_climatology": 0.3878,
+       "rpss": 0.0127,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2002,
+       "cells": 500,
+       "rps_blend": 0.5285,
+       "rps_climatology": 0.4877,
+       "rpss": -0.0836,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2003,
+       "cells": 500,
+       "rps_blend": 0.4977,
+       "rps_climatology": 0.4516,
+       "rpss": -0.1019,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2004,
+       "cells": 500,
+       "rps_blend": 0.4109,
+       "rps_climatology": 0.372,
+       "rpss": -0.1044,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2005,
+       "cells": 500,
+       "rps_blend": 0.4179,
+       "rps_climatology": 0.4071,
+       "rpss": -0.0266,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2006,
+       "cells": 493,
+       "rps_blend": 0.4394,
+       "rps_climatology": 0.5142,
+       "rpss": 0.1455,
+       "coverage": 0.8604
+      },
+      {
+       "year": 2007,
+       "cells": 500,
+       "rps_blend": 0.3496,
+       "rps_climatology": 0.3819,
+       "rpss": 0.0847,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2008,
+       "cells": 500,
+       "rps_blend": 0.4564,
+       "rps_climatology": 0.4388,
+       "rpss": -0.0401,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2009,
+       "cells": 498,
+       "rps_blend": 0.397,
+       "rps_climatology": 0.4176,
+       "rpss": 0.0494,
+       "coverage": 0.8691
+      },
+      {
+       "year": 2010,
+       "cells": 444,
+       "rps_blend": 0.4282,
+       "rps_climatology": 0.5429,
+       "rpss": 0.2113,
+       "coverage": 0.7749
+      },
+      {
+       "year": 2011,
+       "cells": 500,
+       "rps_blend": 0.3274,
+       "rps_climatology": 0.3389,
+       "rpss": 0.034,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2012,
+       "cells": 500,
+       "rps_blend": 0.4061,
+       "rps_climatology": 0.4239,
+       "rpss": 0.042,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2013,
+       "cells": 500,
+       "rps_blend": 0.5266,
+       "rps_climatology": 0.4347,
+       "rpss": -0.2115,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2014,
+       "cells": 499,
+       "rps_blend": 0.3924,
+       "rps_climatology": 0.4212,
+       "rpss": 0.0684,
+       "coverage": 0.8708
+      },
+      {
+       "year": 2015,
+       "cells": 500,
+       "rps_blend": 0.4199,
+       "rps_climatology": 0.4084,
+       "rpss": -0.0282,
+       "coverage": 0.8726
+      },
+      {
+       "year": 2016,
+       "cells": 492,
+       "rps_blend": 0.4936,
+       "rps_climatology": 0.4993,
+       "rpss": 0.0115,
+       "coverage": 0.8586
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1951,
+        "observed": 1.0,
+        "count": 7
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2598,
+        "observed": 0.3392,
+        "count": 8097
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3488,
+        "observed": 0.3104,
+        "count": 2354
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4363,
+        "observed": 0.4507,
+        "count": 1460
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.508,
+        "observed": 0.0,
+        "count": 6
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2469,
+        "observed": 0.2899,
+        "count": 5096
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3549,
+        "observed": 0.2823,
+        "count": 3420
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4358,
+        "observed": 0.3652,
+        "count": 3408
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.287,
+        "observed": 0.1367,
+        "count": 2249
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3434,
+        "observed": 0.3697,
+        "count": 6573
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4227,
+        "observed": 0.5558,
+        "count": 1042
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5139,
+        "observed": 0.3752,
+        "count": 2060
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.3311,
+       "count": 3948
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.496,
+       "count": 5910
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.173,
+       "count": 2066
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2299,
+       0.2164,
+       0.2194
+      ],
+      "climatology": [
+       0.2267,
+       0.2136,
+       0.2255
+      ],
+      "bss": [
+       -0.0141,
+       -0.0132,
+       0.0268
+      ]
+     },
+     "cell_years": 11924,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 0.8671
+    }
+   },
+   "operational": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1262,
+       "rps_blend": 0.4136,
+       "rps_climatology": 0.4733,
+       "rpss": 0.1261,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2018,
+       "cells": 1262,
+       "rps_blend": 0.5204,
+       "rps_climatology": 0.5175,
+       "rpss": -0.0056,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2019,
+       "cells": 1262,
+       "rps_blend": 0.4159,
+       "rps_climatology": 0.4221,
+       "rpss": 0.0147,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2020,
+       "cells": 1262,
+       "rps_blend": 0.3932,
+       "rps_climatology": 0.4014,
+       "rpss": 0.0205,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2021,
+       "cells": 1262,
+       "rps_blend": 0.4519,
+       "rps_climatology": 0.4231,
+       "rpss": -0.0682,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2022,
+       "cells": 1262,
+       "rps_blend": 0.3784,
+       "rps_climatology": 0.3885,
+       "rpss": 0.0261,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2023,
+       "cells": 1262,
+       "rps_blend": 0.3447,
+       "rps_climatology": 0.3482,
+       "rpss": 0.01,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2024,
+       "cells": 1262,
+       "rps_blend": 0.4519,
+       "rps_climatology": 0.4733,
+       "rpss": 0.0451,
+       "coverage": 0.8509
+      },
+      {
+       "year": 2025,
+       "cells": 1262,
+       "rps_blend": 0.4135,
+       "rps_climatology": 0.4209,
+       "rpss": 0.0177,
+       "coverage": 0.8509
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2539,
+        "observed": 0.154,
+        "count": 6177
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3526,
+        "observed": 0.1324,
+        "count": 4051
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4239,
+        "observed": 0.2254,
+        "count": 1130
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2708,
+        "observed": 0.3375,
+        "count": 3085
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3445,
+        "observed": 0.34,
+        "count": 4864
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4428,
+        "observed": 0.4659,
+        "count": 3381
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5025,
+        "observed": 0.4997,
+        "count": 28
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2822,
+        "observed": 0.3525,
+        "count": 2780
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3401,
+        "observed": 0.5108,
+        "count": 7455
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4243,
+        "observed": 0.6692,
+        "count": 352
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5065,
+        "observed": 0.3994,
+        "count": 771
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.5009,
+       "count": 5696
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.4285,
+       "count": 4863
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0707,
+       "count": 799
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1559,
+       0.2326,
+       0.2645
+      ],
+      "climatology": [
+       0.1622,
+       0.2369,
+       0.2676
+      ],
+      "bss": [
+       0.039,
+       0.018,
+       0.0116
+      ]
+     },
+     "cell_years": 11358,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 0.8509
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1016,
+       "rps_blend": 0.4041,
+       "rps_climatology": 0.4562,
+       "rpss": 0.1141,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2018,
+       "cells": 1016,
+       "rps_blend": 0.5204,
+       "rps_climatology": 0.5168,
+       "rpss": -0.0069,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2019,
+       "cells": 1016,
+       "rps_blend": 0.4054,
+       "rps_climatology": 0.4079,
+       "rpss": 0.0063,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2020,
+       "cells": 1016,
+       "rps_blend": 0.3989,
+       "rps_climatology": 0.4075,
+       "rpss": 0.0211,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2021,
+       "cells": 1016,
+       "rps_blend": 0.4296,
+       "rps_climatology": 0.4098,
+       "rpss": -0.0482,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2022,
+       "cells": 1016,
+       "rps_blend": 0.3769,
+       "rps_climatology": 0.3923,
+       "rpss": 0.0392,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2023,
+       "cells": 1016,
+       "rps_blend": 0.3281,
+       "rps_climatology": 0.3313,
+       "rpss": 0.0095,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2024,
+       "cells": 1016,
+       "rps_blend": 0.4415,
+       "rps_climatology": 0.4659,
+       "rpss": 0.0524,
+       "coverage": 0.9069
+      },
+      {
+       "year": 2025,
+       "cells": 1016,
+       "rps_blend": 0.3987,
+       "rps_climatology": 0.4124,
+       "rpss": 0.0333,
+       "coverage": 0.9069
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2528,
+        "observed": 0.1602,
+        "count": 5385
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3518,
+        "observed": 0.1417,
+        "count": 2884
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.424,
+        "observed": 0.2643,
+        "count": 875
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2684,
+        "observed": 0.3674,
+        "count": 2321
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3452,
+        "observed": 0.3565,
+        "count": 3857
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4432,
+        "observed": 0.4817,
+        "count": 2943
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5021,
+        "observed": 0.4782,
+        "count": 23
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2824,
+        "observed": 0.3277,
+        "count": 2373
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3409,
+        "observed": 0.4784,
+        "count": 5742
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4258,
+        "observed": 0.5966,
+        "count": 276
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5065,
+        "observed": 0.3917,
+        "count": 753
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.4669,
+       "count": 4274
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.448,
+       "count": 4094
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0851,
+       "count": 776
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1577,
+       0.2396,
+       0.2538
+      ],
+      "climatology": [
+       0.1659,
+       0.2445,
+       0.2564
+      ],
+      "bss": [
+       0.0495,
+       0.0197,
+       0.0098
+      ]
+     },
+     "cell_years": 9144,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 0.9069
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 495,
+       "rps_blend": 0.3424,
+       "rps_climatology": 0.3764,
+       "rpss": 0.0904,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2018,
+       "cells": 495,
+       "rps_blend": 0.5116,
+       "rps_climatology": 0.5124,
+       "rpss": 0.0015,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2019,
+       "cells": 495,
+       "rps_blend": 0.4059,
+       "rps_climatology": 0.3863,
+       "rpss": -0.0507,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2020,
+       "cells": 495,
+       "rps_blend": 0.4239,
+       "rps_climatology": 0.4184,
+       "rpss": -0.0132,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2021,
+       "cells": 495,
+       "rps_blend": 0.4138,
+       "rps_climatology": 0.4027,
+       "rpss": -0.0274,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2022,
+       "cells": 495,
+       "rps_blend": 0.3457,
+       "rps_climatology": 0.3859,
+       "rpss": 0.1042,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2023,
+       "cells": 495,
+       "rps_blend": 0.3346,
+       "rps_climatology": 0.3261,
+       "rpss": -0.0262,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2024,
+       "cells": 495,
+       "rps_blend": 0.4219,
+       "rps_climatology": 0.4377,
+       "rpss": 0.0361,
+       "coverage": 0.8639
+      },
+      {
+       "year": 2025,
+       "cells": 495,
+       "rps_blend": 0.3897,
+       "rps_climatology": 0.3885,
+       "rpss": -0.0029,
+       "coverage": 0.8639
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2489,
+        "observed": 0.1902,
+        "count": 3055
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3574,
+        "observed": 0.2011,
+        "count": 956
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4251,
+        "observed": 0.2095,
+        "count": 444
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2611,
+        "observed": 0.4264,
+        "count": 1579
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3523,
+        "observed": 0.4303,
+        "count": 1225
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4425,
+        "observed": 0.5019,
+        "count": 1649
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5065,
+        "observed": 0.0,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2849,
+        "observed": 0.2983,
+        "count": 942
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3394,
+        "observed": 0.3632,
+        "count": 2694
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4325,
+        "observed": 0.3702,
+        "count": 108
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5065,
+        "observed": 0.3672,
+        "count": 711
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.3456,
+       "count": 1541
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.4943,
+       "count": 2201
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.1601,
+       "count": 713
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1687,
+       0.2602,
+       0.2301
+      ],
+      "climatology": [
+       0.1759,
+       0.2629,
+       0.2279
+      ],
+      "bss": [
+       0.0408,
+       0.0103,
+       -0.0096
+      ]
+     },
+     "cell_years": 4455,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 0.8639
+    }
+   }
+  },
+  "Mar": {
+   "training": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1464,
+       "rps_blend": 0.5177,
+       "rps_climatology": 0.4866,
+       "rpss": -0.0639,
+       "coverage": 0.9866
+      },
+      {
+       "year": 1994,
+       "cells": 1464,
+       "rps_blend": 0.4708,
+       "rps_climatology": 0.4591,
+       "rpss": -0.0256,
+       "coverage": 0.9866
+      },
+      {
+       "year": 1995,
+       "cells": 1462,
+       "rps_blend": 0.4847,
+       "rps_climatology": 0.496,
+       "rpss": 0.0226,
+       "coverage": 0.9853
+      },
+      {
+       "year": 1996,
+       "cells": 1462,
+       "rps_blend": 0.5129,
+       "rps_climatology": 0.5152,
+       "rpss": 0.0043,
+       "coverage": 0.9853
+      },
+      {
+       "year": 1997,
+       "cells": 1462,
+       "rps_blend": 0.4259,
+       "rps_climatology": 0.4461,
+       "rpss": 0.0453,
+       "coverage": 0.9853
+      },
+      {
+       "year": 1998,
+       "cells": 1461,
+       "rps_blend": 0.4138,
+       "rps_climatology": 0.4101,
+       "rpss": -0.0092,
+       "coverage": 0.9846
+      },
+      {
+       "year": 1999,
+       "cells": 1464,
+       "rps_blend": 0.5119,
+       "rps_climatology": 0.5008,
+       "rpss": -0.0221,
+       "coverage": 0.9866
+      },
+      {
+       "year": 2000,
+       "cells": 1464,
+       "rps_blend": 0.5414,
+       "rps_climatology": 0.5325,
+       "rpss": -0.0167,
+       "coverage": 0.9866
+      },
+      {
+       "year": 2001,
+       "cells": 1462,
+       "rps_blend": 0.404,
+       "rps_climatology": 0.4075,
+       "rpss": 0.0086,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2002,
+       "cells": 1462,
+       "rps_blend": 0.3852,
+       "rps_climatology": 0.3955,
+       "rpss": 0.026,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2003,
+       "cells": 1462,
+       "rps_blend": 0.403,
+       "rps_climatology": 0.4008,
+       "rpss": -0.0056,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2004,
+       "cells": 1463,
+       "rps_blend": 0.4083,
+       "rps_climatology": 0.4188,
+       "rpss": 0.0251,
+       "coverage": 0.986
+      },
+      {
+       "year": 2005,
+       "cells": 1461,
+       "rps_blend": 0.4389,
+       "rps_climatology": 0.4356,
+       "rpss": -0.0077,
+       "coverage": 0.9846
+      },
+      {
+       "year": 2006,
+       "cells": 1462,
+       "rps_blend": 0.4498,
+       "rps_climatology": 0.4377,
+       "rpss": -0.0276,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2007,
+       "cells": 1463,
+       "rps_blend": 0.3754,
+       "rps_climatology": 0.3792,
+       "rpss": 0.0101,
+       "coverage": 0.986
+      },
+      {
+       "year": 2008,
+       "cells": 1464,
+       "rps_blend": 0.5015,
+       "rps_climatology": 0.5057,
+       "rpss": 0.0083,
+       "coverage": 0.9866
+      },
+      {
+       "year": 2009,
+       "cells": 1463,
+       "rps_blend": 0.3814,
+       "rps_climatology": 0.3853,
+       "rpss": 0.0099,
+       "coverage": 0.986
+      },
+      {
+       "year": 2010,
+       "cells": 1464,
+       "rps_blend": 0.4873,
+       "rps_climatology": 0.502,
+       "rpss": 0.0293,
+       "coverage": 0.9866
+      },
+      {
+       "year": 2011,
+       "cells": 1463,
+       "rps_blend": 0.466,
+       "rps_climatology": 0.4656,
+       "rpss": -0.0009,
+       "coverage": 0.986
+      },
+      {
+       "year": 2012,
+       "cells": 1464,
+       "rps_blend": 0.4687,
+       "rps_climatology": 0.4779,
+       "rpss": 0.0193,
+       "coverage": 0.9866
+      },
+      {
+       "year": 2013,
+       "cells": 1462,
+       "rps_blend": 0.4742,
+       "rps_climatology": 0.4896,
+       "rpss": 0.0314,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2014,
+       "cells": 1462,
+       "rps_blend": 0.4724,
+       "rps_climatology": 0.4617,
+       "rpss": -0.0232,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2015,
+       "cells": 1460,
+       "rps_blend": 0.4208,
+       "rps_climatology": 0.4354,
+       "rpss": 0.0335,
+       "coverage": 0.984
+      },
+      {
+       "year": 2016,
+       "cells": 1461,
+       "rps_blend": 0.4359,
+       "rps_climatology": 0.4293,
+       "rpss": -0.0154,
+       "coverage": 0.9846
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2952,
+        "observed": 0.3018,
+        "count": 1559
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3381,
+        "observed": 0.3498,
+        "count": 33493
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4048,
+        "observed": 0.4278,
+        "count": 49
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2853,
+        "observed": 0.2406,
+        "count": 9789
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3294,
+        "observed": 0.3319,
+        "count": 25310
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4024,
+        "observed": 0.0,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2944,
+        "observed": 0.0,
+        "count": 1
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3436,
+        "observed": 0.3472,
+        "count": 33734
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4236,
+        "observed": 0.3131,
+        "count": 1366
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9594,
+       "count": 33684
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0406,
+       "count": 1417
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2262,
+       0.211,
+       0.226
+      ],
+      "climatology": [
+       0.2268,
+       0.2125,
+       0.2262
+      ],
+      "bss": [
+       0.0029,
+       0.0073,
+       0.001
+      ]
+     },
+     "cell_years": 35101,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 0.9857
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1117,
+       "rps_blend": 0.5412,
+       "rps_climatology": 0.4976,
+       "rpss": -0.0876,
+       "coverage": 0.9973
+      },
+      {
+       "year": 1994,
+       "cells": 1117,
+       "rps_blend": 0.4465,
+       "rps_climatology": 0.4406,
+       "rpss": -0.0133,
+       "coverage": 0.9973
+      },
+      {
+       "year": 1995,
+       "cells": 1117,
+       "rps_blend": 0.4891,
+       "rps_climatology": 0.5011,
+       "rpss": 0.0238,
+       "coverage": 0.9973
+      },
+      {
+       "year": 1996,
+       "cells": 1117,
+       "rps_blend": 0.5072,
+       "rps_climatology": 0.507,
+       "rpss": -0.0004,
+       "coverage": 0.9973
+      },
+      {
+       "year": 1997,
+       "cells": 1117,
+       "rps_blend": 0.4284,
+       "rps_climatology": 0.4473,
+       "rpss": 0.0424,
+       "coverage": 0.9973
+      },
+      {
+       "year": 1998,
+       "cells": 1117,
+       "rps_blend": 0.4054,
+       "rps_climatology": 0.4013,
+       "rpss": -0.0102,
+       "coverage": 0.9973
+      },
+      {
+       "year": 1999,
+       "cells": 1117,
+       "rps_blend": 0.5052,
+       "rps_climatology": 0.4934,
+       "rpss": -0.024,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2000,
+       "cells": 1117,
+       "rps_blend": 0.5378,
+       "rps_climatology": 0.5302,
+       "rpss": -0.0143,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2001,
+       "cells": 1117,
+       "rps_blend": 0.4125,
+       "rps_climatology": 0.4135,
+       "rpss": 0.0025,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2002,
+       "cells": 1117,
+       "rps_blend": 0.3894,
+       "rps_climatology": 0.3971,
+       "rpss": 0.0192,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2003,
+       "cells": 1117,
+       "rps_blend": 0.4143,
+       "rps_climatology": 0.4096,
+       "rpss": -0.0114,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2004,
+       "cells": 1117,
+       "rps_blend": 0.4035,
+       "rps_climatology": 0.4178,
+       "rpss": 0.0343,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2005,
+       "cells": 1117,
+       "rps_blend": 0.4274,
+       "rps_climatology": 0.4253,
+       "rpss": -0.005,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2006,
+       "cells": 1117,
+       "rps_blend": 0.441,
+       "rps_climatology": 0.4274,
+       "rpss": -0.0319,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2007,
+       "cells": 1117,
+       "rps_blend": 0.3729,
+       "rps_climatology": 0.3765,
+       "rpss": 0.0097,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2008,
+       "cells": 1117,
+       "rps_blend": 0.4924,
+       "rps_climatology": 0.4951,
+       "rpss": 0.0055,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2009,
+       "cells": 1117,
+       "rps_blend": 0.3835,
+       "rps_climatology": 0.3852,
+       "rpss": 0.0045,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2010,
+       "cells": 1117,
+       "rps_blend": 0.4983,
+       "rps_climatology": 0.5177,
+       "rpss": 0.0374,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2011,
+       "cells": 1117,
+       "rps_blend": 0.4881,
+       "rps_climatology": 0.4848,
+       "rpss": -0.0068,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2012,
+       "cells": 1117,
+       "rps_blend": 0.4747,
+       "rps_climatology": 0.4879,
+       "rpss": 0.0271,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2013,
+       "cells": 1117,
+       "rps_blend": 0.4733,
+       "rps_climatology": 0.4935,
+       "rpss": 0.0408,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2014,
+       "cells": 1117,
+       "rps_blend": 0.4681,
+       "rps_climatology": 0.4547,
+       "rpss": -0.0295,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2015,
+       "cells": 1117,
+       "rps_blend": 0.4333,
+       "rps_climatology": 0.4466,
+       "rpss": 0.0299,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2016,
+       "cells": 1117,
+       "rps_blend": 0.4291,
+       "rps_climatology": 0.4202,
+       "rpss": -0.0212,
+       "coverage": 0.9973
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2952,
+        "observed": 0.2867,
+        "count": 1064
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3395,
+        "observed": 0.3493,
+        "count": 25700
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4049,
+        "observed": 0.4309,
+        "count": 44
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2845,
+        "observed": 0.2431,
+        "count": 8057
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.327,
+        "observed": 0.3341,
+        "count": 18749
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4024,
+        "observed": 0.0,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2944,
+        "observed": 0.0,
+        "count": 1
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.344,
+        "observed": 0.3482,
+        "count": 25489
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4237,
+        "observed": 0.3101,
+        "count": 1318
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.949,
+       "count": 25444
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.051,
+       "count": 1364
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2261,
+       0.2109,
+       0.2265
+      ],
+      "climatology": [
+       0.2266,
+       0.2126,
+       0.2264
+      ],
+      "bss": [
+       0.0019,
+       0.0083,
+       -0.0003
+      ]
+     },
+     "cell_years": 26808,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 0.9973
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 573,
+       "rps_blend": 0.577,
+       "rps_climatology": 0.5114,
+       "rpss": -0.1284,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 573,
+       "rps_blend": 0.4764,
+       "rps_climatology": 0.4671,
+       "rpss": -0.0198,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 573,
+       "rps_blend": 0.4996,
+       "rps_climatology": 0.5197,
+       "rpss": 0.0386,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 573,
+       "rps_blend": 0.4774,
+       "rps_climatology": 0.4736,
+       "rpss": -0.0082,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 573,
+       "rps_blend": 0.4446,
+       "rps_climatology": 0.4692,
+       "rpss": 0.0525,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 573,
+       "rps_blend": 0.387,
+       "rps_climatology": 0.3817,
+       "rpss": -0.0138,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 573,
+       "rps_blend": 0.5602,
+       "rps_climatology": 0.5368,
+       "rpss": -0.0436,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 573,
+       "rps_blend": 0.5496,
+       "rps_climatology": 0.533,
+       "rpss": -0.031,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 573,
+       "rps_blend": 0.3554,
+       "rps_climatology": 0.3529,
+       "rpss": -0.0073,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 573,
+       "rps_blend": 0.4012,
+       "rps_climatology": 0.4098,
+       "rpss": 0.0209,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 573,
+       "rps_blend": 0.4602,
+       "rps_climatology": 0.4491,
+       "rpss": -0.0247,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 573,
+       "rps_blend": 0.3926,
+       "rps_climatology": 0.411,
+       "rpss": 0.0446,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 573,
+       "rps_blend": 0.383,
+       "rps_climatology": 0.3907,
+       "rpss": 0.0199,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 573,
+       "rps_blend": 0.3931,
+       "rps_climatology": 0.3847,
+       "rpss": -0.0218,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 573,
+       "rps_blend": 0.3358,
+       "rps_climatology": 0.3406,
+       "rpss": 0.0141,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 573,
+       "rps_blend": 0.4801,
+       "rps_climatology": 0.4675,
+       "rpss": -0.0268,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 573,
+       "rps_blend": 0.3688,
+       "rps_climatology": 0.3684,
+       "rpss": -0.0011,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 573,
+       "rps_blend": 0.5113,
+       "rps_climatology": 0.5395,
+       "rpss": 0.0523,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 573,
+       "rps_blend": 0.5311,
+       "rps_climatology": 0.5236,
+       "rpss": -0.0142,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 573,
+       "rps_blend": 0.4799,
+       "rps_climatology": 0.4901,
+       "rpss": 0.0209,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 573,
+       "rps_blend": 0.4959,
+       "rps_climatology": 0.5288,
+       "rpss": 0.0623,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 573,
+       "rps_blend": 0.4899,
+       "rps_climatology": 0.48,
+       "rpss": -0.0207,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 573,
+       "rps_blend": 0.4455,
+       "rps_climatology": 0.4523,
+       "rpss": 0.0151,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 573,
+       "rps_blend": 0.3891,
+       "rps_climatology": 0.3801,
+       "rpss": -0.0238,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2952,
+        "observed": 0.2954,
+        "count": 701
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3358,
+        "observed": 0.3509,
+        "count": 13034
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4049,
+        "observed": 0.1176,
+        "count": 17
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2828,
+        "observed": 0.2487,
+        "count": 4881
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3286,
+        "observed": 0.3408,
+        "count": 8869
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4024,
+        "observed": 0.0,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2944,
+        "observed": 0.0,
+        "count": 1
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3488,
+        "observed": 0.347,
+        "count": 12805
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4222,
+        "observed": 0.3062,
+        "count": 946
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9298,
+       "count": 12787
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0702,
+       "count": 965
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2276,
+       0.2112,
+       0.2259
+      ],
+      "climatology": [
+       0.2268,
+       0.2132,
+       0.2257
+      ],
+      "bss": [
+       -0.0033,
+       0.0091,
+       -0.0009
+      ]
+     },
+     "cell_years": 13752,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    }
+   },
+   "operational": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1462,
+       "rps_blend": 0.4053,
+       "rps_climatology": 0.4016,
+       "rpss": -0.0091,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2018,
+       "cells": 1462,
+       "rps_blend": 0.4812,
+       "rps_climatology": 0.492,
+       "rpss": 0.022,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2019,
+       "cells": 1462,
+       "rps_blend": 0.4363,
+       "rps_climatology": 0.43,
+       "rpss": -0.0147,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2020,
+       "cells": 1462,
+       "rps_blend": 0.4661,
+       "rps_climatology": 0.4753,
+       "rpss": 0.0193,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2021,
+       "cells": 1462,
+       "rps_blend": 0.4383,
+       "rps_climatology": 0.4504,
+       "rpss": 0.0268,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2022,
+       "cells": 1462,
+       "rps_blend": 0.4355,
+       "rps_climatology": 0.4459,
+       "rpss": 0.0234,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2023,
+       "cells": 1462,
+       "rps_blend": 0.483,
+       "rps_climatology": 0.4982,
+       "rpss": 0.0306,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2024,
+       "cells": 1462,
+       "rps_blend": 0.4157,
+       "rps_climatology": 0.4027,
+       "rpss": -0.0323,
+       "coverage": 0.9853
+      },
+      {
+       "year": 2025,
+       "cells": 1462,
+       "rps_blend": 0.4564,
+       "rps_climatology": 0.4525,
+       "rpss": -0.0085,
+       "coverage": 0.9853
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2929,
+        "observed": 0.3187,
+        "count": 3557
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3385,
+        "observed": 0.2768,
+        "count": 9601
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2945,
+        "observed": 0.1938,
+        "count": 578
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3414,
+        "observed": 0.3221,
+        "count": 12290
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.404,
+        "observed": 0.3529,
+        "count": 290
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2985,
+        "observed": 0.372,
+        "count": 134
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3309,
+        "observed": 0.3908,
+        "count": 12618
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4138,
+        "observed": 0.5272,
+        "count": 406
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9471,
+       "count": 12462
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0529,
+       "count": 696
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2065,
+       0.2157,
+       0.2399
+      ],
+      "climatology": [
+       0.2071,
+       0.2168,
+       0.2427
+      ],
+      "bss": [
+       0.0031,
+       0.0053,
+       0.0115
+      ]
+     },
+     "cell_years": 13158,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 0.9853
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1117,
+       "rps_blend": 0.407,
+       "rps_climatology": 0.4039,
+       "rpss": -0.0078,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2018,
+       "cells": 1117,
+       "rps_blend": 0.4792,
+       "rps_climatology": 0.4921,
+       "rpss": 0.0261,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2019,
+       "cells": 1117,
+       "rps_blend": 0.4231,
+       "rps_climatology": 0.4188,
+       "rpss": -0.0101,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2020,
+       "cells": 1117,
+       "rps_blend": 0.4745,
+       "rps_climatology": 0.4839,
+       "rpss": 0.0194,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2021,
+       "cells": 1117,
+       "rps_blend": 0.4346,
+       "rps_climatology": 0.4454,
+       "rpss": 0.0242,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2022,
+       "cells": 1117,
+       "rps_blend": 0.4416,
+       "rps_climatology": 0.4563,
+       "rpss": 0.0323,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2023,
+       "cells": 1117,
+       "rps_blend": 0.5168,
+       "rps_climatology": 0.5332,
+       "rpss": 0.0309,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2024,
+       "cells": 1117,
+       "rps_blend": 0.4027,
+       "rps_climatology": 0.3906,
+       "rpss": -0.0311,
+       "coverage": 0.9973
+      },
+      {
+       "year": 2025,
+       "cells": 1117,
+       "rps_blend": 0.4562,
+       "rps_climatology": 0.4556,
+       "rpss": -0.0013,
+       "coverage": 0.9973
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2928,
+        "observed": 0.287,
+        "count": 2444
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3379,
+        "observed": 0.2545,
+        "count": 7609
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2945,
+        "observed": 0.1982,
+        "count": 555
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3399,
+        "observed": 0.3128,
+        "count": 9377
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4033,
+        "observed": 0.3403,
+        "count": 121
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2992,
+        "observed": 0.2216,
+        "count": 72
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3319,
+        "observed": 0.4285,
+        "count": 9584
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4138,
+        "observed": 0.524,
+        "count": 397
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9485,
+       "count": 9535
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0515,
+       "count": 518
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1973,
+       0.2118,
+       0.2511
+      ],
+      "climatology": [
+       0.1986,
+       0.2134,
+       0.2547
+      ],
+      "bss": [
+       0.0063,
+       0.0073,
+       0.0143
+      ]
+     },
+     "cell_years": 10053,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 0.9973
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 573,
+       "rps_blend": 0.4142,
+       "rps_climatology": 0.4048,
+       "rpss": -0.0232,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 573,
+       "rps_blend": 0.4874,
+       "rps_climatology": 0.5103,
+       "rpss": 0.0449,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 573,
+       "rps_blend": 0.4004,
+       "rps_climatology": 0.3939,
+       "rpss": -0.0164,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 573,
+       "rps_blend": 0.504,
+       "rps_climatology": 0.5231,
+       "rpss": 0.0366,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 573,
+       "rps_blend": 0.3613,
+       "rps_climatology": 0.3669,
+       "rpss": 0.0152,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 573,
+       "rps_blend": 0.4184,
+       "rps_climatology": 0.4391,
+       "rpss": 0.0471,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 573,
+       "rps_blend": 0.5321,
+       "rps_climatology": 0.555,
+       "rpss": 0.0413,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 573,
+       "rps_blend": 0.3711,
+       "rps_climatology": 0.36,
+       "rpss": -0.0309,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 573,
+       "rps_blend": 0.4812,
+       "rps_climatology": 0.4871,
+       "rpss": 0.0121,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2928,
+        "observed": 0.2409,
+        "count": 1662
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3337,
+        "observed": 0.1645,
+        "count": 3495
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2949,
+        "observed": 0.2082,
+        "count": 413
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3406,
+        "observed": 0.3286,
+        "count": 4705
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4029,
+        "observed": 0.4632,
+        "count": 39
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2993,
+        "observed": 0.2495,
+        "count": 8
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3383,
+        "observed": 0.4891,
+        "count": 4891
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4136,
+        "observed": 0.535,
+        "count": 258
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9424,
+       "count": 4860
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0576,
+       "count": 297
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1719,
+       0.2161,
+       0.2693
+      ],
+      "climatology": [
+       0.1741,
+       0.2178,
+       0.2748
+      ],
+      "bss": [
+       0.013,
+       0.0078,
+       0.0201
+      ]
+     },
+     "cell_years": 5157,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    }
+   }
+  },
+  "Apr": {
+   "training": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1484,
+       "rps_blend": 0.4886,
+       "rps_climatology": 0.4842,
+       "rpss": -0.0092,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 1484,
+       "rps_blend": 0.4259,
+       "rps_climatology": 0.4321,
+       "rpss": 0.0145,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 1484,
+       "rps_blend": 0.4627,
+       "rps_climatology": 0.4673,
+       "rpss": 0.0099,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 1484,
+       "rps_blend": 0.4041,
+       "rps_climatology": 0.4133,
+       "rpss": 0.0224,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 1484,
+       "rps_blend": 0.4998,
+       "rps_climatology": 0.4952,
+       "rpss": -0.0094,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 1484,
+       "rps_blend": 0.466,
+       "rps_climatology": 0.4349,
+       "rpss": -0.0715,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 1484,
+       "rps_blend": 0.4747,
+       "rps_climatology": 0.4684,
+       "rpss": -0.0134,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 1484,
+       "rps_blend": 0.4423,
+       "rps_climatology": 0.4615,
+       "rpss": 0.0416,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 1484,
+       "rps_blend": 0.4377,
+       "rps_climatology": 0.4507,
+       "rpss": 0.029,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 1484,
+       "rps_blend": 0.3954,
+       "rps_climatology": 0.4113,
+       "rpss": 0.0386,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 1484,
+       "rps_blend": 0.4612,
+       "rps_climatology": 0.4613,
+       "rpss": 0.0003,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 1484,
+       "rps_blend": 0.4404,
+       "rps_climatology": 0.4311,
+       "rpss": -0.0214,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 1484,
+       "rps_blend": 0.393,
+       "rps_climatology": 0.3935,
+       "rpss": 0.0013,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 1484,
+       "rps_blend": 0.5075,
+       "rps_climatology": 0.4538,
+       "rpss": -0.1184,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 1484,
+       "rps_blend": 0.3956,
+       "rps_climatology": 0.3979,
+       "rpss": 0.006,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 1484,
+       "rps_blend": 0.4968,
+       "rps_climatology": 0.4871,
+       "rpss": -0.0199,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 1484,
+       "rps_blend": 0.4291,
+       "rps_climatology": 0.4427,
+       "rpss": 0.0307,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 1484,
+       "rps_blend": 0.4199,
+       "rps_climatology": 0.4413,
+       "rpss": 0.0486,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 1484,
+       "rps_blend": 0.4928,
+       "rps_climatology": 0.5043,
+       "rpss": 0.0228,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 1484,
+       "rps_blend": 0.4234,
+       "rps_climatology": 0.4291,
+       "rpss": 0.0133,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 1484,
+       "rps_blend": 0.4823,
+       "rps_climatology": 0.4732,
+       "rpss": -0.0191,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 1484,
+       "rps_blend": 0.489,
+       "rps_climatology": 0.497,
+       "rpss": 0.0161,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 1484,
+       "rps_blend": 0.5227,
+       "rps_climatology": 0.5152,
+       "rpss": -0.0144,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 1484,
+       "rps_blend": 0.4136,
+       "rps_climatology": 0.4319,
+       "rpss": 0.0424,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2756,
+        "observed": 0.3132,
+        "count": 3578
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3484,
+        "observed": 0.3556,
+        "count": 29662
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4218,
+        "observed": 0.296,
+        "count": 2376
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1957,
+        "observed": 0.0,
+        "count": 3
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2779,
+        "observed": 0.2644,
+        "count": 15413
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3355,
+        "observed": 0.3343,
+        "count": 18905
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4329,
+        "observed": 0.3894,
+        "count": 1241
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5184,
+        "observed": 0.167,
+        "count": 54
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2829,
+        "observed": 0.3021,
+        "count": 4110
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3438,
+        "observed": 0.3509,
+        "count": 30080
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4178,
+        "observed": 0.3917,
+        "count": 1425
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5028,
+        "observed": 0.0,
+        "count": 1
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.8574,
+       "count": 30519
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.1411,
+       "count": 5042
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0015,
+       "count": 55
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2278,
+       0.2102,
+       0.2249
+      ],
+      "climatology": [
+       0.2267,
+       0.2122,
+       0.2266
+      ],
+      "bss": [
+       -0.0049,
+       0.0097,
+       0.0075
+      ]
+     },
+     "cell_years": 35616,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1120,
+       "rps_blend": 0.4847,
+       "rps_climatology": 0.4769,
+       "rpss": -0.0163,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 1120,
+       "rps_blend": 0.4354,
+       "rps_climatology": 0.4403,
+       "rpss": 0.011,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 1120,
+       "rps_blend": 0.4847,
+       "rps_climatology": 0.4835,
+       "rpss": -0.0024,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 1120,
+       "rps_blend": 0.3984,
+       "rps_climatology": 0.4045,
+       "rpss": 0.0151,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 1120,
+       "rps_blend": 0.5083,
+       "rps_climatology": 0.4986,
+       "rpss": -0.0195,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 1120,
+       "rps_blend": 0.4755,
+       "rps_climatology": 0.4427,
+       "rpss": -0.0743,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 1120,
+       "rps_blend": 0.4993,
+       "rps_climatology": 0.4851,
+       "rpss": -0.0292,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 1120,
+       "rps_blend": 0.4402,
+       "rps_climatology": 0.4496,
+       "rpss": 0.0208,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 1120,
+       "rps_blend": 0.4387,
+       "rps_climatology": 0.454,
+       "rpss": 0.0337,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 1120,
+       "rps_blend": 0.4098,
+       "rps_climatology": 0.426,
+       "rpss": 0.0381,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 1120,
+       "rps_blend": 0.4534,
+       "rps_climatology": 0.4482,
+       "rpss": -0.0115,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 1120,
+       "rps_blend": 0.441,
+       "rps_climatology": 0.4331,
+       "rpss": -0.0182,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 1120,
+       "rps_blend": 0.3883,
+       "rps_climatology": 0.3876,
+       "rpss": -0.0019,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 1120,
+       "rps_blend": 0.5218,
+       "rps_climatology": 0.4533,
+       "rpss": -0.1512,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 1120,
+       "rps_blend": 0.389,
+       "rps_climatology": 0.3862,
+       "rpss": -0.007,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 1120,
+       "rps_blend": 0.4857,
+       "rps_climatology": 0.4785,
+       "rpss": -0.0149,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 1120,
+       "rps_blend": 0.4389,
+       "rps_climatology": 0.4502,
+       "rpss": 0.0252,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 1120,
+       "rps_blend": 0.4144,
+       "rps_climatology": 0.4404,
+       "rpss": 0.059,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 1120,
+       "rps_blend": 0.4953,
+       "rps_climatology": 0.5118,
+       "rpss": 0.0323,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 1120,
+       "rps_blend": 0.398,
+       "rps_climatology": 0.4062,
+       "rpss": 0.0201,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 1120,
+       "rps_blend": 0.4922,
+       "rps_climatology": 0.48,
+       "rpss": -0.0253,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 1120,
+       "rps_blend": 0.4794,
+       "rps_climatology": 0.4925,
+       "rpss": 0.0266,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 1120,
+       "rps_blend": 0.505,
+       "rps_climatology": 0.5085,
+       "rpss": 0.0068,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 1120,
+       "rps_blend": 0.4215,
+       "rps_climatology": 0.443,
+       "rpss": 0.0486,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2769,
+        "observed": 0.3358,
+        "count": 2247
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3483,
+        "observed": 0.3546,
+        "count": 22824
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4221,
+        "observed": 0.2723,
+        "count": 1809
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1957,
+        "observed": 0.0,
+        "count": 3
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2782,
+        "observed": 0.2663,
+        "count": 11933
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3345,
+        "observed": 0.3364,
+        "count": 14235
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4328,
+        "observed": 0.3552,
+        "count": 682
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5123,
+        "observed": 0.0372,
+        "count": 27
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2834,
+        "observed": 0.336,
+        "count": 2801
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3436,
+        "observed": 0.347,
+        "count": 22941
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4178,
+        "observed": 0.3768,
+        "count": 1137
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5028,
+        "observed": 0.0,
+        "count": 1
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.8645,
+       "count": 23224
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.1345,
+       "count": 3628
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.001,
+       "count": 28
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2284,
+       0.2105,
+       0.2257
+      ],
+      "climatology": [
+       0.2267,
+       0.2121,
+       0.2266
+      ],
+      "bss": [
+       -0.0074,
+       0.0079,
+       0.0041
+      ]
+     },
+     "cell_years": 26880,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 573,
+       "rps_blend": 0.4742,
+       "rps_climatology": 0.4602,
+       "rpss": -0.0305,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 573,
+       "rps_blend": 0.4356,
+       "rps_climatology": 0.4431,
+       "rpss": 0.0168,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 573,
+       "rps_blend": 0.4768,
+       "rps_climatology": 0.4762,
+       "rpss": -0.0014,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 573,
+       "rps_blend": 0.3974,
+       "rps_climatology": 0.4056,
+       "rpss": 0.0201,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 573,
+       "rps_blend": 0.539,
+       "rps_climatology": 0.5279,
+       "rpss": -0.0211,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 573,
+       "rps_blend": 0.4734,
+       "rps_climatology": 0.4425,
+       "rpss": -0.0699,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 573,
+       "rps_blend": 0.5104,
+       "rps_climatology": 0.48,
+       "rpss": -0.0635,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 573,
+       "rps_blend": 0.4936,
+       "rps_climatology": 0.5056,
+       "rpss": 0.0237,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 573,
+       "rps_blend": 0.4205,
+       "rps_climatology": 0.4326,
+       "rpss": 0.0279,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 573,
+       "rps_blend": 0.4137,
+       "rps_climatology": 0.4321,
+       "rpss": 0.0424,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 573,
+       "rps_blend": 0.4398,
+       "rps_climatology": 0.4345,
+       "rpss": -0.0122,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 573,
+       "rps_blend": 0.4115,
+       "rps_climatology": 0.4066,
+       "rpss": -0.0121,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 573,
+       "rps_blend": 0.3735,
+       "rps_climatology": 0.3704,
+       "rpss": -0.0085,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 573,
+       "rps_blend": 0.5243,
+       "rps_climatology": 0.4432,
+       "rpss": -0.1828,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 573,
+       "rps_blend": 0.3661,
+       "rps_climatology": 0.3647,
+       "rpss": -0.0037,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 573,
+       "rps_blend": 0.4713,
+       "rps_climatology": 0.4676,
+       "rpss": -0.008,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 573,
+       "rps_blend": 0.4341,
+       "rps_climatology": 0.4455,
+       "rpss": 0.0255,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 573,
+       "rps_blend": 0.4037,
+       "rps_climatology": 0.431,
+       "rpss": 0.0634,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 573,
+       "rps_blend": 0.5343,
+       "rps_climatology": 0.5458,
+       "rpss": 0.021,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 573,
+       "rps_blend": 0.3746,
+       "rps_climatology": 0.3901,
+       "rpss": 0.0398,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 573,
+       "rps_blend": 0.5245,
+       "rps_climatology": 0.5256,
+       "rpss": 0.0021,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 573,
+       "rps_blend": 0.499,
+       "rps_climatology": 0.5284,
+       "rpss": 0.0555,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 573,
+       "rps_blend": 0.4806,
+       "rps_climatology": 0.4959,
+       "rpss": 0.0309,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 573,
+       "rps_blend": 0.4076,
+       "rps_climatology": 0.4364,
+       "rpss": 0.066,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2784,
+        "observed": 0.3327,
+        "count": 1165
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3464,
+        "observed": 0.3577,
+        "count": 11870
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4216,
+        "observed": 0.2135,
+        "count": 717
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2806,
+        "observed": 0.235,
+        "count": 5250
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3348,
+        "observed": 0.3469,
+        "count": 8134
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4321,
+        "observed": 0.3514,
+        "count": 356
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5145,
+        "observed": 0.0,
+        "count": 12
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2852,
+        "observed": 0.3654,
+        "count": 1506
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3427,
+        "observed": 0.3444,
+        "count": 11824
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4156,
+        "observed": 0.384,
+        "count": 422
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.8908,
+       "count": 12245
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.1084,
+       "count": 1495
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0009,
+       "count": 12
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2282,
+       0.2086,
+       0.2251
+      ],
+      "climatology": [
+       0.2269,
+       0.2116,
+       0.2269
+      ],
+      "bss": [
+       -0.0057,
+       0.0142,
+       0.0078
+      ]
+     },
+     "cell_years": 13752,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    }
+   },
+   "operational": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1484,
+       "rps_blend": 0.4333,
+       "rps_climatology": 0.4544,
+       "rpss": 0.0465,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 1484,
+       "rps_blend": 0.4853,
+       "rps_climatology": 0.4997,
+       "rpss": 0.0288,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 1484,
+       "rps_blend": 0.471,
+       "rps_climatology": 0.4695,
+       "rpss": -0.0033,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 1484,
+       "rps_blend": 0.5101,
+       "rps_climatology": 0.4851,
+       "rpss": -0.0515,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 1484,
+       "rps_blend": 0.3648,
+       "rps_climatology": 0.3696,
+       "rpss": 0.013,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 1484,
+       "rps_blend": 0.4856,
+       "rps_climatology": 0.4613,
+       "rpss": -0.0526,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 1484,
+       "rps_blend": 0.4365,
+       "rps_climatology": 0.4587,
+       "rpss": 0.0484,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 1484,
+       "rps_blend": 0.4643,
+       "rps_climatology": 0.4601,
+       "rpss": -0.0091,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 1484,
+       "rps_blend": 0.4084,
+       "rps_climatology": 0.4091,
+       "rpss": 0.0018,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2797,
+        "observed": 0.3165,
+        "count": 1805
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3409,
+        "observed": 0.2772,
+        "count": 11426
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4103,
+        "observed": 0.2401,
+        "count": 125
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2898,
+        "observed": 0.1967,
+        "count": 1491
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3374,
+        "observed": 0.323,
+        "count": 11383
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.439,
+        "observed": 0.3755,
+        "count": 482
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2921,
+        "observed": 0.3165,
+        "count": 1349
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3351,
+        "observed": 0.4172,
+        "count": 11961
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4109,
+        "observed": 0.4112,
+        "count": 46
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9516,
+       "count": 12703
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0484,
+       "count": 653
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2055,
+       0.2128,
+       0.2456
+      ],
+      "climatology": [
+       0.2052,
+       0.2147,
+       0.2468
+      ],
+      "bss": [
+       -0.0015,
+       0.009,
+       0.005
+      ]
+     },
+     "cell_years": 13356,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1120,
+       "rps_blend": 0.4293,
+       "rps_climatology": 0.4555,
+       "rpss": 0.0574,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 1120,
+       "rps_blend": 0.5043,
+       "rps_climatology": 0.5227,
+       "rpss": 0.0351,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 1120,
+       "rps_blend": 0.4753,
+       "rps_climatology": 0.4751,
+       "rpss": -0.0005,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 1120,
+       "rps_blend": 0.5084,
+       "rps_climatology": 0.4858,
+       "rpss": -0.0465,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 1120,
+       "rps_blend": 0.353,
+       "rps_climatology": 0.3601,
+       "rpss": 0.0197,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 1120,
+       "rps_blend": 0.517,
+       "rps_climatology": 0.4823,
+       "rpss": -0.0719,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 1120,
+       "rps_blend": 0.428,
+       "rps_climatology": 0.449,
+       "rpss": 0.0468,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 1120,
+       "rps_blend": 0.4704,
+       "rps_climatology": 0.4604,
+       "rpss": -0.0218,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 1120,
+       "rps_blend": 0.4153,
+       "rps_climatology": 0.4153,
+       "rpss": 0.0,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2821,
+        "observed": 0.3558,
+        "count": 1346
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3395,
+        "observed": 0.2778,
+        "count": 8672
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4091,
+        "observed": 0.1452,
+        "count": 62
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.29,
+        "observed": 0.1917,
+        "count": 1112
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3367,
+        "observed": 0.3099,
+        "count": 8702
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4424,
+        "observed": 0.3498,
+        "count": 266
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2918,
+        "observed": 0.3383,
+        "count": 803
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3368,
+        "observed": 0.4217,
+        "count": 9237
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4115,
+        "observed": 0.3239,
+        "count": 40
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9639,
+       "count": 9712
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0361,
+       "count": 368
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2076,
+       0.2089,
+       0.248
+      ],
+      "climatology": [
+       0.2069,
+       0.2104,
+       0.2493
+      ],
+      "bss": [
+       -0.0035,
+       0.0073,
+       0.0052
+      ]
+     },
+     "cell_years": 10080,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 573,
+       "rps_blend": 0.4234,
+       "rps_climatology": 0.4486,
+       "rpss": 0.0561,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 573,
+       "rps_blend": 0.5214,
+       "rps_climatology": 0.5556,
+       "rpss": 0.0616,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 573,
+       "rps_blend": 0.4853,
+       "rps_climatology": 0.494,
+       "rpss": 0.0177,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 573,
+       "rps_blend": 0.5091,
+       "rps_climatology": 0.4979,
+       "rpss": -0.0225,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 573,
+       "rps_blend": 0.3443,
+       "rps_climatology": 0.3497,
+       "rpss": 0.0155,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 573,
+       "rps_blend": 0.5531,
+       "rps_climatology": 0.4921,
+       "rpss": -0.124,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 573,
+       "rps_blend": 0.3812,
+       "rps_climatology": 0.4012,
+       "rpss": 0.05,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 573,
+       "rps_blend": 0.46,
+       "rps_climatology": 0.4585,
+       "rpss": -0.0033,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 573,
+       "rps_blend": 0.3947,
+       "rps_climatology": 0.3896,
+       "rpss": -0.013,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2838,
+        "observed": 0.4093,
+        "count": 947
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3326,
+        "observed": 0.2934,
+        "count": 4208
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.404,
+        "observed": 0.5,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2921,
+        "observed": 0.2256,
+        "count": 350
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3396,
+        "observed": 0.3079,
+        "count": 4671
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.44,
+        "observed": 0.3827,
+        "count": 136
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2927,
+        "observed": 0.272,
+        "count": 327
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.34,
+        "observed": 0.3901,
+        "count": 4809
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4122,
+        "observed": 0.0,
+        "count": 21
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.9696,
+       "count": 4998
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.0304,
+       "count": 159
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0,
+       "count": 0
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0,
+       "count": 0
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2159,
+       0.2121,
+       0.2366
+      ],
+      "climatology": [
+       0.216,
+       0.2125,
+       0.2381
+      ],
+      "bss": [
+       0.0004,
+       0.002,
+       0.0066
+      ]
+     },
+     "cell_years": 5157,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    }
+   }
+  },
+  "May": {
+   "training": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1484,
+       "rps_blend": 0.4362,
+       "rps_climatology": 0.4838,
+       "rpss": 0.0984,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 1484,
+       "rps_blend": 0.4059,
+       "rps_climatology": 0.4092,
+       "rpss": 0.0082,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 1484,
+       "rps_blend": 0.4417,
+       "rps_climatology": 0.4396,
+       "rpss": -0.0047,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 1484,
+       "rps_blend": 0.4689,
+       "rps_climatology": 0.4923,
+       "rpss": 0.0475,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 1484,
+       "rps_blend": 0.4837,
+       "rps_climatology": 0.4356,
+       "rpss": -0.1104,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 1484,
+       "rps_blend": 0.3653,
+       "rps_climatology": 0.4256,
+       "rpss": 0.1418,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 1484,
+       "rps_blend": 0.4775,
+       "rps_climatology": 0.508,
+       "rpss": 0.0601,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 1484,
+       "rps_blend": 0.4122,
+       "rps_climatology": 0.4292,
+       "rpss": 0.0397,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 1484,
+       "rps_blend": 0.4636,
+       "rps_climatology": 0.4193,
+       "rpss": -0.1056,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 1484,
+       "rps_blend": 0.4822,
+       "rps_climatology": 0.5059,
+       "rpss": 0.047,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 1484,
+       "rps_blend": 0.4509,
+       "rps_climatology": 0.4983,
+       "rpss": 0.0951,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 1484,
+       "rps_blend": 0.4759,
+       "rps_climatology": 0.5181,
+       "rpss": 0.0815,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 1484,
+       "rps_blend": 0.456,
+       "rps_climatology": 0.4686,
+       "rpss": 0.0268,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 1484,
+       "rps_blend": 0.4002,
+       "rps_climatology": 0.4142,
+       "rpss": 0.0336,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 1484,
+       "rps_blend": 0.3944,
+       "rps_climatology": 0.4105,
+       "rpss": 0.0392,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 1484,
+       "rps_blend": 0.4161,
+       "rps_climatology": 0.4372,
+       "rpss": 0.0483,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 1484,
+       "rps_blend": 0.4686,
+       "rps_climatology": 0.4745,
+       "rpss": 0.0126,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 1484,
+       "rps_blend": 0.4741,
+       "rps_climatology": 0.4458,
+       "rpss": -0.0634,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 1484,
+       "rps_blend": 0.4671,
+       "rps_climatology": 0.4925,
+       "rpss": 0.0515,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 1484,
+       "rps_blend": 0.386,
+       "rps_climatology": 0.42,
+       "rpss": 0.0811,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 1484,
+       "rps_blend": 0.4102,
+       "rps_climatology": 0.4396,
+       "rpss": 0.0668,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 1484,
+       "rps_blend": 0.422,
+       "rps_climatology": 0.4207,
+       "rpss": -0.0031,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 1484,
+       "rps_blend": 0.4525,
+       "rps_climatology": 0.4461,
+       "rpss": -0.0143,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 1484,
+       "rps_blend": 0.4572,
+       "rps_climatology": 0.4387,
+       "rpss": -0.0423,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.168,
+        "observed": 0.2708,
+        "count": 1556
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2678,
+        "observed": 0.2486,
+        "count": 8660
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3514,
+        "observed": 0.3472,
+        "count": 19575
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4387,
+        "observed": 0.5084,
+        "count": 5498
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5188,
+        "observed": 0.5376,
+        "count": 327
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1813,
+        "observed": 0.1915,
+        "count": 779
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2625,
+        "observed": 0.2354,
+        "count": 13108
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3468,
+        "observed": 0.3278,
+        "count": 15879
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4342,
+        "observed": 0.4285,
+        "count": 4513
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5439,
+        "observed": 0.4131,
+        "count": 1168
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6136,
+        "observed": 0.3492,
+        "count": 169
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1831,
+        "observed": 0.0985,
+        "count": 112
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2666,
+        "observed": 0.2356,
+        "count": 12218
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3458,
+        "observed": 0.4006,
+        "count": 18390
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4352,
+        "observed": 0.4349,
+        "count": 4672
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5256,
+        "observed": 0.3178,
+        "count": 224
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.5381,
+       "count": 19154
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.4093,
+       "count": 14574
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.048,
+       "count": 1719
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0047,
+       "count": 169
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2203,
+       0.2085,
+       0.22
+      ],
+      "climatology": [
+       0.2264,
+       0.2125,
+       0.2266
+      ],
+      "bss": [
+       0.0271,
+       0.0188,
+       0.029
+      ]
+     },
+     "cell_years": 35616,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1120,
+       "rps_blend": 0.4356,
+       "rps_climatology": 0.4949,
+       "rpss": 0.1198,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 1120,
+       "rps_blend": 0.4075,
+       "rps_climatology": 0.4157,
+       "rpss": 0.0196,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 1120,
+       "rps_blend": 0.4552,
+       "rps_climatology": 0.4496,
+       "rpss": -0.0123,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 1120,
+       "rps_blend": 0.4698,
+       "rps_climatology": 0.4841,
+       "rpss": 0.0296,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 1120,
+       "rps_blend": 0.5032,
+       "rps_climatology": 0.4361,
+       "rpss": -0.154,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 1120,
+       "rps_blend": 0.369,
+       "rps_climatology": 0.436,
+       "rpss": 0.1536,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 1120,
+       "rps_blend": 0.4793,
+       "rps_climatology": 0.5126,
+       "rpss": 0.0649,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 1120,
+       "rps_blend": 0.4089,
+       "rps_climatology": 0.4265,
+       "rpss": 0.0411,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 1120,
+       "rps_blend": 0.4565,
+       "rps_climatology": 0.4213,
+       "rpss": -0.0835,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 1120,
+       "rps_blend": 0.4657,
+       "rps_climatology": 0.4951,
+       "rpss": 0.0593,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 1120,
+       "rps_blend": 0.4636,
+       "rps_climatology": 0.4888,
+       "rpss": 0.0517,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 1120,
+       "rps_blend": 0.4601,
+       "rps_climatology": 0.5188,
+       "rpss": 0.1131,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 1120,
+       "rps_blend": 0.4654,
+       "rps_climatology": 0.4815,
+       "rpss": 0.0334,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 1120,
+       "rps_blend": 0.3919,
+       "rps_climatology": 0.4145,
+       "rpss": 0.0546,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 1120,
+       "rps_blend": 0.3952,
+       "rps_climatology": 0.4088,
+       "rpss": 0.0334,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 1120,
+       "rps_blend": 0.415,
+       "rps_climatology": 0.4408,
+       "rpss": 0.0585,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 1120,
+       "rps_blend": 0.4408,
+       "rps_climatology": 0.4542,
+       "rpss": 0.0294,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 1120,
+       "rps_blend": 0.4964,
+       "rps_climatology": 0.4619,
+       "rpss": -0.0749,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 1120,
+       "rps_blend": 0.4579,
+       "rps_climatology": 0.4932,
+       "rpss": 0.0716,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 1120,
+       "rps_blend": 0.3969,
+       "rps_climatology": 0.4245,
+       "rpss": 0.065,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 1120,
+       "rps_blend": 0.425,
+       "rps_climatology": 0.4553,
+       "rpss": 0.0665,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 1120,
+       "rps_blend": 0.3818,
+       "rps_climatology": 0.4025,
+       "rpss": 0.0513,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 1120,
+       "rps_blend": 0.4271,
+       "rps_climatology": 0.4319,
+       "rpss": 0.0112,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 1120,
+       "rps_blend": 0.4323,
+       "rps_climatology": 0.4318,
+       "rpss": -0.0012,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1673,
+        "observed": 0.271,
+        "count": 1293
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2678,
+        "observed": 0.232,
+        "count": 7040
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3503,
+        "observed": 0.351,
+        "count": 14685
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4386,
+        "observed": 0.5661,
+        "count": 3676
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5184,
+        "observed": 0.5582,
+        "count": 186
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.181,
+        "observed": 0.1963,
+        "count": 556
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2638,
+        "observed": 0.2325,
+        "count": 9463
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3471,
+        "observed": 0.3185,
+        "count": 12118
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4343,
+        "observed": 0.4393,
+        "count": 3636
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.544,
+        "observed": 0.413,
+        "count": 960
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6136,
+        "observed": 0.3471,
+        "count": 147
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1828,
+        "observed": 0.1013,
+        "count": 99
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2664,
+        "observed": 0.225,
+        "count": 9203
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3464,
+        "observed": 0.4047,
+        "count": 13610
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4354,
+        "observed": 0.4466,
+        "count": 3775
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5259,
+        "observed": 0.3579,
+        "count": 193
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.5359,
+       "count": 14394
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.4093,
+       "count": 11000
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0494,
+       "count": 1339
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0054,
+       "count": 147
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2185,
+       0.2083,
+       0.219
+      ],
+      "climatology": [
+       0.2265,
+       0.2122,
+       0.2268
+      ],
+      "bss": [
+       0.0356,
+       0.0182,
+       0.0342
+      ]
+     },
+     "cell_years": 26880,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 573,
+       "rps_blend": 0.4235,
+       "rps_climatology": 0.5192,
+       "rpss": 0.1844,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 573,
+       "rps_blend": 0.4062,
+       "rps_climatology": 0.421,
+       "rpss": 0.0351,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 573,
+       "rps_blend": 0.5066,
+       "rps_climatology": 0.4688,
+       "rpss": -0.0806,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 573,
+       "rps_blend": 0.4495,
+       "rps_climatology": 0.4665,
+       "rpss": 0.0364,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 573,
+       "rps_blend": 0.5386,
+       "rps_climatology": 0.4602,
+       "rpss": -0.1706,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 573,
+       "rps_blend": 0.374,
+       "rps_climatology": 0.495,
+       "rpss": 0.2444,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 573,
+       "rps_blend": 0.4635,
+       "rps_climatology": 0.5277,
+       "rpss": 0.1217,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 573,
+       "rps_blend": 0.4649,
+       "rps_climatology": 0.4764,
+       "rpss": 0.024,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 573,
+       "rps_blend": 0.5262,
+       "rps_climatology": 0.4472,
+       "rpss": -0.1768,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 573,
+       "rps_blend": 0.4558,
+       "rps_climatology": 0.4772,
+       "rpss": 0.0448,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 573,
+       "rps_blend": 0.4393,
+       "rps_climatology": 0.4602,
+       "rpss": 0.0454,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 573,
+       "rps_blend": 0.43,
+       "rps_climatology": 0.5319,
+       "rpss": 0.1917,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 573,
+       "rps_blend": 0.4459,
+       "rps_climatology": 0.4896,
+       "rpss": 0.0891,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 573,
+       "rps_blend": 0.3749,
+       "rps_climatology": 0.4019,
+       "rpss": 0.0672,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 573,
+       "rps_blend": 0.358,
+       "rps_climatology": 0.3794,
+       "rpss": 0.0564,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 573,
+       "rps_blend": 0.3866,
+       "rps_climatology": 0.4407,
+       "rpss": 0.1228,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 573,
+       "rps_blend": 0.3982,
+       "rps_climatology": 0.399,
+       "rpss": 0.0019,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 573,
+       "rps_blend": 0.5116,
+       "rps_climatology": 0.457,
+       "rpss": -0.1194,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 573,
+       "rps_blend": 0.4245,
+       "rps_climatology": 0.4867,
+       "rpss": 0.1279,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 573,
+       "rps_blend": 0.4132,
+       "rps_climatology": 0.4157,
+       "rpss": 0.006,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 573,
+       "rps_blend": 0.4679,
+       "rps_climatology": 0.4976,
+       "rpss": 0.0597,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 573,
+       "rps_blend": 0.3436,
+       "rps_climatology": 0.3758,
+       "rpss": 0.0856,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 573,
+       "rps_blend": 0.3842,
+       "rps_climatology": 0.4028,
+       "rpss": 0.0462,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 573,
+       "rps_blend": 0.3528,
+       "rps_climatology": 0.3828,
+       "rpss": 0.0782,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1683,
+        "observed": 0.3659,
+        "count": 299
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2681,
+        "observed": 0.2019,
+        "count": 3995
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3493,
+        "observed": 0.3585,
+        "count": 7514
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.44,
+        "observed": 0.6026,
+        "count": 1857
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5208,
+        "observed": 0.5393,
+        "count": 87
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1791,
+        "observed": 0.2191,
+        "count": 338
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2634,
+        "observed": 0.2229,
+        "count": 5155
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3463,
+        "observed": 0.3179,
+        "count": 6207
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4321,
+        "observed": 0.4963,
+        "count": 1770
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5387,
+        "observed": 0.4679,
+        "count": 238
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6117,
+        "observed": 0.3637,
+        "count": 44
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1819,
+        "observed": 0.1095,
+        "count": 64
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2664,
+        "observed": 0.1954,
+        "count": 4315
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3482,
+        "observed": 0.3851,
+        "count": 6857
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.436,
+        "observed": 0.5141,
+        "count": 2400
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5236,
+        "observed": 0.4311,
+        "count": 116
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.5301,
+       "count": 7287
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.435,
+       "count": 5980
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0318,
+       "count": 441
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0031,
+       "count": 44
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2165,
+       0.2052,
+       0.2143
+      ],
+      "climatology": [
+       0.2267,
+       0.2122,
+       0.2267
+      ],
+      "bss": [
+       0.0447,
+       0.0326,
+       0.0546
+      ]
+     },
+     "cell_years": 13752,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    }
+   },
+   "operational": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1484,
+       "rps_blend": 0.4172,
+       "rps_climatology": 0.4168,
+       "rpss": -0.0009,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 1484,
+       "rps_blend": 0.3833,
+       "rps_climatology": 0.3969,
+       "rpss": 0.0341,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 1484,
+       "rps_blend": 0.4097,
+       "rps_climatology": 0.4496,
+       "rpss": 0.0887,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 1484,
+       "rps_blend": 0.3665,
+       "rps_climatology": 0.358,
+       "rpss": -0.0237,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 1484,
+       "rps_blend": 0.5625,
+       "rps_climatology": 0.4471,
+       "rpss": -0.2579,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 1484,
+       "rps_blend": 0.4935,
+       "rps_climatology": 0.5123,
+       "rpss": 0.0367,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 1484,
+       "rps_blend": 0.4402,
+       "rps_climatology": 0.4544,
+       "rpss": 0.0311,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 1484,
+       "rps_blend": 0.3813,
+       "rps_climatology": 0.4279,
+       "rpss": 0.1089,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 1484,
+       "rps_blend": 0.3782,
+       "rps_climatology": 0.3843,
+       "rpss": 0.0161,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.171,
+        "observed": 0.1452,
+        "count": 537
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2758,
+        "observed": 0.1437,
+        "count": 2783
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3433,
+        "observed": 0.3029,
+        "count": 7418
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4315,
+        "observed": 0.3169,
+        "count": 2526
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5176,
+        "observed": 0.0758,
+        "count": 92
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1941,
+        "observed": 0.3332,
+        "count": 15
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2712,
+        "observed": 0.341,
+        "count": 3507
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.342,
+        "observed": 0.3973,
+        "count": 7840
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4244,
+        "observed": 0.4492,
+        "count": 1432
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5517,
+        "observed": 0.3026,
+        "count": 479
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6151,
+        "observed": 0.3251,
+        "count": 83
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1952,
+        "observed": 0.5279,
+        "count": 74
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2649,
+        "observed": 0.3271,
+        "count": 4749
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3411,
+        "observed": 0.3452,
+        "count": 7621
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4189,
+        "observed": 0.5132,
+        "count": 912
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.5875,
+       "count": 7839
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.364,
+       "count": 4863
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0424,
+       "count": 571
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0061,
+       "count": 83
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1965,
+       0.2404,
+       0.2293
+      ],
+      "climatology": [
+       0.1993,
+       0.2392,
+       0.2282
+      ],
+      "bss": [
+       0.0137,
+       -0.0049,
+       -0.0047
+      ]
+     },
+     "cell_years": 13356,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1120,
+       "rps_blend": 0.3903,
+       "rps_climatology": 0.3891,
+       "rpss": -0.0032,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 1120,
+       "rps_blend": 0.3965,
+       "rps_climatology": 0.4097,
+       "rpss": 0.0322,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 1120,
+       "rps_blend": 0.4182,
+       "rps_climatology": 0.4502,
+       "rpss": 0.0712,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 1120,
+       "rps_blend": 0.3555,
+       "rps_climatology": 0.3514,
+       "rpss": -0.0118,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 1120,
+       "rps_blend": 0.5866,
+       "rps_climatology": 0.4582,
+       "rpss": -0.2802,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 1120,
+       "rps_blend": 0.4987,
+       "rps_climatology": 0.5022,
+       "rpss": 0.007,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 1120,
+       "rps_blend": 0.4273,
+       "rps_climatology": 0.4366,
+       "rpss": 0.0211,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 1120,
+       "rps_blend": 0.3888,
+       "rps_climatology": 0.4347,
+       "rpss": 0.1058,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 1120,
+       "rps_blend": 0.382,
+       "rps_climatology": 0.389,
+       "rpss": 0.0181,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1703,
+        "observed": 0.146,
+        "count": 452
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2763,
+        "observed": 0.1463,
+        "count": 2473
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3401,
+        "observed": 0.293,
+        "count": 5643
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4319,
+        "observed": 0.2087,
+        "count": 1441
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5195,
+        "observed": 0.0423,
+        "count": 71
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1935,
+        "observed": 0.3078,
+        "count": 13
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2715,
+        "observed": 0.3464,
+        "count": 2480
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3432,
+        "observed": 0.4036,
+        "count": 5977
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4243,
+        "observed": 0.4749,
+        "count": 1152
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5527,
+        "observed": 0.2962,
+        "count": 385
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6153,
+        "observed": 0.3286,
+        "count": 73
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.195,
+        "observed": 0.5531,
+        "count": 67
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2636,
+        "observed": 0.3785,
+        "count": 3126
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3432,
+        "observed": 0.3431,
+        "count": 6002
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4192,
+        "observed": 0.5131,
+        "count": 885
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.6038,
+       "count": 6080
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.3444,
+       "count": 3471
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0447,
+       "count": 456
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0071,
+       "count": 73
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1891,
+       0.243,
+       0.238
+      ],
+      "climatology": [
+       0.19,
+       0.2421,
+       0.2346
+      ],
+      "bss": [
+       0.0045,
+       -0.0038,
+       -0.0144
+      ]
+     },
+     "cell_years": 10080,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 573,
+       "rps_blend": 0.3382,
+       "rps_climatology": 0.3414,
+       "rpss": 0.0092,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 573,
+       "rps_blend": 0.401,
+       "rps_climatology": 0.4101,
+       "rpss": 0.0223,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 573,
+       "rps_blend": 0.4166,
+       "rps_climatology": 0.4608,
+       "rpss": 0.0959,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 573,
+       "rps_blend": 0.3511,
+       "rps_climatology": 0.3461,
+       "rpss": -0.0144,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 573,
+       "rps_blend": 0.6515,
+       "rps_climatology": 0.4852,
+       "rpss": -0.3428,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 573,
+       "rps_blend": 0.5076,
+       "rps_climatology": 0.509,
+       "rpss": 0.0028,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 573,
+       "rps_blend": 0.4171,
+       "rps_climatology": 0.4235,
+       "rpss": 0.015,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 573,
+       "rps_blend": 0.4131,
+       "rps_climatology": 0.4644,
+       "rpss": 0.1105,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 573,
+       "rps_blend": 0.377,
+       "rps_climatology": 0.3896,
+       "rpss": 0.0325,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1702,
+        "observed": 0.1473,
+        "count": 95
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2767,
+        "observed": 0.1512,
+        "count": 1560
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3369,
+        "observed": 0.3143,
+        "count": 2895
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.437,
+        "observed": 0.0968,
+        "count": 557
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5205,
+        "observed": 0.0401,
+        "count": 50
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1932,
+        "observed": 0.3334,
+        "count": 12
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2695,
+        "observed": 0.3225,
+        "count": 1395
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3428,
+        "observed": 0.4023,
+        "count": 3134
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4216,
+        "observed": 0.5103,
+        "count": 520
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.555,
+        "observed": 0.3151,
+        "count": 73
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6158,
+        "observed": 0.3477,
+        "count": 23
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1942,
+        "observed": 0.4656,
+        "count": 43
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2573,
+        "observed": 0.4865,
+        "count": 1092
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3478,
+        "observed": 0.3046,
+        "count": 3326
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4197,
+        "observed": 0.5259,
+        "count": 696
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.6292,
+       "count": 3244
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.3429,
+       "count": 1767
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0236,
+       "count": 123
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0044,
+       "count": 23
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1903,
+       0.2385,
+       0.2401
+      ],
+      "climatology": [
+       0.1897,
+       0.2411,
+       0.2359
+      ],
+      "bss": [
+       -0.0032,
+       0.0108,
+       -0.0178
+      ]
+     },
+     "cell_years": 5157,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    }
+   }
+  },
+  "FMAM": {
+   "training": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1484,
+       "rps_blend": 0.3872,
+       "rps_climatology": 0.4589,
+       "rpss": 0.1564,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 1484,
+       "rps_blend": 0.4009,
+       "rps_climatology": 0.4075,
+       "rpss": 0.0163,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 1484,
+       "rps_blend": 0.3999,
+       "rps_climatology": 0.4602,
+       "rpss": 0.1309,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 1484,
+       "rps_blend": 0.4484,
+       "rps_climatology": 0.5001,
+       "rpss": 0.1033,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 1484,
+       "rps_blend": 0.3896,
+       "rps_climatology": 0.4446,
+       "rpss": 0.1238,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 1484,
+       "rps_blend": 0.3988,
+       "rps_climatology": 0.4258,
+       "rpss": 0.0635,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 1484,
+       "rps_blend": 0.4277,
+       "rps_climatology": 0.4842,
+       "rpss": 0.1167,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 1484,
+       "rps_blend": 0.4858,
+       "rps_climatology": 0.4793,
+       "rpss": -0.0134,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 1484,
+       "rps_blend": 0.4772,
+       "rps_climatology": 0.4188,
+       "rpss": -0.1395,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 1484,
+       "rps_blend": 0.4569,
+       "rps_climatology": 0.4611,
+       "rpss": 0.0091,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 1484,
+       "rps_blend": 0.4251,
+       "rps_climatology": 0.4289,
+       "rpss": 0.009,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 1484,
+       "rps_blend": 0.4526,
+       "rps_climatology": 0.4708,
+       "rpss": 0.0388,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 1484,
+       "rps_blend": 0.4363,
+       "rps_climatology": 0.4484,
+       "rpss": 0.0269,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 1484,
+       "rps_blend": 0.5216,
+       "rps_climatology": 0.4137,
+       "rpss": -0.2609,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 1484,
+       "rps_blend": 0.3999,
+       "rps_climatology": 0.414,
+       "rpss": 0.0342,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 1484,
+       "rps_blend": 0.4828,
+       "rps_climatology": 0.5114,
+       "rpss": 0.056,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 1484,
+       "rps_blend": 0.5183,
+       "rps_climatology": 0.4975,
+       "rpss": -0.0418,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 1484,
+       "rps_blend": 0.3835,
+       "rps_climatology": 0.4681,
+       "rpss": 0.1807,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 1484,
+       "rps_blend": 0.4398,
+       "rps_climatology": 0.4397,
+       "rpss": -0.0001,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 1484,
+       "rps_blend": 0.3918,
+       "rps_climatology": 0.4352,
+       "rpss": 0.0999,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 1484,
+       "rps_blend": 0.4519,
+       "rps_climatology": 0.4627,
+       "rpss": 0.0233,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 1484,
+       "rps_blend": 0.4676,
+       "rps_climatology": 0.4573,
+       "rpss": -0.0226,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 1484,
+       "rps_blend": 0.4319,
+       "rps_climatology": 0.4366,
+       "rpss": 0.0108,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 1484,
+       "rps_blend": 0.4396,
+       "rps_climatology": 0.4415,
+       "rpss": 0.0042,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.0,
+         0.1
+        ],
+        "forecast": 0.0862,
+        "observed": 0.3604,
+        "count": 25
+       },
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1754,
+        "observed": 0.2393,
+        "count": 1970
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2597,
+        "observed": 0.2789,
+        "count": 9515
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3457,
+        "observed": 0.3543,
+        "count": 15745
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4392,
+        "observed": 0.4319,
+        "count": 7102
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5364,
+        "observed": 0.4697,
+        "count": 1131
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6248,
+        "observed": 0.4044,
+        "count": 126
+       },
+       {
+        "bin": [
+         0.7,
+         0.8
+        ],
+        "forecast": 0.7054,
+        "observed": 1.0,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.0,
+         0.1
+        ],
+        "forecast": 0.0912,
+        "observed": 0.254,
+        "count": 51
+       },
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.165,
+        "observed": 0.2178,
+        "count": 2517
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2551,
+        "observed": 0.2716,
+        "count": 13518
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3474,
+        "observed": 0.3303,
+        "count": 13571
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4377,
+        "observed": 0.3715,
+        "count": 5086
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.531,
+        "observed": 0.3905,
+        "count": 818
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6267,
+        "observed": 0.4158,
+        "count": 55
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1738,
+        "observed": 0.2328,
+        "count": 1659
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2592,
+        "observed": 0.225,
+        "count": 9708
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3441,
+        "observed": 0.3461,
+        "count": 14878
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4402,
+        "observed": 0.4729,
+        "count": 7339
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5369,
+        "observed": 0.5562,
+        "count": 1815
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6423,
+        "observed": 0.4777,
+        "count": 203
+       },
+       {
+        "bin": [
+         0.7,
+         0.8
+        ],
+        "forecast": 0.7198,
+        "observed": 0.5,
+        "count": 14
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.352,
+       "count": 12533
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.5311,
+       "count": 18919
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.1056,
+       "count": 3764
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0113,
+       "count": 400
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2218,
+       0.2127,
+       0.2164
+      ],
+      "climatology": [
+       0.2266,
+       0.2129,
+       0.2261
+      ],
+      "bss": [
+       0.0216,
+       0.0011,
+       0.0432
+      ]
+     },
+     "cell_years": 35616,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 1120,
+       "rps_blend": 0.383,
+       "rps_climatology": 0.45,
+       "rpss": 0.149,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 1120,
+       "rps_blend": 0.4069,
+       "rps_climatology": 0.4139,
+       "rpss": 0.0171,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 1120,
+       "rps_blend": 0.4009,
+       "rps_climatology": 0.4733,
+       "rpss": 0.153,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 1120,
+       "rps_blend": 0.4499,
+       "rps_climatology": 0.486,
+       "rpss": 0.0745,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 1120,
+       "rps_blend": 0.3879,
+       "rps_climatology": 0.4288,
+       "rpss": 0.0955,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 1120,
+       "rps_blend": 0.4121,
+       "rps_climatology": 0.4349,
+       "rpss": 0.0526,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 1120,
+       "rps_blend": 0.4253,
+       "rps_climatology": 0.4802,
+       "rpss": 0.1143,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 1120,
+       "rps_blend": 0.4963,
+       "rps_climatology": 0.4892,
+       "rpss": -0.0145,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 1120,
+       "rps_blend": 0.4417,
+       "rps_climatology": 0.4157,
+       "rpss": -0.0625,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 1120,
+       "rps_blend": 0.4495,
+       "rps_climatology": 0.4512,
+       "rpss": 0.0036,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 1120,
+       "rps_blend": 0.4379,
+       "rps_climatology": 0.4095,
+       "rpss": -0.0695,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 1120,
+       "rps_blend": 0.4294,
+       "rps_climatology": 0.4684,
+       "rpss": 0.0834,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 1120,
+       "rps_blend": 0.4389,
+       "rps_climatology": 0.4596,
+       "rpss": 0.0452,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 1120,
+       "rps_blend": 0.5495,
+       "rps_climatology": 0.4199,
+       "rpss": -0.3085,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 1120,
+       "rps_blend": 0.4079,
+       "rps_climatology": 0.4223,
+       "rpss": 0.0339,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 1120,
+       "rps_blend": 0.477,
+       "rps_climatology": 0.5142,
+       "rpss": 0.0723,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 1120,
+       "rps_blend": 0.4852,
+       "rps_climatology": 0.4881,
+       "rpss": 0.0058,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 1120,
+       "rps_blend": 0.4,
+       "rps_climatology": 0.5017,
+       "rpss": 0.2027,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 1120,
+       "rps_blend": 0.4444,
+       "rps_climatology": 0.4391,
+       "rpss": -0.012,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 1120,
+       "rps_blend": 0.3872,
+       "rps_climatology": 0.4291,
+       "rpss": 0.0978,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 1120,
+       "rps_blend": 0.469,
+       "rps_climatology": 0.4617,
+       "rpss": -0.0158,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 1120,
+       "rps_blend": 0.4326,
+       "rps_climatology": 0.4388,
+       "rpss": 0.0143,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 1120,
+       "rps_blend": 0.4444,
+       "rps_climatology": 0.4537,
+       "rpss": 0.0206,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 1120,
+       "rps_blend": 0.4234,
+       "rps_climatology": 0.438,
+       "rpss": 0.0334,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.0,
+         0.1
+        ],
+        "forecast": 0.0867,
+        "observed": 0.2391,
+        "count": 21
+       },
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1753,
+        "observed": 0.2097,
+        "count": 1478
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2587,
+        "observed": 0.2648,
+        "count": 7352
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3456,
+        "observed": 0.3683,
+        "count": 12048
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4384,
+        "observed": 0.4429,
+        "count": 5017
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5378,
+        "observed": 0.426,
+        "count": 842
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6256,
+        "observed": 0.3915,
+        "count": 120
+       },
+       {
+        "bin": [
+         0.7,
+         0.8
+        ],
+        "forecast": 0.7054,
+        "observed": 1.0,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.0,
+         0.1
+        ],
+        "forecast": 0.0911,
+        "observed": 0.2089,
+        "count": 43
+       },
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1649,
+        "observed": 0.2289,
+        "count": 1896
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2546,
+        "observed": 0.2659,
+        "count": 9970
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3477,
+        "observed": 0.3306,
+        "count": 10263
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.438,
+        "observed": 0.3794,
+        "count": 3999
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5317,
+        "observed": 0.3562,
+        "count": 659
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.628,
+        "observed": 0.3778,
+        "count": 50
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.172,
+        "observed": 0.2561,
+        "count": 1328
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2588,
+        "observed": 0.2156,
+        "count": 7252
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3438,
+        "observed": 0.3406,
+        "count": 11130
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4405,
+        "observed": 0.4873,
+        "count": 5586
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5376,
+        "observed": 0.5657,
+        "count": 1380
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6434,
+        "observed": 0.4632,
+        "count": 190
+       },
+       {
+        "bin": [
+         0.7,
+         0.8
+        ],
+        "forecast": 0.7198,
+        "observed": 0.5,
+        "count": 14
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.3528,
+       "count": 9480
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.5261,
+       "count": 14143
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.1071,
+       "count": 2881
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.014,
+       "count": 376
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2206,
+       0.2128,
+       0.2161
+      ],
+      "climatology": [
+       0.2266,
+       0.2128,
+       0.2262
+      ],
+      "bss": [
+       0.0266,
+       0.0001,
+       0.0448
+      ]
+     },
+     "cell_years": 26880,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 1993,
+       "cells": 573,
+       "rps_blend": 0.3996,
+       "rps_climatology": 0.4269,
+       "rpss": 0.0637,
+       "coverage": 1.0
+      },
+      {
+       "year": 1994,
+       "cells": 573,
+       "rps_blend": 0.4084,
+       "rps_climatology": 0.4278,
+       "rpss": 0.0453,
+       "coverage": 1.0
+      },
+      {
+       "year": 1995,
+       "cells": 573,
+       "rps_blend": 0.3956,
+       "rps_climatology": 0.4756,
+       "rpss": 0.1681,
+       "coverage": 1.0
+      },
+      {
+       "year": 1996,
+       "cells": 573,
+       "rps_blend": 0.4235,
+       "rps_climatology": 0.4379,
+       "rpss": 0.0329,
+       "coverage": 1.0
+      },
+      {
+       "year": 1997,
+       "cells": 573,
+       "rps_blend": 0.4287,
+       "rps_climatology": 0.4678,
+       "rpss": 0.0836,
+       "coverage": 1.0
+      },
+      {
+       "year": 1998,
+       "cells": 573,
+       "rps_blend": 0.4201,
+       "rps_climatology": 0.4354,
+       "rpss": 0.0351,
+       "coverage": 1.0
+      },
+      {
+       "year": 1999,
+       "cells": 573,
+       "rps_blend": 0.4058,
+       "rps_climatology": 0.4655,
+       "rpss": 0.1283,
+       "coverage": 1.0
+      },
+      {
+       "year": 2000,
+       "cells": 573,
+       "rps_blend": 0.4389,
+       "rps_climatology": 0.4772,
+       "rpss": 0.0804,
+       "coverage": 1.0
+      },
+      {
+       "year": 2001,
+       "cells": 573,
+       "rps_blend": 0.5018,
+       "rps_climatology": 0.4539,
+       "rpss": -0.1055,
+       "coverage": 1.0
+      },
+      {
+       "year": 2002,
+       "cells": 573,
+       "rps_blend": 0.4541,
+       "rps_climatology": 0.4326,
+       "rpss": -0.0496,
+       "coverage": 1.0
+      },
+      {
+       "year": 2003,
+       "cells": 573,
+       "rps_blend": 0.4352,
+       "rps_climatology": 0.4179,
+       "rpss": -0.0414,
+       "coverage": 1.0
+      },
+      {
+       "year": 2004,
+       "cells": 573,
+       "rps_blend": 0.4065,
+       "rps_climatology": 0.4921,
+       "rpss": 0.1741,
+       "coverage": 1.0
+      },
+      {
+       "year": 2005,
+       "cells": 573,
+       "rps_blend": 0.4251,
+       "rps_climatology": 0.4549,
+       "rpss": 0.0654,
+       "coverage": 1.0
+      },
+      {
+       "year": 2006,
+       "cells": 573,
+       "rps_blend": 0.5736,
+       "rps_climatology": 0.4166,
+       "rpss": -0.3767,
+       "coverage": 1.0
+      },
+      {
+       "year": 2007,
+       "cells": 573,
+       "rps_blend": 0.4079,
+       "rps_climatology": 0.4044,
+       "rpss": -0.0087,
+       "coverage": 1.0
+      },
+      {
+       "year": 2008,
+       "cells": 573,
+       "rps_blend": 0.476,
+       "rps_climatology": 0.5149,
+       "rpss": 0.0755,
+       "coverage": 1.0
+      },
+      {
+       "year": 2009,
+       "cells": 573,
+       "rps_blend": 0.4523,
+       "rps_climatology": 0.4857,
+       "rpss": 0.0688,
+       "coverage": 1.0
+      },
+      {
+       "year": 2010,
+       "cells": 573,
+       "rps_blend": 0.3852,
+       "rps_climatology": 0.5114,
+       "rpss": 0.2468,
+       "coverage": 1.0
+      },
+      {
+       "year": 2011,
+       "cells": 573,
+       "rps_blend": 0.5009,
+       "rps_climatology": 0.4879,
+       "rpss": -0.0266,
+       "coverage": 1.0
+      },
+      {
+       "year": 2012,
+       "cells": 573,
+       "rps_blend": 0.3647,
+       "rps_climatology": 0.386,
+       "rpss": 0.0551,
+       "coverage": 1.0
+      },
+      {
+       "year": 2013,
+       "cells": 573,
+       "rps_blend": 0.521,
+       "rps_climatology": 0.5224,
+       "rpss": 0.0027,
+       "coverage": 1.0
+      },
+      {
+       "year": 2014,
+       "cells": 573,
+       "rps_blend": 0.3684,
+       "rps_climatology": 0.4386,
+       "rpss": 0.16,
+       "coverage": 1.0
+      },
+      {
+       "year": 2015,
+       "cells": 573,
+       "rps_blend": 0.4512,
+       "rps_climatology": 0.4434,
+       "rpss": -0.0176,
+       "coverage": 1.0
+      },
+      {
+       "year": 2016,
+       "cells": 573,
+       "rps_blend": 0.3816,
+       "rps_climatology": 0.3901,
+       "rpss": 0.0218,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.0,
+         0.1
+        ],
+        "forecast": 0.0875,
+        "observed": 0.2523,
+        "count": 12
+       },
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1726,
+        "observed": 0.2462,
+        "count": 625
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2594,
+        "observed": 0.2432,
+        "count": 3317
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3469,
+        "observed": 0.3615,
+        "count": 6522
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.437,
+        "observed": 0.4535,
+        "count": 2717
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.543,
+        "observed": 0.3791,
+        "count": 446
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6264,
+        "observed": 0.3873,
+        "count": 111
+       },
+       {
+        "bin": [
+         0.7,
+         0.8
+        ],
+        "forecast": 0.7054,
+        "observed": 1.0,
+        "count": 2
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.0,
+         0.1
+        ],
+        "forecast": 0.0887,
+        "observed": 0.1201,
+        "count": 25
+       },
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1637,
+        "observed": 0.2122,
+        "count": 1084
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2542,
+        "observed": 0.2666,
+        "count": 5353
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3475,
+        "observed": 0.3341,
+        "count": 5160
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4375,
+        "observed": 0.4018,
+        "count": 1810
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5327,
+        "observed": 0.3477,
+        "count": 293
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6344,
+        "observed": 0.4787,
+        "count": 27
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1701,
+        "observed": 0.2336,
+        "count": 792
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2583,
+        "observed": 0.1795,
+        "count": 3621
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3438,
+        "observed": 0.3647,
+        "count": 5731
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4411,
+        "observed": 0.4908,
+        "count": 2783
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.537,
+        "observed": 0.5838,
+        "count": 728
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6415,
+        "observed": 0.4423,
+        "count": 95
+       },
+       {
+        "bin": [
+         0.7,
+         0.8
+        ],
+        "forecast": 0.7073,
+        "observed": 0.0,
+        "count": 2
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.3628,
+       "count": 4989
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.5134,
+       "count": 7059
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.1066,
+       "count": 1467
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0172,
+       "count": 237
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2202,
+       0.2113,
+       0.2143
+      ],
+      "climatology": [
+       0.2265,
+       0.2129,
+       0.2263
+      ],
+      "bss": [
+       0.0281,
+       0.0076,
+       0.0531
+      ]
+     },
+     "cell_years": 13752,
+     "years": 24,
+     "first": 1993,
+     "last": 2016,
+     "coverage": 1.0
+    }
+   },
+   "operational": {
+    "all_ethiopia": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1484,
+       "rps_blend": 0.4224,
+       "rps_climatology": 0.4549,
+       "rpss": 0.0714,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 1484,
+       "rps_blend": 0.4204,
+       "rps_climatology": 0.4706,
+       "rpss": 0.1066,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 1484,
+       "rps_blend": 0.4398,
+       "rps_climatology": 0.4497,
+       "rpss": 0.0221,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 1484,
+       "rps_blend": 0.5158,
+       "rps_climatology": 0.4946,
+       "rpss": -0.0429,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 1484,
+       "rps_blend": 0.3829,
+       "rps_climatology": 0.3646,
+       "rpss": -0.05,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 1484,
+       "rps_blend": 0.5688,
+       "rps_climatology": 0.513,
+       "rpss": -0.1088,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 1484,
+       "rps_blend": 0.4551,
+       "rps_climatology": 0.5316,
+       "rpss": 0.1438,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 1484,
+       "rps_blend": 0.4609,
+       "rps_climatology": 0.4673,
+       "rpss": 0.0135,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 1484,
+       "rps_blend": 0.3986,
+       "rps_climatology": 0.3887,
+       "rpss": -0.0255,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1785,
+        "observed": 0.188,
+        "count": 288
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2639,
+        "observed": 0.2542,
+        "count": 4393
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3433,
+        "observed": 0.2767,
+        "count": 5352
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4367,
+        "observed": 0.3037,
+        "count": 2987
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5286,
+        "observed": 0.3164,
+        "count": 329
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6047,
+        "observed": 0.2862,
+        "count": 7
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.184,
+        "observed": 0.1411,
+        "count": 495
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2628,
+        "observed": 0.2576,
+        "count": 4578
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3431,
+        "observed": 0.3019,
+        "count": 6196
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4283,
+        "observed": 0.347,
+        "count": 1948
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5284,
+        "observed": 0.4236,
+        "count": 130
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6232,
+        "observed": 0.0,
+        "count": 9
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1856,
+        "observed": 0.2873,
+        "count": 495
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2609,
+        "observed": 0.3428,
+        "count": 3735
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3458,
+        "observed": 0.419,
+        "count": 6020
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4298,
+        "observed": 0.601,
+        "count": 2962
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.525,
+        "observed": 0.7908,
+        "count": 144
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.3765,
+       "count": 5025
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.5774,
+       "count": 7712
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.045,
+       "count": 603
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0012,
+       "count": 16
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2058,
+       0.2053,
+       0.2458
+      ],
+      "climatology": [
+       0.2026,
+       0.2072,
+       0.2569
+      ],
+      "bss": [
+       -0.016,
+       0.0092,
+       0.043
+      ]
+     },
+     "cell_years": 13356,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    },
+    "fmam_rainfall_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 1120,
+       "rps_blend": 0.4253,
+       "rps_climatology": 0.4412,
+       "rpss": 0.036,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 1120,
+       "rps_blend": 0.4454,
+       "rps_climatology": 0.5027,
+       "rpss": 0.1141,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 1120,
+       "rps_blend": 0.4455,
+       "rps_climatology": 0.4419,
+       "rpss": -0.0082,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 1120,
+       "rps_blend": 0.5151,
+       "rps_climatology": 0.5098,
+       "rpss": -0.0105,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 1120,
+       "rps_blend": 0.3652,
+       "rps_climatology": 0.3618,
+       "rpss": -0.0093,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 1120,
+       "rps_blend": 0.5912,
+       "rps_climatology": 0.5109,
+       "rpss": -0.1572,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 1120,
+       "rps_blend": 0.445,
+       "rps_climatology": 0.538,
+       "rpss": 0.1729,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 1120,
+       "rps_blend": 0.4779,
+       "rps_climatology": 0.475,
+       "rpss": -0.006,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 1120,
+       "rps_blend": 0.4082,
+       "rps_climatology": 0.3974,
+       "rpss": -0.0271,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1795,
+        "observed": 0.2021,
+        "count": 233
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2636,
+        "observed": 0.2562,
+        "count": 3717
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3422,
+        "observed": 0.2482,
+        "count": 4106
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4338,
+        "observed": 0.2424,
+        "count": 1804
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5314,
+        "observed": 0.3212,
+        "count": 215
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6062,
+        "observed": 0.4004,
+        "count": 5
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.184,
+        "observed": 0.1486,
+        "count": 389
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2627,
+        "observed": 0.2379,
+        "count": 3380
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3434,
+        "observed": 0.2867,
+        "count": 4637
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.429,
+        "observed": 0.3383,
+        "count": 1555
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5292,
+        "observed": 0.3829,
+        "count": 110
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6232,
+        "observed": 0.0,
+        "count": 9
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1859,
+        "observed": 0.2977,
+        "count": 272
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2629,
+        "observed": 0.3808,
+        "count": 2493
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3468,
+        "observed": 0.4597,
+        "count": 4684
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4294,
+        "observed": 0.6053,
+        "count": 2523
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5223,
+        "observed": 0.7586,
+        "count": 108
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.3847,
+       "count": 3876
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.5712,
+       "count": 5757
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0428,
+       "count": 433
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0014,
+       "count": 14
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.1997,
+       0.2005,
+       0.258
+      ],
+      "climatology": [
+       0.1947,
+       0.2024,
+       0.2696
+      ],
+      "bss": [
+       -0.0257,
+       0.0091,
+       0.0433
+      ]
+     },
+     "cell_years": 10080,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    },
+    "fmam_main_season_domain": {
+     "per_year": [
+      {
+       "year": 2017,
+       "cells": 573,
+       "rps_blend": 0.4678,
+       "rps_climatology": 0.4746,
+       "rpss": 0.0144,
+       "coverage": 1.0
+      },
+      {
+       "year": 2018,
+       "cells": 573,
+       "rps_blend": 0.4607,
+       "rps_climatology": 0.5476,
+       "rpss": 0.1587,
+       "coverage": 1.0
+      },
+      {
+       "year": 2019,
+       "cells": 573,
+       "rps_blend": 0.4614,
+       "rps_climatology": 0.4544,
+       "rpss": -0.0154,
+       "coverage": 1.0
+      },
+      {
+       "year": 2020,
+       "cells": 573,
+       "rps_blend": 0.4468,
+       "rps_climatology": 0.5189,
+       "rpss": 0.139,
+       "coverage": 1.0
+      },
+      {
+       "year": 2021,
+       "cells": 573,
+       "rps_blend": 0.3729,
+       "rps_climatology": 0.3665,
+       "rpss": -0.0174,
+       "coverage": 1.0
+      },
+      {
+       "year": 2022,
+       "cells": 573,
+       "rps_blend": 0.6638,
+       "rps_climatology": 0.5271,
+       "rpss": -0.2594,
+       "coverage": 1.0
+      },
+      {
+       "year": 2023,
+       "cells": 573,
+       "rps_blend": 0.4345,
+       "rps_climatology": 0.5491,
+       "rpss": 0.2088,
+       "coverage": 1.0
+      },
+      {
+       "year": 2024,
+       "cells": 573,
+       "rps_blend": 0.4513,
+       "rps_climatology": 0.4888,
+       "rpss": 0.0767,
+       "coverage": 1.0
+      },
+      {
+       "year": 2025,
+       "cells": 573,
+       "rps_blend": 0.3915,
+       "rps_climatology": 0.3723,
+       "rpss": -0.0514,
+       "coverage": 1.0
+      }
+     ],
+     "reliability": [
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1801,
+        "observed": 0.273,
+        "count": 143
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.264,
+        "observed": 0.2906,
+        "count": 2247
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3397,
+        "observed": 0.2657,
+        "count": 2156
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4296,
+        "observed": 0.3122,
+        "count": 561
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.528,
+        "observed": 0.3883,
+        "count": 49
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6143,
+        "observed": 0.0,
+        "count": 1
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1818,
+        "observed": 0.0887,
+        "count": 225
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.2637,
+        "observed": 0.1924,
+        "count": 1729
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.3434,
+        "observed": 0.2443,
+        "count": 2401
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4275,
+        "observed": 0.3279,
+        "count": 738
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5328,
+        "observed": 0.4057,
+        "count": 57
+       },
+       {
+        "bin": [
+         0.6,
+         0.7
+        ],
+        "forecast": 0.6257,
+        "observed": 0.0,
+        "count": 7
+       }
+      ],
+      [
+       {
+        "bin": [
+         0.1,
+         0.2
+        ],
+        "forecast": 0.1806,
+        "observed": 0.3248,
+        "count": 120
+       },
+       {
+        "bin": [
+         0.2,
+         0.3
+        ],
+        "forecast": 0.267,
+        "observed": 0.2703,
+        "count": 824
+       },
+       {
+        "bin": [
+         0.3,
+         0.4
+        ],
+        "forecast": 0.351,
+        "observed": 0.4726,
+        "count": 2443
+       },
+       {
+        "bin": [
+         0.4,
+         0.5
+        ],
+        "forecast": 0.4302,
+        "observed": 0.6033,
+        "count": 1701
+       },
+       {
+        "bin": [
+         0.5,
+         0.6
+        ],
+        "forecast": 0.5181,
+        "observed": 0.7389,
+        "count": 69
+       }
+      ]
+     ],
+     "histogram": [
+      {
+       "label": "weak (<40%)",
+       "share": 0.3972,
+       "count": 2048
+      },
+      {
+       "label": "moderate (40–50%)",
+       "share": 0.5674,
+       "count": 2926
+      },
+      {
+       "label": "strong (50–60%)",
+       "share": 0.0338,
+       "count": 175
+      },
+      {
+       "label": "very strong (≥60%)",
+       "share": 0.0015,
+       "count": 8
+      }
+     ],
+     "brier": {
+      "blend": [
+       0.2081,
+       0.1846,
+       0.2531
+      ],
+      "climatology": [
+       0.2054,
+       0.189,
+       0.2723
+      ],
+      "bss": [
+       -0.0131,
+       0.0233,
+       0.0706
+      ]
+     },
+     "cell_years": 5157,
+     "years": 9,
+     "first": 2017,
+     "last": 2025,
+     "coverage": 1.0
+    }
+   }
+  }
+ },
+ "amount": {
+  "FMAM": {
+   "all_ethiopia": {
+    "period": "2017–2025 (exploratory; parameters fitted on 1993–2016)",
+    "corrected_crps_mm": 57.6866,
+    "climatology_crps_mm": 58.6309,
+    "crpss": 0.0161,
+    "corrected_bias_mm": -27.1093,
+    "raw_bias_mm": -113.3679,
+    "corrected_rmse_mm": 104.5082,
+    "climatology_rmse_mm": 106.122
+   }
+  }
+ }
+}

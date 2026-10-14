@@ -546,7 +546,7 @@
   {
     "id": "2026-10-14.4",
     "date": "2026-10-14",
-    "commit": null,
+    "commit": "a5c1275",
     "title": "Probability calibration, Phase 3",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -558,6 +558,28 @@
       {
         "type": "analysis",
         "text": "Phase 3 of the probability and rainfall-distribution calibration, for all four cycles: Bayesian joint probability, BMA for precipitation and quantile regression forests, scored for terciles, amounts (CRPS), quantiles and interval coverage. No model is confirmed better than the published probabilities or the MVS-corrected ensemble. BMA is the strongest (CRPSS above the MVS ensemble in 13 of 20 targets, none significant); BJP and BMA give near-calibrated 10-90% ranges (78-86%), the forest too narrow ones (69-76%). Across Phases 1-3, the incumbent climatology blend stays; EMOS remains the model of the amount and range shadow. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-14.5",
+    "date": "2026-10-14",
+    "commit": null,
+    "title": "Outlooks, maps and verification on the new pages; daily scoring of new observations",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The forecast outlooks, maps, verification and historical performance are on the new pages (/next/): one page per cycle, area and target with the map viewer and the official-outlook comparison, and per cycle and area the verification and the historical verification explorer. Their text was checked against the current page for every cycle, area and target."
+      },
+      {
+        "type": "display",
+        "text": "New observations are checked daily and each season is scored as soon as its CHIRPS month is published (verification, official-outlook comparison, bias-correction validation, the amount and range shadow and the method suggestions); publishing the new scores stays a release step."
       }
     ]
   }

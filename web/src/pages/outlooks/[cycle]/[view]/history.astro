@@ -1,0 +1,64 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import CycleBar from '../../../../components/CycleBar.astro';
+import { C, cycleOf, dataFile, pagesFor } from '../../../../lib/cycles.js';
+import { renderer } from '../../../../lib/outlook.js';
+
+export function getStaticPaths() {
+  return C.cycles.flatMap((c) => c.views.map(([view]) => ({ params: { cycle: c.id, view } })));
+}
+const { cycle: cid, view } = Astro.params;
+const c = cycleOf(cid);
+const D2 = dataFile(c.diagnostics);
+// The takeaway and the explorer depend on the selected target; every target is rendered and one is shown at a time.
+const per = c.targets.map((t) => {
+  const R = renderer(C, { cycle: cid, view, target: t.id }, pagesFor(c, view));
+  return { id: t.id, label: t.label, hs: R.history(), training: R.diagnostics(D2, t.id, 'training'), operational: R.diagnostics(D2, t.id, 'operational'), viewLabel: R.viewLabel(view) };
+});
+const first = per[0];
+---
+<Base title={`Historical performance · ${c.label} · ${first.viewLabel}`} section="outlooks/"
+      description={`${c.option}: cross-validated skill of the forecast method against climatology, ${first.viewLabel}.`}>
+  <CycleBar cycle={c} view={view} section="history" />
+  <section id="history">
+    <h1>Historical performance · {c.option}</h1>
+    <p>How forecasts made with the same method scored in past years against climatology (the observed frequency of each tercile in the training years, about one-third each). The main number is the <strong>cross-validated 1993–2016</strong> score: each year is forecast with parameters fitted without that year. Later years are <strong>exploratory</strong>: they were seen while the method was chosen.</p>
+    <div class="map-controls">
+      <label>Target <select id="dg-target">{per.map((p) => <option value={p.id}>{p.label}</option>)}</select></label>
+      <div class="seg" role="group" aria-label="Evaluation period" id="dg-period">
+        <button type="button" data-period="training" aria-pressed="true">Cross-validated</button>
+        <button type="button" data-period="operational" aria-pressed="false">Exploratory</button>
+      </div>
+    </div>
+    {per.map((p, i) => <div class="hs-target" data-target={p.id} hidden={i > 0}><div id={i === 0 ? 'hs-body' : undefined} set:html={p.hs['hs-body']} /></div>)}
+    <h3>Historical verification explorer</h3>
+    <p class="caveat">The evidence behind the scores above, for the selected target and area. Choose the evaluation period; all diagnostics use the blended probabilities against climatology.</p>
+    {per.map((p, i) => (
+      <div class="dg-target" data-target={p.id} hidden={i > 0}>
+        <div class="dg-period" data-period="training"><div id={i === 0 ? 'dg-body' : undefined} set:html={p.training} /></div>
+        <div class="dg-period" data-period="operational" hidden set:html={p.operational} />
+      </div>
+    ))}
+    <h3>Historical performance by rainfall region</h3>
+    <div id="hs-regions" set:html={first.hs['hs-regions']} />
+  </section>
+  <script>
+    // Target and period switches (every combination is already on the page).
+    const q = new URLSearchParams(location.search);
+    const sel = document.getElementById('dg-target') as HTMLSelectElement;
+    const state = { target: q.get('target') || sel.value, period: q.get('period') === 'operational' ? 'operational' : 'training' };
+    if ([...sel.options].some((o) => o.value === state.target)) sel.value = state.target; else state.target = sel.value;
+    const show = () => {
+      document.querySelectorAll<HTMLElement>('.hs-target,.dg-target').forEach((el) => { el.hidden = el.dataset.target !== state.target; });
+      document.querySelectorAll<HTMLElement>('.dg-period').forEach((el) => { el.hidden = el.dataset.period !== state.period; });
+      document.querySelectorAll<HTMLElement>('#dg-period button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.period === state.period)));
+      history.replaceState(null, '', location.pathname + '?' + new URLSearchParams(state) + location.hash);
+    };
+    sel.addEventListener('change', () => { state.target = sel.value; show(); });
+    document.getElementById('dg-period').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button') as HTMLElement | null;
+      if (b) { state.period = b.dataset.period; show(); }
+    });
+    show();
+  </script>
+</Base>

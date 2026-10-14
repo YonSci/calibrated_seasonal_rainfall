@@ -5,6 +5,7 @@ figures in site/assets/ alone, without the large outputs/ folder:
 
   site_data/site.json            schema version, current release, release history, sections, build time and code commit
   site_data/cycles.json          forecast cycles: the same data the current page's cycle selector uses
+  site_data/data/*.json          per cycle: the official-outlook comparison and the historical diagnostics (paths as in cycles.json)
   site_data/files.json           every download linked from the site: path -> URL (release asset or site path), size
   site_data/bias/<cycle>.json    bias-correction benchmark: screening, confirmation, ratio-limit study, validation record,
                                  suggestion (docs/47)
@@ -126,6 +127,8 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         change_types=__import__('site_extras').CHANGE_TYPES,
         sections=sections, assets='site/assets (figures and maps, paths relative to the site root)'))
     sizes['cycles.json'] = write(OUT / 'cycles.json', page_data)
+    for f in sorted((site / 'data').glob('*.json')):          # per-cycle comparison and diagnostics, at the same relative paths
+        sizes[f'data/{f.name}'] = write(OUT / 'data' / f.name, json.loads(f.read_text(encoding='utf-8')))
     sizes['files.json'] = write(OUT / 'files.json', downloads(site))
     for name, obj in bias_files(site).items():
         sizes[f'bias/{name}.json'] = write(OUT / 'bias' / f'{name}.json', obj)

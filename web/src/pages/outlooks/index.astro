@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import { C, url, defaultTarget } from '../../lib/cycles.js';
+import { signal } from '../../lib/outlook.js';
+
+const pc = (x) => (x === null || x === undefined ? '—' : `${Math.round(100 * x)}%`);
+const cards = [...C.cycles].reverse().map((c) => {
+  const t = c.targets[0], s = (t.forecast[c.domain_view] || t.forecast[c.default_view]).summary;
+  return { c, t, p: s.mean_local_probabilities, sig: signal(s.mean_local_probabilities), anomaly: s.mean_anomaly_mm,
+    href: url.target(c, c.default_view, defaultTarget(c)), domain: (c.views.find((v) => v[0] === c.domain_view) || [])[1] };
+});
+---
+<Base title="Outlooks" section="outlooks/" description="Seasonal rainfall outlooks for Ethiopia: every forecast cycle, with maps, verification and historical performance.">
+  <h1>Seasonal rainfall outlooks</h1>
+  <p>Calibrated ECMWF SEAS5 outlooks for Ethiopia, one per forecast cycle. Each cycle has its outlook and maps for every target and
+  area, the verification against CHIRPS once a period is complete, and the historical performance of the method.</p>
+  <ul class="cards">
+    {cards.map((k) => (
+      <li><a class="box" href={k.href}>
+        <strong>{k.c.option}</strong>
+        <span class="caveat"><br />{k.t.label}, {k.domain}: {k.sig.text.toLowerCase()} · below / near / above {k.p.map(pc).join(' / ')}
+        <br />Status: {k.t.status.text}</span>
+      </a></li>
+    ))}
+  </ul>
+</Base>

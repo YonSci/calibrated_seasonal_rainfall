@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE, read, names, href, ROOT, cycleTitle } from '../lib/data.js';
+import { SITE, read, names, href, cycleTitle } from '../lib/data.js';
+import { url, defaultTarget } from '../lib/cycles.js';
 
 const C = read('cycles.json');
 const current = SITE.releases.at(-1);
@@ -17,10 +18,10 @@ const bias = names('bias');
   )}
 
   <h2>Forecast cycles</h2>
-  <p class="caveat">Outlooks, maps and verification are still on the <a href={ROOT}>current page</a> (choose the cycle there).</p>
+  <p class="caveat">Each cycle has its outlook and maps for every target and area, the verification against CHIRPS and the historical performance of the method.</p>
   <ul class="cards">
     {C.cycles.map((c) => (
-      <li><a class="box" href={ROOT}><strong>{c.option}</strong><span class="caveat"><br />Targets: {c.targets.map((t) => t.label ?? t.id).join(', ')}
+      <li><a class="box" href={url.target(c, c.default_view, defaultTarget(c))}><strong>{c.option}</strong><span class="caveat"><br />Targets: {c.targets.map((t) => t.label ?? t.id).join(', ')}
         <br />Observations: {c.obs}; reference {c.reference}</span></a></li>
     ))}
   </ul>

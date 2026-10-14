@@ -1,0 +1,23 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import CycleBar from '../../../../components/CycleBar.astro';
+import { C, cycleOf, pagesFor, defaultTarget } from '../../../../lib/cycles.js';
+import { renderer } from '../../../../lib/outlook.js';
+
+export function getStaticPaths() {
+  return C.cycles.flatMap((c) => c.views.map(([view]) => ({ params: { cycle: c.id, view } })));
+}
+const { cycle: cid, view } = Astro.params;
+const c = cycleOf(cid);
+const R = renderer(C, { cycle: cid, view, target: defaultTarget(c) }, pagesFor(c, view));
+const obs = [...new Set(C.cycles.map((x) => x.obs))].join(' and ');
+---
+<Base title={`Verification · ${c.label} · ${R.viewLabel(view)}`} section="outlooks/"
+      description={`${c.option}: frozen forecasts compared with ${obs} observations, ${R.viewLabel(view)}.`}>
+  <CycleBar cycle={c} view={view} section="verification" />
+  <section id="verification">
+    <h1>Verification · {c.option}</h1>
+    <p>Frozen forecasts compared with official {obs} observations once a target period is complete. Each result is one season or month, so it shows what happened this time, not long-term reliability.</p>
+    <div id="vf-body" set:html={R.verification()} />
+  </section>
+</Base>
