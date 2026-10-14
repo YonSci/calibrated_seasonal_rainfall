@@ -40,6 +40,21 @@ function evidence(d, score) {
 }
 const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.entries(s).flatMap(([sc, ts]) =>
   Object.entries(ts).filter(([, x]) => x.decision.confirmed).map(([t]) => `${d.labels[k].split(':')[0]} for ${t} (${sc.toUpperCase()})`)));
+// Forecast-year maps per target: tercile probabilities and favoured tercile (gf_<year>_<target>[_probabilities].png)
+const forecastMaps = (assets) => {
+  const byKey = new Map();
+  for (const a of assets) {
+    const m = a.match(/\/gf_(\d{4})_([A-Za-z]+)(_probabilities)?\.png$/);
+    if (!m) continue;
+    const key = `${m[2]} ${m[1]}`;
+    const e = byKey.get(key) ?? { label: key };
+    e[m[3] ? 'prob' : 'fav'] = a;
+    byKey.set(key, e);
+  }
+  const order = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
+  const rank = (l) => { const i = order.indexOf(l.split(' ')[0]); return i < 0 ? 99 : i; };
+  return [...byKey.values()].sort((x, y) => rank(x.label) - rank(y.label));
+};
 const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' / ') : '—');
 ---
 <Base title="GrazFeediNG calibration" section="research" description="The GrazFeediNG calibration (modified-Leung member-wise affine correction and Identity-Anchored Dirichlet recalibration) tested stage by stage against the published pipeline.">
@@ -82,6 +97,16 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
         <p class="caveat">Negative Δ favours the method. Skill scores against the observed climatology over {d.regions[d.primary_region]}.</p>
         <Figure src={`assets/grazfeeding/${name}/grazfeeding_summary.png`} caption="Skill of each method and target; * confirmed better than the reference." />
 
+        <h3 id={`${name}-reliability`}>Reliability of the tercile probabilities</h3>
+        <p>How often the below- and above-normal categories occurred when each pipeline gave a probability in a bin of 10%. Points on the
+        diagonal are reliable; a line flatter than the diagonal is overconfident, steeper is underconfident; marker size shows how many
+        forecasts fall in the bin (sharpness). Hindcasts over {d.regions[d.primary_region]}.</p>
+        {d.assets.includes(`assets/grazfeeding/${name}/grazfeeding_reliability_training.png`) && (
+          <Figure src={`assets/grazfeeding/${name}/grazfeeding_reliability_training.png`} caption={`Leave-one-year-out ${years(d.training_years)}.`} />)}
+        {d.assets.includes(`assets/grazfeeding/${name}/grazfeeding_reliability_test.png`) && (
+          <details><summary>Test years {years(d.test_years)}</summary>
+            <Figure src={`assets/grazfeeding/${name}/grazfeeding_reliability_test.png`} caption={`Fitted on ${years(d.training_years)}, scored ${years(d.test_years)} (8 years: noisier).`} /></details>)}
+
         <h3>Fitted Dirichlet (on all training years)</h3>
         <Table head={['Target', 'Pipeline', 'A (rows: below / near / above)', 'b', 'Converged']}
           rows={Object.entries(d.targets).flatMap(([t, r]) => ['gf_full', 'iad_on_mvs'].map((k) => [esc(t), `<code>${k}</code>`,
@@ -89,12 +114,17 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
         <p class="caveat">A equal to the identity and b equal to 0 leave the probabilities unchanged. Share of 2017+ forecast members using the pooled climatology
         (members beyond the 25 of the hindcast): {Object.values(d.targets).map((r) => pct(r.iad?.test?.leung_pooled_member_share)).filter((x) => x !== '—')[0] ?? '—'}.</p>
 
-        {d.assets.some((a) => a.includes('/gf_')) && (
+        {forecastMaps(d.assets).length > 0 && (
           <>
-            <h3>The forecast year with the GrazFeediNG calibration (not published)</h3>
-            <p class="caveat">Each method fitted on the cycle's reference years and applied to this year's forecast, next to the published probabilities.</p>
-            {d.assets.filter((a) => a.includes('/gf_')).map((a) => (
-              <details><summary>{a.split('/').at(-1).replace(/^gf_|\.png$/g, '').replace('_', ' ')}</summary><Figure src={a} caption="Favoured tercile: published, GrazFeediNG as uploaded, and without the Dirichlet." /></details>
+            <h3 id={`${name}-forecast`}>The forecast year: tercile probabilities of each pipeline (not published)</h3>
+            <p class="caveat">Every pipeline fitted on the cycle's reference years and applied to this year's forecast, next to the published
+            probabilities (the published stage recomputed here matches the published file). Rows: published, GrazFeediNG as uploaded,
+            without the Dirichlet, MVS + IAD, Leung + published blend; columns: below, near and above normal.</p>
+            {forecastMaps(d.assets).map(({ label, prob, fav }, i) => (
+              <details open={i === forecastMaps(d.assets).length - 1}><summary>{label}</summary>
+                {prob && <Figure src={prob} caption={`Tercile probabilities, ${label}.`} />}
+                {fav && <Figure src={fav} caption={`Favoured tercile (at least 40%), ${label}.`} />}
+              </details>
             ))}
           </>
         )}

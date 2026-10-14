@@ -62,6 +62,7 @@ AMOUNT = ['leung_affine']
 LEVELS = (.1, .5, .9)
 BINS = np.linspace(0, 1, 11)                         # reliability: forecast-probability bins of 0.1
 PANELS = ['incumbent'] + PROB                        # probability pipelines in the plots, published first
+MIN_SHARE = 0.01                                     # reliability bins with fewer forecasts are not drawn
 SHORT = dict(gf_full='GrazFeediNG as uploaded', gf_no_dirichlet='Leung + counts (no Dirichlet)', iad_on_mvs='MVS + counts + IAD',
              leung_blend='Leung + published blend', incumbent='Published (MVS + blend)')
 
@@ -365,7 +366,7 @@ def save_forecast(out_root, cfg, forecasts):
             ax.set_title(title, fontsize=9)
             ax.set_aspect('equal'); ax.set_xticks([]); ax.set_yticks([])
         # favoured tercile
-        fav = lambda p: np.where(np.isfinite(p).all(-1) & (np.nanmax(p, -1) >= 0.4), np.nanargmax(np.nan_to_num(p, nan=-1), -1), np.nan)
+        fav = lambda p: np.where(np.isfinite(p).all(-1) & (np.nan_to_num(p, nan=-1).max(-1) >= 0.4), np.nan_to_num(p, nan=-1).argmax(-1), np.nan)
         fig, axes = plt.subplots(1, len(panels), figsize=(3.4 * len(panels), 3.9), squeeze=False, layout='constrained')
         for ax, (name, p) in zip(axes[0], panels):
             ax.pcolormesh(*E, fav(p), cmap=ListedColormap(['#a6611a', '#bdbdbd', '#1a9641']), vmin=-.5, vmax=2.5)
@@ -410,7 +411,7 @@ def reliability_figure(out, data):
                     if not a:
                         continue
                     w, fs, ob = (np.asarray(a[q]) for q in ('w', 'f', 'o'))
-                    ok = w > 0
+                    ok = w >= MIN_SHARE * w.sum()                # bins with too few forecasts are not shown
                     share = w[ok] / w.sum()
                     ax.plot(fs[ok] / w[ok], ob[ok] / w[ok], '-', color=colours[k], lw=1.2, label=SHORT[k], zorder=2)
                     ax.scatter(fs[ok] / w[ok], ob[ok] / w[ok], s=6 + 400 * share, color=colours[k], alpha=.75, zorder=3)
@@ -426,7 +427,7 @@ def reliability_figure(out, data):
         yrs = data['training_years' if design == 'training' else 'test_years']
         how = 'leave-one-year-out ' if design == 'training' else 'fitted on the training years, scored '
         fig.suptitle(f'Reliability of the tercile probabilities, {data["regions"][data["primary_region"]]}, {how}{yrs[0]}–{yrs[1]}. '
-                     'Marker area: share of forecasts in the bin; on the diagonal = reliable', fontsize=10)
+                     f'Marker area: share of forecasts in the bin (bins under {MIN_SHARE:.0%} not shown); on the diagonal = reliable', fontsize=10)
         (out / 'figures').mkdir(parents=True, exist_ok=True)
         fig.savefig(out / f'figures/grazfeeding_reliability_{design}.png', dpi=120)
         plt.close(fig)
