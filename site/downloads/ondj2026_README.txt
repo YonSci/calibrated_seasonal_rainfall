@@ -2,7 +2,7 @@ ONDJ 2026/27 — September initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-14 21:30 UTC (site release 2026-10-15.1) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-14 22:14 UTC (site release 2026-10-15.2) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
@@ -19,7 +19,7 @@ Reference period: CHIRPS v3.0 ONDJ 1993/94–2024/25 (32 seasons)
 Observations processed through: None yet
 CHIRPS archive: Official CHIRPS v3.0 monthly listing checked 15 Oct 2026: monthly files through Aug 2026
 Verification last run: Not run
-Method / version: Shared climatology blend (λ = 0.18 for ONDJ) · code fd1c0ed
+Method / version: Shared climatology blend (λ = 0.18 for ONDJ) · code 81977e4
 Rainfall domain: Fixed 1993-2025 descriptive domain (Deyr / Hagaya): rainfall regime R3 (GitHub-refined classification of the CHIRPS daily climatology) with ONDJ climatological CHIRPS rainfall >=30 mm; patches smaller than 3 cells removed. Scientific masking walkthrough logic; no onset gate. The same domain is used for the season and each of its months.
 
 Contents

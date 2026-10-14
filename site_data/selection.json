@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-14T21:29:58.854454+00:00",
+ "created_utc": "2026-10-14T22:05:45.498548+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -818,9 +818,25 @@
         "label": "Gamma Quantile Mapping",
         "status": "candidate",
         "historical": null
+       },
+       {
+        "family": "grazfeeding",
+        "family_label": "GrazFeediNG calibration (docs/51)",
+        "method": "leung_affine",
+        "label": "Modified-Leung affine ensemble (amounts)",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.14762842038474358,
+         "years_better": 21,
+         "years": 24,
+         "holm_p": 5e-05,
+         "test_difference": -0.09387171726719717,
+         "test_years_better": 8,
+         "test_years": 8
+        }
        }
       ],
-      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Holm p 0.0209; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction)."
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Holm p 0.0209; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Modified-Leung affine ensemble (amounts) (GrazFeediNG calibration)."
      }
     },
     "ONDJ": {
