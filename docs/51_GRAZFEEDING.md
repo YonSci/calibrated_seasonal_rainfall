@@ -134,11 +134,16 @@ selected for January amounts because its confirmed improvement is larger (−0.4
   south and east) with weaker probabilities. Where the published maps are blank the cells are too dry for terciles
   (mostly January: 1 029 of 1 484 cells are scored); the GrazFeediNG pipelines give values there, but every pipeline is
   scored on the same cells.
-- **Tercile outlook maps** (`forecast/outlook/<pipeline>/<target>.png`, `scripts/grazfeeding_maps.py`): the published
-  "rainfall tercile outlook" figure (same interpolation, smoothing, classes, colours and legend as
-  `presentation_layers.py`) drawn for each pipeline, All Ethiopia, shown on the site next to the published map of the same
-  target. For ONDJ 2026/27 the uploaded pipeline keeps below normal in the west (40–50%) and above normal in the south and
-  east (mostly 40–50%, 50–60% in the far south), and leaves the central highlands and the north without a favoured tercile.
+- **Forecast-year maps on the grid cells** (`scripts/grazfeeding_maps.py`, `forecast/maps/<view>/`): for each target
+  and for two views, the season's rainfall domain (the seasonal mask; for ONDJ the R3 Deyr domain) and All Ethiopia,
+  drawn on the 0.25° cells as computed (no interpolation or smoothing), as the published grid-cell outlook map
+  (`presentation_layers.tercile_cells`: same classes, colours, background and legend):
+  `<pipeline>/<target>.png`, the rainfall tercile outlook of each pipeline, shown on the site next to the published
+  grid-cell map of the same target and view; and `probabilities/<target>.png`, the below-, near- and above-normal
+  probabilities of the published forecast and every pipeline, with area means over the view. On the ONDJ rainfall
+  domain for ONDJ 2026/27 the uploaded pipeline gives above normal 40–50% almost everywhere (50–60% in the far south)
+  where the published forecast gives 50–70%: area means below / near / above 27 / 28 / 45% against the published
+  16 / 26 / 58%.
 
 ## 5. Place in the method selection
 

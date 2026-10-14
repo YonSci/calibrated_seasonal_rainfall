@@ -42,33 +42,27 @@ function evidence(d, score) {
 }
 const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.entries(s).flatMap(([sc, ts]) =>
   Object.entries(ts).filter(([, x]) => x.decision.confirmed).map(([t]) => `${d.labels[k].split(':')[0]} for ${t} (${sc.toUpperCase()})`)));
-// Forecast-year maps per target: tercile probabilities and favoured tercile (gf_<year>_<target>[_probabilities].png)
-const forecastMaps = (assets) => {
-  const byKey = new Map();
-  for (const a of assets) {
-    const m = a.match(/\/gf_(\d{4})_([A-Za-z]+)(_probabilities)?\.png$/);
-    if (!m) continue;
-    const key = `${m[2]} ${m[1]}`;
-    const e = byKey.get(key) ?? { label: key };
-    e[m[3] ? 'prob' : 'fav'] = a;
-    byKey.set(key, e);
-  }
-  const order = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
-  const rank = (l) => { const i = order.indexOf(l.split(' ')[0]); return i < 0 ? 99 : i; };
-  return [...byKey.values()].sort((x, y) => rank(x.label) - rank(y.label));
-};
-// Tercile-outlook maps (scripts/grazfeeding_maps.py) next to the published outlook map of the same target
+// Forecast-year maps on the grid cells (scripts/grazfeeding_maps.py), per view (seasonal rainfall domain first), next to the
+// published grid-cell outlook map of the same target and view
 const OUTLOOK = [['gf_full', 'GrazFeediNG as uploaded'], ['gf_no_dirichlet', 'Leung + counts (no Dirichlet)'],
   ['iad_on_mvs', 'MVS + counts + IAD'], ['leung_blend', 'Leung + published blend']];
-const outlooks = (name, assets) => {
+const mapViews = (name, assets) => {
   const cyc = [...C.cycles].reverse().find((c) => selectionFor(c)?.name === name);
   if (!cyc) return [];
-  return cyc.targets.map((t) => ({
-    id: t.id, label: t.label,
-    maps: [['Published (MVS + climatology blend)', t.forecast?.all_ethiopia?.folder ? `${t.forecast.all_ethiopia.folder}/tercile_outlook.png` : null],
-      ...OUTLOOK.map(([k, l]) => [l, `assets/grazfeeding/${name}/outlook/${k}/${t.id}.png`])].filter(([, a]) => a && (a.startsWith('assets/maps/') || assets.includes(a))),
-  })).filter((x) => x.maps.length > 1)
-    .sort((a, b) => (a.id.length > 3) - (b.id.length > 3));
+  const views = [...cyc.views].sort(([a], [b]) => (a === cyc.domain_view ? -1 : b === cyc.domain_view ? 1 : 0));
+  return views.map(([view, label]) => ({
+    view, label,
+    targets: cyc.targets.map((t) => {
+      const pub = t.forecast?.[view]?.folder;
+      const own = (k) => `assets/grazfeeding/${name}/maps/${view}/${k}/${t.id}.png`;
+      return {
+        id: t.id, label: t.label,
+        maps: [['Published (MVS + climatology blend)', pub ? `${pub}/tercile_outlook_cells.png` : null],
+          ...OUTLOOK.map(([k, l]) => [l, assets.includes(own(k)) ? own(k) : null])].filter(([, x]) => x),
+        probabilities: assets.includes(own('probabilities')) ? own('probabilities') : null,
+      };
+    }).filter((x) => x.maps.length > 1).sort((a, b) => (a.id.length > 3) - (b.id.length > 3)),
+  })).filter((v) => v.targets.length);
 };
 const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' / ') : '—');
 ---
@@ -129,34 +123,27 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
         <p class="caveat">A equal to the identity and b equal to 0 leave the probabilities unchanged. Share of 2017+ forecast members using the pooled climatology
         (members beyond the 25 of the hindcast): {Object.values(d.targets).map((r) => pct(r.iad?.test?.leung_pooled_member_share)).filter((x) => x !== '—')[0] ?? '—'}.</p>
 
-        {outlooks(name, d.assets).length > 0 && (
+        {mapViews(name, d.assets).length > 0 && (
           <>
-            <h3 id={`${name}-outlook`}>Tercile outlook maps, {outlooks(name, d.assets).at(-1).label} (not published)</h3>
-            <p class="caveat">The rainfall tercile outlook of each pipeline, drawn exactly as the published outlook map (same smoothing, classes and
-            colours): the favoured tercile where it reaches 40%, white where no tercile reaches 40%. The published map comes first.</p>
-            {outlooks(name, d.assets).map((x, i, all) => (
-              <details open={i === all.length - 1}><summary>{x.label}</summary>
-                <div class="outlook-grid">
-                  {x.maps.map(([l, a]) => (
-                    <figure><a href={asset(a)} target="_blank" rel="noopener"><img loading="lazy" src={asset(a)} alt={`${x.label} tercile outlook: ${l}`} /></a>
-                      <figcaption class="caveat">{l}</figcaption></figure>))}
-                </div>
-              </details>
-            ))}
-          </>
-        )}
-        {forecastMaps(d.assets).length > 0 && (
-          <>
-            <h3 id={`${name}-forecast`}>The forecast year: tercile probabilities of each pipeline (not published)</h3>
-            <p class="caveat">Every pipeline fitted on the cycle's reference years and applied to this year's forecast, next to the published
-            probabilities (the published stage recomputed here matches the published file). Rows: published, GrazFeediNG as uploaded,
-            without the Dirichlet, MVS + IAD, Leung + published blend; columns: below, near and above normal. Where the published map is
-            blank the cells are too dry for terciles (mostly January); the GrazFeediNG pipelines give values there, but those cells are
-            excluded from the scores of every pipeline, so the comparison above is on the same cells.</p>
-            {forecastMaps(d.assets).map(({ label, prob, fav }, i) => (
-              <details open={i === forecastMaps(d.assets).length - 1}><summary>{label}</summary>
-                {prob && <Figure src={prob} caption={`Tercile probabilities, ${label}.`} />}
-                {fav && <Figure src={fav} caption={`Favoured tercile (at least 40%), ${label}.`} />}
+            <h3 id={`${name}-maps`}>Forecast-year maps, {mapViews(name, d.assets)[0].targets.at(-1).label} (not published)</h3>
+            <p class="caveat">Every pipeline fitted on the cycle's reference years and applied to this year's forecast, drawn on the 0.25° grid
+            cells as computed (no interpolation or smoothing), first on the season's rainfall domain (the seasonal mask), then on All Ethiopia.
+            For each target: the rainfall tercile outlook (favoured tercile where it reaches 40%, white where none does) of the published
+            forecast and of each pipeline, then the below-, near- and above-normal probabilities of all of them. The published stage
+            recomputed here matches the published file. Dark grey cells have no probability (too dry for terciles, mostly January in the
+            published forecast); those cells are excluded from the scores of every pipeline.</p>
+            {mapViews(name, d.assets).map((v, vi) => (
+              <details open={vi === 0}><summary><strong>{v.label}</strong></summary>
+                {v.targets.map((x, i, all) => (
+                  <details open={vi === 0 && i === all.length - 1}><summary>{x.label}</summary>
+                    <div class="outlook-grid">
+                      {x.maps.map(([l, a]) => (
+                        <figure><a href={asset(a)} target="_blank" rel="noopener"><img loading="lazy" src={asset(a)} alt={`${x.label} tercile outlook, ${v.label}: ${l}`} /></a>
+                          <figcaption class="caveat">{l}</figcaption></figure>))}
+                    </div>
+                    {x.probabilities && <Figure src={x.probabilities} caption={`Tercile probabilities, ${x.label}, ${v.label}: published and every pipeline.`} />}
+                  </details>
+                ))}
               </details>
             ))}
           </>

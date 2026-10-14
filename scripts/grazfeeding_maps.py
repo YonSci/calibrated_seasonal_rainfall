@@ -1,14 +1,18 @@
-"""Tercile-outlook maps of the GrazFeediNG pipelines for the forecast year, drawn exactly as the published outlook map
-(presentation_layers.forecast_maps: same interpolation, smoothing, classes, colours, boundary and legend), so each
-pipeline can be compared map for map with the published "rainfall tercile outlook" (docs/51). Never published as a forecast.
+"""Forecast-year maps of the GrazFeediNG pipelines on the native 0.25° grid cells (no interpolation or smoothing), for the
+season's rainfall domain (the seasonal mask) and All Ethiopia, drawn as the published grid-cell outlook map
+(presentation_layers.tercile_cells: same classes, colours, background and legend), so each pipeline can be compared map
+for map with the published one (docs/51). Never published as a forecast.
 
 Input: outputs/grazfeeding/<cycle>/forecast/gf_<year>_<target>.nc (scripts/grazfeeding_benchmark.py).
-Output: outputs/grazfeeding/<cycle>/forecast/outlook/<pipeline>/<target>.png (All Ethiopia view).
+Output, per view (e.g. ondj_rainfall_domain, all_ethiopia), under outputs/grazfeeding/<cycle>/forecast/maps/<view>/:
+  <pipeline>/<target>.png       the rainfall tercile outlook (leading tercile where it reaches 40%)
+  probabilities/<target>.png    below-, near- and above-normal probabilities, published and every pipeline
 
     set CALIBRATION_CYCLE=config\\cycles\\sep_2026_ondj.json
     python scripts\\grazfeeding_maps.py --name sep_ondj
 """
 import argparse
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -25,45 +29,67 @@ import presentation_layers as layers
 import delivery_map_base as base
 
 PIPELINES = {
-    'gf_full': 'GrazFeediNG as uploaded (modified-Leung affine + member counts + IAD Dirichlet)',
-    'gf_no_dirichlet': 'Modified-Leung affine + member counts (no Dirichlet)',
-    'iad_on_mvs': 'Published MVS + member counts + IAD Dirichlet',
-    'leung_blend': 'Modified-Leung affine + published smoothed counts and climatology blend',
+    'gf_full': ('GrazFeediNG as uploaded', 'GrazFeediNG as uploaded (modified-Leung affine + member counts + IAD Dirichlet)'),
+    'gf_no_dirichlet': ('Leung + counts (no Dirichlet)', 'Modified-Leung affine + member counts (no Dirichlet)'),
+    'iad_on_mvs': ('MVS + counts + IAD', 'Published MVS + member counts + IAD Dirichlet'),
+    'leung_blend': ('Leung + published blend', 'Modified-Leung affine + published smoothed counts and climatology blend'),
 }
+BANNER = 'NOT PUBLISHED: GrazFeediNG comparison (docs/51)'
 
 
-def outlook(p, valid, forecast, country_native, lines, target, title, path, settings):
-    """The published tercile-outlook figure (presentation_layers.forecast_maps, All Ethiopia view) for probabilities p."""
-    grid = layers.DisplayGrid(forecast, settings)
-    country = grid.support(country_native)
-    q = np.stack([grid.continuous(p[..., k], valid) for k in range(3)], -1)
-    q = np.clip(q, 0, 1)
-    sums = q.sum(-1, keepdims=True)
-    q = np.divide(q, sums, out=np.full_like(q, np.nan), where=sums > 0)
-    qvalid = np.isfinite(q).all(-1) & country
-    _, shown, peak, _ = base.classify(q, qvalid, settings['minimum_leading_probability'])
+def outlook_cells(p, valid, forecast, country, domain, lines, target, view, title, path, settings):
+    """The published grid-cell tercile outlook (presentation_layers.tercile_cells) for probabilities p."""
+    _, shown, peak, _ = base.classify(p, valid, settings['minimum_leading_probability'])
+    ext = layers.cell_axes(None, forecast, country, domain, valid)
     fig = plt.figure(figsize=(10.6, 8.5))
     gs = fig.add_gridspec(3, 2, width_ratios=[17, 1], left=.08, right=.86, bottom=.19, top=.83, hspace=.45, wspace=.14)
     ax = fig.add_subplot(gs[:, 0])
-    layers.background(ax, grid, country, country, qvalid)
-    ax.contourf(grid.lon, grid.lat, np.where(country & (shown == -1), 1., np.nan), levels=[.5, 1.5], colors=['white'], corner_mask=False)
+    layers.cell_background(ax, ext, country, domain, valid)
     norm = BoundaryNorm(base.PROB_BOUNDS, 7)
     for row, k in enumerate([2, 1, 0]):
         cmap = ListedColormap(base.COLORS[k])
-        ax.contourf(grid.lon, grid.lat, np.where(country & (shown == k), 100 * peak, np.nan), levels=base.PROB_BOUNDS, cmap=cmap, norm=norm,
-                    corner_mask=False)
+        ax.imshow(np.where(domain & valid & (shown == k), 100 * peak, np.nan), origin='lower', extent=ext, cmap=cmap, norm=norm,
+                  interpolation='nearest', zorder=2)
         cb = fig.colorbar(ScalarMappable(norm=norm, cmap=cmap), cax=fig.add_subplot(gs[row, 1]), ticks=[40, 50, 60, 70, 80, 90, 100])
         cb.set_label(['Below normal (%)', 'Near normal (%)', 'Above normal (%)'][k])
-    layers.finish_axis(ax, grid, lines)
+    layers.cell_finish(ax, ext, lines)
     fig.suptitle(f'{CYCLE.target_label(target)} | rainfall tercile outlook', fontsize=18, y=.965)
     fig.text(.5, .918, f'{CYCLE.init_month_name} initialization · {title} · CHIRPS reference {REF_DASH}', ha='center', fontsize=9.5)
-    fig.text(.5, .883, 'All Ethiopia · NOT PUBLISHED: GrazFeediNG comparison (docs/51)', ha='center', fontsize=11, color='#b3401b')
+    fig.text(.5, .883, f'{layers.VIEWS[view]} · grid cells (0.25°) · {BANNER}', ha='center', fontsize=11, color='#b3401b')
     fig.legend(handles=[Patch(facecolor='white', edgecolor='gray', label=f"Weak (<{100 * settings['minimum_leading_probability']:g}%) or tied"),
-                        Patch(facecolor='#c3c9cf', label='No probability'), Patch(facecolor='#edf0f3', label='Outside focus')],
+                        Patch(facecolor='#c3c9cf', label='No probability in view'), Patch(facecolor='#edf0f3', label='Outside focus')],
                loc='lower center', bbox_to_anchor=(.5, .09), ncol=3, frameon=False, fontsize=9)
-    layers.footer(fig, settings)
+    fig.text(.5, .018, layers.CELLS_NOTE, ha='center', va='bottom', fontsize=8, color='#48535d')
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=settings['dpi'], facecolor='white')
+    plt.close(fig)
+
+
+def probability_cells(panels, forecast, country, domain, lines, target, view, path):
+    """Below-, near- and above-normal probabilities of each pipeline (rows) on the grid cells, inside the view only."""
+    ext = layers.cell_axes(None, forecast, country, domain, None)
+    cats = [('Below normal', 'YlOrBr'), ('Near normal', 'Greys'), ('Above normal', 'YlGn')]
+    fig, axes = plt.subplots(len(panels), 3, figsize=(11, 3.2 * len(panels) + .8), squeeze=False, layout='constrained')
+    w = np.asarray(layers.area(forecast))                     # cell areas, for the area means in the titles
+    for i, (name, p) in enumerate(panels):
+        ok = country & domain & np.isfinite(p).all(-1)
+        for j, (cat, cmap) in enumerate(cats):
+            ax = axes[i, j]
+            layers.cell_background(ax, ext, country, domain, ok)
+            im = ax.imshow(np.where(ok, p[..., j], np.nan), origin='lower', extent=ext, cmap=cmap, vmin=0, vmax=.8,
+                           interpolation='nearest', zorder=2)
+            for x, y in lines:
+                ax.plot(x, y, color='#35414b', linewidth=.5, zorder=7)
+            ax.set(xlim=(ext[0], ext[1]), ylim=(ext[2], ext[3]), aspect='equal', xticks=[], yticks=[])
+            mean = float(np.average(p[ok, j], weights=w[ok])) if ok.any() else float('nan')
+            ax.set_title(f'{name}\n{cat}: area mean {mean:.0%}', fontsize=9)
+            if i == len(panels) - 1:
+                fig.colorbar(im, ax=axes[:, j], orientation='horizontal', fraction=.025, pad=.01, label=f'{cat} probability',
+                             ticks=[0, .2, 1 / 3, .6, .8], format=lambda x, _: f'{x:.0%}')
+    fig.suptitle(f'{CYCLE.target_label(target)} | tercile probabilities · {layers.VIEWS[view]} · grid cells (0.25°)\n{BANNER}; '
+                 'climatology 33%; light grey outside the view, dark grey no probability', fontsize=10.5)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, dpi=110, facecolor='white')
     plt.close(fig)
 
 
@@ -76,6 +102,9 @@ def main():
     settings = CYCLE.raw['display']
     lines = base.boundary_lines(CYCLE.root('boundary'))
     mask_path = CYCLE.root('season_domain_mask') if layers.SEASON_VIEW else CYCLE.root('regime_mask')
+    for old in ('outlook', 'maps'):                      # earlier renderings (the smoothed maps) are replaced
+        if (root / old).is_dir():
+            shutil.rmtree(root / old)
     for target in args.targets:
         gf_file = root / f'gf_{CYCLE.year}_{target}.nc'
         if not gf_file.is_file():
@@ -88,10 +117,17 @@ def main():
         with xr.open_dataset(gf_file) as g:
             if not (np.allclose(g.lat, forecast.lat) and np.allclose(g.lon, forecast.lon)):
                 raise ValueError('GrazFeediNG and published grids differ')
-            for k, title in PIPELINES.items():
-                p = g[f'{k}_probability'].transpose('lat', 'lon', 'category').values
-                valid = country & np.isfinite(p).all(-1)
-                outlook(p, valid, forecast, country, lines, target, title, root / 'outlook' / k / f'{target}.png', settings)
+            # near normal = 1 - below - above can be -1e-16 (rounding); clipped for display only
+            probs = {k: np.clip(g[f'{k}_probability'].transpose('lat', 'lon', 'category').values, 0, 1) for k in PIPELINES}
+        published = forecast.blend_probability.sel(category=['below', 'near', 'above']).transpose('lat', 'lon', 'category').values
+        for view, domain in domains.items():
+            domain = np.asarray(domain, bool) & country
+            out = root / 'maps' / view
+            for k, (_, title) in PIPELINES.items():
+                valid = country & np.isfinite(probs[k]).all(-1)
+                outlook_cells(probs[k], valid, forecast, country, domain, lines, target, view, title, out / k / f'{target}.png', settings)
+            panels = [('Published (MVS + climatology blend)', published)] + [(PIPELINES[k][0], probs[k]) for k in PIPELINES]
+            probability_cells(panels, forecast, country, domain, lines, target, view, out / 'probabilities' / f'{target}.png')
         print('Rendered', CYCLE.target_label(target), flush=True)
 
 
