@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-14 23:11 UTC",
- "code_commit": "181c52a",
- "release": "2026-10-15.4",
+ "built_utc": "2026-10-14 23:23 UTC",
+ "code_commit": "7fa8aad",
+ "release": "2026-10-15.5",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -715,7 +715,7 @@
   {
    "id": "2026-10-15.4",
    "date": "2026-10-15",
-   "commit": null,
+   "commit": "0b9d73c",
    "title": "GrazFeediNG: tercile outlook maps, ONDJ 2026/27",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -727,6 +727,24 @@
     {
      "type": "display",
      "text": "Research > GrazFeediNG calibration: the rainfall tercile outlook of each GrazFeediNG pipeline for Oct, Nov, Dec, Jan and ONDJ 2026/27, drawn exactly as the published outlook map and shown next to it (not published as a forecast). The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-15.5",
+   "date": "2026-10-15",
+   "commit": null,
+   "title": "GrazFeediNG maps on the grid cells, with the seasonal rainfall domain",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Research > GrazFeediNG calibration: the tercile outlook and the below-, near- and above-normal probabilities of every pipeline for ONDJ 2026/27 and its months are drawn on the 0.25-degree grid cells (no smoothing), first on the ONDJ R3 (Deyr) rainfall domain and then on All Ethiopia, next to the published grid-cell maps of the same view. They replace the smoothed maps of release 2026-10-15.4. Not published as a forecast; the published forecasts are unchanged."
     }
    ]
   }
