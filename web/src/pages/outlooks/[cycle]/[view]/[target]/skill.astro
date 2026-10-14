@@ -14,7 +14,7 @@ const t = c.targets.find((x) => x.id === target);
 const D2 = dataFile(c.diagnostics);
 const H = R.history();
 ---
-<Base title={`Historical skill · ${t.label} · ${R.viewLabel(view)}`} section="skill"
+<Base title={`Historical skill · ${t.label} · ${c.option} · ${R.viewLabel(view)}`} section="skill"
       description={`${t.label} (${c.init} initialization): how forecasts made with the same method scored in past years, ${R.viewLabel(view)}.`}>
   <ContextBar slot="context" cycle={c} view={view} section="skill" target={target} />
   <section id="history">

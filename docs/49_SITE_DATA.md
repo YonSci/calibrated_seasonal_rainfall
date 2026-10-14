@@ -49,61 +49,89 @@ large `outputs/` folder.
 
 `schema_version` (now 1) is raised whenever a field a page reads is renamed or removed.
 
-## 3. The Astro front end (`web/`)
+## 3. The site (`web/`, Astro)
 
-The new pages are built with [Astro](https://astro.build) 7.3.5 (Node ≥ 22.12) from `site_data/` alone; figures and maps are
-linked from `site/assets/`. They are served under `/next/` next to the current page while the migration runs, and updated
-automatically: every build of the results refreshes `site_data/`, and the Pages workflow (`.github/workflows/pages.yml`)
-rebuilds the Astro pages from it on each push, so new results (a new phase, a new verified season) appear without page edits.
-The built pages are not committed (`site/next/` is ignored). If the Astro build fails, the workflow still publishes the
-current site.
+Since release 2026-10-14.8 the site at the main address is built with [Astro](https://astro.build) 7.3.5 (Node ≥ 22.12) from
+`site_data/` alone; figures, maps and downloads are linked from `site/`. Every build of the results refreshes `site_data/`,
+and the Pages workflow (`.github/workflows/pages.yml`) rebuilds the pages from it on each push, so new results (a new phase,
+a newly verified season) appear without page edits. Deployment (`web/scripts/assemble.mjs`, used by the Pages workflow and
+by Vercel through `vercel.json`):
+
+* the Astro build is placed at the root of the published site (`site/` keeps the figures, downloads and archived releases);
+* the previous single page, still written by `scripts/build_site.py`, is published unchanged at `/classic/` (its links to
+  site files point one level up); links to it from elsewhere — its anchors such as `#methods` and its `?cycle=…` views —
+  open the matching new page or the classic page;
+* every address of the preview under `/next/` (releases 2026-10-14.3 to .7) forwards to the same page at the root;
+* if the Astro build fails, the workflow publishes the previous single page at the root, as before.
+
+The built pages are not committed (`site/next/` and `site/classic/` are ignored).
 
 | Page | Content | Source |
 | --- | --- | --- |
-| `/next/` | the current outlook first (latest cycle, its domain, the season: headline, probabilities, map, amount, signal, skill), every target as a small map, what's new, other cycles, research | `site.json`, `cycles.json` |
-| `/next/outlooks/` | every forecast cycle | `cycles.json` |
-| `/next/outlooks/<cycle>/<area>/<target>/` | outlook (answer first), all targets as small maps with previous/next, map viewer, side panel: links to this target's verification and skill, the official outlooks, the cycle record | `cycles.json` |
-| `/next/outlooks/<cycle>/<area>/<target>/verification/` | forecast vs observed chart and the verification narratives (selected target first) | `cycles.json` |
-| `/next/outlooks/<cycle>/<area>/<target>/skill/` | historical skill, the verification explorer (both periods), regions | `cycles.json`, `data/<cycle>_diagnostics.json` |
-| `/next/outlooks/<cycle>/<area>/official/` | official-outlook comparison (season) | `data/<cycle>_comparison.json` |
-| `/next/probability-calibration/` | plan, definitions, cycles, references | `probcal/<cycle>.json` |
-| `/next/probability-calibration/<cycle>/` | summary: what each phase tested and what was confirmed better, the shadow status | `probcal/<cycle>.json` |
-| `/next/probability-calibration/<cycle>/{phase-1,phase-2,phase-3,shadow,downloads}/` | one sub-page per phase, the amount/range shadow, downloads | `probcal/<cycle>.json` |
-| `/next/bias-correction/` | the benchmark and its cycles | `bias/<cycle>.json` |
-| `/next/bias-correction/<cycle>/` | summary: what the evidence supports and the suggested method | `bias/<cycle>.json` |
-| `/next/bias-correction/<cycle>/{interpretation,methods,screening,confirmation,ratio-limits,shadow,figures,downloads}/` | interpretation and caveats; data, methods and designs; screening (one region at a time, statistics, diagnostics); confirmation; ratio-limit study; shadow and validation; figure browser; files, provenance and references | `bias/<cycle>.json` |
-| `/next/research/amount-shadow/` | the amount and range shadow of every cycle | `probcal/<cycle>.json` |
-| `/next/downloads/` | every data file with size and SHA-256 | `files.json` |
-| `/next/releases/` | change log, archived releases | `site.json` |
+| `/` | the current outlook first (latest cycle, its domain, the season: headline, probabilities, map, amount, signal, skill), every target as a small map, what's new, other cycles, research | `site.json`, `cycles.json` |
+| `/outlooks/` | every forecast cycle | `cycles.json` |
+| `/outlooks/<cycle>/<area>/<target>/` | outlook (answer first), all targets as small maps with previous/next, map viewer, side panel: links to this target's verification and skill, the official outlooks, the cycle record | `cycles.json` |
+| `/outlooks/<cycle>/<area>/<target>/verification/` | forecast vs observed chart and the verification narratives (selected target first) | `cycles.json` |
+| `/outlooks/<cycle>/<area>/<target>/skill/` | historical skill, the verification explorer (both periods), regions | `cycles.json`, `data/<cycle>_diagnostics.json` |
+| `/outlooks/<cycle>/<area>/official/` | official-outlook comparison (season) | `data/<cycle>_comparison.json` |
+| `/probability-calibration/` | plan, definitions, cycles, references | `probcal/<cycle>.json` |
+| `/probability-calibration/<cycle>/` | summary: what each phase tested and what was confirmed better, the shadow status | `probcal/<cycle>.json` |
+| `/probability-calibration/<cycle>/{phase-1,phase-2,phase-3,shadow,downloads}/` | one sub-page per phase, the amount/range shadow, downloads | `probcal/<cycle>.json` |
+| `/bias-correction/` | the benchmark and its cycles | `bias/<cycle>.json` |
+| `/bias-correction/<cycle>/` | summary: what the evidence supports and the suggested method | `bias/<cycle>.json` |
+| `/bias-correction/<cycle>/{interpretation,methods,screening,confirmation,ratio-limits,shadow,figures,downloads}/` | interpretation and caveats; data, methods and designs; screening (one region at a time, statistics, diagnostics); confirmation; ratio-limit study; shadow and validation; figure browser; files, provenance and references | `bias/<cycle>.json` |
+| `/research/amount-shadow/` | the amount and range shadow of every cycle | `probcal/<cycle>.json` |
+| `/downloads/` | every data file with size and SHA-256 | `files.json` |
+| `/releases/` | change log, archived releases | `site.json` |
+| `/about/methods/` | methods and data (the section written by the build, unchanged) | `sections.json` |
+| `/about/domains/<season>/` | rainfall climatology and domain review per season: climatology, EMI references, candidate domains (cutoff picker), assessment | `cycles.json` (`reviews`) |
+| `/about/glossary/` | the scores and terms in one sentence each | `web/src/lib/glossary.js` |
+| `/search/` | site search | Pagefind index |
+| `/classic/` | the previous single page | `scripts/build_site.py` |
 
-Navigation: the site menu puts the forecast first (Outlook, Verification, Skill), then Research and About menus and
-Downloads. On forecast pages a context bar under the menu (breadcrumbs; cycle, area and target; section tabs Outlook and
-maps · Official outlooks · Verification · Historical skill) stays with the page; changing a choice keeps the others and the
-section. Research pages have the same kind of bar: breadcrumbs, the cycle (staying on the same sub-page) and the sub-pages
-as tabs, with previous/next links at the bottom and, on wide screens, an "On this page" list of the headings. The addresses of release 2026-10-14.5 (`/<cycle>/<area>/verification/` and `/history/`) forward to the season's
-pages.
+**Navigation.** The site menu puts the forecast first (Outlook, Verification, Skill), then the Research and About menus,
+Downloads and a search box. On forecast pages a context bar under the menu (breadcrumbs; cycle, area and target; section tabs
+Outlook and maps · Official outlooks · Verification · Historical skill) stays with the page; changing a choice keeps the others
+and the section. Research pages have the same kind of bar: breadcrumbs, the cycle (staying on the same sub-page) and the
+sub-pages as tabs, with previous/next links and, on wide screens, an "On this page" list of the headings. Verification status
+badges are shown on the outlook headline, the target maps and the cycle cards.
+
+**Search.** After `astro build`, `web/scripts/postbuild.mjs` builds a [Pagefind](https://pagefind.app) 1.5.2 index of the main
+content of every page (`pagefind/`, static; no server). Result titles name the target, cycle and area.
+
+**Glossary.** On every page, the first use of each glossary term (RPSS, CRPSS, tercile, MVS, EMOS, Holm, coverage, …) shows its
+one-sentence explanation when the pointer rests on it or the keyboard reaches it; the text itself is unchanged.
+
+**Packages.** Each cycle's package is one ZIP built by `scripts/build_site.py` (every map, the verification reports, the
+official-outlook comparison files and the forecast NetCDF files). It is byte-for-byte reproducible (fixed entry times and
+order), so an unchanged package keeps its SHA-256 and is uploaded once as a release asset. The bulletin, summary, metadata and
+README carry the build time and are linked next to it. (Until release 2026-10-14.8 the package was assembled in the browser;
+since the downloads moved to release assets in 2026-10-14.3 that failed, because browsers may not fetch release assets across
+origins.)
 
 Pages only display what the Python build decided: every ✓, confirmation and interpretation statement comes from the data
-(the bias-correction interpretation statements are computed by `site_bias.findings` and exported as text). The benchmark
-pages are checked number by number against the current page: every signed score of a cycle, collected over its summary and
-sub-pages, is identical (582–641 values per bias-correction cycle, 169–206 per probability-calibration cycle). The outlook pages carry the current page's rendering code, ported to
-build time; for every cycle, area and target the text of each section (outlook, targets, comparison, record, verification,
-historical skill, regions and the explorer in both periods) was compared with the current page rendered in a browser.
+(the bias-correction interpretation statements are computed by `site_bias.findings` and exported as text). The pages are
+checked against the classic page: every signed score of a benchmark cycle, collected over its summary and sub-pages, is
+identical (582–641 values per bias-correction cycle, 169–206 per probability-calibration cycle); for every cycle, area and
+target the text of each outlook, comparison, verification and skill section matches the classic page rendered in a browser;
+the methods page and each season's domain review match word for word.
 
-Preview locally (Git Bash needs `MSYS_NO_PATHCONV=1` so the base path is not rewritten):
+Build and preview locally (Git Bash needs `MSYS_NO_PATHCONV=1` so the base path is not rewritten):
 
 ```
 cd web && npm ci
-MSYS_NO_PATHCONV=1 ASTRO_BASE=/next/ ASTRO_OUT=../site/next npm run build
-cd ../site && python -m http.server 8765        # then open http://127.0.0.1:8765/next/
+MSYS_NO_PATHCONV=1 ASTRO_BASE=/ npm run build              # pages and search index in web/dist
+cp -r ../site /tmp/deploy && node scripts/assemble.mjs /tmp/deploy dist
+cd /tmp/deploy && python -m http.server 8765               # then open http://127.0.0.1:8765/
 ```
 
 ## 4. Next steps
 
-1. ✓ Forecast outlooks, maps, verification and historical performance (one page per cycle, area and target).
-2. Rainfall domains, methods and the cycle download packages.
-3. Make the Astro pages the site root, and retire the HTML generation in `build_site.py`, `site_bias.py` and `site_prob.py`;
-   the Python build keeps producing the results, figures, downloads and `site_data/`.
+1. ✓ Forecast outlooks, maps, verification and historical performance; research summaries and sub-pages; methods, domains,
+   packages, search and glossary; the new site at the main address.
+2. Retire the HTML generation of the classic page in `build_site.py`, `site_bias.py` and `site_prob.py` once the classic page
+   is no longer needed; the Python build keeps producing the results, figures, downloads and `site_data/` (the methods
+   section and the interpretation statements are exported from it today).
 
 A server back end is not planned: everything shown is precomputed. Should on-demand queries be needed (e.g. a time series at
 a clicked point), FastAPI with xarray over the NetCDF outputs fits the existing stack.

@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Table from '../components/Table.astro';
+import OnThisPage from '../components/OnThisPage.astro';
 import { FILES, read, link, esc, mb } from '../lib/data.js';
 
 const C = read('cycles.json');
@@ -16,18 +17,35 @@ const groups = {};
 for (const f of files) (groups[group(f)] ??= []).push(f);
 const order = Object.keys(groups).sort((a, b) => (a.startsWith('Forecast') ? 0 : 1) - (b.startsWith('Forecast') ? 0 : 1) || a.localeCompare(b));
 const total = files.reduce((a, f) => a + (f.bytes ?? 0), 0);
+const cycles = [...C.cycles].reverse();
 ---
-<Base title="Downloads" section="downloads" description="Every data file of the site: forecasts, verification, benchmarks, with sizes and checksums.">
-  <h1>Downloads</h1>
-  <p>{files.length} files, {mb(total)}. Large data files are served from the GitHub release
-  <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/releases/tag/site-files"><code>site-files</code></a>; each is named by its
-  content (SHA-256), so a link never changes once published.</p>
-  {order.map((g) => (
-    <section>
-      <h2>{g}</h2>
-      <Table head={['File', 'Size', 'SHA-256']} caption=""
-             rows={groups[g].map((f) => [`<a href="${esc(link(f.url))}" download>${esc(f.label ?? f.path.split('/').pop())}</a><br><span class="caveat">${esc(f.path.replace(/^downloads\//, ''))}</span>`,
-                                         mb(f.bytes), f.sha256 ? `<code>${f.sha256.slice(0, 16)}…</code>` : '—'])} />
-    </section>
-  ))}
+<Base title="Downloads" section="downloads" description="Every data file of the site: each cycle's package, bulletin and data, and the research results, with sizes and checksums.">
+  <OnThisPage>
+    <h1>Downloads</h1>
+    <p>Each forecast cycle has a package (ZIP) with every map, the verification reports, the official-outlook comparison files and the
+    forecast NetCDF files, and its bulletin, summary, metadata and README as separate files. Large files are served from the GitHub release
+    <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/releases/tag/site-files"><code>site-files</code></a>; each is named by its
+    content (SHA-256), so a link never changes once published.</p>
+    <h2>Forecast cycles</h2>
+    <div class="cards dl-cycles">
+      {cycles.map((c) => (
+        <div class="box">
+          <h3>{c.option}</h3>
+          {c.package_zip && <p><a class="button-link" href={link(c.package_zip.href)} download>Package (ZIP): {c.package_zip.files} files, {mb(c.package_zip.bytes)}</a></p>}
+          <ul class="dl">{c.downloads.map((d) => <li><a href={link(d.href)} download>{d.label}</a><span>{d.note}</span></li>)}</ul>
+        </div>
+      ))}
+    </div>
+    <h2>Every file</h2>
+    <p class="caveat">{files.length} files, {mb(total)}, with their checksums.</p>
+    {order.map((g) => (
+      <section>
+        <h3>{g}</h3>
+        <Table head={['File', 'Size', 'SHA-256']} caption=""
+               rows={groups[g].map((f) => [`<a href="${esc(link(f.url))}" download>${esc(f.label ?? f.path.split('/').pop())}</a><br><span class="caveat">${esc(f.path.replace(/^downloads\//, ''))}</span>`,
+                                           mb(f.bytes), f.sha256 ? `<code>${f.sha256.slice(0, 16)}…</code>` : '—'])} />
+      </section>
+    ))}
+  </OnThisPage>
+  <style is:global>.dl-cycles{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))} .dl-cycles .box{margin:0}</style>
 </Base>

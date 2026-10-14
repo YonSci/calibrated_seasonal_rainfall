@@ -5,11 +5,12 @@
   "description": "Astro front end of the results site, built from site_data/ and site/assets/ (docs/49).",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/postbuild.mjs",
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "7.3.5"
+    "astro": "7.3.5",
+    "pagefind": "1.5.2"
   },
   "engines": {
     "node": ">=22.12.0"

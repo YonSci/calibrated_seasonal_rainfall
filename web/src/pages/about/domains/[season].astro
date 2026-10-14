@@ -1,0 +1,66 @@
+---
+// Rainfall climatology and domains of one season (the review behind each forecast domain; docs/44).
+import Base from '../../../layouts/Base.astro';
+import { href } from '../../../lib/data.js';
+import { C } from '../../../lib/cycles.js';
+import { review } from '../../../lib/domains.js';
+
+export function getStaticPaths() {
+  const seasons = [...new Set(C.cycles.map((c) => c.season))];
+  return seasons.map((s) => ({ params: { season: s.toLowerCase() } }));
+}
+const season = Astro.params.season.toUpperCase();
+const seasons = [...new Set(C.cycles.map((c) => c.season))];
+const R = (C.reviews || []).find((r) => r.season === season);
+const cyc = [...C.cycles].reverse().find((c) => c.season === season);
+const V = R ? review(R, cyc.views) : null;
+---
+<Base title={`Rainfall domains · ${season}`} section="about" description={`${season} rainfall climatology and the rainfall domains used for the forecast summaries.`}>
+  <h1>Rainfall climatology and domains · {season}</h1>
+  <p>Where does a season's rain matter? Before a forecast domain is chosen, this review computes the observed climatology (seasonal
+  total, annual total and the season's share), compares it with EMI's published long-term maps, and tests every combination of rainfall
+  and annual-share cutoffs. Cutoffs are chosen for what the domain means climatologically, never to improve a forecast score.</p>
+  <nav class="tabs" aria-label="Season">{seasons.map((s) => <a class="tab" href={href(`about/domains/${s.toLowerCase()}/`)} aria-pressed={String(s === season)}>{s}</a>)}</nav>
+  {V ? (
+    <div id="dr-body">
+      <Fragment set:html={V.head} />
+      <div class="tabs" role="group" aria-label="Review view">{V.tabs.map(([k, l], i) => <button type="button" class="tab" data-dt={k} aria-pressed={String(i === 0)}>{l}</button>)}</div>
+      {V.tabs.map(([k, , h], i) => <div class="dr-tab" data-tab={k} hidden={i > 0} set:html={h} />)}
+    </div>
+  ) : (
+    <>
+      <p class="notice">No climatology and domain review has been run for {season} yet.</p>
+      <div class="table-wrap"><table><caption>Rainfall domains used by {cyc.option}</caption><thead><tr><th scope="col">Area</th><th scope="col">Definition</th></tr></thead><tbody>
+        {cyc.views.map(([v, label]) => <tr><td>{label}{(cyc.criteria || {})[v] && <><br /><span class="caveat">{cyc.criteria[v]}</span></>}</td><td>{(cyc.definitions || {})[v] || (v === cyc.domain_view ? cyc.definition : '—')}</td></tr>)}
+      </tbody></table></div>
+    </>
+  )}
+  <script type="application/json" id="dr-data" set:html={JSON.stringify(V ? V.candidates : [])} />
+  <script>
+    // Tabs, and the candidate picker (rainfall cutoff × share cutoff, or a named comparison).
+    const cands = JSON.parse(document.getElementById('dr-data').textContent);
+    const show = (id) => document.querySelectorAll<HTMLElement>('.dr-cand').forEach((b) => { b.hidden = b.dataset.cand !== id; });
+    let cur = cands.find((c) => !document.querySelector(`.dr-cand[data-cand="${c.id}"]`)?.hasAttribute('hidden')) || cands[0];
+    const press = () => {
+      document.querySelectorAll<HTMLElement>('[data-dmm]').forEach((b) => b.setAttribute('aria-pressed', String(!!cur && +b.dataset.dmm === cur.mm)));
+      document.querySelectorAll<HTMLElement>('[data-dsh]').forEach((b) => b.setAttribute('aria-pressed', String(!!cur && +b.dataset.dsh === cur.share)));
+    };
+    document.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('[data-dt],[data-dmm],[data-dsh]') as HTMLElement | null;
+      if (!b) return;
+      if (b.dataset.dt) {
+        document.querySelectorAll<HTMLElement>('[data-dt]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        document.querySelectorAll<HTMLElement>('.dr-tab').forEach((t) => { t.hidden = t.dataset.tab !== b.dataset.dt; });
+        return;
+      }
+      const base = cur || cands[0];
+      const next = b.dataset.dmm ? cands.find((c) => c.mm === +b.dataset.dmm && c.share === base.share) : cands.find((c) => c.share === +b.dataset.dsh && c.mm === base.mm);
+      if (next) { cur = next; show(cur.id); press(); const sel = document.querySelector('.dr-comp') as HTMLSelectElement; if (sel) sel.value = ''; }
+    });
+    document.addEventListener('change', (e) => {
+      const s = e.target as HTMLSelectElement;
+      if (!s.classList.contains('dr-comp')) return;
+      if (s.value) { show(s.value); cur = null; press(); } else { cur = cur || cands[0]; show(cur.id); press(); }
+    });
+  </script>
+</Base>

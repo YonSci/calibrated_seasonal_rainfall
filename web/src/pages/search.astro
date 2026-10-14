@@ -1,0 +1,29 @@
+---
+// Site search (Pagefind index built after the Astro build: scripts/postbuild.mjs).
+import Base from '../layouts/Base.astro';
+import { BASE } from '../lib/data.js';
+---
+<Base title="Search" section="" description="Search the outlooks, verification, skill and research pages.">
+  <h1>Search</h1>
+  <link slot="head" rel="stylesheet" href={`${BASE}pagefind/pagefind-ui.css`} />
+  <div id="search" data-bundle={`${BASE}pagefind/`}></div>
+  <noscript><p class="notice">Search needs JavaScript.</p></noscript>
+  <p class="caveat">Searches every page of the site (outlooks, verification, skill, research, methods and domains). Tip: a target and an area, e.g. “Mar 2026 FMAM domain”, or a method, e.g. “quantile mapping”.</p>
+  <script is:inline>
+    (function () {
+      var box = document.getElementById('search');
+      var s = document.createElement('script');
+      s.src = box.dataset.bundle + 'pagefind-ui.js';
+      s.onload = function () {
+        var ui = new PagefindUI({ element: '#search', showSubResults: true, showImages: false, bundlePath: box.dataset.bundle });
+        var q = new URLSearchParams(location.search).get('q');
+        if (q) ui.triggerSearch(q);
+      };
+      s.onerror = function () { box.innerHTML = '<p class="notice">The search index is not available in this build.</p>'; };
+      document.head.appendChild(s);
+    })();
+  </script>
+  <style is:global>
+    #search{--pagefind-ui-primary:var(--accent);--pagefind-ui-text:var(--ink);--pagefind-ui-background:var(--surface);--pagefind-ui-border:var(--line);--pagefind-ui-tag:var(--accent-soft);--pagefind-ui-font:inherit}
+  </style>
+</Base>

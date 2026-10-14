@@ -19,7 +19,7 @@ const cards = [...C.cycles].reverse().map((c) => {
       <li><a class="box" href={k.href}>
         <strong>{k.c.option}</strong>
         <span class="caveat"><br />{k.t.label}, {k.domain}: {k.sig.text.toLowerCase()} · below / near / above {k.p.map(pc).join(' / ')}
-        <br />Status: {k.t.status.text}</span>
+        <br /><span class={`status ${k.t.status.code}`}>{k.t.status.text}</span> · {k.c.targets.filter((t) => Object.keys(t.verification || {}).length).length} of {k.c.targets.length} targets verified</span>
       </a></li>
     ))}
   </ul>

@@ -15,7 +15,7 @@ const t = c.targets.find((x) => x.id === target);
 const obs = [...new Set(C.cycles.map((x) => x.obs))].join(' and ');
 const done = Boolean(t.verification[view]);
 ---
-<Base title={`Verification · ${t.label} · ${R.viewLabel(view)}`} section="verification"
+<Base title={`Verification · ${t.label} · ${c.option} · ${R.viewLabel(view)}`} section="verification"
       description={`${t.label} (${c.init} initialization): the frozen forecast compared with ${obs} observations, ${R.viewLabel(view)}.`}>
   <ContextBar slot="context" cycle={c} view={view} section="verification" target={target} />
   <section id="verification">

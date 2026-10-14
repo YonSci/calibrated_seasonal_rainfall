@@ -599,6 +599,12 @@
   }
   async function downloadPackage() {
     const c = cyc(), btn = $('dl-package'), prog = $('dl-progress');
+    if (c.package_zip) {                       // built during the site build (release files cannot be fetched by the page)
+      const a = document.createElement('a'); a.href = siteURL(c.package_zip.href); a.download = '';
+      document.body.appendChild(a); a.click(); a.remove();
+      prog.textContent = 'Package: ' + c.package_zip.files + ' files, ' + (c.package_zip.bytes / 1e6).toFixed(1) + ' MB. The bulletin, README, metadata and summary are listed below.';
+      return;
+    }
     btn.disabled = true;
     try {
       const Z = await loadZip(), zip = new Z(), root = 'ethiopia-rainfall_' + c.id + '_package/';
@@ -623,7 +629,7 @@
 
   function renderDownloads() {
     const c = cyc();
-    $('dl-package').textContent = 'Download package (ZIP): ' + c.label + ', ' + c.package.length + ' files';
+    $('dl-package').textContent = 'Download package (ZIP): ' + c.label + ', ' + (c.package_zip ? c.package_zip.files + ' files, ' + (c.package_zip.bytes / 1e6).toFixed(0) + ' MB' : c.package.length + ' files');
     $('dl-body').innerHTML = '<div class="box"><h3>' + esc(c.option) + ' — individual files</h3><ul class="dl">' + c.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(d.note) + '</span></li>').join('') + '</ul></div>' +
       '<details><summary>Other cycles</summary><ul class="dl">' + D.cycles.filter(x => x.id !== c.id).flatMap(x => x.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(x.option) + '</span></li>')).join('') + '</ul></details>';
   }

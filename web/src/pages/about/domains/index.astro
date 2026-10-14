@@ -1,0 +1,10 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { href } from '../../../lib/data.js';
+import { C, cycleOf } from '../../../lib/cycles.js';
+const to = href(`about/domains/${cycleOf(C.default).season.toLowerCase()}/`);
+---
+<Base title="Rainfall domains" section="about" description="Rainfall climatology and the forecast domains, per season.">
+  <meta http-equiv="refresh" content={`0; url=${to}`} slot="head" />
+  <p><a href={to}>Open the rainfall-domain review</a></p>
+</Base>

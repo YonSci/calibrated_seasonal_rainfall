@@ -3,6 +3,8 @@
 // context bar (slot "context": cycle, area, target and section, sticky with the menu), release footer, sortable tables.
 import { SITE, ROOT, href, asset, REPO } from '../lib/data.js';
 import { C, cycleOf, url, defaultTarget } from '../lib/cycles.js';
+import { GLOSSARY } from '../lib/glossary.js';
+const CLASSIC = `${ROOT}classic/`;
 const { title, description = '', section = '' } = Astro.props;
 // Forecast entries open the latest cycle; Verification the latest cycle with a verified target.
 const latest = cycleOf(C.default);
@@ -20,10 +22,11 @@ const menus = [
     [href('research/amount-shadow/'), 'Amount & range shadow', 'EMOS medians and 10–90% ranges, scored season by season'],
   ]],
   ['about', 'About', [
-    [`${ROOT}#methods`, 'Methods & data', 'On the current page'],
-    [`${ROOT}#domains`, 'Rainfall domains', 'On the current page'],
+    [href('about/methods/'), 'Methods & data', 'Data, workflow, equations, method choices, limitations'],
+    [href('about/domains/'), 'Rainfall domains', 'Season climatology and the forecast domains'],
+    [href('about/glossary/'), 'Glossary', 'The scores and terms in one sentence each'],
     [href('releases/'), 'Releases', 'Change log and archived releases'],
-    [ROOT, 'Current page', 'The previous single-page site'],
+    [CLASSIC, 'Classic page', 'The previous single-page site, unchanged'],
   ]],
 ];
 ---
@@ -57,7 +60,8 @@ const menus = [
     .dd-menu a span{display:block;color:var(--muted);font-size:.82rem}
     .menu-toggle{display:none}
     .context{border-top:1px solid var(--line);background:var(--surface)}
-    .preview{background:var(--accent-soft);padding:4px 0;font-size:.82rem}
+    .search-form input{font:inherit;font-size:.9rem;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:9.5rem}
+    abbr.term{text-decoration:underline dotted;text-underline-offset:3px;cursor:help}
     main.wrap{padding-top:18px;padding-bottom:32px}
     main section{margin:22px 0}
     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:0;list-style:none}
@@ -66,6 +70,7 @@ const menus = [
     .cards a.box:hover{border-color:var(--accent)}
     .toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.9rem;margin:8px 0 4px}
     figure.map-figure img{max-width:100%;height:auto}
+    .button-link{display:inline-block;background:var(--accent);color:var(--surface);padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600}
     a.chip{text-decoration:none;display:inline-block;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
     a.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
     @media (max-width:860px){
@@ -93,19 +98,48 @@ const menus = [
           </details>
         ))}
         <a href={href('downloads/')} aria-current={section === 'downloads' ? 'page' : undefined}>Downloads</a>
+        <form class="search-form" action={href('search/')} role="search"><input type="search" name="q" placeholder="Search" aria-label="Search the site" /></form>
       </nav>
     </div>
     <div class="context"><slot name="context" /></div>
   </header>
-  <div class="preview"><div class="wrap">New site, built from the same results as the <a href={ROOT}>current page</a>; methods, rainfall domains and the cycle download packages are still there.</div></div>
-  <main class="wrap" id="main">
+  <main class="wrap" id="main" data-pagefind-body>
+    <span class="sr-only" data-pagefind-meta="title" data-pagefind-ignore>{title}</span>
     <slot />
   </main>
   <footer class="wrap foot">
     Release {SITE.release} · built {SITE.built_utc} from <code>site_data/</code> (code <a href={`${REPO}/tree/${SITE.code_commit}`}>{String(SITE.code_commit).slice(0, 7)}</a>) ·
-    <a href={href('releases/')}>Releases and change log</a> · Research reconstructions; not official EMI or ICPAC forecasts.
+    <a href={href('releases/')}>Releases and change log</a> · <a href={CLASSIC}>Classic page</a> · Research reconstructions; not official EMI or ICPAC forecasts.
   </footer>
+  <script type="application/json" id="glossary" set:html={JSON.stringify(GLOSSARY)} />
   <script>
+    // Glossary: the first use of each term on the page explains itself (the text itself is unchanged).
+    {
+      const G = JSON.parse(document.getElementById('glossary').textContent) as [string, string][];
+      const main = document.getElementById('main');
+      const skip = new Set('A,BUTTON,SELECT,OPTION,CODE,PRE,SCRIPT,STYLE,ABBR,SVG,TEXT,TITLE,H1,H2,H3,H4,SUMMARY,LABEL,TH,DT'.split(','));
+      const done = new Set();
+      const terms = [...G].sort((a, b) => b[0].length - a[0].length);
+      const re = new RegExp('(^|[^A-Za-z0-9])(' + terms.map(([t]) => t.replace(/[^A-Za-z0-9 ]/g, (ch) => '[' + ch + ']')).join('|') + ')(?![A-Za-z0-9])', 'g');
+      const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT, { acceptNode: (n) => {
+        for (let e = n.parentElement; e && e !== main; e = e.parentElement) if (skip.has(e.tagName.toUpperCase()) || e.hidden) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT; } });
+      const queue = [];
+      while (walker.nextNode()) queue.push(walker.currentNode);
+      while (queue.length && done.size < terms.length) {
+        const node = queue.shift() as Text;
+        const m = [...node.nodeValue.matchAll(re)].find((x) => !done.has(x[2]));     // the first term of this text not yet explained
+        if (!m) continue;
+        const term = terms.find(([t]) => t === m[2]);
+        done.add(term[0]);
+        const rest = node.splitText(m.index + m[1].length);
+        const tail = rest.splitText(term[0].length);
+        const abbr = document.createElement('abbr');
+        abbr.className = 'term'; abbr.title = term[1]; abbr.tabIndex = 0;
+        rest.parentNode.replaceChild(abbr, rest); abbr.appendChild(rest);
+        queue.unshift(tail);                                                         // the rest of the text may hold other terms
+      }
+    }
     // Site menu: one dropdown open at a time, closed by a click elsewhere or Escape; the Menu button on narrow screens.
     const dds = [...document.querySelectorAll('details.dd')] as HTMLDetailsElement[];
     dds.forEach((d) => d.addEventListener('toggle', () => { if (d.open) dds.forEach((o) => { if (o !== d) o.open = false; }); }));

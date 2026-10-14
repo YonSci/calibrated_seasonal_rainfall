@@ -3896,7 +3896,7 @@
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.34 for FMAM) · code e8c31f1"
+     "Shared climatology blend (λ = 0.34 for FMAM) · code 3022377"
     ]
    ],
    "regions": {
@@ -4397,7 +4397,7 @@
    "downloads": [
     {
      "label": "Bulletin, FMAM 2026 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/6f9fec30d6e8762b-fmam2026_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/41822ae8d2af0895-fmam2026_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -4485,7 +4485,7 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/6f9fec30d6e8762b-fmam2026_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/41822ae8d2af0895-fmam2026_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
@@ -5568,7 +5568,18 @@
      "downloads/fmam2026_comparison_report_package.html",
      "comparison/report.html"
     ]
-   ]
+   ],
+   "package_zip": {
+    "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/885a709e11d6146e-fmam2026_package.zip",
+    "files": 270,
+    "bytes": 45893053,
+    "separate": [
+     "downloads/fmam2026_README.txt",
+     "downloads/fmam2026_metadata.json",
+     "downloads/fmam2026_summary.csv",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/41822ae8d2af0895-fmam2026_bulletin.pdf"
+    ]
+   }
   },
   {
    "id": "fmam2026feb",
@@ -9466,7 +9477,7 @@
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.40 for FMAM) · code e8c31f1"
+     "Shared climatology blend (λ = 0.40 for FMAM) · code 3022377"
     ]
    ],
    "regions": {
@@ -9967,7 +9978,7 @@
    "downloads": [
     {
      "label": "Bulletin, FMAM 2026 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/3712df322a6d9ec1-fmam2026feb_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/6c2290d84310e246-fmam2026feb_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -10055,7 +10066,7 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/3712df322a6d9ec1-fmam2026feb_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/6c2290d84310e246-fmam2026feb_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
@@ -11138,7 +11149,18 @@
      "downloads/fmam2026feb_comparison_report_package.html",
      "comparison/report.html"
     ]
-   ]
+   ],
+   "package_zip": {
+    "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/67119fe35b83c804-fmam2026feb_package.zip",
+    "files": 270,
+    "bytes": 45963379,
+    "separate": [
+     "downloads/fmam2026feb_README.txt",
+     "downloads/fmam2026feb_metadata.json",
+     "downloads/fmam2026feb_summary.csv",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/6c2290d84310e246-fmam2026feb_bulletin.pdf"
+    ]
+   }
   },
   {
    "id": "jjas2026",
@@ -13117,7 +13139,7 @@
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.59 for JJAS) · code e8c31f1"
+     "Shared climatology blend (λ = 0.59 for JJAS) · code 3022377"
     ]
    ],
    "regions": {
@@ -13548,7 +13570,7 @@
    "downloads": [
     {
      "label": "Bulletin, JJAS 2026 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e6875f8c4dd904b6-jjas2026_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e30db8e0c5935cc8-jjas2026_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -13583,7 +13605,7 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e6875f8c4dd904b6-jjas2026_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e30db8e0c5935cc8-jjas2026_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
@@ -14146,7 +14168,18 @@
      "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e6e6b2bf4edc81dc-data.jjas2026.Sep_forecast_2026.nc",
      "data/Sep_forecast_2026.nc"
     ]
-   ]
+   ],
+   "package_zip": {
+    "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/26c1b455d63ae7ca-jjas2026_package.zip",
+    "files": 140,
+    "bytes": 26873130,
+    "separate": [
+     "downloads/jjas2026_README.txt",
+     "downloads/jjas2026_metadata.json",
+     "downloads/jjas2026_summary.csv",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e30db8e0c5935cc8-jjas2026_bulletin.pdf"
+    ]
+   }
   },
   {
    "id": "ondj2026",
@@ -15126,7 +15159,7 @@
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.18 for ONDJ) · code e8c31f1"
+     "Shared climatology blend (λ = 0.18 for ONDJ) · code 3022377"
     ]
    ],
    "regions": {
@@ -15557,7 +15590,7 @@
    "downloads": [
     {
      "label": "Bulletin, ONDJ 2026/27 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/a97923f4faed8af2-ondj2026_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/8ae062558ad3790d-ondj2026_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -15636,7 +15669,7 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/a97923f4faed8af2-ondj2026_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/8ae062558ad3790d-ondj2026_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
@@ -16011,7 +16044,18 @@
      "downloads/ondj2026_comparison_report_package.html",
      "comparison/report.html"
     ]
-   ]
+   ],
+   "package_zip": {
+    "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9fbddb4c762c4d51-ondj2026_package.zip",
+    "files": 93,
+    "bytes": 20007401,
+    "separate": [
+     "downloads/ondj2026_README.txt",
+     "downloads/ondj2026_metadata.json",
+     "downloads/ondj2026_summary.csv",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/8ae062558ad3790d-ondj2026_bulletin.pdf"
+    ]
+   }
   }
  ],
  "default": "ondj2026",

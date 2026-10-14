@@ -7,6 +7,7 @@ figures in site/assets/ alone, without the large outputs/ folder:
   site_data/cycles.json          forecast cycles: the same data the current page's cycle selector uses
   site_data/data/*.json          per cycle: the official-outlook comparison and the historical diagnostics (paths as in cycles.json)
   site_data/files.json           every download linked from the site: path -> URL (release asset or site path), size
+  site_data/sections.json        prose sections written by the build as HTML (methods and data)
   site_data/bias/<cycle>.json    bias-correction benchmark: screening, confirmation, ratio-limit study, validation record,
                                  suggestion (docs/47)
   site_data/probcal/<cycle>.json probability and rainfall-distribution calibration: Phases 1-3 and the amount/range shadow (docs/48)
@@ -117,6 +118,14 @@ def downloads(site):
     return out
 
 
+def sections_html(site):
+    """Prose sections written by the build as HTML (methods and data), for pages that show them unchanged."""
+    import re
+    page = (site / 'index.html').read_text(encoding='utf-8')
+    m = re.search(r'<section id="methods" class="wrap">(.*?)</section>', page, re.S)
+    return dict(methods=m.group(1) if m else None)
+
+
 def export(site, page_data, built, sha, release_id, releases, sections):
     """Write site_data/ from the built site and the result files; returns {file: bytes}."""
     if OUT.exists():
@@ -130,6 +139,7 @@ def export(site, page_data, built, sha, release_id, releases, sections):
     for f in sorted((site / 'data').glob('*.json')):          # per-cycle comparison and diagnostics, at the same relative paths
         sizes[f'data/{f.name}'] = write(OUT / 'data' / f.name, json.loads(f.read_text(encoding='utf-8')))
     sizes['files.json'] = write(OUT / 'files.json', downloads(site))
+    sizes['sections.json'] = write(OUT / 'sections.json', sections_html(site))
     for name, obj in bias_files(site).items():
         sizes[f'bias/{name}.json'] = write(OUT / 'bias' / f'{name}.json', obj)
     for name, obj in probcal_files(site).items():

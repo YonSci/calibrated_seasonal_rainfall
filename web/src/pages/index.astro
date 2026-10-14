@@ -20,7 +20,7 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
 ---
 <Base title="Seasonal rainfall outlook" section=""
       description="Calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia: the current outlook, maps, verification against CHIRPS and historical skill.">
-  <OutlookHero O={O} more={[url.target(c, view, target), `Full ${c.targets[0].label} outlook and maps`]} />
+  <OutlookHero O={O} status={c.targets[0].status} more={[url.target(c, view, target), `Full ${c.targets[0].label} outlook and maps`]} />
 
   <section>
     <h2 class="h3">{c.option}: every target</h2>
@@ -58,6 +58,15 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
       <li><a class="box" href={href('research/amount-shadow/')}><strong>Amount and range shadow</strong><span class="caveat"><br />EMOS medians and 10–90% ranges next to the MVS ensemble, scored season by season.</span></a></li>
     </ul>
   </section>
+  <script is:inline>
+    // Links to the previous single page (its anchors and ?cycle=… views) open the matching new page, or the classic page.
+    (function () {
+      var map = { bias: 'bias-correction/', probcal: 'probability-calibration/', methods: 'about/methods/', domains: 'about/domains/', downloads: 'downloads/' };
+      var h = location.hash.slice(1), q = location.search;
+      if (map[h]) location.replace(map[h]);
+      else if (/[?&]cycle=/.test(q) || ['outlooks', 'official', 'maps', 'verification', 'history'].indexOf(h) >= 0) location.replace('classic/' + q + location.hash);
+    })();
+  </script>
   <style is:global>
     .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
     .home-grid .box{margin:0}

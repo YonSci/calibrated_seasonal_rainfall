@@ -467,6 +467,29 @@ def package_files(cyc):
     return [[a, b] for a, b in files if (OUT / a).is_file() or a.endswith(('README.txt', 'metadata.json'))]
 
 
+VOLATILE = ('README.txt', 'metadata.json', 'summary.csv', 'bulletin.pdf')   # carry the build time: linked separately
+
+
+def package_zip(cyc):
+    """The cycle's package as one ZIP built during the build (browsers cannot fetch release assets across origins, so the
+    package is no longer assembled in the page). Byte-for-byte reproducible: fixed entry times and order, so an unchanged
+    package keeps its SHA-256 and is uploaded once (scripts/site_files.py). The files that carry the build time (README,
+    metadata, summary, bulletin) are linked next to it instead."""
+    import zipfile
+    dest = OUT / f'downloads/{cyc["id"]}_package.zip'
+    root = f'ethiopia-rainfall_{cyc["id"]}_package/'
+    entries = sorted((b, a) for a, b in cyc['package'] if b not in VOLATILE and (OUT / a).is_file())
+    with zipfile.ZipFile(dest, 'w') as z:
+        for inner, src in entries:
+            info = zipfile.ZipInfo(root + inner, date_time=(1980, 1, 1, 0, 0, 0))
+            info.external_attr = 0o644 << 16
+            stored = src.endswith(('.png', '.nc', '.pdf', '.zip'))
+            info.compress_type = zipfile.ZIP_STORED if stored else zipfile.ZIP_DEFLATED
+            z.writestr(info, (OUT / src).read_bytes(), compresslevel=None if stored else 6)
+    return dict(href=f'downloads/{cyc["id"]}_package.zip', files=len(entries), bytes=dest.stat().st_size,
+                separate=[a for a, b in cyc['package'] if b in VOLATILE])
+
+
 def write_csv(cyc):
     path = OUT / f'downloads/{cyc["id"]}_summary.csv'
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -858,7 +881,7 @@ python scripts\\build_site.py</code></pre>
 <section id="downloads" class="wrap">
   <h2>Downloads</h2>
   <div class="box"><h3>Complete package</h3>
-    <p>One ZIP file with the PDF bulletin, summary CSV, metadata, README, every map (forecast and verification), verification reports and the forecast NetCDF files for the selected cycle.</p>
+    <p>One ZIP file with every map (forecast and verification), the verification reports, the official-outlook comparison files and the forecast NetCDF files for the selected cycle. The PDF bulletin, summary CSV, metadata and README are listed below.</p>
     <p><button type="button" id="dl-package">Download package (ZIP)</button> <span id="dl-progress" class="caveat" aria-live="polite"></span></p>
   </div>
   <div id="dl-body"></div>
@@ -1588,6 +1611,12 @@ JS = r'''
   }
   async function downloadPackage() {
     const c = cyc(), btn = $('dl-package'), prog = $('dl-progress');
+    if (c.package_zip) {                       // built during the site build (release files cannot be fetched by the page)
+      const a = document.createElement('a'); a.href = siteURL(c.package_zip.href); a.download = '';
+      document.body.appendChild(a); a.click(); a.remove();
+      prog.textContent = 'Package: ' + c.package_zip.files + ' files, ' + (c.package_zip.bytes / 1e6).toFixed(1) + ' MB. The bulletin, README, metadata and summary are listed below.';
+      return;
+    }
     btn.disabled = true;
     try {
       const Z = await loadZip(), zip = new Z(), root = 'ethiopia-rainfall_' + c.id + '_package/';
@@ -1612,7 +1641,7 @@ JS = r'''
 
   function renderDownloads() {
     const c = cyc();
-    $('dl-package').textContent = 'Download package (ZIP): ' + c.label + ', ' + c.package.length + ' files';
+    $('dl-package').textContent = 'Download package (ZIP): ' + c.label + ', ' + (c.package_zip ? c.package_zip.files + ' files, ' + (c.package_zip.bytes / 1e6).toFixed(0) + ' MB' : c.package.length + ' files');
     $('dl-body').innerHTML = '<div class="box"><h3>' + esc(c.option) + ' — individual files</h3><ul class="dl">' + c.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(d.note) + '</span></li>').join('') + '</ul></div>' +
       '<details><summary>Other cycles</summary><ul class="dl">' + D.cycles.filter(x => x.id !== c.id).flatMap(x => x.downloads.map(d => '<li><a href="' + d.href + '" download>' + esc(d.label) + '</a><span>' + esc(x.option) + '</span></li>')).join('') + '</ul></details>';
   }
@@ -1921,6 +1950,7 @@ def main():
         meta = extras.package_metadata(c, built, release_id, sha, c['package'])
         (OUT / f'downloads/{c["id"]}_metadata.json').write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding='utf-8', newline='')
         (OUT / f'downloads/{c["id"]}_README.txt').write_text(extras.package_readme(c, built, release_id), encoding='utf-8', newline='')
+        c['package_zip'] = package_zip(c)
     # Plain listing of every download (the no-JavaScript fallback links here).
     items = ''.join(f'<h2>{esc(c["option"])}</h2><ul>' + ''.join(
         f'<li><a href="{esc(d["href"].removeprefix("downloads/"))}">{esc(d["label"])}</a> — {esc(d["note"])}</li>' for d in c['downloads'])

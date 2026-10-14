@@ -1,0 +1,27 @@
+// Short explanations of the terms used on the site: shown when the pointer rests on (or the keyboard reaches) the first use
+// of a term on a page, and listed on the glossary page. Wording follows the methods section and docs/47–48.
+export const GLOSSARY = [
+  ['RPSS', 'Ranked probability skill score: 1 − RPS of the forecast / RPS of climatology. Positive is better than climatology; +0.05 means a 5% lower score.'],
+  ['CRPSS', 'Continuous ranked probability skill score for rainfall amounts: 1 − CRPS of the forecast / CRPS of climatology. Positive is better than climatology.'],
+  ['RPS', 'Ranked probability score of tercile probabilities against the observed category (cumulative, so near misses cost less). Lower is better.'],
+  ['CRPS', 'Continuous ranked probability score of a rainfall-amount forecast (ensemble or distribution) against the observed total, in mm. Lower is better.'],
+  ['BSS', 'Brier skill score of the probability of one category (e.g. below normal) against climatology. Positive is better than climatology.'],
+  ['tercile', 'One of three equally likely categories of seasonal rainfall in the reference period: below normal, near normal, above normal.'],
+  ['climatology blend', 'The final probabilities mix the model probabilities with climatology: p = (1 − λ)·p_model + λ·p_climatology, one weight λ per target fitted on past years.'],
+  ['climatology', 'The reference forecast: the observed frequency of each tercile in the training years (about one-third each), or the past observed totals for amounts.'],
+  ['Mean-Variance Scaling', 'MVS, the operational amount correction: each member is shifted and scaled so the model mean and spread match CHIRPS in every grid cell (spread ratio limited to 0.5–2).'],
+  ['MVS', 'Mean-Variance Scaling, the operational amount correction: each member is shifted and scaled so the model mean and spread match CHIRPS in every grid cell.'],
+  ['EMOS', 'Ensemble model output statistics: a regression that turns the raw ensemble into a full rainfall distribution (here a censored shifted gamma).'],
+  ['cross-validated', 'Each year is forecast with parameters fitted without that year (leave-one-year-out), so the score is not inflated by fitting to the year itself.'],
+  ['leave-one-year-out', 'Each year is left out in turn; everything is fitted on the other years and the left-out year is scored.'],
+  ['exploratory', 'Scores of years that were seen while the method was chosen (2017 onward); useful context, but weaker evidence than the cross-validated 1993–2016 scores.'],
+  ['Holm', 'Holm correction for testing many methods or targets at once: p-values are adjusted so that a confirmation is not a chance result of the number of tests.'],
+  ['spread–error', 'Ratio of the ensemble spread to the error of the ensemble mean; 1 means the spread matches the error, below 1 too narrow.'],
+  ['coverage', 'Share of observations inside the forecast 10–90% range; 80% is calibrated, less means the range is too narrow.'],
+  ['pinball loss', 'The score of one forecast quantile (e.g. the median) against the observation; lower is better.'],
+  ['shadow forecast', 'A forecast made every cycle with an alternative method and scored against observations, but never published; it collects independent evidence.'],
+  ['rainfall domain', 'The area where the season matters climatologically (e.g. FMAM ≥ 100 mm and ≥ 20% of annual rainfall); used for summaries and maps, not for calibration.'],
+  ['CHIRPS', 'Climate Hazards Center InfraRed Precipitation with Stations: the gridded observed rainfall (0.05°, averaged to 0.25°) used for calibration and verification.'],
+  ['SEAS5', 'ECMWF seasonal forecast system 5 (system 51): 25 members in the 1993–2016 hindcasts, 51 from 2017.'],
+  ['reliability', 'Whether events forecast with probability p happen p of the time; a reliability diagram plots observed frequency against forecast probability.'],
+];

@@ -1,0 +1,13 @@
+---
+// Methods and data: the section written by the build (scripts/build_site.py), shown unchanged; relative links point at the site.
+import Base from '../../layouts/Base.astro';
+import OnThisPage from '../../components/OnThisPage.astro';
+import { read, ROOT } from '../../lib/data.js';
+
+const html = (read('sections.json').methods || '').replace(/(src|href)="(?!https?:|#|mailto:|\/)([^"]+)"/g, (_, a, u) => `${a}="${ROOT}${u}"`);
+---
+<Base title="Methods & data" section="about" description="How the outlooks are made: data, workflow, equations, method choices, quality control, limitations and how to reproduce them.">
+  <OnThisPage>
+    <div id="methods" set:html={html} />
+  </OnThisPage>
+</Base>

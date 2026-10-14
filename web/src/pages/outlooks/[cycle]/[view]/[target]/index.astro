@@ -22,10 +22,10 @@ const findings = X ? X.summary.length : 0;
 const verified = c.targets.filter((x) => x.verification[view]).length;
 const obsNotice = C.cycles.every((x) => x.obs === 'CHIRPS v3.0');
 ---
-<Base title={`${t.label} outlook · ${R.viewLabel(view)}`} section="outlook"
+<Base title={`${t.label} outlook · ${c.option} · ${R.viewLabel(view)}`} section="outlook"
       description={`${t.label} rainfall outlook for Ethiopia (${c.init} initialization), ${R.viewLabel(view)}: tercile probabilities, amounts and maps.`}>
   <ContextBar slot="context" cycle={c} view={view} section="outlook" target={target} />
-  <OutlookHero O={O} />
+  <OutlookHero O={O} status={t.status} />
 
   <section>
     <h2 class="h3">All targets in this cycle</h2>

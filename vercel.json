@@ -2,6 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "cd web && npm ci --no-audit --no-fund",
-  "buildCommand": "cd web && ASTRO_BASE=/next/ ASTRO_OUT=../site/next npm run build",
+  "buildCommand": "cd web && ASTRO_BASE=/ npm run build && node scripts/assemble.mjs ../site dist",
   "outputDirectory": "site"
 }
