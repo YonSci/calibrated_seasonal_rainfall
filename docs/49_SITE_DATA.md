@@ -88,3 +88,20 @@ cd ../site && python -m http.server 8765        # then open http://127.0.0.1:876
 
 A server back end is not planned: everything shown is precomputed. Should on-demand queries be needed (e.g. a time series at
 a clicked point), FastAPI with xarray over the NetCDF outputs fits the existing stack.
+
+## 5. Operations: scoring each season as observations arrive
+
+`scripts/watch_observations.py` runs daily (Windows scheduled task `SeasonalRainfall\WatchObservations`, 07:00, while the user is
+logged on). For each cycle in `config/observation_watch.json` it asks the operational runner which targets have CHIRPS
+published (read-only preflight); when a target becomes ready that was not ready before, it runs the verification workflow
+for that cycle (observations, scores, report, views, the official-outlook comparison when the cycle enables it, the
+bias-correction validation of every method and the amount/range shadow) and then the bias-correction suggestions. It never
+publishes: rebuild the site (`python scripts/build_site.py --upload-files`), add a release entry and push to publish the new
+scores. State and history: `outputs/observation_watch/status.json` and `watch.log`; a failed run is retried at the next check.
+Remove a cycle from the watch list once every target is verified, and add new cycle files as they start.
+
+```
+python scripts/watch_observations.py --check     # what would be scored now
+schtasks /Query /TN "SeasonalRainfall\WatchObservations"
+schtasks /Delete /TN "SeasonalRainfall\WatchObservations" /F    # stop the daily check
+```

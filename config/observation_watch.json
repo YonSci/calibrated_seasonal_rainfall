@@ -1,0 +1,9 @@
+{
+  "description": "Cycles whose verification is still incomplete; scripts/watch_observations.py checks each for newly published CHIRPS months and scores them. Remove a cycle once every target is verified; add the next cycle files as they start. The official-outlook comparison is scored too when the cycle file enables it.",
+  "cycles": [
+    "config/operational.json",
+    "config/cycles/sep_2026_ondj.json"
+  ],
+  "after_scoring": ["scripts/bias_recommend.py"],
+  "status": "outputs/observation_watch/status.json"
+}
