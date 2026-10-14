@@ -10,7 +10,7 @@ const cards = [...C.cycles].reverse().map((c) => {
     href: url.target(c, c.default_view, defaultTarget(c)), domain: (c.views.find((v) => v[0] === c.domain_view) || [])[1] };
 });
 ---
-<Base title="Outlooks" section="outlooks/" description="Seasonal rainfall outlooks for Ethiopia: every forecast cycle, with maps, verification and historical performance.">
+<Base title="Outlooks" section="outlook" description="Seasonal rainfall outlooks for Ethiopia: every forecast cycle, with maps, verification and historical performance.">
   <h1>Seasonal rainfall outlooks</h1>
   <p>Calibrated ECMWF SEAS5 outlooks for Ethiopia, one per forecast cycle. Each cycle has its outlook and maps for every target and
   area, the verification against CHIRPS once a period is complete, and the historical performance of the method.</p>

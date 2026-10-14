@@ -60,14 +60,23 @@ current site.
 
 | Page | Content | Source |
 | --- | --- | --- |
-| `/next/` | overview: current release, cycles, research benchmarks | `site.json`, `cycles.json` |
-| `/next/outlooks/<cycle>/<area>/<target>/` | outlook (probabilities, amounts, signal, historical skill), all targets, map viewer (forecast and verification maps), official-outlook comparison, cycle record | `cycles.json`, `data/<cycle>_comparison.json` |
-| `/next/outlooks/<cycle>/<area>/verification/` | forecast vs observed chart and the per-target verification narratives | `cycles.json` |
-| `/next/outlooks/<cycle>/<area>/history/` | historical skill, the verification explorer (by year, reliability, signal strength, Brier, amounts; both periods), regions | `cycles.json`, `data/<cycle>_diagnostics.json` |
+| `/next/` | the current outlook first (latest cycle, its domain, the season: headline, probabilities, map, amount, signal, skill), every target as a small map, what's new, other cycles, research | `site.json`, `cycles.json` |
+| `/next/outlooks/` | every forecast cycle | `cycles.json` |
+| `/next/outlooks/<cycle>/<area>/<target>/` | outlook (answer first), all targets as small maps with previous/next, map viewer, side panel: links to this target's verification and skill, the official outlooks, the cycle record | `cycles.json` |
+| `/next/outlooks/<cycle>/<area>/<target>/verification/` | forecast vs observed chart and the verification narratives (selected target first) | `cycles.json` |
+| `/next/outlooks/<cycle>/<area>/<target>/skill/` | historical skill, the verification explorer (both periods), regions | `cycles.json`, `data/<cycle>_diagnostics.json` |
+| `/next/outlooks/<cycle>/<area>/official/` | official-outlook comparison (season) | `data/<cycle>_comparison.json` |
 | `/next/probability-calibration/` and `/<cycle>/` | plan, Phases 1–3, the amount/range shadow, downloads | `probcal/<cycle>.json` |
 | `/next/bias-correction/` and `/<cycle>/` | suggestion, evidence, interpretation, data and methods, screening, confirmation, ratio limits, shadow, validation, figure browser, downloads, provenance | `bias/<cycle>.json` |
+| `/next/research/amount-shadow/` | the amount and range shadow of every cycle | `probcal/<cycle>.json` |
 | `/next/downloads/` | every data file with size and SHA-256 | `files.json` |
 | `/next/releases/` | change log, archived releases | `site.json` |
+
+Navigation: the site menu puts the forecast first (Outlook, Verification, Skill), then Research and About menus and
+Downloads. On forecast pages a context bar under the menu (breadcrumbs; cycle, area and target; section tabs Outlook and
+maps · Official outlooks · Verification · Historical skill) stays with the page; changing a choice keeps the others and the
+section. The addresses of release 2026-10-14.5 (`/<cycle>/<area>/verification/` and `/history/`) forward to the season's
+pages.
 
 Pages only display what the Python build decided: every ✓, confirmation and interpretation statement comes from the data
 (the bias-correction interpretation statements are computed by `site_bias.findings` and exported as text). When ported, the

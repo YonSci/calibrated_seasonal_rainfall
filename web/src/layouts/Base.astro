@@ -1,14 +1,30 @@
 ---
-// Shared page frame: the current site's stylesheet and header style, section navigation, release footer, sortable tables.
+// Shared page frame: the current site's stylesheet, the site menu (forecast first, research and about in menus), an optional
+// context bar (slot "context": cycle, area, target and section, sticky with the menu), release footer, sortable tables.
 import { SITE, ROOT, href, asset, REPO } from '../lib/data.js';
+import { C, cycleOf, url, defaultTarget } from '../lib/cycles.js';
 const { title, description = '', section = '' } = Astro.props;
+// Forecast entries open the latest cycle; Verification the latest cycle with a verified target.
+const latest = cycleOf(C.default);
+const verified = [...C.cycles].reverse().find((c) => c.targets.some((t) => Object.keys(t.verification || {}).length)) || latest;
+const firstVerified = verified.targets.find((t) => t.verification[verified.default_view]) || verified.targets[0];
 const nav = [
-  ['', 'Overview'],
-  ['outlooks/', 'Outlooks'],
-  ['probability-calibration/', 'Probability calibration'],
-  ['bias-correction/', 'Bias correction'],
-  ['downloads/', 'Downloads'],
-  ['releases/', 'Releases'],
+  ['outlook', 'Outlook', url.target(latest, latest.default_view, defaultTarget(latest))],
+  ['verification', 'Verification', url.verification(verified, verified.default_view, firstVerified.id)],
+  ['skill', 'Skill', url.skill(latest, latest.default_view, defaultTarget(latest))],
+];
+const menus = [
+  ['research', 'Research', [
+    [href('bias-correction/'), 'Bias correction', 'Rainfall-amount corrections against the operational MVS'],
+    [href('probability-calibration/'), 'Probability calibration', 'Phases 1–3 against the published probabilities'],
+    [href('research/amount-shadow/'), 'Amount & range shadow', 'EMOS medians and 10–90% ranges, scored season by season'],
+  ]],
+  ['about', 'About', [
+    [`${ROOT}#methods`, 'Methods & data', 'On the current page'],
+    [`${ROOT}#domains`, 'Rainfall domains', 'On the current page'],
+    [href('releases/'), 'Releases', 'Change log and archived releases'],
+    [ROOT, 'Current page', 'The previous single-page site'],
+  ]],
 ];
 ---
 <!doctype html>
@@ -23,8 +39,25 @@ const nav = [
   <link rel="stylesheet" href={asset('assets/style.css')}>
   <slot name="head" />
   <style is:global>
-    .top .nav nav a[aria-current="page"]{color:var(--accent);font-weight:600}
-    .preview{background:var(--accent-soft);padding:6px 0;font-size:.85rem}
+    .top{position:sticky;top:0}
+    .top .nav{flex-wrap:nowrap}
+    .menu{display:flex;align-items:center;gap:2px 4px;flex-wrap:wrap;justify-content:flex-end}
+    .menu > a, .menu summary{display:inline-block;padding:6px 10px;border-radius:8px;color:var(--ink2);text-decoration:none;font-size:.95rem;cursor:pointer;list-style:none}
+    .menu summary::-webkit-details-marker{display:none}
+    .menu summary::after{content:" ▾";font-size:.8em}
+    .menu > a:hover, .menu summary:hover{background:var(--accent-soft);color:var(--ink)}
+    .menu > a[aria-current="page"], .menu details[data-current] > summary{color:var(--accent);font-weight:600;background:var(--accent-soft)}
+    .dd{position:relative}
+    .menu details.dd{border:none;background:none;padding:0;margin:0;border-radius:0}
+    .menu details.dd > summary{margin:0;font-weight:inherit}
+    .dd-menu{position:absolute;right:0;top:calc(100% + 6px);min-width:260px;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+      box-shadow:0 8px 28px rgba(0,0,0,.12);padding:6px;z-index:30;display:flex;flex-direction:column}
+    .dd-menu a{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink)}
+    .dd-menu a:hover{background:var(--accent-soft)}
+    .dd-menu a span{display:block;color:var(--muted);font-size:.82rem}
+    .menu-toggle{display:none}
+    .context{border-top:1px solid var(--line);background:var(--surface)}
+    .preview{background:var(--accent-soft);padding:4px 0;font-size:.82rem}
     main.wrap{padding-top:18px;padding-bottom:32px}
     main section{margin:22px 0}
     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:0;list-style:none}
@@ -35,26 +68,56 @@ const nav = [
     figure.map-figure img{max-width:100%;height:auto}
     a.chip{text-decoration:none;display:inline-block;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
     a.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+    @media (max-width:860px){
+      .top{position:static}
+      .menu-toggle{display:inline-block}
+      .top .nav{flex-wrap:wrap}
+      .menu{display:none;width:100%;flex-direction:column;align-items:stretch;padding-bottom:10px}
+      .menu.open{display:flex}
+      .dd-menu{position:static;box-shadow:none;border:none;padding:0 0 0 12px;min-width:0}
+    }
   </style>
 </head>
 <body>
+  <a class="skip" href="#main">Skip to the content</a>
   <header class="top">
     <div class="wrap nav">
       <a class="brand" href={href('')}>Ethiopia Seasonal Rainfall</a>
-      <nav aria-label="Sections">
-        {nav.map(([p, label]) => <a href={href(p)} aria-current={section === p ? 'page' : undefined}>{label}</a>)}
-        <a href={ROOT}>Current page</a>
+      <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="site-menu">Menu</button>
+      <nav class="menu" id="site-menu" aria-label="Site">
+        {nav.map(([k, label, u]) => <a href={u} aria-current={section === k ? 'page' : undefined}>{label}</a>)}
+        {menus.map(([k, label, items]) => (
+          <details class="dd" data-current={section === k ? '' : undefined}>
+            <summary>{label}</summary>
+            <div class="dd-menu">{items.map(([u, l, note]) => <a href={u}>{l}<span>{note}</span></a>)}</div>
+          </details>
+        ))}
+        <a href={href('downloads/')} aria-current={section === 'downloads' ? 'page' : undefined}>Downloads</a>
       </nav>
     </div>
-    <div class="preview"><div class="wrap">New site, built page by page from the same results. Still only on the <a href={ROOT}>current page</a>: rainfall domains, methods and the cycle download packages.</div></div>
+    <div class="context"><slot name="context" /></div>
   </header>
-  <main class="wrap">
+  <div class="preview"><div class="wrap">New site, built from the same results as the <a href={ROOT}>current page</a>; methods, rainfall domains and the cycle download packages are still there.</div></div>
+  <main class="wrap" id="main">
     <slot />
   </main>
   <footer class="wrap foot">
     Release {SITE.release} · built {SITE.built_utc} from <code>site_data/</code> (code <a href={`${REPO}/tree/${SITE.code_commit}`}>{String(SITE.code_commit).slice(0, 7)}</a>) ·
     <a href={href('releases/')}>Releases and change log</a> · Research reconstructions; not official EMI or ICPAC forecasts.
   </footer>
+  <script>
+    // Site menu: one dropdown open at a time, closed by a click elsewhere or Escape; the Menu button on narrow screens.
+    const dds = [...document.querySelectorAll('details.dd')] as HTMLDetailsElement[];
+    dds.forEach((d) => d.addEventListener('toggle', () => { if (d.open) dds.forEach((o) => { if (o !== d) o.open = false; }); }));
+    document.addEventListener('click', (e) => { if (!(e.target as HTMLElement).closest('details.dd')) dds.forEach((d) => { d.open = false; }); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') dds.forEach((d) => { d.open = false; }); });
+    const toggle = document.querySelector('.menu-toggle') as HTMLButtonElement;
+    toggle.addEventListener('click', () => {
+      const m = document.getElementById('site-menu');
+      const open = m.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  </script>
   <script>
     // Sortable tables: click a column header (numbers by value, text alphabetically; a third click restores the order).
     const sortNumber = (s) => {

@@ -1,0 +1,45 @@
+---
+// The forecast context, sticky under the site menu: breadcrumbs, the cycle / area / target choice and the section tabs.
+// Changing any choice keeps the others and the section (each state has its own address).
+import { C, url, defaultTarget, seasonTarget } from '../lib/cycles.js';
+import { href } from '../lib/data.js';
+const { cycle, view, section, target = null } = Astro.props;     // section: 'outlook' | 'official' | 'verification' | 'skill'
+const tgt = target ?? seasonTarget(cycle);
+const viewFor = (c) => (c.views.some((v) => v[0] === view) ? view : c.default_view);
+const targetFor = (c) => (c.targets.some((t) => t.id === tgt) ? tgt : defaultTarget(c));
+const go = (c, v, t) => url.section(section === 'official' && !c.comparison ? 'outlook' : section, c, v, t);
+const vLabel = (cycle.views.find((v) => v[0] === view) || [view, view])[1];
+const tLabel = (cycle.targets.find((t) => t.id === tgt) || {}).label;
+const SECTIONS = [['outlook', 'Outlook and maps'], ...(cycle.comparison ? [['official', 'Official outlooks']] : []), ['verification', 'Verification'], ['skill', 'Historical skill']];
+const crumbs = [['Outlooks', href('outlooks/')], [cycle.option, url.target(cycle, cycle.default_view, defaultTarget(cycle))], [vLabel, null]];
+if (section !== 'official') crumbs.push([tLabel, null]);
+---
+<div class="wrap ctx">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    {crumbs.map(([l, u], i) => <>{i > 0 && <span aria-hidden="true"> › </span>}{u ? <a href={u}>{l}</a> : <span>{l}</span>}</>)}
+  </nav>
+  <div class="ctx-row">
+    <label>Cycle <select data-go>{C.cycles.map((c) => <option value={go(c, viewFor(c), targetFor(c))} selected={c.id === cycle.id}>{c.option}</option>)}</select></label>
+    <label>Area <select data-go>{cycle.views.map(([v, l]) => <option value={go(cycle, v, tgt)} selected={v === view}>{l}</option>)}</select></label>
+    {section !== 'official' && (
+      <label>Target <select data-go>{cycle.targets.map((t) => <option value={go(cycle, view, t.id)} selected={t.id === tgt}>{t.label}</option>)}</select></label>
+    )}
+    <nav class="ctx-tabs" aria-label="Section">
+      {SECTIONS.map(([k, l]) => <a href={url.section(k, cycle, view, tgt)} aria-current={k === section ? 'page' : undefined}>{l}</a>)}
+    </nav>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('select[data-go]').forEach((s) => s.addEventListener('change', () => { location.href = (s as HTMLSelectElement).value; }));
+</script>
+<style>
+  .ctx{padding:6px 16px 8px}
+  .crumbs{font-size:.82rem;color:var(--muted);margin-bottom:4px}
+  .crumbs a{color:var(--muted)}
+  .ctx-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:.9rem}
+  .ctx-row select{max-width:22rem}
+  .ctx-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
+  .ctx-tabs a{padding:5px 12px;border-radius:999px;text-decoration:none;color:var(--ink2);border:1px solid var(--line);background:var(--bg)}
+  .ctx-tabs a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+  @media (max-width:860px){ .ctx-tabs{margin-left:0} .ctx-row select{max-width:100%} }
+</style>

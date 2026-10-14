@@ -5,7 +5,7 @@ import { SITE, ROOT, REPO } from '../lib/data.js';
 const TYPES = SITE.change_types ?? {};
 const releases = [...SITE.releases].reverse();
 ---
-<Base title="Releases" section="releases/" description="Every published release of the results site and what changed.">
+<Base title="Releases" section="about" description="Every published release of the results site and what changed.">
   <h1>Releases and change log</h1>
   <p>Each release is the site as published at one commit. Archived releases open the exact page published then.</p>
   {releases.map((r, i) => (

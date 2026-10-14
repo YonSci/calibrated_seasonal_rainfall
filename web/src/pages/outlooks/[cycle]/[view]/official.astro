@@ -1,0 +1,23 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import ContextBar from '../../../../components/ContextBar.astro';
+import { C, cycleOf, dataFile, pagesFor, seasonTarget } from '../../../../lib/cycles.js';
+import { renderer } from '../../../../lib/outlook.js';
+
+export function getStaticPaths() {
+  return C.cycles.filter((c) => c.comparison).flatMap((c) => c.views.map(([view]) => ({ params: { cycle: c.id, view } })));
+}
+const { cycle: cid, view } = Astro.params;
+const c = cycleOf(cid);
+const season = seasonTarget(c);
+const R = renderer(C, { cycle: cid, view, target: season }, pagesFor(c, view, season));
+const X = R.comparison(dataFile(c.comparison));
+---
+<Base title={`Official outlooks · ${c.option} · ${R.viewLabel(view)}`} section="outlook"
+      description={`${c.option}: the ICPAC and EMI outlooks compared with this forecast, ${R.viewLabel(view)}.`}>
+  <ContextBar slot="context" cycle={c} view={view} section="official" target={season} />
+  <section>
+    <h1 id="official" set:html={X.official} />
+    <div id="cmp-body" set:html={X['cmp-body']} />
+  </section>
+</Base>

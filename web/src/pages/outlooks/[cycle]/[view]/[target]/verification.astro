@@ -1,0 +1,33 @@
+---
+import Base from '../../../../../layouts/Base.astro';
+import ContextBar from '../../../../../components/ContextBar.astro';
+import TargetStrip from '../../../../../components/TargetStrip.astro';
+import { C, cycleOf, pagesFor, url } from '../../../../../lib/cycles.js';
+import { renderer } from '../../../../../lib/outlook.js';
+
+export function getStaticPaths() {
+  return C.cycles.flatMap((c) => c.views.flatMap(([view]) => c.targets.map((t) => ({ params: { cycle: c.id, view, target: t.id } }))));
+}
+const { cycle: cid, view, target } = Astro.params;
+const c = cycleOf(cid);
+const R = renderer(C, { cycle: cid, view, target }, pagesFor(c, view, target));
+const t = c.targets.find((x) => x.id === target);
+const obs = [...new Set(C.cycles.map((x) => x.obs))].join(' and ');
+const done = Boolean(t.verification[view]);
+---
+<Base title={`Verification · ${t.label} · ${R.viewLabel(view)}`} section="verification"
+      description={`${t.label} (${c.init} initialization): the frozen forecast compared with ${obs} observations, ${R.viewLabel(view)}.`}>
+  <ContextBar slot="context" cycle={c} view={view} section="verification" target={target} />
+  <section id="verification">
+    <h1>Verification · {t.label}</h1>
+    <p>Frozen forecasts compared with official {obs} observations once a target period is complete. Each result is one season or month, so it shows what happened this time, not long-term reliability.</p>
+    {done
+      ? <p class="caveat">The selected target comes first; the other verified targets of the cycle follow. Maps: <a href={url.target(c, view, target) + '?kind=verification&product=verification_comparison#maps'}>forecast and observed anomaly side by side</a>.</p>
+      : <p class="notice">{t.label} has not been verified yet: {t.status.text}. The verified targets of this cycle are shown below.</p>}
+    <div id="vf-body" set:html={R.verification()} />
+  </section>
+  <section>
+    <h2 class="h3">Targets of this cycle</h2>
+    <TargetStrip cycle={c} view={view} current={target} link={(x) => url.verification(c, view, x)} />
+  </section>
+</Base>

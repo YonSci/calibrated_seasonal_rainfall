@@ -17,7 +17,7 @@ for (const f of files) (groups[group(f)] ??= []).push(f);
 const order = Object.keys(groups).sort((a, b) => (a.startsWith('Forecast') ? 0 : 1) - (b.startsWith('Forecast') ? 0 : 1) || a.localeCompare(b));
 const total = files.reduce((a, f) => a + (f.bytes ?? 0), 0);
 ---
-<Base title="Downloads" section="downloads/" description="Every data file of the site: forecasts, verification, benchmarks, with sizes and checksums.">
+<Base title="Downloads" section="downloads" description="Every data file of the site: forecasts, verification, benchmarks, with sizes and checksums.">
   <h1>Downloads</h1>
   <p>{files.length} files, {mb(total)}. Large data files are served from the GitHub release
   <a href="https://github.com/YonSci/calibrated_seasonal_rainfall/releases/tag/site-files"><code>site-files</code></a>; each is named by its

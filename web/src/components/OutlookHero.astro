@@ -1,0 +1,31 @@
+---
+// The answer first: headline, probabilities and map side by side, then the three key figures (amount, signal, skill).
+// O: the outlook pieces from lib/outlook.js (element ids kept, so the text is checked against the current page).
+const { O, more = null } = Astro.props;       // more: [href, label] for a link to the full outlook
+---
+<section id="outlooks" class="hero">
+  <div class="hero-text">
+    <p class="eyebrow" id="ol-eyebrow" set:html={O['ol-eyebrow']} />
+    <h1 id="ol-title" set:html={O['ol-title']} />
+    <p class="research-inline">Research reconstruction · not an official forecast</p>
+    <p class="lead" id="ol-lead" set:html={O['ol-lead']} />
+    <div class="box"><h3>Average local probability</h3><div id="ol-prob" set:html={O['ol-prob']} /><p class="caveat" id="ol-prob-note" set:html={O['ol-prob-note']} /></div>
+    {more && <p><a class="button-link" href={more[0]}>{more[1]} →</a></p>}
+  </div>
+  <figure class="glance-map hero-map" id="ol-map" set:html={O['ol-map']} />
+</section>
+<div class="tiles">
+  <div class="box"><h3>Rainfall amount</h3><div id="ol-amount" set:html={O['ol-amount']} /></div>
+  <div class="box"><h3>Forecast signal</h3><div id="ol-signal" set:html={O['ol-signal']} /></div>
+  <div class="box"><h3 id="ol-skill-title" set:html={O['ol-skill-title']} /><div id="ol-skill" set:html={O['ol-skill']} /></div>
+</div>
+<p class="caveat">Signal strength describes how far this forecast's probabilities depart from climatology. Historical skill describes how forecasts made the same way scored in past years. A strong signal is not a confidence rating.</p>
+<style is:global>
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start;margin-top:8px}
+  .hero h1{margin:.2em 0 .1em;line-height:1.15}
+  .hero-map{margin:0}
+  .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+  .tiles .box{margin:0}
+  .button-link{display:inline-block;background:var(--accent);color:var(--surface);padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600}
+  @media (max-width:860px){ .hero,.tiles{grid-template-columns:1fr} }
+</style>

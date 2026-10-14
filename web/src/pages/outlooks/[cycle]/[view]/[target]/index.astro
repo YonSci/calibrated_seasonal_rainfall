@@ -1,0 +1,138 @@
+---
+import Base from '../../../../../layouts/Base.astro';
+import ContextBar from '../../../../../components/ContextBar.astro';
+import OutlookHero from '../../../../../components/OutlookHero.astro';
+import TargetStrip from '../../../../../components/TargetStrip.astro';
+import { C, cycleOf, dataFile, pagesFor, url } from '../../../../../lib/cycles.js';
+import { renderer } from '../../../../../lib/outlook.js';
+
+export function getStaticPaths() {
+  return C.cycles.flatMap((c) => c.views.flatMap(([view]) => c.targets.map((t) => ({ params: { cycle: c.id, view, target: t.id } }))));
+}
+const { cycle: cid, view, target } = Astro.params;
+const c = cycleOf(cid);
+const R = renderer(C, { cycle: cid, view, target }, pagesFor(c, view, target));
+const O = R.outlook();
+const M = R.maps();
+const t = c.targets.find((x) => x.id === target);
+const i = c.targets.indexOf(t);
+const prev = c.targets[i - 1], next = c.targets[i + 1];
+const X = c.comparison ? dataFile(c.comparison) : null;
+const findings = X ? X.summary.length : 0;
+const verified = c.targets.filter((x) => x.verification[view]).length;
+const obsNotice = C.cycles.every((x) => x.obs === 'CHIRPS v3.0');
+---
+<Base title={`${t.label} outlook · ${R.viewLabel(view)}`} section="outlook"
+      description={`${t.label} rainfall outlook for Ethiopia (${c.init} initialization), ${R.viewLabel(view)}: tercile probabilities, amounts and maps.`}>
+  <ContextBar slot="context" cycle={c} view={view} section="outlook" target={target} />
+  <OutlookHero O={O} />
+
+  <section>
+    <h2 class="h3">All targets in this cycle</h2>
+    <TargetStrip cycle={c} view={view} current={target} link={(x) => url.target(c, view, x)} />
+    <p class="pager">{prev && <a href={url.target(c, view, prev.id)}>← {prev.label}</a>}{next && <a href={url.target(c, view, next.id)}>{next.label} →</a>}</p>
+    <details><summary>The targets as a table</summary><div id="ol-table" set:html={O['ol-table']} /></details>
+  </section>
+
+  <div class="with-aside">
+    <section id="maps">
+      <h2>Maps</h2>
+      <div class="map-controls"><div class="seg" role="group" aria-label="Product" id="mp-kind"></div></div>
+      <div class="tabs" role="group" aria-label="Map type" id="mp-tabs"></div>
+      <div id="mp-toggle"></div>
+      <div class="map-actions" id="mp-actions">
+        <a id="mp-open" target="_blank" rel="noopener">Open full-size</a>
+        <a id="mp-download" download>Download PNG</a>
+      </div>
+      <figure class="map-figure" id="mp-figure"></figure>
+      <div class="box"><h3>How to read this map</h3><div id="mp-help"></div></div>
+      <details><summary>Grey, white and blank areas; smoothing and resolution</summary>
+        <p><strong>Light grey</strong>: outside the selected area. <strong>Dark grey</strong>: inside the area but without values, for example cells where reference-period rainfall is too small for tercile categories, or (percent maps) below 10&nbsp;mm. <strong>White</strong> on tercile maps: no category reaches 40%, or two categories tie. Sea cells have no CHIRPS data.</p>
+        <p><strong>Smoothing and resolution.</strong> Maps are drawn on a 12× finer display grid with light Gaussian smoothing (σ = 0.6 grid cells); all numbers on this page use the original 0.25° grid. The model's own resolution is about 1°: each model cell covers 4×4 grid cells, so detail within a 1° box comes from local CHIRPS rainfall statistics used in the amount correction, not from the model.</p>
+      </details>
+    </section>
+    <aside>
+      <div class="box">
+        <h3>More for this target</h3>
+        <ul class="findings">
+          <li><a href={url.verification(c, view, target)}>Verification</a> <span class="caveat">— {verified} of {c.targets.length} targets verified · {t.status.text}</span></li>
+          <li><a href={url.skill(c, view, target)}>Historical skill</a> <span class="caveat">— cross-validated scores, by year, reliability</span></li>
+          {X && <li><a href={url.official(c, view)}>Official outlooks</a> <span class="caveat">— ICPAC and EMI compared with this forecast ({findings} findings)</span></li>}
+        </ul>
+      </div>
+      {obsNotice && <p class="notice small"><strong>Retrospective reconstruction.</strong> Calibrated and verified with CHIRPS v3.0 since 11 October 2026; the 2026 forecasts were recalibrated after their outcomes were known. The CHIRPS v2.0 versions are in the release archive (release 2026-10-10.2).</p>}
+      <details class="panel-details" open><summary>Cycle status and record</summary><div id="ol-meta" set:html={O['ol-meta']} /></details>
+    </aside>
+  </div>
+
+  <script type="application/json" id="mp-data" set:html={JSON.stringify(M).replace(/</g, '\\u003c')} />
+  <script>
+    // Map viewer: forecast or verification maps of this target and area (the current page's viewer, without the cycle state).
+    const M = JSON.parse(document.getElementById('mp-data').textContent);
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const q = new URLSearchParams(location.search);
+    const S = { kind: q.get('kind') === 'verification' && M.verification ? 'verification' : 'forecast', product: q.get('product') || 'tercile_outlook', style: q.get('style') === 'cells' ? 'cells' : 'smooth' };
+    function render() {
+      $('mp-kind').innerHTML = '<button type="button" data-k="forecast" aria-pressed="' + (S.kind === 'forecast') + '">Forecast</button>' +
+        '<button type="button" data-k="verification" aria-pressed="' + (S.kind === 'verification') + '">Verification' + (M.verification ? '' : ' (not available)') + '</button>';
+      const e = M[S.kind];
+      const prods = e ? e.prods : [];
+      if (prods.length && !prods.some((p) => p[0] === S.product)) S.product = prods[0][0];
+      const cmp = S.product === 'verification_comparison' || S.product === 'verification_comparison_error';
+      $('mp-tabs').innerHTML = prods.filter((p) => p[0] !== 'verification_comparison_error').map((p) => '<button type="button" class="tab" data-p="' + p[0] + '" aria-pressed="' +
+        (p[0] === S.product || (cmp && p[0] === 'verification_comparison')) + '">' + esc(p[1]) + '</button>').join('');
+      const hasCells = S.kind === 'forecast' && e && e.images.includes(S.product + '_cells');
+      $('mp-toggle').innerHTML = cmp && prods.some((p) => p[0] === 'verification_comparison_error')
+        ? '<label class="check"><input type="checkbox" id="mp-error"' + (S.product === 'verification_comparison_error' ? ' checked' : '') + '> Show error map (forecast minus observed)</label>'
+        : hasCells ? '<div class="seg" role="group" aria-label="Map style"><span class="caveat">Map style</span> ' +
+          [['smooth', 'Smoothed'], ['cells', 'Grid cells (0.25°)']].map(([k, l]) => '<button type="button" data-style="' + k + '" aria-pressed="' + (S.style === k) + '">' + l + '</button>').join('') + '</div>' : '';
+      const shown = hasCells && S.style === 'cells' ? S.product + '_cells' : S.product;
+      const fig = $('mp-figure');
+      fig.classList.toggle('wide', S.kind === 'verification' && (S.product === 'verification_maps' || cmp));
+      $('mp-actions').hidden = !e;
+      if (!e) {
+        fig.innerHTML = '<div class="unavailable" role="status"><p><strong>' + esc(M.label) + ' verification is unavailable.</strong> ' + esc(M.status) + '.</p><button type="button" data-k="forecast">View the ' + esc(M.label) + ' forecast</button></div>';
+        $('mp-help').innerHTML = '<p>Verification maps appear once the target period is complete and its CHIRPS observations have been processed.</p>';
+        return;
+      }
+      const pname = prods.find((p) => p[0] === S.product)[1];
+      const cap = M.label + ' · ' + M.view + ' · ' + pname + ' · ' + M.init + ' initialization' + (shown !== S.product ? ' · grid cells (0.25°)' : '');
+      const src = e.folder + '/' + shown + '.png';
+      fig.innerHTML = '<a href="' + src + '" target="_blank" rel="noopener"><img src="' + src + '" alt="' + esc((S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + cap) + '"></a><figcaption>' + esc(cap) + '</figcaption>';
+      $('mp-open').href = src;
+      $('mp-download').href = src;
+      $('mp-open').textContent = cmp ? 'Open full-size comparison' : 'Open full-size';
+      $('mp-download').textContent = cmp ? 'Download comparison figure' : 'Download PNG';
+      $('mp-download').setAttribute('download', M.file + '_' + (M.slugs[S.product] || S.product) + (shown !== S.product ? '_grid-cells' : '') + '.png');
+      $('mp-help').innerHTML = (M.help[S.product] || '') + (hasCells ? (S.style === 'cells'
+        ? '<p><strong>Grid cells (0.25°)</strong>: every cell is drawn exactly as computed, without interpolation or smoothing. The 4 × 4-cell blocks come from the 1° model grid, and neighbouring cells can flip category because probabilities come from counting 51 members.</p>'
+        : '<p><strong>Smoothed</strong> (display only): values are smoothed over about 0.4° and interpolated, which softens the 1° model grid. Switch to Grid cells to see the values exactly as computed.</p>') : '') +
+        '<p class="caveat">Reference period: CHIRPS ' + M.reference + '.</p>';
+      if (location.search || S.kind !== 'forecast' || S.product !== 'tercile_outlook' || S.style !== 'smooth')
+        history.replaceState(null, '', location.pathname + '?' + new URLSearchParams({ kind: S.kind, product: S.product, style: S.style }) + location.hash);
+    }
+    document.addEventListener('click', (ev) => {
+      const b = (ev.target as HTMLElement).closest('[data-k],[data-p],[data-style]') as HTMLElement | null;
+      if (!b || !b.closest('#maps')) return;
+      if (b.dataset.k) S.kind = b.dataset.k;
+      if (b.dataset.p) S.product = b.dataset.p;
+      if (b.dataset.style) S.style = b.dataset.style;
+      render();
+    });
+    document.addEventListener('change', (ev) => {
+      const el = ev.target as HTMLInputElement;
+      if (el.id === 'mp-error') { S.product = el.checked ? 'verification_comparison_error' : 'verification_comparison'; render(); }
+    });
+    render();
+  </script>
+  <style is:global>
+    .pager{display:flex;justify-content:space-between;font-size:.92rem}
+    .with-aside{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start;margin-top:10px}
+    .with-aside aside dl.meta{display:block}
+    .with-aside aside dl.meta dt{font-weight:600;margin-top:8px}
+    .with-aside aside dl.meta dd{margin:0;overflow-wrap:anywhere}
+    .notice.small{font-size:.85rem}
+    @media (max-width:980px){ .with-aside{grid-template-columns:1fr} }
+  </style>
+</Base>

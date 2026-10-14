@@ -1,23 +1,14 @@
 ---
-import Base from '../../../../layouts/Base.astro';
-import CycleBar from '../../../../components/CycleBar.astro';
-import { C, cycleOf, pagesFor, defaultTarget } from '../../../../lib/cycles.js';
-import { renderer } from '../../../../lib/outlook.js';
+// Address of release 2026-10-14.5: forwards to the season target's verification page.
+import { C, cycleOf, url, seasonTarget } from '../../../../lib/cycles.js';
 
 export function getStaticPaths() {
   return C.cycles.flatMap((c) => c.views.map(([view]) => ({ params: { cycle: c.id, view } })));
 }
 const { cycle: cid, view } = Astro.params;
 const c = cycleOf(cid);
-const R = renderer(C, { cycle: cid, view, target: defaultTarget(c) }, pagesFor(c, view));
-const obs = [...new Set(C.cycles.map((x) => x.obs))].join(' and ');
+const to = url.verification(c, view, seasonTarget(c));
 ---
-<Base title={`Verification · ${c.label} · ${R.viewLabel(view)}`} section="outlooks/"
-      description={`${c.option}: frozen forecasts compared with ${obs} observations, ${R.viewLabel(view)}.`}>
-  <CycleBar cycle={c} view={view} section="verification" />
-  <section id="verification">
-    <h1>Verification · {c.option}</h1>
-    <p>Frozen forecasts compared with official {obs} observations once a target period is complete. Each result is one season or month, so it shows what happened this time, not long-term reliability.</p>
-    <div id="vf-body" set:html={R.verification()} />
-  </section>
-</Base>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content={`0; url=${to}`}><link rel="canonical" href={to}><title>Moved</title></head>
+<body><p>This page has moved: <a href={to}>{to}</a></p></body></html>

@@ -22,7 +22,7 @@ const sub = (phase) => (phase === 2 ? 'distribution' : 'phase3');
 const commit = (p) => (p.commit ?? '').slice(0, 7) + (p.uncommitted_changes ? ' (with uncommitted changes)' : '');
 const others = names('probcal').filter((n) => n !== cycle);
 ---
-<Base title={`Probability calibration · ${title}`} section="probability-calibration/"
+<Base title={`Probability calibration · ${title}`} section="research"
       description={`Probability and rainfall-distribution calibration for the ${title} cycle: every method against the published pipeline.`}>
   <p class="caveat"><a href={href('probability-calibration/')}>Probability calibration</a> › {title}</p>
   <h1>{title}</h1>

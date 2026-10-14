@@ -1,0 +1,53 @@
+---
+import Base from '../../../../../layouts/Base.astro';
+import ContextBar from '../../../../../components/ContextBar.astro';
+import { C, cycleOf, dataFile, pagesFor } from '../../../../../lib/cycles.js';
+import { renderer } from '../../../../../lib/outlook.js';
+
+export function getStaticPaths() {
+  return C.cycles.flatMap((c) => c.views.flatMap(([view]) => c.targets.map((t) => ({ params: { cycle: c.id, view, target: t.id } }))));
+}
+const { cycle: cid, view, target } = Astro.params;
+const c = cycleOf(cid);
+const R = renderer(C, { cycle: cid, view, target }, pagesFor(c, view, target));
+const t = c.targets.find((x) => x.id === target);
+const D2 = dataFile(c.diagnostics);
+const H = R.history();
+---
+<Base title={`Historical skill · ${t.label} · ${R.viewLabel(view)}`} section="skill"
+      description={`${t.label} (${c.init} initialization): how forecasts made with the same method scored in past years, ${R.viewLabel(view)}.`}>
+  <ContextBar slot="context" cycle={c} view={view} section="skill" target={target} />
+  <section id="history">
+    <h1>Historical skill · {t.label}</h1>
+    <p>How forecasts made with the same method scored in past years against climatology (the observed frequency of each tercile in the training years, about one-third each). The main number is the <strong>cross-validated 1993–2016</strong> score: each year is forecast with parameters fitted without that year. Later years are <strong>exploratory</strong>: they were seen while the method was chosen.</p>
+    <div id="hs-body" set:html={H['hs-body']} />
+  </section>
+  <section>
+    <h2>Historical verification explorer</h2>
+    <p class="caveat">The evidence behind the scores above, for {t.label} in this area. Choose the evaluation period; all diagnostics use the blended probabilities against climatology.</p>
+    <div class="seg" role="group" aria-label="Evaluation period" id="dg-period">
+      <button type="button" data-period="training" aria-pressed="true">Cross-validated</button>
+      <button type="button" data-period="operational" aria-pressed="false">Exploratory</button>
+    </div>
+    <div class="dg-period" data-period="training"><div id="dg-body" set:html={R.diagnostics(D2, target, 'training')} /></div>
+    <div class="dg-period" data-period="operational" hidden set:html={R.diagnostics(D2, target, 'operational')} />
+  </section>
+  <section>
+    <h2>Historical performance by rainfall region</h2>
+    <div id="hs-regions" set:html={H['hs-regions']} />
+  </section>
+  <script>
+    // Evaluation period switch (both periods are on the page).
+    const q = new URLSearchParams(location.search);
+    let period = q.get('period') === 'operational' ? 'operational' : 'training';
+    const show = () => {
+      document.querySelectorAll<HTMLElement>('.dg-period').forEach((el) => { el.hidden = el.dataset.period !== period; });
+      document.querySelectorAll<HTMLElement>('#dg-period button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.period === period)));
+    };
+    document.getElementById('dg-period').addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest('button') as HTMLElement | null;
+      if (b) { period = b.dataset.period; show(); history.replaceState(null, '', location.pathname + '?period=' + period + location.hash); }
+    });
+    show();
+  </script>
+</Base>

@@ -1,0 +1,35 @@
+---
+// The amount and range shadow of every cycle on one page (from the probability-calibration data; never published as a forecast).
+import Base from '../../layouts/Base.astro';
+import Table from '../../components/Table.astro';
+import Figure from '../../components/Figure.astro';
+import { read, names, href, cycleTitle } from '../../lib/data.js';
+import { shadow } from '../../lib/probcal.js';
+
+const cycles = names('probcal').map((n) => ({ name: n, d: read(`probcal/${n}.json`) })).sort((a, b) => a.d.initialization_month - b.d.initialization_month)
+  .map(({ name, d }) => ({ name, d, title: cycleTitle(d.initialization_month, d.season), S: shadow(d.amount_shadow, Object.keys(d.phase1.targets)) }))
+  .filter((x) => x.S.length);
+const cfg = cycles[0]?.d.shadow_config;
+---
+<Base title="Amount and range shadow" section="research" description="Shadow rainfall-amount and range forecast (EMOS), never published, scored season by season against the MVS-corrected ensemble.">
+  <h1>Amount and range shadow (EMOS)</h1>
+  <p class="notice"><strong>Not a published forecast.</strong> Since {cfg?.since}, each cycle also runs the EMOS distribution model (censored
+  shifted gamma, fitted on the cycle's reference years) and records its median and 10–90% range for every target next to the
+  MVS-corrected ensemble. {cfg?.reason} Each season is scored once its CHIRPS observations exist; any change to what is published is a
+  separate decision after several seasons.</p>
+  <p class="toc">{cycles.map((x) => <a href={`#${x.name}`}>{x.title}</a>)}</p>
+  {cycles.map((x) => (
+    <section id={x.name}>
+      <h2>{x.title}</h2>
+      {x.S.map((y) => (
+        <>
+          <h3>{y.year} forecast · {y.observed.length} of {y.targets.length} targets observed so far</h3>
+          <Table {...y.forecast} />
+          {y.scores ? <Table {...y.scores} /> : <p class="caveat">Awaiting CHIRPS observations.</p>}
+          {y.targets.map((t) => <details><summary>{t} {y.year}: maps</summary><Figure src={`assets/probcal/${x.name}/amount_shadow/${y.year}/shadow_${y.model}_${y.year}_${t}.png`} caption={`Shadow amounts and ranges, ${t} ${y.year}.`} /></details>)}
+        </>
+      ))}
+      <p class="caveat">Benchmark evidence for this cycle: <a href={href(`probability-calibration/${x.name}/#dist2`)}>Phase 2 distribution models</a>.</p>
+    </section>
+  ))}
+</Base>

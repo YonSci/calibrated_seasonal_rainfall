@@ -223,13 +223,6 @@
   "bytes": 165522,
   "sha256": "0d2fffdadc79c4b076e13422c44c3ef881e2ad86ffba7e33153eb910ba6c02cd"
  },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2225269e3047dfde-fmam2026feb_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2225269e3047dfde-fmam2026feb_bulletin.pdf",
-  "path": "downloads/fmam2026feb_bulletin.pdf",
-  "label": null,
-  "bytes": 337155,
-  "sha256": "2225269e3047dfdec09c86f560f117bd9b3c20f148f99c1360ccbd50216e8833"
- },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/22cd980f59e83172-probcal.feb_fmam.phase3.benchmark.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/22cd980f59e83172-probcal.feb_fmam.phase3.benchmark.json",
   "path": "downloads/probcal/feb_fmam/phase3/benchmark.json",
@@ -243,6 +236,13 @@
   "label": "Phase 2, binary calibrators (JSON)",
   "bytes": 972747,
   "sha256": "2b6318c2abf9082a3ad9d2cf9edc64f65fc4ccebd657c7979f158606e46473dc"
+ },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2bc4bf2c14277980-jjas2026_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2bc4bf2c14277980-jjas2026_bulletin.pdf",
+  "path": "downloads/jjas2026_bulletin.pdf",
+  "label": null,
+  "bytes": 325223,
+  "sha256": "2bc4bf2c14277980000a0a138feec51f4157a3f777ca7b3e1683ca4d43fb4a93"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2d3ffb5084da14ad-bias.feb_fmam.ratio_limits.confirmation.confirmation.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2d3ffb5084da14ad-bias.feb_fmam.ratio_limits.confirmation.confirmation.json",
@@ -313,6 +313,13 @@
   "label": "MVS ratio-limit study: screening (JSON)",
   "bytes": 1950018,
   "sha256": "4c91f25448b3d01df32735dd9109b543b7080ec3cda75f06b13c92f33e3431e8"
+ },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/4e3bfef03863952a-fmam2026feb_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/4e3bfef03863952a-fmam2026feb_bulletin.pdf",
+  "path": "downloads/fmam2026feb_bulletin.pdf",
+  "label": null,
+  "bytes": 337155,
+  "sha256": "4e3bfef03863952a69f8a724bc302c991504514ffcd930b9bbf36e29b171ad15"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/4f2e65c22bb51dd7-probcal.feb_fmam.amount_shadow.2026.shadow_emos_csg_2026_Apr.nc": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/4f2e65c22bb51dd7-probcal.feb_fmam.amount_shadow.2026.shadow_emos_csg_2026_Apr.nc",
@@ -454,26 +461,12 @@
   "bytes": 1200539,
   "sha256": "967dca10b242773a36bb0cbb51572e41d8fc17521d453d44d8fa4eb739463009"
  },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/975b5842ff015e7b-jjas2026_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/975b5842ff015e7b-jjas2026_bulletin.pdf",
-  "path": "downloads/jjas2026_bulletin.pdf",
-  "label": null,
-  "bytes": 325223,
-  "sha256": "975b5842ff015e7b6b9ee4d17698896c5f3e852196a91490aef1ada1e864d94c"
- },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/979ba174092cedaa-bias.sep_ondj.confirmation.confirmation.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/979ba174092cedaa-bias.sep_ondj.confirmation.confirmation.json",
   "path": "downloads/bias/sep_ondj/confirmation/confirmation.json",
   "label": "Confirmation: full-pipeline scores, selections and tests (JSON)",
   "bytes": 3406874,
   "sha256": "979ba174092cedaa45e5c748ded38c1b04dee7f4230fc585f528e1bddd45b86c"
- },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9a8f82ce90515c13-ondj2026_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9a8f82ce90515c13-ondj2026_bulletin.pdf",
-  "path": "downloads/ondj2026_bulletin.pdf",
-  "label": null,
-  "bytes": 319504,
-  "sha256": "9a8f82ce90515c137b0316f8a77dc0603d13323c8ea7239ae98f196e3c6c0189"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9f1ff8946cc74bc2-probcal.sep_ondj.phase2_binary.benchmark.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9f1ff8946cc74bc2-probcal.sep_ondj.phase2_binary.benchmark.json",
@@ -509,6 +502,13 @@
   "label": "Corrected forecast members of every method (NetCDF)",
   "bytes": 18714881,
   "sha256": "ae04206743a9908b209336eed74fd3c277508d3e59bdffed40e0a462b57f3722"
+ },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/affa9c0ca29515c8-ondj2026_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/affa9c0ca29515c8-ondj2026_bulletin.pdf",
+  "path": "downloads/ondj2026_bulletin.pdf",
+  "label": null,
+  "bytes": 319504,
+  "sha256": "affa9c0ca29515c80135901f7c0e741e5b483f564f2e37c50c0d3d7a581cd970"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/b3e57118123cab41-probcal.jan_fmam.phase3.benchmark.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/b3e57118123cab41-probcal.jan_fmam.phase3.benchmark.json",
@@ -573,13 +573,6 @@
   "bytes": 148668,
   "sha256": "c89028c47ca929481972d12a668b6c8ecbf2038972ec49a3ec42f047fa22595b"
  },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c913b2fe038ada2a-fmam2026_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c913b2fe038ada2a-fmam2026_bulletin.pdf",
-  "path": "downloads/fmam2026_bulletin.pdf",
-  "label": null,
-  "bytes": 325550,
-  "sha256": "c913b2fe038ada2ad3024d2954997add47d77151051458eecfe2682584bd39ca"
- },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/cafdeeb9424099bd-probcal.feb_fmam.amount_shadow.2026.shadow_emos_csg_2026_FMAM.nc": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/cafdeeb9424099bd-probcal.feb_fmam.amount_shadow.2026.shadow_emos_csg_2026_FMAM.nc",
   "path": "downloads/probcal/feb_fmam/amount_shadow/2026/shadow_emos_csg_2026_FMAM.nc",
@@ -628,6 +621,13 @@
   "label": "Phase 2, rainfall-distribution models (JSON)",
   "bytes": 579052,
   "sha256": "df083f0fab76060f3179521d0221ce357adaf7b1ec331ba94dccae6f1f49bb3f"
+ },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e961cf358d069331-fmam2026_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e961cf358d069331-fmam2026_bulletin.pdf",
+  "path": "downloads/fmam2026_bulletin.pdf",
+  "label": null,
+  "bytes": 325553,
+  "sha256": "e961cf358d06933180f9e39a066a569776147484850c1a92fe9e077fa9c1ae2a"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/f266f25dfc54e36c-probcal.sep_ondj.phase3.benchmark.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/f266f25dfc54e36c-probcal.sep_ondj.phase3.benchmark.json",

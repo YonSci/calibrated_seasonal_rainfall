@@ -564,7 +564,7 @@
   {
     "id": "2026-10-14.5",
     "date": "2026-10-14",
-    "commit": null,
+    "commit": "e29ac74",
     "title": "Outlooks, maps and verification on the new pages; daily scoring of new observations",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -580,6 +580,24 @@
       {
         "type": "display",
         "text": "New observations are checked daily and each season is scored as soon as its CHIRPS month is published (verification, official-outlook comparison, bias-correction validation, the amount and range shadow and the method suggestions); publishing the new scores stays a release step."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-14.6",
+    "date": "2026-10-14",
+    "commit": null,
+    "title": "New site layout and navigation",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The new pages (/next/) put the forecast first: the home page opens on the current outlook (headline, probabilities, map, amount, signal and skill) with every target as a small map; the menu is Outlook, Verification, Skill, Research, About and Downloads. Forecast pages carry a context bar with breadcrumbs, the cycle, area and target, and the sections Outlook and maps, Official outlooks, Verification and Historical skill, which keeps the selection when the section changes. The official-outlook comparison has its own page, verification and skill have one page per target, and the amount and range shadow of every cycle is on one research page. Content and numbers are unchanged and were rechecked against the current page for every cycle, area and target."
       }
     ]
   }

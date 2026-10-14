@@ -9,7 +9,7 @@ export function getStaticPaths() {
 const c = cycleOf(Astro.params.cycle);
 const to = url.target(c, c.default_view, defaultTarget(c));
 ---
-<Base title={c.option} section="outlooks/" description={`${c.option}: seasonal rainfall outlook for Ethiopia.`}>
+<Base title={c.option} section="outlook" description={`${c.option}: seasonal rainfall outlook for Ethiopia.`}>
   <meta http-equiv="refresh" content={`0; url=${to}`} slot="head" />
   <p><a href={to}>{c.option}: open the outlook</a></p>
 </Base>
