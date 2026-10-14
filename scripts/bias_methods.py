@@ -474,6 +474,44 @@ def apply_sdm(members, s, **_):
     return out
 
 
+def fit_leung(models, obs, beta=0.3, ratio_bounds=(0.5, 2.0), sigma_min=1.0, **_):
+    """Modified-Leung member-wise affine calibration (GrazFeediNG, Munoz & Demissie; docs/51), as in process_calib.py.
+
+    Every member index m has its own climatology over the training years: mean mu_m and standard deviation sd_m (ddof 0).
+    sd_eff_m = (1 - beta) sd_m + beta sd_pool, sd_pool = sqrt(mean_m sd_m^2); r_m = clip((sd_obs + 1e-6) / (sd_eff_m + 1e-6),
+    0.5, 2), r_m = 1 where sd_obs and sd_eff_m are both below sigma_min (1 mm). Members without their own climatology
+    (index beyond the training years' member count, e.g. members 26-51 from 2017) use the pooled climatology
+    (mean over members of mu_m, sd_pool): an implementation choice, since the original assumes equal member counts.
+    """
+    o, ok = clean_obs(obs)
+    M = min(len(m) for m in models)
+    X = np.stack([np.asarray(m, float)[:M] for m in models])                  # (year, member, cell)
+    mu_m, sd_m = X.mean(0), X.std(0)                                            # per member, over the years
+    sd_pool = np.sqrt((sd_m ** 2).mean(0))
+    mu_o, sd_o = o.mean(0), o.std(0)
+
+    def ratio(sd_eff):
+        tiny = (sd_o < sigma_min) & (sd_eff < sigma_min)
+        raw = (sd_o + 1e-6) / (sd_eff + 1e-6)
+        return np.where(tiny, 1.0, np.clip(raw, *ratio_bounds)), tiny, raw
+    r_m, tiny_m, raw_m = ratio((1 - beta) * sd_m + beta * sd_pool)
+    r_p, _, _ = ratio(sd_pool)
+    flags = dict(both_tiny=tiny_m.mean(0) > 0.5, ratio_lower_limit=((raw_m < ratio_bounds[0]) & ~tiny_m).mean(0) > 0.5,
+                 ratio_upper_limit=((raw_m > ratio_bounds[1]) & ~tiny_m).mean(0) > 0.5)
+    return dict(ok=ok, mu_obs=mu_o, mu_member=mu_m, ratio_member=r_m, mu_pool=mu_m.mean(0), ratio_pool=r_p, members=M, flags=flags)
+
+
+def apply_leung(members, s, **_):
+    members = np.asarray(members, float)
+    M = s['members']
+    mu = np.vstack([s['mu_member'][:min(M, len(members))]] + ([np.repeat(s['mu_pool'][None], len(members) - M, 0)] if len(members) > M else []))
+    r = np.vstack([s['ratio_member'][:min(M, len(members))]] + ([np.repeat(s['ratio_pool'][None], len(members) - M, 0)] if len(members) > M else []))
+    count(s, 'pooled_climatology_members', max(len(members) - M, 0) * s['ok'].sum(), len(members) * s['ok'].sum())
+    raw = s['mu_obs'] + r * (members - mu)
+    count(s, 'clipped_at_zero', ((raw < 0) & s['ok']).sum(), members.shape[0] * s['ok'].sum())
+    return np.maximum(raw, 0)
+
+
 @dataclass(frozen=True)
 class Method:
     key: str
@@ -547,7 +585,15 @@ VARIANTS = {m.key: m for m in [
            "choice, not a physical rule)", ('Torralba et al. 2017', 'Manzanas et al. 2019'),
            defaults=dict(ratio_bounds=(0.5, 2.0), min_model_sd=1.0, zero_guard=True)),
 ]}
-ALL = {'raw': BASELINE, **METHODS, **VARIANTS}       # benchmark rows: the baseline, the 13 methods and the variants
+# External methods: implemented from other systems and evaluated in their own benchmarks (not in the declared family).
+EXTERNAL = {m.key: m for m in [
+    Method('leung_affine', 'Modified-Leung member-wise affine (GrazFeediNG)', fit_leung, apply_leung, 'external',
+           "x'_m = max(0, mu_obs + r_m (x_m - mu_m)) with each member's own climatology; r_m = clip(sd_obs / sd_eff_m, 0.5, 2), "
+           "sd_eff_m = 0.7 sd_m + 0.3 sd_pool; r = 1 where both spreads < 1 mm; members without their own climatology use the "
+           "pooled one (process_calib.py, docs/51)", ('Munoz & Demissie, GrazFeediNG',),
+           defaults=dict(beta=0.3, ratio_bounds=(0.5, 2.0), sigma_min=1.0)),
+]}
+ALL = {'raw': BASELINE, **METHODS, **VARIANTS, **EXTERNAL}   # benchmark rows: baseline, the 13 methods, variants, external
 
 
 META_KEYS = ('base', 'label', 'family', 'definition')
