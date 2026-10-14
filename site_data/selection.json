@@ -1,0 +1,861 @@
+{
+ "created_utc": "2026-10-14T21:29:58.854454+00:00",
+ "rule": "config/method_selection_rule.json",
+ "rule_contents": {
+  "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
+  "products": {
+   "probabilities": {
+    "label": "Published tercile probabilities",
+    "score": "RPS of the tercile probabilities (lower is better)",
+    "reference": {
+     "amount": "mvs",
+     "probability": "climatology_blend",
+     "label": "Mean-Variance Scaling + climatology blend (published)"
+    },
+    "families": [
+     "bias_correction",
+     "probability_phase1",
+     "probability_phase2_binary",
+     "distribution_phase2",
+     "distribution_phase3"
+    ]
+   },
+   "amounts": {
+    "label": "Rainfall amounts (and ranges)",
+    "score": "CRPS of the rainfall-amount forecast in mm (lower is better)",
+    "reference": {
+     "amount": "mvs",
+     "label": "Mean-Variance Scaling ensemble (published)"
+    },
+    "families": [
+     "bias_correction",
+     "distribution_phase2",
+     "distribution_phase3"
+    ]
+   }
+  },
+  "historical": "A method is a candidate for a target and product only if its benchmark confirms it better than the published reference: outer leave-one-year-out over the training years (1993-2016), Holm-adjusted p < 0.05 across every method and target of its family, and not worse over the test years (2017 onward).",
+  "validation": {
+   "minimum_seasons": 3,
+   "rule": "Independent validation seasons are forecast years scored after the benchmark (bias_validation.py for bias correction; dist_shadow.py for the EMOS amount model). A candidate becomes 'recommended' once at least minimum_seasons have been scored for it and the reference and its mean score over them is not worse; with fewer it stays a 'candidate'; with enough and a worse mean it is 'not supported by validation'. A candidate with no validation record yet needs a shadow forecast before it can be recommended."
+  },
+  "choice": "Among candidates, a recommended one first; then the candidate with the largest training-period improvement over the reference. One change at a time: candidates from different families (e.g. an amount correction and a probability calibration) were each tested against the published approach, not together, so the selection changes one stage only; the others are listed as alternatives.",
+  "statuses": {
+   "keep": "Keep the published approach: no method is confirmed better on the historical evidence.",
+   "candidate": "Confirmed better on the historical evidence; independent validation seasons are still being collected.",
+   "recommended": "Confirmed better on the historical evidence and not worse over the independent validation seasons.",
+   "not_supported": "Confirmed better on the historical evidence but worse over the independent validation seasons."
+  }
+ },
+ "cycles": [
+  {
+   "name": "jan_fmam",
+   "targets": {
+    "Feb": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Feb on the historical evidence."
+     }
+    },
+    "Mar": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Mar on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Mar on the historical evidence."
+     }
+    },
+    "Apr": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Apr on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Apr on the historical evidence."
+     }
+    },
+    "May": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for May on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for May on the historical evidence."
+     }
+    },
+    "FMAM": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for FMAM on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "candidate",
+      "selected": {
+       "family": "distribution_phase2",
+       "family_label": "Distribution model, Phase 2",
+       "stage": "distribution model",
+       "method": "emos_csg",
+       "label": "EMOS, censored shifted gamma"
+      },
+      "historical": {
+       "training_difference": -0.7206597858111602,
+       "years_better": 19,
+       "years": 24,
+       "holm_p": 0.0126,
+       "test_difference": -0.7347773343172624,
+       "test_years_better": 8,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 46.08182745075131,
+         "reference": 47.8437909224533
+        }
+       ],
+       "mean_difference": -1.7619634717019892,
+       "required": 3
+      },
+      "alternatives": [],
+      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM: CRPS (mm) difference -0.7207 over the training years (Holm p 0.0126; 19 of 24 years better), -0.7348 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.762."
+     }
+    }
+   }
+  },
+  {
+   "name": "feb_fmam",
+   "targets": {
+    "Feb": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "candidate",
+      "selected": {
+       "family": "bias_correction",
+       "family_label": "Bias correction (amount correction)",
+       "stage": "amount correction",
+       "method": "sqrt_mvs",
+       "label": "Square-root-space Mean-Variance Scaling"
+      },
+      "historical": {
+       "training_difference": -0.03669166891513275,
+       "holm_p": 0.0264,
+       "years_better": 18,
+       "years": 24,
+       "test_difference": -0.006634972406173217,
+       "test_years_better": 6,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 0.3988891000097336,
+         "reference": 0.40489301924311805
+        }
+       ],
+       "mean_difference": -0.006003919233384447,
+       "required": 3
+      },
+      "alternatives": [],
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Holm p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Feb on the historical evidence."
+     }
+    },
+    "Mar": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Mar on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Mar on the historical evidence."
+     }
+    },
+    "Apr": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Apr on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Apr on the historical evidence."
+     }
+    },
+    "May": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for May on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for May on the historical evidence."
+     }
+    },
+    "FMAM": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for FMAM on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM on the historical evidence."
+     }
+    }
+   }
+  },
+  {
+   "name": "may_jjas",
+   "targets": {
+    "Jun": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Jun on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Jun on the historical evidence."
+     }
+    },
+    "Jul": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Jul on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "candidate",
+      "selected": {
+       "family": "bias_correction",
+       "family_label": "Bias correction (amount correction)",
+       "stage": "amount correction",
+       "method": "vs",
+       "label": "Variance Scaling (unbounded)"
+      },
+      "historical": {
+       "training_difference": -0.1385532224164859,
+       "holm_p": 0.0,
+       "years_better": 23,
+       "years": 24,
+       "test_difference": -0.1399016692539045,
+       "test_years_better": 9,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 25.570328752762315,
+         "reference": 25.987114563855812
+        }
+       ],
+       "mean_difference": -0.4167858110934972,
+       "required": 3
+      },
+      "alternatives": [],
+      "why": "Variance Scaling (unbounded) (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jul: CRPS (mm) difference -0.1386 over the training years (Holm p 0; 23 of 24 years better), -0.1399 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.4168."
+     }
+    },
+    "Aug": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Aug on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "candidate",
+      "selected": {
+       "family": "bias_correction",
+       "family_label": "Bias correction (amount correction)",
+       "stage": "amount correction",
+       "method": "vs",
+       "label": "Variance Scaling (unbounded)"
+      },
+      "historical": {
+       "training_difference": -0.12898291857397526,
+       "holm_p": 0.0,
+       "years_better": 24,
+       "years": 24,
+       "test_difference": -0.08486901377524386,
+       "test_years_better": 8,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 15.270217703931799,
+         "reference": 15.456123493019991
+        }
+       ],
+       "mean_difference": -0.1859057890881921,
+       "required": 3
+      },
+      "alternatives": [
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "sqrt_mvs",
+        "label": "Square-root-space Mean-Variance Scaling",
+        "status": "candidate",
+        "historical": null
+       },
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "pt",
+        "label": "Power Transformation",
+        "status": "candidate",
+        "historical": null
+       },
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "gqm",
+        "label": "Gamma Quantile Mapping",
+        "status": "candidate",
+        "historical": null
+       }
+      ],
+      "why": "Variance Scaling (unbounded) (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Aug: CRPS (mm) difference -0.129 over the training years (Holm p 0; 24 of 24 years better), -0.08487 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.1859. Also confirmed (one change at a time): Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction); Gamma Quantile Mapping (amount correction)."
+     }
+    },
+    "Sep": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Sep on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "candidate",
+      "selected": {
+       "family": "distribution_phase2",
+       "family_label": "Distribution model, Phase 2",
+       "stage": "distribution model",
+       "method": "quantile_regression",
+       "label": "Regularized quantile regression"
+      },
+      "historical": {
+       "training_difference": -1.0827405272293198,
+       "years_better": 18,
+       "years": 24,
+       "holm_p": 0.023799999999999998,
+       "test_difference": -0.5431653039540865,
+       "test_years_better": 4,
+       "test_years": 9
+      },
+      "validation": null,
+      "alternatives": [
+       {
+        "family": "distribution_phase2",
+        "family_label": "Distribution model, Phase 2",
+        "method": "emos_csg",
+        "label": "EMOS, censored shifted gamma",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.9814759192542052,
+         "years_better": 18,
+         "years": 24,
+         "holm_p": 0.007875,
+         "test_difference": -0.5500417116238892,
+         "test_years_better": 5,
+         "test_years": 9
+        }
+       }
+      ],
+      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Holm p 0.0238; 18 of 24 years better), -0.5432 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended. Also confirmed (one change at a time): EMOS, censored shifted gamma (distribution model)."
+     }
+    },
+    "JJAS": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for JJAS on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for JJAS on the historical evidence."
+     }
+    }
+   }
+  },
+  {
+   "name": "sep_ondj",
+   "targets": {
+    "Oct": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Oct on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Oct on the historical evidence."
+     }
+    },
+    "Nov": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Nov on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Nov on the historical evidence."
+     }
+    },
+    "Dec": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Dec on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Dec on the historical evidence."
+     }
+    },
+    "Jan": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Jan on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "candidate",
+      "selected": {
+       "family": "bias_correction",
+       "family_label": "Bias correction (amount correction)",
+       "stage": "amount correction",
+       "method": "sqrt_mvs",
+       "label": "Square-root-space Mean-Variance Scaling"
+      },
+      "historical": {
+       "training_difference": -0.4786897475521504,
+       "holm_p": 0.020945000000000002,
+       "years_better": 18,
+       "years": 24,
+       "test_difference": -0.6902295325749415,
+       "test_years_better": 6,
+       "test_years": 8
+      },
+      "validation": {
+       "seasons": [],
+       "mean_difference": null,
+       "required": 3
+      },
+      "alternatives": [
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "gqm",
+        "label": "Gamma Quantile Mapping",
+        "status": "candidate",
+        "historical": null
+       }
+      ],
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Holm p 0.0209; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction)."
+     }
+    },
+    "ONDJ": {
+     "probabilities": {
+      "product": "Published tercile probabilities",
+      "reference": "Mean-Variance Scaling + climatology blend (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling + climatology blend (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for ONDJ on the historical evidence."
+     },
+     "amounts": {
+      "product": "Rainfall amounts (and ranges)",
+      "reference": "Mean-Variance Scaling ensemble (published)",
+      "status": "keep",
+      "selected": {
+       "family": "published",
+       "label": "Mean-Variance Scaling ensemble (published)",
+       "stage": null,
+       "method": null
+      },
+      "historical": null,
+      "validation": null,
+      "alternatives": [],
+      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for ONDJ on the historical evidence."
+     }
+    }
+   }
+  }
+ ]
+}

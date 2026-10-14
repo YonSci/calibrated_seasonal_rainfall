@@ -42067,7 +42067,7 @@
  "amount_shadow": {
   "2026": {
    "Aug": {
-    "key": "34c7ea3c2f61d5c6d1986ab53d7a2d5c823fc0433270b8b9f1d4bdfdb9b1595c",
+    "key": "ffe7d72490ad0f49e48e33637cf82ddbae9daa4aa72c86840d4a68ffc450bbae",
     "label": "EMOS, censored shifted gamma",
     "target": "Aug",
     "cycle": "config/operational.json",
@@ -42078,9 +42078,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:52:43.279415+00:00",
+    "created_utc": "2026-10-14T21:28:54.706279+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init05_Aug",
@@ -42180,7 +42180,7 @@
     }
    },
    "JJAS": {
-    "key": "acf1884bd06b6b75d9687b2068cf07125bf983155e0e81c88e41e196f54ef2db",
+    "key": "9489b4399cc1915864fdaea1c41f28fc9c618405846909b648a887a9df6b78c3",
     "label": "EMOS, censored shifted gamma",
     "target": "JJAS",
     "cycle": "config/operational.json",
@@ -42191,9 +42191,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:53:24.963441+00:00",
+    "created_utc": "2026-10-14T21:29:13.690074+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init05_JJAS",
@@ -42235,7 +42235,7 @@
     "published_probabilities": "outputs/final_shared_blend/init05_JJAS/2026/forecast_2026.nc"
    },
    "Jul": {
-    "key": "2a26d4f44559b1563ed5561c51dd1a5b64114359704aa24496c767ac390da97f",
+    "key": "a3c221a0e4eedc400d76e3c2fdbbec0a5055a26ef3d75e6958422ecd56c5af11",
     "label": "EMOS, censored shifted gamma",
     "target": "Jul",
     "cycle": "config/operational.json",
@@ -42246,9 +42246,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:52:23.740423+00:00",
+    "created_utc": "2026-10-14T21:28:44.310986+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init05_Jul",
@@ -42348,7 +42348,7 @@
     }
    },
    "Jun": {
-    "key": "71eba9743f4c1a592d74824acf53e6f8adb2590116ab60f7c5621a421f3dc30c",
+    "key": "9c37dba547918cb46cf41dc24594ae5b7e7addf8fa492263634cab1e6e0c8575",
     "label": "EMOS, censored shifted gamma",
     "target": "Jun",
     "cycle": "config/operational.json",
@@ -42359,9 +42359,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:52:08.304736+00:00",
+    "created_utc": "2026-10-14T21:28:37.687606+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init05_Jun",
@@ -42461,7 +42461,7 @@
     }
    },
    "Sep": {
-    "key": "195520531d74e27d632ec1bf58d6820e0736ffda37ccaf491e8b2caca253c2cb",
+    "key": "ca0baf5d19d967a28e0931f45354f549f6e1fec478898754e5666398f93ef63d",
     "label": "EMOS, censored shifted gamma",
     "target": "Sep",
     "cycle": "config/operational.json",
@@ -42472,9 +42472,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:52:57.500727+00:00",
+    "created_utc": "2026-10-14T21:29:00.923891+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init05_Sep",
@@ -42518,7 +42518,7 @@
   }
  },
  "shadow_config": {
-  "description": "Shadow rainfall-amount and range forecast from a rainfall-distribution model (scripts/dist_shadow.py, docs/48). Cycles are matched by initialization month and season, so future cycle files are covered without editing this file. Shadow forecasts are never published as forecasts; the published probabilities and amounts are unchanged.",
+  "description": "Shadow rainfall-amount and range forecast from a rainfall-distribution model (scripts/dist_shadow.py, docs/48). Cycles are matched by initialization month and season, so future cycle files are covered without editing this file. Shadow forecasts are never published as forecasts; the published probabilities and amounts are unchanged. Besides the configured model (EMOS), every distribution model the method selection (scripts/method_selection.py) lists as a candidate for a cycle gets its own shadow, so its independent validation seasons accumulate.",
   "model": "emos_csg",
   "levels": [
    0.1,
@@ -42554,7 +42554,8 @@
    }
   ],
   "reference_amount_method": "mvs",
-  "output_root": "outputs/probability_calibration/{name}/amount_shadow"
+  "output_root": "outputs/probability_calibration/{name}/amount_shadow",
+  "models_from_selection": true
  },
  "figures": "assets/probcal/may_jjas",
  "assets": [

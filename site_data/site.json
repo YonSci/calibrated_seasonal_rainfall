@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-14 20:12 UTC",
- "code_commit": "3022377",
- "release": "2026-10-14.8",
+ "built_utc": "2026-10-14 21:30 UTC",
+ "code_commit": "fd1c0ed",
+ "release": "2026-10-15.1",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -627,7 +627,7 @@
   {
    "id": "2026-10-14.8",
    "date": "2026-10-14",
-   "commit": null,
+   "commit": "a54927b",
    "title": "The new site at the main address; search, glossary, methods, domains and packages",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -647,6 +647,28 @@
     {
      "type": "display",
      "text": "Each cycle's download package is now a ZIP built with the site (every map, the verification reports, the official-outlook comparison files and the forecast NetCDF files), with the bulletin, summary, metadata and README next to it. This fixes the package button of the previous page, which had failed since the downloads moved to release assets (release 2026-10-14.3)."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-15.1",
+   "date": "2026-10-15",
+   "commit": null,
+   "title": "Method selection per season, target and product; menu fix",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Method selection: for each season, target and product (tercile probabilities, rainfall amounts) the platform selects the approach the evidence supports from every benchmark together (amount corrections, probability-stage methods, distribution models): a method must be confirmed better than the published approach over 1993-2016 and not worse over 2017 onward, then becomes recommended after three independent validation seasons that are not worse. One change at a time. Six combinations currently have a candidate; none is recommended yet. Every distribution-model candidate now has its own shadow forecast. The published forecasts are unchanged."
+    },
+    {
+     "type": "display",
+     "text": "The Research and About menus open again (they were hidden by the menu bar); Research > Method selection and an approach box on every outlook page."
     }
    ]
   }

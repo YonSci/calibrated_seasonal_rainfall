@@ -2,9 +2,9 @@
  "cycle": "ONDJ 2026/27",
  "initialization": "2026-09-01",
  "initialization_month": "September",
- "built_utc": "2026-10-14 20:12 UTC",
- "release": "2026-10-14.8",
- "code_version": "3022377",
+ "built_utc": "2026-10-14 21:30 UTC",
+ "release": "2026-10-15.1",
+ "code_version": "fd1c0ed",
  "repository": "https://github.com/YonSci/calibrated_seasonal_rainfall",
  "record": {
   "Model initialization": "1 September 2026 · ECMWF SEAS5 (system 51), 51 members",
@@ -13,9 +13,9 @@
   "Publication status": "Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast",
   "Reference period": "CHIRPS v3.0 ONDJ 1993/94–2024/25 (32 seasons)",
   "Observations processed through": "None yet",
-  "CHIRPS archive": "Official CHIRPS v3.0 monthly listing checked 14 Oct 2026: monthly files through Aug 2026",
+  "CHIRPS archive": "Official CHIRPS v3.0 monthly listing checked 15 Oct 2026: monthly files through Aug 2026",
   "Verification last run": "Not run",
-  "Method / version": "Shared climatology blend (λ = 0.18 for ONDJ) · code 3022377"
+  "Method / version": "Shared climatology blend (λ = 0.18 for ONDJ) · code fd1c0ed"
  },
  "rainfall_domain": {
   "view": "ondj_rainfall_domain",

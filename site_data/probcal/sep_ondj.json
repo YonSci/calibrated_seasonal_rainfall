@@ -41609,7 +41609,7 @@
  "amount_shadow": {
   "2026": {
    "Dec": {
-    "key": "02d55e9bf299e63e746436aef476b7003955051918303226096b459da986be02",
+    "key": "2923a2ac0789bfb8425e10772816810a5320072774a227fe044c29934968544a",
     "label": "EMOS, censored shifted gamma",
     "target": "Dec",
     "cycle": "config/cycles/sep_2026_ondj.json",
@@ -41620,9 +41620,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:54:10.020071+00:00",
+    "created_utc": "2026-10-14T21:29:44.170069+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init09_Dec",
@@ -41664,7 +41664,7 @@
     "published_probabilities": "outputs/final_shared_blend/init09_Dec/2026/forecast_2026.nc"
    },
    "Jan": {
-    "key": "c830566cff08b2aab781b4bd207a369708c7dd6caa43e09573571ce1dbdb8118",
+    "key": "c46d3f0fef135f356045d16436915a0447671bee8345ad6447dbe174a69bf0c4",
     "label": "EMOS, censored shifted gamma",
     "target": "Jan",
     "cycle": "config/cycles/sep_2026_ondj.json",
@@ -41675,9 +41675,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:54:20.504616+00:00",
+    "created_utc": "2026-10-14T21:29:48.882030+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init09_Jan",
@@ -41719,7 +41719,7 @@
     "published_probabilities": "outputs/final_shared_blend/init09_Jan/2026/forecast_2026.nc"
    },
    "Nov": {
-    "key": "1bd3441e199b428588cca9bebff7196025b411c344b42db8b891be801a34c581",
+    "key": "df1f973d73d295b57340b725abd091a15da83c3243063f4f0f6d6aeaf3d9935b",
     "label": "EMOS, censored shifted gamma",
     "target": "Nov",
     "cycle": "config/cycles/sep_2026_ondj.json",
@@ -41730,9 +41730,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:53:57.708806+00:00",
+    "created_utc": "2026-10-14T21:29:39.194088+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init09_Nov",
@@ -41774,7 +41774,7 @@
     "published_probabilities": "outputs/final_shared_blend/init09_Nov/2026/forecast_2026.nc"
    },
    "Oct": {
-    "key": "c466eaba8238955189c390a4dbce30f844eabe357df44b245c1f6762167e692a",
+    "key": "cc1998b35bc572bbd40b007b6ee1bc9e0165d3485771836d88b51e0d7f83cf22",
     "label": "EMOS, censored shifted gamma",
     "target": "Oct",
     "cycle": "config/cycles/sep_2026_ondj.json",
@@ -41785,9 +41785,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:53:43.836957+00:00",
+    "created_utc": "2026-10-14T21:29:33.688760+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init09_Oct",
@@ -41829,7 +41829,7 @@
     "published_probabilities": "outputs/final_shared_blend/init09_Oct/2026/forecast_2026.nc"
    },
    "ONDJ": {
-    "key": "dd42b7aa831776301ec236727411f43396b7529e02cffcd79fc0a49b6db4943c",
+    "key": "a1faff82efc071cc89b366e56b74d84e175c4bab8d65e7ec8ca157121ee93302",
     "label": "EMOS, censored shifted gamma",
     "target": "ONDJ",
     "cycle": "config/cycles/sep_2026_ondj.json",
@@ -41840,9 +41840,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-13T14:54:42.584779+00:00",
+    "created_utc": "2026-10-14T21:29:57.871408+00:00",
     "provenance": {
-     "commit": "536e4ced8c99b329a79b871a5626c5c7cf4040a4",
+     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
      "uncommitted_changes": false
     },
     "tag": "init09_ONDJ",
@@ -41886,7 +41886,7 @@
   }
  },
  "shadow_config": {
-  "description": "Shadow rainfall-amount and range forecast from a rainfall-distribution model (scripts/dist_shadow.py, docs/48). Cycles are matched by initialization month and season, so future cycle files are covered without editing this file. Shadow forecasts are never published as forecasts; the published probabilities and amounts are unchanged.",
+  "description": "Shadow rainfall-amount and range forecast from a rainfall-distribution model (scripts/dist_shadow.py, docs/48). Cycles are matched by initialization month and season, so future cycle files are covered without editing this file. Shadow forecasts are never published as forecasts; the published probabilities and amounts are unchanged. Besides the configured model (EMOS), every distribution model the method selection (scripts/method_selection.py) lists as a candidate for a cycle gets its own shadow, so its independent validation seasons accumulate.",
   "model": "emos_csg",
   "levels": [
    0.1,
@@ -41922,7 +41922,8 @@
    }
   ],
   "reference_amount_method": "mvs",
-  "output_root": "outputs/probability_calibration/{name}/amount_shadow"
+  "output_root": "outputs/probability_calibration/{name}/amount_shadow",
+  "models_from_selection": true
  },
  "figures": "assets/probcal/sep_ondj",
  "assets": [
