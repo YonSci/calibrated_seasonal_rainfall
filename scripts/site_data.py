@@ -106,13 +106,20 @@ def probcal_files(site):
 
 def grazfeeding_files(site):
     """GrazFeediNG calibration compared with the published pipeline (scripts/grazfeeding_benchmark.py, docs/51)."""
+    import site_files
+    by_hash = {v['sha256']: v['url'] for v in site_files.load_manifest()['assets'].values()}
     out = {}
     for f in sorted((ROOT / 'outputs/grazfeeding').glob('*/benchmark.json')):
         name = f.parent.name
         d = read(f)
         d.pop('protocol', None)
-        out[name] = dict(slim(d), assets=assets(site, f'assets/grazfeeding/{name}'),
-                         downloads=sorted(p.relative_to(site).as_posix() for p in (site / 'downloads/grazfeeding' / name).glob('*')))
+        files = []                                   # release-asset URL when uploaded, else the site path
+        for src in [f] + sorted((f.parent / 'forecast').glob('*.nc')):
+            local = f'downloads/grazfeeding/{name}/{src.name}'
+            url = by_hash.get(site_files.sha256(src)) or (local if (site / local).is_file() else None)
+            if url:
+                files.append(url)
+        out[name] = dict(slim(d), assets=assets(site, f'assets/grazfeeding/{name}'), downloads=files)
     return out
 
 

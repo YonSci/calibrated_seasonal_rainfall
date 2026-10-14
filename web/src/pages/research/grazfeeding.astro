@@ -98,7 +98,7 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
             ))}
           </>
         )}
-        <p class="caveat">Downloads: {d.downloads.map((f) => <><a href={link(f)}>{f.split('/').at(-1)}</a>{' '}</>)}</p>
+        <p class="caveat">Downloads: {d.downloads.map((f) => <><a href={link(f)}>{f.split('/').at(-1).replace(/^[0-9a-f]{16}-grazfeeding\.[^.]+\./, '')}</a>{' '}</>)}</p>
       </section>
     ))}
     <p class="caveat">Code: <a href={`${REPO}/blob/main/scripts/grazfeeding.py`}><code>scripts/grazfeeding.py</code></a>,
