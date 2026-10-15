@@ -211,8 +211,40 @@ def forecast_year(gcfg, cfg, project, target, models, obs, lat, lon, idx):
     full = lambda v: (lambda z: (z.__setitem__(idx, v), z)[1])(np.full(len(lat) * len(lon), np.nan))
     probs = dict(gf_full=calibrated(cal, p_nod), gf_no_dirichlet=p_nod, iad_on_mvs=calibrated(cal_m, p_mvs),
                  leung_blend=blend('leung_affine', leung), incumbent_recomputed=blend('mvs', mvs_params))
+    primary = bb.load_mask(cfg['regions'][cfg['primary_region']], lat, lon)[idx]
     return dict(year=int(year), reference_years=cycle['reference_years'], iad=cal.params(),
-                p={k: [full(c) for c in v.T] for k, v in probs.items()}, mean_mm=full(np.nanmean(ens_l, 0)), lat=lat, lon=lon)
+                p={k: [full(c) for c in v.T] for k, v in probs.items()}, mean_mm=full(np.nanmean(ens_l, 0)), lat=lat, lon=lon,
+                validation=validate(cycle, target, year, lat, lon, idx, O, q1, q2, probs, dict(leung_affine=ens_l, mvs_ensemble=ens_m),
+                                    primary, cell_area(lat, lon)[idx]))
+
+
+def validate(cycle, target, year, lat, lon, idx, O, q1, q2, probs, ensembles, primary, area):
+    """The forecast year scored against its CHIRPS observation once it exists (the cycle's verification observations): an
+    independent season for every pipeline. All pipelines on the same cells: the primary region where every pipeline has
+    probabilities and the terciles are defined (as in the benchmark); the published probabilities are the recomputed ones."""
+    import xarray as xr
+    path = ROOT / cycle.get('verification_root', '') / 'observations' / target / f'chirps_{year}_common.nc'
+    if not cycle.get('verification_root') or not path.is_file():
+        return None
+    with xr.open_dataset(path) as d:
+        a = d.precip_season.transpose('lat', 'lon')
+        if not (np.allclose(a.lat, lat) and np.allclose(a.lon, lon)):
+            raise ValueError(f'Observation grid mismatch: {path}')
+        y_obs = a.values.reshape(-1).astype(float)[idx]
+    prob_ok = (O.std(0) >= 1.0) & (q1 > 0) & ((q2 - q1) > 1e-6)
+    cells = primary & prob_ok & np.isfinite(y_obs) & np.all([np.isfinite(v).all(-1) for v in probs.values()], axis=0)
+    w = area[cells] / area[cells].sum()
+    t = np.eye(3)[categories(y_obs, q1, q2)][cells]
+    rps = lambda q: float(w @ np.sum((np.cumsum(q[cells], -1)[:, :2] - np.cumsum(t, -1)[:, :2]) ** 2, -1))
+    clim = np.stack([(categories(O, q1, q2) == k).mean(0) for k in range(3)], -1)
+    out = dict(year=int(year), observation=str(path.relative_to(ROOT)).replace('\\', '/'), cells=int(cells.sum()),
+               rps={('incumbent' if k == 'incumbent_recomputed' else k): rps(v) for k, v in probs.items()}, rps_clim=rps(clim))
+    acells = primary & np.isfinite(y_obs) & np.all([np.isfinite(e).all(0) for e in ensembles.values()], axis=0)
+    wa = area[acells] / area[acells].sum()
+    out['crps'] = {k: float(wa @ bb.ensemble_crps(e[:, acells], y_obs[acells])) for k, e in ensembles.items()}
+    out['crps_clim'] = float(wa @ bb.ensemble_crps(O[:, acells], y_obs[acells]))
+    out['amount_cells'] = int(acells.sum())
+    return out
 
 
 def forecast_record(method, params, models, obs, ref, year, alpha):
@@ -299,6 +331,7 @@ def main(args):
                 results[t] = value
     results = {t: results[t] for t in targets}
     forecasts = {t: results[t].pop('forecast', None) for t in targets}
+    validation = {t: f.pop('validation', None) for t, f in forecasts.items() if f}
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=gcfg, protocol=__doc__.strip(),
                 provenance=bb.provenance(cfg, project, targets, gcfg['benchmark_config'], dep, extra=CODE + [args.config]),
                 methods=PROB + AMOUNT, labels=dict(gcfg['methods'], leung_affine='Modified-Leung affine ensemble (amounts)'),
@@ -306,7 +339,8 @@ def main(args):
                                 mvs_ensemble='MVS-corrected ensemble (published amount correction)'),
                 regions={k: v['label'] for k, v in cfg['regions'].items()}, primary_region=cfg['primary_region'],
                 training_years=cfg['training_years'], test_years=cfg['test_years'], targets=results,
-                tests=tests_of(results, cfg['primary_region'], targets))
+                tests=tests_of(results, cfg['primary_region'], targets),
+                validation={t: v for t, v in validation.items() if v})     # the forecast year, once observed
     save_json(out_root / 'benchmark.json', data)
     save_forecast(out_root, cfg, forecasts)
     figure(out_root, data)

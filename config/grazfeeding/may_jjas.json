@@ -1,0 +1,27 @@
+{
+  "description": "GrazFeediNG calibration (process_calib.py; docs/51) against the published pipeline, May-initialized JJAS: the uploaded pipeline as it is (modified-Leung member-wise affine -> member counts -> Identity-Anchored Dirichlet) and each stage on its own.",
+  "benchmark_config": "config/bias_correction/may_jjas.json",
+  "leung": {
+    "beta": 0.3,
+    "ratio_bounds": [
+      0.5,
+      2.0
+    ],
+    "sigma_min": 1.0
+  },
+  "iad": {
+    "reg": 0.01,
+    "reg_off": null,
+    "reg_diag": null,
+    "reg_b": null,
+    "maxiter": 400,
+    "tol": 1e-06
+  },
+  "methods": {
+    "gf_full": "GrazFeediNG as uploaded: modified-Leung affine -> member counts -> IAD Dirichlet",
+    "gf_no_dirichlet": "Modified-Leung affine -> member counts (the script with --no_dirichlet)",
+    "iad_on_mvs": "Published amount correction (MVS) -> member counts -> IAD Dirichlet (the probability calibration alone)",
+    "leung_blend": "Modified-Leung affine -> the published probability stage (smoothed counts + climatology blend) (the bias correction alone)"
+  },
+  "output_root": "outputs/grazfeeding/may_jjas"
+}
