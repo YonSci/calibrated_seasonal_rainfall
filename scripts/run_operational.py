@@ -506,6 +506,8 @@ def main():
                     runner.stage("forecast_view_"+target,[*common,source],[dest],
                                  action=lambda s=source,t=target,o=dest:build_forecast(s,presentation_mask(cfg),path(cfg["boundary"]),t,o,cfg["display"]))
                     forecasts.append(target)
+            else:   # verification only: the gallery keeps the forecast views already rendered (not rebuilt here)
+                forecasts = [t for t in cfg["targets"] if (output/f"presentation/forecast/{t}/presentation_summary.json").is_file()]
             for target in verified:
                 dest = output/f"presentation/verification/{target}"
                 runner.stage("verification_view_"+target,[*common,*verification_files(vr,target)],[dest],
