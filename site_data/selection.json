@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-14T22:05:45.498548+00:00",
+ "created_utc": "2026-10-15T06:24:51.757159+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -614,7 +614,17 @@
        "test_years_better": 4,
        "test_years": 9
       },
-      "validation": null,
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 16.929083240596846,
+         "reference": 15.340703708133653
+        }
+       ],
+       "mean_difference": 1.5883795324631933,
+       "required": 3
+      },
       "alternatives": [
        {
         "family": "distribution_phase2",
@@ -633,7 +643,7 @@
         }
        }
       ],
-      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Holm p 0.0238; 18 of 24 years better), -0.5432 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended. Also confirmed (one change at a time): EMOS, censored shifted gamma (distribution model)."
+      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Holm p 0.0238; 18 of 24 years better), -0.5432 over the test years. Independent validation: 1 of 3 season(s), mean difference +1.588. Also confirmed (one change at a time): EMOS, censored shifted gamma (distribution model)."
      }
     },
     "JJAS": {

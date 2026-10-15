@@ -3896,7 +3896,7 @@
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.34 for FMAM) · code 7fa8aad"
+     "Shared climatology blend (λ = 0.34 for FMAM) · code 6c68e9c"
     ]
    ],
    "regions": {
@@ -4397,7 +4397,7 @@
    "downloads": [
     {
      "label": "Bulletin, FMAM 2026 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/a1ecfb8f89f9a471-fmam2026_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/1eebdb4e3d859c30-fmam2026_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -4485,7 +4485,7 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/a1ecfb8f89f9a471-fmam2026_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/1eebdb4e3d859c30-fmam2026_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
@@ -5577,7 +5577,7 @@
      "downloads/fmam2026_README.txt",
      "downloads/fmam2026_metadata.json",
      "downloads/fmam2026_summary.csv",
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/a1ecfb8f89f9a471-fmam2026_bulletin.pdf"
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/1eebdb4e3d859c30-fmam2026_bulletin.pdf"
     ]
    }
   },
@@ -9477,7 +9477,7 @@
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.40 for FMAM) · code 7fa8aad"
+     "Shared climatology blend (λ = 0.40 for FMAM) · code 6c68e9c"
     ]
    ],
    "regions": {
@@ -9978,7 +9978,7 @@
    "downloads": [
     {
      "label": "Bulletin, FMAM 2026 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/19b2e42bf2a02527-fmam2026feb_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/966d4127603fb94b-fmam2026feb_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -10066,7 +10066,7 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/19b2e42bf2a02527-fmam2026feb_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/966d4127603fb94b-fmam2026feb_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
@@ -11158,7 +11158,7 @@
      "downloads/fmam2026feb_README.txt",
      "downloads/fmam2026feb_metadata.json",
      "downloads/fmam2026feb_summary.csv",
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/19b2e42bf2a02527-fmam2026feb_bulletin.pdf"
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/966d4127603fb94b-fmam2026feb_bulletin.pdf"
     ]
    }
   },
@@ -11310,10 +11310,343 @@
        ]
       }
      },
-     "verification": {},
+     "verification": {
+      "all_ethiopia": {
+       "summary": {
+        "domain_cells": 1484,
+        "domain_country_area_percent": 99.99999999999999,
+        "amount_cells": 1484,
+        "probability_cells": 1484,
+        "amount_domain_area_percent": 99.99999999999999,
+        "probability_domain_area_percent": 99.99999999999999,
+        "amount_country_area_percent": 99.99999999999999,
+        "probability_country_area_percent": 99.99999999999999,
+        "amount": {
+         "raw": {
+          "bias_mm": 51.298420704773925,
+          "mae_mm": 137.43679696027905,
+          "rmse_mm": 209.49930435988242,
+          "crps_mm": 110.95565072257817,
+          "crpss": -0.09918813358989742
+         },
+         "corrected": {
+          "bias_mm": 44.88888172377649,
+          "mae_mm": 67.07141866815859,
+          "rmse_mm": 96.83446308077639,
+          "crps_mm": 47.20174897299671,
+          "crpss": 0.5323933299662997
+         },
+         "climatology": {
+          "bias_mm": 130.5798031529903,
+          "mae_mm": 137.85045232717115,
+          "rmse_mm": 181.20610348425228,
+          "crps_mm": 100.9432756157967,
+          "crpss": 0.0
+         }
+        },
+        "probability": {
+         "raw_observed_thresholds": {
+          "rps": 0.4239767299476559,
+          "brier_by_category": [
+           0.24607889384768758,
+           0.11082893858744705,
+           0.17789783609996834
+          ],
+          "log_loss": 2.8875648906039286,
+          "rpss": 0.18700769420156804,
+          "bss_by_category": [
+           0.2715660244959689,
+           0.23653199512334788,
+           0.0314924716615721
+          ]
+         },
+         "corrected_member_counts": {
+          "rps": 0.20412354880566375,
+          "brier_by_category": [
+           0.11569285019618049,
+           0.09586155435064797,
+           0.08843069860948326
+          ],
+          "log_loss": 0.7033125815716419,
+          "rpss": 0.6085849460847448,
+          "bss_by_category": [
+           0.6575301461735337,
+           0.3396379088597222,
+           0.5185675148325971
+          ]
+         },
+         "corrected_smoothed": {
+          "rps": 0.20659664216639356,
+          "brier_by_category": [
+           0.11744598649020575,
+           0.09621040763319946,
+           0.08915065567618778
+          ],
+          "log_loss": 0.5705686723213212,
+          "rpss": 0.6038426908339842,
+          "bss_by_category": [
+           0.652340574567902,
+           0.3372347610625961,
+           0.5146479402359059
+          ]
+         },
+         "shared_blend": {
+          "rps": 0.33795870972947745,
+          "brier_by_category": [
+           0.2095536642049058,
+           0.11634716445918002,
+           0.12840504552457163
+          ],
+          "log_loss": 0.800911542195834,
+          "rpss": 0.3519506820066459,
+          "bss_by_category": [
+           0.37968670814695005,
+           0.19851855792502515,
+           0.3009400451768154
+          ]
+         },
+         "climatology": {
+          "rps": 0.5215015282724876,
+          "brier_by_category": [
+           0.3378190778064906,
+           0.14516513839417916,
+           0.18368245046599688
+          ],
+          "log_loss": 1.0986122886681096,
+          "rpss": 0.0,
+          "bss_by_category": [
+           0.0,
+           0.0,
+           0.0
+          ]
+         }
+        },
+        "observed_category_area_fractions": [
+         0.6801239000861383,
+         0.10216208184920424,
+         0.2177140180646574
+        ],
+        "observed_mean_mm": 385.54695527144804,
+        "corrected_mean_mm": 430.4358369952246,
+        "observed_mean_anomaly_mm": -130.5798031529903,
+        "forecast_mean_anomaly_mm": -85.69092142921379,
+        "shared_mean_probabilities": [
+         0.4681988502840361,
+         0.2672252686555425,
+         0.2645758810604213
+        ],
+        "blend_minus_smoothed_rps": 0.13136206756308388
+       },
+       "folder": "assets/maps/jjas2026/verification/JJAS/all_ethiopia",
+       "images": [
+        [
+         "verification_comparison",
+         "Compare forecast and observed"
+        ],
+        [
+         "verification_comparison_error",
+         "Compare with error map"
+        ],
+        [
+         "verification_observed_anomaly",
+         "Observed anomaly"
+        ],
+        [
+         "verification_forecast_anomaly",
+         "Forecast anomaly"
+        ],
+        [
+         "verification_error",
+         "Forecast minus observed"
+        ],
+        [
+         "verification_observed_tercile",
+         "Observed tercile"
+        ],
+        [
+         "verification_rps_difference",
+         "Probability score vs climatology"
+        ],
+        [
+         "verification_crps",
+         "Rainfall amount score (CRPS)"
+        ],
+        [
+         "verification_maps",
+         "All six panels"
+        ]
+       ]
+      },
+      "jjas_r12_rainfall_domain": {
+       "summary": {
+        "domain_cells": 833,
+        "domain_country_area_percent": 55.932173763327185,
+        "amount_cells": 833,
+        "probability_cells": 833,
+        "amount_domain_area_percent": 100.0,
+        "probability_domain_area_percent": 100.0,
+        "amount_country_area_percent": 55.932173763327185,
+        "probability_country_area_percent": 55.932173763327185,
+        "amount": {
+         "raw": {
+          "bias_mm": 87.32989268915617,
+          "mae_mm": 213.30692966813137,
+          "rmse_mm": 273.7032829733132,
+          "crps_mm": 174.75986301898692,
+          "crpss": -0.13396260167910579
+         },
+         "corrected": {
+          "bias_mm": 76.18823188405771,
+          "mae_mm": 101.72941882962475,
+          "rmse_mm": 125.12895523202087,
+          "crps_mm": 71.27670252530561,
+          "crpss": 0.5375075624434317
+         },
+         "climatology": {
+          "bias_mm": 207.58035148029083,
+          "mae_mm": 209.8810972035163,
+          "rmse_mm": 229.5941539915482,
+          "crps_mm": 154.11430920227235,
+          "crpss": 0.0
+         }
+        },
+        "probability": {
+         "raw_observed_thresholds": {
+          "rps": 0.5065140535237479,
+          "brier_by_category": [
+           0.3134674484200968,
+           0.07298055560609175,
+           0.19304660510365113
+          ],
+          "log_loss": 4.228962089284767,
+          "rpss": 0.06805093517686178,
+          "bss_by_category": [
+           0.265473988625311,
+           0.4074664011482515,
+           -0.6536715027009374
+          ]
+         },
+         "corrected_member_counts": {
+          "rps": 0.11700713770213683,
+          "brier_by_category": [
+           0.09503173096333252,
+           0.06082500080628084,
+           0.021975406738804302
+          ],
+          "log_loss": 0.6356199655867524,
+          "rpss": 0.7847153661373661,
+          "bss_by_category": [
+           0.7773188933959689,
+           0.5061580947336919,
+           0.811754763236002
+          ]
+         },
+         "corrected_smoothed": {
+          "rps": 0.1208284551098965,
+          "brier_by_category": [
+           0.09844973395665786,
+           0.06158484477905929,
+           0.02237872115323863
+          ],
+          "log_loss": 0.3983124642823529,
+          "rpss": 0.777684419691204,
+          "bss_by_category": [
+           0.769309729707019,
+           0.4999888750008862,
+           0.8082999003368567
+          ]
+         },
+         "shared_blend": {
+          "rps": 0.30115656619579606,
+          "brier_by_category": [
+           0.24211539182358754,
+           0.08948142590389963,
+           0.05904117437220848
+          ],
+          "log_loss": 0.7131889513623784,
+          "rpss": 0.44589379449792343,
+          "bss_by_category": [
+           0.43266819586872873,
+           0.27349482501338984,
+           0.49424281513318624
+          ]
+         },
+         "climatology": {
+          "rps": 0.5434997175729472,
+          "brier_by_category": [
+           0.4267615354198722,
+           0.12316694909371954,
+           0.1167381821530749
+          ],
+          "log_loss": 1.0986122886681098,
+          "rpss": 0.0,
+          "bss_by_category": [
+           0.0,
+           0.0,
+           0.0
+          ]
+         }
+        },
+        "observed_category_area_fractions": [
+         0.9469512729262832,
+         0.036167513947825324,
+         0.016881213125891394
+        ],
+        "observed_mean_mm": 623.5095463559753,
+        "corrected_mean_mm": 699.6977782400331,
+        "observed_mean_anomaly_mm": -207.58035148029083,
+        "forecast_mean_anomaly_mm": -131.39211959623313,
+        "shared_mean_probabilities": [
+         0.510452801962673,
+         0.26808157020606993,
+         0.2214656278312571
+        ],
+        "blend_minus_smoothed_rps": 0.18032811108589958
+       },
+       "folder": "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain",
+       "images": [
+        [
+         "verification_comparison",
+         "Compare forecast and observed"
+        ],
+        [
+         "verification_comparison_error",
+         "Compare with error map"
+        ],
+        [
+         "verification_observed_anomaly",
+         "Observed anomaly"
+        ],
+        [
+         "verification_forecast_anomaly",
+         "Forecast anomaly"
+        ],
+        [
+         "verification_error",
+         "Forecast minus observed"
+        ],
+        [
+         "verification_observed_tercile",
+         "Observed tercile"
+        ],
+        [
+         "verification_rps_difference",
+         "Probability score vs climatology"
+        ],
+        [
+         "verification_crps",
+         "Rainfall amount score (CRPS)"
+        ],
+        [
+         "verification_maps",
+         "All six panels"
+        ]
+       ]
+      }
+     },
      "status": {
-      "code": "processing",
-      "text": "CHIRPS observations published; awaiting processing"
+      "code": "published",
+      "text": "Verification published"
      },
      "history": {
       "all_ethiopia": {
@@ -13037,10 +13370,343 @@
        ]
       }
      },
-     "verification": {},
+     "verification": {
+      "all_ethiopia": {
+       "summary": {
+        "domain_cells": 1484,
+        "domain_country_area_percent": 99.99999999999999,
+        "amount_cells": 1484,
+        "probability_cells": 1484,
+        "amount_domain_area_percent": 99.99999999999999,
+        "probability_domain_area_percent": 99.99999999999999,
+        "amount_country_area_percent": 99.99999999999999,
+        "probability_country_area_percent": 99.99999999999999,
+        "amount": {
+         "raw": {
+          "bias_mm": 3.329052569776691,
+          "mae_mm": 36.117108503114196,
+          "rmse_mm": 48.4271439697189,
+          "crps_mm": 25.851600255185883,
+          "crpss": -0.3780781473263126
+         },
+         "corrected": {
+          "bias_mm": -2.7156406650656573,
+          "mae_mm": 21.2803707932688,
+          "rmse_mm": 29.20452960949816,
+          "crps_mm": 15.340703708133645,
+          "crpss": 0.1822290173102208
+         },
+         "climatology": {
+          "bias_mm": 12.587555799482574,
+          "mae_mm": 26.325149771372327,
+          "rmse_mm": 36.631103266683404,
+          "crps_mm": 18.759168560463742,
+          "crpss": 0.0
+         }
+        },
+        "probability": {
+         "raw_observed_thresholds": {
+          "rps": 0.47952694635013005,
+          "brier_by_category": [
+           0.2626172106812099,
+           0.2190382913847068,
+           0.21690973566892016
+          ],
+          "log_loss": 1.670129365332222,
+          "rpss": -0.05053308923228683,
+          "bss_by_category": [
+           -0.09832904949101229,
+           -0.043547735441431534,
+           0.002046037308075177
+          ]
+         },
+         "corrected_member_counts": {
+          "rps": 0.310981869122428,
+          "brier_by_category": [
+           0.18249858770052174,
+           0.20387674314194243,
+           0.12848328142190618
+          ],
+          "log_loss": 0.9734921912901231,
+          "rpss": 0.31871035371206224,
+          "bss_by_category": [
+           0.23674651846834283,
+           0.028685293927548705,
+           0.40887669500292945
+          ]
+         },
+         "corrected_smoothed": {
+          "rps": 0.31106305210690477,
+          "brier_by_category": [
+           0.1820127771584052,
+           0.20328167364202818,
+           0.12905027494849955
+          ],
+          "log_loss": 0.8793463157963708,
+          "rpss": 0.31853250049208237,
+          "bss_by_category": [
+           0.23877829631554293,
+           0.03152033900181439,
+           0.40626808255434765
+          ]
+         },
+         "shared_blend": {
+          "rps": 0.4074644208934364,
+          "brier_by_category": [
+           0.21722471130568027,
+           0.20457176817517628,
+           0.19023970958775605
+          ],
+          "log_loss": 1.0191703290673495,
+          "rpss": 0.10733930576472928,
+          "bss_by_category": [
+           0.09151342337595736,
+           0.02537403818810169,
+           0.12474895855186463
+          ]
+         },
+         "climatology": {
+          "rps": 0.45646058297940983,
+          "brier_by_category": [
+           0.23910613199469868,
+           0.20989772096247358,
+           0.21735445098471107
+          ],
+          "log_loss": 1.0980167025918313,
+          "rpss": 0.0,
+          "bss_by_category": [
+           0.0,
+           0.0,
+           0.0
+          ]
+         }
+        },
+        "observed_category_area_fractions": [
+         0.384714716558184,
+         0.29655526382101605,
+         0.31873001962079994
+        ],
+        "observed_mean_mm": 99.41746977271882,
+        "corrected_mean_mm": 96.70182910765315,
+        "observed_mean_anomaly_mm": -12.587555799482574,
+        "forecast_mean_anomaly_mm": -15.303196464548238,
+        "shared_mean_probabilities": [
+         0.3559025920845989,
+         0.3130891450100839,
+         0.331008262905317
+        ],
+        "blend_minus_smoothed_rps": 0.0964013687865316
+       },
+       "folder": "assets/maps/jjas2026/verification/Sep/all_ethiopia",
+       "images": [
+        [
+         "verification_comparison",
+         "Compare forecast and observed"
+        ],
+        [
+         "verification_comparison_error",
+         "Compare with error map"
+        ],
+        [
+         "verification_observed_anomaly",
+         "Observed anomaly"
+        ],
+        [
+         "verification_forecast_anomaly",
+         "Forecast anomaly"
+        ],
+        [
+         "verification_error",
+         "Forecast minus observed"
+        ],
+        [
+         "verification_observed_tercile",
+         "Observed tercile"
+        ],
+        [
+         "verification_rps_difference",
+         "Probability score vs climatology"
+        ],
+        [
+         "verification_crps",
+         "Rainfall amount score (CRPS)"
+        ],
+        [
+         "verification_maps",
+         "All six panels"
+        ]
+       ]
+      },
+      "jjas_r12_rainfall_domain": {
+       "summary": {
+        "domain_cells": 833,
+        "domain_country_area_percent": 55.932173763327185,
+        "amount_cells": 833,
+        "probability_cells": 833,
+        "amount_domain_area_percent": 100.0,
+        "probability_domain_area_percent": 100.0,
+        "amount_country_area_percent": 55.932173763327185,
+        "probability_country_area_percent": 55.932173763327185,
+        "amount": {
+         "raw": {
+          "bias_mm": 7.857339444706259,
+          "mae_mm": 46.97104823578676,
+          "rmse_mm": 59.382572051673016,
+          "crps_mm": 34.15361237612081,
+          "crpss": -0.48978760260643783
+         },
+         "corrected": {
+          "bias_mm": -6.602631009055528,
+          "mae_mm": 26.06158722520641,
+          "rmse_mm": 34.20518040106578,
+          "crps_mm": 19.169997310839992,
+          "crpss": 0.16380077102309887
+         },
+         "climatology": {
+          "bias_mm": 24.58981994718712,
+          "mae_mm": 32.83141729109325,
+          "rmse_mm": 43.01684864294725,
+          "crps_mm": 22.92515544925184,
+          "crpss": 0.0
+         }
+        },
+        "probability": {
+         "raw_observed_thresholds": {
+          "rps": 0.5729710512788905,
+          "brier_by_category": [
+           0.3344538868145922,
+           0.24969543146861378,
+           0.2385171644642982
+          ],
+          "log_loss": 2.083013442033075,
+          "rpss": -0.2987971207272264,
+          "bss_by_category": [
+           -0.1500198742323713,
+           -0.107240312851415,
+           -0.5866162691399668
+          ]
+         },
+         "corrected_member_counts": {
+          "rps": 0.35159345227781436,
+          "brier_by_category": [
+           0.24125151209777423,
+           0.2322131587535549,
+           0.11034194018004011
+          ],
+          "log_loss": 1.0988027871821404,
+          "rpss": 0.2030163435557243,
+          "bss_by_category": [
+           0.17045654262389975,
+           -0.029717560446516744,
+           0.26600537176717287
+          ]
+         },
+         "corrected_smoothed": {
+          "rps": 0.3501951705290664,
+          "brier_by_category": [
+           0.23984740154957263,
+           0.23144751812896322,
+           0.11034776897949389
+          ],
+          "log_loss": 0.9836045693639984,
+          "rpss": 0.20618593529196594,
+          "bss_by_category": [
+           0.1752845775181281,
+           -0.026322431590059425,
+           0.2659665985909795
+          ]
+         },
+         "shared_blend": {
+          "rps": 0.4031431488399159,
+          "brier_by_category": [
+           0.26636564697514803,
+           0.22363415257824898,
+           0.13677750186476792
+          ],
+          "log_loss": 1.0406108902156264,
+          "rpss": 0.08616472021493016,
+          "bss_by_category": [
+           0.08410157599992651,
+           0.008324871590105976,
+           0.09015600534088186
+          ]
+         },
+         "climatology": {
+          "rps": 0.4411551597512557,
+          "brier_by_category": [
+           0.2908244407844146,
+           0.22551150691541108,
+           0.15033071896684105
+          ],
+          "log_loss": 1.0986122886681098,
+          "rpss": 0.0,
+          "bss_by_category": [
+           0.0,
+           0.0,
+           0.0
+          ]
+         }
+        },
+        "observed_category_area_fractions": [
+         0.5391399890199103,
+         0.34320118741289984,
+         0.11765882356718979
+        ],
+        "observed_mean_mm": 141.80843440159154,
+        "corrected_mean_mm": 135.205803392536,
+        "observed_mean_anomaly_mm": -24.58981994718712,
+        "forecast_mean_anomaly_mm": -31.19245095624265,
+        "shared_mean_probabilities": [
+         0.3872877867369334,
+         0.3119730469439776,
+         0.30073916631908887
+        ],
+        "blend_minus_smoothed_rps": 0.05294797831084952
+       },
+       "folder": "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain",
+       "images": [
+        [
+         "verification_comparison",
+         "Compare forecast and observed"
+        ],
+        [
+         "verification_comparison_error",
+         "Compare with error map"
+        ],
+        [
+         "verification_observed_anomaly",
+         "Observed anomaly"
+        ],
+        [
+         "verification_forecast_anomaly",
+         "Forecast anomaly"
+        ],
+        [
+         "verification_error",
+         "Forecast minus observed"
+        ],
+        [
+         "verification_observed_tercile",
+         "Observed tercile"
+        ],
+        [
+         "verification_rps_difference",
+         "Probability score vs climatology"
+        ],
+        [
+         "verification_crps",
+         "Rainfall amount score (CRPS)"
+        ],
+        [
+         "verification_maps",
+         "All six panels"
+        ]
+       ]
+      }
+     },
      "status": {
-      "code": "processing",
-      "text": "CHIRPS observations published; awaiting processing"
+      "code": "published",
+      "text": "Verification published"
      },
      "history": {
       "all_ethiopia": {
@@ -13127,7 +13793,7 @@
     ],
     [
      "Observations processed through",
-     "August 2026 (Jun, Jul, Aug)"
+     "September 2026 (Jun, Jul, Aug, Sep)"
     ],
     [
      "CHIRPS archive",
@@ -13135,11 +13801,11 @@
     ],
     [
      "Verification last run",
-     "11 Oct 2026"
+     "15 Oct 2026"
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.59 for JJAS) · code 7fa8aad"
+     "Shared climatology blend (λ = 0.59 for JJAS) · code 6c68e9c"
     ]
    ],
    "regions": {
@@ -13570,7 +14236,7 @@
    "downloads": [
     {
      "label": "Bulletin, JJAS 2026 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/8583eefb062808f1-jjas2026_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5232ff9a38253423-jjas2026_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -13584,9 +14250,15 @@
      "note": "Initialization, target dates, reference period, method version, freeze status and file list"
     },
     {
-     "label": "Verification report, Jun, Jul, Aug (HTML)",
-     "href": "downloads/jjas2026_verification_report_Jun_Jul_Aug.html",
+     "label": "Verification report, Jun, Jul, Aug, Sep, JJAS (HTML)",
+     "href": "downloads/jjas2026_verification_report_Jun_Jul_Aug_Sep_JJAS.html",
      "note": "Current report: self-contained, with maps and tables"
+    },
+    {
+     "label": "Superseded verification report, Jun, Jul, Aug — 10 Oct 2026 (HTML)",
+     "href": "downloads/archive/jjas2026_verification_report_Jun_Jul_Aug_superseded_20261010.html",
+     "note": "Archived for the record; earlier domain (JJAS R1+R2 rainfall domain). Not part of the current package.",
+     "archived": true
     }
    ],
    "diagnostics": "data/jjas2026_diagnostics.json",
@@ -13605,12 +14277,12 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/8583eefb062808f1-jjas2026_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5232ff9a38253423-jjas2026_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
-     "downloads/jjas2026_verification_report_Jun_Jul_Aug.html",
-     "reports/verification_report_Jun_Jul_Aug.html"
+     "downloads/jjas2026_verification_report_Jun_Jul_Aug_Sep_JJAS.html",
+     "reports/verification_report_Jun_Jul_Aug_Sep_JJAS.html"
     ],
     [
      "assets/maps/jjas2026/forecast/JJAS/all_ethiopia/tercile_outlook.png",
@@ -13675,6 +14347,78 @@
     [
      "assets/maps/jjas2026/forecast/JJAS/jjas_r12_rainfall_domain/rainfall_anomaly_percent_cells.png",
      "maps/forecast/JJAS/jjas_r12_rainfall_domain/rainfall_anomaly_percent_cells.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_comparison.png",
+     "maps/verification/JJAS/all_ethiopia/verification_comparison.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_comparison_error.png",
+     "maps/verification/JJAS/all_ethiopia/verification_comparison_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_observed_anomaly.png",
+     "maps/verification/JJAS/all_ethiopia/verification_observed_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_forecast_anomaly.png",
+     "maps/verification/JJAS/all_ethiopia/verification_forecast_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_error.png",
+     "maps/verification/JJAS/all_ethiopia/verification_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_observed_tercile.png",
+     "maps/verification/JJAS/all_ethiopia/verification_observed_tercile.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_rps_difference.png",
+     "maps/verification/JJAS/all_ethiopia/verification_rps_difference.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_crps.png",
+     "maps/verification/JJAS/all_ethiopia/verification_crps.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/all_ethiopia/verification_maps.png",
+     "maps/verification/JJAS/all_ethiopia/verification_maps.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_comparison.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_comparison.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_comparison_error.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_comparison_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_observed_anomaly.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_observed_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_forecast_anomaly.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_forecast_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_error.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_observed_tercile.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_observed_tercile.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_rps_difference.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_rps_difference.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_crps.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_crps.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/JJAS/jjas_r12_rainfall_domain/verification_maps.png",
+     "maps/verification/JJAS/jjas_r12_rainfall_domain/verification_maps.png"
     ],
     [
      "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2dc2de54afbd5b7d-data.jjas2026.JJAS_forecast_2026.nc",
@@ -14165,19 +14909,91 @@
      "maps/forecast/Sep/jjas_r12_rainfall_domain/rainfall_anomaly_percent_cells.png"
     ],
     [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_comparison.png",
+     "maps/verification/Sep/all_ethiopia/verification_comparison.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_comparison_error.png",
+     "maps/verification/Sep/all_ethiopia/verification_comparison_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_observed_anomaly.png",
+     "maps/verification/Sep/all_ethiopia/verification_observed_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_forecast_anomaly.png",
+     "maps/verification/Sep/all_ethiopia/verification_forecast_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_error.png",
+     "maps/verification/Sep/all_ethiopia/verification_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_observed_tercile.png",
+     "maps/verification/Sep/all_ethiopia/verification_observed_tercile.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_rps_difference.png",
+     "maps/verification/Sep/all_ethiopia/verification_rps_difference.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_crps.png",
+     "maps/verification/Sep/all_ethiopia/verification_crps.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/all_ethiopia/verification_maps.png",
+     "maps/verification/Sep/all_ethiopia/verification_maps.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_comparison.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_comparison.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_comparison_error.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_comparison_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_observed_anomaly.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_observed_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_forecast_anomaly.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_forecast_anomaly.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_error.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_error.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_observed_tercile.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_observed_tercile.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_rps_difference.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_rps_difference.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_crps.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_crps.png"
+    ],
+    [
+     "assets/maps/jjas2026/verification/Sep/jjas_r12_rainfall_domain/verification_maps.png",
+     "maps/verification/Sep/jjas_r12_rainfall_domain/verification_maps.png"
+    ],
+    [
      "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e6e6b2bf4edc81dc-data.jjas2026.Sep_forecast_2026.nc",
      "data/Sep_forecast_2026.nc"
     ]
    ],
    "package_zip": {
-    "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/26c1b455d63ae7ca-jjas2026_package.zip",
-    "files": 140,
-    "bytes": 26873130,
+    "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c413980462f4bd83-jjas2026_package.zip",
+    "files": 176,
+    "bytes": 31787477,
     "separate": [
      "downloads/jjas2026_README.txt",
      "downloads/jjas2026_metadata.json",
      "downloads/jjas2026_summary.csv",
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/8583eefb062808f1-jjas2026_bulletin.pdf"
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5232ff9a38253423-jjas2026_bulletin.pdf"
     ]
    }
   },
@@ -15159,7 +15975,7 @@
     ],
     [
      "Method / version",
-     "Shared climatology blend (λ = 0.18 for ONDJ) · code 7fa8aad"
+     "Shared climatology blend (λ = 0.18 for ONDJ) · code 6c68e9c"
     ]
    ],
    "regions": {
@@ -15590,7 +16406,7 @@
    "downloads": [
     {
      "label": "Bulletin, ONDJ 2026/27 (PDF)",
-     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/deaee33e44d7cc89-ondj2026_bulletin.pdf",
+     "href": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/f3b2bc3785fde2de-ondj2026_bulletin.pdf",
      "note": "Outlook, interpretation, evidence, cycle record, limitations and monthly maps (3 pages)"
     },
     {
@@ -15669,7 +16485,7 @@
      "summary.csv"
     ],
     [
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/deaee33e44d7cc89-ondj2026_bulletin.pdf",
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/f3b2bc3785fde2de-ondj2026_bulletin.pdf",
      "bulletin.pdf"
     ],
     [
@@ -16053,7 +16869,7 @@
      "downloads/ondj2026_README.txt",
      "downloads/ondj2026_metadata.json",
      "downloads/ondj2026_summary.csv",
-     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/deaee33e44d7cc89-ondj2026_bulletin.pdf"
+     "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/f3b2bc3785fde2de-ondj2026_bulletin.pdf"
     ]
    }
   }

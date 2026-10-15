@@ -728,7 +728,7 @@
   {
     "id": "2026-10-15.5",
     "date": "2026-10-15",
-    "commit": null,
+    "commit": "cbfa592",
     "title": "GrazFeediNG maps on the grid cells, with the seasonal rainfall domain",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -740,6 +740,40 @@
       {
         "type": "display",
         "text": "Research > GrazFeediNG calibration: the tercile outlook and the below-, near- and above-normal probabilities of every pipeline for ONDJ 2026/27 and its months are drawn on the 0.25-degree grid cells (no smoothing), first on the ONDJ R3 (Deyr) rainfall domain and then on All Ethiopia, next to the published grid-cell maps of the same view. They replace the smoothed maps of release 2026-10-15.4. Not published as a forecast; the published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-15.6",
+    "date": "2026-10-15",
+    "commit": null,
+    "title": "GrazFeediNG for FMAM and JJAS; every method against the published approach",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "verification",
+        "text": "JJAS 2026 complete: September and the JJAS season verified against CHIRPS (scored by the daily check on 2026-10-15). On the JJAS R1+R2 rainfall domain the published probabilities score RPSS +0.09 (Sep) and +0.45 (JJAS), the corrected amounts CRPSS +0.16 and +0.54."
+      },
+      {
+        "type": "analysis",
+        "text": "The GrazFeediNG calibration tested for FMAM (January initialization) and JJAS (May initialization) as for ONDJ: nothing is confirmed better than the published approach for either season (FMAM February, Dirichlet on MVS, is promising but not significant after the Holm adjustment). The 2026 FMAM and JJAS seasons are scored as independent validation seasons for every GrazFeediNG pipeline."
+      },
+      {
+        "type": "analysis",
+        "text": "Research > Method selection: a table of every bias-correction, probability-stage, distribution and GrazFeediNG method against the published approach over all seasons and targets (confirmed better, better on average 1993-2016 and 2017 onward, better in the 2026 validation seasons), refreshed by the daily scoring. The published forecasts are unchanged."
+      },
+      {
+        "type": "display",
+        "text": "Research > GrazFeediNG calibration: FMAM and JJAS sections with grid-cell maps on each season's rainfall domains and All Ethiopia, and the 2026 validation table."
+      },
+      {
+        "type": "display",
+        "text": "A verification-only run (the daily scoring) rebuilt the cycle gallery without its forecast views, so the site build could not find them; the gallery now keeps the rendered forecast views. Forecasts are unchanged."
       }
     ]
   }

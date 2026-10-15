@@ -1,0 +1,952 @@
+{
+ "created_utc": "2026-10-15T06:24:52.640288+00:00",
+ "region": "ethiopia",
+ "rows": [
+  {
+   "family": "Bias correction",
+   "method": "ls",
+   "label": "Linear Scaling",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 13,
+   "test_better": 5,
+   "test_scored": 20,
+   "validation_better": 3,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "ls",
+   "label": "Linear Scaling",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 1,
+   "test_better": 2,
+   "test_scored": 20,
+   "validation_better": 2,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "vs",
+   "label": "Variance Scaling (unbounded)",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 16,
+   "test_better": 12,
+   "test_scored": 20,
+   "validation_better": 11,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "vs",
+   "label": "Variance Scaling (unbounded)",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "JJAS (May) Jul",
+    "JJAS (May) Aug"
+   ],
+   "training_better": 14,
+   "test_better": 15,
+   "test_scored": 20,
+   "validation_better": 6,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "sqrt_mvs",
+   "label": "Square-root-space Mean-Variance Scaling",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [
+    "FMAM (Feb) Feb"
+   ],
+   "training_better": 14,
+   "test_better": 16,
+   "test_scored": 20,
+   "validation_better": 11,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "sqrt_mvs",
+   "label": "Square-root-space Mean-Variance Scaling",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "JJAS (May) Aug",
+    "ONDJ (Sep) Jan"
+   ],
+   "training_better": 20,
+   "test_better": 18,
+   "test_scored": 20,
+   "validation_better": 10,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "pt",
+   "label": "Power Transformation",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 9,
+   "test_better": 17,
+   "test_scored": 20,
+   "validation_better": 10,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "pt",
+   "label": "Power Transformation",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "JJAS (May) Aug"
+   ],
+   "training_better": 12,
+   "test_better": 16,
+   "test_scored": 20,
+   "validation_better": 9,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "dc",
+   "label": "Delta Change",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 4,
+   "test_better": 5,
+   "test_scored": 20,
+   "validation_better": 7,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "dc",
+   "label": "Delta Change",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 9,
+   "test_better": 8,
+   "test_scored": 20,
+   "validation_better": 6,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "loci",
+   "label": "Local Intensity Scaling",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 14,
+   "test_better": 6,
+   "test_scored": 20,
+   "validation_better": 2,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "loci",
+   "label": "Local Intensity Scaling",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 0,
+   "test_better": 2,
+   "test_scored": 20,
+   "validation_better": 2,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "eqm",
+   "label": "Empirical Quantile Mapping",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 3,
+   "test_better": 5,
+   "test_scored": 20,
+   "validation_better": 7,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "eqm",
+   "label": "Empirical Quantile Mapping",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 6,
+   "test_better": 7,
+   "test_scored": 20,
+   "validation_better": 7,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "gqm",
+   "label": "Gamma Quantile Mapping",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 14,
+   "test_better": 16,
+   "test_scored": 20,
+   "validation_better": 10,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "gqm",
+   "label": "Gamma Quantile Mapping",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "JJAS (May) Aug",
+    "ONDJ (Sep) Jan"
+   ],
+   "training_better": 20,
+   "test_better": 16,
+   "test_scored": 20,
+   "validation_better": 9,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "dqm",
+   "label": "Detrended Quantile Mapping",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 3,
+   "test_better": 7,
+   "test_scored": 20,
+   "validation_better": 6,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "dqm",
+   "label": "Detrended Quantile Mapping",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 2,
+   "test_better": 4,
+   "test_scored": 20,
+   "validation_better": 5,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "qdm",
+   "label": "Quantile Delta Mapping",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 4,
+   "test_better": 7,
+   "test_scored": 20,
+   "validation_better": 5,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "qdm",
+   "label": "Quantile Delta Mapping",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 4,
+   "test_better": 5,
+   "test_scored": 20,
+   "validation_better": 3,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "sdm",
+   "label": "Scaled Distribution Mapping",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 2,
+   "test_better": 3,
+   "test_scored": 20,
+   "validation_better": 5,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "sdm",
+   "label": "Scaled Distribution Mapping",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 0,
+   "test_better": 0,
+   "test_scored": 20,
+   "validation_better": 1,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "cdft",
+   "label": "CDF-transform",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 4,
+   "test_better": 5,
+   "test_scored": 20,
+   "validation_better": 5,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Bias correction",
+   "method": "cdft",
+   "label": "CDF-transform",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 2,
+   "test_better": 3,
+   "test_scored": 20,
+   "validation_better": 4,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 1)",
+   "method": "pseudocount",
+   "label": "Pseudocount smoothing (no blend)",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 2,
+   "test_better": 2,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 1)",
+   "method": "temperature",
+   "label": "Temperature scaling",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 9,
+   "test_better": 8,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 1)",
+   "method": "dirichlet",
+   "label": "Regularized Dirichlet calibration",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 7,
+   "test_better": 7,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 1)",
+   "method": "multinomial_logistic",
+   "label": "Regularized multinomial logistic regression",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 4,
+   "test_better": 6,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 1)",
+   "method": "ordinal_logistic",
+   "label": "Ordinal (cumulative-logit) logistic regression",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 4,
+   "test_better": 5,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 2)",
+   "method": "platt_ovr",
+   "label": "Platt (sigmoid) calibration, one-vs-rest + normalization",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 9,
+   "test_better": 6,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 2)",
+   "method": "beta_ovr",
+   "label": "Beta calibration, one-vs-rest + normalization",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 8,
+   "test_better": 9,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Probability stage (Phase 2)",
+   "method": "isotonic_ovr",
+   "label": "Isotonic regression, one-vs-rest + normalization",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 5,
+   "test_better": 8,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 2)",
+   "method": "emos_csg",
+   "label": "EMOS, censored shifted gamma",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 3,
+   "test_better": 6,
+   "test_scored": 20,
+   "validation_better": 9,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 2)",
+   "method": "emos_csg",
+   "label": "EMOS, censored shifted gamma",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "FMAM (Jan) FMAM",
+    "JJAS (May) Sep"
+   ],
+   "training_better": 15,
+   "test_better": 12,
+   "test_scored": 20,
+   "validation_better": 5,
+   "validation_scored": 15,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 2)",
+   "method": "extended_logistic",
+   "label": "Heteroscedastic extended logistic regression",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 2,
+   "test_better": 8,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 2)",
+   "method": "extended_logistic",
+   "label": "Heteroscedastic extended logistic regression",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 9,
+   "test_better": 9,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 2)",
+   "method": "quantile_regression",
+   "label": "Regularized quantile regression",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 3,
+   "test_better": 5,
+   "test_scored": 20,
+   "validation_better": 3,
+   "validation_scored": 5,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 2)",
+   "method": "quantile_regression",
+   "label": "Regularized quantile regression",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "JJAS (May) Sep"
+   ],
+   "training_better": 17,
+   "test_better": 14,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 5,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 3)",
+   "method": "bjp",
+   "label": "Bayesian joint probability",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 0,
+   "test_better": 1,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 3)",
+   "method": "bjp",
+   "label": "Bayesian joint probability",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 3,
+   "test_better": 4,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 3)",
+   "method": "bma_precipitation",
+   "label": "Bayesian model averaging for precipitation",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 5,
+   "test_better": 3,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 3)",
+   "method": "bma_precipitation",
+   "label": "Bayesian model averaging for precipitation",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 13,
+   "test_better": 7,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 3)",
+   "method": "quantile_regression_forest",
+   "label": "Quantile regression forest",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 1,
+   "test_better": 2,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "Distribution model (Phase 3)",
+   "method": "quantile_regression_forest",
+   "label": "Quantile regression forest",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 5,
+   "test_better": 3,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "GrazFeediNG (docs/51)",
+   "method": "gf_full",
+   "label": "GrazFeediNG as uploaded (Leung + counts + IAD)",
+   "product": "probabilities",
+   "targets": 15,
+   "confirmed": [],
+   "training_better": 2,
+   "test_better": 3,
+   "test_scored": 15,
+   "validation_better": 1,
+   "validation_scored": 10,
+   "seasons": [
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "GrazFeediNG (docs/51)",
+   "method": "gf_no_dirichlet",
+   "label": "Leung + member counts (no Dirichlet)",
+   "product": "probabilities",
+   "targets": 15,
+   "confirmed": [],
+   "training_better": 1,
+   "test_better": 1,
+   "test_scored": 15,
+   "validation_better": 7,
+   "validation_scored": 10,
+   "seasons": [
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "GrazFeediNG (docs/51)",
+   "method": "iad_on_mvs",
+   "label": "MVS + member counts + IAD (Dirichlet alone)",
+   "product": "probabilities",
+   "targets": 15,
+   "confirmed": [],
+   "training_better": 3,
+   "test_better": 3,
+   "test_scored": 15,
+   "validation_better": 1,
+   "validation_scored": 10,
+   "seasons": [
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "GrazFeediNG (docs/51)",
+   "method": "leung_blend",
+   "label": "Leung + published blend (Leung alone)",
+   "product": "probabilities",
+   "targets": 15,
+   "confirmed": [],
+   "training_better": 7,
+   "test_better": 8,
+   "test_scored": 15,
+   "validation_better": 7,
+   "validation_scored": 10,
+   "seasons": [
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  },
+  {
+   "family": "GrazFeediNG (docs/51)",
+   "method": "leung_affine",
+   "label": "Modified-Leung affine ensemble",
+   "product": "amounts",
+   "targets": 15,
+   "confirmed": [
+    "ONDJ (Sep) Jan"
+   ],
+   "training_better": 11,
+   "test_better": 9,
+   "test_scored": 15,
+   "validation_better": 5,
+   "validation_scored": 10,
+   "seasons": [
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ]
+  }
+ ]
+}

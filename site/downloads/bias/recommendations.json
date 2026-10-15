@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-10-13T09:01:58.212918+00:00",
+  "created_utc": "2026-10-15T04:13:07.157747+00:00",
   "rule": "config/bias_correction/recommendation_rule.json",
   "rule_contents": {
     "description": "Rule by which the platform suggests a bias-correction method for each cycle, target and product (scripts/bias_recommend.py, docs/47). Fixed before the independent validation seasons are scored. A suggestion is advice for a decision; it never changes the published forecast.",

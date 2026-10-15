@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-14T22:42:16.816590+00:00",
+ "created_utc": "2026-10-15T06:09:17.943429+00:00",
  "config": "config/grazfeeding/sep_ondj.json",
  "config_contents": {
   "description": "GrazFeediNG calibration (process_calib.py; docs/51) against the published pipeline, September-initialized ONDJ: the uploaded pipeline as it is (modified-Leung member-wise affine -> member counts -> Identity-Anchored Dirichlet) and each stage on its own.",
@@ -29,7 +29,7 @@
   "output_root": "outputs/grazfeeding/sep_ondj"
  },
  "provenance": {
-  "commit": "2f39854b3bf2aca134facb14a6a85fe345a28158",
+  "commit": "421c3c040a06a84aa9c9fcfd10fd51f19372a48a",
   "uncommitted_changes": false,
   "uncommitted_check": "code and configuration files this result depends on",
   "code_sha256": {
@@ -8603,6 +8603,7 @@
    }
   }
  },
+ "validation": {},
  "assets": [
   "assets/grazfeeding/sep_ondj/grazfeeding_reliability_test.png",
   "assets/grazfeeding/sep_ondj/grazfeeding_reliability_training.png",
@@ -8659,7 +8660,7 @@
   "assets/grazfeeding/sep_ondj/maps/ondj_rainfall_domain/probabilities/Oct.png"
  ],
  "downloads": [
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c3a401aa1aa11d58-grazfeeding.sep_ondj.benchmark.json",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/49aaab063985e3dd-grazfeeding.sep_ondj.benchmark.json",
   "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2f0cb582101f4300-grazfeeding.sep_ondj.gf_2026_Dec.nc",
   "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/fc76b6f2d732e3bf-grazfeeding.sep_ondj.gf_2026_Jan.nc",
   "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/7dcf145d2e00738a-grazfeeding.sep_ondj.gf_2026_Nov.nc",

@@ -42067,10 +42067,10 @@
  "amount_shadow": {
   "2026": {
    "Aug": {
-    "key": "ffe7d72490ad0f49e48e33637cf82ddbae9daa4aa72c86840d4a68ffc450bbae",
+    "key": "7271ab3fc2533e540bca7b7007020c8baa9e6880911a433e6fa3357ad5d49194",
     "label": "EMOS, censored shifted gamma",
     "target": "Aug",
-    "cycle": "config/operational.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/operational.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42078,9 +42078,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:54.706279+00:00",
+    "created_utc": "2026-10-15T06:24:14.669642+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "24123731450b632911fddfd28b6ff9af39ddc75e",
      "uncommitted_changes": false
     },
     "tag": "init05_Aug",
@@ -42180,10 +42180,10 @@
     }
    },
    "JJAS": {
-    "key": "9489b4399cc1915864fdaea1c41f28fc9c618405846909b648a887a9df6b78c3",
+    "key": "6cced95d8ddd04b9e569b5f28dfc744a909fa940f82c82f0811516f40ec93473",
     "label": "EMOS, censored shifted gamma",
     "target": "JJAS",
-    "cycle": "config/operational.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/operational.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42191,9 +42191,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:29:13.690074+00:00",
+    "created_utc": "2026-10-15T06:24:29.703771+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "24123731450b632911fddfd28b6ff9af39ddc75e",
      "uncommitted_changes": false
     },
     "tag": "init05_JJAS",
@@ -42209,9 +42209,9 @@
      "converged": true,
      "form": "mu = softplus(a0 + a1 m), sigma = softplus(b0 + b1 md), delta = -softplus(d)"
     },
-    "observed": false,
+    "observed": true,
     "primary_region": "ethiopia",
-    "observation": null,
+    "observation": "outputs/verification_2026/observations/JJAS/chirps_2026_common.nc",
     "cells": {
      "national": 1484,
      "modelled": 1484,
@@ -42232,13 +42232,71 @@
      },
      "climatology_mm": 516.1267584244383
     },
-    "published_probabilities": "outputs/final_shared_blend/init05_JJAS/2026/forecast_2026.nc"
+    "published_probabilities": "outputs/final_shared_blend/init05_JJAS/2026/forecast_2026.nc",
+    "scores": {
+     "ethiopia": {
+      "shadow": {
+       "rps": 0.3278530923832059,
+       "rps_clim": 0.5215015282724871,
+       "crps": 72.20702392292186,
+       "crps_clim": 100.94327561579674,
+       "pinball_10": 24.99732530826776,
+       "pinball_50": 50.50520571698784,
+       "pinball_90": 21.275742182426413,
+       "coverage_80": 0.5862717011829973,
+       "rpss": 0.3713286067075511,
+       "crpss": 0.2846772260714898
+      },
+      "mvs_ensemble": {
+       "crps": 47.20174897299629,
+       "crps_clim": 100.94327561579674,
+       "pinball_10": 13.363941662774547,
+       "pinball_50": 34.19717755804282,
+       "pinball_90": 15.019823767066182,
+       "coverage_80": 0.7292894316754545,
+       "crpss": 0.5323933299663041
+      },
+      "published": {
+       "rps": 0.3379587097294775,
+       "rps_clim": 0.5215015282724871,
+       "rpss": 0.35195068200664514
+      }
+     },
+     "jjas_domain": {
+      "shadow": {
+       "rps": 0.278990967786119,
+       "rps_clim": 0.5434997175729471,
+       "crps": 109.02600025850442,
+       "crps_clim": 154.11430920227238,
+       "pinball_10": 36.54731290133855,
+       "pinball_50": 76.82537442231862,
+       "pinball_90": 32.15200355351263,
+       "coverage_80": 0.48033483190618037,
+       "rpss": 0.4866768854416681,
+       "crpss": 0.2925640660958375
+      },
+      "mvs_ensemble": {
+       "crps": 71.27670252530483,
+       "crps_clim": 154.11430920227238,
+       "pinball_10": 19.65000447905121,
+       "pinball_50": 52.3403931516116,
+       "pinball_90": 22.234628753667224,
+       "coverage_80": 0.6756685252682978,
+       "crpss": 0.5375075624434369
+      },
+      "published": {
+       "rps": 0.301156566195796,
+       "rps_clim": 0.5434997175729471,
+       "rpss": 0.44589379449792343
+      }
+     }
+    }
    },
    "Jul": {
-    "key": "a3c221a0e4eedc400d76e3c2fdbbec0a5055a26ef3d75e6958422ecd56c5af11",
+    "key": "232a6263aa32256498d3a785f872fe2c888868a18ac36e5aba132b5f85e4abe3",
     "label": "EMOS, censored shifted gamma",
     "target": "Jul",
-    "cycle": "config/operational.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/operational.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42246,9 +42304,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:44.310986+00:00",
+    "created_utc": "2026-10-15T06:24:07.391085+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "24123731450b632911fddfd28b6ff9af39ddc75e",
      "uncommitted_changes": false
     },
     "tag": "init05_Jul",
@@ -42348,10 +42406,10 @@
     }
    },
    "Jun": {
-    "key": "9c37dba547918cb46cf41dc24594ae5b7e7addf8fa492263634cab1e6e0c8575",
+    "key": "15b03fad6dec01c1416290ced204d273c509f57060aafa168f2d655c43544594",
     "label": "EMOS, censored shifted gamma",
     "target": "Jun",
-    "cycle": "config/operational.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/operational.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42359,9 +42417,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:37.687606+00:00",
+    "created_utc": "2026-10-15T06:24:01.684746+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "24123731450b632911fddfd28b6ff9af39ddc75e",
      "uncommitted_changes": false
     },
     "tag": "init05_Jun",
@@ -42461,10 +42519,10 @@
     }
    },
    "Sep": {
-    "key": "ca0baf5d19d967a28e0931f45354f549f6e1fec478898754e5666398f93ef63d",
+    "key": "545bd22c4102866caa4c980b72f8a05f88f5980b0798abda2775cff786492949",
     "label": "EMOS, censored shifted gamma",
     "target": "Sep",
-    "cycle": "config/operational.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/operational.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42472,9 +42530,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:29:00.923891+00:00",
+    "created_utc": "2026-10-15T06:24:19.523642+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "24123731450b632911fddfd28b6ff9af39ddc75e",
      "uncommitted_changes": false
     },
     "tag": "init05_Sep",
@@ -42490,9 +42548,9 @@
      "converged": true,
      "form": "mu = softplus(a0 + a1 m), sigma = softplus(b0 + b1 md), delta = -softplus(d)"
     },
-    "observed": false,
+    "observed": true,
     "primary_region": "ethiopia",
-    "observation": null,
+    "observation": "outputs/verification_2026/observations/Sep/chirps_2026_common.nc",
     "cells": {
      "national": 1484,
      "modelled": 1484,
@@ -42513,7 +42571,65 @@
      },
      "climatology_mm": 112.00502557220143
     },
-    "published_probabilities": "outputs/final_shared_blend/init05_Sep/2026/forecast_2026.nc"
+    "published_probabilities": "outputs/final_shared_blend/init05_Sep/2026/forecast_2026.nc",
+    "scores": {
+     "ethiopia": {
+      "shadow": {
+       "rps": 0.3600336782591117,
+       "rps_clim": 0.4564605829794099,
+       "crps": 16.010770369877125,
+       "crps_clim": 18.759168560463742,
+       "pinball_10": 4.39544355761833,
+       "pinball_50": 10.711986634173982,
+       "pinball_90": 6.75406600336379,
+       "coverage_80": 0.8957939872618899,
+       "rpss": 0.21124913807650247,
+       "crpss": 0.1465095951202794
+      },
+      "mvs_ensemble": {
+       "crps": 15.340703708133653,
+       "crps_clim": 18.759168560463742,
+       "pinball_10": 4.808031921170119,
+       "pinball_50": 10.456838415184004,
+       "pinball_90": 5.391342438642194,
+       "coverage_80": 0.8413993935655394,
+       "crpss": 0.18222901731022034
+      },
+      "published": {
+       "rps": 0.4074644208934364,
+       "rps_clim": 0.4564605829794099,
+       "rpss": 0.10733930576472939
+      }
+     },
+     "jjas_domain": {
+      "shadow": {
+       "rps": 0.36983446680979704,
+       "rps_clim": 0.44115515975125563,
+       "crps": 19.651176205367324,
+       "crps_clim": 22.92515544925184,
+       "pinball_10": 5.48152866433152,
+       "pinball_50": 13.05597511016295,
+       "pinball_90": 8.446128812454615,
+       "coverage_80": 0.9300798313769062,
+       "rpss": 0.16166804663844936,
+       "crpss": 0.1428116485897748
+      },
+      "mvs_ensemble": {
+       "crps": 19.16999731084,
+       "crps_clim": 22.92515544925184,
+       "pinball_10": 6.450864346078496,
+       "pinball_50": 13.198912820481183,
+       "pinball_90": 6.1690966308,
+       "coverage_80": 0.8545739292686592,
+       "crpss": 0.16380077102309853
+      },
+      "published": {
+       "rps": 0.40314314883991587,
+       "rps_clim": 0.44115515975125563,
+       "rpss": 0.08616472021493016
+      }
+     }
+    }
    }
   }
  },
