@@ -5,6 +5,13 @@ import OnThisPage from '../../components/OnThisPage.astro';
 import { href, esc, cycleTitle, REPO } from '../../lib/data.js';
 import { C, url, defaultTarget } from '../../lib/cycles.js';
 import { SELECTION, STATUS_LABEL, selectionFor, fmt } from '../../lib/selection.js';
+import { read } from '../../lib/data.js';
+
+let SUMMARY = null;
+try { SUMMARY = read('method_summary.json'); } catch { SUMMARY = null; }
+const ranked = (product) => (SUMMARY?.rows ?? []).filter((r) => r.product === product).sort((a, b) =>
+  b.confirmed.length - a.confirmed.length || b.training_better / b.targets - a.training_better / a.targets
+  || b.test_better / Math.max(b.test_scored, 1) - a.test_better / Math.max(a.test_scored, 1));
 
 const rule = SELECTION?.rule_contents;
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
@@ -38,6 +45,31 @@ const val = (e) => (e.validation && e.validation.seasons ? `${e.validation.seaso
       <li><strong>Validation</strong>: every candidate is scored on the seasons after the benchmark (every bias correction through the validation runs; every distribution-model candidate through its own shadow forecast). It becomes <em>recommended</em> after {rule?.validation.minimum_seasons ?? 3} seasons that are not worse, or <em>not supported</em> if worse.</li>
     </ol>
     <p class="caveat">{STATUS_LABEL.keep}: no method is confirmed better. {STATUS_LABEL.candidate}: confirmed historically, validation seasons being collected. {STATUS_LABEL.recommended}: confirmed and not worse over the validation seasons. {STATUS_LABEL.not_supported}: confirmed historically but worse over the validation seasons.</p>
+
+    {SUMMARY && (
+      <section id="all-methods">
+        <h2>Every method against the published approach</h2>
+        <p>Across all seasons and targets (five per season: the months and the season), All Ethiopia. <strong>Confirmed better</strong>:
+        the benchmark's test (Holm p &lt; 0.05 within its family, not worse over the test years). <strong>Better 1993–2016</strong> and
+        <strong>better 2017+</strong>: targets where it is better on average, whatever the significance. <strong>Validation</strong>: targets of
+        the independent seasons scored after the benchmark (2026 so far). Ranked by confirmed targets, then by the share better over
+        1993–2016.</p>
+        {[['probabilities', 'Tercile probabilities (RPS against MVS + climatology blend)'], ['amounts', 'Rainfall amounts (CRPS against the MVS-corrected ensemble)']].map(([p, title]) => (
+          <>
+            <h3>{title}</h3>
+            <div class="table-wrap"><table class="compact">
+              <thead><tr><th scope="col">Method</th><th scope="col">Family</th><th scope="col">Confirmed better</th><th scope="col">Better 1993–2016</th><th scope="col">Better 2017+</th><th scope="col">Better in validation</th></tr></thead>
+              <tbody>{ranked(p).map((r) => (
+                <tr><td>{r.confirmed.length > 0 ? <strong>{r.label}</strong> : r.label}</td><td>{r.family}</td>
+                  <td>{r.confirmed.length > 0 ? <><strong>{r.confirmed.length}</strong>: {r.confirmed.join(', ')}</> : '0'}</td>
+                  <td>{r.training_better} of {r.targets}</td><td>{r.test_better} of {r.test_scored}</td>
+                  <td>{r.validation_scored ? `${r.validation_better} of ${r.validation_scored}` : '—'}</td></tr>))}</tbody>
+            </table></div>
+          </>
+        ))}
+        <p class="caveat">Code: <code>scripts/method_summary.py</code>, refreshed after each newly scored season.</p>
+      </section>
+    )}
 
     {seasons.map(({ s, title, cyc, rows, changes }) => (
       <section id={s.name}>

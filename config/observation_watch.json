@@ -6,7 +6,7 @@
   ],
   "after_scoring": [
     "scripts/bias_recommend.py",
-    "scripts/method_selection.py"
+    "scripts/method_selection.py", "scripts/method_summary.py"
   ],
   "status": "outputs/observation_watch/status.json"
 }

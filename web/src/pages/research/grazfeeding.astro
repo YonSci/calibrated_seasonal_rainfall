@@ -104,6 +104,22 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
         <h3>Rainfall amounts (CRPS)</h3>
         <Table {...evidence(d, 'crps')} />
         <p class="caveat">Negative Δ favours the method. Skill scores against the observed climatology over {d.regions[d.primary_region]}.</p>
+        {d.validation && Object.keys(d.validation).length > 0 && (
+          <>
+            <h3 id={`${name}-validation`}>Independent season {Object.values(d.validation)[0].year}</h3>
+            <p>The forecast year scored against CHIRPS once observed: every pipeline fitted on the reference years, as the published forecast,
+            on the same cells. Skill against the observed climatology; the best probability pipeline of each target in bold. One season decides
+            nothing on its own; it is one of the validation seasons the method selection collects.</p>
+            <Table head={['Target', 'Published (MVS + blend)', 'GrazFeediNG as uploaded', 'Leung + counts (no Dirichlet)', 'MVS + counts + IAD', 'Leung + published blend', 'CRPSS MVS ensemble', 'CRPSS Leung ensemble']}
+              rows={Object.entries(d.validation).map(([t, v]) => {
+                const keys = ['incumbent', 'gf_full', 'gf_no_dirichlet', 'iad_on_mvs', 'leung_blend'];
+                const sk = Object.fromEntries(keys.map((k) => [k, 1 - v.rps[k] / v.rps_clim]));
+                const best = keys.reduce((a, b) => (sk[b] > sk[a] ? b : a));
+                return [`<strong>${esc(t)}</strong>`, ...keys.map((k) => (k === best ? `<strong>${signed(sk[k])}</strong>` : signed(sk[k]))),
+                  signed(1 - v.crps.mvs_ensemble / v.crps_clim), signed(1 - v.crps.leung_affine / v.crps_clim)];
+              })} />
+          </>
+        )}
         <Figure src={`assets/grazfeeding/${name}/grazfeeding_summary.png`} caption="Skill of each method and target; * confirmed better than the reference." />
 
         <h3 id={`${name}-reliability`}>Reliability of the tercile probabilities</h3>

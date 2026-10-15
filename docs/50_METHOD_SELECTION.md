@@ -53,3 +53,19 @@ No target–product combination is recommended yet. Six have a candidate:
 
 The numbers behind each are on the site and in `selection.json` (training and test differences, Holm p, years better,
 validation seasons).
+
+## Summary across seasons: every method against the published approach
+
+`scripts/method_summary.py` counts, for every method and product over the 20 targets of the four seasons, the targets
+where its benchmark confirms it better, where it is better on average over 1993–2016 and over the test years, and the
+targets of the independent seasons (2026 so far) where it scored better (`outputs/method_selection/summary.md`; on the
+site under *Research › Method selection*; refreshed by the daily scoring). As of 2026-10-15:
+
+- **Tercile probabilities:** only one method is confirmed better anywhere: square-root MVS (FMAM from February, February).
+  It is also the most consistent amount correction overall (better on average for 14 of 20 targets over 1993–2016, 16 of
+  20 over the test years, 11 of 15 validation targets), with Variance Scaling and gamma quantile mapping close. No
+  probability-stage method (Phases 1 and 2), distribution model or GrazFeediNG pipeline is confirmed better than the
+  climatology blend for any target; the best of them are better for at most 9 of 20 targets.
+- **Rainfall amounts:** square-root MVS, gamma QM, EMOS and Variance Scaling are each confirmed for two targets; square-root
+  MVS and gamma QM are better on average for all 20 targets over 1993–2016. Quantile regression, the GrazFeediNG Leung
+  affine and power transformation are confirmed for one target each.

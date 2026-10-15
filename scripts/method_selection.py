@@ -6,7 +6,8 @@ Brings the benchmarks together under one rule (config/method_selection_rule.json
   probability stage     outputs/probability_calibration/<cycle>/benchmark.json (Phase 1) and phase2_binary/
   distribution models   outputs/probability_calibration/<cycle>/distribution/ (Phase 2) and phase3/; their independent
                         seasons from amount_shadow/<year>/ (dist_shadow.py runs a shadow for every candidate model)
-  GrazFeediNG           outputs/grazfeeding/<cycle>/benchmark.json (grazfeeding_benchmark.py; no validation route yet)
+  GrazFeediNG           outputs/grazfeeding/<cycle>/benchmark.json (grazfeeding_benchmark.py; its validation season is the
+                        cycle's forecast year once observed, scored by the same run)
 Products: the published tercile probabilities (RPS against MVS + climatology blend) and rainfall amounts (CRPS against the
 MVS ensemble). A method is a candidate only if its benchmark confirms it better than the published reference (Holm across
 its family, not worse over the test years); validation seasons then decide between candidate, recommended and not
@@ -85,6 +86,16 @@ def shadow_validation(cycle, model, target, minimum):
     return dict(seasons=seasons, mean_difference=float(np.mean([x['method'] - x['reference'] for x in seasons])), required=minimum)
 
 
+def grazfeeding_validation(gf, method, target, score, minimum):
+    """The GrazFeediNG benchmark's forecast year, once observed: the method's score and the published reference's."""
+    v = (gf.get('validation') or {}).get(target)
+    ref = 'incumbent' if score == 'rps' else 'mvs_ensemble'
+    if not v or method not in v[score] or ref not in v[score]:
+        return None
+    seasons = [dict(year=v['year'], method=v[score][method], reference=v[score][ref])]
+    return dict(seasons=seasons, mean_difference=float(seasons[0]['method'] - seasons[0]['reference']), required=minimum)
+
+
 def status_of(c, minimum):
     v = c.get('validation')
     if c['family'] == 'bias_correction' and c.get('status') in ('recommended', 'not_supported', 'candidate'):
@@ -159,6 +170,8 @@ def main():
                 for c in cands:
                     if c['family'].startswith('distribution') and product == 'amounts':
                         c['validation'] = shadow_validation(cy, c['method'], t, minimum)
+                    if c['family'] == 'grazfeeding':
+                        c['validation'] = grazfeeding_validation(gf, c['method'], t, score, minimum)
                     c['status'] = status_of(c, minimum)
                 sel = select(cands)
                 ref = spec['reference']['label']
