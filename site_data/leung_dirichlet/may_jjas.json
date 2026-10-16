@@ -1,8 +1,8 @@
 {
- "created_utc": "2026-10-15T06:09:41.701756+00:00",
- "config": "config/grazfeeding/may_jjas.json",
+ "created_utc": "2026-10-16T09:41:44.490990+00:00",
+ "config": "config/leung_dirichlet/may_jjas.json",
  "config_contents": {
-  "description": "GrazFeediNG calibration (process_calib.py; docs/51) against the published pipeline, May-initialized JJAS: the uploaded pipeline as it is (modified-Leung member-wise affine -> member counts -> Identity-Anchored Dirichlet) and each stage on its own.",
+  "description": "Leung–Dirichlet calibration (process_calib.py; docs/51) against the published pipeline, May-initialized JJAS: the uploaded pipeline as it is (modified-Leung member-wise affine -> member counts -> Identity-Anchored Dirichlet) and each stage on its own.",
   "benchmark_config": "config/bias_correction/may_jjas.json",
   "leung": {
    "beta": 0.3,
@@ -21,19 +21,19 @@
    "tol": 1e-06
   },
   "methods": {
-   "gf_full": "GrazFeediNG as uploaded: modified-Leung affine -> member counts -> IAD Dirichlet",
-   "gf_no_dirichlet": "Modified-Leung affine -> member counts (the script with --no_dirichlet)",
+   "ld_full": "Leung–Dirichlet as uploaded: modified-Leung affine -> member counts -> IAD Dirichlet",
+   "ld_no_dirichlet": "Modified-Leung affine -> member counts (the script with --no_dirichlet)",
    "iad_on_mvs": "Published amount correction (MVS) -> member counts -> IAD Dirichlet (the probability calibration alone)",
    "leung_blend": "Modified-Leung affine -> the published probability stage (smoothed counts + climatology blend) (the bias correction alone)"
   },
-  "output_root": "outputs/grazfeeding/may_jjas"
+  "output_root": "outputs/leung_dirichlet/may_jjas"
  },
  "provenance": {
-  "commit": "421c3c040a06a84aa9c9fcfd10fd51f19372a48a",
+  "commit": "144a21dd5bb0fcbcb7fde48833b128c199428d3d",
   "uncommitted_changes": false,
   "uncommitted_check": "code and configuration files this result depends on",
   "code_sha256": {
-   "scripts/bias_methods.py": "df85ab49d0977bd72f3e957ac8f4e11dec4d6bfd3e9dc2ddcfac9c81ae14db26",
+   "scripts/bias_methods.py": "915b7a2eb2a287738b7f11a9e14fbd41b800f69bfafdab9a9d1c63a3d25d4eee",
    "scripts/bias_benchmark.py": "bd5d0cce44fa15275cc64fbaa1d9317aaefb43626b0f3a0b9c6a719c3b4fa24f",
    "scripts/bias_confirmation.py": "bbc95e4cb64256b101b5c0b30e2f351c5cd2b36893d4dfb0505c63577243f558",
    "scripts/significance.py": "3143761d5d201e4e62df9ad923757b952a3ea768b060c8a722afcd9b3d6a9963",
@@ -99,20 +99,20 @@
    }
   },
   "scoring_version": 3,
-  "dependency_sha256": "2f9c1c4b3efe1db051bf94ff3ac2fef6439e9e04a990de4387daa041b34cfa24",
+  "dependency_sha256": "081073a103294b1e1b600c2c16e66de334b4ddf7e1bd35a522ef1e8d5998ecb1",
   "python": "3.11.9",
   "numpy": "1.26.4"
  },
  "methods": [
-  "gf_full",
-  "gf_no_dirichlet",
+  "ld_full",
+  "ld_no_dirichlet",
   "iad_on_mvs",
   "leung_blend",
   "leung_affine"
  ],
  "labels": {
-  "gf_full": "Leung–Dirichlet calibration as uploaded: modified-Leung affine → member counts → identity-anchored Dirichlet",
-  "gf_no_dirichlet": "Modified-Leung affine → member counts (the uploaded script with --no_dirichlet)",
+  "ld_full": "Leung–Dirichlet calibration as uploaded: modified-Leung affine → member counts → identity-anchored Dirichlet",
+  "ld_no_dirichlet": "Modified-Leung affine → member counts (the uploaded script with --no_dirichlet)",
   "iad_on_mvs": "Published MVS → member counts → identity-anchored Dirichlet (the Dirichlet alone)",
   "leung_blend": "Modified-Leung affine → the published smoothed counts and climatology blend (the Leung correction alone)",
   "leung_affine": "Modified-Leung affine ensemble (amounts)"
@@ -138,7 +138,7 @@
   "Jun": {
    "tag": "init05_Jun",
    "methods": {
-    "gf_full": {
+    "ld_full": {
      "training": {
       "ethiopia": {
        "years": [
@@ -234,7 +234,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "ethiopia": {
        "years": [
@@ -1002,7 +1002,7 @@
       }
      }
     },
-    "gf_full": {
+    "ld_full": {
      "training": {
       "below": {
        "w": [
@@ -1160,7 +1160,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "below": {
        "w": [
@@ -1637,7 +1637,7 @@
    },
    "iad": {
     "test": {
-     "gf_full": {
+     "ld_full": {
       "A": [
        [
         0.0634,
@@ -1701,7 +1701,7 @@
   "Jul": {
    "tag": "init05_Jul",
    "methods": {
-    "gf_full": {
+    "ld_full": {
      "training": {
       "ethiopia": {
        "years": [
@@ -1797,7 +1797,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "ethiopia": {
        "years": [
@@ -2565,7 +2565,7 @@
       }
      }
     },
-    "gf_full": {
+    "ld_full": {
      "training": {
       "below": {
        "w": [
@@ -2723,7 +2723,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "below": {
        "w": [
@@ -3200,7 +3200,7 @@
    },
    "iad": {
     "test": {
-     "gf_full": {
+     "ld_full": {
       "A": [
        [
         0.0669,
@@ -3264,7 +3264,7 @@
   "Aug": {
    "tag": "init05_Aug",
    "methods": {
-    "gf_full": {
+    "ld_full": {
      "training": {
       "ethiopia": {
        "years": [
@@ -3360,7 +3360,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "ethiopia": {
        "years": [
@@ -4128,7 +4128,7 @@
       }
      }
     },
-    "gf_full": {
+    "ld_full": {
      "training": {
       "below": {
        "w": [
@@ -4286,7 +4286,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "below": {
        "w": [
@@ -4763,7 +4763,7 @@
    },
    "iad": {
     "test": {
-     "gf_full": {
+     "ld_full": {
       "A": [
        [
         0.1513,
@@ -4827,7 +4827,7 @@
   "Sep": {
    "tag": "init05_Sep",
    "methods": {
-    "gf_full": {
+    "ld_full": {
      "training": {
       "ethiopia": {
        "years": [
@@ -4923,7 +4923,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "ethiopia": {
        "years": [
@@ -5691,7 +5691,7 @@
       }
      }
     },
-    "gf_full": {
+    "ld_full": {
      "training": {
       "below": {
        "w": [
@@ -5849,7 +5849,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "below": {
        "w": [
@@ -6326,7 +6326,7 @@
    },
    "iad": {
     "test": {
-     "gf_full": {
+     "ld_full": {
       "A": [
        [
         0.0881,
@@ -6390,7 +6390,7 @@
   "JJAS": {
    "tag": "init05_JJAS",
    "methods": {
-    "gf_full": {
+    "ld_full": {
      "training": {
       "ethiopia": {
        "years": [
@@ -6486,7 +6486,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "ethiopia": {
        "years": [
@@ -7254,7 +7254,7 @@
       }
      }
     },
-    "gf_full": {
+    "ld_full": {
      "training": {
       "below": {
        "w": [
@@ -7412,7 +7412,7 @@
       }
      }
     },
-    "gf_no_dirichlet": {
+    "ld_no_dirichlet": {
      "training": {
       "below": {
        "w": [
@@ -7889,7 +7889,7 @@
    },
    "iad": {
     "test": {
-     "gf_full": {
+     "ld_full": {
       "A": [
        [
         0.0743,
@@ -7952,7 +7952,7 @@
   }
  },
  "tests": {
-  "gf_full": {
+  "ld_full": {
    "rps": {
     "Jun": {
      "training": {
@@ -8096,7 +8096,7 @@
     }
    }
   },
-  "gf_no_dirichlet": {
+  "ld_no_dirichlet": {
    "rps": {
     "Jun": {
      "training": {
@@ -8679,8 +8679,8 @@
    "observation": "outputs/verification_2026/observations/Jun/chirps_2026_common.nc",
    "cells": 1483,
    "rps": {
-    "gf_full": 0.4878423937847576,
-    "gf_no_dirichlet": 0.2806892512443008,
+    "ld_full": 0.4878423937847576,
+    "ld_no_dirichlet": 0.2806892512443008,
     "iad_on_mvs": 0.48308818962631417,
     "leung_blend": 0.43064523225955326,
     "incumbent": 0.43334887459643623
@@ -8698,8 +8698,8 @@
    "observation": "outputs/verification_2026/observations/Jul/chirps_2026_common.nc",
    "cells": 1279,
    "rps": {
-    "gf_full": 0.4739204907953896,
-    "gf_no_dirichlet": 0.36816621138097844,
+    "ld_full": 0.4739204907953896,
+    "ld_no_dirichlet": 0.36816621138097844,
     "iad_on_mvs": 0.47240989597777167,
     "leung_blend": 0.4030912922595697,
     "incumbent": 0.40394586308828495
@@ -8717,8 +8717,8 @@
    "observation": "outputs/verification_2026/observations/Aug/chirps_2026_common.nc",
    "cells": 1330,
    "rps": {
-    "gf_full": 0.46684596364903286,
-    "gf_no_dirichlet": 0.28392551005730937,
+    "ld_full": 0.46684596364903286,
+    "ld_no_dirichlet": 0.28392551005730937,
     "iad_on_mvs": 0.4778226181970269,
     "leung_blend": 0.3652586004316148,
     "incumbent": 0.36606798959505016
@@ -8736,8 +8736,8 @@
    "observation": "outputs/verification_2026/observations/Sep/chirps_2026_common.nc",
    "cells": 1484,
    "rps": {
-    "gf_full": 0.44004438017479575,
-    "gf_no_dirichlet": 0.3112124273662253,
+    "ld_full": 0.44004438017479575,
+    "ld_no_dirichlet": 0.3112124273662253,
     "iad_on_mvs": 0.4393862180371821,
     "leung_blend": 0.40575220660928807,
     "incumbent": 0.4074644273590183
@@ -8755,8 +8755,8 @@
    "observation": "outputs/verification_2026/observations/JJAS/chirps_2026_common.nc",
    "cells": 1484,
    "rps": {
-    "gf_full": 0.41184224234601247,
-    "gf_no_dirichlet": 0.20332697007051517,
+    "ld_full": 0.41184224234601247,
+    "ld_no_dirichlet": 0.20332697007051517,
     "iad_on_mvs": 0.4067561695918462,
     "leung_blend": 0.33513814616479587,
     "incumbent": 0.3379587141914573
@@ -8771,75 +8771,75 @@
   }
  },
  "short": {
-  "gf_full": "Leung–Dirichlet (as uploaded)",
-  "gf_no_dirichlet": "Leung + member counts",
+  "ld_full": "Leung–Dirichlet (as uploaded)",
+  "ld_no_dirichlet": "Leung + member counts",
   "iad_on_mvs": "MVS + Dirichlet",
   "leung_blend": "Leung + published blend",
   "leung_affine": "Leung affine (amounts)"
  },
  "name": "Leung–Dirichlet calibration",
- "credit": "from the GrazFeediNG forage-outlook system (Á. G. Muñoz and T. Demissie, ILRI)",
+ "credit": "from process_calib.py by Á. G. Muñoz and T. Demissie (ILRI)",
  "assets": [
-  "assets/grazfeeding/may_jjas/grazfeeding_reliability_test.png",
-  "assets/grazfeeding/may_jjas/grazfeeding_reliability_training.png",
-  "assets/grazfeeding/may_jjas/grazfeeding_summary.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_full/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_full/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_full/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_full/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_full/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_no_dirichlet/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_no_dirichlet/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_no_dirichlet/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_no_dirichlet/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/gf_no_dirichlet/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/iad_on_mvs/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/iad_on_mvs/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/iad_on_mvs/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/iad_on_mvs/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/iad_on_mvs/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/leung_blend/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/leung_blend/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/leung_blend/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/leung_blend/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/leung_blend/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/probabilities/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/probabilities/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/probabilities/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/probabilities/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/all_ethiopia/probabilities/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_full/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_full/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_full/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_full/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_full/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_no_dirichlet/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_no_dirichlet/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_no_dirichlet/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_no_dirichlet/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/gf_no_dirichlet/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Sep.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Aug.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/JJAS.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Jul.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Jun.png",
-  "assets/grazfeeding/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Sep.png"
+  "assets/leung_dirichlet/may_jjas/leung_dirichlet_reliability_test.png",
+  "assets/leung_dirichlet/may_jjas/leung_dirichlet_reliability_training.png",
+  "assets/leung_dirichlet/may_jjas/leung_dirichlet_summary.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/iad_on_mvs/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/iad_on_mvs/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/iad_on_mvs/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/iad_on_mvs/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/iad_on_mvs/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_full/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_full/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_full/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_full/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_full/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_no_dirichlet/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_no_dirichlet/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_no_dirichlet/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_no_dirichlet/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/ld_no_dirichlet/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/leung_blend/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/leung_blend/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/leung_blend/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/leung_blend/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/leung_blend/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/probabilities/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/probabilities/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/probabilities/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/probabilities/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/all_ethiopia/probabilities/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/iad_on_mvs/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_full/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_full/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_full/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_full/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_full/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_no_dirichlet/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_no_dirichlet/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_no_dirichlet/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_no_dirichlet/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/ld_no_dirichlet/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/leung_blend/Sep.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Aug.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/JJAS.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Jul.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Jun.png",
+  "assets/leung_dirichlet/may_jjas/maps/jjas_r12_rainfall_domain/probabilities/Sep.png"
  ],
  "downloads": [
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9cccd4989da174f3-grazfeeding.may_jjas.benchmark.json",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/67338e00b6b0b63b-grazfeeding.may_jjas.gf_2026_Aug.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/f59f158d1f6eaf3f-grazfeeding.may_jjas.gf_2026_JJAS.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/0408888e24cb536f-grazfeeding.may_jjas.gf_2026_Jul.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2e9a28da83544c9e-grazfeeding.may_jjas.gf_2026_Jun.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9ed517a8b0f7e4ea-grazfeeding.may_jjas.gf_2026_Sep.nc"
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/3c6eedca15e1e1a3-leung_dirichlet.may_jjas.benchmark.json",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/3b4eb982cdebd83f-leung_dirichlet.may_jjas.ld_2026_Aug.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5ba9ac30b32c8459-leung_dirichlet.may_jjas.ld_2026_JJAS.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/e47a06e9964a16e7-leung_dirichlet.may_jjas.ld_2026_Jul.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/30a96b85e482d282-leung_dirichlet.may_jjas.ld_2026_Jun.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/28045ef83b0ccbad-leung_dirichlet.may_jjas.ld_2026_Sep.nc"
  ]
 }

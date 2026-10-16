@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-16T09:21:01.043638+00:00",
+ "created_utc": "2026-10-16T09:44:52.860060+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -830,7 +830,7 @@
         "historical": null
        },
        {
-        "family": "grazfeeding",
+        "family": "leung_dirichlet",
         "family_label": "Leung–Dirichlet calibration (docs/51)",
         "method": "leung_affine",
         "label": "Modified-Leung affine ensemble (amounts)",

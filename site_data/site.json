@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-16 09:22 UTC",
- "code_commit": "85f62a5",
- "release": "2026-10-16.1",
+ "built_utc": "2026-10-16 09:45 UTC",
+ "code_commit": "144a21d",
+ "release": "2026-10-16.2",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -676,7 +676,7 @@
    "id": "2026-10-15.2",
    "date": "2026-10-15",
    "commit": "16b2013",
-   "title": "GrazFeediNG calibration (modified-Leung affine + Dirichlet) tested for ONDJ",
+   "title": "Leung–Dirichlet calibration (modified-Leung affine + Dirichlet) tested for ONDJ",
    "cycles": [
     "FMAM 2026 (January initialization)",
     "FMAM 2026 (February initialization)",
@@ -686,11 +686,11 @@
    "changes": [
     {
      "type": "analysis",
-     "text": "The GrazFeediNG calibration (process_calib.py, Munoz and Demissie, ILRI) implemented as separate methods: the modified-Leung member-wise affine bias correction and the Identity-Anchored Dirichlet probability recalibration, tested as uploaded and stage by stage against the published pipeline for ONDJ (September initialization), 1993-2016 cross-validated and 2017-2024 test years. No GrazFeediNG method improves the published tercile probabilities; the raw member counts are overconfident and the Dirichlet mostly flattens them. The Leung affine is confirmed better than the MVS ensemble for January rainfall amounts and enters the method selection as an alternative (square-root MVS stays selected). The 2026 forecast with the GrazFeediNG calibration is shown for comparison and is not published. The published forecasts are unchanged."
+     "text": "The Leung–Dirichlet calibration (process_calib.py, Munoz and Demissie, ILRI) implemented as separate methods: the modified-Leung member-wise affine bias correction and the Identity-Anchored Dirichlet probability recalibration, tested as uploaded and stage by stage against the published pipeline for ONDJ (September initialization), 1993-2016 cross-validated and 2017-2024 test years. No Leung–Dirichlet method improves the published tercile probabilities; the raw member counts are overconfident and the Dirichlet mostly flattens them. The Leung affine is confirmed better than the MVS ensemble for January rainfall amounts and enters the method selection as an alternative (square-root MVS stays selected). The 2026 forecast with the Leung–Dirichlet calibration is shown for comparison and is not published. The published forecasts are unchanged."
     },
     {
      "type": "display",
-     "text": "Research > GrazFeediNG calibration: what the uploaded code does, the comparison, the fitted Dirichlet and the 2026 maps."
+     "text": "Research > Leung–Dirichlet calibration: what the uploaded code does, the comparison, the fitted Dirichlet and the 2026 maps."
     }
    ]
   },
@@ -698,7 +698,7 @@
    "id": "2026-10-15.3",
    "date": "2026-10-15",
    "commit": "f57b5c0",
-   "title": "GrazFeediNG: tercile-probability maps and reliability diagrams",
+   "title": "Leung–Dirichlet: tercile-probability maps and reliability diagrams",
    "cycles": [
     "FMAM 2026 (January initialization)",
     "FMAM 2026 (February initialization)",
@@ -708,7 +708,7 @@
    "changes": [
     {
      "type": "display",
-     "text": "Research > GrazFeediNG calibration: maps of the below-, near- and above-normal probabilities of every pipeline for each ONDJ 2026 target next to the published ones (not published as a forecast), and reliability diagrams of every pipeline from the 1993-2016 cross-validated hindcasts and the 2017-2024 test years. The published forecasts are unchanged."
+     "text": "Research > Leung–Dirichlet calibration: maps of the below-, near- and above-normal probabilities of every pipeline for each ONDJ 2026 target next to the published ones (not published as a forecast), and reliability diagrams of every pipeline from the 1993-2016 cross-validated hindcasts and the 2017-2024 test years. The published forecasts are unchanged."
     }
    ]
   },
@@ -716,7 +716,7 @@
    "id": "2026-10-15.4",
    "date": "2026-10-15",
    "commit": "0b9d73c",
-   "title": "GrazFeediNG: tercile outlook maps, ONDJ 2026/27",
+   "title": "Leung–Dirichlet: tercile outlook maps, ONDJ 2026/27",
    "cycles": [
     "FMAM 2026 (January initialization)",
     "FMAM 2026 (February initialization)",
@@ -726,7 +726,7 @@
    "changes": [
     {
      "type": "display",
-     "text": "Research > GrazFeediNG calibration: the rainfall tercile outlook of each GrazFeediNG pipeline for Oct, Nov, Dec, Jan and ONDJ 2026/27, drawn exactly as the published outlook map and shown next to it (not published as a forecast). The published forecasts are unchanged."
+     "text": "Research > Leung–Dirichlet calibration: the rainfall tercile outlook of each Leung–Dirichlet pipeline for Oct, Nov, Dec, Jan and ONDJ 2026/27, drawn exactly as the published outlook map and shown next to it (not published as a forecast). The published forecasts are unchanged."
     }
    ]
   },
@@ -734,7 +734,7 @@
    "id": "2026-10-15.5",
    "date": "2026-10-15",
    "commit": "cbfa592",
-   "title": "GrazFeediNG maps on the grid cells, with the seasonal rainfall domain",
+   "title": "Leung–Dirichlet maps on the grid cells, with the seasonal rainfall domain",
    "cycles": [
     "FMAM 2026 (January initialization)",
     "FMAM 2026 (February initialization)",
@@ -744,7 +744,7 @@
    "changes": [
     {
      "type": "display",
-     "text": "Research > GrazFeediNG calibration: the tercile outlook and the below-, near- and above-normal probabilities of every pipeline for ONDJ 2026/27 and its months are drawn on the 0.25-degree grid cells (no smoothing), first on the ONDJ R3 (Deyr) rainfall domain and then on All Ethiopia, next to the published grid-cell maps of the same view. They replace the smoothed maps of release 2026-10-15.4. Not published as a forecast; the published forecasts are unchanged."
+     "text": "Research > Leung–Dirichlet calibration: the tercile outlook and the below-, near- and above-normal probabilities of every pipeline for ONDJ 2026/27 and its months are drawn on the 0.25-degree grid cells (no smoothing), first on the ONDJ R3 (Deyr) rainfall domain and then on All Ethiopia, next to the published grid-cell maps of the same view. They replace the smoothed maps of release 2026-10-15.4. Not published as a forecast; the published forecasts are unchanged."
     }
    ]
   },
@@ -752,7 +752,7 @@
    "id": "2026-10-15.6",
    "date": "2026-10-15",
    "commit": "2edc2e4",
-   "title": "GrazFeediNG for FMAM and JJAS; every method against the published approach",
+   "title": "Leung–Dirichlet for FMAM and JJAS; every method against the published approach",
    "cycles": [
     "FMAM 2026 (January initialization)",
     "FMAM 2026 (February initialization)",
@@ -766,15 +766,15 @@
     },
     {
      "type": "analysis",
-     "text": "The GrazFeediNG calibration tested for FMAM (January initialization) and JJAS (May initialization) as for ONDJ: nothing is confirmed better than the published approach for either season (FMAM February, Dirichlet on MVS, is promising but not significant after the Holm adjustment). The 2026 FMAM and JJAS seasons are scored as independent validation seasons for every GrazFeediNG pipeline."
+     "text": "The Leung–Dirichlet calibration tested for FMAM (January initialization) and JJAS (May initialization) as for ONDJ: nothing is confirmed better than the published approach for either season (FMAM February, Dirichlet on MVS, is promising but not significant after the Holm adjustment). The 2026 FMAM and JJAS seasons are scored as independent validation seasons for every Leung–Dirichlet pipeline."
     },
     {
      "type": "analysis",
-     "text": "Research > Method selection: a table of every bias-correction, probability-stage, distribution and GrazFeediNG method against the published approach over all seasons and targets (confirmed better, better on average 1993-2016 and 2017 onward, better in the 2026 validation seasons), refreshed by the daily scoring. The published forecasts are unchanged."
+     "text": "Research > Method selection: a table of every bias-correction, probability-stage, distribution and Leung–Dirichlet method against the published approach over all seasons and targets (confirmed better, better on average 1993-2016 and 2017 onward, better in the 2026 validation seasons), refreshed by the daily scoring. The published forecasts are unchanged."
     },
     {
      "type": "display",
-     "text": "Research > GrazFeediNG calibration: FMAM and JJAS sections with grid-cell maps on each season's rainfall domains and All Ethiopia, and the 2026 validation table."
+     "text": "Research > Leung–Dirichlet calibration: FMAM and JJAS sections with grid-cell maps on each season's rainfall domains and All Ethiopia, and the 2026 validation table."
     },
     {
      "type": "display",
@@ -785,8 +785,8 @@
   {
    "id": "2026-10-16.1",
    "date": "2026-10-16",
-   "commit": null,
-   "title": "GrazFeediNG calibration renamed Leung–Dirichlet calibration",
+   "commit": "61a44ed",
+   "title": "Leung–Dirichlet calibration: the new name on every page",
    "cycles": [
     "FMAM 2026 (January initialization)",
     "FMAM 2026 (February initialization)",
@@ -796,7 +796,25 @@
    "changes": [
     {
      "type": "display",
-     "text": "The calibration from the GrazFeediNG forage-outlook system (modified-Leung member-wise affine correction + identity-anchored Dirichlet) is now called the Leung–Dirichlet calibration on every page, figure, map and table: Research > Leung–Dirichlet calibration (the previous address forwards there), method selection and the summary of all methods. The source is credited. Results unchanged; the published forecasts are unchanged."
+     "text": "The calibration from process_calib.py (modified-Leung member-wise affine correction + identity-anchored Dirichlet) is now called the Leung–Dirichlet calibration on every page, figure, map and table: Research > Leung–Dirichlet calibration (the previous address forwards there), method selection and the summary of all methods. The source is credited. Results unchanged; the published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-16.2",
+   "date": "2026-10-16",
+   "commit": null,
+   "title": "Leung–Dirichlet calibration: the name in the code, files and addresses",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "The Leung–Dirichlet calibration now uses its name throughout: scripts, configurations, output folders, site data, figure and map files, download names and the release log. The benchmarks were rerun under the new names with identical results. The authors of process_calib.py stay credited; the previous page address forwards to the new one. The published forecasts are unchanged."
     }
    ]
   }

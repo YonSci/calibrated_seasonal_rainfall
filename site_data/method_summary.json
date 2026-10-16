@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-16T09:21:02.066502+00:00",
+ "created_utc": "2026-10-16T09:44:54.003800+00:00",
  "region": "ethiopia",
  "rows": [
   {
@@ -858,7 +858,7 @@
   },
   {
    "family": "Leung–Dirichlet (docs/51)",
-   "method": "gf_full",
+   "method": "ld_full",
    "label": "Leung–Dirichlet as uploaded (Leung + counts + Dirichlet)",
    "product": "probabilities",
    "targets": 15,
@@ -876,7 +876,7 @@
   },
   {
    "family": "Leung–Dirichlet (docs/51)",
-   "method": "gf_no_dirichlet",
+   "method": "ld_no_dirichlet",
    "label": "Leung + member counts",
    "product": "probabilities",
    "targets": 15,
