@@ -1,8 +1,9 @@
+SCRO - Seasonal Calibrated Rainfall Outlook
 JJAS 2026 — May initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction; not an official EMI or ICPAC forecast.
-Built 2026-10-16 17:38 UTC (site release 2026-10-16.4) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-16 18:04 UTC (site release 2026-10-16.5) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
@@ -19,7 +20,7 @@ Reference period: CHIRPS v3.0 JJAS 1993–2025 (33 seasons)
 Observations processed through: September 2026 (Jun, Jul, Aug, Sep)
 CHIRPS archive: Official CHIRPS v3.0 monthly listing checked 16 Oct 2026: monthly files through Sep 2026
 Verification last run: 15 Oct 2026
-Method / version: Shared climatology blend (λ = 0.59 for JJAS) · code e0ac07a
+Method / version: Shared climatology blend (λ = 0.59 for JJAS) · code 62e2413
 Rainfall domain: Fixed 1993-2025 descriptive domain: cleaned GitHub-refined R1/R2; JJAS climatological rainfall >=120 mm and >=20% of annual rainfall. The same domain is used for Jun, Jul, Aug, Sep and JJAS. No onset gate.
 
 Contents

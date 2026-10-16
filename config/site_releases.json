@@ -834,7 +834,7 @@
   {
     "id": "2026-10-16.4",
     "date": "2026-10-16",
-    "commit": null,
+    "commit": "cd3b18d",
     "title": "Research overview: which methods are better, and which to use in each season",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -846,6 +846,24 @@
       {
         "type": "display",
         "text": "Research (first entry of the Research menu): how a method is judged for tercile probabilities and rainfall amounts, the method to use in each season (the published approach everywhere for now, with the candidates and their validation progress), findings, and comparison tables of every method. The outlook-map switch now reads Grid cells | Smoothed. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-16.5",
+    "date": "2026-10-16",
+    "commit": null,
+    "title": "The platform is now called SCRO: Seasonal Calibrated Rainfall Outlook",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The site is named Seasonal Calibrated Rainfall Outlook (SCRO): header, page titles, home page, classic page, PDF bulletins and the README of every download package. Content and forecasts are unchanged."
       }
     ]
   }
