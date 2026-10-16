@@ -870,7 +870,7 @@
   {
     "id": "2026-10-16.6",
     "date": "2026-10-16",
-    "commit": null,
+    "commit": "ce2ba67",
     "title": "Larger site title",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -882,6 +882,24 @@
       {
         "type": "display",
         "text": "The header shows Seasonal Calibrated Rainfall Outlook as a larger title with an SCRO tag (on smaller screens the title alone, over two lines)."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-16.7",
+    "date": "2026-10-16",
+    "commit": null,
+    "title": "Method comparison by category",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Research > Which methods are better and Method selection: 27 methods in four categories (12 bias corrections, 8 probability calibrations, 6 rainfall-distribution models, 1 two-stage calibration); the Leung–Dirichlet calibration counts as one method (the whole calibration for probabilities, its corrected amounts for amounts). Findings unchanged; the published forecasts are unchanged."
       }
     ]
   }
