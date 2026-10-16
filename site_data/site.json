@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-16 18:51 UTC",
- "code_commit": "cc21f52",
- "release": "2026-10-16.7",
+ "built_utc": "2026-10-16 19:46 UTC",
+ "code_commit": "59eb62f",
+ "release": "2026-10-17.1",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -893,7 +893,7 @@
   {
    "id": "2026-10-16.7",
    "date": "2026-10-16",
-   "commit": null,
+   "commit": "09b0798",
    "title": "Method comparison by category",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -905,6 +905,24 @@
     {
      "type": "display",
      "text": "Research > Which methods are better and Method selection: 27 methods in four categories (12 bias corrections, 8 probability calibrations, 6 rainfall-distribution models, 1 two-stage calibration); the Leung–Dirichlet calibration counts as one method (the whole calibration for probabilities, its corrected amounts for amounts). Findings unchanged; the published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-17.1",
+   "date": "2026-10-17",
+   "commit": null,
+   "title": "The platform is now called the Seasonal Rainfall Outlook Platform",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "New name, Seasonal Rainfall Outlook Platform, in the header, page titles, home page, classic page, PDF bulletins and the README of every download package (previously Seasonal Calibrated Rainfall Outlook, SCRO). Content and forecasts are unchanged."
     }
    ]
   }
