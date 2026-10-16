@@ -20,7 +20,30 @@ const { O, more = null, status = null } = Astro.props;       // more: [href, lab
   <div class="box"><h3 id="ol-skill-title" set:html={O['ol-skill-title']} /><div id="ol-skill" set:html={O['ol-skill']} /></div>
 </div>
 <p class="caveat">Signal strength describes how far this forecast's probabilities depart from climatology. Historical skill describes how forecasts made the same way scored in past years. A strong signal is not a confidence rating.</p>
+<script>
+  // Smoothed / Grid cells switch of the outlook map. Starts from ?style= (as the map viewer below) or the choice remembered
+  // in this browser (shared with the viewer), else Smoothed; storage may be unavailable, which only drops the memory.
+  const KEY = 'mapStyle';
+  const recall = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
+  const remember = (v: string) => { try { localStorage.setItem(KEY, v); } catch { /* storage unavailable */ } };
+  function show(style: string) {
+    const fig = document.getElementById('ol-map');
+    if (!fig || !fig.querySelector('.hero-switch')) return;
+    fig.querySelectorAll<HTMLElement>('[data-map-style]').forEach((el) => { el.hidden = el.dataset.mapStyle !== style; });
+    fig.querySelectorAll<HTMLElement>('[data-hero-style]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.heroStyle === style)));
+  }
+  const asked = new URLSearchParams(location.search).get('style');
+  show(asked === 'cells' || asked === 'smooth' ? asked : recall() === 'cells' ? 'cells' : 'smooth');
+  document.addEventListener('click', (ev) => {
+    const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-hero-style]');
+    if (!b || !b.dataset.heroStyle) return;
+    show(b.dataset.heroStyle);
+    remember(b.dataset.heroStyle);
+  });
+</script>
 <style is:global>
+  .hero-switch{margin:0 0 8px}
+  .hero-map [hidden]{display:none !important}
   .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start;margin-top:8px}
   .hero h1{margin:.2em 0 .1em;line-height:1.15}
   .hero-map{margin:0}

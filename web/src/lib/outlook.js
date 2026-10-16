@@ -56,6 +56,25 @@ function img(e, name, cap, alt) {
     '<figcaption>' + esc(cap) + '</figcaption>';
 }
 
+// The outlook map with a Smoothed / Grid cells switch (both images are in the page; the switch script in OutlookHero.astro
+// shows one). Without a grid-cell rendering the smoothed map is shown alone, as before.
+function heroMap(e, label, view) {
+  const cap = 'Tercile probabilities, ' + label + ', ' + view + '. Open the map viewer below for other products.';
+  const alt = 'Map of ' + label + ' tercile probabilities for ' + view;
+  if (!(e.images || []).some((x) => x[0] === 'tercile_outlook_cells')) return img(e, 'tercile_outlook', cap, alt);
+  const pic = (name, style, a) => {
+    const src = asset(e.folder + '/' + name + '.png');
+    return '<a class="map-style" data-map-style="' + style + '"' + (style === 'cells' ? ' hidden' : '') + ' href="' + src +
+      '" target="_blank" rel="noopener"><img src="' + src + '" alt="' + esc(a) + '" loading="' + (style === 'cells' ? 'lazy' : 'eager') + '"></a>';
+  };
+  return '<div class="seg hero-switch" role="group" aria-label="Map style"><span class="caveat">Map style</span> ' +
+    '<button type="button" data-hero-style="smooth" aria-pressed="true">Smoothed</button>' +
+    '<button type="button" data-hero-style="cells" aria-pressed="false">Grid cells (0.25°)</button></div>' +
+    pic('tercile_outlook', 'smooth', alt) + pic('tercile_outlook_cells', 'cells', alt + ' (grid cells, 0.25°)') +
+    '<figcaption>' + esc(cap) + ' <span class="map-style" data-map-style="smooth">Smoothed for display; switch to Grid cells to see the values as computed.</span>' +
+    '<span class="map-style" data-map-style="cells" hidden>Grid cells (0.25°): every cell as computed, no interpolation or smoothing.</span></figcaption>';
+}
+
 // The renderer of one state; `pages` gives the URLs of the other pages (targets, history, verification).
 export function renderer(D, S, pages) {
   const cyc = () => D.cycles.find((c) => c.id === S.cycle);
@@ -101,8 +120,7 @@ export function renderer(D, S, pages) {
       holmText(h, c.targets.length) + ' <a href="' + pages.history + '">Details</a></p>' +
       (A.fallback ? '<p class="caveat">Historical skill for the selected rainfall domain has not yet been evaluated.</p>' : '')
       : '<p>Not computed for this target.</p>';
-    o['ol-map'] = img(f, 'tercile_outlook', 'Tercile probabilities, ' + t.label + ', ' + viewLabel(S.view) + '. Open the map viewer below for other products.',
-      'Map of ' + t.label + ' tercile probabilities for ' + viewLabel(S.view));
+    o['ol-map'] = heroMap(f, t.label, viewLabel(S.view));
     o['ol-table'] = '<div class="table-wrap"><table><caption>' + esc(c.label) + ' targets, ' + esc(viewLabel(S.view)) +
       '. Probabilities are average local probabilities.</caption><thead><tr><th scope="col">Target</th><th scope="col">Period</th><th scope="col">Below / near / above</th><th scope="col">Probability coverage</th><th scope="col">Anomaly</th><th scope="col">Verification status</th></tr></thead><tbody>' +
       c.targets.map((x) => { const v = (x.forecast[S.view] || {}).summary; return '<tr' + (x.id === S.target ? ' class="current"' : '') + '><td><a href="' + pages.target(x.id) + '">' + esc(x.label) + '</a></td><td>' + dt(x.start) + ' – ' + dt(x.end) + '</td><td>' +

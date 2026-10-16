@@ -88,7 +88,10 @@ const selT = SEL?.targets[target];
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const q = new URLSearchParams(location.search);
-    const S = { kind: q.get('kind') === 'verification' && M.verification ? 'verification' : 'forecast', product: q.get('product') || 'tercile_outlook', style: q.get('style') === 'cells' ? 'cells' : 'smooth' };
+    // The map style chosen here or on the outlook map above is remembered in this browser (storage may be unavailable).
+    const recall = () => { try { return localStorage.getItem('mapStyle'); } catch { return null; } };
+    const remember = (v: string) => { try { localStorage.setItem('mapStyle', v); } catch { /* storage unavailable */ } };
+    const S = { kind: q.get('kind') === 'verification' && M.verification ? 'verification' : 'forecast', product: q.get('product') || 'tercile_outlook', style: q.get('style') ? (q.get('style') === 'cells' ? 'cells' : 'smooth') : recall() === 'cells' ? 'cells' : 'smooth' };
     function render() {
       $('mp-kind').innerHTML = '<button type="button" data-k="forecast" aria-pressed="' + (S.kind === 'forecast') + '">Forecast</button>' +
         '<button type="button" data-k="verification" aria-pressed="' + (S.kind === 'verification') + '">Verification' + (M.verification ? '' : ' (not available)') + '</button>';
@@ -133,7 +136,7 @@ const selT = SEL?.targets[target];
       if (!b || !b.closest('#maps')) return;
       if (b.dataset.k) S.kind = b.dataset.k;
       if (b.dataset.p) S.product = b.dataset.p;
-      if (b.dataset.style) S.style = b.dataset.style;
+      if (b.dataset.style) { S.style = b.dataset.style; remember(S.style); }
       render();
     });
     document.addEventListener('change', (ev) => {
