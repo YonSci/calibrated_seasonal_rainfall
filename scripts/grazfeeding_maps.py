@@ -119,7 +119,7 @@ def main():
         for view, domain in domains.items():
             domain = np.asarray(domain, bool) & country
             out = root / 'maps' / view
-            for k, (_, title) in PIPELINES.items():
+            for k, (title, _) in PIPELINES.items():           # the short name fits the subtitle line
                 valid = country & np.isfinite(probs[k]).all(-1)
                 outlook_cells(probs[k], valid, forecast, country, domain, lines, target, view, title, out / k / f'{target}.png', settings)
             panels = [('Published (MVS + climatology blend)', published)] + [(PIPELINES[k][0], probs[k]) for k in PIPELINES]
