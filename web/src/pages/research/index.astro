@@ -36,11 +36,17 @@ const recommended = seasons.flatMap((x) => Object.values(x.use).flat()).filter((
 const findings = Object.fromEntries(PRODUCTS.map((p) => {
   const rows = ranked(p.key);
   const confirmed = rows.filter((r) => r.confirmed.length);
-  const other = confirmed.filter((r) => r.family !== 'Bias correction');
   const best = rows[0];
-  return [p.key, { rows, confirmed, other, best, targets: Math.max(0, ...rows.map((r) => r.targets)) }];
+  return [p.key, { rows, confirmed, best, targets: Math.max(0, ...rows.map((r) => r.targets)) }];
 }));
 const share = (a, b) => (b ? `${a} of ${b}` : '—');
+const PLURAL = { 'Bias correction': 'bias corrections', 'Probability calibration': 'probability calibrations',
+  'Rainfall-distribution model': 'rainfall-distribution models', 'Two-stage calibration': 'two-stage calibrations' };
+const SINGULAR = { 'Bias correction': 'bias correction', 'Probability calibration': 'probability calibration',
+  'Rainfall-distribution model': 'rainfall-distribution model', 'Two-stage calibration': 'two-stage calibration' };
+// categories with no method confirmed better for a product (for the findings)
+const unconfirmed = (key) => Object.keys(SUMMARY?.categories ?? {}).filter((c) =>
+  !findings[key].rows.some((r) => r.category === c && r.confirmed.length) && findings[key].rows.some((r) => r.category === c));
 const TOP = 6;
 const PAGES = [
   ['research/method-selection/', 'Method selection', 'The approach the evidence supports for each season, target and product, with the evidence for each change.'],
@@ -55,8 +61,10 @@ const PAGES = [
 
   <section id="which-methods">
     <h2>Which methods are better</h2>
-    <p class="lead">Every bias-correction, probability-calibration, rainfall-distribution and Leung–Dirichlet method has been compared
-    with the approach the platform publishes, for {seasons.length} seasons and their months ({findings.probabilities.targets} targets), over All Ethiopia.
+    <p class="lead">{SUMMARY?.methods ?? ''} methods have been compared with the approach the platform publishes, for {seasons.length}
+    seasons and their months ({findings.probabilities.targets} targets), over All Ethiopia:
+    {Object.entries(SUMMARY?.categories ?? {}).map(([k, n]) => `${n} ${n === 1 ? SINGULAR[k] ?? k.toLowerCase() : PLURAL[k] ?? k.toLowerCase()}`).join(', ').replace(/, ([^,]*)$/, ' and $1')}.
+    Each was tested on its own against the published approach.
     {recommended.length === 0
       ? <>So far <strong>no method is recommended in place of the published approach</strong>; the published forecasts keep it.</>
       : <><strong>{recommended.length} change{recommended.length === 1 ? ' is' : 's are'} recommended</strong> (see the table below); a change to the published forecasts is a separate decision.</>}</p>
@@ -100,7 +108,7 @@ const PAGES = [
         {findings.probabilities.confirmed.length === 0
           ? 'No method is confirmed better than the published probabilities for any target.'
           : <>Confirmed better for at least one target: {findings.probabilities.confirmed.map((r) => `${r.label} (${r.confirmed.join(', ')})`).join('; ')}.</>}
-        {findings.probabilities.other.length === 0 && ' No probability-calibration method, distribution model or Leung–Dirichlet pipeline is confirmed better for any target: the climatology blend holds up.'}
+        {unconfirmed('probabilities').length > 0 && ` No ${unconfirmed('probabilities').map((c) => (c === 'Two-stage calibration' ? 'two-stage calibration' : PLURAL[c].replace(/s$/, ''))).join(', ').replace(/, ([^,]*)$/, ' or $1')} is confirmed better for any target.`}
         {findings.probabilities.best && <> Most consistent: {findings.probabilities.best.label}, better on average for {share(findings.probabilities.best.training_better, findings.probabilities.best.targets)} targets over 1993–2016 and {share(findings.probabilities.best.test_better, findings.probabilities.best.test_scored)} over 2017+.</>}</li>
       <li><strong>Rainfall amounts.</strong>{' '}
         {findings.amounts.confirmed.length === 0
@@ -115,9 +123,9 @@ const PAGES = [
       const rest = rows.slice(head.length);
       const table = (list) => (
         <div class="table-wrap"><table class="compact">
-          <thead><tr><th scope="col">Method</th><th scope="col">Type</th><th scope="col">Confirmed better</th><th scope="col">Better 1993–2016</th><th scope="col">Better 2017+</th><th scope="col">Better in 2026</th></tr></thead>
+          <thead><tr><th scope="col">Method</th><th scope="col">Category</th><th scope="col">Confirmed better</th><th scope="col">Better 1993–2016</th><th scope="col">Better 2017+</th><th scope="col">Better in 2026</th></tr></thead>
           <tbody>{list.map((r) => (
-            <tr><td>{r.confirmed.length ? <strong>{r.label}</strong> : r.label}</td><td>{r.family.replace(' (docs/51)', '')}</td>
+            <tr><td>{r.confirmed.length ? <strong>{r.label}</strong> : r.label}</td><td>{r.category}</td>
               <td>{r.confirmed.length ? <><strong>{r.confirmed.length}</strong>: {r.confirmed.join(', ')}</> : '0'}</td>
               <td>{share(r.training_better, r.targets)}</td><td>{share(r.test_better, r.test_scored)}</td>
               <td>{r.validation_scored ? share(r.validation_better, r.validation_scored) : '—'}</td></tr>))}</tbody>

@@ -23,8 +23,13 @@ CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 SEASON = dict(jan_fmam='FMAM (Jan)', feb_fmam='FMAM (Feb)', may_jjas='JJAS (May)', sep_ondj='ONDJ (Sep)')
 REGION = 'ethiopia'
 PRODUCTS = dict(probabilities='rps', amounts='crps')
-LD_LABEL = dict(ldc.SHORT, ld_full='Leung–Dirichlet as uploaded (Leung + counts + Dirichlet)',
-                iad_on_mvs='MVS + Dirichlet (the Dirichlet alone)', leung_blend='Leung + published blend (Leung alone)')
+# The Leung–Dirichlet calibration counts as one method: the whole calibration for tercile probabilities and its corrected
+# amounts for rainfall amounts (its stage-by-stage variants stay on its own page, docs/51).
+LD_METHOD = dict(probabilities='ld_full', amounts='leung_affine')
+# Plain categories for the overview, with the benchmark families they gather
+CATEGORY = {'Bias correction': 'Bias correction', 'Probability stage (Phase 1)': 'Probability calibration',
+            'Probability stage (Phase 2)': 'Probability calibration', 'Distribution model (Phase 2)': 'Rainfall-distribution model',
+            'Distribution model (Phase 3)': 'Rainfall-distribution model', 'Two-stage calibration': 'Two-stage calibration'}
 
 
 def read(p):
@@ -108,11 +113,10 @@ def probability(store):
                                 add_validation(r, s.get('shadow', {}).get('crps'), s.get('mvs_ensemble', {}).get('crps'))
         g = read(f'outputs/leung_dirichlet/{cy}/benchmark.json')
         if g:
-            for m in g['methods']:
-                for product, sc in PRODUCTS.items():
-                    if sc not in g['tests'].get(m, {}):
-                        continue
-                    r = row(store, 'Leung–Dirichlet (docs/51)', m, LD_LABEL.get(m, m), product)
+            for product, sc in PRODUCTS.items():
+                m = LD_METHOD[product]
+                if sc in g['tests'].get(m, {}):
+                    r = row(store, 'Two-stage calibration', 'leung_dirichlet', ldc.NAME, product)
                     for target, t in g['tests'][m][sc].items():
                         add_test(r, cy, target, t)
                         v = (g.get('validation') or {}).get(target)
@@ -125,12 +129,12 @@ def table(rows, product):
     rows = sorted([r for r in rows if r['product'] == product],
                   key=lambda r: (-len(r['confirmed']), -r['training_better'] / max(r['targets'], 1), -r['test_better'] / max(r['test_scored'], 1)))
     ref = 'MVS + climatology blend (RPS)' if product == 'probabilities' else 'MVS-corrected ensemble (CRPS)'
-    lines = [f'| Method | Family | Seasons | Confirmed better | Better 1993–2016 | Better 2017+ | Better in validation (2026) |',
+    lines = [f'| Method | Category | Seasons | Confirmed better | Better 1993–2016 | Better 2017+ | Better in validation (2026) |',
              '| --- | --- | --- | --- | --- | --- | --- |']
     for r in rows:
         conf = f"**{len(r['confirmed'])}** ({', '.join(r['confirmed'])})" if r['confirmed'] else '0'
         val = f"{r['validation_better']} of {r['validation_scored']}" if r['validation_scored'] else '—'
-        lines.append(f"| {r['label']} | {r['family']} | {len(r['seasons'])} | {conf} | {r['training_better']} of {r['targets']} | "
+        lines.append(f"| {r['label']} | {r['category']} | {len(r['seasons'])} | {conf} | {r['training_better']} of {r['targets']} | "
                      f"{r['test_better']} of {r['test_scored']} | {val} |")
     return f'Reference: {ref}.\n\n' + '\n'.join(lines)
 
@@ -139,14 +143,20 @@ def main():
     store = {}
     bias(store)
     probability(store)
-    rows = [dict(r, seasons=sorted(r['seasons'])) for r in store.values()]
-    data = dict(created_utc=datetime.now(timezone.utc).isoformat(), region=REGION, protocol=__doc__.strip(), rows=rows)
+    rows = [dict(r, seasons=sorted(r['seasons']), category=CATEGORY[r['family']]) for r in store.values()]
+    categories = {}                                          # methods per category, each counted once over both products
+    for r in rows:
+        categories.setdefault(r['category'], set()).add(r['method'])
+    categories = {k: len(v) for k, v in sorted(categories.items(), key=lambda kv: list(CATEGORY.values()).index(kv[0]))}
+    data = dict(created_utc=datetime.now(timezone.utc).isoformat(), region=REGION, protocol=__doc__.strip(),
+                categories=categories, methods=sum(categories.values()), rows=rows)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / 'summary.json').write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
     md = ['# Methods against the published approach, all seasons', '',
           f'Generated {data["created_utc"][:10]} by scripts/method_summary.py (region: All Ethiopia). Counts are targets '
           '(5 per season: the months and the season). Validation: targets of the independent seasons scored after the benchmark '
           '(2026 so far: FMAM from January and February, JJAS from May; ONDJ not yet observed).', '',
+          f'{data["methods"]} methods: ' + ', '.join(f'{k.lower()} {n}' for k, n in categories.items()) + '.', '',
           '## Tercile probabilities', '', table(rows, 'probabilities'), '', '## Rainfall amounts', '', table(rows, 'amounts'), '']
     (OUT / 'summary.md').write_text('\n'.join(md), encoding='utf-8')
     print('\n'.join(md))

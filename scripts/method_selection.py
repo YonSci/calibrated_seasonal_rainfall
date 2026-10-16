@@ -31,7 +31,7 @@ OUT = ROOT / 'outputs/method_selection/selection.json'
 CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'probability_phase1': 'Probability stage, Phase 1',
                 'probability_phase2_binary': 'Probability stage, Phase 2 binary calibrators', 'distribution_phase2': 'Distribution model, Phase 2',
-                'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Leung–Dirichlet calibration (docs/51)'}
+                'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Two-stage calibration (docs/51)'}
 STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probability stage', 'probability_phase2_binary': 'probability stage',
          'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration'}
 
@@ -167,8 +167,10 @@ def main():
                         cands += confirmed(d, fam, t, score, d['models'], lambda k, d=d: d['registry'][k]['name'],
                                            reference='incumbent' if score == 'rps' else 'mvs_ensemble')
                 if ld:
-                    cands += confirmed(ld, 'leung_dirichlet', t, score, [k for k in ld['methods'] if score in ld['tests'].get(k, {})],
-                                       lambda k: ldc.LONG.get(k, k), reference='incumbent' if score == 'rps' else 'mvs_ensemble')
+                    # one method: the whole calibration for probabilities, its corrected amounts for amounts
+                    key = 'ld_full' if score == 'rps' else 'leung_affine'
+                    cands += confirmed(ld, 'leung_dirichlet', t, score, [key] if score in ld['tests'].get(key, {}) else [],
+                                       lambda k: ldc.NAME, reference='incumbent' if score == 'rps' else 'mvs_ensemble')
                 for c in cands:
                     if c['family'].startswith('distribution') and product == 'amounts':
                         c['validation'] = shadow_validation(cy, c['method'], t, minimum)

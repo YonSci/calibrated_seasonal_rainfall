@@ -50,9 +50,9 @@ const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainf
           <>
             <h3>{title}</h3>
             <div class="table-wrap"><table class="compact">
-              <thead><tr><th scope="col">Method</th><th scope="col">Family</th><th scope="col">Confirmed better</th><th scope="col">Better 1993–2016</th><th scope="col">Better 2017+</th><th scope="col">Better in validation</th></tr></thead>
+              <thead><tr><th scope="col">Method</th><th scope="col">Category</th><th scope="col">Confirmed better</th><th scope="col">Better 1993–2016</th><th scope="col">Better 2017+</th><th scope="col">Better in validation</th></tr></thead>
               <tbody>{ranked(p).map((r) => (
-                <tr><td>{r.confirmed.length > 0 ? <strong>{r.label}</strong> : r.label}</td><td>{r.family}</td>
+                <tr><td>{r.confirmed.length > 0 ? <strong>{r.label}</strong> : r.label}</td><td>{r.category}</td>
                   <td>{r.confirmed.length > 0 ? <><strong>{r.confirmed.length}</strong>: {r.confirmed.join(', ')}</> : '0'}</td>
                   <td>{r.training_better} of {r.targets}</td><td>{r.test_better} of {r.test_scored}</td>
                   <td>{r.validation_scored ? `${r.validation_better} of ${r.validation_scored}` : '—'}</td></tr>))}</tbody>
