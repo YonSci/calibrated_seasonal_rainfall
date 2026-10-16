@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-16 19:46 UTC",
- "code_commit": "59eb62f",
- "release": "2026-10-17.1",
+ "built_utc": "2026-10-16 21:25 UTC",
+ "code_commit": "a2437e2",
+ "release": "2026-10-17.2",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -911,7 +911,7 @@
   {
    "id": "2026-10-17.1",
    "date": "2026-10-17",
-   "commit": null,
+   "commit": "fccd30a",
    "title": "The platform is now called the Seasonal Rainfall Outlook Platform",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -923,6 +923,36 @@
     {
      "type": "display",
      "text": "New name, Seasonal Rainfall Outlook Platform, in the header, page titles, home page, classic page, PDF bulletins and the README of every download package (previously Seasonal Calibrated Rainfall Outlook, SCRO). Content and forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-17.2",
+   "date": "2026-10-17",
+   "commit": null,
+   "title": "Real-time issue from 2027, statistical downscaling, more statistical power, dry-season maps",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "method",
+     "text": "From 2027 each forecast is issued in real time: frozen and published as a GitHub release before its target period (scripts/issue_forecast.py), with every statement about its status read from its issue record; targets already under way when issued (February and FMAM of the February-initialized FMAM cycle) are labelled in season. From 2027 the forecasts use the first 25 SEAS5 members, as the hindcasts. 2026 forecasts remain research reconstructions. docs/52."
+    },
+    {
+     "type": "analysis",
+     "text": "Statistical downscaling by model output statistics (canonical correlation analysis and principal component regression, the CPT approach of ICPAC and IRI) tested against the published pipeline for the four cycles: confirmed only for JJAS September amounts; worse than the published approach when pooled over all targets, though better in the 2026 JJAS season. docs/53."
+    },
+    {
+     "type": "analysis",
+     "text": "More statistical power on the Research overview: every method tested over all 33 out-of-sample years and pooled over its targets and seasons, with Holm and Benjamini-Hochberg corrections. For amounts, Variance Scaling, square-root MVS, gamma QM and quantile regression are significantly better when pooled; for probabilities no method is. The selection rule is unchanged."
+    },
+    {
+     "type": "display",
+     "text": "Tercile maps show cells without terciles as \"Dry season: no tercile forecast\" in their own colour."
     }
    ]
   }

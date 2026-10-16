@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-16T18:46:41.818631+00:00",
+ "created_utc": "2026-10-16T21:04:45.790997+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -641,9 +641,41 @@
          "test_years_better": 5,
          "test_years": 9
         }
+       },
+       {
+        "family": "mos",
+        "family_label": "Statistical downscaling (docs/53)",
+        "method": "cca",
+        "label": "Canonical correlation analysis (CCA)",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.8847065074118037,
+         "years_better": 17,
+         "years": 24,
+         "holm_p": 0.036449999999999996,
+         "test_difference": -0.9786195843590403,
+         "test_years_better": 5,
+         "test_years": 9
+        }
+       },
+       {
+        "family": "mos",
+        "family_label": "Statistical downscaling (docs/53)",
+        "method": "pcr",
+        "label": "Principal component regression (PCR)",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.9359395379679771,
+         "years_better": 18,
+         "years": 24,
+         "holm_p": 0.0234,
+         "test_difference": -0.7307156732441906,
+         "test_years_better": 6,
+         "test_years": 9
+        }
        }
       ],
-      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Holm p 0.0238; 18 of 24 years better), -0.5432 over the test years. Independent validation: 1 of 3 season(s), mean difference +1.588. Also confirmed (one change at a time): EMOS, censored shifted gamma (distribution model)."
+      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Holm p 0.0238; 18 of 24 years better), -0.5432 over the test years. Independent validation: 1 of 3 season(s), mean difference +1.588. Also confirmed (one change at a time): EMOS, censored shifted gamma (distribution model); Canonical correlation analysis (CCA) (statistical downscaling); Principal component regression (PCR) (statistical downscaling)."
      }
     },
     "JJAS": {

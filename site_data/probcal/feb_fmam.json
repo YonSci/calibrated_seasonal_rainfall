@@ -41763,10 +41763,10 @@
  "amount_shadow": {
   "2026": {
    "Apr": {
-    "key": "7c2442a9c4758eaa69ecb3e5f12f26cdd0f9f5597642893507850a322e74b9a6",
+    "key": "27304176c82148a91e1bc09c11dbcc87ee3e5a2c85841b3047cc0b7e218b31fc",
     "label": "EMOS, censored shifted gamma",
     "target": "Apr",
-    "cycle": "config/cycles/feb_2026_fmam.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/cycles/feb_2026_fmam.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -41774,9 +41774,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:14.421432+00:00",
+    "created_utc": "2026-10-16T21:20:36.123674+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "a2437e23b10446234316e331765c5c42c29e514d",
      "uncommitted_changes": false
     },
     "tag": "init02_Apr",
@@ -41876,10 +41876,10 @@
     }
    },
    "Feb": {
-    "key": "bcbe4e66f0217e4118cc57a927fa5c2fe67e1c4e1a52ea7a4af7aabfb71f998b",
+    "key": "5132f20587da8b29f2fd38b4b3a2ca6e16f9f2175d601a1c9d6b226b8f5e96ec",
     "label": "EMOS, censored shifted gamma",
     "target": "Feb",
-    "cycle": "config/cycles/feb_2026_fmam.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/cycles/feb_2026_fmam.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -41887,9 +41887,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:02.746502+00:00",
+    "created_utc": "2026-10-16T21:20:11.827209+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "a2437e23b10446234316e331765c5c42c29e514d",
      "uncommitted_changes": false
     },
     "tag": "init02_Feb",
@@ -41989,10 +41989,10 @@
     }
    },
    "FMAM": {
-    "key": "c24cb8a564236f583353f306f8939b86f65f5cada373aa0bb8c954a3ca77990e",
+    "key": "daa6da8c61a8394f5c1244e671b15841c449cde11960414ce0c33057aff6a160",
     "label": "EMOS, censored shifted gamma",
     "target": "FMAM",
-    "cycle": "config/cycles/feb_2026_fmam.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/cycles/feb_2026_fmam.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42000,9 +42000,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:30.473068+00:00",
+    "created_utc": "2026-10-16T21:21:12.838259+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "a2437e23b10446234316e331765c5c42c29e514d",
      "uncommitted_changes": false
     },
     "tag": "init02_FMAM",
@@ -42102,10 +42102,10 @@
     }
    },
    "Mar": {
-    "key": "08d3c031452f1cb9a20c70a2299daee3a49e23a9495153466efb8f576589af72",
+    "key": "20320d655bdd2a5203e6d17bc62913a43007885b92a3b5d20de2feb5efc8900d",
     "label": "EMOS, censored shifted gamma",
     "target": "Mar",
-    "cycle": "config/cycles/feb_2026_fmam.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/cycles/feb_2026_fmam.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42113,9 +42113,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:08.043339+00:00",
+    "created_utc": "2026-10-16T21:20:23.167040+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "a2437e23b10446234316e331765c5c42c29e514d",
      "uncommitted_changes": false
     },
     "tag": "init02_Mar",
@@ -42215,10 +42215,10 @@
     }
    },
    "May": {
-    "key": "a1ceb1205c4fbfb0e430b686106894f2902da53da27d235ab0b8d83c10137eaf",
+    "key": "17441aa77c6fcc7879aa3efa5c8530005c9ef6973da2bb351c645e0feaf153d3",
     "label": "EMOS, censored shifted gamma",
     "target": "May",
-    "cycle": "config/cycles/feb_2026_fmam.json",
+    "cycle": "D:/calibrated_seasonal_rainfall/config/cycles/feb_2026_fmam.json",
     "forecast_year": 2026,
     "reference_years": [
      1993,
@@ -42226,9 +42226,9 @@
     ],
     "shadow": true,
     "since": "2026-10-14",
-    "created_utc": "2026-10-14T21:28:20.172449+00:00",
+    "created_utc": "2026-10-16T21:20:48.445537+00:00",
     "provenance": {
-     "commit": "fd1c0ed0d82b8ca21496fe569fea450f2a86cc82",
+     "commit": "a2437e23b10446234316e331765c5c42c29e514d",
      "uncommitted_changes": false
     },
     "tag": "init02_May",

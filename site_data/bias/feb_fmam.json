@@ -114494,20 +114494,20 @@
      }
     },
     "mvs": {
-     "key": "83e77022b6b508f7e69a1d53c4c1c8771fd154a2e0ed98becf4bc7dadafd29cb",
+     "key": "35e018c1e0c6b12de63a7377c23229e7720888602b8f81d358017abc87476aa5",
      "method": "mvs",
      "label": "Mean-Variance Scaling (operational)",
      "target": "Feb",
-     "cycle": "config/cycles/feb_2026_fmam.json",
+     "cycle": "D:/calibrated_seasonal_rainfall/config/cycles/feb_2026_fmam.json",
      "forecast_year": 2026,
      "reference_years": [
       1993,
       2025
      ],
      "shadow": false,
-     "created_utc": "2026-10-13T08:10:10.948649+00:00",
+     "created_utc": "2026-10-16T21:20:00.886319+00:00",
      "provenance": {
-      "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+      "commit": "a2437e23b10446234316e331765c5c42c29e514d",
       "uncommitted_changes": false
      },
      "tag": "init02_Feb",
@@ -114730,20 +114730,20 @@
      }
     },
     "sqrt_mvs": {
-     "key": "4c8937dd1364e96451fb790fbf805311d475715b6835af88af057f8e12d3dc21",
+     "key": "45563454288d5761be400387d78b2645e840277751cfb5f59b787ead8b4bd38e",
      "method": "sqrt_mvs",
      "label": "Square-root-space Mean-Variance Scaling",
      "target": "Feb",
-     "cycle": "config/cycles/feb_2026_fmam.json",
+     "cycle": "D:/calibrated_seasonal_rainfall/config/cycles/feb_2026_fmam.json",
      "forecast_year": 2026,
      "reference_years": [
       1993,
       2025
      ],
      "shadow": true,
-     "created_utc": "2026-10-13T08:10:43.962919+00:00",
+     "created_utc": "2026-10-16T21:20:01.616190+00:00",
      "provenance": {
-      "commit": "7a30c51754d59197f09277056c255726b0e5e303",
+      "commit": "a2437e23b10446234316e331765c5c42c29e514d",
       "uncommitted_changes": false
      },
      "tag": "init02_Feb",
