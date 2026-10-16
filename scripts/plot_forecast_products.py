@@ -13,6 +13,7 @@ from matplotlib.cm import ScalarMappable
 from matplotlib.patches import Patch
 from output_runs import staged_output, check_destination
 from cycle import CYCLE, YEAR, REF, REF_DASH, REF_YEARS, MEMBERS, REGIME, REGIME_YEARS, OVERLAP_YEAR, EVALUATION_STUDY
+import forecast_issue
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = ['JJAS', 'Jun', 'Jul', 'Aug', 'Sep']
@@ -90,7 +91,7 @@ def derive(d, minimum=.40, percent_floor=10.):
         'probability_source':'blend_probability; unchanged',
         'display_minimum_probability':minimum,'tie_tolerance':1e-8,
         'percent_anomaly_minimum_climatology_mm':percent_floor,
-        'status':'Research reconstruction; not an EMI or ICPAC product',
+        'status':forecast_issue.issue_status(CYCLE)['long'],
         'mask_note':'Existing region and eligibility masks only; no new land-ocean or dry-season mask'})
     def add(name,values,attrs=None):
         out[name]=(('lat','lon'),values)
@@ -171,7 +172,7 @@ def probability_map(g,target,path,lines):
     threshold=100*g.attrs['display_minimum_probability']
     fig.legend(handles=[Patch(facecolor='white',edgecolor='gray',label=f'Weak (<{threshold:g}%) or tied maximum'),
                         Patch(facecolor='#bdbdbd',label='Inside region, probability ineligible')],loc='lower center',bbox_to_anchor=(.47,.08),ncol=1,frameon=False)
-    fig.text(.5,.035,'Color shows the leading category and its probability, not certainty or rainfall amount.\nResearch reconstruction; not an official EMI/ICPAC forecast. Outside region is blank.',ha='center',fontsize=9)
+    fig.text(.5,.035,'Color shows the leading category and its probability, not certainty or rainfall amount.\n'+forecast_issue.issue_status(CYCLE)['footer']+' Outside region is blank.',ha='center',fontsize=9)
     save(fig,path)
 
 

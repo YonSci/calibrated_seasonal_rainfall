@@ -84,8 +84,19 @@ class Cycle:
         y = self.regime_mask_years
         return f'{y[0]}-{y[-1]}'
 
-    def members(self, year):
+    def archive_members(self, year):
+        """Members in the downloaded SEAS5 file of a year (the project's member-count rule)."""
         return expected_members(year, self.raw.get('expected_members'))
+
+    def members(self, year):
+        """Members used for a year. A cycle's `member_policy` ({"from_year": 2027, "use_first": 25}) keeps only the first members
+        (lowest member numbers, the same numbering as the 25-member hindcasts) from that year on; data preparation applies it,
+        so every later step sees the same ensemble."""
+        n = self.archive_members(year)
+        pol = self.raw.get('member_policy') or {}
+        if pol and year >= int(pol['from_year']):
+            return min(n, int(pol['use_first']))
+        return n
 
     def root(self, key, default=None):
         value = self.raw.get(key, default)

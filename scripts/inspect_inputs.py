@@ -26,7 +26,7 @@ def inspect_model(path, cfg, year):
             sample = da.isel(member=0, lat=da.sizes["lat"] // 2, lon=da.sizes["lon"] // 2).values
             negative = int(np.sum(np.diff(sample) * 1000 < -cfg["negative_increment_tolerance_mm"]))
             members = da.sizes["member"]
-            if members != CYCLE.members(year):
+            if members != CYCLE.archive_members(year):          # the downloaded file; a member policy subsets later
                 raise ValueError(f"Unexpected member count: {members}; inspect provenance")
             if negative:
                 raise ValueError("Sample has negative accumulation increments")

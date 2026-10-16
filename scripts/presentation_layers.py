@@ -19,6 +19,7 @@ from matplotlib.patches import Patch, PathPatch
 from matplotlib.path import Path as MplPath
 from scipy.ndimage import gaussian_filter, map_coordinates, distance_transform_edt
 import delivery_map_base as base
+import forecast_issue
 from followup_common import area, same_grid, METHOD, freeze_snapshot, unchanged
 from verify2026_common import check_forecast
 from verify_2026_regimes import inspect_source, make_domains, summarize_domain
@@ -222,7 +223,7 @@ def footer(fig, settings, verification=False):
     text = (f"Display only: {settings['interpolation_factor']}× interpolation; Gaussian σ={settings['gaussian_sigma_cells']:g} native cells "
             f"(≈{0.25 * settings['gaussian_sigma_cells']:.2f}°, softens the 1° model grid). Statistics and exported fields use the original 0.25° grid.\n")
     text += ("Single-year descriptive verification; observed category codes are not smoothed."
-             if verification else f"Research reconstruction of a {CYCLE.init_month_name}-initialized forecast; not an official EMI/ICPAC product.")
+             if verification else forecast_issue.issue_status(CYCLE)['footer'])
     fig.text(.5, .018, text, ha="center", va="bottom", fontsize=8, color="#48535d")
 
 
@@ -283,7 +284,7 @@ def tercile_cells(forecast, fields, country, domain, lines, target, view, path, 
     fig.legend(handles=[Patch(facecolor="white", edgecolor="gray", label=f"Weak (<{100*settings['minimum_leading_probability']:g}%) or tied"),
                         Patch(facecolor=DRY_COLOR, label=DRY_LABEL), Patch(facecolor="#edf0f3", label="Outside focus")],
                loc="lower center", bbox_to_anchor=(.5, .09), ncol=3, frameon=False, fontsize=9)
-    fig.text(.5, .018, CELLS_NOTE + f"\nResearch reconstruction of a {CYCLE.init_month_name}-initialized forecast; not an official EMI/ICPAC product.",
+    fig.text(.5, .018, CELLS_NOTE + "\n" + forecast_issue.issue_status(CYCLE)['footer'],
              ha="center", va="bottom", fontsize=8, color="#48535d")
     save_figure(fig, path, settings)
 

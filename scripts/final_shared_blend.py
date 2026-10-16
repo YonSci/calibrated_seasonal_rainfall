@@ -19,6 +19,7 @@ from local_blend import fit_weights
 from run_calibration import load_inputs, load_land, cell_area, params_dataset
 from output_runs import check_destination, staged_output
 from cycle import CYCLE
+import forecast_issue
 
 TRAIN=CYCLE.reference_years
 YEAR=CYCLE.year
@@ -71,7 +72,9 @@ def write_result(out,cfg,models,members,lat,lon,pars,clim,lam,region,area,land_i
         target_period=json.dumps(cfg['season']),initialization_month=cfg['initialization_month'],
         method='equal-year mean-variance rainfall correction; alpha=0.5 count smoothing; shared climatology blend',
         climatology_weight=float(lam),processing_utc=datetime.now(timezone.utc).isoformat(),
-        status=f'Retrospective reconstruction of {CYCLE.init_month_name}-initialized {YEAR} forecast; no {YEAR} observations used',
+        status=(f'{CYCLE.init_month_name}-initialized {YEAR} forecast made before its target period; issued status in the issue record (docs/52)'
+                if datetime.now(timezone.utc).date() < forecast_issue.period_start(CYCLE)
+                else f'Retrospective reconstruction of {CYCLE.init_month_name}-initialized {YEAR} forecast; no {YEAR} observations used'),
         mask_json=json.dumps(dict(land=land_info,region=region_info)))
     d=xr.Dataset(coords=dict(member=members[YEAR],lat=lat,lon=lon,category=['below','near','above']),attrs=attrs)
     d['precip_corrected']=(('member','lat','lon'),corrected.reshape(len(members[YEAR]),*shape))

@@ -467,6 +467,8 @@ def main():
         # Import after config validation for a more useful error on unsupported cycles.
         from presentation_layers import build_forecast,build_verification,build_gallery,boundary_files
         from followup_common import unchanged
+        import forecast_issue                          # the cycle's issue status (docs/52)
+        from cycle import CYCLE
         info = preflight(cfg,a.workflow,a.verification_targets)
         print("Preflight passed. Adapter:",cfg["adapter"],flush=True)
         print("Forecast targets:",", ".join(cfg["targets"]),flush=True)
@@ -521,7 +523,7 @@ def main():
                 gallery_inputs.append(comparison/"interpretation")
             for kind,targets in [("forecast",forecasts),("verification",verified)]:
                 gallery_inputs += [output/f"presentation/{kind}/{t}" for t in targets]
-            details = {"workflow":a.workflow,"forecast_status":"retrospective reconstruction", "verification_report":report,
+            details = {"workflow":a.workflow,"forecast_status":forecast_issue.issue_status(CYCLE)["kind"], "verification_report":report,
                        **({"external_comparison_report":str((comparison/"interpretation/report.html").relative_to(output)).replace("\\","/")} if comparison else {}),
                        "complete_requested_verification":not pending,
                        **({"full_jjas_verified":"JJAS" in verified} if SEASON=="JJAS" else {"full_season_verified":SEASON in verified})}

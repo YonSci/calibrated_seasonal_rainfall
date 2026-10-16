@@ -51,5 +51,9 @@
     2025
   ],
   "overlap_year": 2025,
-  "notes": "Template for the May 2027 cycle. Prerequisites: 2026 CHIRPS added with extend_observations.py; ECMWF May 2027 downloaded and prepared. See docs/37_NEW_FORECAST_CYCLE.md."
+  "notes": "Template for the May 2027 cycle. Prerequisites: 2026 CHIRPS added with extend_observations.py; ECMWF May 2027 downloaded and prepared. See docs/37_NEW_FORECAST_CYCLE.md. Forecast members: the first 25 of the 51 (as the hindcasts). Issue in real time: run as soon as SEAS5 for the initialization is on CDS, then scripts/issue_forecast.py before the target period starts (docs/52).",
+  "member_policy": {
+    "from_year": 2027,
+    "use_first": 25
+  }
 }

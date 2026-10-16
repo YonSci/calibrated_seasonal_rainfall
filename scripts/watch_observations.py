@@ -6,6 +6,10 @@ run the verification workflow for the cycle — observations, scores, report, vi
 cycle enables it, the bias-correction validation of every method and the amount/range shadow — then the steps listed in
 `after_scoring` (the bias-correction suggestions). Nothing is published: the site is rebuilt and released separately.
 
+It also reminds about real-time issues (docs/52): for every cycle in `issue_cycles`, from the 13th of its initialization
+month (SEAS5 on CDS) until its last target period starts, it logs that the forecast is due and how many days are left,
+and it logs a missed issue once every target period has started. It never downloads, runs or issues a forecast itself.
+
 State and history: outputs/observation_watch/status.json (targets ready per cycle, every run with its outcome) and
 outputs/observation_watch/watch.log. A failed scoring run is retried at the next check.
 
@@ -59,6 +63,33 @@ def score(cycle, logfile):
     return r.returncode
 
 
+def issue_reminders(cycles, logfile, today=None):
+    """Due and missed real-time issues of the cycles in `issue_cycles` (docs/52); returns the log lines."""
+    from datetime import date
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    from cycle import load_cycle
+    import forecast_issue as fi
+    today = today or datetime.now(timezone.utc).date()
+    lines = []
+    for path in cycles:
+        c = load_cycle(ROOT / path)
+        due, start, last = date(c.year, c.init_month, 13), fi.period_start(c), fi.last_start(c)
+        s = fi.issue_status(c)
+        if s['issued']:
+            if not s['release_url'] and today < last:
+                lines.append(f'{path}: issued {s["date"]} but not yet published; run issue_forecast.py --publish now')
+            continue
+        if due <= today < last:
+            lines.append(f'{path}: ISSUE DUE: run the cycle (docs/40 section 2) and issue_forecast.py; '
+                         + (f'{(start - today).days} days before the target period starts ({start})' if today < start
+                            else f'the target period began {start}: in season for the targets already started, issue as soon as possible'))
+        elif today >= last and not fi.read_record(c):
+            lines.append(f'{path}: issue missed (every target period has started); this forecast can only be a reconstruction')
+    for line in lines:
+        log(line, logfile)
+    return lines
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--check', action='store_true', help='Only report newly available targets')
@@ -98,6 +129,10 @@ def main():
             state['scored'] = sorted(set(state['scored']) | set(ready), key=ready.index)
             state['pending_publication'] = sorted(set(state.get('pending_publication', [])) | set(new))
             scored_any = True
+    try:
+        issue_reminders(cfg.get('issue_cycles', []), logfile)
+    except Exception as exc:                                       # a reminder failure never stops the scoring
+        log(f'issue reminders failed: {exc}', logfile)
     if scored_any:
         for step in cfg.get('after_scoring', []):
             r = subprocess.run([PY, step], cwd=ROOT, capture_output=True, text=True, encoding='utf-8', errors='replace')

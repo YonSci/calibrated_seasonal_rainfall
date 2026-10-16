@@ -6,7 +6,15 @@
   ],
   "after_scoring": [
     "scripts/bias_recommend.py",
-    "scripts/method_selection.py", "scripts/method_summary.py"
+    "scripts/method_selection.py",
+    "scripts/method_summary.py"
   ],
-  "status": "outputs/observation_watch/status.json"
+  "status": "outputs/observation_watch/status.json",
+  "issue_cycles": [
+    "config/cycles/jan_2027_fmam.json",
+    "config/cycles/feb_2027_fmam.json",
+    "config/cycles/may_2027.json",
+    "config/cycles/sep_2027_ondj.json"
+  ],
+  "issue_description": "Cycles to issue in real time (docs/52): from the 13th of the initialization month until the target period starts, the daily check logs that the forecast is due; it never runs or issues one itself."
 }

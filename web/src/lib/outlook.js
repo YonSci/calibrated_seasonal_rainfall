@@ -91,6 +91,8 @@ export function renderer(D, S, pages) {
     const c = cyc(), t = tgt(), f = t.forecast[S.view], o = {};
     o['ol-eyebrow'] = esc(c.init + ' initialization · ECMWF SEAS5 calibrated with CHIRPS · ' + viewLabel(S.view));
     o['ol-title'] = esc(t.label + ' rainfall outlook');
+    // issued before its season, or a research reconstruction (scripts/forecast_issue.py, docs/52)
+    o['ol-publication'] = esc((c.publication && c.publication.short) || 'Research reconstruction · not an official forecast');
     o['ol-targets'] = c.targets.map((x) => '<a class="chip" aria-pressed="' + (x.id === S.target) + '" href="' + pages.target(x.id) + '">' + esc(x.label) + '</a>').join('');
     if (!f) { o['ol-lead'] = 'No forecast is available for this view.'; return o; }
     const s = f.summary, p = s.mean_local_probabilities, sig = signal(p);

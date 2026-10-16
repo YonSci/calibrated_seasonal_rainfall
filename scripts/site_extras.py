@@ -156,7 +156,8 @@ def bulletin_pdf(cyc, out_pdf, built, site):
         fig.text(.07, .955, f'{season["label"]} rainfall outlook', fontsize=20, weight='bold', color=ink)
         fig.text(.07, .932, f'ECMWF SEAS5 initialized 1 {cyc["init"]} {cyc["init_date"][:4]} · calibrated with {cyc.get("obs", "CHIRPS")} · {area}',
                  fontsize=9.5, color=muted)
-        fig.text(.07, .912, 'Research reconstruction — not an official EMI or ICPAC forecast', fontsize=9, color=amber, weight='bold')
+        fig.text(.07, .912, (cyc.get('publication') or {}).get('short', 'Research reconstruction · not an official EMI or ICPAC forecast').replace(' · ', ' — '),
+                 fontsize=9, color=amber, weight='bold')
         y = _wrap(fig, .07, .89, interpretation(cyc, season, view), 98, 10.5, color=ink)
         ax = fig.add_axes([.07, y - .03, .86, .022])
         left = 0
@@ -275,7 +276,7 @@ def package_readme(cyc, built, release_id):
         f'{cyc["option"]} - forecast and evidence package',
         '=' * 60,
         '',
-        'Research reconstruction; not an official EMI or ICPAC forecast.',
+        (cyc.get('publication') or {}).get('long', 'Research reconstruction; not an official EMI or ICPAC forecast.'),
         f'Built {built} (site release {release_id}) from {REPO}',
         '',
         'What this forecast is',
@@ -318,7 +319,8 @@ def package_metadata(cyc, built, release_id, sha, files):
                 reference_period=cyc['reference'],
                 targets=[dict(target=t['label'], start=t['start'], end=t['end'], status=t['status'],
                               verified_areas=sorted(t['verification'])) for t in cyc['targets']],
-                files=[f for _, f in files], status='research reconstruction; not an official EMI or ICPAC forecast')
+                files=[f for _, f in files], status=(cyc.get('publication') or {}).get('long', 'research reconstruction; not an official EMI or ICPAC forecast'),
+                issue=dict((k, (cyc.get('publication') or {}).get(k)) for k in ('issued', 'date', 'tag', 'release_url')))
 
 
 # ---------------------------------------------------------------- release archive
@@ -465,7 +467,7 @@ def build_releases(out, current_data, esc):
         '<p>Each release is the site as published at one commit. Archived releases open the exact page published then; its maps '
         'and files are served from that commit in the repository.</p>'
         f'<details><summary>Change types</summary><ul>{types}</ul></details>{"".join(cards)}'
-        '<p class="caveat">Research reconstructions; not official EMI or ICPAC forecasts.</p></main></body></html>\n',
+        '<p class="caveat">Not official EMI or ICPAC forecasts; cycles before 2027 are research reconstructions.</p></main></body></html>\n',
         encoding='utf-8', newline='')
     return releases[-1]['id']
 

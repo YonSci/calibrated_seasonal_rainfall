@@ -7,7 +7,7 @@ const { O, more = null, status = null } = Astro.props;       // more: [href, lab
   <div class="hero-text">
     <p class="eyebrow" id="ol-eyebrow" set:html={O['ol-eyebrow']} />
     <h1 id="ol-title" set:html={O['ol-title']} />
-    <p class="badges"><span class="research-inline">Research reconstruction · not an official forecast</span>{status && <span class={`status ${status.code}`}>{status.text}</span>}</p>
+    <p class="badges"><span class="research-inline" set:html={O['ol-publication']} />{status && <span class={`status ${status.code}`}>{status.text}</span>}</p>
     <p class="lead" id="ol-lead" set:html={O['ol-lead']} />
     <div class="box"><h3>Average local probability</h3><div id="ol-prob" set:html={O['ol-prob']} /><p class="caveat" id="ol-prob-note" set:html={O['ol-prob-note']} /></div>
     {more && <p><a class="button-link" href={more[0]}>{more[1]} →</a></p>}

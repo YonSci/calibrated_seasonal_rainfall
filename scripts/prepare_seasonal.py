@@ -198,9 +198,15 @@ def main():
                 raise FileNotFoundError(path)
             with xr.open_dataset(path) as ds:
                 model, report = model_season(ds, cfg, year)
-            expected_members = CYCLE.members(year)
+            expected_members = CYCLE.archive_members(year)
             if report["members"] != expected_members:
                 raise ValueError(f"{year}: expected {expected_members} members per project inventory, found {report['members']}")
+            used = CYCLE.members(year)
+            if used < report["members"]:                  # cycle member_policy: keep the first members (lowest numbers)
+                keep = np.sort(model.member.values)[:used]
+                model = model.sel(member=keep)
+                model.attrs.update(member_count=used, member_subset=f"first {used} of {report['members']} members (numbers {int(keep[0])}-{int(keep[-1])})")
+                report.update(members=used, members_downloaded=expected_members)
             model.attrs.update(source_file=str(path), processing_utc=datetime.now(timezone.utc).isoformat(),
                                config_json=json.dumps(cfg))
             save_netcdf(model, ROOT / f"data/interim/{tag}/ecmwf_{year}_native.nc")

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "adapter": "shared_blend",
+  "forecast_year": 2027,
+  "initialization_month": 2,
+  "reference_years": [
+    1993,
+    2026
+  ],
+  "targets": [
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "FMAM"
+  ],
+  "project_config": "config/fmam_feb/project.json",
+  "forecast_root": "outputs/final_shared_blend",
+  "verification_root": "outputs/verification_2027_fmam_feb",
+  "processed_root": "data/processed",
+  "download_cache": "data/raw/chirps/verification_p25",
+  "regime_mask": "evidence/followup_regime_comparison_and_masks.nc",
+  "boundary": "data/boundaries/ethiopia/eth_admin0.shp",
+  "historical_review": "outputs/verification_followup/historical/historical_blend_review.json",
+  "output_root": "outputs/operational_2027_fmam_feb",
+  "display": {
+    "interpolation_factor": 12,
+    "gaussian_sigma_cells": 1.5,
+    "minimum_leading_probability": 0.4,
+    "percent_anomaly_minimum_climatology_mm": 10.0,
+    "monthly_anomaly_limit_mm": 100.0,
+    "jjas_anomaly_limit_mm": 300.0,
+    "dpi": 180,
+    "pdf": true
+  },
+  "season_domain_mask": "data/masks/fmam_coverage_chirps_v3_1993_2025_v1.nc",
+  "extra_domain_masks": [
+    {
+      "view": "fmam_main_season_domain",
+      "mask": "data/masks/FMAM_main_season_domain.nc",
+      "criteria": "FMAM >= 40% of annual and >= 80 mm; CHIRPS v2.0 1993-2025 climatology; patches < 3 cells removed"
+    }
+  ],
+  "site_id": "fmam2027feb",
+  "notes": "FMAM 2027 cycle, initialization month 2. Reference 1993-2026. Forecast members: the first 25 of the 51 (as the hindcasts). Issue in real time: run as soon as SEAS5 for the initialization is on CDS, then scripts/issue_forecast.py before the target period starts (docs/52). External comparison disabled until the 2027 official outlooks are registered.",
+  "external_comparison": {
+    "enabled": false,
+    "registry": "config/external_forecasts/fmam_2026.json",
+    "cache_root": "data/external_forecasts",
+    "output_root": "outputs/operational_2027_fmam_feb/comparisons",
+    "products": [
+      "rainfall_probability",
+      "rainfall_anomaly"
+    ],
+    "interpretation_engine": "rules"
+  },
+  "member_policy": {
+    "from_year": 2027,
+    "use_first": 25
+  }
+}

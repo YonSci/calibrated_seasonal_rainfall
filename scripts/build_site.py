@@ -32,6 +32,7 @@ import site_extras as extras                          # noqa: E402
 import obs_source                                     # noqa: E402
 import site_bias                                      # noqa: E402
 import site_prob                                      # noqa: E402
+import forecast_issue                                 # noqa: E402
 import site_files                                     # noqa: E402
 import site_data                                      # noqa: E402
 
@@ -358,6 +359,10 @@ def build_cycle(cfg_path, published, today, sha):
     else:
         made = iso_day(ej['created_utc']) if 'created_utc' in ej else 'date not recorded'
         frozen = f'Generated {made}; not yet frozen for verification (freeze before observations are used)'
+    issue = forecast_issue.issue_status(c)                       # issued in real time, or a research reconstruction (docs/52)
+    if issue['issued']:
+        frozen = (f'Frozen and issued {iso_day(issue["date"])}, before the target period'
+                  + (f' (public release {issue["tag"]}); SHA-256 manifest' if issue['release_url'] else f' (tag {issue["tag"]}); SHA-256 manifest'))
     obs_months = sorted((target_window(m, c)[0].year, list(calendar.month_abbr).index(m)) for m in processed)
     if obs_months:
         y, m = obs_months[-1]
@@ -378,11 +383,11 @@ def build_cycle(cfg_path, published, today, sha):
                    + (f'; {", ".join(gaps)} file not found' if gaps else ''))
     lam = next((x['lambda'] for x in targets if x['kind'] == 'season'), None)
     meta = [
-        ['Model initialization', f'1 {c.init_month_name} {c.year} · ECMWF SEAS5 (system 51), {c.members(c.year)} members'],
+        ['Model initialization', f'1 {c.init_month_name} {c.year} · ECMWF SEAS5 (system 51), {c.members(c.year)} members'
+         + (f' (the first {c.members(c.year)} of {c.archive_members(c.year)}, as the hindcasts)' if c.members(c.year) < c.archive_members(c.year) else '')],
         ['Target period', f'{day(s_start)} – {day(s_end)}'],
         ['Forecast record', frozen],
-        ['Publication status', 'Research reconstruction: produced after the initialization date with the published '
-                               'method; not an official EMI or ICPAC forecast'],
+        ['Publication status', issue['long']],
         ['Reference period', f'{src["label"]} {season} {ref_label(c, crosses)} ({len(c.reference_years)} seasons)'],
         ['Observations processed through', obs_text],
         ['CHIRPS archive', archive],
@@ -437,7 +442,7 @@ def build_cycle(cfg_path, published, today, sha):
         copies.append((bulletin, OUT / f'downloads/{cid}_bulletin.md'))
         downloads.append(dict(label='Original forecast bulletin (Markdown)', href=f'downloads/{cid}_bulletin.md',
                               note='Text bulletin issued with the frozen forecast'))
-    data = dict(id=cid, cfg=cfg_path, tag=c.tag, season=season, obs=src['label'], obs_citation=src['citation'], label=c.target_label(season), init=c.init_month_name,
+    data = dict(id=cid, publication=forecast_issue.issue_status(c), cfg=cfg_path, tag=c.tag, season=season, obs=src['label'], obs_citation=src['citation'], label=c.target_label(season), init=c.init_month_name,
                 option=f'{c.target_label(season)} — {c.init_month_name} initialization',
                 init_date=date(c.year, c.init_month, 1).isoformat(), views=views, domain_view=domain_view,
                 default_view=default_view, definition=definition, definitions=view_definitions(c, ej), criteria=view_criteria(c, domain_view), note=note, reference=ref_label(c, crosses), targets=targets, meta=meta, regions=regions,
@@ -717,7 +722,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None,
       <label>Forecast cycle <select id="cycle">{options}</select></label>
       <label>Area <select id="view"></select></label>
       <span class="caveat" id="view-criteria"></span>
-      <span class="research">Research reconstruction · not an official EMI or ICPAC forecast</span>
+      <span class="research">Not an official EMI or ICPAC forecast · cycles before 2027 are research reconstructions</span>
     </div>
   </div>
 </header>
@@ -727,7 +732,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None,
 <section id="outlooks" class="wrap">
   <p class="eyebrow" id="ol-eyebrow"></p>
   <h1 id="ol-title">Seasonal rainfall outlook</h1>
-  <p class="research-inline">Research reconstruction · not an official forecast</p>
+  <p class="research-inline">Not an official forecast · see the cycle's publication status</p>
   {obs_notice}
   <div id="ol-live" aria-live="polite" class="sr-only"></div>
   <div class="targets" role="group" aria-label="Target period" id="ol-targets"></div>
@@ -867,7 +872,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None,
       <li>Few evaluation years and single verification seasons give wide uncertainty; regional and monthly results are noisy.</li>
       <li>The later evaluation years were inspected during method development; the cleanest evidence is the cross-validated 1993–2016 score.</li>
       <li>The 0.25° maps repeat 1° model information; they add no dynamical detail.</li>
-      <li>All cycles are research reconstructions produced after their initialization dates, not official EMI or ICPAC forecasts.</li>
+      <li>Cycles before 2027 are research reconstructions produced after their initialization dates; from 2027 each forecast is issued and frozen before its season (docs/52). None is an official EMI or ICPAC forecast.</li>
     </ul></details>
   <details><summary>Reproduce</summary>
   <pre><code>git clone {REPO}.git
@@ -1959,7 +1964,7 @@ def main():
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
         '<title>Seasonal Rainfall Outlook Platform: downloads</title><link rel="stylesheet" href="../assets/style.css"></head>'
         f'<body><main class="wrap"><h1>Downloads</h1><p><a href="../index.html">Back to the outlooks</a></p>{items}'
-        '<p class="caveat">Research reconstructions; not official EMI or ICPAC forecasts.</p></main></body></html>\n',
+        '<p class="caveat">Not official EMI or ICPAC forecasts; cycles before 2027 are research reconstructions.</p></main></body></html>\n',
         encoding='utf-8', newline='')
     (OUT / 'assets/site.js').write_text(JS.strip() + '\n', encoding='utf-8', newline='')
     (OUT / 'assets/style.css').write_text(CSS.strip() + '\n', encoding='utf-8', newline='')
