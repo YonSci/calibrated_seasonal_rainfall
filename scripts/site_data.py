@@ -127,6 +127,21 @@ def leung_dirichlet_files(site):
     return out
 
 
+def mos_files(site):
+    """Statistical downscaling (MOS: CCA, PCR) against the published pipeline (scripts/mos_benchmark.py, docs/53)."""
+    import site_files
+    by_hash = {v['sha256']: v['url'] for v in site_files.load_manifest()['assets'].values()}
+    out = {}
+    for f in sorted((ROOT / 'outputs/mos').glob('*/benchmark.json')):
+        name = f.parent.name
+        d = read(f)
+        d.pop('protocol', None)
+        local = f'downloads/mos/{name}/benchmark.json'
+        url = by_hash.get(site_files.sha256(f)) or (local if (site / local).is_file() else None)
+        out[name] = dict(slim(d), assets=assets(site, f'assets/mos/{name}'), downloads=[url] if url else [])
+    return out
+
+
 def downloads(site):
     """Every download link of the page: site path or release-asset URL, with its size when known."""
     import re
@@ -176,6 +191,8 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         sizes[f'bias/{name}.json'] = write(OUT / 'bias' / f'{name}.json', obj)
     for name, obj in probcal_files(site).items():
         sizes[f'probcal/{name}.json'] = write(OUT / 'probcal' / f'{name}.json', obj)
+    for name, obj in mos_files(site).items():
+        sizes[f'mos/{name}.json'] = write(OUT / 'mos' / f'{name}.json', obj)
     for name, obj in leung_dirichlet_files(site).items():
         sizes[f'leung_dirichlet/{name}.json'] = write(OUT / 'leung_dirichlet' / f'{name}.json', obj)
     return sizes

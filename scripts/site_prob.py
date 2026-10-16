@@ -122,7 +122,21 @@ def export(out_dir):
                 files.append((f'downloads/probcal/{b["name"]}/{rel}', label, d.stat().st_size))
         blocks.append((b['name'], block(b, files)))
     export_leung_dirichlet(out_dir)
+    export_mos(out_dir)
     return blocks
+
+
+def export_mos(out_dir):
+    """Statistical downscaling (docs/53): figures to assets/, results to downloads/."""
+    for folder in sorted((ROOT / 'outputs/mos').glob('*/benchmark.json')):
+        name, src = folder.parent.name, folder.parent
+        for f in sorted((src / 'figures').glob('*.png')):
+            d = out_dir / 'assets/mos' / name / f.name
+            d.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, d)
+        d = out_dir / 'downloads/mos' / name / 'benchmark.json'
+        d.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(folder, d)
 
 
 def export_leung_dirichlet(out_dir):

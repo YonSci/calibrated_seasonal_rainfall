@@ -1,0 +1,90 @@
+---
+// Statistical downscaling by model output statistics (CCA, PCR; the CPT/PyCPT approach of ICPAC and IRI) against the published
+// pipeline (scripts/mos_benchmark.py, docs/53). Results from site_data/mos/<cycle>.json.
+import Base from '../../layouts/Base.astro';
+import OnThisPage from '../../components/OnThisPage.astro';
+import Table from '../../components/Table.astro';
+import Figure from '../../components/Figure.astro';
+import { read, names, href, link, esc, signed, num, years, cycleTitle, REPO } from '../../lib/data.js';
+
+const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
+const cycles = names('mos').map((n) => ({ name: n, d: read(`mos/${n}.json`) }))
+  .map((x) => ({ ...x, title: cycleTitle(INIT[x.name.split('_')[0]], x.name.split('_')[1].toUpperCase()) }))
+  .sort((a, b) => INIT[a.name.split('_')[0]] - INIT[b.name.split('_')[0]]);
+const verdict = (dec) => (dec.confirmed ? '<strong>✓ confirmed better</strong>' : dec.no_harm ? 'not confirmed' : 'not confirmed; worse over the test years');
+function evidence(d, score) {
+  const reg = d.primary_region;
+  const skill = score === 'rps' ? 'rpss' : 'crpss';
+  const ref = score === 'rps' ? 'incumbent' : 'mvs_ensemble';
+  const rows = [];
+  for (const t of Object.keys(d.targets)) for (const k of [ref, ...d.methods]) {
+    const m = d.targets[t].methods[k];
+    const x = d.tests[k]?.[score]?.[t];
+    rows.push([`<strong>${esc(t)}</strong>`, k === ref ? `<em>${esc(d.references[k])}</em>` : esc(d.labels[k]),
+      signed(m.training[reg][skill]), signed(m.test[reg][skill]),
+      x ? signed(x.training.mean_difference, 4) : '—', x ? num(x.decision.holm_p_family, 3) : '—',
+      x ? `${x.training.years_better} of ${x.training.years}` : '—', x ? signed(x.test.mean_difference, 4) : '—', x ? verdict(x.decision) : 'reference']);
+  }
+  return {
+    head: ['Target', 'Method', `${skill.toUpperCase()} ${years(d.training_years)} (LOYO)`, `${skill.toUpperCase()} ${years(d.test_years)}`,
+      `Δ${score.toUpperCase()} vs reference`, 'Holm p', 'Years better', `Δ${score.toUpperCase()} (test years)`, 'Decision'],
+    rows,
+  };
+}
+const commonModes = (list) => {
+  const n = new Map();
+  for (const m of list) n.set(m.join(','), (n.get(m.join(',')) ?? 0) + 1);
+  const [k, c] = [...n].sort((a, b) => b[1] - a[1])[0] ?? ['', 0];
+  return k ? `${k.split(',').slice(0, 3).join(' / ')} (${c} of ${list.length} folds)` : '—';
+};
+const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.entries(s).flatMap(([sc, ts]) =>
+  Object.entries(ts).filter(([, x]) => x.decision.confirmed).map(([t]) => `${d.labels[k]} for ${t} (${sc.toUpperCase()})`)));
+---
+<Base title="Statistical downscaling" section="research" description="Statistical downscaling by model output statistics (canonical correlation analysis and principal component regression, the CPT approach) tested against the published pipeline.">
+  <OnThisPage>
+    <h1>Statistical downscaling (MOS)</h1>
+    <p>Model output statistics as in CPT / PyCPT, the tools ICPAC and IRI use for regional seasonal outlooks: the large-scale pattern of
+    the SEAS5 forecast is related statistically to the observed CHIRPS pattern over the training years, and the relation is applied to
+    the new forecast. Two methods, each tested against the published pipeline with the same data, cross-validation and tests as the
+    other benchmarks.</p>
+    <p class="notice"><strong>A comparison, not a published forecast.</strong> The published forecasts keep the published approach. A
+    method confirmed here becomes a candidate in the <a href={href('research/method-selection/')}>method selection</a>.</p>
+
+    <h2 id="what">The methods</h2>
+    <ul class="findings">
+      <li><strong>Predictor:</strong> SEAS5 ensemble-mean rainfall over the whole model box, averaged to its 1° cells (180 predictors).
+        <strong>Predictand:</strong> CHIRPS at every 0.25° cell of Ethiopia. Both on square-root rainfall, standardized with the training years.</li>
+      <li><strong>Canonical correlation analysis (CCA):</strong> EOF pre-filtering of both fields (up to 6 modes each), then up to 3 canonical modes between their leading principal components.</li>
+      <li><strong>Principal component regression (PCR):</strong> every CHIRPS cell regressed on the leading predictor principal components (up to 6).</li>
+      <li><strong>Choice of modes:</strong> inner leave-one-year-out cross-validation inside each fold (smallest mean normalized squared error over the cells).</li>
+      <li><strong>Probabilities and amounts:</strong> a Gaussian predictive distribution in square-root space with the cross-validated error of the chosen modes: tercile probabilities from it, amounts and 10–90% ranges from 51 of its quantiles.</li>
+    </ul>
+
+    {cycles.map(({ name, d, title }) => (
+      <section id={name}>
+        <h2>{title}</h2>
+        <p><strong>Confirmed better than the published approach:</strong> {confirmedOf(d).length ? confirmedOf(d).join('; ') : 'none'}.
+        Modes most often chosen (predictor EOFs / predictand EOFs / canonical modes), season target: CCA {commonModes(d.targets[Object.keys(d.targets).at(-1)].modes.cca.training)},
+        PCR {commonModes(d.targets[Object.keys(d.targets).at(-1)].modes.pcr.training).replace(/ \/ 0 \/ 0/, '')}.</p>
+        <h3>Tercile probabilities (RPS)</h3>
+        <Table {...evidence(d, 'rps')} />
+        <h3>Rainfall amounts (CRPS)</h3>
+        <Table {...evidence(d, 'crps')} />
+        <p class="caveat">Negative Δ favours the method. Skill against the observed climatology over {d.regions[d.primary_region]}; Holm across both methods and the five targets.</p>
+        {d.assets.includes(`assets/mos/${name}/mos_summary.png`) && <Figure src={`assets/mos/${name}/mos_summary.png`} caption="Skill of each method and target; * confirmed better than the reference." />}
+        {d.validation && Object.keys(d.validation).length > 0 && (
+          <>
+            <h3>Independent season {Object.values(d.validation)[0].year}</h3>
+            <Table head={['Target', 'RPSS published', 'RPSS CCA', 'RPSS PCR', 'CRPSS MVS ensemble', 'CRPSS CCA', 'CRPSS PCR']}
+              rows={Object.entries(d.validation).map(([t, v]) => [`<strong>${esc(t)}</strong>`,
+                ...['incumbent', 'cca', 'pcr'].map((k) => signed(1 - v.rps[k] / v.rps_clim)),
+                ...['mvs_ensemble', 'cca', 'pcr'].map((k) => signed(1 - v.crps[k] / v.crps_clim))])} />
+            <p class="caveat">The forecast year fitted on the reference years, scored against CHIRPS once observed. One season is one validation season, not a verdict.</p>
+          </>
+        )}
+        <p class="caveat">Download: {d.downloads.map((f) => <a href={link(f)}>benchmark.json</a>)}</p>
+      </section>
+    ))}
+    <p class="caveat">Code: <a href={`${REPO}/blob/main/scripts/mos_benchmark.py`}><code>scripts/mos_benchmark.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/53_STATISTICAL_DOWNSCALING.md`}>docs/53</a>.</p>
+  </OnThisPage>
+</Base>

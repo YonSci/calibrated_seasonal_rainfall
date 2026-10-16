@@ -71,3 +71,31 @@ site under *Research › Method selection*; refreshed by the daily scoring). As 
 - **Rainfall amounts:** square-root MVS, gamma QM, EMOS and Variance Scaling are each confirmed for two targets; square-root
   MVS and gamma QM are better on average for all 20 targets over 1993–2016. Quantile regression, the Leung–Dirichlet
   calibration and power transformation are confirmed for one target each.
+
+## More statistical power (2026-10-17)
+
+`scripts/method_summary.py` also reads the same out-of-sample scores three further ways (no refitting):
+
+- **33 years.** Each target's 1993–2016 leave-one-year-out years are joined with its test years (2017 onward, fitted on
+  1993–2016), so every year 1993–2025 counts, scored by a model that did not see it. This gives a paired whole-year
+  sign-flip test per target over 33 years (32 for ONDJ).
+- **Pooled.** For each method and year, its skill difference from the published approach is averaged over all its targets of
+  all seasons, as a share of the climatology score, so targets of different rainfall add up. This gives one test per method
+  over the years.
+- **Holm and Benjamini–Hochberg** across every method of a product, for the pooled tests and for the 33-year target tests.
+
+**Results:**
+- **Tercile probabilities:** no method is significantly better when pooled, under either correction. Square-root MVS comes
+  closest: better in 25 of 33 years, p 0.004 before adjustment, Holm 0.12, BH 0.08 (across all 29 methods).
+- **Rainfall amounts, pooled:**
+  - Holm: Variance Scaling, square-root MVS, gamma QM and quantile regression are significantly better than the MVS-corrected
+    ensemble.
+  - Benjamini–Hochberg: the same four, plus EMOS.
+- **Rainfall amounts, per target over 33 years:** square-root MVS is confirmed for 3 targets under Holm and 12 under BH;
+  gamma QM for 2 and 8.
+- **Statistical downscaling** (CCA, PCR, docs/53) is worse than the published approach when pooled.
+
+The selection rule stays as fixed in advance: Holm within each benchmark family. These results are sensitivity analyses on
+the Research overview. Switching to Benjamini–Hochberg or to pooled evidence would be a decision. It would most likely make
+square-root MVS a candidate for amounts in more targets.
+
