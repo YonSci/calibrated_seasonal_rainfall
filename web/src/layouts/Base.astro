@@ -6,6 +6,7 @@ import { C, cycleOf, url, defaultTarget } from '../lib/cycles.js';
 import { GLOSSARY } from '../lib/glossary.js';
 const CLASSIC = `${ROOT}classic/`;
 const { title, description = '', section = '' } = Astro.props;
+const SITE_NAME = 'Seasonal Calibrated Rainfall Outlook';           // the platform's name (SCRO); the home page's title
 // Forecast entries open the latest cycle; Verification the latest cycle with a verified target.
 const latest = cycleOf(C.default);
 const verified = [...C.cycles].reverse().find((c) => c.targets.some((t) => Object.keys(t.verification || {}).length)) || latest;
@@ -38,7 +39,8 @@ const menus = [
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{title} · Ethiopia Seasonal Rainfall</title>
+  <title>{title === SITE_NAME ? `${SITE_NAME} (SCRO) · Ethiopia` : `${title} · SCRO`}</title>
+  <meta property="og:site_name" content={`${SITE_NAME} (SCRO)`}>
   <meta name="description" content={description}>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -79,6 +81,9 @@ const menus = [
     .toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.9rem;margin:8px 0 4px}
     figure.map-figure img{max-width:100%;height:auto}
     .button-link{display:inline-block;background:var(--accent);color:var(--surface);padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600}
+    .brand{display:flex;flex-direction:column;line-height:1.1}
+    .brand-short{font-size:1.15rem;letter-spacing:.04em}
+    .brand-full{font-size:.72rem;font-weight:500;color:var(--muted)}
     a.chip{text-decoration:none;display:inline-block;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
     a.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
     @media (max-width:860px){
@@ -95,7 +100,7 @@ const menus = [
   <a class="skip" href="#main">Skip to the content</a>
   <header class="top">
     <div class="wrap nav">
-      <a class="brand" href={href('')}>Ethiopia Seasonal Rainfall</a>
+      <a class="brand" href={href('')} aria-label={`${SITE_NAME} (SCRO), home`}><span class="brand-short">SCRO</span><span class="brand-full">{SITE_NAME}</span></a>
       <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="site-menu">Menu</button>
       <nav class="menu" id="site-menu" aria-label="Site">
         {nav.map(([k, label, u]) => <a href={u} aria-current={section === k ? 'page' : undefined}>{label}</a>)}
