@@ -51,7 +51,7 @@ PATH_KEYS = ["project_config","forecast_root","verification_root","processed_roo
 PRODUCT_SCRIPTS = ["operational_core.py","presentation_layers.py","run_operational.py",
                    "delivery_map_base.py","delivery_output_runs.py","plot_forecast_products.py",
                    "output_runs.py","cycle.py","common.py","run_monthly.py","followup_common.py",
-                   "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py","obs_source.py"]
+                   "verify_2026_regimes.py","verify2026_common.py","verify2026_outputs.py","obs_source.py","forecast_issue.py"]
 EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "interpret_external_forecasts.py",
                     "verify_external_forecasts.py", "verify2026_math.py"]
 BIAS_SCRIPTS = ["bias_validation.py", "bias_methods.py", "bias_confirmation.py", "bias_benchmark.py", "calibration_core.py",
