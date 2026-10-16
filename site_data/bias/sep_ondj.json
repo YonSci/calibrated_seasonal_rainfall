@@ -114583,14 +114583,23 @@
      "chosen_by": "selection-aware procedure (training years only)",
      "alternatives": [
       {
+       "method": "vs",
+       "label": "Variance Scaling (unbounded)",
+       "p_adjusted": 0.024900000000000002,
+       "holm_p": 0.07221
+      },
+      {
        "method": "gqm",
        "label": "Gamma Quantile Mapping",
+       "p_adjusted": 0.0084,
        "holm_p": 0.0084
       }
      ],
      "historical": {
       "training_difference": -0.4786897475521504,
       "holm_p": 0.020945000000000002,
+      "p_adjusted": 0.01065,
+      "correction": "benjamini_hochberg",
       "years_better": 18,
       "years": 24,
       "test_difference": -0.6902295325749415,
@@ -114602,7 +114611,7 @@
       "mean_difference": null,
       "required": 3
      },
-     "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Jan (CRPS (mm) difference -0.4787 over the training years, Holm p 0.0209; -0.6902 over the test years). Independent validation: 0 of 3 season(s)."
+     "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Jan (CRPS (mm) difference -0.4787 over the training years, Benjamini–Hochberg p 0.0106; -0.6902 over the test years). Independent validation: 0 of 3 season(s)."
     }
    },
    "ONDJ": {
@@ -114624,7 +114633,8 @@
     }
    }
   },
-  "confirmation_commit": "bed63b906c77cfb3450514d7034ec5f68d067bc0"
+  "confirmation_commit": "bed63b906c77cfb3450514d7034ec5f68d067bc0",
+  "multiple_testing": "benjamini_hochberg"
  },
  "recommendation_rule": {
   "description": "Rule by which the platform suggests a bias-correction method for each cycle, target and product (scripts/bias_recommend.py, docs/47). Fixed before the independent validation seasons are scored. A suggestion is advice for a decision; it never changes the published forecast.",
@@ -114648,7 +114658,15 @@
     "unit": "CRPS (mm)"
    }
   },
-  "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Holm-adjusted p < 0.05 across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+  "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Benjamini-Hochberg-adjusted p < 0.05 (false discovery rate) across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+  "multiple_testing": "benjamini_hochberg",
+  "changes": [
+   {
+    "date": "2026-10-17",
+    "change": "multiple-testing correction: Holm -> Benjamini-Hochberg",
+    "note": "Decided by the project lead after the sensitivity analyses (33-year and pooled evidence, Holm and Benjamini-Hochberg) had been seen; the decisions are recomputed from the p-values each benchmark stored, within the same families. The benchmarks keep their own Holm decisions as run."
+   }
+  ],
   "choice": "Among candidates, the method the selection-aware procedure chooses from all training years (training-only information); if that method is not a candidate, the candidate with the best training-period score. Other candidates are listed as alternatives: a confirmation establishes improvement against the operational method, not a ranking among candidates.",
   "validation": {
    "minimum_seasons": 3,

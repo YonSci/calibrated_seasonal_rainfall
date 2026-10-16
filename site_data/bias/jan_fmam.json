@@ -116879,7 +116879,8 @@
     }
    }
   },
-  "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a"
+  "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a",
+  "multiple_testing": "benjamini_hochberg"
  },
  "recommendation_rule": {
   "description": "Rule by which the platform suggests a bias-correction method for each cycle, target and product (scripts/bias_recommend.py, docs/47). Fixed before the independent validation seasons are scored. A suggestion is advice for a decision; it never changes the published forecast.",
@@ -116903,7 +116904,15 @@
     "unit": "CRPS (mm)"
    }
   },
-  "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Holm-adjusted p < 0.05 across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+  "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Benjamini-Hochberg-adjusted p < 0.05 (false discovery rate) across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+  "multiple_testing": "benjamini_hochberg",
+  "changes": [
+   {
+    "date": "2026-10-17",
+    "change": "multiple-testing correction: Holm -> Benjamini-Hochberg",
+    "note": "Decided by the project lead after the sensitivity analyses (33-year and pooled evidence, Holm and Benjamini-Hochberg) had been seen; the decisions are recomputed from the p-values each benchmark stored, within the same families. The benchmarks keep their own Holm decisions as run."
+   }
+  ],
   "choice": "Among candidates, the method the selection-aware procedure chooses from all training years (training-only information); if that method is not a candidate, the candidate with the best training-period score. Other candidates are listed as alternatives: a confirmation establishes improvement against the operational method, not a ranking among candidates.",
   "validation": {
    "minimum_seasons": 3,

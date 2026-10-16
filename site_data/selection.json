@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-16T21:04:45.790997+00:00",
+ "created_utc": "2026-10-16T22:07:23.166611+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -34,7 +34,15 @@
     ]
    }
   },
-  "historical": "A method is a candidate for a target and product only if its benchmark confirms it better than the published reference: outer leave-one-year-out over the training years (1993-2016), Holm-adjusted p < 0.05 across every method and target of its family, and not worse over the test years (2017 onward).",
+  "historical": "A method is a candidate for a target and product only if its benchmark confirms it better than the published reference: outer leave-one-year-out over the training years (1993-2016), Benjamini-Hochberg-adjusted p < 0.05 (false discovery rate) across every method and target of its family, and not worse over the test years (2017 onward).",
+  "multiple_testing": "benjamini_hochberg",
+  "changes": [
+   {
+    "date": "2026-10-17",
+    "change": "multiple-testing correction: Holm -> Benjamini-Hochberg",
+    "note": "Decided by the project lead after the sensitivity analyses (33-year and pooled evidence, Holm and Benjamini-Hochberg) had been seen; the decisions are recomputed from the p-values each benchmark stored, within the same families. The benchmarks keep their own Holm decisions as run."
+   }
+  ],
   "validation": {
    "minimum_seasons": 3,
    "rule": "Independent validation seasons are forecast years scored after the benchmark (bias_validation.py for bias correction; dist_shadow.py for the EMOS amount model). A candidate becomes 'recommended' once at least minimum_seasons have been scored for it and the reference and its mean score over them is not worse; with fewer it stays a 'candidate'; with enough and a worse mean it is 'not supported by validation'. A candidate with no validation record yet needs a shadow forecast before it can be recommended."
@@ -212,6 +220,8 @@
        "years": 24,
        "holm_p": 0.0126,
        "test_difference": -0.7347773343172624,
+       "p_adjusted": 0.0126,
+       "correction": "benjamini_hochberg",
        "test_years_better": 8,
        "test_years": 9
       },
@@ -227,7 +237,7 @@
        "required": 3
       },
       "alternatives": [],
-      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM: CRPS (mm) difference -0.7207 over the training years (Holm p 0.0126; 19 of 24 years better), -0.7348 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.762."
+      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM: CRPS (mm) difference -0.7207 over the training years (Benjamini–Hochberg p 0.0126; 19 of 24 years better), -0.7348 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.762."
      }
     }
    }
@@ -250,6 +260,8 @@
       "historical": {
        "training_difference": -0.03669166891513275,
        "holm_p": 0.0264,
+       "p_adjusted": 0.0264,
+       "correction": "benjamini_hochberg",
        "years_better": 18,
        "years": 24,
        "test_difference": -0.006634972406173217,
@@ -268,7 +280,7 @@
        "required": 3
       },
       "alternatives": [],
-      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Holm p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004."
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Benjamini–Hochberg p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004."
      },
      "amounts": {
       "product": "Rainfall amounts (and ranges)",
@@ -438,17 +450,47 @@
      "amounts": {
       "product": "Rainfall amounts (and ranges)",
       "reference": "Mean-Variance Scaling ensemble (published)",
-      "status": "keep",
+      "status": "candidate",
       "selected": {
-       "family": "published",
-       "label": "Mean-Variance Scaling ensemble (published)",
-       "stage": null,
-       "method": null
+       "family": "bias_correction",
+       "family_label": "Bias correction (amount correction)",
+       "stage": "amount correction",
+       "method": "gqm",
+       "label": "Gamma Quantile Mapping"
       },
-      "historical": null,
-      "validation": null,
-      "alternatives": [],
-      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Jun on the historical evidence."
+      "historical": {
+       "training_difference": -0.13088596934082633,
+       "holm_p": 0.47872999999999993,
+       "p_adjusted": 0.04885,
+       "correction": "benjamini_hochberg",
+       "years_better": 18,
+       "years": 24,
+       "test_difference": -0.1625831950877789,
+       "test_years_better": 8,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 14.312099911938494,
+         "reference": 14.005909664407207
+        }
+       ],
+       "mean_difference": 0.306190247531287,
+       "required": 3
+      },
+      "alternatives": [
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "sqrt_mvs",
+        "label": "Square-root-space Mean-Variance Scaling",
+        "status": "candidate",
+        "historical": null
+       }
+      ],
+      "why": "Gamma Quantile Mapping (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jun: CRPS (mm) difference -0.1309 over the training years (Benjamini–Hochberg p 0.0488; 18 of 24 years better), -0.1626 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.3062. Also confirmed (one change at a time): Square-root-space Mean-Variance Scaling (amount correction)."
      }
     },
     "Jul": {
@@ -481,6 +523,8 @@
       "historical": {
        "training_difference": -0.1385532224164859,
        "holm_p": 0.0,
+       "p_adjusted": 0.0,
+       "correction": "benjamini_hochberg",
        "years_better": 23,
        "years": 24,
        "test_difference": -0.1399016692539045,
@@ -498,8 +542,25 @@
        "mean_difference": -0.4167858110934972,
        "required": 3
       },
-      "alternatives": [],
-      "why": "Variance Scaling (unbounded) (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jul: CRPS (mm) difference -0.1386 over the training years (Holm p 0; 23 of 24 years better), -0.1399 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.4168."
+      "alternatives": [
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "sqrt_mvs",
+        "label": "Square-root-space Mean-Variance Scaling",
+        "status": "candidate",
+        "historical": null
+       },
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "pt",
+        "label": "Power Transformation",
+        "status": "candidate",
+        "historical": null
+       }
+      ],
+      "why": "Variance Scaling (unbounded) (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jul: CRPS (mm) difference -0.1386 over the training years (Benjamini–Hochberg p 0; 23 of 24 years better), -0.1399 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.4168. Also confirmed (one change at a time): Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction)."
      }
     },
     "Aug": {
@@ -523,33 +584,53 @@
       "reference": "Mean-Variance Scaling ensemble (published)",
       "status": "candidate",
       "selected": {
-       "family": "bias_correction",
-       "family_label": "Bias correction (amount correction)",
-       "stage": "amount correction",
-       "method": "vs",
-       "label": "Variance Scaling (unbounded)"
+       "family": "mos",
+       "family_label": "Statistical downscaling (docs/53)",
+       "stage": "statistical downscaling",
+       "method": "pcr",
+       "label": "Principal component regression (PCR)"
       },
       "historical": {
-       "training_difference": -0.12898291857397526,
-       "holm_p": 0.0,
-       "years_better": 24,
+       "training_difference": -1.3089340745176288,
+       "years_better": 16,
        "years": 24,
-       "test_difference": -0.08486901377524386,
-       "test_years_better": 8,
+       "holm_p": 0.05904,
+       "test_difference": -0.7517057509202265,
+       "p_adjusted": 0.0246,
+       "correction": "benjamini_hochberg",
+       "test_years_better": 3,
        "test_years": 9
       },
       "validation": {
        "seasons": [
         {
          "year": 2026,
-         "method": 15.270217703931799,
-         "reference": 15.456123493019991
+         "method": 18.72613508676848,
+         "reference": 15.45612349301999
         }
        ],
-       "mean_difference": -0.1859057890881921,
+       "mean_difference": 3.2700115937484906,
        "required": 3
       },
       "alternatives": [
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "vs",
+        "label": "Variance Scaling (unbounded)",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.12898291857397526,
+         "holm_p": 0.0,
+         "p_adjusted": 0.0,
+         "correction": "benjamini_hochberg",
+         "years_better": 24,
+         "years": 24,
+         "test_difference": -0.08486901377524386,
+         "test_years_better": 8,
+         "test_years": 9
+        }
+       },
        {
         "family": "bias_correction",
         "family_label": "Bias correction (amount correction)",
@@ -575,7 +656,7 @@
         "historical": null
        }
       ],
-      "why": "Variance Scaling (unbounded) (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Aug: CRPS (mm) difference -0.129 over the training years (Holm p 0; 24 of 24 years better), -0.08487 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.1859. Also confirmed (one change at a time): Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction); Gamma Quantile Mapping (amount correction)."
+      "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for Aug: CRPS (mm) difference -1.309 over the training years (Benjamini–Hochberg p 0.0246; 16 of 24 years better), -0.7517 over the test years. Independent validation: 1 of 3 season(s), mean difference +3.27. Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction); Gamma Quantile Mapping (amount correction)."
      }
     },
     "Sep": {
@@ -611,6 +692,8 @@
        "years": 24,
        "holm_p": 0.023799999999999998,
        "test_difference": -0.5431653039540865,
+       "p_adjusted": 0.01275,
+       "correction": "benjamini_hochberg",
        "test_years_better": 4,
        "test_years": 9
       },
@@ -627,6 +710,40 @@
       },
       "alternatives": [
        {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "gqm",
+        "label": "Gamma Quantile Mapping",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.07191713669204391,
+         "holm_p": 0.094075,
+         "p_adjusted": 0.013312500000000001,
+         "correction": "benjamini_hochberg",
+         "years_better": 19,
+         "years": 24,
+         "test_difference": -0.09469943593441282,
+         "test_years_better": 7,
+         "test_years": 9
+        }
+       },
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "vs",
+        "label": "Variance Scaling (unbounded)",
+        "status": "candidate",
+        "historical": null
+       },
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "sqrt_mvs",
+        "label": "Square-root-space Mean-Variance Scaling",
+        "status": "candidate",
+        "historical": null
+       },
+       {
         "family": "distribution_phase2",
         "family_label": "Distribution model, Phase 2",
         "method": "emos_csg",
@@ -638,6 +755,8 @@
          "years": 24,
          "holm_p": 0.007875,
          "test_difference": -0.5500417116238892,
+         "p_adjusted": 0.007875,
+         "correction": "benjamini_hochberg",
          "test_years_better": 5,
          "test_years": 9
         }
@@ -654,6 +773,8 @@
          "years": 24,
          "holm_p": 0.036449999999999996,
          "test_difference": -0.9786195843590403,
+         "p_adjusted": 0.020249999999999997,
+         "correction": "benjamini_hochberg",
          "test_years_better": 5,
          "test_years": 9
         }
@@ -670,12 +791,14 @@
          "years": 24,
          "holm_p": 0.0234,
          "test_difference": -0.7307156732441906,
+         "p_adjusted": 0.020249999999999997,
+         "correction": "benjamini_hochberg",
          "test_years_better": 6,
          "test_years": 9
         }
        }
       ],
-      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Holm p 0.0238; 18 of 24 years better), -0.5432 over the test years. Independent validation: 1 of 3 season(s), mean difference +1.588. Also confirmed (one change at a time): EMOS, censored shifted gamma (distribution model); Canonical correlation analysis (CCA) (statistical downscaling); Principal component regression (PCR) (statistical downscaling)."
+      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Benjamini–Hochberg p 0.0127; 18 of 24 years better), -0.5432 over the test years. Independent validation: 1 of 3 season(s), mean difference +1.588. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Canonical correlation analysis (CCA) (statistical downscaling); Principal component regression (PCR) (statistical downscaling)."
      }
     },
     "JJAS": {
@@ -697,17 +820,38 @@
      "amounts": {
       "product": "Rainfall amounts (and ranges)",
       "reference": "Mean-Variance Scaling ensemble (published)",
-      "status": "keep",
+      "status": "candidate",
       "selected": {
-       "family": "published",
-       "label": "Mean-Variance Scaling ensemble (published)",
-       "stage": null,
-       "method": null
+       "family": "mos",
+       "family_label": "Statistical downscaling (docs/53)",
+       "stage": "statistical downscaling",
+       "method": "pcr",
+       "label": "Principal component regression (PCR)"
       },
-      "historical": null,
-      "validation": null,
+      "historical": {
+       "training_difference": -2.9036420584837117,
+       "years_better": 17,
+       "years": 24,
+       "holm_p": 0.124145,
+       "test_difference": -3.639149743550623,
+       "p_adjusted": 0.0443375,
+       "correction": "benjamini_hochberg",
+       "test_years_better": 7,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 59.735371766209276,
+         "reference": 47.20174897299629
+        }
+       ],
+       "mean_difference": 12.533622793212984,
+       "required": 3
+      },
       "alternatives": [],
-      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for JJAS on the historical evidence."
+      "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for JJAS: CRPS (mm) difference -2.904 over the training years (Benjamini–Hochberg p 0.0443; 17 of 24 years better), -3.639 over the test years. Independent validation: 1 of 3 season(s), mean difference +12.53."
      }
     }
    }
@@ -841,6 +985,8 @@
       "historical": {
        "training_difference": -0.4786897475521504,
        "holm_p": 0.020945000000000002,
+       "p_adjusted": 0.01065,
+       "correction": "benjamini_hochberg",
        "years_better": 18,
        "years": 24,
        "test_difference": -0.6902295325749415,
@@ -853,6 +999,14 @@
        "required": 3
       },
       "alternatives": [
+       {
+        "family": "bias_correction",
+        "family_label": "Bias correction (amount correction)",
+        "method": "vs",
+        "label": "Variance Scaling (unbounded)",
+        "status": "candidate",
+        "historical": null
+       },
        {
         "family": "bias_correction",
         "family_label": "Bias correction (amount correction)",
@@ -873,12 +1027,14 @@
          "years": 24,
          "holm_p": 5e-05,
          "test_difference": -0.09387171726719717,
+         "p_adjusted": 5e-05,
+         "correction": "benjamini_hochberg",
          "test_years_better": 8,
          "test_years": 8
         }
        }
       ],
-      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Holm p 0.0209; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Leung–Dirichlet calibration (Leung–Dirichlet calibration)."
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Benjamini–Hochberg p 0.0106; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Gamma Quantile Mapping (amount correction); Leung–Dirichlet calibration (Leung–Dirichlet calibration)."
      }
     },
     "ONDJ": {

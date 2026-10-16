@@ -1,5 +1,5 @@
 {
-  "created_utc": "2026-10-15T04:13:07.157747+00:00",
+  "created_utc": "2026-10-16T22:07:22.411069+00:00",
   "rule": "config/bias_correction/recommendation_rule.json",
   "rule_contents": {
     "description": "Rule by which the platform suggests a bias-correction method for each cycle, target and product (scripts/bias_recommend.py, docs/47). Fixed before the independent validation seasons are scored. A suggestion is advice for a decision; it never changes the published forecast.",
@@ -23,7 +23,15 @@
         "unit": "CRPS (mm)"
       }
     },
-    "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Holm-adjusted p < 0.05 across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+    "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Benjamini-Hochberg-adjusted p < 0.05 (false discovery rate) across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+    "multiple_testing": "benjamini_hochberg",
+    "changes": [
+      {
+        "date": "2026-10-17",
+        "change": "multiple-testing correction: Holm -> Benjamini-Hochberg",
+        "note": "Decided by the project lead after the sensitivity analyses (33-year and pooled evidence, Holm and Benjamini-Hochberg) had been seen; the decisions are recomputed from the p-values each benchmark stored, within the same families. The benchmarks keep their own Holm decisions as run."
+      }
+    ],
     "choice": "Among candidates, the method the selection-aware procedure chooses from all training years (training-only information); if that method is not a candidate, the candidate with the best training-period score. Other candidates are listed as alternatives: a confirmation establishes improvement against the operational method, not a ranking among candidates.",
     "validation": {
       "minimum_seasons": 3,
@@ -135,7 +143,8 @@
           }
         }
       },
-      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a"
+      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a",
+      "multiple_testing": "benjamini_hochberg"
     },
     {
       "benchmark": "config/bias_correction/feb_fmam.json",
@@ -154,6 +163,8 @@
             "historical": {
               "training_difference": -0.03669166891513275,
               "holm_p": 0.0264,
+              "p_adjusted": 0.0264,
+              "correction": "benjamini_hochberg",
               "years_better": 18,
               "years": 24,
               "test_difference": -0.006634972406173217,
@@ -171,7 +182,7 @@
               "mean_difference": -0.006003919233384447,
               "required": 3
             },
-            "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Feb (RPS difference -0.03669 over the training years, Holm p 0.0264; -0.006635 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.006004."
+            "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Feb (RPS difference -0.03669 over the training years, Benjamini–Hochberg p 0.0264; -0.006635 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.006004."
           },
           "amounts": {
             "product": "Rainfall amounts",
@@ -255,7 +266,8 @@
           }
         }
       },
-      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a"
+      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a",
+      "multiple_testing": "benjamini_hochberg"
     },
     {
       "benchmark": "config/bias_correction/may_jjas.json",
@@ -274,11 +286,41 @@
           },
           "amounts": {
             "product": "Rainfall amounts",
-            "status": "keep",
-            "method": "mvs",
-            "method_label": "Mean-Variance Scaling",
-            "alternatives": [],
-            "why": "No method is confirmed better than Mean-Variance Scaling for Jun on the historical evidence."
+            "status": "candidate",
+            "method": "gqm",
+            "method_label": "Gamma Quantile Mapping",
+            "chosen_by": "selection-aware procedure (training years only)",
+            "alternatives": [
+              {
+                "method": "sqrt_mvs",
+                "label": "Square-root-space Mean-Variance Scaling",
+                "p_adjusted": 0.018090000000000002,
+                "holm_p": 0.15574
+              }
+            ],
+            "historical": {
+              "training_difference": -0.13088596934082633,
+              "holm_p": 0.47872999999999993,
+              "p_adjusted": 0.04885,
+              "correction": "benjamini_hochberg",
+              "years_better": 18,
+              "years": 24,
+              "test_difference": -0.1625831950877789,
+              "test_years_better": 8,
+              "test_years": 9
+            },
+            "validation": {
+              "seasons": [
+                {
+                  "year": 2026,
+                  "method": 14.312099911938494,
+                  "reference": 14.005909664407207
+                }
+              ],
+              "mean_difference": 0.306190247531287,
+              "required": 3
+            },
+            "why": "Gamma Quantile Mapping is confirmed better than Mean-Variance Scaling for Jun (CRPS (mm) difference -0.1309 over the training years, Benjamini–Hochberg p 0.0488; -0.1626 over the test years). Independent validation: 1 of 3 season(s), mean difference +0.3062."
           }
         },
         "Jul": {
@@ -296,10 +338,25 @@
             "method": "vs",
             "method_label": "Variance Scaling (unbounded)",
             "chosen_by": "best training score among candidates",
-            "alternatives": [],
+            "alternatives": [
+              {
+                "method": "sqrt_mvs",
+                "label": "Square-root-space Mean-Variance Scaling",
+                "p_adjusted": 0.037936363636363636,
+                "holm_p": 0.34775
+              },
+              {
+                "method": "pt",
+                "label": "Power Transformation",
+                "p_adjusted": 0.0094,
+                "holm_p": 0.051699999999999996
+              }
+            ],
             "historical": {
               "training_difference": -0.1385532224164859,
               "holm_p": 0.0,
+              "p_adjusted": 0.0,
+              "correction": "benjamini_hochberg",
               "years_better": 23,
               "years": 24,
               "test_difference": -0.1399016692539045,
@@ -317,7 +374,7 @@
               "mean_difference": -0.4167858110934972,
               "required": 3
             },
-            "why": "Variance Scaling (unbounded) is confirmed better than Mean-Variance Scaling for Jul (CRPS (mm) difference -0.1386 over the training years, Holm p 0; -0.1399 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.4168."
+            "why": "Variance Scaling (unbounded) is confirmed better than Mean-Variance Scaling for Jul (CRPS (mm) difference -0.1386 over the training years, Benjamini–Hochberg p 0; -0.1399 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.4168."
           }
         },
         "Aug": {
@@ -339,22 +396,27 @@
               {
                 "method": "sqrt_mvs",
                 "label": "Square-root-space Mean-Variance Scaling",
+                "p_adjusted": 0.0,
                 "holm_p": 0.0
               },
               {
                 "method": "pt",
                 "label": "Power Transformation",
+                "p_adjusted": 0.00035999999999999997,
                 "holm_p": 0.00168
               },
               {
                 "method": "gqm",
                 "label": "Gamma Quantile Mapping",
+                "p_adjusted": 7.500000000000001e-05,
                 "holm_p": 0.00028500000000000004
               }
             ],
             "historical": {
               "training_difference": -0.12898291857397526,
               "holm_p": 0.0,
+              "p_adjusted": 0.0,
+              "correction": "benjamini_hochberg",
               "years_better": 24,
               "years": 24,
               "test_difference": -0.08486901377524386,
@@ -372,7 +434,7 @@
               "mean_difference": -0.1859057890881921,
               "required": 3
             },
-            "why": "Variance Scaling (unbounded) is confirmed better than Mean-Variance Scaling for Aug (CRPS (mm) difference -0.129 over the training years, Holm p 0; -0.08487 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.1859."
+            "why": "Variance Scaling (unbounded) is confirmed better than Mean-Variance Scaling for Aug (CRPS (mm) difference -0.129 over the training years, Benjamini–Hochberg p 0; -0.08487 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.1859."
           }
         },
         "Sep": {
@@ -386,11 +448,47 @@
           },
           "amounts": {
             "product": "Rainfall amounts",
-            "status": "keep",
-            "method": "mvs",
-            "method_label": "Mean-Variance Scaling",
-            "alternatives": [],
-            "why": "No method is confirmed better than Mean-Variance Scaling for Sep on the historical evidence."
+            "status": "candidate",
+            "method": "gqm",
+            "method_label": "Gamma Quantile Mapping",
+            "chosen_by": "selection-aware procedure (training years only)",
+            "alternatives": [
+              {
+                "method": "vs",
+                "label": "Variance Scaling (unbounded)",
+                "p_adjusted": 0.018090000000000002,
+                "holm_p": 0.15574
+              },
+              {
+                "method": "sqrt_mvs",
+                "label": "Square-root-space Mean-Variance Scaling",
+                "p_adjusted": 0.009685714285714285,
+                "holm_p": 0.06102
+              }
+            ],
+            "historical": {
+              "training_difference": -0.07191713669204391,
+              "holm_p": 0.094075,
+              "p_adjusted": 0.013312500000000001,
+              "correction": "benjamini_hochberg",
+              "years_better": 19,
+              "years": 24,
+              "test_difference": -0.09469943593441282,
+              "test_years_better": 7,
+              "test_years": 9
+            },
+            "validation": {
+              "seasons": [
+                {
+                  "year": 2026,
+                  "method": 15.220990495200661,
+                  "reference": 15.340703708133603
+                }
+              ],
+              "mean_difference": -0.11971321293294146,
+              "required": 3
+            },
+            "why": "Gamma Quantile Mapping is confirmed better than Mean-Variance Scaling for Sep (CRPS (mm) difference -0.07192 over the training years, Benjamini–Hochberg p 0.0133; -0.0947 over the test years). Independent validation: 1 of 3 season(s), mean difference -0.1197."
           }
         },
         "JJAS": {
@@ -412,7 +510,8 @@
           }
         }
       },
-      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a"
+      "confirmation_commit": "9f397927f5d4ddf2be3a1fa52595f34fc8fcb56a",
+      "multiple_testing": "benjamini_hochberg"
     },
     {
       "benchmark": "config/bias_correction/sep_ondj.json",
@@ -491,14 +590,23 @@
             "chosen_by": "selection-aware procedure (training years only)",
             "alternatives": [
               {
+                "method": "vs",
+                "label": "Variance Scaling (unbounded)",
+                "p_adjusted": 0.024900000000000002,
+                "holm_p": 0.07221
+              },
+              {
                 "method": "gqm",
                 "label": "Gamma Quantile Mapping",
+                "p_adjusted": 0.0084,
                 "holm_p": 0.0084
               }
             ],
             "historical": {
               "training_difference": -0.4786897475521504,
               "holm_p": 0.020945000000000002,
+              "p_adjusted": 0.01065,
+              "correction": "benjamini_hochberg",
               "years_better": 18,
               "years": 24,
               "test_difference": -0.6902295325749415,
@@ -510,7 +618,7 @@
               "mean_difference": null,
               "required": 3
             },
-            "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Jan (CRPS (mm) difference -0.4787 over the training years, Holm p 0.0209; -0.6902 over the test years). Independent validation: 0 of 3 season(s)."
+            "why": "Square-root-space Mean-Variance Scaling is confirmed better than Mean-Variance Scaling for Jan (CRPS (mm) difference -0.4787 over the training years, Benjamini–Hochberg p 0.0106; -0.6902 over the test years). Independent validation: 0 of 3 season(s)."
           }
         },
         "ONDJ": {
@@ -532,7 +640,8 @@
           }
         }
       },
-      "confirmation_commit": "bed63b906c77cfb3450514d7034ec5f68d067bc0"
+      "confirmation_commit": "bed63b906c77cfb3450514d7034ec5f68d067bc0",
+      "multiple_testing": "benjamini_hochberg"
     }
   ]
 }
