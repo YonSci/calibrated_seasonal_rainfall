@@ -111,10 +111,10 @@
   "leung_affine"
  ],
  "labels": {
-  "gf_full": "GrazFeediNG as uploaded: modified-Leung affine -> member counts -> IAD Dirichlet",
-  "gf_no_dirichlet": "Modified-Leung affine -> member counts (the script with --no_dirichlet)",
-  "iad_on_mvs": "Published amount correction (MVS) -> member counts -> IAD Dirichlet (the probability calibration alone)",
-  "leung_blend": "Modified-Leung affine -> the published probability stage (smoothed counts + climatology blend) (the bias correction alone)",
+  "gf_full": "Leung–Dirichlet calibration as uploaded: modified-Leung affine → member counts → identity-anchored Dirichlet",
+  "gf_no_dirichlet": "Modified-Leung affine → member counts (the uploaded script with --no_dirichlet)",
+  "iad_on_mvs": "Published MVS → member counts → identity-anchored Dirichlet (the Dirichlet alone)",
+  "leung_blend": "Modified-Leung affine → the published smoothed counts and climatology blend (the Leung correction alone)",
   "leung_affine": "Modified-Leung affine ensemble (amounts)"
  },
  "references": {
@@ -8770,6 +8770,15 @@
    "amount_cells": 1484
   }
  },
+ "short": {
+  "gf_full": "Leung–Dirichlet (as uploaded)",
+  "gf_no_dirichlet": "Leung + member counts",
+  "iad_on_mvs": "MVS + Dirichlet",
+  "leung_blend": "Leung + published blend",
+  "leung_affine": "Leung affine (amounts)"
+ },
+ "name": "Leung–Dirichlet calibration",
+ "credit": "from the GrazFeediNG forage-outlook system (Á. G. Muñoz and T. Demissie, ILRI)",
  "assets": [
   "assets/grazfeeding/may_jjas/grazfeeding_reliability_test.png",
   "assets/grazfeeding/may_jjas/grazfeeding_reliability_training.png",
@@ -8827,10 +8836,10 @@
  ],
  "downloads": [
   "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9cccd4989da174f3-grazfeeding.may_jjas.benchmark.json",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/b6afb274021501b7-grazfeeding.may_jjas.gf_2026_Aug.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/ec95207303a62908-grazfeeding.may_jjas.gf_2026_JJAS.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/8672cb37769cdbfe-grazfeeding.may_jjas.gf_2026_Jul.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/6987756754650d25-grazfeeding.may_jjas.gf_2026_Jun.nc",
-  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/894a53b0b485ed22-grazfeeding.may_jjas.gf_2026_Sep.nc"
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/67338e00b6b0b63b-grazfeeding.may_jjas.gf_2026_Aug.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/f59f158d1f6eaf3f-grazfeeding.may_jjas.gf_2026_JJAS.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/0408888e24cb536f-grazfeeding.may_jjas.gf_2026_Jul.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/2e9a28da83544c9e-grazfeeding.may_jjas.gf_2026_Jun.nc",
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/9ed517a8b0f7e4ea-grazfeeding.may_jjas.gf_2026_Sep.nc"
  ]
 }

@@ -746,7 +746,7 @@
   {
     "id": "2026-10-15.6",
     "date": "2026-10-15",
-    "commit": null,
+    "commit": "2edc2e4",
     "title": "GrazFeediNG for FMAM and JJAS; every method against the published approach",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -774,6 +774,24 @@
       {
         "type": "display",
         "text": "A verification-only run (the daily scoring) rebuilt the cycle gallery without its forecast views, so the site build could not find them; the gallery now keeps the rendered forecast views. Forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-16.1",
+    "date": "2026-10-16",
+    "commit": null,
+    "title": "GrazFeediNG calibration renamed Leung–Dirichlet calibration",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The calibration from the GrazFeediNG forage-outlook system (modified-Leung member-wise affine correction + identity-anchored Dirichlet) is now called the Leung–Dirichlet calibration on every page, figure, map and table: Research > Leung–Dirichlet calibration (the previous address forwards there), method selection and the summary of all methods. The source is credited. Results unchanged; the published forecasts are unchanged."
       }
     ]
   }

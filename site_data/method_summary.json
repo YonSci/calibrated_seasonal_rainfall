@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-15T06:24:52.640288+00:00",
+ "created_utc": "2026-10-16T09:21:02.066502+00:00",
  "region": "ethiopia",
  "rows": [
   {
@@ -857,9 +857,9 @@
    ]
   },
   {
-   "family": "GrazFeediNG (docs/51)",
+   "family": "Leung–Dirichlet (docs/51)",
    "method": "gf_full",
-   "label": "GrazFeediNG as uploaded (Leung + counts + IAD)",
+   "label": "Leung–Dirichlet as uploaded (Leung + counts + Dirichlet)",
    "product": "probabilities",
    "targets": 15,
    "confirmed": [],
@@ -875,9 +875,9 @@
    ]
   },
   {
-   "family": "GrazFeediNG (docs/51)",
+   "family": "Leung–Dirichlet (docs/51)",
    "method": "gf_no_dirichlet",
-   "label": "Leung + member counts (no Dirichlet)",
+   "label": "Leung + member counts",
    "product": "probabilities",
    "targets": 15,
    "confirmed": [],
@@ -893,9 +893,9 @@
    ]
   },
   {
-   "family": "GrazFeediNG (docs/51)",
+   "family": "Leung–Dirichlet (docs/51)",
    "method": "iad_on_mvs",
-   "label": "MVS + member counts + IAD (Dirichlet alone)",
+   "label": "MVS + Dirichlet (the Dirichlet alone)",
    "product": "probabilities",
    "targets": 15,
    "confirmed": [],
@@ -911,7 +911,7 @@
    ]
   },
   {
-   "family": "GrazFeediNG (docs/51)",
+   "family": "Leung–Dirichlet (docs/51)",
    "method": "leung_blend",
    "label": "Leung + published blend (Leung alone)",
    "product": "probabilities",
@@ -929,9 +929,9 @@
    ]
   },
   {
-   "family": "GrazFeediNG (docs/51)",
+   "family": "Leung–Dirichlet (docs/51)",
    "method": "leung_affine",
-   "label": "Modified-Leung affine ensemble",
+   "label": "Leung affine (amounts)",
    "product": "amounts",
    "targets": 15,
    "confirmed": [

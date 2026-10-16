@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-15T06:24:51.757159+00:00",
+ "created_utc": "2026-10-16T09:21:01.043638+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -831,7 +831,7 @@
        },
        {
         "family": "grazfeeding",
-        "family_label": "GrazFeediNG calibration (docs/51)",
+        "family_label": "Leung–Dirichlet calibration (docs/51)",
         "method": "leung_affine",
         "label": "Modified-Leung affine ensemble (amounts)",
         "status": "candidate",
@@ -846,7 +846,7 @@
         }
        }
       ],
-      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Holm p 0.0209; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Modified-Leung affine ensemble (amounts) (GrazFeediNG calibration)."
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Holm p 0.0209; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Modified-Leung affine ensemble (amounts) (Leung–Dirichlet calibration)."
      }
     },
     "ONDJ": {
