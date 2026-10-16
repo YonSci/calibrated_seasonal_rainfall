@@ -14,3 +14,15 @@ export function selectionFor(cycle) {
   return SEL.cycles.find((c) => c.name === `${MON[m]}_${cycle.season.toLowerCase()}`) || null;
 }
 export const fmt = (x, d = 4) => (typeof x === 'number' && Number.isFinite(x) ? (x >= 0 ? '+' : '-') + Math.abs(x).toPrecision(d) : '—');
+
+// Every method against the published approach, all seasons (scripts/method_summary.py): ranked by targets confirmed better,
+// then by the share better on average over 1993-2016, then over the test years.
+let SUM = null;
+try { SUM = read('method_summary.json'); } catch { SUM = null; }
+export const SUMMARY = SUM;
+export const ranked = (product) => (SUM?.rows ?? []).filter((r) => r.product === product).sort((a, b) =>
+  b.confirmed.length - a.confirmed.length || b.training_better / b.targets - a.training_better / a.targets
+  || b.test_better / Math.max(b.test_scored, 1) - a.test_better / Math.max(a.test_scored, 1));
+
+// Validation progress of a selection entry ('1 of 3'), as on the method-selection page.
+export const validationText = (e) => (e.validation && e.validation.seasons ? `${e.validation.seasons.length} of ${e.validation.required}` : e.status === 'keep' ? '—' : '0 of 3');

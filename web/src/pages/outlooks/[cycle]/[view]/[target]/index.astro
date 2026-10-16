@@ -104,8 +104,8 @@ const selT = SEL?.targets[target];
       const hasCells = S.kind === 'forecast' && e && e.images.includes(S.product + '_cells');
       $('mp-toggle').innerHTML = cmp && prods.some((p) => p[0] === 'verification_comparison_error')
         ? '<label class="check"><input type="checkbox" id="mp-error"' + (S.product === 'verification_comparison_error' ? ' checked' : '') + '> Show error map (forecast minus observed)</label>'
-        : hasCells ? '<div class="seg" role="group" aria-label="Map style"><span class="caveat">Map style</span> ' +
-          [['smooth', 'Smoothed'], ['cells', 'Grid cells (0.25°)']].map(([k, l]) => '<button type="button" data-style="' + k + '" aria-pressed="' + (S.style === k) + '">' + l + '</button>').join('') + '</div>' : '';
+        : hasCells ? '<div class="seg" role="group" aria-label="Map style">' +
+          [['cells', 'Grid cells'], ['smooth', 'Smoothed']].map(([k, l]) => '<button type="button" data-style="' + k + '" aria-pressed="' + (S.style === k) + '">' + l + '</button>').join('') + '</div>' : '';
       const shown = hasCells && S.style === 'cells' ? S.product + '_cells' : S.product;
       const fig = $('mp-figure');
       fig.classList.toggle('wide', S.kind === 'verification' && (S.product === 'verification_maps' || cmp));
@@ -116,7 +116,7 @@ const selT = SEL?.targets[target];
         return;
       }
       const pname = prods.find((p) => p[0] === S.product)[1];
-      const cap = M.label + ' · ' + M.view + ' · ' + pname + ' · ' + M.init + ' initialization' + (shown !== S.product ? ' · grid cells (0.25°)' : '');
+      const cap = M.label + ' · ' + M.view + ' · ' + pname + ' · ' + M.init + ' initialization' + (shown !== S.product ? ' · grid cells' : '');
       const src = e.folder + '/' + shown + '.png';
       fig.innerHTML = '<a href="' + src + '" target="_blank" rel="noopener"><img src="' + src + '" alt="' + esc((S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + cap) + '"></a><figcaption>' + esc(cap) + '</figcaption>';
       $('mp-open').href = src;
@@ -125,7 +125,7 @@ const selT = SEL?.targets[target];
       $('mp-download').textContent = cmp ? 'Download comparison figure' : 'Download PNG';
       $('mp-download').setAttribute('download', M.file + '_' + (M.slugs[S.product] || S.product) + (shown !== S.product ? '_grid-cells' : '') + '.png');
       $('mp-help').innerHTML = (M.help[S.product] || '') + (hasCells ? (S.style === 'cells'
-        ? '<p><strong>Grid cells (0.25°)</strong>: every cell is drawn exactly as computed, without interpolation or smoothing. The 4 × 4-cell blocks come from the 1° model grid, and neighbouring cells can flip category because probabilities come from counting 51 members.</p>'
+        ? '<p><strong>Grid cells</strong>: every cell is drawn exactly as computed, without interpolation or smoothing. The 4 × 4-cell blocks come from the 1° model grid, and neighbouring cells can flip category because probabilities come from counting 51 members.</p>'
         : '<p><strong>Smoothed</strong> (display only): values are smoothed over about 0.4° and interpolated, which softens the 1° model grid. Switch to Grid cells to see the values exactly as computed.</p>') : '') +
         '<p class="caveat">Reference period: CHIRPS ' + M.reference + '.</p>';
       if (location.search || S.kind !== 'forecast' || S.product !== 'tercile_outlook' || S.style !== 'smooth')

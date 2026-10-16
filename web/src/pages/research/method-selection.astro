@@ -4,14 +4,7 @@ import Base from '../../layouts/Base.astro';
 import OnThisPage from '../../components/OnThisPage.astro';
 import { href, esc, cycleTitle, REPO } from '../../lib/data.js';
 import { C, url, defaultTarget } from '../../lib/cycles.js';
-import { SELECTION, STATUS_LABEL, selectionFor, fmt } from '../../lib/selection.js';
-import { read } from '../../lib/data.js';
-
-let SUMMARY = null;
-try { SUMMARY = read('method_summary.json'); } catch { SUMMARY = null; }
-const ranked = (product) => (SUMMARY?.rows ?? []).filter((r) => r.product === product).sort((a, b) =>
-  b.confirmed.length - a.confirmed.length || b.training_better / b.targets - a.training_better / a.targets
-  || b.test_better / Math.max(b.test_scored, 1) - a.test_better / Math.max(a.test_scored, 1));
+import { SELECTION, STATUS_LABEL, SUMMARY, ranked, validationText as val, selectionFor, fmt } from '../../lib/selection.js';
 
 const rule = SELECTION?.rule_contents;
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
@@ -25,7 +18,6 @@ const seasons = (SELECTION?.cycles ?? []).map((s) => {
 const total = seasons.reduce((a, x) => a + x.changes, 0);
 const recommended = (SELECTION?.cycles ?? []).flatMap((s) => Object.values(s.targets).flatMap((p) => Object.values(p))).filter((e) => e.status === 'recommended').length;
 const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainfall amounts']];
-const val = (e) => (e.validation && e.validation.seasons ? `${e.validation.seasons.length} of ${e.validation.required}` : e.status === 'keep' ? '—' : '0 of 3');
 ---
 <Base title="Method selection" section="research" description="The bias-correction and probability-calibration approach the evidence supports for each season, target and product.">
   <OnThisPage>

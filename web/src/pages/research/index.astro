@@ -1,0 +1,151 @@
+---
+// Research overview: which methods are better (criteria, the method to use in each season, comparison tables), then the
+// research pages. Everything comes from site_data/selection.json and method_summary.json (docs/50), so it follows each
+// newly scored season.
+import Base from '../../layouts/Base.astro';
+import { href } from '../../lib/data.js';
+import { SELECTION, SUMMARY, STATUS_LABEL, ranked, validationText } from '../../lib/selection.js';
+
+const MONTH = { jan: 'January', feb: 'February', may: 'May', sep: 'September' };
+const PRODUCTS = [
+  { key: 'probabilities', title: 'Tercile probabilities', score: 'RPS', published: 'MVS + climatology blend' },
+  { key: 'amounts', title: 'Rainfall amounts', score: 'CRPS', published: 'MVS-corrected ensemble' },
+];
+const rule = SELECTION?.rule_contents;
+const minimum = rule?.validation?.minimum_seasons ?? 3;
+
+// The method to use in each season and product: the published approach unless a method is recommended; candidates listed.
+const seasons = (SELECTION?.cycles ?? []).map((c) => {
+  const [m, s] = c.name.split('_');
+  const use = Object.fromEntries(PRODUCTS.map((p) => {
+    const groups = new Map();
+    for (const [t, e] of Object.entries(c.targets)) {
+      const x = e[p.key];
+      if (!x || x.status === 'keep') continue;
+      const g = groups.get(x.selected.label) ?? { label: x.selected.label, stage: x.selected.stage, status: x.status, val: validationText(x), targets: [] };
+      g.targets.push(t);
+      groups.set(x.selected.label, g);
+    }
+    return [p.key, [...groups.values()]];
+  }));
+  return { name: c.name, title: `${s.toUpperCase()} (${MONTH[m] ?? m} start)`, use };
+});
+const recommended = seasons.flatMap((x) => Object.values(x.use).flat()).filter((g) => g.status === 'recommended');
+
+// Findings per product, from the summary of every method
+const findings = Object.fromEntries(PRODUCTS.map((p) => {
+  const rows = ranked(p.key);
+  const confirmed = rows.filter((r) => r.confirmed.length);
+  const other = confirmed.filter((r) => r.family !== 'Bias correction');
+  const best = rows[0];
+  return [p.key, { rows, confirmed, other, best, targets: Math.max(0, ...rows.map((r) => r.targets)) }];
+}));
+const share = (a, b) => (b ? `${a} of ${b}` : '—');
+const TOP = 6;
+const PAGES = [
+  ['research/method-selection/', 'Method selection', 'The approach the evidence supports for each season, target and product, with the evidence for each change.'],
+  ['bias-correction/', 'Bias correction', 'Thirteen rainfall-amount corrections against the operational Mean-Variance Scaling.'],
+  ['probability-calibration/', 'Probability calibration', 'Probability-stage methods and rainfall-distribution models (Phases 1–3) against the published probabilities.'],
+  ['research/amount-shadow/', 'Amount and range shadow', 'EMOS medians and 10–90% ranges next to the MVS ensemble, scored season by season.'],
+  ['research/leung-dirichlet/', 'Leung–Dirichlet calibration', 'Member-wise Leung correction and identity-anchored Dirichlet, each stage against the published pipeline.'],
+];
+---
+<Base title="Research" section="research" description="Which bias-correction and probability-calibration methods are better than the published approach, and which to use in each season.">
+  <h1>Research</h1>
+
+  <section id="which-methods">
+    <h2>Which methods are better</h2>
+    <p class="lead">Every bias-correction, probability-calibration, rainfall-distribution and Leung–Dirichlet method has been compared
+    with the approach the platform publishes, for {seasons.length} seasons and their months ({findings.probabilities.targets} targets), over All Ethiopia.
+    {recommended.length === 0
+      ? <>So far <strong>no method is recommended in place of the published approach</strong>; the published forecasts keep it.</>
+      : <><strong>{recommended.length} change{recommended.length === 1 ? ' is' : 's are'} recommended</strong> (see the table below); a change to the published forecasts is a separate decision.</>}</p>
+
+    <h3>How a method is judged</h3>
+    <div class="criteria">
+      {PRODUCTS.map((p) => (
+        <div class="box"><h4>{p.title}</h4><p>Scored with the <strong>{p.score}</strong> against the published <strong>{p.published}</strong>.</p></div>
+      ))}
+    </div>
+    <ol class="findings">
+      <li><strong>Confirmed better</strong> (historical evidence): better over 1993–2016 when each year is forecast from the other years,
+        significant after correcting for the number of methods and targets tested (Holm-adjusted p &lt; 0.05), and not worse over the test
+        years from 2017 on. A confirmed method becomes a <em>candidate</em>.</li>
+      <li><strong>Validation</strong>: a candidate is then scored on independent seasons as they are observed. It is <em>recommended</em> after
+        {minimum} seasons that are not worse than the published approach, and <em>not supported</em> if worse.</li>
+      <li><strong>One change at a time</strong>: each method was tested against the published approach, not combined with another; the
+        published forecasts change only after a recommendation and a decision.</li>
+    </ol>
+
+    <h3>Which method to use in each season</h3>
+    <div class="table-wrap"><table class="compact nosort">
+      <thead><tr><th scope="col">Season</th>{PRODUCTS.map((p) => <th scope="col">{p.title}</th>)}</tr></thead>
+      <tbody>{seasons.map((x) => (
+        <tr><td><strong>{x.title}</strong></td>
+          {PRODUCTS.map((p) => (
+            <td>{x.use[p.key].some((g) => g.status === 'recommended')
+              ? <><strong>Switch recommended</strong>{x.use[p.key].filter((g) => g.status === 'recommended').map((g) => <><br />{g.label} for {g.targets.join(', ')}</>)}</>
+              : <><strong>Published</strong> ({p.published})</>}
+              {x.use[p.key].filter((g) => g.status !== 'recommended').map((g) => (
+                <><br /><span class="caveat">{STATUS_LABEL[g.status]}: {g.label} for {g.targets.join(', ')} · validation {g.val} seasons</span></>))}
+            </td>))}
+        </tr>))}</tbody>
+    </table></div>
+    <p class="caveat">A candidate is confirmed on the historical evidence and waiting for validation seasons. The evidence for each target is on
+    <a href={href('research/method-selection/')}>Method selection</a>.</p>
+
+    <h3>Findings</h3>
+    <ul class="findings">
+      <li><strong>Tercile probabilities.</strong>{' '}
+        {findings.probabilities.confirmed.length === 0
+          ? 'No method is confirmed better than the published probabilities for any target.'
+          : <>Confirmed better for at least one target: {findings.probabilities.confirmed.map((r) => `${r.label} (${r.confirmed.join(', ')})`).join('; ')}.</>}
+        {findings.probabilities.other.length === 0 && ' No probability-calibration method, distribution model or Leung–Dirichlet pipeline is confirmed better for any target: the climatology blend holds up.'}
+        {findings.probabilities.best && <> Most consistent: {findings.probabilities.best.label}, better on average for {share(findings.probabilities.best.training_better, findings.probabilities.best.targets)} targets over 1993–2016 and {share(findings.probabilities.best.test_better, findings.probabilities.best.test_scored)} over 2017+.</>}</li>
+      <li><strong>Rainfall amounts.</strong>{' '}
+        {findings.amounts.confirmed.length === 0
+          ? 'No method is confirmed better than the MVS-corrected ensemble for any target.'
+          : <>Confirmed better for at least one target: {findings.amounts.confirmed.map((r) => `${r.label} (${r.confirmed.length})`).join(', ')}.</>}
+        {findings.amounts.best && <> Most consistent: {findings.amounts.best.label}, better on average for {share(findings.amounts.best.training_better, findings.amounts.best.targets)} targets over 1993–2016 and {share(findings.amounts.best.test_better, findings.amounts.best.test_scored)} over 2017+.</>}</li>
+    </ul>
+
+    {SUMMARY && PRODUCTS.map((p) => {
+      const rows = findings[p.key].rows;
+      const head = rows.filter((r, i) => r.confirmed.length || i < TOP);
+      const rest = rows.slice(head.length);
+      const table = (list) => (
+        <div class="table-wrap"><table class="compact">
+          <thead><tr><th scope="col">Method</th><th scope="col">Type</th><th scope="col">Confirmed better</th><th scope="col">Better 1993–2016</th><th scope="col">Better 2017+</th><th scope="col">Better in 2026</th></tr></thead>
+          <tbody>{list.map((r) => (
+            <tr><td>{r.confirmed.length ? <strong>{r.label}</strong> : r.label}</td><td>{r.family.replace(' (docs/51)', '')}</td>
+              <td>{r.confirmed.length ? <><strong>{r.confirmed.length}</strong>: {r.confirmed.join(', ')}</> : '0'}</td>
+              <td>{share(r.training_better, r.targets)}</td><td>{share(r.test_better, r.test_scored)}</td>
+              <td>{r.validation_scored ? share(r.validation_better, r.validation_scored) : '—'}</td></tr>))}</tbody>
+        </table></div>);
+      return (
+        <>
+          <h3>Comparison: {p.title.toLowerCase()}</h3>
+          <p class="caveat">Against the published {p.published} ({p.score}). Counts are targets; “Better in 2026” counts the targets of the
+          independent 2026 seasons observed so far.</p>
+          {table(head)}
+          {rest.length > 0 && <details><summary>The other {rest.length} methods ({rows.length} in all)</summary>{table(rest)}</details>}
+        </>
+      );
+    })}
+  </section>
+
+  <section id="pages">
+    <h2>Research pages</h2>
+    <ul class="cards">
+      {PAGES.map(([u, t, d]) => <li><a class="box" href={href(u)}><strong>{t}</strong><span class="caveat"><br />{d}</span></a></li>)}
+    </ul>
+  </section>
+  <style>
+    .criteria{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .criteria .box{margin:0}
+    .criteria h4{margin:0 0 4px}
+    .cards{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}
+    .cards a{display:block;height:100%;text-decoration:none;color:inherit}
+    @media (max-width:640px){ .criteria{grid-template-columns:1fr} }
+  </style>
+</Base>

@@ -67,12 +67,12 @@ function heroMap(e, label, view) {
     return '<a class="map-style" data-map-style="' + style + '"' + (style === 'cells' ? ' hidden' : '') + ' href="' + src +
       '" target="_blank" rel="noopener"><img src="' + src + '" alt="' + esc(a) + '" loading="' + (style === 'cells' ? 'lazy' : 'eager') + '"></a>';
   };
-  return '<div class="seg hero-switch" role="group" aria-label="Map style"><span class="caveat">Map style</span> ' +
-    '<button type="button" data-hero-style="smooth" aria-pressed="true">Smoothed</button>' +
-    '<button type="button" data-hero-style="cells" aria-pressed="false">Grid cells (0.25°)</button></div>' +
-    pic('tercile_outlook', 'smooth', alt) + pic('tercile_outlook_cells', 'cells', alt + ' (grid cells, 0.25°)') +
+  return '<div class="seg hero-switch" role="group" aria-label="Map style">' +
+    '<button type="button" data-hero-style="cells" aria-pressed="false">Grid cells</button>' +
+    '<button type="button" data-hero-style="smooth" aria-pressed="true">Smoothed</button></div>' +
+    pic('tercile_outlook', 'smooth', alt) + pic('tercile_outlook_cells', 'cells', alt + ' (grid cells)') +
     '<figcaption>' + esc(cap) + ' <span class="map-style" data-map-style="smooth">Smoothed for display; switch to Grid cells to see the values as computed.</span>' +
-    '<span class="map-style" data-map-style="cells" hidden>Grid cells (0.25°): every cell as computed, no interpolation or smoothing.</span></figcaption>';
+    '<span class="map-style" data-map-style="cells" hidden>Grid cells: every cell as computed, no interpolation or smoothing.</span></figcaption>';
 }
 
 // The renderer of one state; `pages` gives the URLs of the other pages (targets, history, verification).
