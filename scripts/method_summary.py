@@ -9,13 +9,25 @@ CRPS against the MVS-corrected ensemble), over all targets of all seasons with a
   validation    independent seasons scored after the benchmark (forecast years with CHIRPS): seasons better / scored
 Counts are comparable across targets; the differences themselves are in each benchmark.
 
+Further evidence from the same out-of-sample scores, no refitting (docs/50, section "More statistical power"):
+  33 years      each target's 1993-2016 leave-one-year-out years joined with its 2017+ test years (fitted on 1993-2016), so
+                every year 1993-2025 is scored out of sample: a paired whole-year sign-flip test over all of them
+  pooled        per year, the method's skill difference from the reference ((score - reference) / climatology score) averaged
+                over all its targets of all seasons; one sign-flip test over the years for the method
+  adjustments   Holm (family-wise error) and Benjamini-Hochberg (false discovery rate) across every method of a product, for
+                the pooled tests and for the 33-year target tests. The selection rule (docs/50) stays on Holm within each
+                benchmark family; these are sensitivity analyses.
+
   python scripts/method_summary.py      ->  outputs/method_selection/summary.json and summary.md
 """
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import numpy as np
+
 import leung_dirichlet as ldc
+from significance import paired_summary, sign_flip_p, holm
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'outputs/method_selection'
@@ -29,7 +41,34 @@ LD_METHOD = dict(probabilities='ld_full', amounts='leung_affine')
 # Plain categories for the overview, with the benchmark families they gather
 CATEGORY = {'Bias correction': 'Bias correction', 'Probability stage (Phase 1)': 'Probability calibration',
             'Probability stage (Phase 2)': 'Probability calibration', 'Distribution model (Phase 2)': 'Rainfall-distribution model',
-            'Distribution model (Phase 3)': 'Rainfall-distribution model', 'Two-stage calibration': 'Two-stage calibration'}
+            'Distribution model (Phase 3)': 'Rainfall-distribution model', 'Two-stage calibration': 'Two-stage calibration',
+            'Statistical downscaling (MOS)': 'Statistical downscaling'}
+ALPHA = 0.05
+
+
+def bh(pvalues):
+    """Benjamini-Hochberg adjusted p-values (false discovery rate)."""
+    keys = sorted(pvalues, key=lambda k: pvalues[k])
+    m, adjusted, running = len(keys), {}, 1.0
+    for i in range(m - 1, -1, -1):
+        running = min(running, pvalues[keys[i]] * m / (i + 1))
+        adjusted[keys[i]] = min(1.0, running)
+    return adjusted
+
+
+def add_series(r, cycle, target, mres, rres, sc):
+    """The per-year scores of a method and its reference over both designs (training LOYO years, then test years)."""
+    years, m, ref, clim = [], [], [], []
+    for design in ('training', 'test'):
+        a, b = (mres.get(design) or {}).get(REGION), (rres.get(design) or {}).get(REGION)
+        if not a or not b or sc not in a['per_year']:
+            continue
+        ya, yb = list(dict.fromkeys(a['years'])), list(dict.fromkeys(b['years']))    # a method scored twice a year lists it twice
+        if ya != yb or len(ya) != len(a['per_year'][sc]):
+            raise ValueError(f'year mismatch {cycle} {target} {design}')
+        years += ya; m += a['per_year'][sc]; ref += b['per_year'][sc]; clim += a['per_year'][sc + '_clim']
+    if years:
+        r.setdefault('series', []).append(dict(cycle=cycle, target=target, years=years, m=m, ref=ref, clim=clim))
 
 
 def read(p):
@@ -77,6 +116,7 @@ def bias(store):
                 r = row(store, 'Bias correction', m, label(m), product)
                 for target, t in conf['tests'][m][sc].items():
                     add_test(r, cy, target, t)
+                    add_series(r, cy, target, conf['targets'][target]['methods'][m], conf['targets'][target]['methods'][ref], sc)
                     for year_dir in sorted((ROOT / f'outputs/bias_correction_benchmark/{cy}/validation').glob('[0-9]*')):
                         a, b = read(year_dir / f'{m}__{target}.json'), read(year_dir / f'{ref}__{target}.json')
                         if a and b and a.get('observed') and b.get('observed'):
@@ -94,6 +134,7 @@ def probability(store):
                     r = row(store, family, m, d['registry'][m]['name'], 'probabilities')
                     for target, t in d['tests'][m]['rps'].items():
                         add_test(r, cy, target, t)
+                        add_series(r, cy, target, d['targets'][target]['methods'][m], d['targets'][target]['methods'][d['incumbent']], 'rps')
         for rel, family in (('distribution/benchmark.json', 'Distribution model (Phase 2)'), ('phase3/benchmark.json', 'Distribution model (Phase 3)')):
             d = read(f'{base}/{rel}')
             if not d:
@@ -105,6 +146,8 @@ def probability(store):
                     r = row(store, family, m, d['registry'][m]['name'], product)
                     for target, t in d['tests'][m][sc].items():
                         add_test(r, cy, target, t)
+                        add_series(r, cy, target, d['targets'][target]['methods'][m],
+                                   d['targets'][target]['methods']['incumbent' if sc == 'rps' else 'mvs_ensemble'], sc)
                         for f in sorted((ROOT / base / 'amount_shadow').glob(f'*/{m}__{target}.json')):    # shadow seasons
                             s = (read(f).get('scores') or {}).get(REGION, {}) if read(f).get('observed') else {}
                             if product == 'probabilities':
@@ -119,10 +162,66 @@ def probability(store):
                     r = row(store, 'Two-stage calibration', 'leung_dirichlet', ldc.NAME, product)
                     for target, t in g['tests'][m][sc].items():
                         add_test(r, cy, target, t)
+                        ref = 'incumbent' if sc == 'rps' else 'mvs_ensemble'
+                        add_series(r, cy, target, g['targets'][target]['methods'][m], g['targets'][target]['methods'][ref], sc)
                         v = (g.get('validation') or {}).get(target)
                         if v:
-                            ref = 'incumbent' if sc == 'rps' else 'mvs_ensemble'
                             add_validation(r, v[sc].get(m), v[sc].get(ref))
+        g = read(f'outputs/mos/{cy}/benchmark.json')                   # statistical downscaling (docs/53)
+        if g:
+            for m in g['methods']:
+                for product, sc in PRODUCTS.items():
+                    if sc not in g['tests'].get(m, {}):
+                        continue
+                    r = row(store, 'Statistical downscaling (MOS)', m, g['labels'][m], product)
+                    ref = 'incumbent' if sc == 'rps' else 'mvs_ensemble'
+                    for target, t in g['tests'][m][sc].items():
+                        add_test(r, cy, target, t)
+                        add_series(r, cy, target, g['targets'][target]['methods'][m], g['targets'][target]['methods'][ref], sc)
+                        v = (g.get('validation') or {}).get(target)
+                        if v and m in v[sc] and ref in v[sc]:
+                            add_validation(r, v[sc][m], v[sc][ref])
+
+
+def evidence(rows):
+    """33-year target tests and pooled tests per method, with Holm and Benjamini-Hochberg across the methods of a product."""
+    for product in PRODUCTS:
+        prod = [r for r in rows if r['product'] == product and r.get('series')]
+        target_p, pooled_p = {}, {}
+        for i, r in enumerate(prod):
+            per_year = {}
+            r['oos33'] = dict(targets=0, better=0, tests={})
+            for s in r['series']:
+                ps = paired_summary(s['m'], s['ref'])
+                r['oos33']['targets'] += 1
+                r['oos33']['better'] += ps['mean_difference'] < 0
+                key = (i, f"{SEASON[s['cycle']]} {s['target']}")
+                target_p[key] = ps['p_improvement']
+                r['oos33']['tests'][key[1]] = dict(years=ps['years'], mean_difference=ps['mean_difference'], p=ps['p_improvement'],
+                                                   years_better=ps['years_better'])
+                for y, a, b, c in zip(s['years'], s['m'], s['ref'], s['clim']):
+                    if c > 0:
+                        per_year.setdefault(y, []).append((a - b) / c)       # negative: better than the reference
+            years = sorted(per_year)
+            d = np.array([np.mean(per_year[y]) for y in years])
+            pooled_p[i] = sign_flip_p(d)
+            r['pooled'] = dict(years=len(years), first=years[0], last=years[-1], skill_gain=float(-d.mean()),
+                               years_better=int((d < 0).sum()), p=float(pooled_p[i]))
+        for name, adjust in (('holm', holm), ('bh', bh)):
+            a = adjust(pooled_p)
+            for i, r in enumerate(prod):
+                r['pooled'][f'p_{name}'] = float(a[i])
+                r['pooled'][f'better_{name}'] = bool(r['pooled']['skill_gain'] > 0 and a[i] < ALPHA)
+            a = adjust(target_p)
+            for (i, label), p in a.items():
+                t = prod[i]['oos33']['tests'][label]
+                t[f'p_{name}'] = float(p)
+                if t['mean_difference'] < 0 and p < ALPHA:
+                    prod[i]['oos33'].setdefault(f'confirmed_{name}', []).append(label)
+        for r in prod:
+            r['oos33'].setdefault('confirmed_holm', [])
+            r['oos33'].setdefault('confirmed_bh', [])
+            r['oos33']['tests'] = {k: v for k, v in r['oos33']['tests'].items()}
 
 
 def table(rows, product):
@@ -143,7 +242,8 @@ def main():
     store = {}
     bias(store)
     probability(store)
-    rows = [dict(r, seasons=sorted(r['seasons']), category=CATEGORY[r['family']]) for r in store.values()]
+    evidence(list(store.values()))
+    rows = [dict({k: v for k, v in r.items() if k != 'series'}, seasons=sorted(r['seasons']), category=CATEGORY[r['family']]) for r in store.values()]
     categories = {}                                          # methods per category, each counted once over both products
     for r in rows:
         categories.setdefault(r['category'], set()).add(r['method'])

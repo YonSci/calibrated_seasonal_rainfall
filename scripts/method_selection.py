@@ -6,6 +6,7 @@ Brings the benchmarks together under one rule (config/method_selection_rule.json
   probability stage     outputs/probability_calibration/<cycle>/benchmark.json (Phase 1) and phase2_binary/
   distribution models   outputs/probability_calibration/<cycle>/distribution/ (Phase 2) and phase3/; their independent
                         seasons from amount_shadow/<year>/ (dist_shadow.py runs a shadow for every candidate model)
+  statistical downscaling  outputs/mos/<cycle>/benchmark.json (mos_benchmark.py: CCA, PCR; validation as Leung–Dirichlet)
   Leung–Dirichlet       outputs/leung_dirichlet/<cycle>/benchmark.json (leung_dirichlet_benchmark.py; its validation season is the
                         cycle's forecast year once observed, scored by the same run)
 Products: the published tercile probabilities (RPS against MVS + climatology blend) and rainfall amounts (CRPS against the
@@ -31,9 +32,9 @@ OUT = ROOT / 'outputs/method_selection/selection.json'
 CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'probability_phase1': 'Probability stage, Phase 1',
                 'probability_phase2_binary': 'Probability stage, Phase 2 binary calibrators', 'distribution_phase2': 'Distribution model, Phase 2',
-                'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Two-stage calibration (docs/51)'}
+                'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Two-stage calibration (docs/51)', 'mos': 'Statistical downscaling (docs/53)'}
 STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probability stage', 'probability_phase2_binary': 'probability stage',
-         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration'}
+         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration', 'mos': 'statistical downscaling'}
 
 
 def read(p):
@@ -145,6 +146,7 @@ def main():
         base = f'outputs/probability_calibration/{cy}'
         p1, p2b, d2, d3 = read(f'{base}/benchmark.json'), read(f'{base}/phase2_binary/benchmark.json'), read(f'{base}/distribution/benchmark.json'), read(f'{base}/phase3/benchmark.json')
         ld = read(f'outputs/leung_dirichlet/{cy}/benchmark.json')
+        mos = read(f'outputs/mos/{cy}/benchmark.json')
         rec = recs.get(cy)
         if not (p1 or rec):
             continue
@@ -171,11 +173,16 @@ def main():
                     key = 'ld_full' if score == 'rps' else 'leung_affine'
                     cands += confirmed(ld, 'leung_dirichlet', t, score, [key] if score in ld['tests'].get(key, {}) else [],
                                        lambda k: ldc.NAME, reference='incumbent' if score == 'rps' else 'mvs_ensemble')
+                if mos:                                                  # statistical downscaling: CCA and PCR, both products
+                    cands += confirmed(mos, 'mos', t, score, [k for k in mos['methods'] if score in mos['tests'].get(k, {})],
+                                       lambda k: mos['labels'][k], reference='incumbent' if score == 'rps' else 'mvs_ensemble')
                 for c in cands:
                     if c['family'].startswith('distribution') and product == 'amounts':
                         c['validation'] = shadow_validation(cy, c['method'], t, minimum)
                     if c['family'] == 'leung_dirichlet':
                         c['validation'] = leung_dirichlet_validation(ld, c['method'], t, score, minimum)
+                    if c['family'] == 'mos':                                # the forecast year, scored by the same run
+                        c['validation'] = leung_dirichlet_validation(mos, c['method'], t, score, minimum)
                     c['status'] = status_of(c, minimum)
                 sel = select(cands)
                 ref = spec['reference']['label']

@@ -213,8 +213,8 @@ def run_target(config_path, target):
             m = MOS(k, s['max_x_modes'], s['max_y_modes'], s['max_cca_modes']).fit(X, Ys)
             mean, sig = m.predict(Xall[y])
             p, ens, quant = products(mean, sig, q1, q2)
-            prob(k, p)
-            score(k, crps=bb.ensemble_crps(ens, np.nan_to_num(y_obs)), quant=quant)
+            score(k, p=p, crps=bb.ensemble_crps(ens, np.nan_to_num(y_obs)), quant=quant)      # one record per year, both products
+            ldb.reliability_add(rel[k][design], p, categories(y_obs, q1, q2), primary & st['prob_ok'] & st['valid'] & np.isfinite(y_obs), area_e)
             chosen[k][design].append(list(m.combo))
 
     for y in train:                                          # outer leave-one-year-out
