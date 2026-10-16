@@ -1,11 +1,9 @@
 # Leung–Dirichlet calibration: the uploaded pipeline as methods, tested for FMAM (January), JJAS (May) and ONDJ (September)
 
-**Leung–Dirichlet calibration** is this project's name for the rainfall calibration of the GrazFeediNG forage-outlook system: a
-modified-Leung member-wise affine bias correction followed by an identity-anchored Dirichlet (IAD) recalibration of the
-tercile probabilities (named so since 2026-10-16; earlier releases called it the GrazFeediNG calibration). Internal names keep
-the earlier form (`gf_*` keys, `scripts/grazfeeding*.py`, `outputs/grazfeeding/`).
+**Leung–Dirichlet calibration**: a modified-Leung member-wise affine bias correction followed by an identity-anchored
+Dirichlet (IAD) recalibration of the tercile probabilities, from `process_calib.py`.
 
-`process_calib.py` (GrazFeediNG forage-outlook system; Á. G. Muñoz and T. Demissie, ILRI / Alisios Corporation) calibrates
+`process_calib.py` (Á. G. Muñoz and T. Demissie, ILRI / Alisios Corporation; written for a forage outlook) calibrates
 SEAS5 seasonal rainfall for East Africa and turns it into tercile probabilities and a pasture index. Its rainfall
 calibration has **two methods**, one per stage, which are implemented here unchanged as separate methods and tested with
 the same data, cross-validation and tests as the other benchmarks (docs/47, docs/48):
@@ -13,11 +11,11 @@ the same data, cross-validation and tests as the other benchmarks (docs/47, docs
 | Stage | Method (uploaded code) | Here |
 | --- | --- | --- |
 | Bias correction (amounts) | modified-Leung member-wise affine calibration | `leung_affine` in `scripts/bias_methods.py` (`fit_leung`, `apply_leung`) |
-| Probabilities | raw member counts against the CHIRPS terciles | `member_probabilities()` in `scripts/grazfeeding.py` |
-| Probability calibration | Identity-Anchored Dirichlet (IAD) recalibration | `IADDirichlet` in `scripts/grazfeeding.py` |
+| Probabilities | raw member counts against the CHIRPS terciles | `member_probabilities()` in `scripts/leung_dirichlet.py` |
+| Probability calibration | Identity-Anchored Dirichlet (IAD) recalibration | `IADDirichlet` in `scripts/leung_dirichlet.py` |
 
-The benchmark is `scripts/grazfeeding_benchmark.py` with one configuration per season (`config/grazfeeding/jan_fmam.json`,
-`may_jjas.json`, `sep_ondj.json`); results in `outputs/grazfeeding/<cycle>/` and on the site (*Research › Leung–Dirichlet
+The benchmark is `scripts/leung_dirichlet_benchmark.py` with one configuration per season (`config/leung_dirichlet/jan_fmam.json`,
+`may_jjas.json`, `sep_ondj.json`); results in `outputs/leung_dirichlet/<cycle>/` and on the site (*Research › Leung–Dirichlet
 calibration*). Sections 1–4 were written for ONDJ; section 4b adds FMAM and JJAS. **Nothing here changes the published
 forecast.**
 
@@ -66,8 +64,8 @@ The code is reproduced as it is; three points needed a decision because the proj
 
 | Key | Pipeline | Tests |
 | --- | --- | --- |
-| `gf_full` | Leung affine → member counts → IAD (the uploaded code) | the whole calibration |
-| `gf_no_dirichlet` | Leung affine → member counts (the script with `--no_dirichlet`) | the bias correction with raw counts |
+| `ld_full` | Leung affine → member counts → IAD (the uploaded code) | the whole calibration |
+| `ld_no_dirichlet` | Leung affine → member counts (the script with `--no_dirichlet`) | the bias correction with raw counts |
 | `iad_on_mvs` | published MVS → member counts → IAD | the probability calibration alone |
 | `leung_blend` | Leung affine → the published probability stage (smoothed counts, climatology blend with its weight from inner years) | the bias correction alone |
 | `leung_affine` | Leung-corrected ensemble (amounts) | the bias correction for amounts |
@@ -97,7 +95,7 @@ Skill against the observed climatology (RPSS for probabilities, CRPSS for amount
 (training / test). Tests against the reference:
 
 - **Tercile probabilities: no Leung–Dirichlet pipeline is confirmed better than the published probabilities** for any target
-  (Holm p = 1 for all 20). The uploaded pipeline (`gf_full`) is slightly worse than the published probabilities over the
+  (Holm p = 1 for all 20). The uploaded pipeline (`ld_full`) is slightly worse than the published probabilities over the
   training years for Oct, Nov, Jan and ONDJ (ΔRPS +0.002 to +0.006) and over the test years for all targets but Jan.
 - **The raw member counts are overconfident**, most of all for the drier months (Jan RPSS −0.13 training, −0.21 test):
   without the Dirichlet the uploaded pipeline is the worst method.
@@ -123,16 +121,16 @@ selected for January amounts because its confirmed improvement is larger (−0.4
 
 ### Tercile-probability plots
 
-- **Reliability diagrams** (`figures/grazfeeding_reliability_training.png`, `_test.png`): for every pipeline, below and
+- **Reliability diagrams** (`figures/leung_dirichlet_reliability_training.png`, `_test.png`): for every pipeline, below and
   above normal, the observed frequency against the forecast probability in bins of 10% (area-weighted, each year equal;
   bins with under 1% of the forecasts not drawn; marker area = share of forecasts). The member counts without the
   Dirichlet spread their probabilities from 0 to 80% but verify close to 33% for Oct, Dec and Jan (a line much flatter
   than the diagonal): overconfident, which is why their RPS is the worst. The pipelines with the IAD and the published
   blend keep almost all probabilities between 25% and 45%; where they go further (Nov, ONDJ) the outcomes roughly follow
   the diagonal. The IAD gains reliability by giving up sharpness, as the published blend does.
-- **Forecast-year maps** (`forecast/gf_<year>_<target>_probabilities.png`): the below-, near- and above-normal
+- **Forecast-year maps** (`forecast/ld_<year>_<target>_probabilities.png`): the below-, near- and above-normal
   probabilities of every pipeline for each 2026 target, next to the published ones (rows: published, Leung–Dirichlet
-  (as uploaded), Leung + member counts, MVS + Dirichlet, Leung + published blend), and the favoured tercile (`gf_<year>_<target>.png`).
+  (as uploaded), Leung + member counts, MVS + Dirichlet, Leung + published blend), and the favoured tercile (`ld_<year>_<target>.png`).
   The published probability stage recomputed by the benchmark matches the published files (largest difference below
   10⁻⁸), so the panels are directly comparable. ONDJ 2026, national means below / near / above: published 27 / 27 / 46%,
   Leung–Dirichlet (as uploaded) 32 / 30 / 38%, Leung + member counts 25 / 26 / 50%, MVS + Dirichlet 31 / 30 / 39%, Leung + published
@@ -140,7 +138,7 @@ selected for January amounts because its confirmed improvement is larger (−0.4
   south and east) with weaker probabilities. Where the published maps are blank the cells are too dry for terciles
   (mostly January: 1 029 of 1 484 cells are scored); the Leung–Dirichlet pipelines give values there, but every pipeline is
   scored on the same cells.
-- **Forecast-year maps on the grid cells** (`scripts/grazfeeding_maps.py`, `forecast/maps/<view>/`): for each target
+- **Forecast-year maps on the grid cells** (`scripts/leung_dirichlet_maps.py`, `forecast/maps/<view>/`): for each target
   and for two views, the season's rainfall domain (the seasonal mask; for ONDJ the R3 Deyr domain) and All Ethiopia,
   drawn on the 0.25° cells as computed (no interpolation or smoothing), as the published grid-cell outlook map
   (`presentation_layers.tercile_cells`: same classes, colours, background and legend):
@@ -195,26 +193,26 @@ right, which is why the selection needs several seasons.
 
 ## 5. Place in the method selection
 
-The comparison is a family of its own (`grazfeeding`) in `scripts/method_selection.py` (docs/50). A method confirmed
+The comparison is a family of its own (`leung_dirichlet`) in `scripts/method_selection.py` (docs/50). A method confirmed
 here becomes a candidate for that target and product (so far only the Leung affine for ONDJ January amounts, listed as
 an alternative to square-root MVS). Its validation seasons are the cycle's forecast years once observed, scored by the
 benchmark run itself (section 4b); the published forecast is unchanged.
 
 ## 6. Running
 
-    python scripts/grazfeeding_benchmark.py --config config/grazfeeding/sep_ondj.json --workers 2
+    python scripts/leung_dirichlet_benchmark.py --config config/leung_dirichlet/sep_ondj.json --workers 2
 
 The grid-cell maps are drawn afterwards from the forecast files, with the season's cycle configuration
 (`config/cycles/jan_2026_fmam.json` for jan_fmam, `config/operational.json` for may_jjas):
 
     set CALIBRATION_CYCLE=config\cycles\sep_2026_ondj.json
-    python scripts/grazfeeding_maps.py --name sep_ondj
+    python scripts/leung_dirichlet_maps.py --name sep_ondj
 
-Checkpoints per target in `outputs/grazfeeding/sep_ondj/parts/` (keyed on inputs, code and configuration). Outputs:
-`benchmark.json` (scores per year, reliability sums, tests, fitted IAD parameters, provenance), `figures/grazfeeding_summary.png`,
-`figures/grazfeeding_reliability_{training,test}.png`, and for the forecast year `forecast/gf_<year>_<target>.nc` (every
-pipeline's probabilities and the published ones; not published) with `gf_<year>_<target>.png` (favoured tercile) and
-`gf_<year>_<target>_probabilities.png` (tercile probabilities). Other cycles need only a configuration file pointing at their bias-correction benchmark configuration.
+Checkpoints per target in `outputs/leung_dirichlet/sep_ondj/parts/` (keyed on inputs, code and configuration). Outputs:
+`benchmark.json` (scores per year, reliability sums, tests, fitted IAD parameters, provenance), `figures/leung_dirichlet_summary.png`,
+`figures/leung_dirichlet_reliability_{training,test}.png`, and for the forecast year `forecast/ld_<year>_<target>.nc` (every
+pipeline's probabilities and the published ones; not published) with `ld_<year>_<target>.png` (favoured tercile) and
+`ld_<year>_<target>_probabilities.png` (tercile probabilities). Other cycles need only a configuration file pointing at their bias-correction benchmark configuration.
 
-Tests: `tests/test_grazfeeding.py` (the IAD stays near the identity on calibrated input and softens overconfident
+Tests: `tests/test_leung_dirichlet.py` (the IAD stays near the identity on calibrated input and softens overconfident
 input; the Leung affine reproduces each member's climatology and handles extra members; counts and categories).
