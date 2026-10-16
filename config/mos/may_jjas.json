@@ -1,0 +1,14 @@
+{
+  "description": "Statistical downscaling by MOS (CCA, PCR; CPT/PyCPT approach) against the published pipeline, May-initialized JJAS (docs/53).",
+  "benchmark_config": "config/bias_correction/may_jjas.json",
+  "settings": {
+    "block": 4,
+    "max_x_modes": 6,
+    "max_y_modes": 6,
+    "max_cca_modes": 3,
+    "transform": "sqrt",
+    "predictor": "SEAS5 ensemble-mean rainfall over the model box, averaged to its 1-degree cells",
+    "predictand": "CHIRPS at every 0.25-degree national cell"
+  },
+  "output_root": "outputs/mos/may_jjas"
+}
