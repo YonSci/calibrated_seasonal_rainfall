@@ -56,7 +56,7 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
       <li><a class="box" href={href('bias-correction/')}><strong>Bias correction</strong><span class="caveat"><br />13 rainfall-amount corrections against the operational MVS; suggestions, shadow forecasts and validation.</span></a></li>
       <li><a class="box" href={href('probability-calibration/')}><strong>Probability calibration</strong><span class="caveat"><br />Phases 1–3 against the published probabilities; the climatology blend stays.</span></a></li>
       <li><a class="box" href={href('research/amount-shadow/')}><strong>Amount and range shadow</strong><span class="caveat"><br />EMOS medians and 10–90% ranges next to the MVS ensemble, scored season by season.</span></a></li>
-      <li><a class="box" href={href('research/leung-dirichlet/')}><strong>Leung–Dirichlet calibration</strong><span class="caveat"><br />Member-wise modified-Leung correction + identity-anchored Dirichlet (from GrazFeediNG), each stage tested against the published one.</span></a></li>
+      <li><a class="box" href={href('research/leung-dirichlet/')}><strong>Leung–Dirichlet calibration</strong><span class="caveat"><br />Member-wise modified-Leung correction + identity-anchored Dirichlet, each stage tested against the published one.</span></a></li>
     </ul>
   </section>
   <script is:inline>

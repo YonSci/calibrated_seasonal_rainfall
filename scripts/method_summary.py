@@ -15,7 +15,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-import grazfeeding as gfl
+import leung_dirichlet as ldc
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'outputs/method_selection'
@@ -23,7 +23,7 @@ CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 SEASON = dict(jan_fmam='FMAM (Jan)', feb_fmam='FMAM (Feb)', may_jjas='JJAS (May)', sep_ondj='ONDJ (Sep)')
 REGION = 'ethiopia'
 PRODUCTS = dict(probabilities='rps', amounts='crps')
-GF_LABEL = dict(gfl.SHORT, gf_full='Leung–Dirichlet as uploaded (Leung + counts + Dirichlet)',
+LD_LABEL = dict(ldc.SHORT, ld_full='Leung–Dirichlet as uploaded (Leung + counts + Dirichlet)',
                 iad_on_mvs='MVS + Dirichlet (the Dirichlet alone)', leung_blend='Leung + published blend (Leung alone)')
 
 
@@ -106,13 +106,13 @@ def probability(store):
                                 add_validation(r, s.get('shadow', {}).get('rps'), s.get('published', {}).get('rps'))
                             else:
                                 add_validation(r, s.get('shadow', {}).get('crps'), s.get('mvs_ensemble', {}).get('crps'))
-        g = read(f'outputs/grazfeeding/{cy}/benchmark.json')
+        g = read(f'outputs/leung_dirichlet/{cy}/benchmark.json')
         if g:
             for m in g['methods']:
                 for product, sc in PRODUCTS.items():
                     if sc not in g['tests'].get(m, {}):
                         continue
-                    r = row(store, 'Leung–Dirichlet (docs/51)', m, GF_LABEL.get(m, m), product)
+                    r = row(store, 'Leung–Dirichlet (docs/51)', m, LD_LABEL.get(m, m), product)
                     for target, t in g['tests'][m][sc].items():
                         add_test(r, cy, target, t)
                         v = (g.get('validation') or {}).get(target)

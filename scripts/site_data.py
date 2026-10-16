@@ -13,7 +13,7 @@ figures in site/assets/ alone, without the large outputs/ folder:
   site_data/bias/<cycle>.json    bias-correction benchmark: screening, confirmation, ratio-limit study, validation record,
                                  suggestion (docs/47)
   site_data/probcal/<cycle>.json probability and rainfall-distribution calibration: Phases 1-3 and the amount/range shadow (docs/48)
-  site_data/grazfeeding/<cycle>.json  Leung–Dirichlet (GrazFeediNG) calibration against the published pipeline (docs/51)
+  site_data/leung_dirichlet/<cycle>.json  Leung–Dirichlet calibration against the published pipeline (docs/51)
 
 Benchmark files keep their structure (documented in docs/47 and docs/48) but are slimmed: per-year series, per-cell values
 and other long arrays are dropped (they remain in the full JSON downloads), leaving every summary score, test and decision.
@@ -105,25 +105,25 @@ def probcal_files(site):
     return out
 
 
-def grazfeeding_files(site):
-    """Leung–Dirichlet (GrazFeediNG) calibration compared with the published pipeline (scripts/grazfeeding_benchmark.py, docs/51);
-    the display names come from scripts/grazfeeding.py, not from the saved results."""
-    import grazfeeding as gfl
+def leung_dirichlet_files(site):
+    """Leung–Dirichlet calibration compared with the published pipeline (scripts/leung_dirichlet_benchmark.py, docs/51);
+    the display names come from scripts/leung_dirichlet.py, not from the saved results."""
+    import leung_dirichlet as ldc
     import site_files
     by_hash = {v['sha256']: v['url'] for v in site_files.load_manifest()['assets'].values()}
     out = {}
-    for f in sorted((ROOT / 'outputs/grazfeeding').glob('*/benchmark.json')):
+    for f in sorted((ROOT / 'outputs/leung_dirichlet').glob('*/benchmark.json')):
         name = f.parent.name
         d = read(f)
         d.pop('protocol', None)
         files = []                                   # release-asset URL when uploaded, else the site path
         for src in [f] + sorted((f.parent / 'forecast').glob('*.nc')):
-            local = f'downloads/grazfeeding/{name}/{src.name}'
+            local = f'downloads/leung_dirichlet/{name}/{src.name}'
             url = by_hash.get(site_files.sha256(src)) or (local if (site / local).is_file() else None)
             if url:
                 files.append(url)
-        out[name] = dict(slim(d), labels=gfl.LONG, short=gfl.SHORT, name=gfl.NAME, credit=gfl.CREDIT,
-                         assets=assets(site, f'assets/grazfeeding/{name}'), downloads=files)
+        out[name] = dict(slim(d), labels=ldc.LONG, short=ldc.SHORT, name=ldc.NAME, credit=ldc.CREDIT,
+                         assets=assets(site, f'assets/leung_dirichlet/{name}'), downloads=files)
     return out
 
 
@@ -176,6 +176,6 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         sizes[f'bias/{name}.json'] = write(OUT / 'bias' / f'{name}.json', obj)
     for name, obj in probcal_files(site).items():
         sizes[f'probcal/{name}.json'] = write(OUT / 'probcal' / f'{name}.json', obj)
-    for name, obj in grazfeeding_files(site).items():
-        sizes[f'grazfeeding/{name}.json'] = write(OUT / 'grazfeeding' / f'{name}.json', obj)
+    for name, obj in leung_dirichlet_files(site).items():
+        sizes[f'leung_dirichlet/{name}.json'] = write(OUT / 'leung_dirichlet' / f'{name}.json', obj)
     return sizes

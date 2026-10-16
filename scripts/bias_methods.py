@@ -475,7 +475,8 @@ def apply_sdm(members, s, **_):
 
 
 def fit_leung(models, obs, beta=0.3, ratio_bounds=(0.5, 2.0), sigma_min=1.0, **_):
-    """Modified-Leung member-wise affine calibration (GrazFeediNG, Munoz & Demissie; docs/51), as in process_calib.py.
+    """Modified-Leung member-wise affine calibration (the Leung stage of the Leung–Dirichlet calibration, Munoz & Demissie;
+    docs/51), as in process_calib.py.
 
     Every member index m has its own climatology over the training years: mean mu_m and standard deviation sd_m (ddof 0).
     sd_eff_m = (1 - beta) sd_m + beta sd_pool, sd_pool = sqrt(mean_m sd_m^2); r_m = clip((sd_obs + 1e-6) / (sd_eff_m + 1e-6),
@@ -587,10 +588,10 @@ VARIANTS = {m.key: m for m in [
 ]}
 # External methods: implemented from other systems and evaluated in their own benchmarks (not in the declared family).
 EXTERNAL = {m.key: m for m in [
-    Method('leung_affine', 'Modified-Leung member-wise affine (GrazFeediNG)', fit_leung, apply_leung, 'external',
+    Method('leung_affine', 'Modified-Leung member-wise affine (Leung–Dirichlet)', fit_leung, apply_leung, 'external',
            "x'_m = max(0, mu_obs + r_m (x_m - mu_m)) with each member's own climatology; r_m = clip(sd_obs / sd_eff_m, 0.5, 2), "
            "sd_eff_m = 0.7 sd_m + 0.3 sd_pool; r = 1 where both spreads < 1 mm; members without their own climatology use the "
-           "pooled one (process_calib.py, docs/51)", ('Munoz & Demissie, GrazFeediNG',),
+           "pooled one (process_calib.py, docs/51)", ('Munoz & Demissie, process_calib.py',),
            defaults=dict(beta=0.3, ratio_bounds=(0.5, 2.0), sigma_min=1.0)),
 ]}
 ALL = {'raw': BASELINE, **METHODS, **VARIANTS, **EXTERNAL}   # benchmark rows: baseline, the 13 methods, variants, external

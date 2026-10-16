@@ -1,5 +1,5 @@
 {
-  "description": "GrazFeediNG calibration (process_calib.py; docs/51) against the published pipeline, January-initialized FMAM: the uploaded pipeline as it is (modified-Leung member-wise affine -> member counts -> Identity-Anchored Dirichlet) and each stage on its own.",
+  "description": "Leung–Dirichlet calibration (process_calib.py; docs/51) against the published pipeline, January-initialized FMAM: the uploaded pipeline as it is (modified-Leung member-wise affine -> member counts -> Identity-Anchored Dirichlet) and each stage on its own.",
   "benchmark_config": "config/bias_correction/jan_fmam.json",
   "leung": {
     "beta": 0.3,
@@ -18,10 +18,10 @@
     "tol": 1e-06
   },
   "methods": {
-    "gf_full": "GrazFeediNG as uploaded: modified-Leung affine -> member counts -> IAD Dirichlet",
-    "gf_no_dirichlet": "Modified-Leung affine -> member counts (the script with --no_dirichlet)",
+    "ld_full": "Leung–Dirichlet as uploaded: modified-Leung affine -> member counts -> IAD Dirichlet",
+    "ld_no_dirichlet": "Modified-Leung affine -> member counts (the script with --no_dirichlet)",
     "iad_on_mvs": "Published amount correction (MVS) -> member counts -> IAD Dirichlet (the probability calibration alone)",
     "leung_blend": "Modified-Leung affine -> the published probability stage (smoothed counts + climatology blend) (the bias correction alone)"
   },
-  "output_root": "outputs/grazfeeding/jan_fmam"
+  "output_root": "outputs/leung_dirichlet/jan_fmam"
 }

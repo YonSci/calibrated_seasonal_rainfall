@@ -1,9 +1,9 @@
-"""Leung–Dirichlet calibration (the GrazFeediNG rainfall calibration) against the published pipeline (docs/51), one cycle.
+"""Leung–Dirichlet calibration against the published pipeline (docs/51), one cycle.
 
-Methods (scripts/grazfeeding.py; 'leung_affine' in bias_methods.py), each fitted inside the folds:
-  gf_full          the uploaded pipeline as it is: modified-Leung member-wise affine -> member counts -> IAD Dirichlet, the
+Methods (scripts/leung_dirichlet.py; 'leung_affine' in bias_methods.py), each fitted inside the folds:
+  ld_full          the uploaded pipeline as it is: modified-Leung member-wise affine -> member counts -> IAD Dirichlet, the
                    Dirichlet fitted (as in the script) on the training years' probabilities from the affine fitted on those years
-  gf_no_dirichlet  the same without the Dirichlet (the script's --no_dirichlet)
+  ld_no_dirichlet  the same without the Dirichlet (the script's --no_dirichlet)
   iad_on_mvs       the published amount correction (MVS) -> member counts -> IAD Dirichlet: the probability calibration alone
   leung_blend      modified-Leung affine -> the published probability stage (smoothed counts, climatology blend with its weight
                    from inner years): the bias correction alone
@@ -14,8 +14,8 @@ training years, test years fitted on all training years; paired whole-year sign-
 targets (RPS) and across the targets (CRPS), not worse over the test years.
 Also the forecast year: every method fitted on the cycle's observed years and applied to the forecast (never published).
 
-  python scripts/grazfeeding_benchmark.py --config config/grazfeeding/sep_ondj.json
-  python scripts/grazfeeding_benchmark.py --config config/grazfeeding/sep_ondj.json --figures-only   # redraw from benchmark.json
+  python scripts/leung_dirichlet_benchmark.py --config config/leung_dirichlet/sep_ondj.json
+  python scripts/leung_dirichlet_benchmark.py --config config/leung_dirichlet/sep_ondj.json --figures-only   # redraw from benchmark.json
 """
 import argparse
 import hashlib
@@ -31,7 +31,7 @@ import numpy as np
 
 def parse():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('--config', default='config/grazfeeding/sep_ondj.json')
+    p.add_argument('--config', default='config/leung_dirichlet/sep_ondj.json')
     p.add_argument('--targets', nargs='+')
     p.add_argument('--workers', type=int, default=2)
     p.add_argument('--no-resume', action='store_true')
@@ -56,18 +56,18 @@ import dist_benchmark as db                                             # noqa: 
 from prob_benchmark import Records                                      # noqa: E402
 from calibration_core import fit_amount, categories, labels             # noqa: E402
 from compare_calibration import smooth                                  # noqa: E402
-from grazfeeding import IADDirichlet, member_probabilities, observed_category   # noqa: E402
-import grazfeeding as gfl                                               # noqa: E402
+from leung_dirichlet import IADDirichlet, member_probabilities, observed_category   # noqa: E402
+import leung_dirichlet as ldc                                               # noqa: E402
 
-CODE = ['scripts/grazfeeding_benchmark.py', 'scripts/grazfeeding.py', 'scripts/bias_methods.py', 'scripts/dist_benchmark.py',
+CODE = ['scripts/leung_dirichlet_benchmark.py', 'scripts/leung_dirichlet.py', 'scripts/bias_methods.py', 'scripts/dist_benchmark.py',
         'scripts/prob_calibration.py', 'scripts/prob_benchmark.py']
-PROB = ['gf_full', 'gf_no_dirichlet', 'iad_on_mvs', 'leung_blend']
+PROB = ['ld_full', 'ld_no_dirichlet', 'iad_on_mvs', 'leung_blend']
 AMOUNT = ['leung_affine']
 LEVELS = (.1, .5, .9)
 BINS = np.linspace(0, 1, 11)                         # reliability: forecast-probability bins of 0.1
 PANELS = ['incumbent'] + PROB                        # probability pipelines in the plots, published first
 MIN_SHARE = 0.01                                     # reliability bins with fewer forecasts are not drawn
-SHORT = dict(gfl.SHORT, incumbent='Published (MVS + blend)')
+SHORT = dict(ldc.SHORT, incumbent='Published (MVS + blend)')
 
 
 def read(p):
@@ -150,13 +150,13 @@ def run_target(config_path, target):
         p_leung, p_mvs = member_probabilities(ens_leung, q1, q2), member_probabilities(ens_mvs, q1, q2)
         cal_l = fit_iad('leung_affine', leung, tr, O, T, obs, idx, q1, q2, gcfg['iad'])
         cal_m = fit_iad('mvs', mvs_params, tr, O, T, obs, idx, q1, q2, gcfg['iad'])
-        prob('gf_full', calibrated(cal_l, p_leung))
-        prob('gf_no_dirichlet', p_leung)
+        prob('ld_full', calibrated(cal_l, p_leung))
+        prob('ld_no_dirichlet', p_leung)
         prob('iad_on_mvs', calibrated(cal_m, p_mvs))
         prob('leung_blend', pc.predict(pc.fit(pc.INCUMBENT, inner_leung, area_all), outer_leung)[idx])
         if design == 'test' and 'test' not in iad_params:
             pooled = st_l.get('counts', {}).get('pooled_climatology_members', [0, 1])
-            iad_params['test'] = dict(gf_full=cal_l.params(), iad_on_mvs=cal_m.params(), leung_pooled_member_share=pooled[0] / max(pooled[1], 1))
+            iad_params['test'] = dict(ld_full=cal_l.params(), iad_on_mvs=cal_m.params(), leung_pooled_member_share=pooled[0] / max(pooled[1], 1))
         iad_params.setdefault(design + '_converged', []).extend([cal_l.converged, cal_m.converged])
 
     for y in train:                                          # outer leave-one-year-out
@@ -212,7 +212,7 @@ def forecast_year(gcfg, cfg, project, target, models, obs, lat, lon, idx):
         fit = pc.fit(pc.INCUMBENT, [rec.get(frozenset((z,)), [z])[0] for z in ref], area_all)
         return pc.predict(fit, forecast_record(method, params, models, obs, ref, year, cfg['smoothing_alpha']))[idx]
     full = lambda v: (lambda z: (z.__setitem__(idx, v), z)[1])(np.full(len(lat) * len(lon), np.nan))
-    probs = dict(gf_full=calibrated(cal, p_nod), gf_no_dirichlet=p_nod, iad_on_mvs=calibrated(cal_m, p_mvs),
+    probs = dict(ld_full=calibrated(cal, p_nod), ld_no_dirichlet=p_nod, iad_on_mvs=calibrated(cal_m, p_mvs),
                  leung_blend=blend('leung_affine', leung), incumbent_recomputed=blend('mvs', mvs_params))
     primary = bb.load_mask(cfg['regions'][cfg['primary_region']], lat, lon)[idx]
     return dict(year=int(year), reference_years=cycle['reference_years'], iad=cal.params(),
@@ -381,7 +381,7 @@ def save_forecast(out_root, cfg, forecasts):
         both = country & np.isfinite(rec).all(-1) & (np.isfinite(pub).all(-1) if pub is not None else False)
         check = float(np.abs(rec[both] - pub[both]).max()) if pub is not None and both.any() else None
         ds = xr.Dataset(coords=dict(lat=lat, lon=lon, category=['below', 'near', 'above']),
-                        attrs=dict(description=f'NOT PUBLISHED: {gfl.NAME} ({gfl.CREDIT}; docs/51), {t} {f["year"]}, fitted on '
+                        attrs=dict(description=f'NOT PUBLISHED: {ldc.NAME} ({ldc.CREDIT}; docs/51), {t} {f["year"]}, fitted on '
                                                f'{f["reference_years"][0]}-{f["reference_years"][1]}.',
                                    published_recomputed_max_abs_difference=check if check is not None else 'n/a'))
         for k in PROB:
@@ -390,7 +390,7 @@ def save_forecast(out_root, cfg, forecasts):
         ds['leung_mean_mm'] = (('lat', 'lon'), np.asarray(f['mean_mm']).reshape(shape))
         if pub is not None:
             ds['published_probability'] = (('lat', 'lon', 'category'), pub)
-        ds.to_netcdf(folder / f'gf_{f["year"]}_{t}.nc')
+        ds.to_netcdf(folder / f'ld_{f["year"]}_{t}.nc')
         print(f'{t} {f["year"]}: published stage recomputed vs published file, max |difference| {check}', flush=True)
 
         panels = [(SHORT[k], pub if k == 'incumbent' else grid(k)) for k in PANELS]
@@ -410,7 +410,7 @@ def save_forecast(out_root, cfg, forecasts):
             frame(ax, name)
         fig.suptitle(f'NOT PUBLISHED · {t} {f["year"]}: favoured tercile (≥ 40%); brown below, grey near, green above normal; '
                      'white: no tercile reaches 40%', fontsize=10)
-        fig.savefig(folder / f'gf_{f["year"]}_{t}.png', dpi=130)
+        fig.savefig(folder / f'ld_{f["year"]}_{t}.png', dpi=130)
         plt.close(fig)
         # tercile probabilities
         cats = [('Below normal', 'YlOrBr'), ('Near normal', 'Greys'), ('Above normal', 'YlGn')]
@@ -424,7 +424,7 @@ def save_forecast(out_root, cfg, forecasts):
                     fig.colorbar(im, ax=axes[:, j], orientation='horizontal', fraction=.025, pad=.01, label=f'{cat} probability',
                                  ticks=[0, .2, 1 / 3, .6, .8], format=lambda x, _: f'{x:.0%}')
         fig.suptitle(f'NOT PUBLISHED · {t} {f["year"]}: tercile probabilities of each pipeline (climatology 33%)', fontsize=11)
-        fig.savefig(folder / f'gf_{f["year"]}_{t}_probabilities.png', dpi=110)
+        fig.savefig(folder / f'ld_{f["year"]}_{t}_probabilities.png', dpi=110)
         plt.close(fig)
 
 
@@ -434,7 +434,7 @@ def reliability_figure(out, data):
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     T = list(data['targets'])
-    colours = dict(incumbent='#000000', gf_full='#d95f02', gf_no_dirichlet='#7570b3', iad_on_mvs='#1b9e77', leung_blend='#e7298a')
+    colours = dict(incumbent='#000000', ld_full='#d95f02', ld_no_dirichlet='#7570b3', iad_on_mvs='#1b9e77', leung_blend='#e7298a')
     for design in ('training', 'test'):
         fig, axes = plt.subplots(2, len(T), figsize=(3.3 * len(T), 6.9), sharex=True, sharey=True, squeeze=False, layout='constrained')
         for j, t in enumerate(T):
@@ -466,7 +466,7 @@ def reliability_figure(out, data):
         fig.suptitle(f'Reliability of the tercile probabilities, {data["regions"][data["primary_region"]]}, {how}{yrs[0]}–{yrs[1]}. '
                      f'Marker area: share of forecasts in the bin (bins under {MIN_SHARE:.0%} not shown); on the diagonal = reliable', fontsize=10)
         (out / 'figures').mkdir(parents=True, exist_ok=True)
-        fig.savefig(out / f'figures/grazfeeding_reliability_{design}.png', dpi=120)
+        fig.savefig(out / f'figures/leung_dirichlet_reliability_{design}.png', dpi=120)
         plt.close(fig)
 
 
@@ -493,10 +493,10 @@ def figure(out, data):
         ax.set_title(('Leave-one-year-out ' if design == 'training' else 'Fit on training years, scored ') +
                      '–'.join(map(str, data['training_years' if design == 'training' else 'test_years'])), fontsize=10)
     axes[0].set_yticks(range(len(rows)), [n for *_, n in rows])
-    fig.suptitle(f'{gfl.NAME} against the published pipeline ({data["regions"][reg]}); RPSS rows: tercile '
+    fig.suptitle(f'{ldc.NAME} against the published pipeline ({data["regions"][reg]}); RPSS rows: tercile '
                  'probabilities, CRPSS rows: amounts. * confirmed better than the reference', fontsize=10)
     (out / 'figures').mkdir(parents=True, exist_ok=True)
-    fig.savefig(out / 'figures/grazfeeding_summary.png', dpi=140)
+    fig.savefig(out / 'figures/leung_dirichlet_summary.png', dpi=140)
     plt.close(fig)
 
 
@@ -508,12 +508,12 @@ def figures_only(args):
     data = read(Path(gcfg['output_root']) / 'benchmark.json')
     figure(out_root, data)
     reliability_figure(out_root, data)
-    for f in sorted((out_root / 'forecast').glob('gf_*.nc')):
+    for f in sorted((out_root / 'forecast').glob('ld_*.nc')):
         with xr.open_dataset(f) as d:
             ds = d.load()
         old = ds.attrs.get('description', '')
         if 'docs/51)' in old:                       # keep the target, year and fitting period after the reference
-            ds.attrs['description'] = f'NOT PUBLISHED: {gfl.NAME} ({gfl.CREDIT}; docs/51)' + old.split('docs/51)', 1)[1]
+            ds.attrs['description'] = f'NOT PUBLISHED: {ldc.NAME} ({ldc.CREDIT}; docs/51)' + old.split('docs/51)', 1)[1]
         for k in PROB:
             if f'{k}_probability' in ds:
                 ds[f'{k}_probability'].attrs['long_name'] = SHORT[k]
