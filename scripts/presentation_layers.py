@@ -194,9 +194,13 @@ def vector_clip(ax, lines):
         collection.set_clip_path(clip)
 
 
-def background(ax, grid, country, domain, valid):
+# Tercile maps: cells in view without tercile probabilities are dry-season cells (too little reference rainfall for terciles).
+DRY_COLOR, DRY_LABEL = "#e6dcc6", "Dry season: no tercile forecast"
+
+
+def background(ax, grid, country, domain, valid, gap="#c3c9cf"):
     # Outside-focus gray differs from missing-value gray; zero rainfall stays a value.
-    for mask, color in [(country, "#edf0f3"), (domain, "#c3c9cf"), (domain & valid, "#ffffff")]:
+    for mask, color in [(country, "#edf0f3"), (domain, gap), (domain & valid, "#ffffff")]:
         if mask.any():
             ax.contourf(grid.lon, grid.lat, np.where(mask, 1., np.nan), levels=[.5,1.5],
                         colors=[color], corner_mask=False)
@@ -241,8 +245,8 @@ def cell_axes(fig, forecast, country, domain, valid):
     return ext
 
 
-def cell_background(ax, ext, country, domain, valid):
-    for mask, color in [(country, "#edf0f3"), (country & domain, "#c3c9cf"), (country & domain & valid, "#ffffff")]:
+def cell_background(ax, ext, country, domain, valid, gap="#c3c9cf"):
+    for mask, color in [(country, "#edf0f3"), (country & domain, gap), (country & domain & valid, "#ffffff")]:
         if mask.any():
             ax.imshow(np.where(mask, 1., np.nan), origin="lower", extent=ext, cmap=ListedColormap([color]),
                       interpolation="nearest", zorder=0)
@@ -264,7 +268,7 @@ def tercile_cells(forecast, fields, country, domain, lines, target, view, path, 
     fig = plt.figure(figsize=(10.6, 8.5))
     gs = fig.add_gridspec(3, 2, width_ratios=[17, 1], left=.08, right=.86, bottom=.19, top=.83, hspace=.45, wspace=.14)
     ax = fig.add_subplot(gs[:, 0])
-    cell_background(ax, ext, country, domain, pv)
+    cell_background(ax, ext, country, domain, pv, gap=DRY_COLOR)
     norm = BoundaryNorm(base.PROB_BOUNDS, 7)
     for row, k in enumerate([2, 1, 0]):
         cmap = ListedColormap(base.COLORS[k])
@@ -277,7 +281,7 @@ def tercile_cells(forecast, fields, country, domain, lines, target, view, path, 
     fig.text(.5, .918, f"{CYCLE.init_month_name} initialization · shared probability blend · CHIRPS reference {REF_DASH}", ha="center", fontsize=10)
     fig.text(.5, .883, VIEWS[view] + " · grid cells (0.25°)", ha="center", fontsize=11, color="#176d62")
     fig.legend(handles=[Patch(facecolor="white", edgecolor="gray", label=f"Weak (<{100*settings['minimum_leading_probability']:g}%) or tied"),
-                        Patch(facecolor="#c3c9cf", label="Ineligible in view"), Patch(facecolor="#edf0f3", label="Outside focus")],
+                        Patch(facecolor=DRY_COLOR, label=DRY_LABEL), Patch(facecolor="#edf0f3", label="Outside focus")],
                loc="lower center", bbox_to_anchor=(.5, .09), ncol=3, frameon=False, fontsize=9)
     fig.text(.5, .018, CELLS_NOTE + f"\nResearch reconstruction of a {CYCLE.init_month_name}-initialized forecast; not an official EMI/ICPAC product.",
              ha="center", va="bottom", fontsize=8, color="#48535d")
@@ -326,7 +330,7 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
         fig = plt.figure(figsize=(10.6, 8.5))
         gs = fig.add_gridspec(3, 2, width_ratios=[17,1], left=.08,right=.86,bottom=.19,top=.83,hspace=.45,wspace=.14)
         ax = fig.add_subplot(gs[:,0])
-        background(ax, grid, country, focus, pvalid)
+        background(ax, grid, country, focus, pvalid, gap=DRY_COLOR)
         ax.contourf(grid.lon, grid.lat, np.where(focus & (shown == -1),1.,np.nan), levels=[.5,1.5], colors=["white"], corner_mask=False)
         norm = BoundaryNorm(base.PROB_BOUNDS, 7)
         for row, k in enumerate([2,1,0]):
@@ -341,7 +345,7 @@ def forecast_maps(forecast, fields, domains, lines, target, out, settings):
         fig.text(.5,.918,f"{CYCLE.init_month_name} initialization · shared probability blend · CHIRPS reference {REF_DASH}",ha="center",fontsize=10)
         fig.text(.5,.883,VIEWS[view]+" · presentation layer",ha="center",fontsize=11,color="#176d62")
         fig.legend(handles=[Patch(facecolor="white",edgecolor="gray",label=f"Weak (<{100*settings['minimum_leading_probability']:g}%) or tied"),
-                            Patch(facecolor="#c3c9cf",label="Ineligible in view"),Patch(facecolor="#edf0f3",label="Outside focus")],
+                            Patch(facecolor=DRY_COLOR,label=DRY_LABEL),Patch(facecolor="#edf0f3",label="Outside focus")],
                    loc="lower center",bbox_to_anchor=(.5,.09),ncol=3,frameon=False,fontsize=9)
         footer(fig,settings)
         save_figure(fig,folder/"tercile_outlook",settings)

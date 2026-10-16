@@ -40,7 +40,7 @@ def outlook_cells(p, valid, forecast, country, domain, lines, target, view, titl
     fig = plt.figure(figsize=(10.6, 8.5))
     gs = fig.add_gridspec(3, 2, width_ratios=[17, 1], left=.08, right=.86, bottom=.19, top=.83, hspace=.45, wspace=.14)
     ax = fig.add_subplot(gs[:, 0])
-    layers.cell_background(ax, ext, country, domain, valid)
+    layers.cell_background(ax, ext, country, domain, valid, gap=layers.DRY_COLOR)
     norm = BoundaryNorm(base.PROB_BOUNDS, 7)
     for row, k in enumerate([2, 1, 0]):
         cmap = ListedColormap(base.COLORS[k])
@@ -53,7 +53,7 @@ def outlook_cells(p, valid, forecast, country, domain, lines, target, view, titl
     fig.text(.5, .918, f'{CYCLE.init_month_name} initialization · {title} · CHIRPS reference {REF_DASH}', ha='center', fontsize=9.5)
     fig.text(.5, .883, f'{layers.VIEWS[view]} · grid cells (0.25°) · {BANNER}', ha='center', fontsize=11, color='#b3401b')
     fig.legend(handles=[Patch(facecolor='white', edgecolor='gray', label=f"Weak (<{100 * settings['minimum_leading_probability']:g}%) or tied"),
-                        Patch(facecolor='#c3c9cf', label='No probability in view'), Patch(facecolor='#edf0f3', label='Outside focus')],
+                        Patch(facecolor=layers.DRY_COLOR, label=layers.DRY_LABEL), Patch(facecolor='#edf0f3', label='Outside focus')],
                loc='lower center', bbox_to_anchor=(.5, .09), ncol=3, frameon=False, fontsize=9)
     fig.text(.5, .018, layers.CELLS_NOTE, ha='center', va='bottom', fontsize=8, color='#48535d')
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -71,7 +71,7 @@ def probability_cells(panels, forecast, country, domain, lines, target, view, pa
         ok = country & domain & np.isfinite(p).all(-1)
         for j, (cat, cmap) in enumerate(cats):
             ax = axes[i, j]
-            layers.cell_background(ax, ext, country, domain, ok)
+            layers.cell_background(ax, ext, country, domain, ok, gap=layers.DRY_COLOR)
             im = ax.imshow(np.where(ok, p[..., j], np.nan), origin='lower', extent=ext, cmap=cmap, vmin=0, vmax=.8,
                            interpolation='nearest', zorder=2)
             for x, y in lines:
@@ -83,7 +83,7 @@ def probability_cells(panels, forecast, country, domain, lines, target, view, pa
                 fig.colorbar(im, ax=axes[:, j], orientation='horizontal', fraction=.025, pad=.01, label=f'{cat} probability',
                              ticks=[0, .2, 1 / 3, .6, .8], format=lambda x, _: f'{x:.0%}')
     fig.suptitle(f'{CYCLE.target_label(target)} | tercile probabilities · {layers.VIEWS[view]} · grid cells (0.25°)\n{BANNER}; '
-                 'climatology 33%; light grey outside the view, dark grey no probability', fontsize=10.5)
+                 f'climatology 33%; light grey outside the view, sand: {layers.DRY_LABEL.lower()}', fontsize=10.5)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=110, facecolor='white')
     plt.close(fig)
