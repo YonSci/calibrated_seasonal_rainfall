@@ -852,7 +852,7 @@
   {
     "id": "2026-10-16.5",
     "date": "2026-10-16",
-    "commit": null,
+    "commit": "090058e",
     "title": "The platform is now called SCRO: Seasonal Calibrated Rainfall Outlook",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -864,6 +864,24 @@
       {
         "type": "display",
         "text": "The site is named Seasonal Calibrated Rainfall Outlook (SCRO): header, page titles, home page, classic page, PDF bulletins and the README of every download package. Content and forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-16.6",
+    "date": "2026-10-16",
+    "commit": null,
+    "title": "Larger site title",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The header shows Seasonal Calibrated Rainfall Outlook as a larger title with an SCRO tag (on smaller screens the title alone, over two lines)."
       }
     ]
   }
