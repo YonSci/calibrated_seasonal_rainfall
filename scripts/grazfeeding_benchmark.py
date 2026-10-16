@@ -1,4 +1,4 @@
-"""GrazFeediNG calibration against the published pipeline (docs/51), one cycle (here September-initialized ONDJ).
+"""Leung–Dirichlet calibration (the GrazFeediNG rainfall calibration) against the published pipeline (docs/51), one cycle.
 
 Methods (scripts/grazfeeding.py; 'leung_affine' in bias_methods.py), each fitted inside the folds:
   gf_full          the uploaded pipeline as it is: modified-Leung member-wise affine -> member counts -> IAD Dirichlet, the
@@ -15,6 +15,7 @@ targets (RPS) and across the targets (CRPS), not worse over the test years.
 Also the forecast year: every method fitted on the cycle's observed years and applied to the forecast (never published).
 
   python scripts/grazfeeding_benchmark.py --config config/grazfeeding/sep_ondj.json
+  python scripts/grazfeeding_benchmark.py --config config/grazfeeding/sep_ondj.json --figures-only   # redraw from benchmark.json
 """
 import argparse
 import hashlib
@@ -34,6 +35,8 @@ def parse():
     p.add_argument('--targets', nargs='+')
     p.add_argument('--workers', type=int, default=2)
     p.add_argument('--no-resume', action='store_true')
+    p.add_argument('--figures-only', action='store_true',
+                   help='Redraw the figures and relabel the forecast files from the saved benchmark.json (no fitting)')
     return p.parse_args()
 
 
@@ -54,6 +57,7 @@ from prob_benchmark import Records                                      # noqa: 
 from calibration_core import fit_amount, categories, labels             # noqa: E402
 from compare_calibration import smooth                                  # noqa: E402
 from grazfeeding import IADDirichlet, member_probabilities, observed_category   # noqa: E402
+import grazfeeding as gfl                                               # noqa: E402
 
 CODE = ['scripts/grazfeeding_benchmark.py', 'scripts/grazfeeding.py', 'scripts/bias_methods.py', 'scripts/dist_benchmark.py',
         'scripts/prob_calibration.py', 'scripts/prob_benchmark.py']
@@ -63,8 +67,7 @@ LEVELS = (.1, .5, .9)
 BINS = np.linspace(0, 1, 11)                         # reliability: forecast-probability bins of 0.1
 PANELS = ['incumbent'] + PROB                        # probability pipelines in the plots, published first
 MIN_SHARE = 0.01                                     # reliability bins with fewer forecasts are not drawn
-SHORT = dict(gf_full='GrazFeediNG as uploaded', gf_no_dirichlet='Leung + counts (no Dirichlet)', iad_on_mvs='MVS + counts + IAD',
-             leung_blend='Leung + published blend', incumbent='Published (MVS + blend)')
+SHORT = dict(gfl.SHORT, incumbent='Published (MVS + blend)')
 
 
 def read(p):
@@ -378,7 +381,7 @@ def save_forecast(out_root, cfg, forecasts):
         both = country & np.isfinite(rec).all(-1) & (np.isfinite(pub).all(-1) if pub is not None else False)
         check = float(np.abs(rec[both] - pub[both]).max()) if pub is not None and both.any() else None
         ds = xr.Dataset(coords=dict(lat=lat, lon=lon, category=['below', 'near', 'above']),
-                        attrs=dict(description=f'NOT PUBLISHED: GrazFeediNG calibration (docs/51), {t} {f["year"]}, fitted on '
+                        attrs=dict(description=f'NOT PUBLISHED: {gfl.NAME} ({gfl.CREDIT}; docs/51), {t} {f["year"]}, fitted on '
                                                f'{f["reference_years"][0]}-{f["reference_years"][1]}.',
                                    published_recomputed_max_abs_difference=check if check is not None else 'n/a'))
         for k in PROB:
@@ -474,7 +477,7 @@ def figure(out, data):
     reg = data['primary_region']
     T = list(data['targets'])
     rows = [('incumbent', 'rpss', 'Published probabilities')] + [(k, 'rpss', SHORT[k]) for k in PROB] + \
-           [('mvs_ensemble', 'crpss', 'MVS ensemble (CRPSS)'), ('leung_affine', 'crpss', 'Modified-Leung ensemble (CRPSS)')]
+           [('mvs_ensemble', 'crpss', 'MVS ensemble (CRPSS)'), ('leung_affine', 'crpss', 'Leung affine ensemble (CRPSS)')]
     fig, axes = plt.subplots(1, 2, figsize=(15, 0.5 * len(rows) + 2.2), sharey=True, layout='constrained')
     for ax, design in zip(axes, ('training', 'test')):
         v = np.array([[data['targets'][t]['methods'][k][design][reg][key] for t in T] for k, key, _ in rows])
@@ -490,12 +493,33 @@ def figure(out, data):
         ax.set_title(('Leave-one-year-out ' if design == 'training' else 'Fit on training years, scored ') +
                      '–'.join(map(str, data['training_years' if design == 'training' else 'test_years'])), fontsize=10)
     axes[0].set_yticks(range(len(rows)), [n for *_, n in rows])
-    fig.suptitle(f'GrazFeediNG calibration against the published pipeline ({data["regions"][reg]}); RPSS rows: tercile '
+    fig.suptitle(f'{gfl.NAME} against the published pipeline ({data["regions"][reg]}); RPSS rows: tercile '
                  'probabilities, CRPSS rows: amounts. * confirmed better than the reference', fontsize=10)
     (out / 'figures').mkdir(parents=True, exist_ok=True)
     fig.savefig(out / 'figures/grazfeeding_summary.png', dpi=140)
     plt.close(fig)
 
 
+def figures_only(args):
+    """Redraw the figures from the saved results and relabel the forecast files (display changes only; no fitting)."""
+    import xarray as xr
+    gcfg = read(args.config)
+    out_root = ROOT / gcfg['output_root']
+    data = read(Path(gcfg['output_root']) / 'benchmark.json')
+    figure(out_root, data)
+    reliability_figure(out_root, data)
+    for f in sorted((out_root / 'forecast').glob('gf_*.nc')):
+        with xr.open_dataset(f) as d:
+            ds = d.load()
+        old = ds.attrs.get('description', '')
+        if 'docs/51)' in old:                       # keep the target, year and fitting period after the reference
+            ds.attrs['description'] = f'NOT PUBLISHED: {gfl.NAME} ({gfl.CREDIT}; docs/51)' + old.split('docs/51)', 1)[1]
+        for k in PROB:
+            if f'{k}_probability' in ds:
+                ds[f'{k}_probability'].attrs['long_name'] = SHORT[k]
+        ds.to_netcdf(f)
+    print('Redrawn:', out_root)
+
+
 if __name__ == '__main__':
-    main(ARGS)
+    figures_only(ARGS) if ARGS.figures_only else main(ARGS)

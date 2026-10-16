@@ -6,7 +6,7 @@ Brings the benchmarks together under one rule (config/method_selection_rule.json
   probability stage     outputs/probability_calibration/<cycle>/benchmark.json (Phase 1) and phase2_binary/
   distribution models   outputs/probability_calibration/<cycle>/distribution/ (Phase 2) and phase3/; their independent
                         seasons from amount_shadow/<year>/ (dist_shadow.py runs a shadow for every candidate model)
-  GrazFeediNG           outputs/grazfeeding/<cycle>/benchmark.json (grazfeeding_benchmark.py; its validation season is the
+  Leung–Dirichlet       outputs/grazfeeding/<cycle>/benchmark.json (grazfeeding_benchmark.py; its validation season is the
                         cycle's forecast year once observed, scored by the same run)
 Products: the published tercile probabilities (RPS against MVS + climatology blend) and rainfall amounts (CRPS against the
 MVS ensemble). A method is a candidate only if its benchmark confirms it better than the published reference (Holm across
@@ -23,15 +23,17 @@ from pathlib import Path
 
 import numpy as np
 
+import grazfeeding as gfl
+
 ROOT = Path(__file__).resolve().parents[1]
 RULE = 'config/method_selection_rule.json'
 OUT = ROOT / 'outputs/method_selection/selection.json'
 CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'probability_phase1': 'Probability stage, Phase 1',
                 'probability_phase2_binary': 'Probability stage, Phase 2 binary calibrators', 'distribution_phase2': 'Distribution model, Phase 2',
-                'distribution_phase3': 'Distribution model, Phase 3', 'grazfeeding': 'GrazFeediNG calibration (docs/51)'}
+                'distribution_phase3': 'Distribution model, Phase 3', 'grazfeeding': 'Leung–Dirichlet calibration (docs/51)'}
 STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probability stage', 'probability_phase2_binary': 'probability stage',
-         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'grazfeeding': 'GrazFeediNG calibration'}
+         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'grazfeeding': 'Leung–Dirichlet calibration'}
 
 
 def read(p):
@@ -87,7 +89,7 @@ def shadow_validation(cycle, model, target, minimum):
 
 
 def grazfeeding_validation(gf, method, target, score, minimum):
-    """The GrazFeediNG benchmark's forecast year, once observed: the method's score and the published reference's."""
+    """The Leung–Dirichlet benchmark's forecast year, once observed: the method's score and the published reference's."""
     v = (gf.get('validation') or {}).get(target)
     ref = 'incumbent' if score == 'rps' else 'mvs_ensemble'
     if not v or method not in v[score] or ref not in v[score]:
@@ -166,7 +168,7 @@ def main():
                                            reference='incumbent' if score == 'rps' else 'mvs_ensemble')
                 if gf:
                     cands += confirmed(gf, 'grazfeeding', t, score, [k for k in gf['methods'] if score in gf['tests'].get(k, {})],
-                                       lambda k: gf['labels'][k].split(':')[0], reference='incumbent' if score == 'rps' else 'mvs_ensemble')
+                                       lambda k: gfl.LONG.get(k, k), reference='incumbent' if score == 'rps' else 'mvs_ensemble')
                 for c in cands:
                     if c['family'].startswith('distribution') and product == 'amounts':
                         c['validation'] = shadow_validation(cy, c['method'], t, minimum)

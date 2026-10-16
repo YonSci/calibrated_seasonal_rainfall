@@ -1,4 +1,5 @@
-"""GrazFeediNG calibration (process_calib.py by A. G. Munoz and T. Demissie, ILRI / Alisios Corporation; docs/51), as methods.
+"""Leung–Dirichlet calibration: the rainfall calibration of the GrazFeediNG forage-outlook system (process_calib.py by
+A. G. Munoz and T. Demissie, ILRI / Alisios Corporation; docs/51), as methods. Internal keys keep the gf_ prefix.
 
 The uploaded pipeline, stage by stage:
   1. SEAS5 seasonal totals put on the CHIRPS grid (nearest neighbour; here the project's 4 x 4 block copy of the 1 deg cells).
@@ -13,6 +14,17 @@ The uploaded pipeline, stage by stage:
 import numpy as np
 
 EPS = 1e-12
+
+# Display names (site, figures, maps, method selection and summary); the keys are the benchmark's.
+NAME = 'Leung–Dirichlet calibration'
+CREDIT = 'from the GrazFeediNG forage-outlook system (Á. G. Muñoz and T. Demissie, ILRI)'
+SHORT = dict(gf_full='Leung–Dirichlet (as uploaded)', gf_no_dirichlet='Leung + member counts', iad_on_mvs='MVS + Dirichlet',
+             leung_blend='Leung + published blend', leung_affine='Leung affine (amounts)')
+LONG = dict(gf_full='Leung–Dirichlet calibration as uploaded: modified-Leung affine → member counts → identity-anchored Dirichlet',
+            gf_no_dirichlet='Modified-Leung affine → member counts (the uploaded script with --no_dirichlet)',
+            iad_on_mvs='Published MVS → member counts → identity-anchored Dirichlet (the Dirichlet alone)',
+            leung_blend='Modified-Leung affine → the published smoothed counts and climatology blend (the Leung correction alone)',
+            leung_affine='Modified-Leung affine ensemble (amounts)')
 
 
 def _softmax(z, axis=-1):

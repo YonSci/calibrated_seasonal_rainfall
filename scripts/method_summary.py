@@ -15,15 +15,16 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+import grazfeeding as gfl
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'outputs/method_selection'
 CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 SEASON = dict(jan_fmam='FMAM (Jan)', feb_fmam='FMAM (Feb)', may_jjas='JJAS (May)', sep_ondj='ONDJ (Sep)')
 REGION = 'ethiopia'
 PRODUCTS = dict(probabilities='rps', amounts='crps')
-GF_LABEL = dict(gf_full='GrazFeediNG as uploaded (Leung + counts + IAD)', gf_no_dirichlet='Leung + member counts (no Dirichlet)',
-                iad_on_mvs='MVS + member counts + IAD (Dirichlet alone)', leung_blend='Leung + published blend (Leung alone)',
-                leung_affine='Modified-Leung affine ensemble')
+GF_LABEL = dict(gfl.SHORT, gf_full='Leung–Dirichlet as uploaded (Leung + counts + Dirichlet)',
+                iad_on_mvs='MVS + Dirichlet (the Dirichlet alone)', leung_blend='Leung + published blend (Leung alone)')
 
 
 def read(p):
@@ -78,7 +79,7 @@ def bias(store):
 
 
 def probability(store):
-    """Probability stage (Phases 1 and 2 binary), distribution models (Phases 2 and 3) and the GrazFeediNG calibration (docs/48, 51)."""
+    """Probability stage (Phases 1 and 2 binary), distribution models (Phases 2 and 3) and the Leung–Dirichlet calibration (docs/48, 51)."""
     for cy in CYCLES:
         base = f'outputs/probability_calibration/{cy}'
         for rel, family in (('benchmark.json', 'Probability stage (Phase 1)'), ('phase2_binary/benchmark.json', 'Probability stage (Phase 2)')):
@@ -111,7 +112,7 @@ def probability(store):
                 for product, sc in PRODUCTS.items():
                     if sc not in g['tests'].get(m, {}):
                         continue
-                    r = row(store, 'GrazFeediNG (docs/51)', m, GF_LABEL.get(m, m), product)
+                    r = row(store, 'Leung–Dirichlet (docs/51)', m, GF_LABEL.get(m, m), product)
                     for target, t in g['tests'][m][sc].items():
                         add_test(r, cy, target, t)
                         v = (g.get('validation') or {}).get(target)

@@ -1,4 +1,9 @@
-# GrazFeediNG calibration: the uploaded pipeline as methods, tested for FMAM (January), JJAS (May) and ONDJ (September)
+# Leung–Dirichlet calibration: the uploaded pipeline as methods, tested for FMAM (January), JJAS (May) and ONDJ (September)
+
+**Leung–Dirichlet calibration** is this project's name for the rainfall calibration of the GrazFeediNG forage-outlook system: a
+modified-Leung member-wise affine bias correction followed by an identity-anchored Dirichlet (IAD) recalibration of the
+tercile probabilities (named so since 2026-10-16; earlier releases called it the GrazFeediNG calibration). Internal names keep
+the earlier form (`gf_*` keys, `scripts/grazfeeding*.py`, `outputs/grazfeeding/`).
 
 `process_calib.py` (GrazFeediNG forage-outlook system; Á. G. Muñoz and T. Demissie, ILRI / Alisios Corporation) calibrates
 SEAS5 seasonal rainfall for East Africa and turns it into tercile probabilities and a pasture index. Its rainfall
@@ -12,7 +17,7 @@ the same data, cross-validation and tests as the other benchmarks (docs/47, docs
 | Probability calibration | Identity-Anchored Dirichlet (IAD) recalibration | `IADDirichlet` in `scripts/grazfeeding.py` |
 
 The benchmark is `scripts/grazfeeding_benchmark.py` with one configuration per season (`config/grazfeeding/jan_fmam.json`,
-`may_jjas.json`, `sep_ondj.json`); results in `outputs/grazfeeding/<cycle>/` and on the site (*Research › GrazFeediNG
+`may_jjas.json`, `sep_ondj.json`); results in `outputs/grazfeeding/<cycle>/` and on the site (*Research › Leung–Dirichlet
 calibration*). Sections 1–4 were written for ONDJ; section 4b adds FMAM and JJAS. **Nothing here changes the published
 forecast.**
 
@@ -81,7 +86,7 @@ and not worse over the test years.
 Skill against the observed climatology (RPSS for probabilities, CRPSS for amounts); training = leave-one-year-out
 1993–2016, test = fitted on 1993–2016 and scored 2017–2024.
 
-| Target | Published probabilities | GrazFeediNG as uploaded | Leung + counts (no Dirichlet) | MVS + counts + IAD | Leung + published blend | MVS ensemble (CRPSS) | Leung ensemble (CRPSS) |
+| Target | Published probabilities | Leung–Dirichlet (as uploaded) | Leung + member counts | MVS + Dirichlet | Leung + published blend | MVS ensemble (CRPSS) | Leung ensemble (CRPSS) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Oct | +0.013 / +0.027 | +0.004 / +0.001 | −0.021 / +0.004 | +0.003 / +0.006 | +0.009 / +0.024 | −0.002 / +0.059 | −0.006 / +0.055 |
 | Nov | +0.040 / +0.053 | +0.035 / +0.014 | +0.046 / +0.041 | +0.035 / +0.015 | +0.041 / +0.053 | +0.084 / +0.158 | +0.088 / +0.162 |
@@ -91,7 +96,7 @@ Skill against the observed climatology (RPSS for probabilities, CRPSS for amount
 
 (training / test). Tests against the reference:
 
-- **Tercile probabilities: no GrazFeediNG method is confirmed better than the published probabilities** for any target
+- **Tercile probabilities: no Leung–Dirichlet pipeline is confirmed better than the published probabilities** for any target
   (Holm p = 1 for all 20). The uploaded pipeline (`gf_full`) is slightly worse than the published probabilities over the
   training years for Oct, Nov, Jan and ONDJ (ΔRPS +0.002 to +0.006) and over the test years for all targets but Jan.
 - **The raw member counts are overconfident**, most of all for the drier months (Jan RPSS −0.13 training, −0.21 test):
@@ -126,14 +131,14 @@ selected for January amounts because its confirmed improvement is larger (−0.4
   blend keep almost all probabilities between 25% and 45%; where they go further (Nov, ONDJ) the outcomes roughly follow
   the diagonal. The IAD gains reliability by giving up sharpness, as the published blend does.
 - **Forecast-year maps** (`forecast/gf_<year>_<target>_probabilities.png`): the below-, near- and above-normal
-  probabilities of every pipeline for each 2026 target, next to the published ones (rows: published, GrazFeediNG as
-  uploaded, without the Dirichlet, MVS + IAD, Leung + published blend), and the favoured tercile (`gf_<year>_<target>.png`).
+  probabilities of every pipeline for each 2026 target, next to the published ones (rows: published, Leung–Dirichlet
+  (as uploaded), Leung + member counts, MVS + Dirichlet, Leung + published blend), and the favoured tercile (`gf_<year>_<target>.png`).
   The published probability stage recomputed by the benchmark matches the published files (largest difference below
   10⁻⁸), so the panels are directly comparable. ONDJ 2026, national means below / near / above: published 27 / 27 / 46%,
-  GrazFeediNG as uploaded 32 / 30 / 38%, without the Dirichlet 25 / 26 / 50%, MVS + IAD 31 / 30 / 39%, Leung + published
+  Leung–Dirichlet (as uploaded) 32 / 30 / 38%, Leung + member counts 25 / 26 / 50%, MVS + Dirichlet 31 / 30 / 39%, Leung + published
   blend 27 / 27 / 46%: the uploaded pipeline keeps the published pattern (below normal in the west, above normal in the
   south and east) with weaker probabilities. Where the published maps are blank the cells are too dry for terciles
-  (mostly January: 1 029 of 1 484 cells are scored); the GrazFeediNG pipelines give values there, but every pipeline is
+  (mostly January: 1 029 of 1 484 cells are scored); the Leung–Dirichlet pipelines give values there, but every pipeline is
   scored on the same cells.
 - **Forecast-year maps on the grid cells** (`scripts/grazfeeding_maps.py`, `forecast/maps/<view>/`): for each target
   and for two views, the season's rainfall domain (the seasonal mask; for ONDJ the R3 Deyr domain) and All Ethiopia,
@@ -151,7 +156,7 @@ selected for January amounts because its confirmed improvement is larger (−0.4
 Same design (outer leave-one-year-out 1993–2016, test years 2017–2025, Holm across the four probability pipelines and five
 targets, and across the five targets for amounts). RPSS / CRPSS, training / test:
 
-| Season | Target | Published | GrazFeediNG as uploaded | Leung + counts | MVS + IAD | Leung + published blend | MVS ensemble (CRPSS) | Leung ensemble (CRPSS) |
+| Season | Target | Published | Leung–Dirichlet (as uploaded) | Leung + member counts | MVS + Dirichlet | Leung + published blend | MVS ensemble (CRPSS) | Leung ensemble (CRPSS) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | FMAM | Feb | +0.033 / +0.020 | +0.079 / −0.017 | +0.027 / −0.068 | +0.076 / +0.033 | +0.050 / +0.017 | +0.074 / +0.002 | +0.091 / +0.010 |
 | FMAM | Mar | +0.002 / +0.008 | −0.003 / −0.002 | −0.080 / −0.045 | −0.005 / +0.001 | +0.002 / +0.010 | −0.044 / +0.005 | −0.040 / +0.015 |
@@ -179,7 +184,7 @@ targets, and across the five targets for amounts). RPSS / CRPSS, training / test
 
 **Independent season 2026** (FMAM and JJAS have been observed; ONDJ not yet), RPSS against the observed climatology:
 
-| Target | Published | GrazFeediNG as uploaded | Leung + counts | MVS + IAD | Leung + published blend |
+| Target | Published | Leung–Dirichlet (as uploaded) | Leung + member counts | MVS + Dirichlet | Leung + published blend |
 | --- | --- | --- | --- | --- | --- |
 | FMAM Feb / Mar / Apr / May / FMAM | −0.037 / +0.049 / +0.010 / +0.028 / −0.026 | −0.070 / +0.011 / −0.006 / +0.016 / −0.023 | −0.260 / +0.238 / −0.002 / +0.039 / −0.066 | −0.071 / +0.017 / −0.005 / +0.014 / −0.022 | −0.053 / +0.059 / +0.010 / +0.031 / −0.032 |
 | JJAS Jun / Jul / Aug / Sep / JJAS | +0.125 / +0.198 / +0.277 / +0.107 / +0.352 | +0.015 / +0.060 / +0.077 / +0.036 / +0.210 | +0.433 / +0.269 / +0.439 / +0.318 / +0.610 | +0.024 / +0.063 / +0.056 / +0.037 / +0.220 | +0.130 / +0.200 / +0.278 / +0.111 / +0.352 |

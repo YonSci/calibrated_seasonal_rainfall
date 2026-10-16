@@ -13,7 +13,7 @@ figures in site/assets/ alone, without the large outputs/ folder:
   site_data/bias/<cycle>.json    bias-correction benchmark: screening, confirmation, ratio-limit study, validation record,
                                  suggestion (docs/47)
   site_data/probcal/<cycle>.json probability and rainfall-distribution calibration: Phases 1-3 and the amount/range shadow (docs/48)
-  site_data/grazfeeding/<cycle>.json  GrazFeediNG calibration (process_calib.py) against the published pipeline (docs/51)
+  site_data/grazfeeding/<cycle>.json  Leung–Dirichlet (GrazFeediNG) calibration against the published pipeline (docs/51)
 
 Benchmark files keep their structure (documented in docs/47 and docs/48) but are slimmed: per-year series, per-cell values
 and other long arrays are dropped (they remain in the full JSON downloads), leaving every summary score, test and decision.
@@ -106,7 +106,9 @@ def probcal_files(site):
 
 
 def grazfeeding_files(site):
-    """GrazFeediNG calibration compared with the published pipeline (scripts/grazfeeding_benchmark.py, docs/51)."""
+    """Leung–Dirichlet (GrazFeediNG) calibration compared with the published pipeline (scripts/grazfeeding_benchmark.py, docs/51);
+    the display names come from scripts/grazfeeding.py, not from the saved results."""
+    import grazfeeding as gfl
     import site_files
     by_hash = {v['sha256']: v['url'] for v in site_files.load_manifest()['assets'].values()}
     out = {}
@@ -120,7 +122,8 @@ def grazfeeding_files(site):
             url = by_hash.get(site_files.sha256(src)) or (local if (site / local).is_file() else None)
             if url:
                 files.append(url)
-        out[name] = dict(slim(d), assets=assets(site, f'assets/grazfeeding/{name}'), downloads=files)
+        out[name] = dict(slim(d), labels=gfl.LONG, short=gfl.SHORT, name=gfl.NAME, credit=gfl.CREDIT,
+                         assets=assets(site, f'assets/grazfeeding/{name}'), downloads=files)
     return out
 
 

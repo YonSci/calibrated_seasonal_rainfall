@@ -1,4 +1,4 @@
-"""Forecast-year maps of the GrazFeediNG pipelines on the native 0.25° grid cells (no interpolation or smoothing), for the
+"""Forecast-year maps of the Leung–Dirichlet (GrazFeediNG) pipelines on the native 0.25° grid cells (no interpolation or smoothing), for the
 season's rainfall domain (the seasonal mask) and All Ethiopia, drawn as the published grid-cell outlook map
 (presentation_layers.tercile_cells: same classes, colours, background and legend), so each pipeline can be compared map
 for map with the published one (docs/51). Never published as a forecast.
@@ -27,14 +27,10 @@ from matplotlib.patches import Patch
 from cycle import CYCLE, REF_DASH
 import presentation_layers as layers
 import delivery_map_base as base
+import grazfeeding as gfl
 
-PIPELINES = {
-    'gf_full': ('GrazFeediNG as uploaded', 'GrazFeediNG as uploaded (modified-Leung affine + member counts + IAD Dirichlet)'),
-    'gf_no_dirichlet': ('Leung + counts (no Dirichlet)', 'Modified-Leung affine + member counts (no Dirichlet)'),
-    'iad_on_mvs': ('MVS + counts + IAD', 'Published MVS + member counts + IAD Dirichlet'),
-    'leung_blend': ('Leung + published blend', 'Modified-Leung affine + published smoothed counts and climatology blend'),
-}
-BANNER = 'NOT PUBLISHED: GrazFeediNG comparison (docs/51)'
+PIPELINES = {k: (gfl.SHORT[k], gfl.LONG[k]) for k in ('gf_full', 'gf_no_dirichlet', 'iad_on_mvs', 'leung_blend')}
+BANNER = f'NOT PUBLISHED: {gfl.NAME} comparison (docs/51)'
 
 
 def outlook_cells(p, valid, forecast, country, domain, lines, target, view, title, path, settings):
@@ -116,7 +112,7 @@ def main():
         country = np.asarray(domains['all_ethiopia'], bool)
         with xr.open_dataset(gf_file) as g:
             if not (np.allclose(g.lat, forecast.lat) and np.allclose(g.lon, forecast.lon)):
-                raise ValueError('GrazFeediNG and published grids differ')
+                raise ValueError('Leung–Dirichlet and published grids differ')
             # near normal = 1 - below - above can be -1e-16 (rounding); clipped for display only
             probs = {k: np.clip(g[f'{k}_probability'].transpose('lat', 'lon', 'category').values, 0, 1) for k in PIPELINES}
         published = forecast.blend_probability.sel(category=['below', 'near', 'above']).transpose('lat', 'lon', 'category').values

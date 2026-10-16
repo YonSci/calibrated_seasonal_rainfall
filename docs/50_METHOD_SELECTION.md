@@ -10,8 +10,8 @@ supports, from all benchmarks together, by a rule fixed in advance (`config/meth
 
 | Product | Score | Reference (published approach) | Families considered |
 | --- | --- | --- | --- |
-| Tercile probabilities | RPS | MVS + climatology blend | amount corrections (docs/47), probability-stage methods of Phases 1 and 2, distribution models of Phases 2 and 3 (docs/48), GrazFeediNG calibration (docs/51) |
-| Rainfall amounts | CRPS (mm) | MVS-corrected ensemble | amount corrections, distribution models of Phases 2 and 3, the GrazFeediNG Leung affine (docs/51) |
+| Tercile probabilities | RPS | MVS + climatology blend | amount corrections (docs/47), probability-stage methods of Phases 1 and 2, distribution models of Phases 2 and 3 (docs/48), Leung–Dirichlet calibration (docs/51) |
+| Rainfall amounts | CRPS (mm) | MVS-corrected ensemble | amount corrections, distribution models of Phases 2 and 3, the Leung affine of the Leung–Dirichlet calibration (docs/51) |
 
 ## Rule
 
@@ -49,7 +49,7 @@ No target–product combination is recommended yet. Six have a candidate:
 | JJAS, May initialization | Jul | amounts | Variance Scaling, unbounded (amount correction) | 1 of 3 |
 | JJAS, May initialization | Aug | amounts | Variance Scaling, unbounded (amount correction) | 1 of 3 |
 | JJAS, May initialization | Sep | amounts | quantile regression (distribution model; EMOS also confirmed) | 0 of 3 |
-| ONDJ, September initialization | Jan | amounts | square-root MVS (amount correction; GrazFeediNG Leung affine and gamma QM also confirmed) | 0 of 3 |
+| ONDJ, September initialization | Jan | amounts | square-root MVS (amount correction; Leung affine and gamma QM also confirmed) | 0 of 3 |
 
 The numbers behind each are on the site and in `selection.json` (training and test differences, Holm p, years better,
 validation seasons).
@@ -64,8 +64,8 @@ site under *Research › Method selection*; refreshed by the daily scoring). As 
 - **Tercile probabilities:** only one method is confirmed better anywhere: square-root MVS (FMAM from February, February).
   It is also the most consistent amount correction overall (better on average for 14 of 20 targets over 1993–2016, 16 of
   20 over the test years, 11 of 15 validation targets), with Variance Scaling and gamma quantile mapping close. No
-  probability-stage method (Phases 1 and 2), distribution model or GrazFeediNG pipeline is confirmed better than the
+  probability-stage method (Phases 1 and 2), distribution model or Leung–Dirichlet pipeline is confirmed better than the
   climatology blend for any target; the best of them are better for at most 9 of 20 targets.
 - **Rainfall amounts:** square-root MVS, gamma QM, EMOS and Variance Scaling are each confirmed for two targets; square-root
-  MVS and gamma QM are better on average for all 20 targets over 1993–2016. Quantile regression, the GrazFeediNG Leung
+  MVS and gamma QM are better on average for all 20 targets over 1993–2016. Quantile regression, the Leung
   affine and power transformation are confirmed for one target each.
