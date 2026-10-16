@@ -798,7 +798,7 @@
   {
     "id": "2026-10-16.2",
     "date": "2026-10-16",
-    "commit": null,
+    "commit": "c8ff1fc",
     "title": "Leung–Dirichlet calibration: the name in the code, files and addresses",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -810,6 +810,24 @@
       {
         "type": "display",
         "text": "The Leung–Dirichlet calibration now uses its name throughout: scripts, configurations, output folders, site data, figure and map files, download names and the release log. The benchmarks were rerun under the new names with identical results. The authors of process_calib.py stay credited; the previous page address forwards to the new one. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-16.3",
+    "date": "2026-10-16",
+    "commit": null,
+    "title": "Outlook map: switch between the smoothed map and the grid cells",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The outlook map at the top of every outlook page has a Smoothed / Grid cells (0.25°) switch. The choice is remembered in the browser and shared with the map viewer further down the page; ?style=cells opens a page on the grid cells. The published forecasts are unchanged."
       }
     ]
   }
