@@ -84,8 +84,8 @@ const PAGES = [
     </div>
     <ol class="findings">
       <li><strong>Confirmed better</strong> (historical evidence): better over 1993–2016 when each year is forecast from the other years,
-        significant after correcting for the number of methods and targets tested (Holm-adjusted p &lt; 0.05), and not worse over the test
-        years from 2017 on. A confirmed method becomes a <em>candidate</em>.</li>
+        significant after correcting for the number of methods and targets tested (Benjamini–Hochberg-adjusted p &lt; 0.05, which controls
+        the share of false findings; Holm until 17 October 2026), and not worse over the test years from 2017 on. A confirmed method becomes a <em>candidate</em>.</li>
       <li><strong>Validation</strong>: a candidate is then scored on independent seasons as they are observed. It is <em>recommended</em> after
         {minimum} seasons that are not worse than the published approach, and <em>not supported</em> if worse.</li>
       <li><strong>One change at a time</strong>: each method was tested against the published approach, not combined with another; the
@@ -161,8 +161,8 @@ const PAGES = [
         <li><strong>Two corrections for testing many methods:</strong> Holm (controls the chance of any false finding) and Benjamini–Hochberg
           (controls the share of false findings; less conservative).</li>
       </ol>
-      <p class="caveat">These are sensitivity analyses. The selection rule above stays as fixed in advance (Holm within each benchmark family);
-      changing it is a decision.</p>
+      <p class="caveat">The selection rule above applies Benjamini–Hochberg within each benchmark family (it used Holm until 17 October 2026;
+      changed by decision after these analyses were seen). The pooled and 33-year tests below are sensitivity analyses, not part of the rule.</p>
       {[['probabilities', 'Tercile probabilities'], ['amounts', 'Rainfall amounts']].map(([p, title]) => {
         const rows = pooledRows(p);
         const sig = (r, k) => r.pooled[`better_${k}`];

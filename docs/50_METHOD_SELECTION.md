@@ -16,8 +16,12 @@ supports, from all benchmarks together, by a rule fixed in advance (`config/meth
 ## Rule
 
 1. **Historical evidence (candidate).** A method is a candidate for a target and product only if its benchmark confirms it
-   better than the published reference: outer leave-one-year-out over 1993–2016, Holm-adjusted p < 0.05 across every method
-   and target of its family, and not worse over the test years (2017 onward).
+   better than the published reference: outer leave-one-year-out over 1993–2016, Benjamini–Hochberg-adjusted p < 0.05
+   (false discovery rate) across every method and target of its family, and not worse over the test years (2017 onward).
+   The adjusted p-values are recomputed (`scripts/selection_tests.py`) from the unadjusted p-values each benchmark stored,
+   within the same families as the benchmark (its methods × targets, per score; the selection-aware SEL procedures are their
+   own family); nothing is refitted. `selection_tests.holm_check` reproduces every benchmark's own Holm decision exactly, so
+   the families are rebuilt correctly. The correction is `multiple_testing` in `config/method_selection_rule.json`.
 2. **Choice.** A recommended candidate first; then the candidate with the largest improvement over the training years.
    **One change at a time:** each family was tested against the published approach, not combined with another family, so the
    selection changes one stage (the amount correction, the probability stage or the whole distribution); the other candidates
@@ -38,39 +42,53 @@ The daily scoring (`scripts/watch_observations.py`) runs, after each newly score
 `method_selection.py`; the next site build publishes the updated selection. A status reaches *recommended* only through new
 validation seasons, so changes come no faster than seasons are observed.
 
-## Current selection (2026-10-15)
+## Change of the multiple-testing correction (2026-10-17)
 
-No target–product combination is recommended yet. Six have a candidate:
+Until 2026-10-17 the rule used Holm (family-wise error) within each benchmark family. After the sensitivity analyses below
+(33-year and pooled evidence, Holm and Benjamini–Hochberg) the project lead decided to use Benjamini–Hochberg, which controls
+the expected share of false findings among the confirmed methods and is less strict. The benchmarks keep their own Holm
+decisions as run (their pages say so); the selection, the bias-correction suggestions and the summary across seasons apply
+Benjamini–Hochberg to the same p-values. The change is recorded in both rule files (`changes`). Effect: six targets had a
+candidate under Holm, eight under Benjamini–Hochberg (new: JJAS Jun amounts, gamma QM; JJAS season amounts, PCR), and for
+JJAS Aug amounts PCR (larger training improvement) replaces Variance Scaling, which stays an alternative. No status is
+*recommended* under either correction: that still needs three validation seasons.
+
+## Current selection (2026-10-17)
+
+No target–product combination is recommended yet. Eight have a candidate:
 
 | Season | Target | Product | Selected | Validation seasons |
 | --- | --- | --- | --- | --- |
 | FMAM, January initialization | FMAM | amounts | EMOS (distribution model) | 1 of 3 |
 | FMAM, February initialization | Feb | probabilities | square-root MVS (amount correction) | 1 of 3 |
+| JJAS, May initialization | Jun | amounts | gamma QM (amount correction; square-root MVS also confirmed) | 1 of 3 |
 | JJAS, May initialization | Jul | amounts | Variance Scaling, unbounded (amount correction) | 1 of 3 |
-| JJAS, May initialization | Aug | amounts | Variance Scaling, unbounded (amount correction) | 1 of 3 |
-| JJAS, May initialization | Sep | amounts | quantile regression (distribution model; EMOS also confirmed) | 0 of 3 |
+| JJAS, May initialization | Aug | amounts | PCR (statistical downscaling; VS, square-root MVS, PT and gamma QM also confirmed) | 1 of 3 |
+| JJAS, May initialization | Sep | amounts | quantile regression (distribution model; EMOS, CCA, PCR, gamma QM, VS, square-root MVS also confirmed) | 1 of 3 |
+| JJAS, May initialization | JJAS | amounts | PCR (statistical downscaling) | 1 of 3 |
 | ONDJ, September initialization | Jan | amounts | square-root MVS (amount correction; Leung–Dirichlet and gamma QM also confirmed) | 0 of 3 |
 
-The numbers behind each are on the site and in `selection.json` (training and test differences, Holm p, years better,
+The numbers behind each are on the site and in `selection.json` (training and test differences, Benjamini–Hochberg p and the benchmark's Holm p, years better,
 validation seasons).
 
 ## Summary across seasons: every method against the published approach
 
-`scripts/method_summary.py` counts, for each of the 27 methods (12 bias corrections, 8 probability calibrations, 6
-rainfall-distribution models and 1 two-stage calibration, Leung–Dirichlet, counted once: the whole calibration for
-probabilities, its corrected amounts for amounts) and each product over the 20 targets of the four seasons, the targets
-where its benchmark confirms it better, where it is better on average over 1993–2016 and over the test years, and the
+`scripts/method_summary.py` counts, for each of the 29 methods (12 bias corrections, 8 probability calibrations, 6
+rainfall-distribution models, 1 two-stage calibration, Leung–Dirichlet, counted once: the whole calibration for
+probabilities, its corrected amounts for amounts, and 2 statistical downscaling methods, CCA and PCR) and each product over
+the 20 targets of the four seasons, the targets where it is confirmed better under the selection rule (Benjamini–Hochberg
+within its benchmark family since 2026-10-17), where it is better on average over 1993–2016 and over the test years, and the
 targets of the independent seasons (2026 so far) where it scored better (`outputs/method_selection/summary.md`; on the
-site under *Research › Method selection*; refreshed by the daily scoring). As of 2026-10-15:
+site under *Research › Method selection*; refreshed by the daily scoring). As of 2026-10-17 (Benjamini–Hochberg):
 
 - **Tercile probabilities:** only one method is confirmed better anywhere: square-root MVS (FMAM from February, February).
   It is also the most consistent amount correction overall (better on average for 14 of 20 targets over 1993–2016, 16 of
   20 over the test years, 11 of 15 validation targets), with Variance Scaling and gamma quantile mapping close. No
   probability calibration, rainfall-distribution model or two-stage calibration is confirmed better than the
   climatology blend for any target; the best of them are better for at most 9 of 20 targets.
-- **Rainfall amounts:** square-root MVS, gamma QM, EMOS and Variance Scaling are each confirmed for two targets; square-root
-  MVS and gamma QM are better on average for all 20 targets over 1993–2016. Quantile regression, the Leung–Dirichlet
-  calibration and power transformation are confirmed for one target each.
+- **Rainfall amounts:** square-root MVS is confirmed for 5 targets, Variance Scaling and gamma QM for 4, PCR for 3, EMOS
+  and power transformation for 2; quantile regression, CCA and the Leung–Dirichlet calibration for one each (under Holm:
+  2, 2, 2, 1, 2, 1, 1, 1, 1). Square-root MVS and gamma QM are better on average for all 20 targets over 1993–2016.
 
 ## More statistical power (2026-10-17)
 
@@ -95,7 +113,7 @@ site under *Research › Method selection*; refreshed by the daily scoring). As 
   gamma QM for 2 and 8.
 - **Statistical downscaling** (CCA, PCR, docs/53) is worse than the published approach when pooled.
 
-The selection rule stays as fixed in advance: Holm within each benchmark family. These results are sensitivity analyses on
-the Research overview. Switching to Benjamini–Hochberg or to pooled evidence would be a decision. It would most likely make
-square-root MVS a candidate for amounts in more targets.
+These results are sensitivity analyses on the Research overview. After seeing them the project lead switched the selection
+rule to Benjamini–Hochberg within each benchmark family (section "Change of the multiple-testing correction"); the pooled
+tests are not part of the rule.
 

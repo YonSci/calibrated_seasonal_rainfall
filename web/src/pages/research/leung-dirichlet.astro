@@ -99,7 +99,7 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
         <p class="caveat">References: {Object.values(d.references).join('; ')}. Every method is fitted inside the folds: outer
         leave-one-year-out over {years(d.training_years)}, and fitted on all of {years(d.training_years)} for the test years {years(d.test_years)}.
         The Dirichlet is fitted, as in the uploaded code, on the training years' probabilities from the affine correction fitted on those years.
-        Confirmed better: better over the training years with Holm-adjusted p &lt; 0.05 across all methods and targets of the comparison, and not worse over the test years.</p>
+        Confirmed better: better over the training years with Holm-adjusted p &lt; 0.05 across all methods and targets of the comparison, and not worse over the test years. This is the benchmark’s own decision, as run (Holm); the <a href={href('research/method-selection/')}>method selection</a> applies Benjamini–Hochberg to the same p-values (since 17 October 2026).</p>
         <p><strong>Confirmed better than the published approach:</strong> {confirmedOf(d).length ? confirmedOf(d).join('; ') : 'none'}.</p>
 
         <h3>Tercile probabilities (RPS)</h3>

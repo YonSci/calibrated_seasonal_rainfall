@@ -14,7 +14,9 @@
       "families": ["bias_correction", "distribution_phase2", "distribution_phase3"]
     }
   },
-  "historical": "A method is a candidate for a target and product only if its benchmark confirms it better than the published reference: outer leave-one-year-out over the training years (1993-2016), Holm-adjusted p < 0.05 across every method and target of its family, and not worse over the test years (2017 onward).",
+  "historical": "A method is a candidate for a target and product only if its benchmark confirms it better than the published reference: outer leave-one-year-out over the training years (1993-2016), Benjamini-Hochberg-adjusted p < 0.05 (false discovery rate) across every method and target of its family, and not worse over the test years (2017 onward).",
+  "multiple_testing": "benjamini_hochberg",
+  "changes": [{"date": "2026-10-17", "change": "multiple-testing correction: Holm -> Benjamini-Hochberg", "note": "Decided by the project lead after the sensitivity analyses (33-year and pooled evidence, Holm and Benjamini-Hochberg) had been seen; the decisions are recomputed from the p-values each benchmark stored, within the same families. The benchmarks keep their own Holm decisions as run."}],
   "validation": {
     "minimum_seasons": 3,
     "rule": "Independent validation seasons are forecast years scored after the benchmark (bias_validation.py for bias correction; dist_shadow.py for the EMOS amount model). A candidate becomes 'recommended' once at least minimum_seasons have been scored for it and the reference and its mean score over them is not worse; with fewer it stays a 'candidate'; with enough and a worse mean it is 'not supported by validation'. A candidate with no validation record yet needs a shadow forecast before it can be recommended."

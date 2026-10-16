@@ -3,7 +3,8 @@
 Applies the rule in config/bias_correction/recommendation_rule.json — fixed before the validation seasons are scored —
 to two kinds of evidence:
   historical  the benchmark confirmation against CHIRPS (outer leave-one-year-out over the training years, full pipeline,
-              Holm across every declared method and target, no harm over the test years) and its selection-aware choice;
+              the rule's multiple-testing correction (`multiple_testing`: Benjamini-Hochberg since 2026-10-17, Holm before)
+              across every declared method and target, no harm over the test years) and its selection-aware choice;
   validation  independent seasons scored after the benchmark (bias_validation.py: <benchmark>/validation/<year>/*.json).
 Statuses: keep (no candidate), candidate (confirmed; validation seasons still being collected), recommended (confirmed
 and not worse over at least the minimum number of validation seasons), not_supported (worse over them).
@@ -19,7 +20,10 @@ from pathlib import Path
 
 import numpy as np
 
+import selection_tests as st
+
 ROOT = Path(__file__).resolve().parents[1]
+CORR_NAME = {'holm': 'Holm', 'benjamini_hochberg': 'Benjamini–Hochberg'}
 
 
 def read(p):
@@ -47,14 +51,17 @@ def recommend(bench_path, rule):
     minimum = rule['validation']['minimum_seasons']
     names =json.loads((folder / 'benchmark.json').read_text(encoding='utf-8'))['methods']
     label = lambda m: names.get(m, {}).get('label', m).replace(' (operational)', '')
+    correction = rule.get('multiple_testing', 'holm')
+    dec = {sc: st.decide(conf['tests'], [m for m in family if m != ref], sc, correction)
+           for sc in {spec['score'] for spec in rule['products'].values()}}
     out = dict(benchmark=bench_path, name=bench['name'], reference=ref, reference_label=label(ref), targets={},
-               confirmation_commit=conf['provenance']['commit'])
+               confirmation_commit=conf['provenance']['commit'], multiple_testing=correction)
     for t in conf['targets']:
         out['targets'][t] = {}
         for product, spec in rule['products'].items():
             sc = spec['score']
             tests = conf['tests']
-            cands = [m for m in family if m != ref and tests[m][sc][t]['decision']['confirmed']]
+            cands = [m for m in family if m != ref and dec[sc][(m, t)]['confirmed']]
             train_mean = lambda m: float(np.mean(conf['targets'][t]['methods'][m]['training'][region]['per_year'][sc]))
             entry = dict(product=spec['label'])
             if not cands:
@@ -73,14 +80,16 @@ def recommend(bench_path, rule):
                 entry.update(
                     status=status, method=pick, method_label=label(pick),
                     chosen_by=('selection-aware procedure (training years only)' if pick == chosen else 'best training score among candidates'),
-                    alternatives=[dict(method=m, label=label(m), holm_p=tests[m][sc][t]['decision']['holm_p_family']) for m in cands if m != pick],
+                    alternatives=[dict(method=m, label=label(m), p_adjusted=dec[sc][(m, t)]['p_adjusted'],
+                                       holm_p=tests[m][sc][t]['decision']['holm_p_family']) for m in cands if m != pick],
                     historical=dict(training_difference=d['training']['mean_difference'], holm_p=d['decision']['holm_p_family'],
+                                    p_adjusted=dec[sc][(pick, t)]['p_adjusted'], correction=correction,
                                     years_better=d['training']['years_better'], years=d['training']['years'],
                                     test_difference=d['test']['mean_difference'], test_years_better=d['test']['years_better'],
                                     test_years=d['test']['years']),
                     validation=dict(seasons=seasons, mean_difference=diff, required=minimum),
                     why=(f"{label(pick)} is confirmed better than {label(ref)} for {t} ({spec['unit']} difference "
-                         f"{d['training']['mean_difference']:+.4g} over the training years, Holm p {d['decision']['holm_p_family']:.3g}; "
+                         f"{d['training']['mean_difference']:+.4g} over the training years, {CORR_NAME[correction]} p {dec[sc][(pick, t)]['p_adjusted']:.3g}; "
                          f"{d['test']['mean_difference']:+.4g} over the test years). Independent validation: {len(seasons)} of {minimum} "
                          f"season(s)" + (f", mean difference {diff:+.4g}" if seasons else '') + '.'))
             out['targets'][t][product] = entry

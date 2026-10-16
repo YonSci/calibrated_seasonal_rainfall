@@ -73,7 +73,7 @@ const prev = P[idx - 1], next = P[idx + 1];
       <section id="phase1">
         <p><strong>Confirmed better than the incumbent climatology blend for the published tercile probabilities (RPS): {P1.confirmed}.</strong>
         ✓ = better than the incumbent with Holm-adjusted p &lt; 0.05 across every method and target (SEL: across the targets) and not worse
-        over {P1.te}. Amount correction fixed: {String(P1.amount).toUpperCase()}. National aggregate ({P1.region}). Run at commit <code>{commit(P1.provenance)}</code>.</p>
+        over {P1.te}. This is the benchmark’s own decision, as run (Holm); the <a href={href('research/method-selection/')}>method selection</a> applies Benjamini–Hochberg to the same p-values (since 17 October 2026). Amount correction fixed: {String(P1.amount).toUpperCase()}. National aggregate ({P1.region}). Run at commit <code>{commit(P1.provenance)}</code>.</p>
         <h2>Tercile skill</h2>
         <Table {...P1.rpss} />
         <Table {...P1.test} />

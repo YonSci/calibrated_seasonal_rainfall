@@ -3,7 +3,8 @@ target, from the historical benchmarks and the independent validation seasons (d
 
 For every method and product (tercile probabilities: RPS against the published MVS + climatology blend; rainfall amounts:
 CRPS against the MVS-corrected ensemble), over all targets of all seasons with a benchmark:
-  confirmed     targets where the benchmark confirms it better (Holm p < 0.05 within its family, not worse over the test years)
+  confirmed     targets where it is confirmed better under the selection rule's correction (Benjamini-Hochberg since
+                2026-10-17, Holm before) within its benchmark family, p < 0.05, and not worse over the test years
   training      targets where it is better on average over 1993-2016 (leave one year out), whatever the significance
   test          targets where it is better on average over the test years (2017 onward)
   validation    independent seasons scored after the benchmark (forecast years with CHIRPS): seasons better / scored
@@ -15,8 +16,8 @@ Further evidence from the same out-of-sample scores, no refitting (docs/50, sect
   pooled        per year, the method's skill difference from the reference ((score - reference) / climatology score) averaged
                 over all its targets of all seasons; one sign-flip test over the years for the method
   adjustments   Holm (family-wise error) and Benjamini-Hochberg (false discovery rate) across every method of a product, for
-                the pooled tests and for the 33-year target tests. The selection rule (docs/50) stays on Holm within each
-                benchmark family; these are sensitivity analyses.
+                the pooled tests and for the 33-year target tests. The selection rule (docs/50) uses Benjamini-Hochberg within
+                each benchmark family (decided 2026-10-17); these are sensitivity analyses.
 
   python scripts/method_summary.py      ->  outputs/method_selection/summary.json and summary.md
 """
@@ -27,6 +28,7 @@ from pathlib import Path
 import numpy as np
 
 import leung_dirichlet as ldc
+import selection_tests as st
 from significance import paired_summary, sign_flip_p, holm
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,11 +85,21 @@ def row(store, family, method, label, product):
                                       seasons=set()))
 
 
-def add_test(r, cycle, target, t):
-    """One target's test record (paired_summary for training and test, and the decision)."""
+CORRECTION = read('config/method_selection_rule.json').get('multiple_testing', 'holm')
+
+
+def decisions(tests, score, family=None):
+    """The rule's decisions for one benchmark and score, {(method, target): decision}, within the benchmark's family
+    (by default every method with the score except SEL, which is its own family, as in the benchmarks)."""
+    family = family if family is not None else [m for m in tests if m != 'SEL' and score in tests[m]]
+    return {**st.decide(tests, family, score, CORRECTION), **st.decide(tests, ['SEL'], score, CORRECTION)}
+
+
+def add_test(r, cycle, target, t, decision):
+    """One target's test record (paired_summary for training and test) and the rule's decision."""
     r['targets'] += 1
     r['seasons'].add(cycle)
-    if t['decision']['confirmed']:
+    if decision['confirmed']:
         r['confirmed'].append(f'{SEASON[cycle]} {target}')
     r['training_better'] += t['training']['mean_difference'] < 0
     if t.get('test') and t['test'].get('years'):
@@ -111,11 +123,13 @@ def bias(store):
             continue
         ref = conf['reference']
         label = lambda m: bench['methods'].get(m, {}).get('label', m).replace(' (operational)', '')
-        for m in [m for m in conf['family'] if m != ref]:
+        fam = [m for m in conf['family'] if m != ref]
+        dec = {sc: decisions(conf['tests'], sc, fam) for sc in PRODUCTS.values()}
+        for m in fam:
             for product, sc in PRODUCTS.items():
                 r = row(store, 'Bias correction', m, label(m), product)
                 for target, t in conf['tests'][m][sc].items():
-                    add_test(r, cy, target, t)
+                    add_test(r, cy, target, t, dec[sc][(m, target)])
                     add_series(r, cy, target, conf['targets'][target]['methods'][m], conf['targets'][target]['methods'][ref], sc)
                     for year_dir in sorted((ROOT / f'outputs/bias_correction_benchmark/{cy}/validation').glob('[0-9]*')):
                         a, b = read(year_dir / f'{m}__{target}.json'), read(year_dir / f'{ref}__{target}.json')
@@ -130,22 +144,24 @@ def probability(store):
         for rel, family in (('benchmark.json', 'Probability stage (Phase 1)'), ('phase2_binary/benchmark.json', 'Probability stage (Phase 2)')):
             d = read(f'{base}/{rel}')
             if d:
+                dec = decisions(d['tests'], 'rps')
                 for m in [m for m in d['methods'] if m != d['incumbent']]:
                     r = row(store, family, m, d['registry'][m]['name'], 'probabilities')
                     for target, t in d['tests'][m]['rps'].items():
-                        add_test(r, cy, target, t)
+                        add_test(r, cy, target, t, dec[(m, target)])
                         add_series(r, cy, target, d['targets'][target]['methods'][m], d['targets'][target]['methods'][d['incumbent']], 'rps')
         for rel, family in (('distribution/benchmark.json', 'Distribution model (Phase 2)'), ('phase3/benchmark.json', 'Distribution model (Phase 3)')):
             d = read(f'{base}/{rel}')
             if not d:
                 continue
+            dec = {sc: decisions(d['tests'], sc) for sc in PRODUCTS.values()}
             for m in d['models']:
                 for product, sc in PRODUCTS.items():
                     if sc not in d['tests'].get(m, {}):
                         continue
                     r = row(store, family, m, d['registry'][m]['name'], product)
                     for target, t in d['tests'][m][sc].items():
-                        add_test(r, cy, target, t)
+                        add_test(r, cy, target, t, dec[sc][(m, target)])
                         add_series(r, cy, target, d['targets'][target]['methods'][m],
                                    d['targets'][target]['methods']['incumbent' if sc == 'rps' else 'mvs_ensemble'], sc)
                         for f in sorted((ROOT / base / 'amount_shadow').glob(f'*/{m}__{target}.json')):    # shadow seasons
@@ -160,8 +176,9 @@ def probability(store):
                 m = LD_METHOD[product]
                 if sc in g['tests'].get(m, {}):
                     r = row(store, 'Two-stage calibration', 'leung_dirichlet', ldc.NAME, product)
+                    dec = decisions(g['tests'], sc)
                     for target, t in g['tests'][m][sc].items():
-                        add_test(r, cy, target, t)
+                        add_test(r, cy, target, t, dec[(m, target)])
                         ref = 'incumbent' if sc == 'rps' else 'mvs_ensemble'
                         add_series(r, cy, target, g['targets'][target]['methods'][m], g['targets'][target]['methods'][ref], sc)
                         v = (g.get('validation') or {}).get(target)
@@ -175,8 +192,9 @@ def probability(store):
                         continue
                     r = row(store, 'Statistical downscaling (MOS)', m, g['labels'][m], product)
                     ref = 'incumbent' if sc == 'rps' else 'mvs_ensemble'
+                    dec = decisions(g['tests'], sc)
                     for target, t in g['tests'][m][sc].items():
-                        add_test(r, cy, target, t)
+                        add_test(r, cy, target, t, dec[(m, target)])
                         add_series(r, cy, target, g['targets'][target]['methods'][m], g['targets'][target]['methods'][ref], sc)
                         v = (g.get('validation') or {}).get(target)
                         if v and m in v[sc] and ref in v[sc]:
@@ -249,7 +267,7 @@ def main():
         categories.setdefault(r['category'], set()).add(r['method'])
     categories = {k: len(v) for k, v in sorted(categories.items(), key=lambda kv: list(CATEGORY.values()).index(kv[0]))}
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), region=REGION, protocol=__doc__.strip(),
-                categories=categories, methods=sum(categories.values()), rows=rows)
+                categories=categories, methods=sum(categories.values()), multiple_testing=CORRECTION, rows=rows)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / 'summary.json').write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
     md = ['# Methods against the published approach, all seasons', '',

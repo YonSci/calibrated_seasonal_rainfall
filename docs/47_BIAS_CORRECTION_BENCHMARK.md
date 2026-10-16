@@ -711,19 +711,22 @@ cycles is the way to accumulate independent evidence before a change.
   its dependency fingerprint (code, configurations, masks, model and observation inputs) is unchanged.
 * **Suggested method** (`scripts/bias_recommend.py`, rule fixed in `config/bias_correction/recommendation_rule.json` before the
   validation seasons are scored): for each cycle, target and product, *keep* the operational method unless a method is
-  confirmed better on the historical evidence (section 6/7 confirmation: Holm across all declared methods and targets, no
-  harm in the test years); among confirmed methods, the one the selection-aware procedure picks from training years only.
+  confirmed better on the historical evidence (section 6/7 confirmation, no harm in the test years; adjusted p < 0.05 across
+  all declared methods and targets with the rule's `multiple_testing` correction: Holm until 2026-10-17, Benjamini–Hochberg
+  since, recomputed from the confirmation's p-values, docs/50); among confirmed methods, the one the selection-aware procedure picks from training years only.
   A confirmed method is a *candidate* until at least 3 independent seasons are scored; then *recommended* if its mean score
   over them is not worse than the operational method, otherwise *not supported by validation*. A suggestion informs a
   decision; it never changes the published forecast.
 
-Status after the 2026 seasons (national aggregate):
+Status after the 2026 seasons (national aggregate; Benjamini–Hochberg since 2026-10-17, which added JJAS Jun and Sep):
 
 | Cycle | Target | Product | Suggested | Status | Validation so far |
 | --- | --- | --- | --- | --- | --- |
 | February · FMAM | Feb | Published probabilities | Square-root MVS | Candidate | 2026: RPS 0.399 vs 0.405 (1 of 3 seasons) |
+| May · JJAS | Jun | Amounts | Gamma QM | Candidate | 2026: CRPS 14.31 vs 14.01 mm (1 of 3) |
 | May · JJAS | Jul | Amounts | VS (no ratio limits) | Candidate | 2026: CRPS 25.57 vs 25.99 mm (1 of 3) |
 | May · JJAS | Aug | Amounts | VS (no ratio limits) | Candidate | 2026: CRPS 15.27 vs 15.46 mm (1 of 3) |
+| May · JJAS | Sep | Amounts | Gamma QM | Candidate | 2026: CRPS 15.22 vs 15.34 mm (1 of 3) |
 | September · ONDJ | Jan | Amounts | Square-root MVS | Candidate | awaiting January 2027 (0 of 3) |
 | all others | | | MVS (operational) | Keep | — |
 

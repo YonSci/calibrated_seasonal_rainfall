@@ -70,7 +70,7 @@ const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.en
         <Table {...evidence(d, 'rps')} />
         <h3>Rainfall amounts (CRPS)</h3>
         <Table {...evidence(d, 'crps')} />
-        <p class="caveat">Negative Δ favours the method. Skill against the observed climatology over {d.regions[d.primary_region]}; Holm across both methods and the five targets.</p>
+        <p class="caveat">Negative Δ favours the method. Skill against the observed climatology over {d.regions[d.primary_region]}; Holm across both methods and the five targets. This is the benchmark’s own decision, as run (Holm); the <a href={href('research/method-selection/')}>method selection</a> applies Benjamini–Hochberg to the same p-values (since 17 October 2026).</p>
         {d.assets.includes(`assets/mos/${name}/mos_summary.png`) && <Figure src={`assets/mos/${name}/mos_summary.png`} caption="Skill of each method and target; * confirmed better than the reference." />}
         {d.validation && Object.keys(d.validation).length > 0 && (
           <>

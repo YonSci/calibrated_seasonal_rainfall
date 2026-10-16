@@ -32,7 +32,7 @@ const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainf
 
     <h2>How the selection works</h2>
     <ol class="findings">
-      <li><strong>Candidate</strong>: a method is a candidate only if its benchmark confirms it better than the published approach — better over the training years with Holm-adjusted p &lt; 0.05 across every method and target of its family, and not worse over the test years.</li>
+      <li><strong>Candidate</strong>: a method is a candidate only if its benchmark confirms it better than the published approach — better over the training years with Benjamini–Hochberg-adjusted p &lt; 0.05 (false discovery rate) across every method and target of its family, and not worse over the test years. The adjusted p-values are recomputed from the p-values each benchmark stored, within the same families; until 17 October 2026 the rule used Holm, which is stricter (decision of the project lead after the sensitivity analyses on the <a href={href('research/')}>Research overview</a>).</li>
       <li><strong>Choice</strong>: a recommended candidate first, then the largest improvement over the training years. One change at a time: an amount correction and a probability or distribution method were each tested against the published approach, not together.</li>
       <li><strong>Validation</strong>: every candidate is scored on the seasons after the benchmark (every bias correction through the validation runs; every distribution-model candidate through its own shadow forecast). It becomes <em>recommended</em> after {rule?.validation.minimum_seasons ?? 3} seasons that are not worse, or <em>not supported</em> if worse.</li>
     </ol>
@@ -42,7 +42,7 @@ const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainf
       <section id="all-methods">
         <h2>Every method against the published approach</h2>
         <p>Across all seasons and targets (five per season: the months and the season), All Ethiopia. <strong>Confirmed better</strong>:
-        the benchmark's test (Holm p &lt; 0.05 within its family, not worse over the test years). <strong>Better 1993–2016</strong> and
+        the selection rule's test (Benjamini–Hochberg p &lt; 0.05 within the benchmark's family, not worse over the test years). <strong>Better 1993–2016</strong> and
         <strong>better 2017+</strong>: targets where it is better on average, whatever the significance. <strong>Validation</strong>: targets of
         the independent seasons scored after the benchmark (2026 so far). Ranked by confirmed targets, then by the share better over
         1993–2016.</p>

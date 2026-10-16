@@ -25,6 +25,7 @@ from pathlib import Path
 import numpy as np
 
 import leung_dirichlet as ldc
+import selection_tests as st
 
 ROOT = Path(__file__).resolve().parents[1]
 RULE = 'config/method_selection_rule.json'
@@ -42,10 +43,17 @@ def read(p):
     return json.loads(p.read_text(encoding='utf-8')) if p.is_file() else None
 
 
-def hist(test):
+CORRECTION = 'holm'                                   # set from the rule's multiple_testing in main()
+CORR_NAME = {'holm': 'Holm', 'benjamini_hochberg': 'Benjamini–Hochberg'}
+
+
+def hist(test, decision=None):
+    """The historical evidence of a test; `decision` is the rule's re-decision (selection_tests.decide)."""
     a, b, d = test['training'], test['test'], test['decision']
     return dict(training_difference=a['mean_difference'], years_better=a['years_better'], years=a['years'],
                 holm_p=d.get('holm_p_family', d.get('holm_p')), test_difference=b['mean_difference'],
+                p_adjusted=(decision or {}).get('p_adjusted', d.get('holm_p_family', d.get('holm_p'))),
+                correction=(decision or {}).get('correction', 'holm'),
                 test_years_better=b['years_better'], test_years=b['years'])
 
 
@@ -65,14 +73,18 @@ def bias_candidates(rec, target, product):
 
 
 def confirmed(data, family, target, score, keys, names, reference=None):
-    """Candidates of one probability/distribution family: methods its benchmark confirms better (score: 'rps' or 'crps')."""
+    """Candidates of one benchmark family: methods confirmed better under the rule's correction (score: 'rps' or 'crps'),
+    adjusted across every method and target of the benchmark's family (SEL is its own family, as in the benchmark)."""
     out = []
     if not data:
         return out
+    family_methods = [m for m in data['tests'] if m != 'SEL' and score in data['tests'][m]]
+    dec = {**st.decide(data['tests'], family_methods, score, CORRECTION), **st.decide(data['tests'], ['SEL'], score, CORRECTION)}
     for k in keys:
         t = data['tests'].get(k, {}).get(score, {}).get(target)
-        if t and t['decision']['confirmed'] and (reference is None or t['decision'].get('reference', reference) == reference):
-            out.append(dict(family=family, method=k, label=names(k), historical=hist(t), validation=None, status='candidate'))
+        d = dec.get((k, target))
+        if t and d and d['confirmed'] and (reference is None or t['decision'].get('reference', reference) == reference):
+            out.append(dict(family=family, method=k, label=names(k), historical=hist(t, d), validation=None, status='candidate'))
     return out
 
 
@@ -123,7 +135,7 @@ def why(sel, product, target, ref_label, cands, unit):
         return base + (f'; {len(rejected)} confirmed method(s) were worse over the validation seasons.' if rejected else '.')
     h, v = sel.get('historical') or {}, sel.get('validation')
     txt = (f"{sel['label']} ({FAMILY_LABEL[sel['family']].lower()}) is confirmed better than {ref_label} for {target}: {unit} difference "
-           f"{h.get('training_difference', float('nan')):+.4g} over the training years (Holm p {h.get('holm_p', float('nan')):.3g}; "
+           f"{h.get('training_difference', float('nan')):+.4g} over the training years ({CORR_NAME.get(h.get('correction', 'holm'), 'Holm')} p {h.get('p_adjusted', h.get('holm_p', float('nan'))):.3g}; "
            f"{h.get('years_better', '?')} of {h.get('years', '?')} years better), {h.get('test_difference', float('nan')):+.4g} over the test years.")
     if v and v.get('seasons') and v.get('mean_difference') is not None:
         txt += f" Independent validation: {len(v['seasons'])} of {v['required']} season(s), mean difference {v['mean_difference']:+.4g}."
@@ -139,6 +151,8 @@ def why(sel, product, target, ref_label, cands, unit):
 
 def main():
     rule = read(RULE)
+    global CORRECTION
+    CORRECTION = rule.get('multiple_testing', 'holm')
     minimum = rule['validation']['minimum_seasons']
     recs = {c['name']: c for c in (read('outputs/bias_correction_benchmark/recommendations.json') or {}).get('cycles', [])}
     cycles = []

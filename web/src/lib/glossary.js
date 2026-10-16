@@ -16,6 +16,7 @@ export const GLOSSARY = [
   ['leave-one-year-out', 'Each year is left out in turn; everything is fitted on the other years and the left-out year is scored.'],
   ['exploratory', 'Scores of years that were seen while the method was chosen (2017 onward); useful context, but weaker evidence than the cross-validated 1993–2016 scores.'],
   ['Holm', 'Holm correction for testing many methods or targets at once: p-values are adjusted so that a confirmation is not a chance result of the number of tests.'],
+  ['Benjamini–Hochberg', 'Benjamini–Hochberg correction for testing many methods or targets at once: controls the expected share of false findings among those confirmed (less strict than Holm). The method selection uses it since 17 October 2026.'],
   ['spread–error', 'Ratio of the ensemble spread to the error of the ensemble mean; 1 means the spread matches the error, below 1 too narrow.'],
   ['coverage', 'Share of observations inside the forecast 10–90% range; 80% is calibrated, less means the range is too narrow.'],
   ['pinball loss', 'The score of one forecast quantile (e.g. the median) against the observation; lower is better.'],

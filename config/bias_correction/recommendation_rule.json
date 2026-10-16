@@ -6,7 +6,9 @@
     "probabilities": {"score": "rps", "selection": "SEL-P", "label": "Published tercile probabilities", "unit": "RPS"},
     "amounts": {"score": "crps", "selection": "SEL-A", "label": "Rainfall amounts", "unit": "CRPS (mm)"}
   },
-  "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Holm-adjusted p < 0.05 across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+  "historical": "A method is a candidate only if the confirmation (CHIRPS, outer leave-one-year-out over the training years, full pipeline) finds it better than the operational method with Benjamini-Hochberg-adjusted p < 0.05 (false discovery rate) across every declared method and target, and not worse over the test years. Variants outside the declared family are not candidates.",
+  "multiple_testing": "benjamini_hochberg",
+  "changes": [{"date": "2026-10-17", "change": "multiple-testing correction: Holm -> Benjamini-Hochberg", "note": "Decided by the project lead after the sensitivity analyses (33-year and pooled evidence, Holm and Benjamini-Hochberg) had been seen; the decisions are recomputed from the p-values each benchmark stored, within the same families. The benchmarks keep their own Holm decisions as run."}],
   "choice": "Among candidates, the method the selection-aware procedure chooses from all training years (training-only information); if that method is not a candidate, the candidate with the best training-period score. Other candidates are listed as alternatives: a confirmation establishes improvement against the operational method, not a ranking among candidates.",
   "validation": {
     "minimum_seasons": 3,
