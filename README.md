@@ -1,4 +1,4 @@
-# Seasonal Calibrated Rainfall Outlook (SCRO)
+# Seasonal Rainfall Outlook Platform
 
 Calibrated seasonal rainfall outlooks for Ethiopia (ECMWF SEAS5 → CHIRPS).
 

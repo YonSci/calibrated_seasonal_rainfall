@@ -699,8 +699,8 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None,
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SCRO · Seasonal Calibrated Rainfall Outlook (classic page)</title>
-<meta name="description" content="Seasonal Calibrated Rainfall Outlook (SCRO): calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia (FMAM, JJAS, ONDJ), with maps, verification against CHIRPS and historical skill.">
+<title>Seasonal Rainfall Outlook Platform (classic page)</title>
+<meta name="description" content="Seasonal Rainfall Outlook Platform: calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia (FMAM, JJAS, ONDJ), with maps, verification against CHIRPS and historical skill.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
@@ -709,7 +709,7 @@ def page(cycles, default, ev, built, sha, release_id='unreleased', reviews=None,
 <a class="skip" href="#outlooks">Skip to the outlook</a>
 <header class="top">
   <div class="wrap nav">
-    <a class="brand" href="#top">SCRO · Seasonal Calibrated Rainfall Outlook</a>
+    <a class="brand" href="#top">Seasonal Rainfall Outlook Platform</a>
     <nav aria-label="Sections"><a href="#outlooks">Outlooks</a><a href="#official">Compare outlooks</a><a href="#maps">Maps</a><a href="#verification">Verification</a><a href="#history">Historical performance</a><a href="#bias">Bias correction</a><a href="#probcal">Probability calibration</a><a href="#domains">Rainfall domains</a><a href="#methods">Methods &amp; data</a><a href="#downloads">Downloads</a></nav>
   </div>
   <div class="cyclebar">
@@ -1957,7 +1957,7 @@ def main():
         + '</ul>' for c in cycles)
     (OUT / 'downloads/index.html').write_text(
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
-        '<title>SCRO downloads</title><link rel="stylesheet" href="../assets/style.css"></head>'
+        '<title>Seasonal Rainfall Outlook Platform: downloads</title><link rel="stylesheet" href="../assets/style.css"></head>'
         f'<body><main class="wrap"><h1>Downloads</h1><p><a href="../index.html">Back to the outlooks</a></p>{items}'
         '<p class="caveat">Research reconstructions; not official EMI or ICPAC forecasts.</p></main></body></html>\n',
         encoding='utf-8', newline='')

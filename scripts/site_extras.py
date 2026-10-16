@@ -152,7 +152,7 @@ def bulletin_pdf(cyc, out_pdf, built, site):
     with PdfPages(out_pdf) as pdf:
         # ---- page 1: outlook
         fig = plt.figure(figsize=(8.27, 11.69))
-        fig.text(.07, .978, 'SCRO · Seasonal Calibrated Rainfall Outlook', fontsize=8.5, color=muted)
+        fig.text(.07, .978, 'Seasonal Rainfall Outlook Platform', fontsize=8.5, color=muted)
         fig.text(.07, .955, f'{season["label"]} rainfall outlook', fontsize=20, weight='bold', color=ink)
         fig.text(.07, .932, f'ECMWF SEAS5 initialized 1 {cyc["init"]} {cyc["init_date"][:4]} · calibrated with {cyc.get("obs", "CHIRPS")} · {area}',
                  fontsize=9.5, color=muted)
@@ -271,7 +271,7 @@ def package_readme(cyc, built, release_id):
     view = cyc['domain_view']
     season = cyc['targets'][0]
     lines = [
-        'SCRO - Seasonal Calibrated Rainfall Outlook',
+        'Seasonal Rainfall Outlook Platform',
         f'{cyc["option"]} - forecast and evidence package',
         '=' * 60,
         '',

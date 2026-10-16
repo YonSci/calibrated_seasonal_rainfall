@@ -18,8 +18,8 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
   return { x, verified: v, href: url.target(x, x.default_view, defaultTarget(x)), vhref: url.verification(x, x.default_view, defaultTarget(x)) };
 });
 ---
-<Base title="Seasonal Calibrated Rainfall Outlook" section=""
-      description="Seasonal Calibrated Rainfall Outlook (SCRO): calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia: the current outlook, maps, verification against CHIRPS and historical skill.">
+<Base title="Seasonal Rainfall Outlook Platform" section=""
+      description="Seasonal Rainfall Outlook Platform: calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia: the current outlook, maps, verification against CHIRPS and historical skill.">
   <OutlookHero O={O} status={c.targets[0].status} more={[url.target(c, view, target), `Full ${c.targets[0].label} outlook and maps`]} />
 
   <section>

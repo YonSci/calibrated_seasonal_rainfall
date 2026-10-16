@@ -6,7 +6,7 @@ import { C, cycleOf, url, defaultTarget } from '../lib/cycles.js';
 import { GLOSSARY } from '../lib/glossary.js';
 const CLASSIC = `${ROOT}classic/`;
 const { title, description = '', section = '' } = Astro.props;
-const SITE_NAME = 'Seasonal Calibrated Rainfall Outlook';           // the platform's name (SCRO); the home page's title
+const SITE_NAME = 'Seasonal Rainfall Outlook Platform';           // the platform's name; the home page's title
 // Forecast entries open the latest cycle; Verification the latest cycle with a verified target.
 const latest = cycleOf(C.default);
 const verified = [...C.cycles].reverse().find((c) => c.targets.some((t) => Object.keys(t.verification || {}).length)) || latest;
@@ -39,8 +39,8 @@ const menus = [
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{title === SITE_NAME ? `${SITE_NAME} (SCRO) · Ethiopia` : `${title} · SCRO`}</title>
-  <meta property="og:site_name" content={`${SITE_NAME} (SCRO)`}>
+  <title>{title === SITE_NAME ? `${SITE_NAME} · Ethiopia` : `${title} · ${SITE_NAME}`}</title>
+  <meta property="og:site_name" content={SITE_NAME}>
   <meta name="description" content={description}>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -84,8 +84,7 @@ const menus = [
     .brand{display:flex;align-items:center;gap:10px;white-space:normal;min-width:0}
     .brand-full{font-size:1.25rem;font-weight:700;line-height:1.15;color:var(--ink)}
     @media (min-width:861px){ .top .menu{flex-shrink:0} }   /* if room runs short the title wraps, not the menu */
-    .brand-short{font-size:.72rem;font-weight:600;letter-spacing:.06em;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:1px 6px;flex:none}
-    @media (max-width:1240px){ .brand-full{font-size:1.15rem;max-width:11em} .brand-short{display:none} }   /* room for the menu */
+    @media (max-width:1240px){ .brand-full{font-size:1.15rem;max-width:11em} }   /* room for the menu: the title over two lines */
     a.chip{text-decoration:none;display:inline-block;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
     a.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
     @media (max-width:860px){
@@ -102,7 +101,7 @@ const menus = [
   <a class="skip" href="#main">Skip to the content</a>
   <header class="top">
     <div class="wrap nav">
-      <a class="brand" href={href('')} aria-label={`${SITE_NAME} (SCRO), home`}><span class="brand-full">{SITE_NAME}</span><span class="brand-short">SCRO</span></a>
+      <a class="brand" href={href('')} aria-label={`${SITE_NAME}, home`}><span class="brand-full">{SITE_NAME}</span></a>
       <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="site-menu">Menu</button>
       <nav class="menu" id="site-menu" aria-label="Site">
         {nav.map(([k, label, u]) => <a href={u} aria-current={section === k ? 'page' : undefined}>{label}</a>)}
