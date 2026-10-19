@@ -12,7 +12,23 @@ const cycles = names('mos').map((n) => ({ name: n, d: read(`mos/${n}.json`) }))
   .map((x) => ({ ...x, title: cycleTitle(INIT[x.name.split('_')[0]], x.name.split('_')[1].toUpperCase()) }))
   .sort((a, b) => INIT[a.name.split('_')[0]] - INIT[b.name.split('_')[0]]);
 const verdict = (dec) => (dec.confirmed ? '<strong>✓ confirmed better</strong>' : dec.no_harm ? 'not confirmed' : 'not confirmed; worse over the test years');
+// The method selection's decision (docs/50): Benjamini–Hochberg across both methods and the targets of the cycle, per score,
+// from the stored one-sided p-values (as scripts/selection_tests.py).
+function bhDecisions(d, score) {
+  const keys = d.methods.flatMap((k) => Object.keys(d.tests[k]?.[score] ?? {}).map((t) => [k, t]));
+  const order = keys.map(([k, t]) => ({ k, t, p: d.tests[k][score][t].training.p_improvement })).sort((a, b) => a.p - b.p);
+  const out = {};
+  let run = 1;
+  for (let i = order.length - 1; i >= 0; i--) {
+    run = Math.min(run, order[i].p * order.length / (i + 1));
+    const x = d.tests[order[i].k][score][order[i].t];
+    const adj = Math.min(1, run);
+    out[`${order[i].k}|${order[i].t}`] = { p: adj, confirmed: x.training.mean_difference < 0 && adj < 0.05 && x.test.mean_difference <= 0 };
+  }
+  return out;
+}
 function evidence(d, score) {
+  const bh = bhDecisions(d, score);
   const reg = d.primary_region;
   const skill = score === 'rps' ? 'rpss' : 'crpss';
   const ref = score === 'rps' ? 'incumbent' : 'mvs_ensemble';
@@ -22,12 +38,13 @@ function evidence(d, score) {
     const x = d.tests[k]?.[score]?.[t];
     rows.push([`<strong>${esc(t)}</strong>`, k === ref ? `<em>${esc(d.references[k])}</em>` : esc(d.labels[k]),
       signed(m.training[reg][skill]), signed(m.test[reg][skill]),
-      x ? signed(x.training.mean_difference, 4) : '—', x ? num(x.decision.holm_p_family, 3) : '—',
-      x ? `${x.training.years_better} of ${x.training.years}` : '—', x ? signed(x.test.mean_difference, 4) : '—', x ? verdict(x.decision) : 'reference']);
+      x ? signed(x.training.mean_difference, 4) : '—', x ? num(x.decision.holm_p_family, 3) : '—', x ? num(bh[`${k}|${t}`].p, 3) : '—',
+      x ? `${x.training.years_better} of ${x.training.years}` : '—', x ? signed(x.test.mean_difference, 4) : '—',
+      x ? verdict(x.decision) : 'reference', x ? (bh[`${k}|${t}`].confirmed ? '<strong>✓ candidate</strong>' : '—') : '']);
   }
   return {
     head: ['Target', 'Method', `${skill.toUpperCase()} ${years(d.training_years)} (LOYO)`, `${skill.toUpperCase()} ${years(d.test_years)}`,
-      `Δ${score.toUpperCase()} vs reference`, 'Holm p', 'Years better', `Δ${score.toUpperCase()} (test years)`, 'Decision'],
+      `Δ${score.toUpperCase()} vs reference`, 'Holm p', 'BH p', 'Years better', `Δ${score.toUpperCase()} (test years)`, 'Benchmark (Holm)', 'Selection rule (BH)'],
     rows,
   };
 }
@@ -39,6 +56,8 @@ const commonModes = (list) => {
 };
 const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.entries(s).flatMap(([sc, ts]) =>
   Object.entries(ts).filter(([, x]) => x.decision.confirmed).map(([t]) => `${d.labels[k]} for ${t} (${sc.toUpperCase()})`)));
+const candidatesOf = (d) => ['rps', 'crps'].flatMap((sc) => Object.entries(bhDecisions(d, sc)).filter(([, x]) => x.confirmed)
+  .map(([key]) => { const [k, t] = key.split('|'); return `${d.labels[k]} for ${t} (${sc.toUpperCase()})`; }));
 ---
 <Base title="Statistical downscaling" section="research" description="Statistical downscaling by model output statistics (canonical correlation analysis and principal component regression, the CPT approach) tested against the published pipeline.">
   <OnThisPage>
@@ -60,17 +79,48 @@ const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.en
       <li><strong>Probabilities and amounts:</strong> a Gaussian predictive distribution in square-root space with the cross-validated error of the chosen modes: tercile probabilities from it, amounts and 10–90% ranges from 51 of its quantiles.</li>
     </ul>
 
+    <h2 id="how">How it is implemented</h2>
+    <p>Every step is fitted with the training years of the fold only. The full description, with the function behind each step, is in
+    <a href={`${REPO}/blob/main/docs/53_STATISTICAL_DOWNSCALING.md#2-implementation`}>docs/53, section 2</a>.</p>
+    <ol class="findings">
+      <li><strong>Fields.</strong> Forecast: the SEAS5 ensemble mean of the target's rainfall, square-rooted and averaged over 4 × 4 blocks of
+        0.25° cells (180 values). Observation: square-rooted CHIRPS at every 0.25° cell of Ethiopia. Each column is standardized with the
+        training years: <code>Xz = (X − mx)/sx</code>, <code>Yz = (Y − my)/sy</code>.</li>
+      <li><strong>EOFs.</strong> Singular value decompositions <code>Xz = Ux Sx Vxᵀ</code> and <code>Yz = Uy Sy Vyᵀ</code> give principal
+        components of unit variance, <code>Xpc = √n Ux</code> and <code>Ypc = √n Uy</code>. A new forecast is projected on the first m
+        predictor EOFs.</li>
+      <li><strong>PCR.</strong> Every cell is regressed on the m predictor PCs. As the PCs are uncorrelated with unit variance, the
+        coefficients are <code>B = Xpcᵀ Yz / n</code> and the prediction is <code>ŷz = xpc B</code>.</li>
+      <li><strong>CCA.</strong> The cross-covariance of m predictor PCs and l predictand PCs, <code>C = Xpcᵀ Ypc / n = A diag(r) Bᵀ</code>,
+        gives the canonical correlations r and the weights A, B. The forecast's first k canonical variates, multiplied by their
+        correlations, are mapped back to the predictand PCs and through the predictand EOFs to every cell.</li>
+      <li><strong>Choice of modes.</strong> PCR tries m = 1–6; CCA every m, l = 1–6 with k = 1–3 canonical modes (77 combinations). Each
+        training year is left out in turn, everything is refitted on the others and the left-out year predicted. The combination with the
+        smallest squared error, divided by each cell's variance and averaged over the cells that vary from year to year, wins. In practice
+        CCA keeps one canonical mode and PCR one or two PCs.</li>
+      <li><strong>Forecast distribution.</strong> Gaussian in square-root space: the mean μ from the chosen model refitted on all training
+        years, the standard deviation σ the cell's cross-validated error. Tercile probabilities: <code>P(below) = Φ((√q1 − μ)/σ)</code>,
+        <code>P(above) = 1 − Φ((√q2 − μ)/σ)</code>, with the terciles q1, q2 of the training years' CHIRPS. Amounts: 51 quantiles of the
+        Gaussian, set to zero below zero and squared back; the median and the 10–90% range likewise. No smoothing or climatology blend.</li>
+      <li><strong>Evaluation.</strong> Outer leave-one-year-out over the training years (the choice of modes nested inside each fold), then
+        fitted on all training years for the test years, with the published probabilities and the MVS-corrected ensemble computed in the
+        same folds. One-sided paired sign-flip test over whole years for each method, target and score.</li>
+    </ol>
+    <p class="caveat">Known limitations: the ensemble mean averages 25 members in 1993–2016 and 51 from 2017; one predictor field (no
+    sea-surface temperature); σ is the same every year; no climatology blend.</p>
+
     {cycles.map(({ name, d, title }) => (
       <section id={name}>
         <h2>{title}</h2>
-        <p><strong>Confirmed better than the published approach:</strong> {confirmedOf(d).length ? confirmedOf(d).join('; ') : 'none'}.
+        <p><strong>Confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {candidatesOf(d).length ? candidatesOf(d).join('; ') : 'none'}.
+        In the benchmark as run (Holm): {confirmedOf(d).length ? confirmedOf(d).join('; ') : 'none'}.
         Modes most often chosen (predictor EOFs / predictand EOFs / canonical modes), season target: CCA {commonModes(d.targets[Object.keys(d.targets).at(-1)].modes.cca.training)},
         PCR {commonModes(d.targets[Object.keys(d.targets).at(-1)].modes.pcr.training).replace(/ \/ 0 \/ 0/, '')}.</p>
         <h3>Tercile probabilities (RPS)</h3>
         <Table {...evidence(d, 'rps')} />
         <h3>Rainfall amounts (CRPS)</h3>
         <Table {...evidence(d, 'crps')} />
-        <p class="caveat">Negative Δ favours the method. Skill against the observed climatology over {d.regions[d.primary_region]}; Holm across both methods and the five targets. This is the benchmark’s own decision, as run (Holm); the <a href={href('research/method-selection/')}>method selection</a> applies Benjamini–Hochberg to the same p-values (since 17 October 2026).</p>
+        <p class="caveat">Negative Δ favours the method. Skill against the observed climatology over {d.regions[d.primary_region]}; Holm and Benjamini–Hochberg (BH) across both methods and the five targets. The benchmark’s own decision, as run, uses Holm; the <a href={href('research/method-selection/')}>method selection</a> applies BH to the same p-values (since 17 October 2026), and a method confirmed under BH is a candidate there.</p>
         {d.assets.includes(`assets/mos/${name}/mos_summary.png`) && <Figure src={`assets/mos/${name}/mos_summary.png`} caption="Skill of each method and target; * confirmed better than the reference." />}
         {d.validation && Object.keys(d.validation).length > 0 && (
           <>
