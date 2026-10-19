@@ -954,7 +954,7 @@
   {
     "id": "2026-10-17.3",
     "date": "2026-10-17",
-    "commit": null,
+    "commit": "7867cf9",
     "title": "Method selection with Benjamini-Hochberg",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -966,6 +966,24 @@
       {
         "type": "method",
         "text": "The method selection, the bias-correction suggestions and the summary across seasons adjust for testing many methods and targets with Benjamini-Hochberg (false discovery rate) instead of Holm, within each benchmark family, recomputed from the p-values each benchmark stored (decision of 17 October 2026, after the sensitivity analyses). Eight target-product combinations now have a candidate instead of six: JJAS June amounts (gamma quantile mapping) and JJAS season amounts (principal component regression) are new, and for JJAS August amounts principal component regression replaces Variance Scaling. None is recommended yet: that needs three validation seasons. The published forecasts are unchanged. docs/50."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-19.0",
+    "date": "2026-10-19",
+    "commit": null,
+    "title": "How statistical downscaling is implemented",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The statistical downscaling page explains how canonical correlation analysis and principal component regression are implemented (fields, EOFs, the regression and canonical steps, the choice of modes, the forecast distribution and the evaluation) and shows each comparison under the benchmark (Holm) and under the selection rule (Benjamini-Hochberg). docs/53 section 2 gives the full description with the function behind each step."
       }
     ]
   }
