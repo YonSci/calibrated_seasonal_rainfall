@@ -31,6 +31,20 @@ class Selection(unittest.TestCase):
         self.assertIsNone(ms.select([d]))                                           # never select a method validation rejected
         self.assertIsNone(ms.select([]))
 
+    def test_practical_tie_rule_prefers_the_simplest_close_candidate(self):
+        drn, qr, emos = (cand('distribution_neural', 'drn_csg', -1.10), cand('distribution_phase2', 'quantile_regression', -1.08),
+                         cand('distribution_phase2', 'emos_csg', -0.98))
+        self.assertEqual(ms.select([drn, qr, emos])['method'], 'drn_csg')                       # no rule: the largest gain
+        s = ms.select([drn, qr, emos], level=19.34, margin=0.01)                                # 1% of 19.34 = 0.19: all three tie
+        self.assertEqual(s['method'], 'emos_csg')
+        self.assertEqual(s['tie']['best'], 'drn_csg')
+        self.assertEqual(ms.select([drn, qr, emos], level=19.34, margin=0.005)['method'], 'quantile_regression')   # 0.097: EMOS out
+        self.assertEqual(ms.select([drn, cand('distribution_phase2', 'emos_csg', -0.5)], level=19.34, margin=0.01)['method'], 'drn_csg')
+        rec = cand('distribution_neural', 'drn_csg', -0.9, [-0.5, -0.1, -0.2])
+        rec['status'] = 'recommended'
+        self.assertEqual(ms.select([rec, emos], level=19.34, margin=0.01)['method'], 'drn_csg')   # a recommended one first
+        self.assertIn('practical tie rule', ms.why(s, 'amounts', 'Sep', 'MVS', [drn, qr, emos], 'CRPS (mm)'))
+
     def test_explanation_names_the_reference_and_the_alternatives(self):
         a = cand('bias_correction', 'vs', -0.5, [-0.1]); b = cand('distribution_phase2', 'qr', -2.0)
         for x in (a, b):

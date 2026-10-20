@@ -23,6 +23,13 @@ supports, from all benchmarks together, by a rule fixed in advance (`config/meth
    own family); nothing is refitted. `selection_tests.holm_check` reproduces every benchmark's own Holm decision exactly, so
    the families are rebuilt correctly. The correction is `multiple_testing` in `config/method_selection_rule.json`.
 2. **Choice.** A recommended candidate first; then the candidate with the largest improvement over the training years.
+   **Practical tie rule** (`tie_rule`, decided 2026-10-20): candidates of the same status whose improvement is within 1% of the
+   published approach's own training-period score (MVS-ensemble CRPS for amounts, published RPS for probabilities, All
+   Ethiopia) of the largest improvement are tied, and the simplest is selected: amount corrections and probability-stage
+   calibrations, then EMOS, then quantile and extended logistic regression, then the Phase 3 models, Leung–Dirichlet and
+   statistical downscaling, then the neural networks. The tie is recorded in `selection.json`. 1% is above the largest error of
+   the earlier numerical CRPS (0.7%, `scripts/crps_precision.py`) and well below the typical confirmed improvements (3–8%). It
+   was decided before the second stage re-scores the close JJAS September comparison with the corrected CRPS (docs/54, 3f).
    **One change at a time:** each family was tested against the published approach, not combined with another family, so the
    selection changes one stage (the amount correction, the probability stage or the whole distribution); the other candidates
    are listed as alternatives.
@@ -67,13 +74,16 @@ No target–product combination is recommended yet. Eight have a candidate:
 | JJAS, May initialization | Jun | amounts | gamma QM (amount correction; square-root MVS also confirmed) | 1 of 3 |
 | JJAS, May initialization | Jul | amounts | Variance Scaling, unbounded (amount correction) | 1 of 3 |
 | JJAS, May initialization | Aug | amounts | PCR (statistical downscaling; VS, square-root MVS, PT and gamma QM also confirmed) | 1 of 3 |
-| JJAS, May initialization | Sep | amounts | DRN (neural network, docs/54; quantile regression, EMOS, gamma QM, VS, square-root MVS also confirmed) | 0 of 3 (needs a shadow forecast) |
+| JJAS, May initialization | Sep | amounts | EMOS (distribution model; tied within 1% with the DRN and quantile regression, practical tie rule; gamma QM, VS, square-root MVS also confirmed) | 1 of 3 |
 | JJAS, May initialization | JJAS | amounts | PCR (statistical downscaling) | 1 of 3 |
 | ONDJ, September initialization | Jan | amounts | square-root MVS (amount correction; Leung–Dirichlet and gamma QM also confirmed) | 0 of 3 |
 
 Changes on 2026-10-20: statistical downscaling version 2 (docs/53) keeps PCR confirmed for JJAS August and season amounts
 but no longer confirms CCA and PCR for September; the neural network (DRN, docs/54) is confirmed for JJAS September amounts
-and selected there (improvement −1.10 mm over 1993–2016 against −1.08 mm for quantile regression, now an alternative).
+and was selected there (improvement −1.10 mm over 1993–2016 against −1.08 mm for quantile regression). Under the practical tie
+rule adopted the same day, the DRN (−1.10 mm), quantile regression (−1.08 mm) and EMOS (−0.98 mm) are within 1% of the
+published CRPS (19.34 mm, tolerance 0.19 mm), so EMOS, the simplest, is selected; the DRN and quantile regression remain
+confirmed alternatives with their own shadow forecasts.
 
 The numbers behind each are on the site and in `selection.json` (training and test differences, Benjamini–Hochberg p and the benchmark's Holm p, years better,
 validation seasons).

@@ -37,6 +37,17 @@ FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'proba
                 'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Two-stage calibration (docs/51)', 'mos': 'Statistical downscaling (docs/53)',
                 'distribution_neural': 'Neural network (docs/54)', 'distribution_neural_ext': 'Neural network, second stage (docs/54)',
                 'distribution_neural_pooled': 'Neural network, pooled over the months (docs/54)'}
+# Simplicity order of the practical tie rule (rule 'tie_rule'): fewer and more interpretable parameters first
+SIMPLICITY = {'bias_correction': 1, 'probability_phase1': 1, 'probability_phase2_binary': 1, 'distribution_phase2': 2,
+              'distribution_phase3': 4, 'leung_dirichlet': 4, 'mos': 4, 'distribution_neural': 5, 'distribution_neural_ext': 5,
+              'distribution_neural_pooled': 5}
+SIMPLER_METHOD = {'emos_csg': 2, 'quantile_regression': 3, 'extended_logistic': 3}     # within the Phase 2 distribution models
+
+
+def simplicity(c):
+    return SIMPLER_METHOD.get(c['method'], SIMPLICITY.get(c['family'], 9))
+
+
 STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probability stage', 'probability_phase2_binary': 'probability stage',
          'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration', 'mos': 'statistical downscaling',
          'distribution_neural': 'distribution model (neural network)', 'distribution_neural_ext': 'distribution model (neural network)',
@@ -145,12 +156,36 @@ def status_of(c, minimum):
     return 'recommended' if v['mean_difference'] <= 0 else 'not_supported'
 
 
-def select(cands):
+def select(cands, level=None, margin=None):
+    """The selected candidate: the best status, then the largest historical gain. Practical tie rule (rule 'tie_rule'): candidates
+    of that status whose historical gain is within margin x level (level: the published approach's own historical score for
+    the target and product) of the best are tied, and the simplest of them (SIMPLICITY) is selected; the tie is recorded."""
     order = {'recommended': 0, 'candidate': 1, 'not_supported': 2}
     usable = [c for c in cands if c['status'] != 'not_supported']
     if not usable:
         return None
-    return sorted(usable, key=lambda c: (order[c['status']], (c.get('historical') or {}).get('training_difference', 0)))[0]
+    gain = lambda c: (c.get('historical') or {}).get('training_difference')          # noqa: E731
+    best = sorted(usable, key=lambda c: (order[c['status']], gain(c) if gain(c) is not None else 0))[0]
+    if not (margin and level and gain(best) is not None):
+        return best
+    tol = margin * level
+    tied = [c for c in usable if c['status'] == best['status'] and gain(c) is not None and gain(c) - gain(best) <= tol]
+    chosen = sorted(tied, key=lambda c: (simplicity(c), gain(c)))[0]
+    if len(tied) > 1:
+        chosen = dict(chosen, tie=dict(margin=margin, level=level, tolerance=tol, best=best['method'], best_gain=gain(best),
+                                       tied=[dict(method=c['method'], family=c['family'], gain=gain(c), simplicity=simplicity(c)) for c in tied]))
+    return chosen
+
+
+def reference_level(cycle, target, score):
+    """The published approach's own historical score for a target (training years, All Ethiopia): the MVS ensemble's CRPS or
+    the published probabilities' RPS, from the Phase 2 distribution benchmark (the same folds and region as every family)."""
+    d = read(f'outputs/probability_calibration/{cycle}/distribution/benchmark.json')
+    try:
+        m = d['targets'][target]['methods']['mvs_ensemble' if score == 'crps' else 'incumbent']['training'][d.get('primary_region', 'ethiopia')]
+        return float(m[score])
+    except (TypeError, KeyError):
+        return None
 
 
 def why(sel, product, target, ref_label, cands, unit):
@@ -168,7 +203,12 @@ def why(sel, product, target, ref_label, cands, unit):
         txt += f" Independent validation: 0 of {v.get('required', 3)} seasons scored so far."
     else:
         txt += ' No independent validation season yet: a shadow forecast is needed before it can be recommended.'
-    others = [c for c in cands if c is not sel and c['status'] != 'not_supported']
+    if sel.get('tie'):
+        tie = sel['tie']
+        tied = ', '.join(x['method'] for x in tie['tied'] if x['method'] != sel['method'])
+        txt += (f" Tied within {100 * tie['margin']:g}% of the published score ({tie['tolerance']:.3g} {unit}) with {tied}: the simplest "
+                f"is selected (practical tie rule; the largest gain was {tie['best']}).")
+    others = [c for c in cands if (c['method'], c['family']) != (sel['method'], sel['family']) and c['status'] != 'not_supported']
     if others:
         txt += ' Also confirmed (one change at a time): ' + '; '.join(f"{c['label']} ({STAGE[c['family']]})" for c in others) + '.'
     return txt
@@ -227,7 +267,8 @@ def main():
                     if c['family'] == 'mos':                                # the benchmark's forecast year and the shadow seasons
                         c['validation'] = mos_validation(cy, mos, c['method'], t, score, minimum)
                     c['status'] = status_of(c, minimum)
-                sel = select(cands)
+                margin = (rule.get('tie_rule') or {}).get('margin')
+                sel = select(cands, reference_level(cy, t, score) if margin else None, margin)
                 ref = spec['reference']['label']
                 out['targets'][t][product] = dict(
                     product=spec['label'], reference=ref, status=sel['status'] if sel else 'keep',
@@ -235,7 +276,8 @@ def main():
                                   label=sel['label']) if sel else dict(family='published', label=ref, stage=None, method=None),
                     historical=sel.get('historical') if sel else None, validation=sel.get('validation') if sel else None,
                     alternatives=[dict(family=c['family'], family_label=FAMILY_LABEL[c['family']], method=c['method'], label=c['label'], status=c['status'],
-                                       historical=c.get('historical')) for c in cands if c is not sel],
+                                       historical=c.get('historical')) for c in cands if not sel or c['method'] != sel['method'] or c['family'] != sel['family']],
+                    tie=sel.get('tie') if sel else None,
                     why=why(sel, product, t, ref, cands, 'RPS' if score == 'rps' else 'CRPS (mm)'))
         cycles.append(out)
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), rule=RULE, rule_contents=rule, cycles=cycles)
