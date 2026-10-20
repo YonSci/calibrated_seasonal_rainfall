@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-20T15:43:25.663342+00:00",
+ "created_utc": "2026-10-20T17:55:06.729350+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -41,13 +41,31 @@
     "date": "2026-10-17",
     "change": "multiple-testing correction: Holm -> Benjamini-Hochberg",
     "note": "Decided by the project lead after the sensitivity analyses (33-year and pooled evidence, Holm and Benjamini-Hochberg) had been seen; the decisions are recomputed from the p-values each benchmark stored, within the same families. The benchmarks keep their own Holm decisions as run."
+   },
+   {
+    "date": "2026-10-20",
+    "change": "Practical tie rule: candidates within 1% of the published score are tied; the simplest is selected",
+    "note": "Decided by the project lead before the re-scored second-stage results are known."
    }
   ],
   "validation": {
    "minimum_seasons": 3,
    "rule": "Independent validation seasons are forecast years scored after the benchmark (bias_validation.py for bias correction; dist_shadow.py for the EMOS amount model). A candidate becomes 'recommended' once at least minimum_seasons have been scored for it and the reference and its mean score over them is not worse; with fewer it stays a 'candidate'; with enough and a worse mean it is 'not supported by validation'. A candidate with no validation record yet needs a shadow forecast before it can be recommended."
   },
-  "choice": "Among candidates, a recommended one first; then the candidate with the largest training-period improvement over the reference. One change at a time: candidates from different families (e.g. an amount correction and a probability calibration) were each tested against the published approach, not together, so the selection changes one stage only; the others are listed as alternatives.",
+  "choice": "Among candidates, a recommended one first; then the candidate with the largest training-period improvement over the reference, unless the practical tie rule (tie_rule) applies. One change at a time: candidates from different families (e.g. an amount correction and a probability calibration) were each tested against the published approach, not together, so the selection changes one stage only; the others are listed as alternatives.",
+  "tie_rule": {
+   "margin": 0.01,
+   "rule": "Candidates of the same status whose training-period improvement is within 1% of the published approach's own training-period score (CRPS of the MVS ensemble for amounts, RPS of the published probabilities for probabilities, All Ethiopia) of the largest improvement are tied; the simplest tied candidate is selected, and the tie is recorded.",
+   "simplicity_order": [
+    "amount corrections and probability-stage calibrations",
+    "EMOS",
+    "quantile regression, extended logistic regression",
+    "Phase 3 distribution models (BJP, BMA, QRF), Leung–Dirichlet calibration, statistical downscaling (CCA, PCR)",
+    "neural networks (DRN and its variants)"
+   ],
+   "reason": "A negligible difference does not displace a simpler, better-understood method: 1% is above the largest error of the earlier numerical CRPS (0.7%, scripts/crps_precision.py) and well below the typical confirmed improvements (3–8%).",
+   "decided": "2026-10-20 by the project lead, before the second-stage re-scoring of the close JJAS September comparison"
+  },
   "statuses": {
    "keep": "Keep the published approach: no method is confirmed better on the historical evidence.",
    "candidate": "Confirmed better on the historical evidence; independent validation seasons are still being collected.",
@@ -73,6 +91,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb on the historical evidence."
      },
      "amounts": {
@@ -88,6 +107,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Feb on the historical evidence."
      }
     },
@@ -105,6 +125,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Mar on the historical evidence."
      },
      "amounts": {
@@ -120,6 +141,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Mar on the historical evidence."
      }
     },
@@ -137,6 +159,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Apr on the historical evidence."
      },
      "amounts": {
@@ -152,6 +175,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Apr on the historical evidence."
      }
     },
@@ -169,6 +193,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for May on the historical evidence."
      },
      "amounts": {
@@ -184,6 +209,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for May on the historical evidence."
      }
     },
@@ -201,6 +227,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for FMAM on the historical evidence."
      },
      "amounts": {
@@ -237,6 +264,7 @@
        "required": 3
       },
       "alternatives": [],
+      "tie": null,
       "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM: CRPS (mm) difference -0.7207 over the training years (Benjamini–Hochberg p 0.0126; 19 of 24 years better), -0.7348 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.762."
      }
     }
@@ -280,6 +308,7 @@
        "required": 3
       },
       "alternatives": [],
+      "tie": null,
       "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Benjamini–Hochberg p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004."
      },
      "amounts": {
@@ -295,6 +324,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Feb on the historical evidence."
      }
     },
@@ -312,6 +342,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Mar on the historical evidence."
      },
      "amounts": {
@@ -327,6 +358,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Mar on the historical evidence."
      }
     },
@@ -344,6 +376,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Apr on the historical evidence."
      },
      "amounts": {
@@ -359,6 +392,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Apr on the historical evidence."
      }
     },
@@ -376,6 +410,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for May on the historical evidence."
      },
      "amounts": {
@@ -391,6 +426,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for May on the historical evidence."
      }
     },
@@ -408,6 +444,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for FMAM on the historical evidence."
      },
      "amounts": {
@@ -423,6 +460,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM on the historical evidence."
      }
     }
@@ -445,6 +483,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Jun on the historical evidence."
      },
      "amounts": {
@@ -490,6 +529,7 @@
         "historical": null
        }
       ],
+      "tie": null,
       "why": "Gamma Quantile Mapping (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jun: CRPS (mm) difference -0.1309 over the training years (Benjamini–Hochberg p 0.0488; 18 of 24 years better), -0.1626 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.3062. Also confirmed (one change at a time): Square-root-space Mean-Variance Scaling (amount correction)."
      }
     },
@@ -507,6 +547,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Jul on the historical evidence."
      },
      "amounts": {
@@ -560,6 +601,7 @@
         "historical": null
        }
       ],
+      "tie": null,
       "why": "Variance Scaling (unbounded) (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jul: CRPS (mm) difference -0.1386 over the training years (Benjamini–Hochberg p 0; 23 of 24 years better), -0.1399 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.4168. Also confirmed (one change at a time): Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction)."
      }
     },
@@ -577,6 +619,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Aug on the historical evidence."
      },
      "amounts": {
@@ -656,6 +699,7 @@
         "historical": null
        }
       ],
+      "tie": null,
       "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for Aug: CRPS (mm) difference -1.574 over the training years (Benjamini–Hochberg p 0.00795; 18 of 24 years better), -0.6664 over the test years. Independent validation: 1 of 3 season(s), mean difference +3.128. Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction); Gamma Quantile Mapping (amount correction)."
      }
     },
@@ -673,6 +717,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Sep on the historical evidence."
      },
      "amounts": {
@@ -680,32 +725,32 @@
       "reference": "Mean-Variance Scaling ensemble (published)",
       "status": "candidate",
       "selected": {
-       "family": "distribution_neural",
-       "family_label": "Neural network (docs/54)",
-       "stage": "distribution model (neural network)",
-       "method": "drn_csg",
-       "label": "Distributional regression network (DRN), censored shifted gamma"
+       "family": "distribution_phase2",
+       "family_label": "Distribution model, Phase 2",
+       "stage": "distribution model",
+       "method": "emos_csg",
+       "label": "EMOS, censored shifted gamma"
       },
       "historical": {
-       "training_difference": -1.0991795584563333,
-       "years_better": 17,
+       "training_difference": -0.9814759192542052,
+       "years_better": 18,
        "years": 24,
-       "holm_p": 0.010875,
-       "test_difference": -1.2035375936288792,
-       "p_adjusted": 0.010875,
+       "holm_p": 0.007875,
+       "test_difference": -0.5500417116238892,
+       "p_adjusted": 0.007875,
        "correction": "benjamini_hochberg",
-       "test_years_better": 7,
+       "test_years_better": 5,
        "test_years": 9
       },
       "validation": {
        "seasons": [
         {
          "year": 2026,
-         "method": 17.778841347431946,
-         "reference": 15.226470747388095
+         "method": 16.010770369877125,
+         "reference": 15.340703708133653
         }
        ],
-       "mean_difference": 2.552370600043851,
+       "mean_difference": 0.6700666617434727,
        "required": 3
       },
       "alternatives": [
@@ -746,24 +791,6 @@
        {
         "family": "distribution_phase2",
         "family_label": "Distribution model, Phase 2",
-        "method": "emos_csg",
-        "label": "EMOS, censored shifted gamma",
-        "status": "candidate",
-        "historical": {
-         "training_difference": -0.9814759192542052,
-         "years_better": 18,
-         "years": 24,
-         "holm_p": 0.007875,
-         "test_difference": -0.5500417116238892,
-         "p_adjusted": 0.007875,
-         "correction": "benjamini_hochberg",
-         "test_years_better": 5,
-         "test_years": 9
-        }
-       },
-       {
-        "family": "distribution_phase2",
-        "family_label": "Distribution model, Phase 2",
         "method": "quantile_regression",
         "label": "Regularized quantile regression",
         "status": "candidate",
@@ -778,9 +805,54 @@
          "test_years_better": 4,
          "test_years": 9
         }
+       },
+       {
+        "family": "distribution_neural",
+        "family_label": "Neural network (docs/54)",
+        "method": "drn_csg",
+        "label": "Distributional regression network (DRN), censored shifted gamma",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -1.0991795584563333,
+         "years_better": 17,
+         "years": 24,
+         "holm_p": 0.010875,
+         "test_difference": -1.2035375936288792,
+         "p_adjusted": 0.010875,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 7,
+         "test_years": 9
+        }
        }
       ],
-      "why": "Distributional regression network (DRN), censored shifted gamma (neural network (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.099 over the training years (Benjamini–Hochberg p 0.0109; 17 of 24 years better), -1.204 over the test years. Independent validation: 1 of 3 season(s), mean difference +2.552. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Regularized quantile regression (distribution model)."
+      "tie": {
+       "margin": 0.01,
+       "level": 19.34218640484381,
+       "tolerance": 0.1934218640484381,
+       "best": "drn_csg",
+       "best_gain": -1.0991795584563333,
+       "tied": [
+        {
+         "method": "emos_csg",
+         "family": "distribution_phase2",
+         "gain": -0.9814759192542052,
+         "simplicity": 2
+        },
+        {
+         "method": "quantile_regression",
+         "family": "distribution_phase2",
+         "gain": -1.0827405272293198,
+         "simplicity": 3
+        },
+        {
+         "method": "drn_csg",
+         "family": "distribution_neural",
+         "gain": -1.0991795584563333,
+         "simplicity": 5
+        }
+       ]
+      },
+      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -0.9815 over the training years (Benjamini–Hochberg p 0.00788; 18 of 24 years better), -0.55 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.6701. Tied within 1% of the published score (0.193 CRPS (mm)) with quantile_regression, drn_csg: the simplest is selected (practical tie rule; the largest gain was drn_csg). Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Regularized quantile regression (distribution model); Distributional regression network (DRN), censored shifted gamma (distribution model (neural network))."
      }
     },
     "JJAS": {
@@ -797,6 +869,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for JJAS on the historical evidence."
      },
      "amounts": {
@@ -833,6 +906,7 @@
        "required": 3
       },
       "alternatives": [],
+      "tie": null,
       "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for JJAS: CRPS (mm) difference -3.824 over the training years (Benjamini–Hochberg p 0.0256; 17 of 24 years better), -1.597 over the test years. Independent validation: 1 of 3 season(s), mean difference +14.75."
      }
     }
@@ -855,6 +929,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Oct on the historical evidence."
      },
      "amounts": {
@@ -870,6 +945,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Oct on the historical evidence."
      }
     },
@@ -887,6 +963,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Nov on the historical evidence."
      },
      "amounts": {
@@ -902,6 +979,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Nov on the historical evidence."
      }
     },
@@ -919,6 +997,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Dec on the historical evidence."
      },
      "amounts": {
@@ -934,6 +1013,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Dec on the historical evidence."
      }
     },
@@ -951,6 +1031,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for Jan on the historical evidence."
      },
      "amounts": {
@@ -1016,6 +1097,7 @@
         }
        }
       ],
+      "tie": null,
       "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Benjamini–Hochberg p 0.0106; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Gamma Quantile Mapping (amount correction); Leung–Dirichlet calibration (Leung–Dirichlet calibration)."
      }
     },
@@ -1033,6 +1115,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling + climatology blend (published) for ONDJ on the historical evidence."
      },
      "amounts": {
@@ -1048,6 +1131,7 @@
       "historical": null,
       "validation": null,
       "alternatives": [],
+      "tie": null,
       "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for ONDJ on the historical evidence."
      }
     }

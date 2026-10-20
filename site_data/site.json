@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-20 15:53 UTC",
- "code_commit": "8cf53dc",
- "release": "2026-10-20.5",
+ "built_utc": "2026-10-20 17:59 UTC",
+ "code_commit": "a9a4fec",
+ "release": "2026-10-20.6",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -1113,7 +1113,7 @@
   {
    "id": "2026-10-20.5",
    "date": "2026-10-20",
-   "commit": null,
+   "commit": "6ba6a53",
    "title": "How the neural network works; which experiment each result comes from",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -1133,6 +1133,24 @@
     {
      "type": "display",
      "text": "Outlook pages state each cycle's own publication record instead of a general reconstruction note; the area search reports no match or lists the matching places; tables sort with the keyboard; translated passages carry their language."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-20.6",
+   "date": "2026-10-20",
+   "commit": null,
+   "title": "Method selection: a practical tie rule",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Method selection: candidates whose improvement is within 1% of the published score are tied, and the simplest is selected (decided before the corrected-CRPS re-scoring). JJAS September amounts: EMOS is selected instead of the neural network (DRN −1.10 mm, quantile regression −1.08 mm, EMOS −0.98 mm over 1993–2016, tolerance 0.19 mm); the DRN and quantile regression stay confirmed alternatives. The published forecasts are unchanged."
     }
    ]
   }
