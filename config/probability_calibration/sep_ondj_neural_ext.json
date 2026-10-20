@@ -1,9 +1,12 @@
 {
-  "description": "Neural network, second stage (docs/54): SST indices and rainfall regions, a neural correction of EMOS and a forecast-only ablation, September-initialized ONDJ.",
+  "description": "Neural network, second stage (docs/54): SST indices and rainfall regions (with a regions-only control), the DRN refitted on the same folds, a neural correction of EMOS and a forecast-only ablation, September-initialized ONDJ.",
   "benchmark_config": "config/bias_correction/sep_ondj.json",
   "reference_amount_method": "mvs",
   "models": [
     "emos_csg",
+    "quantile_regression",
+    "drn_csg",
+    "drn_regions",
     "drn_sst",
     "drn_emos_residual",
     "drn_forecast_only"
@@ -13,6 +16,14 @@
     "drn_emos_residual"
   ],
   "comparisons": [
+    [
+      "drn_sst",
+      "drn_regions"
+    ],
+    [
+      "drn_regions",
+      "drn_csg"
+    ],
     [
       "drn_sst",
       "drn_csg"
@@ -28,6 +39,10 @@
     [
       "drn_csg",
       "drn_forecast_only"
+    ],
+    [
+      "drn_csg",
+      "quantile_regression"
     ]
   ],
   "extra_inputs": [
@@ -39,8 +54,5 @@
   "reliability": true,
   "output_root": "outputs/probability_calibration/sep_ondj/neural_ext",
   "phase": 4,
-  "external_models": {
-    "drn_csg": "outputs/probability_calibration/{name}/neural/benchmark.json"
-  },
-  "external_note": "The DRN is not refitted here: the comparisons read its per-year scores from the first benchmark (same folds, years and seeds)."
+  "external_note": "The DRN is refitted here (same folds, years and seeds as the first stage, so the same networks), so that every comparison uses the same scoring rule (scoring version 2: CRPS split at the observation, closed form for the censored shifted gamma); drn_sst against drn_regions isolates the SST indices. Quantile regression is refitted too (diagnostic): the method selection decided between it and the DRN for JJAS September amounts on a margin smaller than the scoring error of the earlier rule."
 }

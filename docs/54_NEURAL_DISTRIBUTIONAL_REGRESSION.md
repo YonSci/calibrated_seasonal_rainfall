@@ -206,6 +206,50 @@ configuration are trained as usual. `drn_csg_tuned` is the DRN with this procedu
 (`config/probability_calibration/may_jjas_neural_tuning.json`, not a candidate): the comparison with the DRN shows whether
 the tuning procedure matters. Results: pending.
 
+## 3f. Review follow-ups (20 October 2026)
+
+An external review of the code and results (at commit 6e350da) raised points on scoring, provenance and presentation. What
+was found and done:
+
+**CRPS precision (scoring version 2).** `Distribution.crps` integrated (F(x) − 1{x ≥ y})² on one uniform 400-point grid; the
+integrand jumps at the observation, which falls between grid points, so the error is of the order of the grid step.
+`scripts/crps_precision.py` measures it against the closed form (single censored shifted gammas) and adaptive quadrature
+(three-seed mixtures) on 81 dry, ordinary, wet and extreme cases (`outputs/crps_precision/report.json`): up to 0.7% of the score
+(9 mm on an extreme wet-season case; 0.15 mm on the review's example, k = 3, θ = 100 mm, δ = −10 mm, y = 210 mm, reproduced
+exactly). Splitting the grid at the observation brings the error within 0.15%; the censored shifted gamma is now scored by its
+closed form. The results so far (scoring version 1) are kept; the errors partly cancel over cells and years, but the method
+selection decided between the DRN and quantile regression for JJAS September amounts on a margin (about 0.02 mm) below the
+old rule's error. From the second stage on (scoring version 2): the second stage refits the DRN, EMOS and quantile regression on
+the same folds, so every comparison uses one rule (a comparison with results of another scoring version is an error), and the
+JJAS September choice can be re-examined. A practical tie rule (a negligible difference does not displace the simpler
+candidate) is proposed for the method selection; it changes the rule, so it awaits a decision.
+
+**Experiment provenance.** The runner now records the commit and the hashes of every code and configuration file at the
+*start* of the run (the code the workers import), the resume keys, the SST and region files used, the experiment's settings,
+and whether HEAD moved during the run. Results already produced keep the provenance they were produced with.
+
+**Accepted results.** The site, the method summary and the method selection read neural results only through
+`scripts/accept_results.py` (`config/accepted_results.json`, archived copies in `outputs/accepted/`): a batch is accepted only
+when every cycle passes the completeness checks (five targets, years, 25 members, every model with training and test scores,
+clean-commit provenance, the evaluated configurations recorded). The published results are `drn-stage1-v1` (architectures 32
+and 32-16, weight decay fixed at 10⁻⁴); the rerun with the decay search becomes `drn-stage1-v2` once all four cycles are in. The
+neural page states the experiment shown, its commit and configuration, the options actually evaluated, and pending runs.
+
+**Training diagnostics.** Each seed records its best step, the steps run, why training stopped (early stopping, the step limit,
+or a non-finite loss, gradient or validation score), and whether the starting point was returned; `converged` means early
+stopping without non-finite values (it was based on the step count before).
+
+**Second-stage checks.** The neural correction of EMOS now uses exactly EMOS's links, so a zero correction reproduces EMOS
+(the mean had a 0.001 floor; the test compared the shape only within 1%, now mean, spread and shift exactly). A regions-only
+DRN (`drn_regions`) separates the SST indices from the regions: `drn_sst` against `drn_regions` is the SST effect. A missing or
+non-finite SST value is an error, never a zero. The pooled network keeps each row's season year (ONDJ's January with October to
+December of its September initialization) and keeps the season total as its own model. The separate tuning split now refits the
+input standardization on each inner fitting subset; the relative units (division by the fold's training means) and the
+climatology inputs still come from all training years of the outer fold, so this experiment stays a diagnostic.
+
+**Still open.** Saving fold-level predictions so a future scoring change needs no refit; a shadow-forecast path for the pooled
+network before it could be validated; the practical tie rule (a decision). Translations need review by fluent speakers.
+
 ## 4. Running
 
     python scripts/dist_benchmark.py --config config/probability_calibration/<cycle>_neural.json --workers 5
