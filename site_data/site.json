@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-20 12:07 UTC",
- "code_commit": "ca77e3d",
- "release": "2026-10-20.3",
+ "built_utc": "2026-10-20 13:33 UTC",
+ "code_commit": "8c68122",
+ "release": "2026-10-20.4",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -1061,7 +1061,7 @@
   {
    "id": "2026-10-20.3",
    "date": "2026-10-20",
-   "commit": null,
+   "commit": "4b72f36",
    "title": "Outlook summaries in Amharic and Afaan Oromo",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -1073,6 +1073,40 @@
     {
      "type": "display",
      "text": "The plain-language outlook summaries and the area panel of the map are available in Amharic and Afaan Oromo (language switch on the summary, remembered in the browser). The translations are drafts, to be reviewed by native speakers; the English text is authoritative."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-20.4",
+   "date": "2026-10-20",
+   "commit": null,
+   "title": "How did we do, season timeline, one-page outlook, embeddable widget, accessibility and lighter pages",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Verification pages: a forecast-against-observed map with a draggable divider (category or difference from normal) and a \"How did we do?\" score: where the forecast favoured a category, the share of that area that fell in it."
+    },
+    {
+     "type": "display",
+     "text": "The forecast year at a glance (issue dates, months verified, under way and to come); the dates of each outlook (initialization, freeze, last verification, page update); \"In short\" boxes and an evidence card per method on the research pages."
+    },
+    {
+     "type": "display",
+     "text": "Each outlook on one A4 page (print or PDF) with a table of the regions; an embeddable widget (embed/ for the current outlook); an Atom feed of releases; a \"Was this page useful?\" prompt."
+    },
+    {
+     "type": "display",
+     "text": "Accessibility: the interactive map works with the keyboard and describes each layer in words; chart values are read with the arrow keys; below / near / above normal in colour-blind-safe brown, grey and teal."
+    },
+    {
+     "type": "display",
+     "text": "Faster pages: figures are shown as WebP copies sized for the screen (the PNG stays the full-size image and download), loaded lazily; a wider layout on large screens."
     }
    ]
   }
