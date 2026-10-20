@@ -44,7 +44,7 @@ LD_METHOD = dict(probabilities='ld_full', amounts='leung_affine')
 CATEGORY = {'Bias correction': 'Bias correction', 'Probability stage (Phase 1)': 'Probability calibration',
             'Probability stage (Phase 2)': 'Probability calibration', 'Distribution model (Phase 2)': 'Rainfall-distribution model',
             'Distribution model (Phase 3)': 'Rainfall-distribution model', 'Two-stage calibration': 'Two-stage calibration',
-            'Statistical downscaling (MOS)': 'Statistical downscaling'}
+            'Statistical downscaling (MOS)': 'Statistical downscaling', 'Neural network (DRN)': 'Neural network'}
 ALPHA = 0.05
 
 
@@ -150,7 +150,8 @@ def probability(store):
                     for target, t in d['tests'][m]['rps'].items():
                         add_test(r, cy, target, t, dec[(m, target)])
                         add_series(r, cy, target, d['targets'][target]['methods'][m], d['targets'][target]['methods'][d['incumbent']], 'rps')
-        for rel, family in (('distribution/benchmark.json', 'Distribution model (Phase 2)'), ('phase3/benchmark.json', 'Distribution model (Phase 3)')):
+        for rel, family in (('distribution/benchmark.json', 'Distribution model (Phase 2)'), ('phase3/benchmark.json', 'Distribution model (Phase 3)'),
+                            ('neural/benchmark.json', 'Neural network (DRN)')):          # neural: its decision model only (docs/54)
             d = read(f'{base}/{rel}')
             if not d:
                 continue

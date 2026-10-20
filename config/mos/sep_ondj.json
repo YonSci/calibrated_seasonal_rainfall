@@ -7,8 +7,17 @@
     "max_y_modes": 6,
     "max_cca_modes": 3,
     "transform": "sqrt",
-    "predictor": "SEAS5 ensemble-mean rainfall over the model box, averaged to its 1-degree cells",
-    "predictand": "CHIRPS at every 0.25-degree national cell"
+    "predictor": "Chosen inside the folds: SEAS5 ensemble-mean rainfall over the model box (1-degree cells), SEAS5 sea-surface temperature over 20S-20N, 30E-80W (2-degree cells), or both; first 25 members every year",
+    "predictand": "CHIRPS at every 0.25-degree national cell",
+    "members": 25,
+    "fields": [
+      "rain",
+      "sst",
+      "rain+sst"
+    ],
+    "sst_block": 2,
+    "spread": "cross-validated error variance x (1 + leverage of the forecast)",
+    "blend": "tercile probabilities blended with climatology, weight 0-1 (step 0.05) by inner leave-one-year-out RPS"
   },
   "output_root": "outputs/mos/sep_ondj"
 }

@@ -1,0 +1,151 @@
+---
+// Neural distributional regression (DRN, censored shifted gamma) against the published pipeline and EMOS
+// (scripts/neural_calibration.py, scripts/dist_benchmark.py with config/probability_calibration/<cycle>_neural.json, docs/54).
+import Base from '../../layouts/Base.astro';
+import OnThisPage from '../../components/OnThisPage.astro';
+import Table from '../../components/Table.astro';
+import Figure from '../../components/Figure.astro';
+import { read, names, href, link, esc, signed, num, years, cycleTitle, REPO } from '../../lib/data.js';
+
+const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
+const cycles = names('neural').map((n) => ({ name: n, d: read(`neural/${n}.json`) }))
+  .map((x) => ({ ...x, title: cycleTitle(INIT[x.name.split('_')[0]], x.name.split('_')[1].toUpperCase()) }))
+  .sort((a, b) => INIT[a.name.split('_')[0]] - INIT[b.name.split('_')[0]]);
+const SHORT = { incumbent: 'Published probabilities', mvs_ensemble: 'MVS ensemble (published amounts)', emos_csg: 'EMOS',
+  drn_csg: 'DRN', drn_linear_csg: 'Linear control', drn_climatology: 'No-forecast ablation' };
+
+// The method selection's decision (docs/50): Benjamini–Hochberg across the decision model's targets, per score
+function bhDecisions(d, score) {
+  const keys = (d.decision_models ?? []).flatMap((k) => Object.keys(d.tests[k]?.[score] ?? {}).map((t) => [k, t]));
+  const order = keys.map(([k, t]) => ({ k, t, p: d.tests[k][score][t].training.p_improvement })).sort((a, b) => a.p - b.p);
+  const out = {};
+  let run = 1;
+  for (let i = order.length - 1; i >= 0; i--) {
+    run = Math.min(run, order[i].p * order.length / (i + 1));
+    const x = d.tests[order[i].k][score][order[i].t];
+    const adj = Math.min(1, run);
+    out[`${order[i].k}|${order[i].t}`] = { p: adj, confirmed: x.training.mean_difference < 0 && adj < 0.05 && x.test.mean_difference <= 0 };
+  }
+  return out;
+}
+const confirmedList = (d, rule) => ['rps', 'crps'].flatMap((sc) => {
+  const bh = bhDecisions(d, sc);
+  return (d.decision_models ?? []).flatMap((k) => Object.entries(d.tests[k]?.[sc] ?? {})
+    .filter(([t, x]) => (rule === 'bh' ? bh[`${k}|${t}`]?.confirmed : x.decision.confirmed))
+    .map(([t]) => `${t} (${sc === 'rps' ? 'probabilities' : 'amounts'})`));
+});
+
+function skillTable(d, score) {
+  const reg = d.primary_region;
+  const key = score === 'rps' ? 'rpss' : 'crpss';
+  const ref = score === 'rps' ? 'incumbent' : 'mvs_ensemble';
+  const ks = [ref, ...d.models];
+  const bh = bhDecisions(d, score);
+  const rows = Object.keys(d.targets).map((t) => {
+    const x = d.tests.drn_csg?.[score]?.[t];
+    return [`<strong>${esc(t)}</strong>`, ...ks.map((k) => signed(d.targets[t].methods[k].training[reg][key])),
+      ...ks.map((k) => signed(d.targets[t].methods[k].test[reg][key])),
+      x ? `${num(x.decision.holm_p_family, 3)} / ${num(bh[`drn_csg|${t}`].p, 3)}` : '—',
+      x ? (bh[`drn_csg|${t}`].confirmed ? '<strong>✓ candidate</strong>' : x.decision.no_harm ? 'not confirmed' : 'not confirmed; worse over the test years') : '—'];
+  });
+  const k1 = ks.map((k) => `${SHORT[k] ?? k} ${years(d.training_years)}`);
+  const k2 = ks.map((k) => `${SHORT[k] ?? k} ${years(d.test_years)}`);
+  return { head: ['Target', ...k1, ...k2, 'DRN p (Holm / BH)', 'DRN (selection rule)'], rows,
+    caption: `${key.toUpperCase()} against the observed climatology over ${d.regions[reg]}: leave-one-year-out ${years(d.training_years)}, then fitted on ${years(d.training_years)} and scored ${years(d.test_years)}.` };
+}
+function coverageTable(d) {
+  const reg = d.primary_region;
+  const ks = ['mvs_ensemble', ...d.models];
+  return { head: ['Target', ...ks.map((k) => SHORT[k] ?? k)],
+    rows: Object.keys(d.targets).map((t) => [`<strong>${esc(t)}</strong>`, ...ks.map((k) => {
+      const v = d.targets[t].methods[k].training[reg].coverage_80;
+      return v == null ? '—' : `${Math.round(v * 100)}%`;
+    })]),
+    caption: `Share of observations inside the 10–90% range, ${years(d.training_years)} (nominal 80%).` };
+}
+function comparisonTable(d, score) {
+  const rows = [];
+  for (const [pair, s] of Object.entries(d.comparisons ?? {})) {
+    const other = pair.split('|')[1];
+    for (const [t, x] of Object.entries(s[score] ?? {})) {
+      rows.push([`<strong>${esc(t)}</strong>`, esc(SHORT[other] ?? other), signed(x.training.mean_difference, 4),
+        `${x.training.years_better} of ${x.training.years}`, num(x.training.p_improvement, 3), signed(x.test.mean_difference, 4),
+        `${x.test.years_better} of ${x.test.years}`]);
+    }
+  }
+  return { head: ['Target', 'DRN against', `Δ${score.toUpperCase()} ${years(d.training_years)}`, 'Years DRN better', 'p (one-sided)',
+    `Δ${score.toUpperCase()} ${years(d.test_years)}`, 'Years DRN better'], rows };
+}
+const chosen = (d) => {
+  const n = new Map();
+  for (const t of Object.values(d.targets)) {
+    const h = t.fitted?.drn_csg?.hidden;
+    if (h) n.set(h.join('–'), (n.get(h.join('–')) ?? 0) + 1);
+  }
+  return [...n].map(([h, c]) => `${h} units (${c} target${c === 1 ? '' : 's'})`).join(', ') || '—';
+};
+---
+<Base title="Neural network (DRN)" section="research" description="A distributional regression network (neural EMOS with a censored shifted gamma) tested against the published pipeline and EMOS.">
+  <OnThisPage>
+    <h1>Neural network: distributional regression (DRN)</h1>
+    <p>A small neural network that turns the SEAS5 ensemble and the local rainfall climate of each grid cell into a full rainfall
+    distribution: the censored shifted gamma of the EMOS model, with its parameters learned by a network instead of two linear formulas.
+    From the distribution come rainfall amounts, 10–90% ranges and tercile probabilities. It is tested against the published pipeline and
+    against EMOS, with the same data, folds and tests as the other distribution models.</p>
+    <p class="notice"><strong>A comparison, not a published forecast.</strong> The published forecasts keep the published approach. If the
+    DRN is confirmed better for a target, it becomes a candidate in the <a href={href('research/method-selection/')}>method selection</a>
+    and needs three validation seasons before it can be recommended.</p>
+
+    <h2 id="what">What is compared</h2>
+    <ul class="findings">
+      <li><strong>DRN (the candidate):</strong> one network shared by every cell of a target, with one or two hidden layers (32, or 32 and 16 units), chosen inside each fold.</li>
+      <li><strong>EMOS:</strong> the existing censored shifted gamma model (ensemble mean and spread, linear), in the same folds: does the network add anything?</li>
+      <li><strong>Linear control:</strong> the DRN's inputs and training, without a hidden layer: is a gain due to the network or to the extra inputs and the CRPS loss?</li>
+      <li><strong>No-forecast ablation:</strong> the network with only the local climate and location: does the SEAS5 forecast add anything beyond the cell's normal rainfall?</li>
+      <li><strong>References:</strong> the published probabilities (MVS and the climatology blend; RPS) and the MVS-corrected ensemble (CRPS). Every model uses the first 25 SEAS5 members in every year, the 2027 policy.</li>
+    </ul>
+    <p class="caveat">Only the DRN is tested for adoption (5 targets per cycle and score). EMOS, the control and the ablation are diagnostic comparisons and do not enter the multiple-testing adjustment.</p>
+
+    <h2 id="how">How it is implemented</h2>
+    <ol class="findings">
+      <li><strong>Inputs per cell and year</strong> (relative to the training-year climatology, then standardized): the ensemble mean, median,
+        standard deviation, mean absolute difference, 10% and 90% quantiles; the log of the cell's CHIRPS mean and its coefficient of
+        variation; latitude and longitude.</li>
+      <li><strong>Network:</strong> ELU hidden layers, three outputs turned into the mean <code>μ = softplus(o₁)</code>, standard deviation
+        <code>σ = softplus(o₂)</code> and shift <code>δ = −softplus(o₃)</code> of the censored shifted gamma, as in EMOS.</li>
+      <li><strong>Loss:</strong> the closed-form CRPS of the censored shifted gamma (Scheuerer &amp; Hamill 2015), area-weighted with equal
+        weight per year, plus weight decay. The gradient is computed exactly through the network; the CRPS's own derivatives by finite
+        differences.</li>
+      <li><strong>Training inside each fold:</strong> Adam; about 20% of the training years held out to stop training when their CRPS stops
+        improving; three seeds with different held-out years; the architecture with the lower held-out CRPS is kept, and the forecast is the
+        mixture of its three seeds. Training uses every second cell in each direction; forecasts cover every cell.</li>
+      <li><strong>Products:</strong> tercile probabilities from the distribution at the training-year terciles; amounts, median and 10–90%
+        range from its quantiles.</li>
+      <li><strong>Evaluation:</strong> outer leave-one-year-out over the training years, then fitted on all training years for the test years;
+        one-sided paired sign-flip test over whole years.</li>
+    </ol>
+
+    {cycles.length === 0 && <p class="notice">The benchmark has not been run yet.</p>}
+    {cycles.map(({ name, d, title }) => (
+      <section id={name}>
+        <h2>{title}</h2>
+        <p><strong>DRN confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(d, 'bh').join('; ') || 'none'}.
+        In the benchmark as run (Holm): {confirmedList(d, 'holm').join('; ') || 'none'}. Architecture chosen (fit on all training years): {chosen(d)}.</p>
+        <h3>Rainfall amounts (CRPS skill)</h3>
+        <Table {...skillTable(d, 'crps')} />
+        <h3>Tercile probabilities (RPS skill)</h3>
+        <Table {...skillTable(d, 'rps')} />
+        <h3>Ranges</h3>
+        <Table {...coverageTable(d)} />
+        <h3>What the DRN adds (paired, no adjustment)</h3>
+        <Table {...comparisonTable(d, 'crps')} />
+        <Table {...comparisonTable(d, 'rps')} />
+        <p class="caveat">Negative Δ favours the DRN. Against EMOS: the value of the network over the linear model; against the linear control:
+        the value of the hidden layers; against the ablation: the value of the forecast itself.</p>
+        {d.assets.includes(`assets/neural/${name}/distribution_summary.png`) && <Figure src={`assets/neural/${name}/distribution_summary.png`} caption="Skill of every model and target; * the DRN confirmed better than the reference (Holm, as run)." />}
+        <p class="caveat">Download: {d.downloads.map((f) => <a href={link(f)}>benchmark.json</a>)} (with the fitted network weights).</p>
+      </section>
+    ))}
+    <p class="caveat">Code: <a href={`${REPO}/blob/main/scripts/neural_calibration.py`}><code>scripts/neural_calibration.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/54_NEURAL_DISTRIBUTIONAL_REGRESSION.md`}>docs/54</a>.</p>
+  </OnThisPage>
+</Base>

@@ -28,6 +28,37 @@ class MOSModel(unittest.TestCase):
             self.assertTrue((sigma > 0).all())
             self.assertLessEqual(m.combo[0], 6)
 
+    def test_spread_grows_with_leverage(self):
+        X, Y = synthetic()
+        m = mb.MOS('pcr').fit(X[:-1], Y[:-1])
+        typical = X[:-1].mean(0)
+        _, s_typical = m.predict(typical)
+        _, s_unusual = m.predict(typical + 4 * (X[:-1] - typical).std(0))
+        self.assertTrue((s_unusual > s_typical).all())
+
+    def test_blend_weight_follows_the_signal(self):
+        rng = np.random.default_rng(1)
+        X, Y = synthetic(n=30, seed=1)
+        Y = Y ** 2 / 4 + 5                                             # rainfall-like amounts whose square root carries the signal
+        Ys = np.sqrt(Y)
+        strong = mb.MOS('pcr').fit(X, Ys)
+        noise = mb.MOS('pcr').fit(rng.normal(size=X.shape), Ys)
+        self.assertGreater(strong.w, noise.w)
+        self.assertLessEqual(noise.w, 0.5)
+
+    def test_field_choice_and_combined_weights(self):
+        X, Y = synthetic()
+        rng = np.random.default_rng(2)
+        fields = {'rain': rng.normal(size=X.shape), 'sst': X, 'rain+sst': np.hstack([rng.normal(size=X.shape), X])}
+        m = mb.MOS('pcr', fields=['rain', 'sst', 'rain+sst']).fit(fields, Y, widths={'rain+sst': [X.shape[1], X.shape[1]]})
+        self.assertIn(m.field, ('sst', 'rain+sst'))                    # the informative field is used
+        w = mb.MOS.column_weights([4, 16])
+        self.assertAlmostEqual(float(np.sum(w[:4] ** 2)), float(np.sum(w[4:] ** 2)))
+
+    def test_target_months_cross_the_year(self):
+        self.assertEqual(mb.target_months({'season': {'start': '10-01', 'end': '01-31'}}), [10, 11, 12, 1])
+        self.assertEqual(mb.target_months({'season': {'start': '06-01', 'end': '06-30'}}), [6])
+
     def test_products_are_coherent(self):
         mean, sigma = np.array([2.0, 5.0, 8.0]), np.array([1.0, 1.0, 1.0])
         q1, q2 = np.array([16.0, 16.0, 16.0]), np.array([36.0, 36.0, 36.0])       # square roots 4 and 6

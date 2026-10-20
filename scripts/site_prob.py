@@ -123,7 +123,21 @@ def export(out_dir):
         blocks.append((b['name'], block(b, files)))
     export_leung_dirichlet(out_dir)
     export_mos(out_dir)
+    export_neural(out_dir)
     return blocks
+
+
+def export_neural(out_dir):
+    """Neural distributional regression (docs/54): figures to assets/, results to downloads/."""
+    for folder in sorted((ROOT / 'outputs/probability_calibration').glob('*/neural/benchmark.json')):
+        name, src = folder.parent.parent.name, folder.parent
+        for f in sorted((src / 'figures').glob('*.png')):
+            d = out_dir / 'assets/neural' / name / f.name
+            d.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, d)
+        d = out_dir / 'downloads/neural' / name / 'benchmark.json'
+        d.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(folder, d)
 
 
 def export_mos(out_dir):

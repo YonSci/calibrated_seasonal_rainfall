@@ -54,6 +54,16 @@ const commonModes = (list) => {
   const [k, c] = [...n].sort((a, b) => b[1] - a[1])[0] ?? ['', 0];
   return k ? `${k.split(',').slice(0, 3).join(' / ')} (${c} of ${list.length} folds)` : '—';
 };
+const FIELD = { rain: 'SEAS5 rainfall', sst: 'SEAS5 SST', 'rain+sst': 'rainfall and SST' };
+const fieldsOf = (list = []) => {
+  const n = new Map();
+  for (const c of list) n.set(c.field, (n.get(c.field) ?? 0) + 1);
+  return [...n].sort((a, b) => b[1] - a[1]).map(([f, c]) => `${FIELD[f] ?? f} ${c}`).join(', ') || '—';
+};
+const medianBlend = (list = []) => {
+  const w = list.map((c) => c.blend).sort((a, b) => a - b);
+  return w.length ? w[Math.floor(w.length / 2)].toFixed(2) : '—';
+};
 const confirmedOf = (d) => Object.entries(d.tests).flatMap(([k, s]) => Object.entries(s).flatMap(([sc, ts]) =>
   Object.entries(ts).filter(([, x]) => x.decision.confirmed).map(([t]) => `${d.labels[k]} for ${t} (${sc.toUpperCase()})`)));
 const candidatesOf = (d) => ['rps', 'crps'].flatMap((sc) => Object.entries(bhDecisions(d, sc)).filter(([, x]) => x.confirmed)
@@ -71,21 +81,25 @@ const candidatesOf = (d) => ['rps', 'crps'].flatMap((sc) => Object.entries(bhDec
 
     <h2 id="what">The methods</h2>
     <ul class="findings">
-      <li><strong>Predictor:</strong> SEAS5 ensemble-mean rainfall over the whole model box, averaged to its 1° cells (180 predictors).
-        <strong>Predictand:</strong> CHIRPS at every 0.25° cell of Ethiopia. Both on square-root rainfall, standardized with the training years.</li>
+      <li><strong>Predictor:</strong> chosen inside each fold from three fields: SEAS5 ensemble-mean rainfall over the model box, averaged to
+        its 1° cells (180 predictors); SEAS5 sea-surface temperature over the tropical Indian and Pacific Oceans (20° S–20° N, 30° E–80° W,
+        2° cells); or both, with equal weight. Ensemble means of the first 25 members in every year.
+        <strong>Predictand:</strong> CHIRPS at every 0.25° cell of Ethiopia, square-root rainfall. Every field standardized with the training years.</li>
       <li><strong>Canonical correlation analysis (CCA):</strong> EOF pre-filtering of both fields (up to 6 modes each), then up to 3 canonical modes between their leading principal components.</li>
       <li><strong>Principal component regression (PCR):</strong> every CHIRPS cell regressed on the leading predictor principal components (up to 6).</li>
-      <li><strong>Choice of modes:</strong> inner leave-one-year-out cross-validation inside each fold (smallest mean normalized squared error over the cells).</li>
-      <li><strong>Probabilities and amounts:</strong> a Gaussian predictive distribution in square-root space with the cross-validated error of the chosen modes: tercile probabilities from it, amounts and 10–90% ranges from 51 of its quantiles.</li>
+      <li><strong>Choice of field and modes:</strong> inner leave-one-year-out cross-validation inside each fold (smallest mean normalized squared error over the cells).</li>
+      <li><strong>Probabilities and amounts:</strong> a Gaussian predictive distribution in square-root space, wider when the forecast is unusual (the cross-validated error scaled by the forecast's leverage): tercile probabilities from it, blended with climatology by a weight chosen in the same inner folds; amounts and 10–90% ranges from 51 of its quantiles.</li>
     </ul>
 
     <h2 id="how">How it is implemented</h2>
     <p>Every step is fitted with the training years of the fold only. The full description, with the function behind each step, is in
     <a href={`${REPO}/blob/main/docs/53_STATISTICAL_DOWNSCALING.md#2-implementation`}>docs/53, section 2</a>.</p>
     <ol class="findings">
-      <li><strong>Fields.</strong> Forecast: the SEAS5 ensemble mean of the target's rainfall, square-rooted and averaged over 4 × 4 blocks of
-        0.25° cells (180 values). Observation: square-rooted CHIRPS at every 0.25° cell of Ethiopia. Each column is standardized with the
-        training years: <code>Xz = (X − mx)/sx</code>, <code>Yz = (Y − my)/sy</code>.</li>
+      <li><strong>Fields.</strong> Forecast, from the first 25 SEAS5 members of every year: the ensemble mean of the target's rainfall,
+        square-rooted and averaged over 4 × 4 blocks of 0.25° cells (180 values); the ensemble-mean sea-surface temperature of the target
+        months over 2° cells of the tropical Indian and Pacific Oceans; or both, each part weighted to the same total variance.
+        Observation: square-rooted CHIRPS at every 0.25° cell of Ethiopia. Each column is standardized with the training years:
+        <code>Xz = (X − mx)/sx</code>, <code>Yz = (Y − my)/sy</code>.</li>
       <li><strong>EOFs.</strong> Singular value decompositions <code>Xz = Ux Sx Vxᵀ</code> and <code>Yz = Uy Sy Vyᵀ</code> give principal
         components of unit variance, <code>Xpc = √n Ux</code> and <code>Ypc = √n Uy</code>. A new forecast is projected on the first m
         predictor EOFs.</li>
@@ -94,20 +108,24 @@ const candidatesOf = (d) => ['rps', 'crps'].flatMap((sc) => Object.entries(bhDec
       <li><strong>CCA.</strong> The cross-covariance of m predictor PCs and l predictand PCs, <code>C = Xpcᵀ Ypc / n = A diag(r) Bᵀ</code>,
         gives the canonical correlations r and the weights A, B. The forecast's first k canonical variates, multiplied by their
         correlations, are mapped back to the predictand PCs and through the predictand EOFs to every cell.</li>
-      <li><strong>Choice of modes.</strong> PCR tries m = 1–6; CCA every m, l = 1–6 with k = 1–3 canonical modes (77 combinations). Each
-        training year is left out in turn, everything is refitted on the others and the left-out year predicted. The combination with the
-        smallest squared error, divided by each cell's variance and averaged over the cells that vary from year to year, wins. In practice
-        CCA keeps one canonical mode and PCR one or two PCs.</li>
+      <li><strong>Choice of field and modes.</strong> For each of the three fields, PCR tries m = 1–6; CCA every m, l = 1–6 with k = 1–3
+        canonical modes (77 combinations). Each training year is left out in turn, everything is refitted on the others and the left-out
+        year predicted. The field and combination with the smallest squared error, divided by each cell's variance and averaged over the
+        cells that vary from year to year, win.</li>
       <li><strong>Forecast distribution.</strong> Gaussian in square-root space: the mean μ from the chosen model refitted on all training
-        years, the standard deviation σ the cell's cross-validated error. Tercile probabilities: <code>P(below) = Φ((√q1 − μ)/σ)</code>,
-        <code>P(above) = 1 − Φ((√q2 − μ)/σ)</code>, with the terciles q1, q2 of the training years' CHIRPS. Amounts: 51 quantiles of the
-        Gaussian, set to zero below zero and squared back; the median and the 10–90% range likewise. No smoothing or climatology blend.</li>
+        years; the variance <code>σ² = s² (1 + h)</code>, where s² is the cell's cross-validated error variance and
+        <code>h = (1 + |v|²)/n</code> the leverage of the forecast's regressors v (its predictor PCs, or canonical variates), so the
+        forecast is wider when it is far from the training years. Tercile probabilities: <code>P(below) = Φ((√q1 − μ)/σ)</code>,
+        <code>P(above) = 1 − Φ((√q2 − μ)/σ)</code>, with the terciles q1, q2 of the training years' CHIRPS, then blended with
+        climatology, <code>w·P + (1 − w)/3</code>, with w (0–1) the weight with the smallest inner leave-one-year-out RPS. Amounts: 51
+        quantiles of the Gaussian, set to zero below zero and squared back; the median and the 10–90% range likewise.</li>
       <li><strong>Evaluation.</strong> Outer leave-one-year-out over the training years (the choice of modes nested inside each fold), then
         fitted on all training years for the test years, with the published probabilities and the MVS-corrected ensemble computed in the
         same folds. One-sided paired sign-flip test over whole years for each method, target and score.</li>
     </ol>
-    <p class="caveat">Known limitations: the ensemble mean averages 25 members in 1993–2016 and 51 from 2017; one predictor field (no
-    sea-surface temperature); σ is the same every year; no climatology blend.</p>
+    <p class="caveat">Version 2 (19 October 2026) addressed four limitations of the first version: the ensemble mean now uses 25 members in
+    every year (before: 25 in 1993–2016, 51 from 2017); sea-surface temperature is a candidate predictor; the spread depends on the forecast;
+    the probabilities are blended with climatology. The results below are version 2; docs/53 compares the two.</p>
 
     {cycles.map(({ name, d, title }) => (
       <section id={name}>
@@ -115,7 +133,12 @@ const candidatesOf = (d) => ['rps', 'crps'].flatMap((sc) => Object.entries(bhDec
         <p><strong>Confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {candidatesOf(d).length ? candidatesOf(d).join('; ') : 'none'}.
         In the benchmark as run (Holm): {confirmedOf(d).length ? confirmedOf(d).join('; ') : 'none'}.
         Modes most often chosen (predictor EOFs / predictand EOFs / canonical modes), season target: CCA {commonModes(d.targets[Object.keys(d.targets).at(-1)].modes.cca.training)},
-        PCR {commonModes(d.targets[Object.keys(d.targets).at(-1)].modes.pcr.training).replace(/ \/ 0 \/ 0/, '')}.</p>
+        PCR {commonModes(d.targets[Object.keys(d.targets).at(-1)].modes.pcr.training).replace(/ \/ 0 \/ 0/, '')}.
+        {d.targets[Object.keys(d.targets).at(-1)].choices && (
+          <>Predictor field chosen (folds), season target: CCA {fieldsOf(d.targets[Object.keys(d.targets).at(-1)].choices.cca.training)};
+          PCR {fieldsOf(d.targets[Object.keys(d.targets).at(-1)].choices.pcr.training)}. Climatology blend weight of the probabilities (median
+          over the folds), season target: CCA {medianBlend(d.targets[Object.keys(d.targets).at(-1)].choices.cca.training)}, PCR {medianBlend(d.targets[Object.keys(d.targets).at(-1)].choices.pcr.training)}.</>
+        )}</p>
         <h3>Tercile probabilities (RPS)</h3>
         <Table {...evidence(d, 'rps')} />
         <h3>Rainfall amounts (CRPS)</h3>

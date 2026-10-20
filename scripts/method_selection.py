@@ -33,9 +33,11 @@ OUT = ROOT / 'outputs/method_selection/selection.json'
 CYCLES = ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']
 FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'probability_phase1': 'Probability stage, Phase 1',
                 'probability_phase2_binary': 'Probability stage, Phase 2 binary calibrators', 'distribution_phase2': 'Distribution model, Phase 2',
-                'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Two-stage calibration (docs/51)', 'mos': 'Statistical downscaling (docs/53)'}
+                'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Two-stage calibration (docs/51)', 'mos': 'Statistical downscaling (docs/53)',
+                'distribution_neural': 'Neural network (docs/54)'}
 STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probability stage', 'probability_phase2_binary': 'probability stage',
-         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration', 'mos': 'statistical downscaling'}
+         'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration', 'mos': 'statistical downscaling',
+         'distribution_neural': 'distribution model (neural network)'}
 
 
 def read(p):
@@ -159,6 +161,7 @@ def main():
     for cy in CYCLES:
         base = f'outputs/probability_calibration/{cy}'
         p1, p2b, d2, d3 = read(f'{base}/benchmark.json'), read(f'{base}/phase2_binary/benchmark.json'), read(f'{base}/distribution/benchmark.json'), read(f'{base}/phase3/benchmark.json')
+        dn = read(f'{base}/neural/benchmark.json')               # neural network (docs/54): its decision model only
         ld = read(f'outputs/leung_dirichlet/{cy}/benchmark.json')
         mos = read(f'outputs/mos/{cy}/benchmark.json')
         rec = recs.get(cy)
@@ -178,7 +181,7 @@ def main():
                         cands += confirmed(p1, 'probability_phase1', t, 'rps', [m for m in p1['methods'] if m != p1['incumbent']], lambda k: p1['registry'][k]['name'])
                     if p2b:
                         cands += confirmed(p2b, 'probability_phase2_binary', t, 'rps', [m for m in p2b['methods'] if m != p2b['incumbent']], lambda k: p2b['registry'][k]['name'])
-                for fam, d in (('distribution_phase2', d2), ('distribution_phase3', d3)):
+                for fam, d in (('distribution_phase2', d2), ('distribution_phase3', d3), ('distribution_neural', dn)):
                     if d:
                         cands += confirmed(d, fam, t, score, d['models'], lambda k, d=d: d['registry'][k]['name'],
                                            reference='incumbent' if score == 'rps' else 'mvs_ensemble')

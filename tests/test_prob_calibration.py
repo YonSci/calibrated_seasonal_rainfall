@@ -132,13 +132,15 @@ class Distributions(unittest.TestCase):
         m = members.mean(1)
         y = np.maximum(0, rng.gamma(4., .25 * m / 1., n) - .05)                    # mean grows with m
         thr = np.tile(np.quantile(y, dc.THRESHOLD_LEVELS), (n, 1))
-        q10, q90 = np.quantile(members, [.1, .9], axis=1)
+        q10, q50, q90 = np.quantile(members, [.1, .5, .9], axis=1)
         S = dict(y=y, m=m, s=members.std(1), md=np.full(n, .35), w=np.full(n, 1 / n), thresholds=thr, members=members,
-                 q10=q10, q90=q90, logmu=np.zeros(n), cv=np.full(n, .3), n_years=24)
+                 q10=q10, q50=q50, q90=q90, logmu=np.zeros(n), cv=np.full(n, .3), lat=np.zeros(n), lon=np.zeros(n), n_years=24)
         fm = np.array([.5, 1., 2.])[None, :] * np.ones((8, 1))
-        F = dict(m=fm.mean(0), s=np.full(3, .3), md=np.full(3, .35), q10=.8 * fm[0], q90=1.2 * fm[0], members=fm,
-                 logmu=np.zeros(3), cv=np.full(3, .3), scale=np.ones(3), valid=np.ones(3, bool))
+        F = dict(m=fm.mean(0), s=np.full(3, .3), md=np.full(3, .35), q10=.8 * fm[0], q50=fm[0], q90=1.2 * fm[0], members=fm,
+                 logmu=np.zeros(3), cv=np.full(3, .3), lat=np.zeros(3), lon=np.zeros(3), scale=np.ones(3), valid=np.ones(3, bool))
         for key, mdl in dc.MODELS.items():
+            if key == 'drn_climatology':                                           # the ablation ignores the forecast by design
+                continue
             d = mdl.predict(F, mdl.fit(S))
             med = d.quantile(np.full(3, .5))
             self.assertTrue(med[0] < med[1] < med[2], key)                         # wetter ensemble, wetter forecast

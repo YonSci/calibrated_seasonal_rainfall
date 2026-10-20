@@ -1,0 +1,31 @@
+{
+  "description": "Neural distributional regression (DRN, censored shifted gamma) against the published pipeline and EMOS, February-initialized FMAM (docs/54).",
+  "benchmark_config": "config/bias_correction/feb_fmam.json",
+  "reference_amount_method": "mvs",
+  "models": [
+    "emos_csg",
+    "drn_csg",
+    "drn_linear_csg",
+    "drn_climatology"
+  ],
+  "decision_models": [
+    "drn_csg"
+  ],
+  "comparisons": [
+    [
+      "drn_csg",
+      "emos_csg"
+    ],
+    [
+      "drn_csg",
+      "drn_linear_csg"
+    ],
+    [
+      "drn_csg",
+      "drn_climatology"
+    ]
+  ],
+  "members": 25,
+  "output_root": "outputs/probability_calibration/feb_fmam/neural",
+  "phase": 4
+}

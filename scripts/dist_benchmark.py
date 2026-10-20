@@ -55,7 +55,7 @@ import prob_calibration as pc                                           # noqa: 
 import dist_calibration as dc                                           # noqa: E402
 from prob_benchmark import Records                                      # noqa: E402
 
-CODE = ['scripts/dist_benchmark.py', 'scripts/dist_calibration.py', 'scripts/prob_calibration.py', 'scripts/prob_benchmark.py']
+CODE = ['scripts/dist_benchmark.py', 'scripts/dist_calibration.py', 'scripts/neural_calibration.py', 'scripts/prob_calibration.py', 'scripts/prob_benchmark.py']
 LEVELS = (.1, .5, .9)
 
 
@@ -68,8 +68,10 @@ def pinball(q, y, tau):
     return np.where(r >= 0, tau * r, (tau - 1) * r)
 
 
-def fold(models, obs, T, idx, area_e, valid_min=1.0):
-    """Training samples (relative units) and per-cell statistics from the training years T, on the national cells idx."""
+def fold(models, obs, T, idx, area_e, valid_min=1.0, coords=None):
+    """Training samples (relative units) and per-cell statistics from the training years T, on the national cells idx;
+    coords: (latitude, longitude) of those cells (location predictors of the DRN, docs/54)."""
+    lat_c, lon_c = coords if coords is not None else (None, None)
     O = np.stack([obs[z][idx] for z in T])
     mu_o = O.mean(0)
     mu_m = np.mean([models[z][:, idx].mean(0) for z in T], axis=0)          # equal-year weights
@@ -79,10 +81,10 @@ def fold(models, obs, T, idx, area_e, valid_min=1.0):
     thr = np.quantile(O, dc.THRESHOLD_LEVELS, axis=0).T / np.where(valid, mu_o, 1)[:, None]
     cv = np.where(valid, O.std(0) / np.where(valid, mu_o, 1), 0.)
     M = max(models[z].shape[0] for z in T)
-    keys = ('m', 's', 'md', 'q10', 'q90', 'logmu', 'cv')
+    keys = ('m', 's', 'md', 'q10', 'q50', 'q90', 'logmu', 'cv', 'lat', 'lon')
     S = {k: [] for k in ('y', 'w', 'thresholds', 'members') + keys}
     for z in T:
-        F = dc.features(models[z][:, idx], mu_o, mu_m, valid, cv)
+        F = dc.features(models[z][:, idx], mu_o, mu_m, valid, cv, lat_c, lon_c)
         w = np.where(valid, area_e, 0.)
         S['y'].append(np.where(valid, obs[z][idx] / np.where(valid, mu_o, 1), 0)[valid])
         for k in keys:
@@ -131,8 +133,12 @@ def run_target(config_path, target):
     rng = lambda a, b: list(range(a, b + 1))
     train, test = rng(*cfg['training_years']), rng(*cfg['test_years'])
     tag, models, obs, lat, lon = bb.load_target(cfg, project, target)
+    if pcfg.get('members'):                                  # the same ensemble size in every year (docs/52, docs/54)
+        models = {z: m[:pcfg['members']] for z, m in models.items()}
     area_all = cell_area(lat, lon)
     idx = np.flatnonzero(bb.load_mask(cfg['cells'], lat, lon))
+    glat, glon = np.meshgrid(lat, lon, indexing='ij')
+    coords = (glat.ravel()[idx], glon.ravel()[idx])
     area_e = area_all[idx]
     regions = {k: bb.load_mask(v, lat, lon)[idx] for k, v in cfg['regions'].items()}
     rec = Records(pcfg['reference_amount_method'], cfg['methods'].get(pcfg['reference_amount_method'], {}), models, obs, train,
@@ -142,7 +148,7 @@ def run_target(config_path, target):
     diag = {k: dict(crossings=[], converged=[]) for k in keys}
 
     def evaluate(design, y, T, inner_records, outer_record, fitted=None):
-        S, st = fold(models, obs, T, idx, area_e)
+        S, st = fold(models, obs, T, idx, area_e, coords=coords)
         y_obs = obs[y][idx]
         lam_fit = pc.fit(pc.INCUMBENT, inner_records, area_all)               # incumbent: blend weight from inner years
         p_inc = pc.predict(lam_fit, outer_record)[idx]
@@ -154,7 +160,7 @@ def run_target(config_path, target):
         crps_ens = np.where(ens_ok, bb.ensemble_crps(e0, np.nan_to_num(y_obs)), np.nan)
         quant = {tau: np.quantile(e0, tau, axis=0) for tau in LEVELS}
         score_year(y, None, crps_ens, quant, st, y_obs, area_e, regions, store['mvs_ensemble'][design])
-        F = dc.features(models[y][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'])
+        F = dc.features(models[y][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords)
         for k in keys:
             m = dc.MODELS[k]
             model = (fitted or {}).get(k) or m.fit(S, **{**m.defaults, **pcfg.get('parameters', {}).get(k, {})})
@@ -212,6 +218,20 @@ def tests_of(results, keys, region, targets):
     return out
 
 
+def comparisons_of(results, pairs, region, targets):
+    """Diagnostic paired comparisons between models (no adjustment, no decision): {'model|other': {score: {target: summary}}}."""
+    out = {}
+    for k, other in pairs:
+        for score in ('rps', 'crps'):
+            for t in targets:
+                a, b = results[t]['methods'][k], results[t]['methods'][other]
+                if score not in a['training'][region]['per_year'] or score not in b['training'][region]['per_year']:
+                    continue
+                out.setdefault(f'{k}|{other}', {}).setdefault(score, {})[t] = {
+                    d: paired_summary(a[d][region]['per_year'][score], b[d][region]['per_year'][score]) for d in ('training', 'test')}
+    return out
+
+
 def sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
@@ -264,7 +284,9 @@ def main(args):
                                 mvs_ensemble='MVS-corrected ensemble (empirical distribution)'),
                 regions={k: v['label'] for k, v in cfg['regions'].items()}, primary_region=cfg['primary_region'],
                 training_years=cfg['training_years'], test_years=cfg['test_years'], targets=results,
-                tests=tests_of(results, model_keys, cfg['primary_region'], targets))
+                decision_models=pcfg.get('decision_models', model_keys),
+                tests=tests_of(results, pcfg.get('decision_models', model_keys), cfg['primary_region'], targets),
+                comparisons=comparisons_of(results, pcfg.get('comparisons', []), cfg['primary_region'], targets))
     save_json(out_root / 'benchmark.json', data)
     if not args.no_figures:
         figure(out_root, data)
@@ -292,7 +314,7 @@ def figure(out, data):
         for i, (k, _) in enumerate(rows):
             for j, t in enumerate(T):
                 mark = ''
-                if design == 'training' and k != 'incumbent':
+                if design == 'training' and k in data['tests']:
                     tt = data['tests'][k]['rps' if key == 'rpss' else 'crps'][t]['decision']
                     mark = ' *' if tt['confirmed'] else ''
                 ax.text(j, i, f'{v[i, j]:+.3f}{mark}', ha='center', va='center', fontsize=8, fontweight='bold' if k == 'incumbent' else 'normal')

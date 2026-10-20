@@ -444,6 +444,16 @@ def qrf_predict(F, model, chunk=150):
     return Quantiles(levels, q, F['scale'], F['valid'])
 
 
+def _drn_fit(S, **params):
+    import neural_calibration                           # JAX, only when a neural model is used (docs/54)
+    return neural_calibration.fit(S, **params)
+
+
+def _drn_predict(F, model):
+    import neural_calibration
+    return neural_calibration.predict(F, model)
+
+
 @dataclass(frozen=True)
 class Model:
     key: str
@@ -480,15 +490,32 @@ MODELS = {m.key: m for m in [
           "m', s', md', ensemble 10% and 90% quantiles (relative), log climatological mean, CHIRPS coefficient of variation",
           '200 trees, at least 40 samples per leaf, half the predictors per split, pooled', ('Meinshausen 2006',),
           defaults=dict(trees=200, min_leaf=40, max_features=.5, seed=0)),
+    Model('drn_csg', 'Distributional regression network (DRN), censored shifted gamma', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "m', ensemble median, s', md', ensemble 10% and 90% quantiles (relative), log climatological mean, CHIRPS coefficient "
+          'of variation, latitude, longitude',
+          'shared MLP (32 or 32-16 ELU units) -> CSG parameters; CRPS + weight decay; early stopping on held-out years; '
+          'architecture and decay by validation CRPS, pooled', ('Rasp & Lerch 2018', 'Scheuerer & Hamill 2015',
+                                                               'Uttarwar et al. 2025'), defaults=dict(inputs='full')),
+    Model('drn_linear_csg', 'Linear CSG with the DRN inputs and CRPS (control)', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)', 'the DRN inputs',
+          'no hidden layer; CRPS; early stopping on held-out years, pooled', ('Scheuerer & Hamill 2015',),
+          defaults=dict(inputs='full', configs=[([], 0.0)])),
+    Model('drn_climatology', 'DRN without the forecast (climatology and location; ablation)', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          'log climatological mean, CHIRPS coefficient of variation, latitude, longitude (no SEAS5 input)',
+          'as the DRN', ('Rasp & Lerch 2018',), defaults=dict(inputs='climatology')),
 ]}
 
 
-def features(members, mu_obs, mu_model, valid, cv=None):
+def features(members, mu_obs, mu_model, valid, cv=None, lat=None, lon=None):
     """Relative ensemble predictors of one year's members (member, cell); cv: the cell's training CHIRPS coefficient of
-    variation (climatology predictor of the quantile regression forest)."""
+    variation (climatology predictor of the quantile regression forest); lat, lon: the cells' coordinates (DRN)."""
     xbar, sd = members.mean(0), members.std(0)
     md = np.abs(members[:, None, :] - members[None, :, :]).mean((0, 1))
     scale = np.where(mu_model > 0, mu_model, np.nan)
-    q10, q90 = np.quantile(members, [.1, .9], axis=0)
-    return dict(m=xbar / scale, s=sd / scale, md=md / scale, q10=q10 / scale, q90=q90 / scale, members=members / scale,
-                logmu=np.log(np.maximum(mu_obs, 1e-3)), cv=np.zeros_like(xbar) if cv is None else cv, scale=mu_obs, valid=valid)
+    q10, q50, q90 = np.quantile(members, [.1, .5, .9], axis=0)
+    zero = np.zeros_like(xbar)
+    return dict(m=xbar / scale, s=sd / scale, md=md / scale, q10=q10 / scale, q50=q50 / scale, q90=q90 / scale,
+                members=members / scale, logmu=np.log(np.maximum(mu_obs, 1e-3)), cv=zero if cv is None else cv,
+                lat=zero if lat is None else lat, lon=zero if lon is None else lon, scale=mu_obs, valid=valid)

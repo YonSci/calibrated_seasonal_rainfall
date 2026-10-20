@@ -42,10 +42,10 @@ const findings = Object.fromEntries(PRODUCTS.map((p) => {
 const share = (a, b) => (b ? `${a} of ${b}` : '—');
 const PLURAL = { 'Bias correction': 'bias corrections', 'Probability calibration': 'probability calibrations',
   'Rainfall-distribution model': 'rainfall-distribution models', 'Two-stage calibration': 'two-stage calibrations',
-  'Statistical downscaling': 'statistical downscaling methods' };
+  'Statistical downscaling': 'statistical downscaling methods', 'Neural network': 'neural networks' };
 const SINGULAR = { 'Bias correction': 'bias correction', 'Probability calibration': 'probability calibration',
   'Rainfall-distribution model': 'rainfall-distribution model', 'Two-stage calibration': 'two-stage calibration',
-  'Statistical downscaling': 'statistical downscaling method' };
+  'Statistical downscaling': 'statistical downscaling method', 'Neural network': 'neural network' };
 // More statistical power (method_summary.py): pooled evidence over all targets and 1993-2025, Holm and Benjamini-Hochberg
 const pooledRows = (product) => (SUMMARY?.rows ?? []).filter((r) => r.product === product && r.pooled)
   .sort((a, b) => b.pooled.skill_gain - a.pooled.skill_gain);
@@ -61,6 +61,7 @@ const PAGES = [
   ['research/amount-shadow/', 'Amount and range shadow', 'EMOS medians and 10–90% ranges next to the MVS ensemble, scored season by season.'],
   ['research/downscaling/', 'Statistical downscaling', 'Model output statistics (CCA, PCR), the CPT approach of ICPAC and IRI, against the published pipeline.'],
   ['research/leung-dirichlet/', 'Leung–Dirichlet calibration', 'Member-wise Leung correction and identity-anchored Dirichlet, each stage against the published pipeline.'],
+  ['research/neural-network/', 'Neural network (DRN)', 'A distributional regression network (neural EMOS, censored shifted gamma) against the published pipeline and EMOS.'],
 ];
 ---
 <Base title="Research" section="research" description="Which bias-correction and probability-calibration methods are better than the published approach, and which to use in each season.">

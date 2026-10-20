@@ -142,6 +142,24 @@ def mos_files(site):
     return out
 
 
+def neural_files(site):
+    """Neural distributional regression (DRN) against the published pipeline and EMOS (scripts/neural_calibration.py, docs/54)."""
+    import site_files
+    by_hash = {v['sha256']: v['url'] for v in site_files.load_manifest()['assets'].values()}
+    out = {}
+    for f in sorted((ROOT / 'outputs/probability_calibration').glob('*/neural/benchmark.json')):
+        name = f.parent.parent.name
+        d = read(f)
+        d.pop('protocol', None)
+        for t in d.get('targets', {}).values():                   # network weights: in the download, not the page data
+            t['fitted'] = {k: {kk: v.get(kk) for kk in ('hidden', 'decay', 'steps', 'validation_crps')}
+                           for k, v in (t.get('fitted') or {}).items() if k.startswith('drn')}
+        local = f'downloads/neural/{name}/benchmark.json'
+        url = by_hash.get(site_files.sha256(f)) or (local if (site / local).is_file() else None)
+        out[name] = dict(slim(d), assets=assets(site, f'assets/neural/{name}'), downloads=[url] if url else [])
+    return out
+
+
 def downloads(site):
     """Every download link of the page: site path or release-asset URL, with its size when known."""
     import re
@@ -195,4 +213,6 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         sizes[f'mos/{name}.json'] = write(OUT / 'mos' / f'{name}.json', obj)
     for name, obj in leung_dirichlet_files(site).items():
         sizes[f'leung_dirichlet/{name}.json'] = write(OUT / 'leung_dirichlet' / f'{name}.json', obj)
+    for name, obj in neural_files(site).items():
+        sizes[f'neural/{name}.json'] = write(OUT / 'neural' / f'{name}.json', obj)
     return sizes
