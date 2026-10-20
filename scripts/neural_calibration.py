@@ -10,8 +10,8 @@ Gradient: the CRPS of each sample is differentiated with respect to (mu, sigma, 
 incomplete gamma, double precision) and back-propagated through the network by hand.
 Training: full-batch Adam on every second cell in each direction (neighbouring 0.25-degree cells carry nearly the same
 information; predictions cover every cell); early stopping on validation years held out of the training years (a different
-random set for each of three seeds); the architecture is chosen by the mean validation CRPS of the seeds, all inside the
-outer fold. The forecast is the equal mixture of the three seeds' distributions.
+random set for each of three seeds); the architecture (32, or 32-16 units) and the weight decay (1e-4 or 1e-3) are chosen by
+the mean validation CRPS of the seeds, all inside the outer fold. The forecast is the equal mixture of the three seeds' distributions.
 
 Variants (registered in dist_calibration.MODELS):
   drn_csg          the network on the ensemble summaries and the local context (INPUTS['full'])
@@ -28,8 +28,7 @@ INPUTS = {'full': ('m', 'q50', 's', 'md', 'q10', 'q90', 'logmu', 'cv', 'lat', 'l
 SEEDS = (0, 1, 2)
 VALID_SHARE = 0.2                     # share of the training years held out for early stopping
 STEPS, CHECK, PATIENCE, LR = 2000, 10, 15, 0.003
-DECAY = 1e-4
-DEFAULT_CONFIGS = ([32], DECAY), ([32, 16], DECAY)
+DEFAULT_CONFIGS = ([32], 1e-4), ([32], 1e-3), ([32, 16], 1e-4), ([32, 16], 1e-3)   # architecture x weight decay
 THIN = 2                              # training cells: every THIN-th cell in each direction
 
 
