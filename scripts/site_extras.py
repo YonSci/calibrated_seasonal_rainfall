@@ -434,7 +434,9 @@ def build_releases(out, current_data, esc):
             # Assets and downloads come from the release commit; the page's data files are copied next to it
             # (with their own asset links pointed at the commit) so the archived script loads them unchanged.
             page = re.sub(r'(["\'(])(assets/|downloads/)', lambda m: m.group(1) + raw + m.group(2), page)
-            names = _git('ls-tree', '--name-only', f'{sha}:site/data').decode().split() if _has(sha, 'site/data') else []
+            # the page's own data files only (blobs; folders such as data/cells/ are for the newer pages)
+            names = [l.split('	', 1)[1] for l in _git('ls-tree', f'{sha}:site/data').decode().splitlines()
+                     if l.split()[1] == 'blob'] if _has(sha, 'site/data') else []
             for name in names:
                 text = _git('show', f'{sha}:site/data/{name}').decode('utf-8')
                 text = re.sub(r'"(assets/|downloads/)', lambda m: '"' + raw + m.group(1), text)
