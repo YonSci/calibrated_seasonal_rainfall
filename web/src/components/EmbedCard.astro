@@ -1,0 +1,56 @@
+---
+// The embeddable outlook widget (an iframe on partner sites): title, the summary in plain words, the probabilities, the track
+// record and a link to the full outlook. Links open in a new tab; light or dark follows ?theme= or the reader's setting.
+import { cycleOf, url } from '../lib/cycles.js';
+import { summaryFor } from '../lib/summary.js';
+const { cid, view, target, viewLabel } = Astro.props;
+const c = cycleOf(cid);
+const t = c.targets.find((x) => x.id === target);
+const plain = summaryFor(cid, view, target, t.label);
+const CATS = ['below', 'near', 'above'];
+const pc = (x) => `${Math.round(100 * x)}%`;
+const full = new URL(url.target(c, view, target), Astro.site ?? 'https://yonsci.github.io').href;
+---
+<div class="emb">
+  <p class="emb-brand"><a href={full} target="_blank" rel="noopener">Seasonal Rainfall Outlook Platform</a></p>
+  <h1>{t.label} rainfall outlook</h1>
+  <p class="emb-sub">{c.init} initialization · {viewLabel}</p>
+  {plain ? (
+    <>
+      <p class="emb-text">{plain.text}</p>
+      {plain.p && (
+        <>
+          <div class="probbar" role="img" aria-label={`Below normal ${pc(plain.p[0])}, near normal ${pc(plain.p[1])}, above normal ${pc(plain.p[2])}`}>
+            {CATS.map((k, i) => <span class={`pb-${k}`} style={`flex:${plain.p[i]}`}>{pc(plain.p[i])}</span>)}
+          </div>
+          <p class="emb-key"><span><i class="pb-below"></i>below</span><span><i class="pb-near"></i>near</span><span><i class="pb-above"></i>above normal</span></p>
+        </>
+      )}
+    </>
+  ) : <p class="emb-text">The outlook summary is not available for this view.</p>}
+  <p class="emb-foot"><a href={full} target="_blank" rel="noopener">Full outlook, map and your area →</a><br />
+    <span>{c.publication?.short ?? 'Research reconstruction · not an official forecast'}</span></p>
+</div>
+<script is:inline>
+  (function () {
+    var th = new URLSearchParams(location.search).get('theme');
+    if (th === 'light' || th === 'dark') document.documentElement.setAttribute('data-theme', th);
+  })();
+</script>
+<style is:global>
+  html,body{margin:0;background:transparent}
+  body{font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+  .emb{box-sizing:border-box;max-width:520px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:14px;line-height:1.45}
+  .emb h1{font-size:19px;margin:2px 0 0;line-height:1.2}
+  .emb-brand{margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .emb-brand a{color:var(--accent);text-decoration:none}
+  .emb-sub{margin:2px 0 6px;color:var(--muted);font-size:12px}
+  .emb-text{margin:4px 0}
+  .emb .probbar{height:24px;margin:8px 0 2px}
+  .emb-key{display:flex;gap:10px;margin:0;font-size:11.5px;color:var(--muted)}
+  .emb-key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+  .emb-key .pb-below{background:var(--below)}.emb-key .pb-near{background:var(--near)}.emb-key .pb-above{background:var(--above)}
+  .emb-foot{margin:8px 0 0;font-size:12px}
+  .emb-foot a{font-weight:600;color:var(--accent)}
+  .emb-foot span{color:var(--muted);font-size:11px}
+</style>

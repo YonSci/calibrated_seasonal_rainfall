@@ -156,3 +156,15 @@ export function scorecard(grid, d, pos) {
   r.verdict = r.leaned < 0.1 ? 'nosignal' : r.hit >= 0.5 ? 'right' : r.opposite >= 1 / 3 ? 'missed' : 'partly';
   return r;
 }
+
+// One row per region (admin 1) with enough cells in the view: area-mean probabilities, amounts and track record
+// (the print sheet and the embeddable widget).
+export function regionRows(grid, d, areas, viewPos) {
+  const inView = new Set(viewPos);
+  return areas.areas.filter((x) => x.level === 1).map((a) => {
+    const pos = positions(grid, a.cells).filter((i) => inView.has(i));
+    if (pos.length < 3) return null;
+    const s = stats(grid, d, pos);
+    return { name: a.name, cells: pos.length, p: s.p, favoured: s.p ? s.favoured : null, mean: s.mean, normal: s.normal, anomaly: s.anomaly, rpss: s.rpss };
+  }).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
+}

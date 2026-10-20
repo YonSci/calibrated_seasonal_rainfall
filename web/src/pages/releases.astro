@@ -1,15 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE, ROOT, REPO } from '../lib/data.js';
+import { SITE, ROOT, REPO, href } from '../lib/data.js';
 
 const TYPES = SITE.change_types ?? {};
 const releases = [...SITE.releases].reverse();
 ---
 <Base title="Releases" section="about" description="Every published release of the results site and what changed.">
   <h1>Releases and change log</h1>
-  <p>Each release is the site as published at one commit. Archived releases open the exact page published then.</p>
+  <p>Each release is the site as published at one commit. Archived releases open the exact page published then. Follow new releases with the
+  <a href={href('feed.xml')}>Atom feed</a> in any feed reader.</p>
   {releases.map((r, i) => (
-    <section class="box">
+    <section class="box" id={`release-${r.id}`}>
       <h2>Release {r.id} <span class="caveat">· {r.date}</span></h2>
       <p>{r.title}</p>
       <ul class="findings">{(r.changes ?? []).map((c) => <li><strong>{TYPES[c.type] ?? c.type}:</strong> {c.text}</li>)}</ul>

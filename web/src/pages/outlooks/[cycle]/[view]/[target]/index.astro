@@ -28,6 +28,9 @@ const obsNotice = C.cycles.every((x) => x.obs === 'CHIRPS v3.0');
 const SEL = selectionFor(c);
 const selT = SEL?.targets[target];
 const plain = summaryFor(cid, view, target, t.label);
+const embedSrc = new URL(href(`embed/${cid}/${view}/${target}/`), Astro.site ?? 'https://yonsci.github.io').href;
+const embedLatest = new URL(href('embed/'), Astro.site ?? 'https://yonsci.github.io').href;
+const snippet = (src) => `<iframe src="${src}" title="Seasonal rainfall outlook, Ethiopia" width="420" height="330" style="border:0;max-width:100%" loading="lazy"></iframe>`;
 ---
 <Base title={`${t.label} outlook · ${c.option} · ${R.viewLabel(view)}`} section="outlook"
       description={`${t.label} rainfall outlook for Ethiopia (${c.init} initialization), ${R.viewLabel(view)}: tercile probabilities, amounts and maps.`}>
@@ -67,6 +70,18 @@ const plain = summaryFor(cid, view, target, t.label);
           <li><a href={url.skill(c, view, target)}>Historical skill</a> <span class="caveat">— cross-validated scores, by year, reliability</span></li>
           {X && <li><a href={url.official(c, view)}>Official outlooks</a> <span class="caveat">— ICPAC and EMI compared with this forecast ({findings} findings)</span></li>}
         </ul>
+      </div>
+      <div class="box share-box">
+        <h3>Print, share or embed</h3>
+        <ul class="findings">
+          <li><a href={url.target(c, view, target) + 'print/'}>One-page outlook (A4)</a> <span class="caveat">— to print or save as PDF</span></li>
+          <li><a href={href('feed.xml')}>Feed of new releases (Atom)</a></li>
+        </ul>
+        <p class="caveat">Embed this outlook on another site:</p>
+        <textarea class="embed-code" id="embed-this" readonly rows="3" aria-label="Embed code for this outlook">{snippet(embedSrc)}</textarea>
+        <p class="caveat">Or the current outlook, always the latest cycle: <button type="button" class="linkbtn" data-copy="embed-latest">copy</button></p>
+        <textarea class="embed-code" id="embed-latest" readonly rows="2" aria-label="Embed code for the current outlook" hidden>{snippet(embedLatest)}</textarea>
+        <p><button type="button" class="linkbtn" data-copy="embed-this">Copy the embed code</button> · <a href={href(`embed/${cid}/${view}/${target}/`)}>preview</a></p>
       </div>
       {selT && (
         <div class="box">
@@ -149,6 +164,12 @@ const plain = summaryFor(cid, view, target, t.label);
       if (el.id === 'mp-error') { S.product = el.checked ? 'verification_comparison_error' : 'verification_comparison'; render(); }
     });
     render();
+    document.addEventListener('click', (ev) => {
+      const b = (ev.target as HTMLElement).closest('[data-copy]') as HTMLElement | null;
+      if (!b) return;
+      const ta = document.getElementById(b.dataset.copy!) as HTMLTextAreaElement;
+      navigator.clipboard?.writeText(ta.value).then(() => { b.textContent = 'copied'; }, () => { ta.hidden = false; ta.select(); });
+    });
   </script>
   <style is:global>
     .pager{display:flex;justify-content:space-between;font-size:.92rem}
@@ -157,6 +178,7 @@ const plain = summaryFor(cid, view, target, t.label);
     .with-aside aside dl.meta dt{font-weight:600;margin-top:8px}
     .with-aside aside dl.meta dd{margin:0;overflow-wrap:anywhere}
     .notice.small{font-size:.85rem}
+    .embed-code{width:100%;font:12px/1.4 'JetBrains Mono',monospace;border:1px solid var(--line);border-radius:8px;padding:6px;background:var(--bg);color:var(--ink);resize:vertical}
     @media (max-width:980px){ .with-aside{grid-template-columns:1fr} }
   </style>
 </Base>

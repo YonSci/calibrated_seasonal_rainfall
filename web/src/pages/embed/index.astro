@@ -1,0 +1,13 @@
+---
+// Embeddable widget of the current outlook: always the latest cycle's first target on its rainfall domain, so a partner
+// site embeds one address once: <iframe src=".../embed/">
+import Bare from '../../layouts/Bare.astro';
+import EmbedCard from '../../components/EmbedCard.astro';
+import { C, cycleOf, defaultTarget } from '../../lib/cycles.js';
+const c = cycleOf(C.default);
+const view = c.default_view, target = defaultTarget(c);
+const viewLabel = (c.views.find((v) => v[0] === view) || [])[1] ?? view;
+---
+<Bare title="Current outlook widget · Seasonal Rainfall Outlook Platform" description="Embeddable current seasonal rainfall outlook for Ethiopia." robots="noindex">
+  <EmbedCard cid={c.id} view={view} target={target} viewLabel={viewLabel} />
+</Bare>

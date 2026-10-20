@@ -47,6 +47,7 @@ const menus = [
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href={asset('assets/style.css')}>
+  <link rel="alternate" type="application/atom+xml" title="Seasonal Rainfall Outlook Platform: releases" href={href('feed.xml')}>
   <slot name="head" />
   <style is:global>
     .top{position:sticky;top:0}
@@ -93,6 +94,23 @@ const menus = [
     .tenths{font-size:1.25rem;letter-spacing:2px;margin:2px 0;line-height:1}
     .tenths .t-below{color:var(--below)}.tenths .t-near{color:var(--near)}.tenths .t-above{color:var(--above)}
     .tr{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.85rem}
+    /* large screens: a wider page for maps, tables and charts, with running text kept to a readable measure */
+    @media (min-width:1500px){
+      .wrap{max-width:1440px}
+      main > p, main > ul > li, .otp-main > p, .otp-main > section > p, main > section > p, .lead{max-width:80ch}
+      .with-otp{grid-template-columns:minmax(0,1fr) 260px}
+    }
+    @media (min-width:1900px){ .wrap{max-width:1600px} }
+    /* printing an ordinary page: no menu, context bar or controls; colours kept (the one-page outlook is .../print/) */
+    @media print{
+      .top,.ctx,.foot nav,.otp,.menu-toggle,.lang-switch,.ex-controls,.ex-layers,.ex-zoom,#explore,.seg,.map-actions,.share-box,.sheet-actions,.skip{display:none!important}
+      .wrap{max-width:none;padding:0}
+      .with-otp,.with-aside,.hero{display:block}
+      body{background:#fff}
+      *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      a{color:inherit}
+      details{display:block}
+    }
     .ch-tip{position:fixed;z-index:60;pointer-events:none;max-width:300px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.82rem;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.14)}
     .ch-tip[hidden]{display:none}
     svg.chart .ch-pt{cursor:default;transition:opacity .1s}
@@ -143,7 +161,7 @@ const menus = [
   </main>
   <footer class="wrap foot">
     Release {SITE.release} · built {SITE.built_utc} from <code>site_data/</code> (code <a href={`${REPO}/tree/${SITE.code_commit}`}>{String(SITE.code_commit).slice(0, 7)}</a>) ·
-    <a href={href('releases/')}>Releases and change log</a> · <a href={CLASSIC}>Classic page</a> · Research reconstructions; not official EMI or ICPAC forecasts.
+    <a href={href('releases/')}>Releases and change log</a> · <a href={href('feed.xml')}>Feed (Atom)</a> · <a href={CLASSIC}>Classic page</a> · Research reconstructions; not official EMI or ICPAC forecasts.
   </footer>
   <script type="application/json" id="glossary" set:html={JSON.stringify(GLOSSARY)} />
   <script>

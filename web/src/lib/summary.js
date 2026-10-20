@@ -29,3 +29,11 @@ export function scorecardFor(cycleId, view, targetId) {
   const [grid, d] = got;
   return P.scorecard(grid, d, grid.views[view] ?? grid.views.all_ethiopia);
 }
+
+// The regions of a target and view (lib/plain.js regionRows), for the print sheet.
+export function regionsFor(cycleId, view, targetId) {
+  const got = cells(cycleId, targetId);
+  if (!got) return [];
+  const [grid, d, areas] = got;
+  return P.regionRows(grid, d, areas, grid.views[view] ?? grid.views.all_ethiopia);
+}

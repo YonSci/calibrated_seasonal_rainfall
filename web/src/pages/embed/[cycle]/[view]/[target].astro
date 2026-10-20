@@ -1,0 +1,16 @@
+---
+// Embeddable widget of one outlook (components/EmbedCard.astro): <iframe src=".../embed/<cycle>/<area>/<target>/">
+import Bare from '../../../../layouts/Bare.astro';
+import EmbedCard from '../../../../components/EmbedCard.astro';
+import { C, cycleOf } from '../../../../lib/cycles.js';
+
+export function getStaticPaths() {
+  return C.cycles.flatMap((c) => c.views.flatMap(([view]) => c.targets.map((t) => ({ params: { cycle: c.id, view, target: t.id } }))));
+}
+const { cycle: cid, view, target } = Astro.params;
+const c = cycleOf(cid);
+const viewLabel = (c.views.find((v) => v[0] === view) || [])[1] ?? view;
+---
+<Bare title={`${target} outlook widget · ${c.option}`} description={`Embeddable ${c.option} outlook (${viewLabel}).`} robots="noindex">
+  <EmbedCard cid={cid} view={view} target={target} viewLabel={viewLabel} />
+</Bare>
