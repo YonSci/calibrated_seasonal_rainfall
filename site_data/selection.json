@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-20T06:16:48.166660+00:00",
+ "created_utc": "2026-10-20T15:43:25.663342+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",

@@ -4932,6 +4932,56 @@
    }
   }
  },
+ "accepted": {
+  "experiment": "drn-stage1-v1",
+  "sha256": "8969e097f15a49ba4662aa29913f9411a001fb6a36742ad703b7e929a0474ebc",
+  "archive": "outputs/accepted/neural/feb_fmam/8969e097f15a49ba",
+  "accepted_utc": "2026-10-20T15:42:09Z",
+  "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+  "figures": [
+   "distribution_summary.png"
+  ],
+  "created_utc": "2026-10-20T01:59:25.664380+00:00",
+  "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+  "uncommitted_changes": false,
+  "config": "config/probability_calibration/feb_fmam_neural.json",
+  "training_years": [
+   1993,
+   2016
+  ],
+  "test_years": [
+   2017,
+   2025
+  ],
+  "members": 25,
+  "models": [
+   "emos_csg",
+   "drn_csg",
+   "drn_linear_csg",
+   "drn_climatology"
+  ],
+  "targets": [
+   "Apr",
+   "FMAM",
+   "Feb",
+   "Mar",
+   "May"
+  ],
+  "searched": {
+   "emos_csg": [],
+   "drn_csg": [
+    "[32, 16]|0.0001",
+    "[32]|0.0001"
+   ],
+   "drn_linear_csg": [
+    "[]|0.0"
+   ],
+   "drn_climatology": [
+    "[32, 16]|0.0001",
+    "[32]|0.0001"
+   ]
+  }
+ },
  "assets": [
   "assets/neural/feb_fmam/distribution_summary.png"
  ],

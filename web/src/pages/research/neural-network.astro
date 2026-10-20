@@ -283,9 +283,9 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
     <div class="table-wrap"><table class="compact nosort drn-table exp-panel">
       <tbody>
         <tr><th scope="row">Displayed experiment</th><td>{EXP.length ? EXP.map((e) => <code>{e}</code>) : 'none accepted'}{shown[0]?.a?.note ? ` — ${shown[0].a.note}` : ''}</td></tr>
-        <tr><th scope="row">Completed</th><td>{created.length ? `${created[0].slice(0, 16).replace('T', ' ')} to ${created.at(-1).slice(11, 16)} UTC` : '—'}{shown[0]?.a?.accepted_utc ? `; accepted for publication ${shown[0].a.accepted_utc.slice(0, 10)}` : ''}</td></tr>
+        <tr><th scope="row">Completed</th><td>{created.length ? created[0].slice(0, 16).replace('T', ' ') + (created.at(-1).slice(0, 16) !== created[0].slice(0, 16) ? ` to ${created.at(-1).slice(0, 16).replace('T', ' ')}` : '') + ' UTC' : '—'}{shown[0]?.a?.accepted_utc ? `; accepted for publication ${shown[0].a.accepted_utc.slice(0, 10)}` : ''}</td></tr>
         <tr><th scope="row">Result source</th><td>{commits.map((c) => <a href={`${REPO}/tree/${c}`}><code>{c.slice(0, 7)}</code></a>)} (the code that produced the results, not the website build) ·
-          configuration <code>{shown[0]?.a?.config ?? '—'}</code></td></tr>
+          configuration <code>{(shown[0]?.a?.config ?? '—').replace(/(jan_fmam|feb_fmam|may_jjas|sep_ondj)/, '<cycle>')}</code></td></tr>
         <tr><th scope="row">Data policy</th><td>CHIRPS v3.0 observations; training {years(TRAIN)}, test {years(TEST)}; the first {shown[0]?.a?.members ?? 25} SEAS5 members every year</td></tr>
         <tr><th scope="row">Search evaluated</th><td>{SEARCHED.length ? SEARCHED.map(([h, v]) => `${JSON.parse(h).join(' + ')} units, decay ${decayText(v)}`).join(' · ') : '—'}</td></tr>
         <tr><th scope="row">Scientific status</th><td>Research comparison; the published forecasts do not use it.{SHADOW.length ? ` Selection candidate for ${SHADOW.join('; ')}: needs three independent validation seasons before it can be recommended.` : ' Not a selection candidate.'}</td></tr>

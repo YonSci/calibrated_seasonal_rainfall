@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-20 13:33 UTC",
- "code_commit": "8c68122",
- "release": "2026-10-20.4",
+ "built_utc": "2026-10-20 15:53 UTC",
+ "code_commit": "8cf53dc",
+ "release": "2026-10-20.5",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -1079,7 +1079,7 @@
   {
    "id": "2026-10-20.4",
    "date": "2026-10-20",
-   "commit": null,
+   "commit": "8d9992f",
    "title": "How did we do, season timeline, one-page outlook, embeddable widget, accessibility and lighter pages",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -1107,6 +1107,32 @@
     {
      "type": "display",
      "text": "Faster pages: figures are shown as WebP copies sized for the screen (the PNG stays the full-size image and download), loaded lazily; a wider layout on large screens."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-20.5",
+   "date": "2026-10-20",
+   "commit": null,
+   "title": "How the neural network works; which experiment each result comes from",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "display",
+     "text": "Neural network page: an architecture diagram, the input data and the 10 inputs, the training, the outputs and how each is scored, the architecture chosen for every target, and a panel naming the experiment shown (its code commit, configuration, data policy, the options actually evaluated, status and pending runs); a cycle selector."
+    },
+    {
+     "type": "analysis",
+     "text": "Neural results are published only from accepted batches: all four cycles complete (five targets, years, 25 members, every model, clean-commit provenance), recorded with their hash and archived (scripts/accept_results.py); the method summary and selection read the same accepted results. The results shown remain the first DRN benchmark; the reruns are published together once complete."
+    },
+    {
+     "type": "display",
+     "text": "Outlook pages state each cycle's own publication record instead of a general reconstruction note; the area search reports no match or lists the matching places; tables sort with the keyboard; translated passages carry their language."
     }
    ]
   }

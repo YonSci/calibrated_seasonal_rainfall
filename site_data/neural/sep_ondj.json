@@ -4872,6 +4872,56 @@
    }
   }
  },
+ "accepted": {
+  "experiment": "drn-stage1-v1",
+  "sha256": "ff49d86fa344f730ab45704f306c28668b741619adeaa5fa1272ab7c67ff6918",
+  "archive": "outputs/accepted/neural/sep_ondj/ff49d86fa344f730",
+  "accepted_utc": "2026-10-20T15:42:09Z",
+  "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+  "figures": [
+   "distribution_summary.png"
+  ],
+  "created_utc": "2026-10-20T01:59:34.615325+00:00",
+  "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+  "uncommitted_changes": false,
+  "config": "config/probability_calibration/sep_ondj_neural.json",
+  "training_years": [
+   1993,
+   2016
+  ],
+  "test_years": [
+   2017,
+   2024
+  ],
+  "members": 25,
+  "models": [
+   "emos_csg",
+   "drn_csg",
+   "drn_linear_csg",
+   "drn_climatology"
+  ],
+  "targets": [
+   "Dec",
+   "Jan",
+   "Nov",
+   "ONDJ",
+   "Oct"
+  ],
+  "searched": {
+   "emos_csg": [],
+   "drn_csg": [
+    "[32, 16]|0.0001",
+    "[32]|0.0001"
+   ],
+   "drn_linear_csg": [
+    "[]|0.0"
+   ],
+   "drn_climatology": [
+    "[32, 16]|0.0001",
+    "[32]|0.0001"
+   ]
+  }
+ },
  "assets": [
   "assets/neural/sep_ondj/distribution_summary.png"
  ],
