@@ -18,6 +18,38 @@ export function names(folder) {
 }
 
 export const SITE = read('site.json');
+
+// The figures of a site folder (e.g. assets/maps/...) that have WebP display copies (scripts/site_webp.py), for pages that
+// build their <picture> in the browser (the map viewer); static pages get theirs from scripts/pictures.mjs.
+const SITE_DIR = process.env.SITE_DIR ?? path.resolve(process.cwd(), '..', 'site');
+const pngWidth = (file) => {
+  try {
+    const b = Buffer.alloc(24); const fd = fs.openSync(file, 'r'); fs.readSync(fd, b, 0, 24, 0); fs.closeSync(fd);
+    return b.toString('latin1', 12, 16) === 'IHDR' ? b.readUInt32BE(16) : null;
+  } catch { return null; }
+};
+// srcset of the WebP copies of one figure (path relative to site/, e.g. assets/maps/.../x.png), with their true widths, or null
+export function webpSet(rel) {
+  const f = path.join(SITE_DIR, rel), w = pngWidth(f);
+  if (!w) return null;
+  const v = [640, 1280].filter((x) => fs.existsSync(f.replace(/\.png$/, `.w${x}.webp`)));
+  if (!v.length) return null;
+  const seen = new Set();
+  return v.map((x) => [x, Math.min(x, w)]).filter(([, a]) => !seen.has(a) && seen.add(a))
+    .map(([x, a]) => `${asset(rel.replace(/\.png$/, `.w${x}.webp`))} ${a}w`).join(', ');
+}
+// { name: srcset } for every figure of a folder (the map viewer and the figure browser build <picture> in the browser)
+export function webpSets(folderRel, sub = '') {
+  const d = path.join(SITE_DIR, folderRel, sub);
+  if (!fs.existsSync(d)) return {};
+  const out = {};
+  for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    const name = sub ? `${sub}/${e.name}` : e.name;
+    if (e.isDirectory()) Object.assign(out, webpSets(folderRel, name));
+    else if (e.name.endsWith('.png')) { const s = webpSet(`${folderRel}/${name}`); if (s) out[name.slice(0, -4)] = s; }
+  }
+  return out;
+}
 export const FILES = read('files.json');
 export const REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall';
 

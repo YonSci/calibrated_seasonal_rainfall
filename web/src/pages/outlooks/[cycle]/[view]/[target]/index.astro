@@ -137,7 +137,9 @@ const snippet = (src) => `<iframe src="${src}" title="Seasonal rainfall outlook,
       const pname = prods.find((p) => p[0] === S.product)[1];
       const cap = M.label + ' · ' + M.view + ' · ' + pname + ' · ' + M.init + ' initialization' + (shown !== S.product ? ' · grid cells' : '');
       const src = e.folder + '/' + shown + '.png';
-      fig.innerHTML = '<a href="' + src + '" target="_blank" rel="noopener"><img src="' + src + '" alt="' + esc((S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + cap) + '"></a><figcaption>' + esc(cap) + '</figcaption>';
+      const webp = e.webp && e.webp[shown]                      // WebP display copies (scripts/site_webp.py); the PNG opens full size
+        ? '<source type="image/webp" sizes="(max-width: 860px) 100vw, 60vw" srcset="' + e.webp[shown] + '">' : '';
+      fig.innerHTML = '<a href="' + src + '" target="_blank" rel="noopener"><picture>' + webp + '<img decoding="async" src="' + src + '" alt="' + esc((S.kind === 'forecast' ? 'Forecast map: ' : 'Verification map: ') + cap) + '"></picture></a><figcaption>' + esc(cap) + '</figcaption>';
       $('mp-open').href = src;
       $('mp-download').href = src;
       $('mp-open').textContent = cmp ? 'Open full-size comparison' : 'Open full-size';

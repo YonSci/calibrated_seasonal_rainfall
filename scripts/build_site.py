@@ -35,6 +35,7 @@ import site_prob                                      # noqa: E402
 import forecast_issue                                 # noqa: E402
 import site_files                                     # noqa: E402
 import site_data                                      # noqa: E402
+import site_webp                                      # noqa: E402
 
 OUT = ROOT / 'site'
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
@@ -1975,6 +1976,8 @@ def main():
     (OUT / 'index.html').write_text(page(cycles, default, jjas_evidence(), built, sha, release_id, reviews, bias, probcal),
                                     encoding='utf-8', newline='')
     (OUT / '.nojekyll').write_text('', encoding='utf-8')
+    figs, encoded, webp_bytes = site_webp.make_all(OUT / 'assets')   # display copies of the figures (scripts/site_webp.py)
+    print(f'WebP copies: {figs} figures ({encoded} images encoded now, {webp_bytes / 1e6:.1f} MB)')
     files = None if a.keep_downloads else site_files.offload(OUT, upload_new=a.upload_files, offline=a.offline)
     checked = site_bias.check_published(OUT)                 # every advertised download and asset must be deployable
     size = sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())

@@ -10,7 +10,8 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
          data-areas={asset('data/areas.json')} data-view={view} data-label={label} data-view-label={viewLabel} data-reference={reference}>
   <h2>Explore the map</h2>
   <p class="caveat">Hover over the map for the values of each grid cell, click a place or search for a region, zone or woreda for its outlook in
-  words. Zoom with the + and − buttons (or Ctrl + wheel), drag to move when zoomed in.</p>
+  words. Zoom with the + and − buttons (or Ctrl + wheel), drag to move when zoomed in. With the keyboard: Tab to the map, then the arrow keys
+  move between cells, Enter selects the woreda, + and − zoom, 0 resets.</p>
   <div class="ex-controls">
     <label class="ex-search">Find a place
       <input id="ex-search" list="ex-areas" type="search" placeholder="Region, zone or woreda (e.g. Borena)" autocomplete="off" />
@@ -28,10 +29,11 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
   </div>
   <div class="ex-body">
     <div class="ex-mapwrap">
-      <canvas id="ex-map" role="img" aria-label={`Interactive map of the ${label} outlook`}></canvas>
+      <canvas id="ex-map" tabindex="0" role="img" aria-label={`Interactive map of the ${label} outlook. Arrow keys move between cells, Enter selects the woreda.`} aria-describedby="ex-desc"></canvas>
       <div class="ex-zoom"><button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="reset" aria-label="Reset the view">⟲</button></div>
       <div id="ex-tip" class="ex-tip" hidden></div>
       <div id="ex-legend" class="ex-legend"></div>
+      <p id="ex-desc" class="ex-desc caveat" aria-live="polite"></p>
       <p id="ex-status" class="caveat" role="status">Loading the map…</p>
     </div>
     <aside id="ex-panel" class="box ex-panel" aria-live="polite">
@@ -94,14 +96,48 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
 
   // ---------------------------------------------------------------- drawing (lib/cellmap.js)
   function draw() {
-    M.draw(color, { sel: S.sel ? S.sel.pos : null });
+    M.draw(color, { sel: S.sel ? S.sel.pos : null, cursor: S.kb ?? -1 });
     $('ex-legend').innerHTML = LEGENDS[S.layer]();
+    if (S.described !== S.layer) { $('ex-desc').textContent = describe(); S.described = S.layer; }
+  }
+  // The map in words (screen readers and everyone): what the chosen layer shows over the selected area, cos(latitude)-weighted.
+  function describe() {
+    const w = G._w ?? (G._w = P.weights(G)), pos = [...inView];
+    const share = (f: (i: number) => boolean | null) => { let a = 0, b = 0; for (const i of pos) { const v = f(i); if (v === null) continue; b += w[i]; if (v) a += w[i]; } return b ? a / b : null; };
+    const s = P.stats(G, D, pos), where = root.dataset.viewLabel;
+    if (S.layer === 'tercile') {
+      if (!s.share) return `In words: no tercile forecast over the ${where} (dry season).`;
+      const parts = (['above', 'below', 'near'] as const).filter((k) => s.share[k] >= 0.005).sort((a, b) => s.share[b] - s.share[a])
+        .map((k) => `${k} normal over ${pc(s.share[k])}`);
+      return `In words: the most likely outcome (40% chance or more) is ${parts.length ? parts.join(', ') : 'none'} of the ${where}` + (s.share.none >= 0.005 ? `; no category reaches 40% over ${pc(s.share.none)}.` : '.');
+    }
+    if (S.layer === 'above' || S.layer === 'below') {
+      const k = S.layer === 'above' ? 2 : 0, arr = S.layer === 'above' ? D.pa : D.pb;
+      const hi = share((i) => (arr[i] == null ? null : arr[i] >= 0.5));
+      return s.p ? `In words: the chance of ${S.layer} normal averages ${pc(s.p[k])} over the ${where} (33% is the normal chance); it is 50% or more over ${pc(hi ?? 0)} of the area.` : 'In words: no tercile forecast here.';
+    }
+    if (S.layer === 'mean') return s.mean != null ? `In words: expected rainfall averages ${mm(s.mean)} over the ${where}, against a normal of ${mm(s.normal)}.` : '';
+    if (S.layer === 'anomaly') {
+      const wet = share((i) => (D.mean[i] == null || !(D.normal[i] > 0) ? null : D.mean[i] > 1.05 * D.normal[i]));
+      const dry = share((i) => (D.mean[i] == null || !(D.normal[i] > 0) ? null : D.mean[i] < 0.95 * D.normal[i]));
+      return s.anomaly != null ? `In words: expected rainfall is ${pc(Math.abs(s.anomaly))} ${s.anomaly >= 0 ? 'above' : 'below'} normal on average over the ${where}; more than 5% wetter than normal over ${pc(wet ?? 0)} of the area and more than 5% drier over ${pc(dry ?? 0)}.` : '';
+    }
+    const better = share((i) => {
+      const rb = D.rb_tr?.[i], rc = D.rc_tr?.[i];
+      return rb == null || !(rc > 0) ? null : rb < rc;
+    });
+    const tr = P.track(s.rpss, L);
+    return `In words: over past years, forecasts made this way scored better than climatology over ${pc(better ?? 0)} of the ${where} (1993–2016, cross-validated); overall track record: ${tr.word}.`;
   }
 
   // ---------------------------------------------------------------- interaction
   const cellAt = (ev: MouseEvent) => M.cellAt(ev.clientX, ev.clientY);
   function tip(ev: MouseEvent) {
-    const i = cellAt(ev), t = $('ex-tip');
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    tipAt(cellAt(ev), ev.clientX - rect.left, ev.clientY - rect.top);
+  }
+  function tipAt(i: number, x: number, y: number) {
+    const t = $('ex-tip');
     if (i < 0) { t.hidden = true; return; }
     const c = G.cells[i], [la, lo] = M.latlon(i);
     const w = byCell.get(c);
@@ -110,8 +146,8 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     t.innerHTML = `<strong>${where}</strong><br>` + (s.p ? `Below ${pc(s.p[0])} · near ${pc(s.p[1])} · above ${pc(s.p[2])}` : 'Dry season: no tercile forecast') +
       (s.mean != null ? `<br>Expected ${mm(s.mean)} (normal ${mm(s.normal)})` : '') + (inView.has(i) ? '' : '<br><em>outside the selected domain</em>');
     const rect = canvas.parentElement!.getBoundingClientRect();
-    t.style.left = Math.min(ev.clientX - rect.left + 14, rect.width - 230) + 'px';
-    t.style.top = ev.clientY - rect.top + 14 + 'px';
+    t.style.left = Math.max(4, Math.min(x + 14, rect.width - 230)) + 'px';
+    t.style.top = y + 14 + 'px';
     t.hidden = false;
   }
   function select(area: any, push = true) {
@@ -205,7 +241,28 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     if (drag) { const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) moved = true; M.view.ox = drag.ox + dx; M.view.oy = drag.oy + dy; draw(); }
     if (G && ev.pointerType === 'mouse') tip(ev);
   });
-  canvas.addEventListener('pointerleave', () => { $('ex-tip').hidden = true; });
+  canvas.addEventListener('pointerleave', () => { if (S.kb == null || S.kb < 0) $('ex-tip').hidden = true; });
+  // keyboard: arrows move a cell cursor (shift: 4 cells), Enter / Space selects its woreda, + / − zoom, 0 resets, Escape leaves the cursor
+  canvas.addEventListener('keydown', (ev) => {
+    if (!M) return;
+    const moves: Record<string, [number, number]> = { ArrowUp: [1, 0], ArrowDown: [-1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
+    if (moves[ev.key]) {
+      ev.preventDefault();
+      if (S.kb == null || S.kb < 0) S.kb = S.sel?.pos?.[0] ?? [...inView][Math.floor(inView.size / 2)] ?? 0;
+      else for (let n = 0; n < (ev.shiftKey ? 4 : 1); n++) S.kb = M.step(S.kb, ...moves[ev.key]);
+      M.reveal(S.kb);
+    } else if ((ev.key === 'Enter' || ev.key === ' ') && S.kb >= 0) {
+      ev.preventDefault();
+      const w = byCell.get(G.cells[S.kb]); if (w) select(w);
+    } else if (ev.key === '+' || ev.key === '=') { M.zoom(1.5); if (S.kb >= 0) M.reveal(S.kb); }
+    else if (ev.key === '-' || ev.key === '_') M.zoom(1 / 1.5);
+    else if (ev.key === '0') M.reset();
+    else if (ev.key === 'Escape') { S.kb = -1; $('ex-tip').hidden = true; draw(); return; }
+    else return;
+    draw();
+    if (S.kb >= 0) { const b = M.cellBox(S.kb); tipAt(S.kb, b.x + b.w, b.y + b.h); }
+  });
+  canvas.addEventListener('blur', () => { $('ex-tip').hidden = true; });
   canvas.addEventListener('click', (ev) => {
     if (moved || !G) return;
     const i = cellAt(ev); if (i < 0) return;
@@ -247,6 +304,8 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
   .explore .ex-zoom{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px}
   .explore .ex-zoom button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1rem;cursor:pointer}
   .explore .ex-tip{position:absolute;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.82rem;box-shadow:0 4px 14px rgba(0,0,0,.12);max-width:240px}
+  .explore canvas:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+  .explore .ex-desc{margin:0;padding:4px 10px 8px;background:var(--surface)}
   .explore .ex-legend{padding:8px 10px;font-size:.8rem;background:var(--surface);border-top:1px solid var(--line)}
   .explore .lg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:2px 0}
   .explore .lg-row b{min-width:9.5em;font-weight:600}

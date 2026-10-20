@@ -1,0 +1,45 @@
+---
+// "Was this page useful?": a yes / no answer, then an optional comment as a pre-filled GitHub issue (the site is static, so
+// nothing is sent until the reader submits the issue). The answer is remembered for the page in this browser only.
+import { REPO } from '../lib/data.js';
+---
+<section class="feedback" id="feedback" aria-labelledby="fb-q" data-repo={REPO}>
+  <p id="fb-q"><strong>Was this page useful?</strong>
+    <button type="button" class="fb-btn" data-fb="yes">Yes</button>
+    <button type="button" class="fb-btn" data-fb="no">No</button>
+  </p>
+  <p class="fb-more caveat" id="fb-more" hidden role="status">
+    <span id="fb-thanks">Thank you.</span> Tell us what you used it for or what was missing:
+    <a id="fb-link" target="_blank" rel="noopener">write a short note on GitHub</a> (a free GitHub account is needed; the page address is filled in).
+  </p>
+</section>
+<script>
+  const box = document.getElementById('feedback') as HTMLElement | null;
+  if (box) {
+    const key = 'feedback:' + location.pathname;
+    const link = document.getElementById('fb-link') as HTMLAnchorElement;
+    const open = (answer: string) => {
+      const page = location.href.split('#')[0];
+      const title = `Feedback (${answer === 'yes' ? 'useful' : 'not useful'}): ${document.title.split(' · ')[0]}`;
+      const body = `Page: ${page}\nUseful: ${answer}\n\nWhat did you use the page for?\n\n\nWhat was missing, unclear or wrong?\n\n\nWho are you (optional; e.g. extension officer, NGO, researcher)?\n`;
+      link.href = `${box.dataset.repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+      (document.getElementById('fb-thanks') as HTMLElement).textContent = answer === 'yes' ? 'Thank you.' : 'Thank you; sorry it did not help.';
+      (document.getElementById('fb-more') as HTMLElement).hidden = false;
+      box.querySelectorAll<HTMLElement>('[data-fb]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fb === answer)));
+    };
+    try { const kept = localStorage.getItem(key); if (kept) open(kept); } catch { /* storage unavailable */ }
+    box.addEventListener('click', (ev) => {
+      const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-fb]');
+      if (!b) return;
+      try { localStorage.setItem(key, b.dataset.fb!); } catch { /* storage unavailable */ }
+      open(b.dataset.fb!);
+    });
+  }
+</script>
+<style is:global>
+  .feedback{margin:28px 0 8px;padding:10px 14px;border-top:1px solid var(--line)}
+  .feedback p{margin:.3em 0}
+  .fb-btn{font:inherit;font-size:.9rem;padding:3px 14px;margin-left:6px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+  .fb-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+  @media print{ .feedback{display:none} }
+</style>

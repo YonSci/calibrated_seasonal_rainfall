@@ -6,7 +6,7 @@ import Figure from '../../../components/Figure.astro';
 import Downloads from '../../../components/Downloads.astro';
 import ResearchBar from '../../../components/ResearchBar.astro';
 import OnThisPage from '../../../components/OnThisPage.astro';
-import { read, names, href, asset, years, cycleTitle, REPO } from '../../../lib/data.js';
+import { read, names, href, asset, years, cycleTitle, REPO, webpSets } from '../../../lib/data.js';
 import { View, suggestion, decision, dataTable, methodsTable, screening, gates, confirmation, ratio, shadows, validation, provenance,
   groups, diagnostics, parts as partsOf } from '../../../lib/bias.js';
 
@@ -220,7 +220,7 @@ const prev = P[idx - 1], next = P[idx + 1];
     {part === 'figures' && (
       <section id="figures">
         <p class="caveat">Figures show the national aggregate ({V.national}) or per-cell maps of the whole country.</p>
-        <div class="bc-figs" data-root={asset(D.figures)} data-season={V.season}>
+        <div class="bc-figs" data-root={asset(D.figures)} data-season={V.season} data-webp={JSON.stringify(webpSets(D.figures))}>
           <div class="map-controls">
             <label>Figure <select class="bc-kind">{kinds.map((k) => <option value={k.pattern} data-per-target={String(k.per_target)}>{k.label}</option>)}</select></label>
             <label>Target <select class="bc-target">{V.targets.map((t) => <option selected={t === V.season}>{t}</option>)}</select></label>
@@ -270,6 +270,11 @@ const prev = P[idx - 1], next = P[idx + 1];
           const src = `${el.dataset.root}/${opt.value.replace('{t}', target.value)}.png`;
           const cap = opt.textContent + (per ? ' — ' + target.value : '');
           const img = el.querySelector('.bc-img') as HTMLImageElement;
+          // WebP display copies (scripts/site_webp.py); the PNG if they fail to load
+          const sets = JSON.parse(el.dataset.webp || '{}'), set = sets[opt.value.replace('{t}', target.value)];
+          img.onerror = () => { if (img.srcset) { img.removeAttribute('srcset'); img.src = src; } };
+          img.sizes = '(max-width: 860px) 100vw, 60vw';
+          if (set) img.srcset = set; else img.removeAttribute('srcset');
           img.src = src; img.alt = cap;
           (el.querySelector('.bc-cap') as HTMLElement).textContent = cap;
           (el.querySelector('.bc-open') as HTMLAnchorElement).href = src;

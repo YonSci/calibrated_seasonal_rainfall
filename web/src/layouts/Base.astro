@@ -4,6 +4,7 @@
 import { SITE, ROOT, href, asset, REPO } from '../lib/data.js';
 import { C, cycleOf, url, defaultTarget } from '../lib/cycles.js';
 import { GLOSSARY } from '../lib/glossary.js';
+import Feedback from '../components/Feedback.astro';
 const CLASSIC = `${ROOT}classic/`;
 const { title, description = '', section = '' } = Astro.props;
 const SITE_NAME = 'Seasonal Rainfall Outlook Platform';           // the platform's name; the home page's title
@@ -158,6 +159,7 @@ const menus = [
   <main class="wrap" id="main" data-pagefind-body>
     <span class="sr-only" data-pagefind-meta="title" data-pagefind-ignore>{title}</span>
     <slot />
+    <div data-pagefind-ignore><Feedback /></div>
   </main>
   <footer class="wrap foot">
     Release {SITE.release} · built {SITE.built_utc} from <code>site_data/</code> (code <a href={`${REPO}/tree/${SITE.code_commit}`}>{String(SITE.code_commit).slice(0, 7)}</a>) ·

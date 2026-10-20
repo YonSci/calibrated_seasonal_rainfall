@@ -1,7 +1,7 @@
 // Forecast outlooks, maps, verification and historical performance (docs/49): the current page's rendering
 // (scripts/build_site.py, JS) ported to build time. Each function keeps the original wording and numbers; instead of
 // filling an element it returns the element's HTML, keyed by the same element id. State S = {cycle, target, view, period}.
-import { asset, link } from './data.js';
+import { asset, link, webpSets } from './data.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const CAT = ['below normal', 'near normal', 'above normal'];
@@ -142,7 +142,7 @@ export function renderer(D, S, pages) {
       const e = kind === 'forecast' ? t.forecast[S.view] : t.verification[S.view];
       if (!e) return null;
       const prods = kind === 'forecast' ? D.products : e.images;
-      return { folder: asset(e.folder), prods, images: e.images.map((i) => i[0]) };
+      return { folder: asset(e.folder), prods, images: e.images.map((i) => i[0]), webp: webpSets(e.folder) };
     };
     return { label: t.label, view: viewLabel(S.view), init: c.init, reference: c.reference, status: t.status.text,
       forecast: entry('forecast'), verification: entry('verification'), help: HELP,

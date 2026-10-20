@@ -58,7 +58,7 @@ export function createMap(canvas, G, A) {
     ctx.closePath(); ctx.lineWidth = width; ctx.strokeStyle = col; ctx.stroke();
   }
   // colour(i) for every cell; with split (0..1) and colour2, the right part of the map is drawn with colour2
-  function draw(colour, { sel = null, split = null, colour2 = null } = {}) {
+  function draw(colour, { sel = null, split = null, colour2 = null, cursor = -1 } = {}) {
     const e = extent(), dpr = window.devicePixelRatio || 1;
     if (canvas.width !== Math.round(e.w * dpr) || canvas.height !== Math.round(e.h * dpr)) {
       canvas.width = Math.round(e.w * dpr); canvas.height = Math.round(e.h * dpr); canvas.style.height = e.h + 'px';
@@ -78,6 +78,11 @@ export function createMap(canvas, G, A) {
     if (sel) {
       ctx.lineWidth = 2; ctx.strokeStyle = '#111';
       for (const i of sel) { const [x, y, w, h] = cellRect(i, e); ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); }
+    }
+    if (cursor >= 0) {                                         // the keyboard cursor: one cell, ringed in black and white
+      const [x, y, w, h] = cellRect(cursor, e);
+      ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.strokeRect(x - 1, y - 1, w + 2, h + 2);
+      ctx.lineWidth = 1.5; ctx.strokeStyle = '#111'; ctx.strokeRect(x - 1, y - 1, w + 2, h + 2);
     }
     if (split != null) {
       const sx = split * e.w;
@@ -103,6 +108,27 @@ export function createMap(canvas, G, A) {
     if (view.scale === 1) { view.ox = 0; view.oy = 0; }
   }
   function reset() { view.scale = 1; view.ox = 0; view.oy = 0; }
+  // the cell's box in CSS pixels relative to the canvas (for a tooltip at a keyboard-selected cell)
+  function cellBox(i) { const [x, y, w, h] = cellRect(i, extent()); return { x, y, w, h }; }
+  // the nearest cell of the country from position i in direction (dlat, dlon) grid steps, or i if none within reach
+  function step(i, dlat, dlon) {
+    const c = G.cells[i];
+    let r = Math.floor(c / G.nlon), k = c % G.nlon;
+    for (let n = 0; n < Math.max(G.nlat, G.nlon); n++) {
+      r += dlat; k += dlon;
+      if (r < 0 || k < 0 || r >= G.nlat || k >= G.nlon) return i;
+      const p = G._pos.get(r * G.nlon + k);
+      if (p !== undefined) return p;
+    }
+    return i;
+  }
+  // keep a cell in view when zoomed in (keyboard moves)
+  function reveal(i) {
+    if (view.scale <= 1) return;
+    const e = extent(), b = cellBox(i), m = 20;
+    if (b.x < m) view.ox += m - b.x; else if (b.x + b.w > e.w - m) view.ox -= b.x + b.w - (e.w - m);
+    if (b.y < m) view.oy += m - b.y; else if (b.y + b.h > e.h - m) view.oy -= b.y + b.h - (e.h - m);
+  }
   function latlon(i) { const c = G.cells[i]; return [G.lat0 + G.dlat * Math.floor(c / G.nlon), G.lon0 + G.dlon * (c % G.nlon)]; }
-  return { draw, cellAt, zoom, reset, view, extent, latlon };
+  return { draw, cellAt, zoom, reset, view, extent, latlon, cellBox, step, reveal };
 }
