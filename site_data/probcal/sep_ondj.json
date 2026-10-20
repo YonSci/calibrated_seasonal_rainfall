@@ -41923,7 +41923,11 @@
   ],
   "reference_amount_method": "mvs",
   "output_root": "outputs/probability_calibration/{name}/amount_shadow",
-  "models_from_selection": true
+  "models_from_selection": true,
+  "members": {
+   "drn_csg": 25
+  },
+  "members_note": "Ensemble members per model, as in the model's benchmark: the DRN (docs/54) was benchmarked with the first 25 SEAS5 members in every year."
  },
  "figures": "assets/probcal/sep_ondj",
  "assets": [

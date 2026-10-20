@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-20T02:05:55.426087+00:00",
+ "created_utc": "2026-10-20T06:19:15.890772+00:00",
  "region": "ethiopia",
  "categories": {
   "Bias correction": 12,
@@ -8901,8 +8901,8 @@
    "training_better": 4,
    "test_better": 4,
    "test_scored": 20,
-   "validation_better": 0,
-   "validation_scored": 0,
+   "validation_better": 3,
+   "validation_scored": 5,
    "seasons": [
     "feb_fmam",
     "jan_fmam",
@@ -9104,7 +9104,7 @@
    "test_better": 10,
    "test_scored": 20,
    "validation_better": 0,
-   "validation_scored": 0,
+   "validation_scored": 5,
    "seasons": [
     "feb_fmam",
     "jan_fmam",

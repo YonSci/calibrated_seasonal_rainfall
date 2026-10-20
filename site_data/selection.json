@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-20T02:04:04.540820+00:00",
+ "created_utc": "2026-10-20T06:16:48.166660+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -697,7 +697,17 @@
        "test_years_better": 7,
        "test_years": 9
       },
-      "validation": null,
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 17.778841347431946,
+         "reference": 15.226470747388095
+        }
+       ],
+       "mean_difference": 2.552370600043851,
+       "required": 3
+      },
       "alternatives": [
        {
         "family": "bias_correction",
@@ -770,7 +780,7 @@
         }
        }
       ],
-      "why": "Distributional regression network (DRN), censored shifted gamma (neural network (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.099 over the training years (Benjamini–Hochberg p 0.0109; 17 of 24 years better), -1.204 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Regularized quantile regression (distribution model)."
+      "why": "Distributional regression network (DRN), censored shifted gamma (neural network (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.099 over the training years (Benjamini–Hochberg p 0.0109; 17 of 24 years better), -1.204 over the test years. Independent validation: 1 of 3 season(s), mean difference +2.552. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Regularized quantile regression (distribution model)."
      }
     },
     "JJAS": {

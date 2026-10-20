@@ -990,7 +990,7 @@
   {
     "id": "2026-10-20.0",
     "date": "2026-10-20",
-    "commit": null,
+    "commit": "b3bad0c",
     "title": "A neural network benchmark; statistical downscaling version 2",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -1006,6 +1006,24 @@
       {
         "type": "analysis",
         "text": "Statistical downscaling version 2 fixes four limitations: the first 25 SEAS5 members in every year, SEAS5 sea-surface temperature over the tropical Indian and Pacific Oceans as a candidate predictor, a spread that grows for unusual forecasts, and a climatology blend of the probabilities. The probabilities now match the published ones on average (PCR) instead of falling below them; PCR stays confirmed for JJAS August and season amounts, September is no longer confirmed. docs/53."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-20.1",
+    "date": "2026-10-20",
+    "commit": null,
+    "title": "Automatic validation of the new methods from 2027",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "method",
+        "text": "Every candidate now collects independent validation seasons automatically: from 2027 statistical downscaling (CCA, PCR) is forecast when each cycle is run, before its season, frozen and scored once CHIRPS is available; the neural network runs in the amount shadow with the other distribution models. Its first season, JJAS 2026 September, was worse than the published amounts (as for EMOS and quantile regression that season). docs/50, docs/53, docs/54."
       }
     ]
   }
