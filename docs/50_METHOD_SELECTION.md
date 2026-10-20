@@ -53,7 +53,7 @@ candidate under Holm, eight under Benjamini–Hochberg (new: JJAS Jun amounts, g
 JJAS Aug amounts PCR (larger training improvement) replaces Variance Scaling, which stays an alternative. No status is
 *recommended* under either correction: that still needs three validation seasons.
 
-## Current selection (2026-10-17)
+## Current selection (2026-10-20)
 
 No target–product combination is recommended yet. Eight have a candidate:
 
@@ -64,31 +64,37 @@ No target–product combination is recommended yet. Eight have a candidate:
 | JJAS, May initialization | Jun | amounts | gamma QM (amount correction; square-root MVS also confirmed) | 1 of 3 |
 | JJAS, May initialization | Jul | amounts | Variance Scaling, unbounded (amount correction) | 1 of 3 |
 | JJAS, May initialization | Aug | amounts | PCR (statistical downscaling; VS, square-root MVS, PT and gamma QM also confirmed) | 1 of 3 |
-| JJAS, May initialization | Sep | amounts | quantile regression (distribution model; EMOS, CCA, PCR, gamma QM, VS, square-root MVS also confirmed) | 1 of 3 |
+| JJAS, May initialization | Sep | amounts | DRN (neural network, docs/54; quantile regression, EMOS, gamma QM, VS, square-root MVS also confirmed) | 0 of 3 (needs a shadow forecast) |
 | JJAS, May initialization | JJAS | amounts | PCR (statistical downscaling) | 1 of 3 |
 | ONDJ, September initialization | Jan | amounts | square-root MVS (amount correction; Leung–Dirichlet and gamma QM also confirmed) | 0 of 3 |
+
+Changes on 2026-10-20: statistical downscaling version 2 (docs/53) keeps PCR confirmed for JJAS August and season amounts
+but no longer confirms CCA and PCR for September; the neural network (DRN, docs/54) is confirmed for JJAS September amounts
+and selected there (improvement −1.10 mm over 1993–2016 against −1.08 mm for quantile regression, now an alternative).
 
 The numbers behind each are on the site and in `selection.json` (training and test differences, Benjamini–Hochberg p and the benchmark's Holm p, years better,
 validation seasons).
 
 ## Summary across seasons: every method against the published approach
 
-`scripts/method_summary.py` counts, for each of the 29 methods (12 bias corrections, 8 probability calibrations, 6
+`scripts/method_summary.py` counts, for each of the 30 methods (12 bias corrections, 8 probability calibrations, 6
 rainfall-distribution models, 1 two-stage calibration, Leung–Dirichlet, counted once: the whole calibration for
-probabilities, its corrected amounts for amounts, and 2 statistical downscaling methods, CCA and PCR) and each product over
+probabilities, its corrected amounts for amounts, 2 statistical downscaling methods, CCA and PCR, and 1 neural network, the
+DRN of docs/54) and each product over
 the 20 targets of the four seasons, the targets where it is confirmed better under the selection rule (Benjamini–Hochberg
 within its benchmark family since 2026-10-17), where it is better on average over 1993–2016 and over the test years, and the
 targets of the independent seasons (2026 so far) where it scored better (`outputs/method_selection/summary.md`; on the
-site under *Research › Method selection*; refreshed by the daily scoring). As of 2026-10-17 (Benjamini–Hochberg):
+site under *Research › Method selection*; refreshed by the daily scoring). As of 2026-10-20 (Benjamini–Hochberg; statistical
+downscaling version 2):
 
 - **Tercile probabilities:** only one method is confirmed better anywhere: square-root MVS (FMAM from February, February).
   It is also the most consistent amount correction overall (better on average for 14 of 20 targets over 1993–2016, 16 of
   20 over the test years, 11 of 15 validation targets), with Variance Scaling and gamma quantile mapping close. No
   probability calibration, rainfall-distribution model or two-stage calibration is confirmed better than the
   climatology blend for any target; the best of them are better for at most 9 of 20 targets.
-- **Rainfall amounts:** square-root MVS is confirmed for 5 targets, Variance Scaling and gamma QM for 4, PCR for 3, EMOS
-  and power transformation for 2; quantile regression, CCA and the Leung–Dirichlet calibration for one each (under Holm:
-  2, 2, 2, 1, 2, 1, 1, 1, 1). Square-root MVS and gamma QM are better on average for all 20 targets over 1993–2016.
+- **Rainfall amounts:** square-root MVS is confirmed for 5 targets, Variance Scaling and gamma QM for 4, PCR, EMOS and
+  power transformation for 2; quantile regression, the Leung–Dirichlet calibration and the DRN for one each. Square-root
+  MVS and gamma QM are better on average for all 20 targets over 1993–2016.
 
 ## More statistical power (2026-10-17)
 
@@ -104,14 +110,16 @@ site under *Research › Method selection*; refreshed by the daily scoring). As 
 
 **Results:**
 - **Tercile probabilities:** no method is significantly better when pooled, under either correction. Square-root MVS comes
-  closest: better in 25 of 33 years, p 0.004 before adjustment, Holm 0.12, BH 0.08 (across all 29 methods).
+  closest: better in 25 of 33 years, p 0.004 before adjustment, Holm 0.13, BH 0.085 (across all 30 methods).
 - **Rainfall amounts, pooled:**
-  - Holm: Variance Scaling, square-root MVS, gamma QM and quantile regression are significantly better than the MVS-corrected
-    ensemble.
-  - Benjamini–Hochberg: the same four, plus EMOS.
+  - Holm: Variance Scaling, square-root MVS, gamma QM, quantile regression and the DRN are significantly better than the
+    MVS-corrected ensemble. The DRN has the largest pooled gain (+2.2% of the climatology score, 27 of 33 years), mostly from
+    its better-calibrated ranges (docs/54).
+  - Benjamini–Hochberg: the same five, plus EMOS.
 - **Rainfall amounts, per target over 33 years:** square-root MVS is confirmed for 3 targets under Holm and 12 under BH;
   gamma QM for 2 and 8.
-- **Statistical downscaling** (CCA, PCR, docs/53) is worse than the published approach when pooled.
+- **Statistical downscaling** (CCA, PCR, docs/53, version 2) is not better than the published approach when pooled: PCR's
+  probabilities match it (−0.06%), CCA's are below (−1.2%), and both are below for amounts (−2.3%, −3.2%).
 
 These results are sensitivity analyses on the Research overview. After seeing them the project lead switched the selection
 rule to Benjamini–Hochberg within each benchmark family (section "Change of the multiple-testing correction"); the pooled

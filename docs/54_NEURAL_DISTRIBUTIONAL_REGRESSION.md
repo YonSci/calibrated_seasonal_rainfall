@@ -97,16 +97,55 @@ still comes from those seasons, and the tests use whole years. The years 2017 on
 development of the other methods; they are a check, not an untouched test set. Real evidence will come from forecasts saved
 before their seasons (docs/52).
 
-## 3. Results
+## 3. Results (All Ethiopia, four cycles, 20 targets)
 
-Pending: the benchmark is running (May-initialized JJAS first, the declared primary cycle).
+| Mean over the 20 targets | DRN | EMOS | Linear control | No-forecast ablation | Published |
+| --- | --- | --- | --- | --- | --- |
+| Amounts, CRPSS 1993–2016 | +0.025 | +0.024 | +0.022 | +0.006 | +0.009 (MVS ensemble) |
+| Amounts, CRPSS 2017+ | +0.016 | | | | +0.011 |
+| Coverage of the 10–90% range, 1993–2016 (nominal 80%) | 81% (75–90%) | 80% | | | 67% (46–76%) |
+| Probabilities, RPSS 1993–2016 | +0.013 | −0.003 | | | +0.022 |
+
+- **Rainfall amounts.** The DRN is better than the published MVS ensemble on average over 1993–2016 for 16 of 20 targets
+  and over the test years for 10. **Confirmed better only for JJAS September** (Holm and Benjamini–Hochberg, adjusted p
+  0.011; 17 of 24 years better, better over the test years too). Close: FMAM-February February (unadjusted p 0.015) and
+  JJAS June and August (0.045 and 0.032; Benjamini–Hochberg 0.075).
+- **Ranges.** The clearest gain: the DRN's 10–90% ranges hold 75–90% of the observations (mean 81%), against 46–76% for the
+  MVS ensemble, whose ranges are too narrow. EMOS is as well calibrated (80%).
+- **Against EMOS:** about equal. The DRN's CRPS is lower for 9 of 20 targets; significantly so (unadjusted) only for
+  FMAM-February February and JJAS August. **The network does not add a clear gain over EMOS.**
+- **Against the linear control:** lower CRPS for 13 of 20 targets, significantly (unadjusted) for the JJAS season and ONDJ
+  December: the hidden layers help a little at most. One hidden layer or two were chosen (32–16 units for 16 targets).
+- **Against the no-forecast ablation:** the decisive check. The ablation (the cell's climate and location only) beats the
+  MVS ensemble for 14 of 20 targets, because the MVS ensemble's amounts are worse than climatology for many targets. The
+  DRN beats the ablation for only 11 of 20, significantly only for FMAM-February February, where SEAS5 has real skill
+  (DRN RPSS +0.205, published +0.137). **Most of the DRN's gain over the published amounts comes from a well-calibrated
+  distribution, not from the forecast.**
+- **Tercile probabilities:** the DRN is below the published probabilities on average (RPSS +0.013 against +0.022) and better
+  for 4 of 20 targets, none confirmed (FMAM-February February comes closest, unadjusted p 0.013).
+- **Training:** early stopping ended most networks after about 30 steps (median), close to their starting point (a
+  climatological distribution): with 18 training years per network, the held-out years stop the networks before they learn
+  much from the forecast.
+- **Pooled over the 20 targets and 1993–2025** (docs/50, "More statistical power"): the DRN's amounts are significantly
+  better than the MVS ensemble (skill gain +2.2% of the climatology score, better in 27 of 33 years; Holm p 0.015,
+  Benjamini–Hochberg 0.004); its probabilities are not (−1.2%).
+
+**Reading.** The neural network does what a well-calibrated distribution model does: better amount ranges than the published
+ensemble, about as good as EMOS. It does not find additional, nonlinear forecast signal: with about two dozen seasons per
+fold, the year-to-year evidence is too thin for a network to learn more than EMOS's few coefficients. Where SEAS5 is skilful
+(February), the DRN uses it and does well, as EMOS does. In the method selection the DRN becomes a candidate for JJAS
+September amounts, and is selected there: its improvement over 1993–2016 (−1.10 mm) is slightly larger than quantile
+regression's (−1.08 mm), which becomes an alternative. A recommendation would need three shadow-forecast seasons, and the
+ablation result is a reason for caution. The results support the recommendation's order: a spatial CNN or a larger network is not
+justified by these data; more forecast information (predictors) and more independent seasons would come first.
 
 ## 4. Running
 
-    python scripts/dist_benchmark.py --config config/probability_calibration/may_jjas_neural.json --workers 5
+    python scripts/dist_benchmark.py --config config/probability_calibration/<cycle>_neural.json --workers 5
 
-About an hour per target with one worker (15 networks per fold: 6 for the DRN, 6 for the ablation, 3 for the linear
-control). Checkpoints per target in `outputs/probability_calibration/<cycle>/neural/parts/`.
+About two hours per cycle with five workers (15 networks per fold: 6 for the DRN, 6 for the ablation, 3 for the linear
+control). Checkpoints per target in `outputs/probability_calibration/<cycle>/neural/parts/`. JAX was tried first for the
+gradients: its incomplete gamma function made one step 0.7 s, against about 20 ms with SciPy and the derivatives above.
 
 ## 5. Possible next steps
 
