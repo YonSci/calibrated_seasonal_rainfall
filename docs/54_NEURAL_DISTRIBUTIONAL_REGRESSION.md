@@ -29,6 +29,16 @@ diagnostic comparisons, reported without adjustment, and do not dilute the multi
 
 ## 2. Implementation (`scripts/neural_calibration.py`)
 
+![The DRN: ten inputs per cell and year, standardized; a shared network of 32 (and optionally 16) ELU units; three outputs turned into the mean, spread and shift of a censored shifted gamma; an equal mixture of three seeds; the products. Training below.](figures/drn_architecture.svg)
+
+*The model at a glance* (drawn by `web/src/lib/drn_diagram.js`, the same drawing as the research page *Neural network (DRN)* and
+the scientists' deck; this copy has fixed colours). Inputs (10 per cell and year): ensemble mean, median, standard deviation,
+mean absolute difference, 10% and 90% quantiles of the first 25 SEAS5 members, each divided by the cell's SEAS5 training mean;
+the log of the cell's CHIRPS training mean and its coefficient of variation; latitude and longitude. Target: the CHIRPS total
+divided by the cell's CHIRPS training mean. Outputs: the mixture distribution F; terciles F(q₁), F(q₂) − F(q₁), 1 − F(q₂) at
+the cell's training terciles; the median; the 10–90% range; the chance of no rain F(0). Parameters: 451 with one hidden layer,
+931 with two.
+
 ### 2.1 Samples and inputs (`dist_benchmark.fold`, `dist_calibration.features`)
 
 As for every distribution model: within each fold, every valid cell (training-mean CHIRPS and SEAS5 at least 1 mm) and

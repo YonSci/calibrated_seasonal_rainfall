@@ -6,6 +6,8 @@ import OnThisPage from '../../components/OnThisPage.astro';
 import Table from '../../components/Table.astro';
 import Figure from '../../components/Figure.astro';
 import InShort from '../../components/InShort.astro';
+import { drnDiagram } from '../../lib/drn_diagram.js';
+import { candidates } from '../../lib/evidence.js';
 import { read, names, href, link, esc, signed, num, years, cycleTitle, REPO } from '../../lib/data.js';
 
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
@@ -125,6 +127,41 @@ const chosen = (d) => {
   }
   return [...n].map(([h, c]) => `${h} (${c} target${c === 1 ? '' : 's'})`).join('; ') || '—';
 };
+// The model at a glance, input data, outputs (lib/drn_diagram.js; the numbers below come from the benchmark files and the cell data)
+const TRAIN = cycles[0]?.d.training_years ?? [1993, 2016], TEST = cycles[0]?.d.test_years ?? [2017, 2025];
+const fmt = (n) => Number(n).toLocaleString('en');
+const INPUT_ROWS = [
+  ['SEAS5 ensemble', 'Ensemble mean', 'Mean of the 25 members, divided by the cell’s SEAS5 mean over the training years'],
+  ['SEAS5 ensemble', 'Ensemble median', 'Median of the members (relative, as above)'],
+  ['SEAS5 ensemble', 'Standard deviation', 'Spread of the members (relative)'],
+  ['SEAS5 ensemble', 'Mean absolute difference', 'Average |xᵢ − xⱼ| over all pairs of members: the spread measure of EMOS (relative)'],
+  ['SEAS5 ensemble', '10% and 90% quantiles', 'The lower and upper tails of the members (relative)'],
+  ['Local climate', 'Log mean rainfall', 'Log of the cell’s CHIRPS mean over the training years (mm): how wet the cell normally is'],
+  ['Local climate', 'Coefficient of variation', 'Standard deviation ÷ mean of the cell’s CHIRPS totals over the training years: how variable it is'],
+  ['Location', 'Latitude, longitude', 'Centre of the 0.25° cell: lets the network treat regions differently'],
+];
+const layers = (h) => [10, ...h, 3].reduce((n, a, i, all) => (i ? n + all[i - 1] * a + a : n), 0);
+const PARAMS = [layers([32]), layers([32, 16])];
+// cells with rainfall (CHIRPS mean at least 1 mm) per target, from the site's cell data
+const CELLS = (() => {
+  const n = [];
+  for (const id of ['fmam2026', 'jjas2026', 'ondj2026']) {
+    try {
+      for (const t of names(`cells/${id}`).filter((x) => x !== 'grid')) n.push(read(`cells/${id}/${t}.json`).normal.filter((v) => v != null && v >= 1).length);
+    } catch { /* no cell data */ }
+  }
+  return n.length ? { min: Math.min(...n), max: Math.max(...n) } : { min: 0, max: 0 };
+})();
+const CYCLE_NAME = { jan_fmam: 'FMAM (Jan)', feb_fmam: 'FMAM (Feb)', may_jjas: 'JJAS (May)', sep_ondj: 'ONDJ (Sep)' };
+const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+const decayText = (v) => (Number(v) === 0 ? '0' : '10' + String(Math.round(Math.log10(Number(v)))).split('').map((ch) => SUP[ch]).join(''));
+const optionText = (k) => { const [h, d] = k.split('|'); const units = JSON.parse(h); return `${units.length ? units.join(' + ') : 'linear'}, ${decayText(d)}`; };
+const CHOSEN = cycles.flatMap(({ name, d }) => Object.entries(d.targets).map(([t, x]) => {
+  const f = x.fitted?.drn_csg;
+  return f && { cycle: CYCLE_NAME[name] ?? name, target: t, hidden: f.hidden.join(' + '), decay: decayText(f.decay),
+    steps: (f.steps ?? []).join(', '), options: Object.entries(f.validation_crps ?? {}).map(([k, v]) => `${optionText(k)}: ${v.toFixed(4)}`).join(' · ') };
+}).filter(Boolean));
+const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.product === 'amounts' ? 'amounts' : 'probabilities'}`);
 ---
 <Base title="Neural network (DRN)" section="research" description="A distributional regression network (neural EMOS with a censored shifted gamma) tested against the published pipeline and EMOS.">
   <OnThisPage>
@@ -149,24 +186,82 @@ const chosen = (d) => {
     </ul>
     <p class="caveat">Only the DRN is tested for adoption (5 targets per cycle and score). EMOS, the control and the ablation are diagnostic comparisons and do not enter the multiple-testing adjustment.</p>
 
-    <h2 id="how">How it is implemented</h2>
+    <h2 id="model">The model at a glance</h2>
+    <figure class="drn-fig" set:html={drnDiagram()} />
+    <p class="caveat">The same network is shared by every grid cell of a target and fitted again inside every fold. Code:
+    <a href={`${REPO}/blob/main/scripts/neural_calibration.py`}><code>scripts/neural_calibration.py</code></a>; full description in
+    <a href={`${REPO}/blob/main/docs/54_NEURAL_DISTRIBUTIONAL_REGRESSION.md`}>docs/54</a>.</p>
+
+    <h2 id="inputs">Input data</h2>
+    <div class="table-wrap"><table class="compact nosort drn-table">
+      <caption>Data the network learns from</caption>
+      <tbody>
+        <tr><th scope="row">Forecast</th><td>ECMWF SEAS5 (system 51) seasonal hindcasts and forecasts, the <strong>first 25 members</strong> in every year
+          (the 2027 policy), initialized in January, February, May or September; monthly totals summed over the target months, on the 0.25° CHIRPS
+          grid (the model’s own resolution is about 1°).</td></tr>
+        <tr><th scope="row">Observations (the target)</th><td>CHIRPS v3.0 rainfall total of the target month or season, divided by the cell’s CHIRPS
+          mean over the training years, so one network serves wet and dry cells alike.</td></tr>
+        <tr><th scope="row">Years</th><td>Training {years(TRAIN)}, scored by leave-one-year-out (each year predicted by a network fitted without it);
+          test years {years(TEST)}, predicted by a network fitted on {years(TRAIN)}.</td></tr>
+        <tr><th scope="row">Samples</th><td>One sample per grid cell and training year: up to about {fmt(CELLS.max)} cells with rainfall
+          (at least 1 mm on average; {fmt(CELLS.min)} in the driest target) × {TRAIN[1] - TRAIN[0]} years in each fold. The network trains on every second
+          cell in each direction (about a quarter of them) and about 80% of those years; the other years stop the training.</td></tr>
+        <tr><th scope="row">Weights</th><td>Each cell by its area (cos latitude); every year the same total weight.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-wrap"><table class="compact nosort drn-table">
+      <caption>The 10 inputs of each cell and year, standardized with the training samples of the fold before entering the network</caption>
+      <thead><tr><th scope="col">Group</th><th scope="col">Input</th><th scope="col">Definition</th></tr></thead>
+      <tbody>
+        {INPUT_ROWS.map(([grp, name, def], i) => <tr><td>{i === 0 || INPUT_ROWS[i - 1][0] !== grp ? <strong>{grp}</strong> : ''}</td><td>{name}</td><td>{def}</td></tr>)}
+      </tbody>
+    </table></div>
+
+    <h2 id="training">Training</h2>
     <ol class="findings">
-      <li><strong>Inputs per cell and year</strong> (relative to the training-year climatology, then standardized): the ensemble mean, median,
-        standard deviation, mean absolute difference, 10% and 90% quantiles; the log of the cell's CHIRPS mean and its coefficient of
-        variation; latitude and longitude.</li>
-      <li><strong>Network:</strong> ELU hidden layers, three outputs turned into the mean <code>μ = softplus(o₁)</code>, standard deviation
-        <code>σ = softplus(o₂)</code> and shift <code>δ = −softplus(o₃)</code> of the censored shifted gamma, as in EMOS.</li>
+      <li><strong>Network:</strong> one hidden layer of 32 ELU units, or two (32 and 16), then three outputs, turned into the mean
+        <code>μ = softplus(o₁)</code>, the spread <code>σ = softplus(o₂)</code> and the shift <code>δ = −softplus(o₃)</code> of a censored
+        shifted gamma, as in EMOS. {fmt(PARAMS[0])} trainable parameters with one hidden layer, {fmt(PARAMS[1])} with two; the output starts at
+        the training climatology.</li>
       <li><strong>Loss:</strong> the closed-form CRPS of the censored shifted gamma (Scheuerer &amp; Hamill 2015), area-weighted with equal
-        weight per year, plus weight decay. The gradient is computed exactly through the network; the CRPS's own derivatives by finite
+        weight per year, plus weight decay. The gradient is computed exactly through the network; the CRPS’s own derivatives by finite
         differences.</li>
-      <li><strong>Training inside each fold:</strong> Adam; about 20% of the training years held out to stop training when their CRPS stops
-        improving; three seeds with different held-out years; the architecture (32, or 32 and 16 units) and weight decay (10⁻⁴ or 10⁻³) with
-        the lowest held-out CRPS are kept, and the forecast is the mixture of the three seeds. Training uses every second cell in each direction; forecasts cover every cell.</li>
-      <li><strong>Products:</strong> tercile probabilities from the distribution at the training-year terciles; amounts, median and 10–90%
-        range from its quantiles.</li>
-      <li><strong>Evaluation:</strong> outer leave-one-year-out over the training years, then fitted on all training years for the test years;
-        one-sided paired sign-flip test over whole years.</li>
+      <li><strong>Optimizer and stopping:</strong> Adam (learning rate 0.003, full batch, at most 2,000 steps). Every 10 steps the CRPS of
+        the held-out years (about 20% of the training years) is checked; training stops after 15 checks without improvement and keeps the best
+        network.</li>
+      <li><strong>Choice inside each fold:</strong> the architecture and the weight decay (10⁻⁴ or 10⁻³) with the lowest held-out CRPS,
+        averaged over three seeds that each hold out different years; the forecast is the equal mixture of the three seeds.</li>
+      <li><strong>Evaluation:</strong> outer leave-one-year-out over the training years, then the test years; one-sided paired sign-flip test
+        over whole years, Benjamini–Hochberg across the targets of a cycle.</li>
     </ol>
+    {CHOSEN.length > 0 && (
+      <details>
+        <summary>The architecture chosen for each target (the network fitted on {years(TRAIN)} that predicts the test years)</summary>
+        <div class="table-wrap"><table class="compact">
+          <thead><tr><th scope="col">Cycle</th><th scope="col">Target</th><th scope="col">Hidden units</th><th scope="col">Weight decay</th><th scope="col">Training steps of the 3 seeds</th><th scope="col">Held-out CRPS of each option</th></tr></thead>
+          <tbody>{CHOSEN.map((r) => <tr><td>{r.cycle}</td><td>{r.target}</td><td>{r.hidden}</td><td>{r.decay}</td><td>{r.steps}</td><td class="caveat">{r.options}</td></tr>)}</tbody>
+        </table></div>
+        <p class="caveat">Held-out CRPS is in relative units (rainfall ÷ the cell’s mean); lower is better. Early stopping usually ends training
+        after tens to a few hundred steps: the predictable signal is small, and longer training would fit noise.</p>
+      </details>
+    )}
+
+    <h2 id="outputs">Outputs</h2>
+    <div class="table-wrap"><table class="compact nosort drn-table">
+      <caption>What the network produces for each cell, from the mixture distribution F of the three seeds</caption>
+      <thead><tr><th scope="col">Output</th><th scope="col">How it is obtained</th><th scope="col">Scored by</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Full rainfall distribution</strong></td><td>F(y): a chance of no rain at zero and a gamma-shaped density above it, in mm (relative units × the cell’s CHIRPS mean)</td><td>CRPS and CRPSS, against the MVS-corrected ensemble</td></tr>
+        <tr><td><strong>Tercile probabilities</strong></td><td>below F(q₁), near F(q₂) − F(q₁), above 1 − F(q₂), at the cell’s CHIRPS training terciles q₁ and q₂</td><td>RPS, RPSS and Brier skill, against the published probabilities; reliability</td></tr>
+        <tr><td><strong>Rainfall amount</strong></td><td>the median F⁻¹(0.5)</td><td>pinball loss</td></tr>
+        <tr><td><strong>10–90% range</strong></td><td>F⁻¹(0.1) to F⁻¹(0.9)</td><td>coverage (80% is calibrated) and width</td></tr>
+        <tr><td><strong>Chance of no rain</strong></td><td>F(0)</td><td>part of the CRPS</td></tr>
+      </tbody>
+    </table></div>
+    <p>{SHADOW.length
+      ? <>Where the method selection lists the DRN as a candidate ({SHADOW.join('; ')}), a <strong>shadow forecast</strong> is made each season next to the
+        published one: the median and 10–90% range, frozen before the season and scored when CHIRPS arrives. It is never published as a forecast.</>
+      : <>The DRN is not a selection candidate for any target, so no shadow forecast is made.</>}</p>
 
     {cycles.length === 0 && <p class="notice">The benchmark has not been run yet.</p>}
     {cycles.map(({ name, d, x, p, u, title }) => (
@@ -240,4 +335,9 @@ const chosen = (d) => {
     ))}
     <p class="caveat">Code: <a href={`${REPO}/blob/main/scripts/neural_calibration.py`}><code>scripts/neural_calibration.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/54_NEURAL_DISTRIBUTIONAL_REGRESSION.md`}>docs/54</a>.</p>
   </OnThisPage>
+<style is:global>
+  .drn-fig{margin:10px 0 4px;overflow-x:auto}
+  .drn-fig svg{display:block;width:100%;min-width:760px;height:auto}
+  .drn-table th[scope=row]{white-space:nowrap;vertical-align:top}
+</style>
 </Base>
