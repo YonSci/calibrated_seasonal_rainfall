@@ -24,6 +24,7 @@ from pathlib import Path
 
 import numpy as np
 
+import accept_results
 import leung_dirichlet as ldc
 import selection_tests as st
 
@@ -183,9 +184,9 @@ def main():
     for cy in CYCLES:
         base = f'outputs/probability_calibration/{cy}'
         p1, p2b, d2, d3 = read(f'{base}/benchmark.json'), read(f'{base}/phase2_binary/benchmark.json'), read(f'{base}/distribution/benchmark.json'), read(f'{base}/phase3/benchmark.json')
-        dn = read(f'{base}/neural/benchmark.json')               # neural network (docs/54): its decision models only
-        dx = read(f'{base}/neural_ext/benchmark.json')           # second stage: SST inputs, neural correction of EMOS
-        dp = read(f'{base}/neural_pooled/benchmark.json')        # one network for the months of the cycle
+        # neural network (docs/54), accepted results only (scripts/accept_results.py): its decision models; the second stage
+        # (SST inputs, neural correction of EMOS); one network for the months of the cycle
+        dn, dx, dp = (accept_results.read_accepted(f, cy) for f in ('neural', 'neural_ext', 'neural_pooled'))
         ld = read(f'outputs/leung_dirichlet/{cy}/benchmark.json')
         mos = read(f'outputs/mos/{cy}/benchmark.json')
         rec = recs.get(cy)

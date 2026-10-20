@@ -24,7 +24,12 @@ const prev = c.targets[i - 1], next = c.targets[i + 1];
 const X = c.comparison ? dataFile(c.comparison) : null;
 const findings = X ? X.summary.length : 0;
 const verified = c.targets.filter((x) => x.verification[view]).length;
-const obsNotice = C.cycles.every((x) => x.obs === 'CHIRPS v3.0');
+// The cycle's own publication record (not a blanket statement): issued before its season, or how the reconstruction was made
+const META = Object.fromEntries(c.meta ?? []);
+const record = String(META['Forecast record'] ?? '').replace(' (SHA-256 manifest)', '').replace('; SHA-256 manifest)', ')').trim();
+const issued = Boolean(c.publication?.issued);
+const recalibratedV3 = c.obs === 'CHIRPS v3.0' && c.init_date < '2026-10-11';    // calibrated with CHIRPS v2.0 at first, redone with v3.0
+const MEMBERS = Number((String(META['Model initialization'] ?? '').match(/(\d+) members/) ?? [])[1]) || null;
 const SEL = selectionFor(c);
 const selT = SEL?.targets[target];
 const plain = summaryFor(cid, view, target, t.label);
@@ -95,12 +100,16 @@ const snippet = (src) => `<iframe src="${src}" title="Seasonal rainfall outlook,
           <p class="caveat"><a href={href(`research/method-selection/#${SEL.name}`)}>Method selection and evidence →</a></p>
         </div>
       )}
-      {obsNotice && <p class="notice small"><strong>Retrospective reconstruction.</strong> Calibrated and verified with CHIRPS v3.0 since 11 October 2026; the 2026 forecasts were recalibrated after their outcomes were known. The CHIRPS v2.0 versions are in the release archive (release 2026-10-10.2).</p>}
+      {issued
+        ? <p class="notice small"><strong>Issued before its season.</strong> {c.publication.long ?? ''} {record}</p>
+        : <p class="notice small"><strong>{(c.publication?.kind ?? 'research reconstruction').replace(/^./, (x) => x.toUpperCase())}.</strong> {record ? record.replace(/\.?$/, '.') : ''}
+          {recalibratedV3 && <> Calibrated and verified with CHIRPS v3.0 since 11 October 2026; the CHIRPS v2.0 versions are in the release archive (release 2026-10-10.2).</>}
+          {' '}Its verification is retrospective evidence; prospective evidence comes from forecasts issued before their season (from 2027).</p>}
       <details class="panel-details" open><summary>Cycle status and record</summary><div id="ol-meta" set:html={O['ol-meta']} /></details>
     </aside>
   </div>
 
-  <script type="application/json" id="mp-data" set:html={JSON.stringify(M).replace(/</g, '\\u003c')} />
+  <script type="application/json" id="mp-data" set:html={JSON.stringify({ ...M, members: MEMBERS }).replace(/</g, '\\u003c')} />
   <script>
     // Map viewer: forecast or verification maps of this target and area (the current page's viewer, without the cycle state).
     const M = JSON.parse(document.getElementById('mp-data').textContent);
@@ -146,7 +155,7 @@ const snippet = (src) => `<iframe src="${src}" title="Seasonal rainfall outlook,
       $('mp-download').textContent = cmp ? 'Download comparison figure' : 'Download PNG';
       $('mp-download').setAttribute('download', M.file + '_' + (M.slugs[S.product] || S.product) + (shown !== S.product ? '_grid-cells' : '') + '.png');
       $('mp-help').innerHTML = (M.help[S.product] || '') + (hasCells ? (S.style === 'cells'
-        ? '<p><strong>Grid cells</strong>: every cell is drawn exactly as computed, without interpolation or smoothing. The 4 × 4-cell blocks come from the 1° model grid, and neighbouring cells can flip category because probabilities come from counting 51 members.</p>'
+        ? '<p><strong>Grid cells</strong>: every cell is drawn exactly as computed, without interpolation or smoothing. The 4 × 4-cell blocks come from the 1° model grid, and neighbouring cells can flip category because probabilities come from counting ' + (M.members ? M.members + ' ' : '') + 'members.</p>'
         : '<p><strong>Smoothed</strong> (display only): values are smoothed over about 0.4° and interpolated, which softens the 1° model grid. Switch to Grid cells to see the values exactly as computed.</p>') : '') +
         '<p class="caveat">Reference period: CHIRPS ' + M.reference + '.</p>';
       if (location.search || S.kind !== 'forecast' || S.product !== 'tercile_outlook' || S.style !== 'smooth')

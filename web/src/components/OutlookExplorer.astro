@@ -19,6 +19,7 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     <datalist id="ex-areas"></datalist>
     <label class="check"><input type="checkbox" id="ex-cb" /> Colour-blind friendly colours</label>
   </div>
+  <p id="ex-find" class="caveat ex-find" role="status" aria-live="polite" hidden></p>
   <div class="seg ex-layers" role="group" aria-label="Map layer" id="ex-layer">
     <button type="button" data-layer="tercile" aria-pressed="true">Most likely outcome</button>
     <button type="button" data-layer="above" aria-pressed="false">Chance of above normal</button>
@@ -210,6 +211,7 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     dl.innerHTML = A.areas.map((a: any) => `<option value="${esc(a.name)}${a.level > 1 ? ' — ' + esc(a.level === 3 ? a.zone + ', ' + a.region : a.region) : ''}">${esc(A.levels[String(a.level)])}</option>`).join('');
     $('ex-status').textContent = '';
     draw();
+    if (L !== 'en') $('ex-panel').setAttribute('lang', L);         // the area panel is in the chosen language
     if (L !== 'en') {                                               // the hero summary translates itself (OutlookHero)
       $('ex-panel').querySelector('h3')!.textContent = t(L, 'yourArea');
       ($('ex-panel').querySelector('.caveat') as HTMLElement).textContent = t(L, 'clickHint');
@@ -228,7 +230,7 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
       draw(); return;
     }
     const up = el.closest('[data-area]') as HTMLElement | null;
-    if (up) { const a = A.areas.find((x: any) => x.id === up.dataset.area); if (a) select(a); return; }
+    if (up) { const a = A.areas.find((x: any) => x.id === up.dataset.area); if (a) { $('ex-find').hidden = true; select(a); } return; }
     if (el.id === 'ex-csv') { csv(); return; }
     if (el.id === 'ex-share') { navigator.clipboard?.writeText(location.href); el.textContent = t(L, 'copied'); return; }
   });
@@ -285,9 +287,19 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     if (!A || !v) return;
     const name = v.split(' — ')[0];
     const rest = v.includes(' — ') ? v.split(' — ')[1] : '';
-    const hit = A.areas.find((a: any) => a.name.toLowerCase() === name && (!rest || rest.includes((a.region ?? '').toLowerCase())))
-      ?? A.areas.find((a: any) => a.name.toLowerCase().startsWith(name));
-    if (hit) select(hit);
+    const ctx = (a: any) => (a.level === 3 ? `${a.zone}, ${a.region}` : a.level === 2 ? a.region : '').toLowerCase();
+    const msg = $('ex-find');
+    msg.hidden = true;
+    // an exact name (narrowed by the context of the datalist entry), else one area starting with the text, else a choice
+    let hits = A.areas.filter((a: any) => a.name.toLowerCase() === name && (!rest || ctx(a) === rest || rest.includes((a.region ?? '').toLowerCase())));
+    if (!hits.length) hits = A.areas.filter((a: any) => a.name.toLowerCase().startsWith(name));
+    if (!hits.length) hits = A.areas.filter((a: any) => a.name.toLowerCase().includes(name));
+    if (hits.length === 1) { select(hits[0]); return; }
+    msg.innerHTML = !hits.length
+      ? `No region, zone or woreda matches “${esc(v)}”. Check the spelling, or try a shorter part of the name.`
+      : `${hits.length} places match “${esc(v)}”${hits.length > 12 ? ' (the first 12)' : ''}: ` + hits.slice(0, 12).map((a: any) =>
+        `<button type="button" class="linkbtn" data-area="${a.id}">${esc(a.name)}${ctx(a) ? ' — ' + esc(a.level === 3 ? a.zone + ', ' + a.region : a.region) : ''} (${esc(A.levels[String(a.level)]).toLowerCase()})</button>`).join(' · ');
+    msg.hidden = false;
   });
   window.addEventListener('resize', () => { if (G) draw(); });
   start();

@@ -27,6 +27,7 @@ from pathlib import Path
 
 import numpy as np
 
+import accept_results
 import leung_dirichlet as ldc
 import selection_tests as st
 from significance import paired_summary, sign_flip_p, holm
@@ -158,7 +159,8 @@ def probability(store):
         for rel, family in (('distribution/benchmark.json', 'Distribution model (Phase 2)'), ('phase3/benchmark.json', 'Distribution model (Phase 3)'),
                             ('neural/benchmark.json', 'Neural network (DRN)'),           # neural: its decision models only (docs/54)
                             ('neural_ext/benchmark.json', 'Neural network (DRN)'), ('neural_pooled/benchmark.json', 'Neural network (DRN)')):
-            d = read(f'{base}/{rel}')
+            fam = rel.split('/')[0]
+            d = accept_results.read_accepted(fam, cy) if fam in accept_results.GATED else read(f'{base}/{rel}')   # neural: accepted only
             if not d:
                 continue
             dec = {sc: decisions(d['tests'], sc) for sc in PRODUCTS.values()}

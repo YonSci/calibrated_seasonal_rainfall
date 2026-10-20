@@ -40,7 +40,7 @@ const confirmedList = (d, rule) => ['rps', 'crps'].flatMap((sc) => {
   const bh = bhDecisions(d, sc);
   return (d.decision_models ?? []).flatMap((k) => Object.entries(d.tests[k]?.[sc] ?? {})
     .filter(([t, x]) => (rule === 'bh' ? bh[`${k}|${t}`]?.confirmed : x.decision.confirmed))
-    .map(([t]) => `${t} (${sc === 'rps' ? 'probabilities' : 'amounts'})`));
+    .map(([t]) => ((d.decision_models ?? []).length > 1 ? `${SHORT[k] ?? k}: ` : '') + `${t} (${sc === 'rps' ? 'probabilities' : 'amounts'})`));
 });
 
 function skillTable(d, score, cand = 'drn_csg') {
@@ -161,6 +161,21 @@ const CHOSEN = cycles.flatMap(({ name, d }) => Object.entries(d.targets).map(([t
   return f && { cycle: CYCLE_NAME[name] ?? name, target: t, hidden: f.hidden.join(' + '), decay: decayText(f.decay),
     steps: (f.steps ?? []).join(', '), options: Object.entries(f.validation_crps ?? {}).map(([k, v]) => `${optionText(k)}: ${v.toFixed(4)}`).join(' · ') };
 }).filter(Boolean));
+// The experiment shown: the accepted result of each cycle (config/accepted_results.json), what it searched, and pending runs
+let ACC = { accepted: {}, status: [] };
+try { ACC = read('accepted.json'); } catch { /* older build: no registry */ }
+const shown = cycles.map(({ name, d }) => ({ name, a: d.accepted ?? ACC.accepted[`neural/${name}`] ?? null }));
+const EXP = [...new Set(shown.map((s) => s.a?.experiment).filter(Boolean))];
+const SEARCHED = [...new Set(shown.flatMap((s) => s.a?.searched?.drn_csg ?? []))].map((k) => k.split('|'));
+const UNITS = [...new Set(SEARCHED.map(([h]) => JSON.parse(h).join('–')))], DECAYS = [...new Set(SEARCHED.map(([, v]) => decayText(v)))];
+const SEARCH_TEXT = SEARCHED.length
+  ? `Architecture (${UNITS.join(' or ')} units)` + (DECAYS.length > 1 ? ` × weight decay (${DECAYS.join(' or ')})` : `, weight decay ${DECAYS[0]}`) + ' chosen by held-out CRPS'
+  : undefined;
+const created = shown.map((s) => s.a?.created_utc).filter(Boolean).sort();
+const commits = [...new Set(shown.map((s) => s.a?.commit).filter(Boolean))];
+const PENDING = (ACC.status ?? []).filter((r) => r.family === 'neural' && r.pending);
+const NOT_RUN = ['neural_ext', 'neural_pooled', 'neural_tuning'].filter((f) => !(ACC.status ?? []).some((r) => r.family === f && (r.accepted || r.pending)));
+const FAMILY = { neural_ext: 'second stage (SST and regions, neural correction of EMOS)', neural_pooled: 'pooled network', neural_tuning: 'separate tuning split' };
 const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.product === 'amounts' ? 'amounts' : 'probabilities'}`);
 ---
 <Base title="Neural network (DRN)" section="research" description="A distributional regression network (neural EMOS with a censored shifted gamma) tested against the published pipeline and EMOS.">
@@ -187,7 +202,7 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
     <p class="caveat">Only the DRN is tested for adoption (5 targets per cycle and score). EMOS, the control and the ablation are diagnostic comparisons and do not enter the multiple-testing adjustment.</p>
 
     <h2 id="model">The model at a glance</h2>
-    <figure class="drn-fig" set:html={drnDiagram()} />
+    <figure class="drn-fig" set:html={drnDiagram(undefined, { search: SEARCH_TEXT })} />
     <p class="caveat">The same network is shared by every grid cell of a target and fitted again inside every fold. Code:
     <a href={`${REPO}/blob/main/scripts/neural_calibration.py`}><code>scripts/neural_calibration.py</code></a>; full description in
     <a href={`${REPO}/blob/main/docs/54_NEURAL_DISTRIBUTIONAL_REGRESSION.md`}>docs/54</a>.</p>
@@ -229,8 +244,9 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
       <li><strong>Optimizer and stopping:</strong> Adam (learning rate 0.003, full batch, at most 2,000 steps). Every 10 steps the CRPS of
         the held-out years (about 20% of the training years) is checked; training stops after 15 checks without improvement and keeps the best
         network.</li>
-      <li><strong>Choice inside each fold:</strong> the architecture and the weight decay (10⁻⁴ or 10⁻³) with the lowest held-out CRPS,
-        averaged over three seeds that each hold out different years; the forecast is the equal mixture of the three seeds.</li>
+      <li><strong>Choice inside each fold:</strong> {SEARCHED.length ? <>of the options evaluated in the results shown ({UNITS.join(' or ')} units;
+        weight decay {DECAYS.join(' or ')}),</> : 'the architecture and weight decay'} the one with the lowest held-out CRPS, averaged over three seeds
+        that each hold out different years; the forecast is the equal mixture of the three seeds.</li>
       <li><strong>Evaluation:</strong> outer leave-one-year-out over the training years, then the test years; one-sided paired sign-flip test
         over whole years, Benjamini–Hochberg across the targets of a cycle.</li>
     </ol>
@@ -263,9 +279,33 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
         published one: the median and 10–90% range, frozen before the season and scored when CHIRPS arrives. It is never published as a forecast.</>
       : <>The DRN is not a selection candidate for any target, so no shadow forecast is made.</>}</p>
 
+    <h2 id="experiment">Which experiment these results come from</h2>
+    <div class="table-wrap"><table class="compact nosort drn-table exp-panel">
+      <tbody>
+        <tr><th scope="row">Displayed experiment</th><td>{EXP.length ? EXP.map((e) => <code>{e}</code>) : 'none accepted'}{shown[0]?.a?.note ? ` — ${shown[0].a.note}` : ''}</td></tr>
+        <tr><th scope="row">Completed</th><td>{created.length ? `${created[0].slice(0, 16).replace('T', ' ')} to ${created.at(-1).slice(11, 16)} UTC` : '—'}{shown[0]?.a?.accepted_utc ? `; accepted for publication ${shown[0].a.accepted_utc.slice(0, 10)}` : ''}</td></tr>
+        <tr><th scope="row">Result source</th><td>{commits.map((c) => <a href={`${REPO}/tree/${c}`}><code>{c.slice(0, 7)}</code></a>)} (the code that produced the results, not the website build) ·
+          configuration <code>{shown[0]?.a?.config ?? '—'}</code></td></tr>
+        <tr><th scope="row">Data policy</th><td>CHIRPS v3.0 observations; training {years(TRAIN)}, test {years(TEST)}; the first {shown[0]?.a?.members ?? 25} SEAS5 members every year</td></tr>
+        <tr><th scope="row">Search evaluated</th><td>{SEARCHED.length ? SEARCHED.map(([h, v]) => `${JSON.parse(h).join(' + ')} units, decay ${decayText(v)}`).join(' · ') : '—'}</td></tr>
+        <tr><th scope="row">Scientific status</th><td>Research comparison; the published forecasts do not use it.{SHADOW.length ? ` Selection candidate for ${SHADOW.join('; ')}: needs three independent validation seasons before it can be recommended.` : ' Not a selection candidate.'}</td></tr>
+        <tr><th scope="row">Pending</th><td>{PENDING.length || NOT_RUN.length ? <>
+          {PENDING.length > 0 && <>Newer runs not yet published ({PENDING.map((r) => `${CYCLE_NAME[r.cycle]} ${r.pending.created_utc.slice(0, 10)}`).join(', ')}); they are published together once all four cycles are complete. </>}
+          {NOT_RUN.length > 0 && <>Not yet run: {NOT_RUN.map((f) => FAMILY[f]).join(', ')}.</>}</> : 'nothing'}</td></tr>
+      </tbody>
+    </table></div>
+    <p class="caveat">Results are published only after a whole batch passes the completeness checks (five targets per cycle, years, members,
+    models, clean-commit provenance; <code>scripts/accept_results.py</code>), so the page never mixes experiments.</p>
+
+    {cycles.length > 1 && (
+      <div class="seg cycle-pick" role="group" aria-label="Show results for">
+        <button type="button" data-cyc="all" aria-pressed="true">All cycles</button>
+        {cycles.map(({ name }) => <button type="button" data-cyc={name} aria-pressed="false">{CYCLE_NAME[name] ?? name}</button>)}
+      </div>
+    )}
     {cycles.length === 0 && <p class="notice">The benchmark has not been run yet.</p>}
     {cycles.map(({ name, d, x, p, u, title }) => (
-      <section id={name}>
+      <section id={name} class="cyc-sec">
         <h2>{title}</h2>
         <p><strong>DRN confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(d, 'bh').join('; ') || 'none'}.
         In the benchmark as run (Holm): {confirmedList(d, 'holm').join('; ') || 'none'}. Architecture chosen (fit on all training years): {chosen(d)}.</p>
@@ -335,7 +375,27 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
     ))}
     <p class="caveat">Code: <a href={`${REPO}/blob/main/scripts/neural_calibration.py`}><code>scripts/neural_calibration.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/54_NEURAL_DISTRIBUTIONAL_REGRESSION.md`}>docs/54</a>.</p>
   </OnThisPage>
+<script>
+  // Cycle selector: one cycle's results at a time (or all); the choice is kept in the address (#cycle)
+  const pick = document.querySelector('.cycle-pick');
+  if (pick) {
+    const show = (c: string) => {
+      document.querySelectorAll<HTMLElement>('.cyc-sec').forEach((s) => { s.hidden = c !== 'all' && s.id !== c; });
+      pick.querySelectorAll<HTMLElement>('[data-cyc]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cyc === c)));
+    };
+    pick.addEventListener('click', (ev) => {
+      const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-cyc]');
+      if (!b) return;
+      show(b.dataset.cyc!);
+      history.replaceState(null, '', b.dataset.cyc === 'all' ? location.pathname + location.search : '#' + b.dataset.cyc);
+    });
+    const h = location.hash.slice(1);
+    if (h && document.getElementById(h)?.classList.contains('cyc-sec')) show(h);
+  }
+</script>
 <style is:global>
+  .cycle-pick{flex-wrap:wrap;margin:10px 0 4px;position:sticky;top:120px;z-index:5;background:var(--bg);padding:4px 0}
+  .exp-panel td code{margin-right:6px}
   .drn-fig{margin:10px 0 4px;overflow-x:auto}
   .drn-fig svg{display:block;width:100%;min-width:760px;height:auto}
   .drn-table th[scope=row]{white-space:nowrap;vertical-align:top}

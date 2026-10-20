@@ -37,6 +37,8 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
         <datalist id="fa-list">{AREAS.map(([, n]) => <option value={n} />)}</datalist>
         <button type="submit" class="button-link">Show the outlook</button>
       </form>
+      <p id="fa-msg" class="caveat" role="status" aria-live="polite"></p>
+      <ul id="fa-choices" class="fa-choices" hidden></ul>
       <script type="application/json" id="fa-areas" set:html={JSON.stringify(AREAS).replace(/</g, '\\u003c')} />
     </section>
   )}
@@ -111,8 +113,23 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
       form.addEventListener('submit', (ev) => {
         ev.preventDefault();
         const v = (document.getElementById('fa-input') as HTMLInputElement).value.trim().toLowerCase();
-        const hit = list.find(([, n]) => n.toLowerCase() === v) ?? list.find(([, n]) => n.toLowerCase().startsWith(v));
-        if (hit) location.href = (form as HTMLElement).dataset.target + '?area=' + encodeURIComponent(hit[0]) + '#explore';
+        const msg = document.getElementById('fa-msg')!, box = document.getElementById('fa-choices')!;
+        const go = (id: string) => { location.href = (form as HTMLElement).dataset.target + '?area=' + encodeURIComponent(id) + '#explore'; };
+        box.hidden = true; box.innerHTML = '';
+        if (!v) { msg.textContent = 'Type the name of a region, zone or woreda first.'; return; }
+        const exact = list.filter(([, n]) => n.toLowerCase() === v || n.toLowerCase().split(' — ')[0] === v);
+        if (exact.length === 1) { go(exact[0][0]); return; }
+        const hits = exact.length ? exact : list.filter(([, n]) => n.toLowerCase().startsWith(v));
+        const loose = hits.length ? hits : list.filter(([, n]) => n.toLowerCase().includes(v));
+        if (loose.length === 1) { go(loose[0][0]); return; }
+        if (!loose.length) { msg.textContent = `No region, zone or woreda matches “${v}”. Check the spelling, or try a shorter part of the name.`; return; }
+        msg.textContent = `${loose.length} places match “${v}”${loose.length > 12 ? '; the first 12' : ''}. Choose one:`;
+        loose.slice(0, 12).forEach(([id, n]) => {
+          const li = document.createElement('li'), b = document.createElement('button');
+          b.type = 'button'; b.className = 'linkbtn'; b.textContent = n; b.addEventListener('click', () => go(id));
+          li.append(b); box.append(li);
+        });
+        box.hidden = false;
       });
     }
   </script>
@@ -120,6 +137,9 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
     .find-area form{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .find-area input{font:inherit;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);flex:1 1 320px}
     .find-area button{border:none;cursor:pointer;font:inherit}
+    .fa-choices{list-style:none;padding:0;margin:4px 0 0;columns:2 260px;font-size:.92rem}
+    .fa-choices li{margin:2px 0;break-inside:avoid}
+    .find-area .fa-choices button.linkbtn{background:none;padding:0;text-align:left}
     .paths{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
     .paths .path{display:block;text-decoration:none;color:var(--ink);padding:18px 20px}
     .paths .path strong{display:block;font-size:1.3rem;color:var(--accent);margin-bottom:4px}

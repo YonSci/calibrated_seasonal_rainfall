@@ -32,7 +32,7 @@ const dates = !cycle ? [] : [
         <div class="plain-head">
           <h2 class="plain-title" id="plain-title">In plain words</h2>
           <div class="seg lang-switch" role="group" aria-label="Language">
-            {Object.entries(LANGS).filter(([k]) => PUBLISHED[k]).map(([k, l]) => <button type="button" data-lang={k} aria-pressed={k === 'en' ? 'true' : 'false'}>{l.replace(' (Amharic)', '')}</button>)}
+            {Object.entries(LANGS).filter(([k]) => PUBLISHED[k]).map(([k, l]) => <button type="button" data-lang={k} lang={k} aria-pressed={k === 'en' ? 'true' : 'false'}>{l.replace(' (Amharic)', '')}</button>)}
           </div>
         </div>
         <p class="caveat plain-draft" id="plain-draft" hidden></p>
@@ -79,6 +79,7 @@ const dates = !cycle ? [] : [
         const r = P.regional(G, D, A, G.views[box.dataset.view!] ?? G.views.all_ethiopia, box.dataset.label, L);
         document.getElementById('plain-text')!.textContent = r.text;
         document.getElementById('plain-title')!.textContent = t(L, 'inPlainWords');
+        ['plain-text', 'plain-title', 'plain-tenths'].forEach((id) => document.getElementById(id)?.setAttribute('lang', L));   // translated passages
         const el = document.getElementById('plain-tenths');
         if (el && r.all.p) {
           const n = P.tenths(r.all.p), tr = P.track(r.all.rpss, L);

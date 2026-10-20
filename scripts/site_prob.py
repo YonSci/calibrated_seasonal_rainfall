@@ -129,10 +129,14 @@ def export(out_dir):
 
 def export_neural(out_dir):
     """Neural distributional regression (docs/54): figures to assets/, results to downloads/."""
+    import accept_results                                          # only accepted results (config/accepted_results.json)
     for sub in ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning'):   # the DRN, its second stage, pooled, tuning
-        for folder in sorted((ROOT / 'outputs/probability_calibration').glob(f'*/{sub}/benchmark.json')):
-            name, src = folder.parent.parent.name, folder.parent
-            for f in sorted((src / 'figures').glob('*.png')):
+        for name in accept_results.CYCLES:
+            got = accept_results.resolve(sub, name)
+            if not got:
+                continue
+            folder, figs = got
+            for f in sorted(figs.glob('*.png')):
                 d = out_dir / f'assets/{sub}' / name / f.name
                 d.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(f, d)

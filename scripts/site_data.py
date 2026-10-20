@@ -145,11 +145,16 @@ def mos_files(site):
 def neural_files(site, sub='neural'):
     """Neural distributional regression (DRN) against the published pipeline and EMOS (scripts/neural_calibration.py, docs/54)."""
     import site_files
+    import accept_results                                         # only accepted results (config/accepted_results.json)
     by_hash = {v['sha256']: v['url'] for v in site_files.load_manifest()['assets'].values()}
     out = {}
-    for f in sorted((ROOT / 'outputs/probability_calibration').glob(f'*/{sub}/benchmark.json')):
-        name = f.parent.parent.name
+    for name in accept_results.CYCLES:
+        got = accept_results.resolve(sub, name)
+        if not got:
+            continue
+        f = got[0]
         d = read(f)
+        d['accepted'] = accept_results.load()['accepted'].get(f'{sub}/{name}')
         d.pop('protocol', None)
         for t in d.get('targets', {}).values():                   # network weights: in the download, not the page data
             t['fitted'] = {k: {kk: v.get(kk) for kk in ('hidden', 'decay', 'steps', 'validation_crps')}
@@ -226,4 +231,6 @@ def export(site, page_data, built, sha, release_id, releases, sections):
     for sub in ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning'):
         for name, obj in neural_files(site, sub).items():
             sizes[f'{sub}/{name}.json'] = write(OUT / sub / f'{name}.json', obj)
+    import accept_results                                          # accepted and pending experiments (the neural page's panel)
+    sizes['accepted.json'] = write(OUT / 'accepted.json', dict(accepted=accept_results.load()['accepted'], status=accept_results.status()))
     return sizes

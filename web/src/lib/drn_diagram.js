@@ -12,7 +12,8 @@ export const HEX = {
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-export function drnDiagram(colours = CSS, { font = 'Inter, Calibri, Arial, sans-serif', title = true, background = null } = {}) {
+export function drnDiagram(colours = CSS, { font = 'Inter, Calibri, Arial, sans-serif', title = true, background = null,
+  search = 'Architecture (32 or 32–16 units) × weight decay (10⁻⁴ or 10⁻³) chosen by held-out CRPS' } = {}) {
   const C = { ...CSS, ...colours };
   const W = 1000, H = 548;
   let g = '';
@@ -127,7 +128,7 @@ export function drnDiagram(colours = CSS, { font = 'Inter, Calibri, Arial, sans-
   text(24, 477, 'Training, inside every outer fold (nothing from the scored year):', { size: 12.5, weight: 700, fill: C.accent });
   text(24, 497, 'Loss: closed-form CRPS of the censored shifted gamma (Scheuerer & Hamill 2015), area-weighted, equal weight per year, + weight decay.', { size: 11.5 });
   text(24, 514, 'Adam (learning rate 0.003, up to 2,000 full-batch steps); stop when the held-out years’ CRPS stops improving (20% of the years, per seed).', { size: 11.5 });
-  text(24, 530, 'Architecture (32 or 32–16 units) × weight decay (10⁻⁴ or 10⁻³) chosen by held-out CRPS; trained on every second cell, forecasts for every cell.', { size: 11.5 });
+  text(24, 530, `${search}; trained on every second cell, forecasts for every cell.`, { size: 11.5 });
 
   // arrows between columns
   line(242, 220, 256, 220, { arrow: true });

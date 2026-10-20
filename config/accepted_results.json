@@ -1,0 +1,211 @@
+{
+ "description": "Accepted benchmark results published by the site (scripts/accept_results.py).",
+ "gated": [
+  "neural",
+  "neural_ext",
+  "neural_pooled",
+  "neural_tuning"
+ ],
+ "accepted": {
+  "neural/jan_fmam": {
+   "experiment": "drn-stage1-v1",
+   "sha256": "3708b0469644edd693dc493e21a3fa79b3e1df46236c7f3e7728cd38570ff2bc",
+   "archive": "outputs/accepted/neural/jan_fmam/3708b0469644edd6",
+   "accepted_utc": "2026-10-20T15:42:09Z",
+   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-20T01:59:21.000315+00:00",
+   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/jan_fmam_neural.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "drn_csg",
+    "drn_linear_csg",
+    "drn_climatology"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ],
+    "drn_linear_csg": [
+     "[]|0.0"
+    ],
+    "drn_climatology": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ]
+   }
+  },
+  "neural/feb_fmam": {
+   "experiment": "drn-stage1-v1",
+   "sha256": "8969e097f15a49ba4662aa29913f9411a001fb6a36742ad703b7e929a0474ebc",
+   "archive": "outputs/accepted/neural/feb_fmam/8969e097f15a49ba",
+   "accepted_utc": "2026-10-20T15:42:09Z",
+   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-20T01:59:25.664380+00:00",
+   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/feb_fmam_neural.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "drn_csg",
+    "drn_linear_csg",
+    "drn_climatology"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ],
+    "drn_linear_csg": [
+     "[]|0.0"
+    ],
+    "drn_climatology": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ]
+   }
+  },
+  "neural/may_jjas": {
+   "experiment": "drn-stage1-v1",
+   "sha256": "63a15f4cab256d67d53a58e3bd80a9e255d4d7195f7d5b876f963f1ef7803f1b",
+   "archive": "outputs/accepted/neural/may_jjas/63a15f4cab256d67",
+   "accepted_utc": "2026-10-20T15:42:09Z",
+   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-20T01:59:30.189431+00:00",
+   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_neural.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "drn_csg",
+    "drn_linear_csg",
+    "drn_climatology"
+   ],
+   "targets": [
+    "Aug",
+    "JJAS",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ],
+    "drn_linear_csg": [
+     "[]|0.0"
+    ],
+    "drn_climatology": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ]
+   }
+  },
+  "neural/sep_ondj": {
+   "experiment": "drn-stage1-v1",
+   "sha256": "ff49d86fa344f730ab45704f306c28668b741619adeaa5fa1272ab7c67ff6918",
+   "archive": "outputs/accepted/neural/sep_ondj/ff49d86fa344f730",
+   "accepted_utc": "2026-10-20T15:42:09Z",
+   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-20T01:59:34.615325+00:00",
+   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/sep_ondj_neural.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "drn_csg",
+    "drn_linear_csg",
+    "drn_climatology"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "ONDJ",
+    "Oct"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ],
+    "drn_linear_csg": [
+     "[]|0.0"
+    ],
+    "drn_climatology": [
+     "[32, 16]|0.0001",
+     "[32]|0.0001"
+    ]
+   }
+  }
+ }
+}
