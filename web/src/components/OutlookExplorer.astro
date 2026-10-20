@@ -1,0 +1,325 @@
+---
+// Interactive outlook map and area search: every 0.25-degree cell of the forecast, hover for its values, click or search a
+// region, zone or woreda for a plain-language summary (lib/plain.js). Data: site/data/cells/<cycle>/ and site/data/areas.json
+// (scripts/site_cells.py), fetched in the browser; without JavaScript the static maps below remain.
+import { asset } from '../lib/data.js';
+const { cycle, view, target, label, viewLabel, reference } = Astro.props;
+---
+<section id="explore" class="explore"
+         data-grid={asset(`data/cells/${cycle}/grid.json`)} data-cells={asset(`data/cells/${cycle}/${target}.json`)}
+         data-areas={asset('data/areas.json')} data-view={view} data-label={label} data-view-label={viewLabel} data-reference={reference}>
+  <h2>Explore the map</h2>
+  <p class="caveat">Hover over the map for the values of each grid cell, click a place or search for a region, zone or woreda for its outlook in
+  words. Zoom with the + and − buttons (or Ctrl + wheel), drag to move when zoomed in.</p>
+  <div class="ex-controls">
+    <label class="ex-search">Find a place
+      <input id="ex-search" list="ex-areas" type="search" placeholder="Region, zone or woreda (e.g. Borena)" autocomplete="off" />
+    </label>
+    <datalist id="ex-areas"></datalist>
+    <label class="check"><input type="checkbox" id="ex-cb" /> Colour-blind friendly colours</label>
+  </div>
+  <div class="seg ex-layers" role="group" aria-label="Map layer" id="ex-layer">
+    <button type="button" data-layer="tercile" aria-pressed="true">Most likely outcome</button>
+    <button type="button" data-layer="above" aria-pressed="false">Chance of above normal</button>
+    <button type="button" data-layer="below" aria-pressed="false">Chance of below normal</button>
+    <button type="button" data-layer="mean" aria-pressed="false">Expected rainfall</button>
+    <button type="button" data-layer="anomaly" aria-pressed="false">Difference from normal</button>
+    <button type="button" data-layer="skill" aria-pressed="false">Track record</button>
+  </div>
+  <div class="ex-body">
+    <div class="ex-mapwrap">
+      <canvas id="ex-map" role="img" aria-label={`Interactive map of the ${label} outlook`}></canvas>
+      <div class="ex-zoom"><button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="reset" aria-label="Reset the view">⟲</button></div>
+      <div id="ex-tip" class="ex-tip" hidden></div>
+      <div id="ex-legend" class="ex-legend"></div>
+      <p id="ex-status" class="caveat" role="status">Loading the map…</p>
+    </div>
+    <aside id="ex-panel" class="box ex-panel" aria-live="polite">
+      <h3>Your area</h3>
+      <p class="caveat">Click the map or search for a place to see its outlook in words.</p>
+    </aside>
+  </div>
+  <noscript><p class="notice">The interactive map needs JavaScript; the maps below show the same forecast.</p></noscript>
+  <p class="caveat ex-source">Grid: 0.25° (about 28 km); the model's own resolution is about 1°. Boundaries: OCHA Common Operational Datasets (COD-AB,
+  2025), CC BY-IGO; shown for orientation only. Areas are matched to the grid cells whose centres fall inside them; a woreda smaller than a cell takes the
+  cell at its centre.</p>
+</section>
+
+<script>
+  import * as P from '../lib/plain.js';
+
+  const root = document.getElementById('explore') as HTMLElement;
+  const ASKED = new URLSearchParams(location.search).get('area');      // read at once: other scripts may rewrite the query
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
+  const pc = (x: number) => `${Math.round(100 * x)}%`;
+  const mm = (x: number) => `${Math.round(x)} mm`;
+
+  // The tercile ramps of the published maps (scripts/plot_forecast_products.py), and colour-blind friendly ones (BrBG family)
+  const RAMPS: Record<string, string[][]> = {
+    standard: [['#fff3a1', '#ffe100', '#ffbd00', '#ff9400', '#ff7100', '#ff4300', '#ef0000'],
+               ['#e3ffff', '#b4ffff', '#80ffff', '#49f5f5', '#1adede', '#00bebe', '#009595'],
+               ['#c1ffc1', '#83f76b', '#50d425', '#30ab00', '#218500', '#106000', '#004000']],
+    cb: [['#f6e8c3', '#ecd29b', '#dfc27d', '#c8963f', '#bf812d', '#8c510a', '#543005'],
+         ['#f0f0f0', '#e0e0e0', '#cccccc', '#b5b5b5', '#9e9e9e', '#868686', '#6e6e6e'],
+         ['#d8f0ec', '#c7eae5', '#80cdc1', '#5ab4ac', '#35978f', '#01665e', '#003c30']],
+  };
+  const BOUNDS = [100 / 3, 40, 50, 60, 70, 80, 90, 100];
+  const SEQ = { standard: ['#ffffcc', '#d9f0a3', '#addd8e', '#78c679', '#41ab5d', '#238443', '#005a32'],
+                cb: ['#f7fbff', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594'] };
+  const RAIN = ['#ffffd9', '#edf8b1', '#c7e9b4', '#7fcdbb', '#41b6c4', '#1d91c0', '#225ea8', '#0c2c84'];
+  const DIV = ['#8c510a', '#bf812d', '#dfc27d', '#f6e8c3', '#f5f5f5', '#c7eae5', '#80cdc1', '#35978f', '#01665e'];
+  const SKILL = ['#b2182b', '#ef8a62', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de', '#4393c3', '#2166ac'];
+  const DRY = '#e6dcc6', OUT = '#e9ecef', NONE = '#ffffff', LINE = '#35414b';
+
+  const S: any = { layer: 'tercile', palette: 'standard', scale: 1, ox: 0, oy: 0, sel: null, hover: -1 };
+  let G: any, D: any, A: any, byCell: Map<number, any>, inView: Set<number>, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D;
+
+  function bin(v: number, edges: number[]) { let k = 0; while (k < edges.length - 2 && v >= edges[k + 1]) k++; return k; }
+  function color(i: number): string {
+    if (!inView.has(i)) return OUT;
+    const pb = D.pb[i], pn = D.pn[i], pa = D.pa[i];
+    if (S.layer === 'tercile' || S.layer === 'above' || S.layer === 'below') {
+      if (pb == null) return DRY;
+      if (S.layer !== 'tercile') {
+        const v = 100 * (S.layer === 'above' ? pa : pb);
+        const ramp = S.layer === 'above' ? (S.palette === 'cb' ? RAMPS.cb[2] : SEQ.standard) : RAMPS[S.palette][0];
+        return ramp[Math.min(ramp.length - 1, Math.max(0, Math.floor((v - 10) / 10)))];
+      }
+      const p = [pb, pn, pa], k = p.indexOf(Math.max(...p));
+      if (100 * p[k] < 40 || p.filter((x) => x === p[k]).length > 1) return NONE;
+      return RAMPS[S.palette][k][bin(100 * p[k], BOUNDS)];
+    }
+    if (S.layer === 'mean') {
+      const v = D.mean[i]; if (v == null) return DRY;
+      return RAIN[bin(v, S.rainEdges)];
+    }
+    if (S.layer === 'anomaly') {
+      const v = D.mean[i], n = D.normal[i]; if (v == null || !(n > 0)) return DRY;
+      return DIV[bin(100 * (v / n - 1), [-1e9, -60, -40, -20, -5, 5, 20, 40, 60, 1e9])];
+    }
+    const rb = D.rb_tr?.[i], rc = D.rc_tr?.[i]; if (rb == null || !(rc > 0)) return DRY;
+    const r = 1 - (D.n_tr * rb / rc + (D.rb_op?.[i] != null && D.rc_op[i] > 0 ? D.n_op * D.rb_op[i] / D.rc_op[i] : D.n_op * rb / rc)) / (D.n_tr + D.n_op);
+    return SKILL[bin(r, [-1e9, -0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3, 1e9])];
+  }
+  const LEGENDS: Record<string, () => string> = {
+    tercile: () => ['Below normal', 'Near normal', 'Above normal'].map((n, k) => `<span class="lg-row"><b>${n}</b>${RAMPS[S.palette][k].map((c) => `<i style="background:${c}"></i>`).join('')}</span>`).join('') +
+      `<span class="lg-row caveat">40% → 100% chance of the most likely category; white: no category reaches 40%</span>`,
+    above: () => `<span class="lg-row"><b>Chance of above normal</b>${(S.palette === 'cb' ? RAMPS.cb[2] : SEQ.standard).map((c) => `<i style="background:${c}"></i>`).join('')}</span><span class="lg-row caveat">10% → 70%+ (33% is the normal chance)</span>`,
+    below: () => `<span class="lg-row"><b>Chance of below normal</b>${RAMPS[S.palette][0].map((c) => `<i style="background:${c}"></i>`).join('')}</span><span class="lg-row caveat">10% → 70%+ (33% is the normal chance)</span>`,
+    mean: () => `<span class="lg-row"><b>Expected rainfall</b>${RAIN.map((c) => `<i style="background:${c}"></i>`).join('')}</span><span class="lg-row caveat">${S.rainEdges.slice(1, -1).map((e: number) => Math.round(e)).join(' · ')} mm</span>`,
+    anomaly: () => `<span class="lg-row"><b>Difference from normal</b>${DIV.map((c) => `<i style="background:${c}"></i>`).join('')}</span><span class="lg-row caveat">−60% · −40% · −20% · ±5% · +20% · +40% · +60%</span>`,
+    skill: () => `<span class="lg-row"><b>Track record (skill)</b>${SKILL.map((c) => `<i style="background:${c}"></i>`).join('')}</span><span class="lg-row caveat">worse than climatology ← 0 → better (RPSS −0.1 … +0.3); single cells are noisy</span>`,
+  };
+
+  // ---------------------------------------------------------------- drawing
+  function extent() {
+    const w = canvas.clientWidth, lonSpan = G.nlon * G.dlon, latSpan = G.nlat * G.dlat;
+    const k = Math.cos(((G.lat0 + latSpan / 2) * Math.PI) / 180);
+    const base = w / (lonSpan * k);
+    return { w, h: base * latSpan, base, k, lonSpan, latSpan };
+  }
+  function toXY(lon: number, lat: number, e: any) {
+    const x = ((lon - (G.lon0 - G.dlon / 2)) * e.k * e.base) * S.scale + S.ox;
+    const y = ((G.lat0 - G.dlat / 2 + e.latSpan - lat) * e.base) * S.scale + S.oy;
+    return [x, y];
+  }
+  function draw() {
+    const e = extent(), dpr = window.devicePixelRatio || 1;
+    if (canvas.height !== Math.round(e.h * dpr) || canvas.width !== Math.round(e.w * dpr)) {
+      canvas.width = Math.round(e.w * dpr); canvas.height = Math.round(e.h * dpr); canvas.style.height = e.h + 'px';
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.style.touchAction = S.scale > 1 ? 'none' : 'pan-y';
+    ctx.clearRect(0, 0, e.w, e.h);
+    const cw = G.dlon * e.k * e.base * S.scale, ch = G.dlat * e.base * S.scale;
+    G.cells.forEach((c: number, i: number) => {
+      const la = G.lat0 + G.dlat * Math.floor(c / G.nlon), lo = G.lon0 + G.dlon * (c % G.nlon);
+      const [x, y] = toXY(lo - G.dlon / 2, la + G.dlat / 2, e);
+      ctx.fillStyle = color(i);
+      ctx.fillRect(x, y, cw + 0.6, ch + 0.6);
+    });
+    const ring = (pts: number[][], width: number, col: string) => {
+      ctx.beginPath();
+      pts.forEach(([lo, la], j) => { const [x, y] = toXY(lo, la, e); j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+      ctx.closePath(); ctx.lineWidth = width; ctx.strokeStyle = col; ctx.stroke();
+    };
+    Object.values(A.outlines.regions).forEach((rings: any) => rings.forEach((r: number[][]) => ring(r, 0.7, 'rgba(53,65,75,.55)')));
+    A.outlines.country.forEach((r: number[][]) => ring(r, 1.4, LINE));
+    if (S.sel) {                                                  // the selected area: its cells outlined
+      ctx.lineWidth = 2; ctx.strokeStyle = '#111';
+      for (const i of S.sel.pos) {
+        const c = G.cells[i], la = G.lat0 + G.dlat * Math.floor(c / G.nlon), lo = G.lon0 + G.dlon * (c % G.nlon);
+        const [x, y] = toXY(lo - G.dlon / 2, la + G.dlat / 2, e);
+        ctx.strokeRect(x + 1, y + 1, cw - 2, ch - 2);
+      }
+    }
+    $('ex-legend').innerHTML = LEGENDS[S.layer]();
+  }
+
+  // ---------------------------------------------------------------- interaction
+  function cellAt(ev: MouseEvent) {
+    const e = extent(), rect = canvas.getBoundingClientRect();
+    const x = (ev.clientX - rect.left - S.ox) / S.scale, y = (ev.clientY - rect.top - S.oy) / S.scale;
+    const lon = G.lon0 - G.dlon / 2 + x / (e.k * e.base), lat = G.lat0 - G.dlat / 2 + e.latSpan - y / e.base;
+    const ci = Math.round((lat - G.lat0) / G.dlat), cj = Math.round((lon - G.lon0) / G.dlon);
+    if (ci < 0 || cj < 0 || ci >= G.nlat || cj >= G.nlon) return -1;
+    const pos = G._pos.get(ci * G.nlon + cj);
+    return pos === undefined ? -1 : pos;
+  }
+  function tip(ev: MouseEvent) {
+    const i = cellAt(ev), t = $('ex-tip');
+    if (i < 0) { t.hidden = true; return; }
+    const c = G.cells[i], la = G.lat0 + G.dlat * Math.floor(c / G.nlon), lo = G.lon0 + G.dlon * (c % G.nlon);
+    const w = byCell.get(c);
+    const s = P.stats(G, D, [i]);
+    const where = w ? `${esc(w.name)}, ${esc(w.zone)} (${esc(w.region)})` : `${la.toFixed(2)}°N ${lo.toFixed(2)}°E`;
+    t.innerHTML = `<strong>${where}</strong><br>` + (s.p ? `Below ${pc(s.p[0])} · near ${pc(s.p[1])} · above ${pc(s.p[2])}` : 'Dry season: no tercile forecast') +
+      (s.mean != null ? `<br>Expected ${mm(s.mean)} (normal ${mm(s.normal)})` : '') + (inView.has(i) ? '' : '<br><em>outside the selected domain</em>');
+    const rect = canvas.parentElement!.getBoundingClientRect();
+    t.style.left = Math.min(ev.clientX - rect.left + 14, rect.width - 230) + 'px';
+    t.style.top = ev.clientY - rect.top + 14 + 'px';
+    t.hidden = false;
+  }
+  function select(area: any, push = true) {
+    S.sel = { area, pos: P.positions(G, area.cells) };
+    const s = P.stats(G, D, S.sel.pos);
+    const parents = [area.zone, area.region].filter(Boolean);
+    const level = A.levels[String(area.level)];
+    const up = area.level === 3 ? A.areas.filter((x: any) => (x.level === 2 && x.name === area.zone && x.region === area.region) || (x.level === 1 && x.name === area.region))
+      : area.level === 2 ? A.areas.filter((x: any) => x.level === 1 && x.name === area.region) : [];
+    const t10 = s.p ? P.tenths(s.p) : null;
+    const tr = P.track(s.rpss);
+    const cats = ['below', 'near', 'above'];
+    $('ex-panel').innerHTML = `<h3>${esc(area.name)}</h3><p class="caveat">${esc(level)}${parents.length ? ' · ' + parents.map(esc).join(', ') : ''} · ${s.cells} grid cell${s.cells === 1 ? '' : 's'}</p>` +
+      (s.p ? `<div class="probbar" role="img" aria-label="Chances: below ${pc(s.p[0])}, near ${pc(s.p[1])}, above ${pc(s.p[2])}">${cats.map((c, k) => `<span class="pb-${c}" style="flex:${s.p[k]}">${pc(s.p[k])}</span>`).join('')}</div>
+        <p class="tenths" aria-hidden="true">${t10!.map((n: number, k: number) => `<span class="t-${cats[k]}">${'●'.repeat(n)}</span>`).join('')}</p>
+        <p class="caveat">Out of 10 seasons like this one: about ${t10![0]} below normal, ${t10![1]} near normal, ${t10![2]} above normal.</p>` : '') +
+      `<p>${esc(P.describe(s, area.name, root.dataset.label))}</p>` +
+      `<dl class="ex-facts">` + (s.mean != null ? `<dt>Expected rainfall</dt><dd>${mm(s.mean)} (normal ${mm(s.normal)}, ${root.dataset.reference})</dd>` : '') +
+      (s.observed != null ? `<dt>Observed</dt><dd>${mm(s.observed)} (CHIRPS)</dd>` : '') +
+      `<dt>Track record here</dt><dd><span class="tr tr-${tr.level}">${esc(tr.word)}</span>${s.rpss != null ? ` <span class="caveat">(skill score ${s.rpss >= 0 ? '+' : ''}${s.rpss.toFixed(2)}, ${s.years} past seasons)</span>` : ''}</dd></dl>` +
+      (area.level === 3 && s.cells === 1 ? '<p class="caveat">This woreda is smaller than one grid cell: the values are those of the cell at its centre.</p>' : '') +
+      (up.length ? `<p class="ex-up">${up.sort((a: any, b: any) => b.level - a.level).map((u: any) => `<button type="button" class="linkbtn" data-area="${u.id}">${esc(u.name)} (${esc(A.levels[String(u.level)].toLowerCase())})</button>`).join(' · ')}</p>` : '') +
+      `<p><button type="button" class="linkbtn" id="ex-csv">Download this area's cells (CSV)</button> · <button type="button" class="linkbtn" id="ex-share">Copy link</button></p>`;
+    if (push) {
+      const q = new URLSearchParams(location.search); q.set('area', area.id);
+      history.replaceState(null, '', location.pathname + '?' + q + location.hash);
+    }
+    draw();
+  }
+  function csv() {
+    const rows = [['lat', 'lon', 'p_below', 'p_near', 'p_above', 'expected_mm', 'normal_mm', 'members_q10_mm', 'members_q90_mm']];
+    for (const i of S.sel.pos) {
+      const c = G.cells[i];
+      rows.push([(G.lat0 + G.dlat * Math.floor(c / G.nlon)).toFixed(3), (G.lon0 + G.dlon * (c % G.nlon)).toFixed(3),
+        D.pb[i], D.pn[i], D.pa[i], D.mean[i], D.normal[i], D.q10[i], D.q90[i]].map((v) => (v == null ? '' : String(v))));
+    }
+    const blob = new Blob([rows.map((r) => r.join(',')).join('\n') + '\n'], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${S.sel.area.id}_${S.sel.area.name.replace(/\W+/g, '_')}_${root.dataset.label!.replace(/\W+/g, '_')}.csv`;
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function start() {
+    canvas = $('ex-map') as HTMLCanvasElement; ctx = canvas.getContext('2d')!;
+    try {
+      [G, D, A] = await Promise.all([root.dataset.grid, root.dataset.cells, root.dataset.areas].map((u) => fetch(u!).then((r) => { if (!r.ok) throw new Error(u); return r.json(); })));
+    } catch (err) { $('ex-status').textContent = 'The interactive map could not be loaded; the maps below show the same forecast.'; return; }
+    P.positions(G, []);
+    inView = new Set(G.views[root.dataset.view!] ?? G.views.all_ethiopia);
+    byCell = new Map();
+    A.areas.filter((a: any) => a.level === 3).forEach((a: any) => a.cells.forEach((c: number) => { if (!byCell.has(c)) byCell.set(c, a); }));
+    const vals = D.mean.filter((v: any) => v != null).sort((a: number, b: number) => a - b);
+    const q = (f: number) => vals[Math.floor(f * (vals.length - 1))] ?? 0;
+    const nice = (v: number) => { const p = Math.pow(10, Math.floor(Math.log10(Math.max(v, 1)))); return Math.round(v / p) * p; };
+    S.rainEdges = [-1e9, ...[.1, .25, .4, .55, .7, .85, .95].map((f) => nice(q(f))), 1e9];
+    try { S.palette = localStorage.getItem('mapPalette') === 'cb' ? 'cb' : 'standard'; } catch { /* storage unavailable */ }
+    ($('ex-cb') as HTMLInputElement).checked = S.palette === 'cb';
+    const dl = $('ex-areas');
+    dl.innerHTML = A.areas.map((a: any) => `<option value="${esc(a.name)}${a.level > 1 ? ' — ' + esc(a.level === 3 ? a.zone + ', ' + a.region : a.region) : ''}">${esc(A.levels[String(a.level)])}</option>`).join('');
+    $('ex-status').textContent = '';
+    draw();
+    const first = ASKED && A.areas.find((a: any) => a.id === ASKED);
+    if (first) select(first, false);
+  }
+
+  root.addEventListener('click', (ev) => {
+    const el = ev.target as HTMLElement;
+    const b = el.closest('[data-layer]') as HTMLElement | null;
+    if (b) { S.layer = b.dataset.layer; root.querySelectorAll('[data-layer]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); draw(); return; }
+    const z = el.closest('[data-zoom]') as HTMLElement | null;
+    if (z) {
+      const e = extent();
+      if (z.dataset.zoom === 'reset') { S.scale = 1; S.ox = 0; S.oy = 0; }
+      else { const f = z.dataset.zoom === 'in' ? 1.5 : 1 / 1.5; S.ox = e.w / 2 - (e.w / 2 - S.ox) * f; S.oy = e.h / 2 - (e.h / 2 - S.oy) * f; S.scale *= f; }
+      draw(); return;
+    }
+    const up = el.closest('[data-area]') as HTMLElement | null;
+    if (up) { const a = A.areas.find((x: any) => x.id === up.dataset.area); if (a) select(a); return; }
+    if (el.id === 'ex-csv') { csv(); return; }
+    if (el.id === 'ex-share') { navigator.clipboard?.writeText(location.href); el.textContent = 'Link copied'; return; }
+  });
+  let drag: any = null, moved = false;
+  canvas = $('ex-map') as HTMLCanvasElement;
+  // pointer events (mouse, pen, touch): drag moves the map only when zoomed in, so the page still scrolls over it otherwise
+  canvas.addEventListener('pointerdown', (ev) => { moved = false; if (S.scale > 1) { drag = { x: ev.clientX, y: ev.clientY, ox: S.ox, oy: S.oy }; canvas.setPointerCapture(ev.pointerId); } });
+  canvas.addEventListener('pointerup', () => { drag = null; });
+  canvas.addEventListener('pointercancel', () => { drag = null; });
+  canvas.addEventListener('pointermove', (ev) => {
+    if (drag) { const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) moved = true; S.ox = drag.ox + dx; S.oy = drag.oy + dy; draw(); }
+    if (G && ev.pointerType === 'mouse') tip(ev);
+  });
+  canvas.addEventListener('pointerleave', () => { $('ex-tip').hidden = true; });
+  canvas.addEventListener('click', (ev) => {
+    if (moved || !G) return;
+    const i = cellAt(ev); if (i < 0) return;
+    const w = byCell.get(G.cells[i]); if (w) select(w);
+  });
+  canvas.addEventListener('wheel', (ev) => {
+    if (!G || !(ev.ctrlKey || ev.metaKey)) return;              // plain wheel scrolls the page
+    ev.preventDefault();
+    const rect = canvas.getBoundingClientRect(), mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+    const f = ev.deltaY < 0 ? 1.2 : 1 / 1.2, ns = Math.min(8, Math.max(1, S.scale * f)), g = ns / S.scale;
+    S.ox = mx - (mx - S.ox) * g; S.oy = my - (my - S.oy) * g; S.scale = ns;
+    if (S.scale === 1) { S.ox = 0; S.oy = 0; }
+    draw();
+  }, { passive: false });
+  $('ex-cb').addEventListener('change', (ev) => {
+    S.palette = (ev.target as HTMLInputElement).checked ? 'cb' : 'standard';
+    try { localStorage.setItem('mapPalette', S.palette); } catch { /* storage unavailable */ }
+    draw();
+  });
+  $('ex-search').addEventListener('change', (ev) => {
+    const v = (ev.target as HTMLInputElement).value.trim().toLowerCase();
+    if (!A || !v) return;
+    const name = v.split(' — ')[0];
+    const rest = v.includes(' — ') ? v.split(' — ')[1] : '';
+    const hit = A.areas.find((a: any) => a.name.toLowerCase() === name && (!rest || rest.includes((a.region ?? '').toLowerCase())))
+      ?? A.areas.find((a: any) => a.name.toLowerCase().startsWith(name));
+    if (hit) select(hit);
+  });
+  window.addEventListener('resize', () => { if (G) draw(); });
+  start();
+</script>
+
+<style is:global>
+  .explore .ex-controls{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:end;margin:8px 0}
+  .explore .ex-search{display:flex;flex-direction:column;font-weight:600;font-size:.92rem;gap:4px}
+  .explore .ex-search input{font:inherit;font-weight:400;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);min-width:min(340px,80vw)}
+  .explore .ex-layers{flex-wrap:wrap;margin:6px 0 10px}
+  .explore .ex-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:18px;align-items:start}
+  .explore .ex-mapwrap{position:relative;border:1px solid var(--line);border-radius:12px;background:#f3f5f7;overflow:hidden}
+  .explore canvas{display:block;width:100%;cursor:crosshair;touch-action:pan-y}
+  .explore .ex-zoom{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px}
+  .explore .ex-zoom button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1rem;cursor:pointer}
+  .explore .ex-tip{position:absolute;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.82rem;box-shadow:0 4px 14px rgba(0,0,0,.12);max-width:240px}
+  .explore .ex-legend{padding:8px 10px;font-size:.8rem;background:var(--surface);border-top:1px solid var(--line)}
+  .explore .lg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:2px 0}
+  .explore .lg-row b{min-width:9.5em;font-weight:600}
+  .explore .lg-row i{display:inline-block;width:22px;height:12px;border:1px solid rgba(0,0,0,.08)}
+  .explore .ex-panel{margin:0}
+  .explore .ex-facts dt{font-weight:600;margin-top:6px}
+  .explore .ex-facts dd{margin:0}
+  @media (max-width:900px){ .explore .ex-body{grid-template-columns:1fr} }
+</style>

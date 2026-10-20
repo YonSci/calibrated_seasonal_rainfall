@@ -142,21 +142,22 @@ def mos_files(site):
     return out
 
 
-def neural_files(site):
+def neural_files(site, sub='neural'):
     """Neural distributional regression (DRN) against the published pipeline and EMOS (scripts/neural_calibration.py, docs/54)."""
     import site_files
     by_hash = {v['sha256']: v['url'] for v in site_files.load_manifest()['assets'].values()}
     out = {}
-    for f in sorted((ROOT / 'outputs/probability_calibration').glob('*/neural/benchmark.json')):
+    for f in sorted((ROOT / 'outputs/probability_calibration').glob(f'*/{sub}/benchmark.json')):
         name = f.parent.parent.name
         d = read(f)
         d.pop('protocol', None)
         for t in d.get('targets', {}).values():                   # network weights: in the download, not the page data
             t['fitted'] = {k: {kk: v.get(kk) for kk in ('hidden', 'decay', 'steps', 'validation_crps')}
                            for k, v in (t.get('fitted') or {}).items() if k.startswith('drn')}
-        local = f'downloads/neural/{name}/benchmark.json'
+            t.pop('reliability', None)                             # drawn in the reliability figure
+        local = f'downloads/{sub}/{name}/benchmark.json'
         url = by_hash.get(site_files.sha256(f)) or (local if (site / local).is_file() else None)
-        out[name] = dict(slim(d), assets=assets(site, f'assets/neural/{name}'), downloads=[url] if url else [])
+        out[name] = dict(slim(d), assets=assets(site, f'assets/{sub}/{name}'), downloads=[url] if url else [])
     return out
 
 
@@ -194,6 +195,15 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         change_types=__import__('site_extras').CHANGE_TYPES,
         sections=sections, assets='site/assets (figures and maps, paths relative to the site root)'))
     sizes['cycles.json'] = write(OUT / 'cycles.json', page_data)
+    import site_cells                                          # per-cell data and areas: the interactive map and area search
+    sizes.update(site_cells.export_all(OUT, page_data))
+    for rel in ['areas.json', *[f'cells/{c["id"]}' for c in page_data['cycles']]]:     # also served to the browser
+        src, dest = OUT / rel, site / 'data' / rel
+        if src.is_dir():
+            shutil.copytree(src, dest, dirs_exist_ok=True)
+        elif src.is_file():
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dest)
     for f in sorted((site / 'data').glob('*.json')):          # per-cycle comparison and diagnostics, at the same relative paths
         sizes[f'data/{f.name}'] = write(OUT / 'data' / f.name, json.loads(f.read_text(encoding='utf-8')))
     sizes['files.json'] = write(OUT / 'files.json', downloads(site))
@@ -213,6 +223,7 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         sizes[f'mos/{name}.json'] = write(OUT / 'mos' / f'{name}.json', obj)
     for name, obj in leung_dirichlet_files(site).items():
         sizes[f'leung_dirichlet/{name}.json'] = write(OUT / 'leung_dirichlet' / f'{name}.json', obj)
-    for name, obj in neural_files(site).items():
-        sizes[f'neural/{name}.json'] = write(OUT / 'neural' / f'{name}.json', obj)
+    for sub in ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning'):
+        for name, obj in neural_files(site, sub).items():
+            sizes[f'{sub}/{name}.json'] = write(OUT / sub / f'{name}.json', obj)
     return sizes

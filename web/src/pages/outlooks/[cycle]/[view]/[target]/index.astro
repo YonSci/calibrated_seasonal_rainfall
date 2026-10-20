@@ -2,6 +2,8 @@
 import Base from '../../../../../layouts/Base.astro';
 import ContextBar from '../../../../../components/ContextBar.astro';
 import OutlookHero from '../../../../../components/OutlookHero.astro';
+import OutlookExplorer from '../../../../../components/OutlookExplorer.astro';
+import { summaryFor } from '../../../../../lib/summary.js';
 import TargetStrip from '../../../../../components/TargetStrip.astro';
 import { C, cycleOf, dataFile, pagesFor, url } from '../../../../../lib/cycles.js';
 import { renderer } from '../../../../../lib/outlook.js';
@@ -25,11 +27,13 @@ const verified = c.targets.filter((x) => x.verification[view]).length;
 const obsNotice = C.cycles.every((x) => x.obs === 'CHIRPS v3.0');
 const SEL = selectionFor(c);
 const selT = SEL?.targets[target];
+const plain = summaryFor(cid, view, target, t.label);
 ---
 <Base title={`${t.label} outlook · ${c.option} · ${R.viewLabel(view)}`} section="outlook"
       description={`${t.label} rainfall outlook for Ethiopia (${c.init} initialization), ${R.viewLabel(view)}: tercile probabilities, amounts and maps.`}>
   <ContextBar slot="context" cycle={c} view={view} section="outlook" target={target} />
-  <OutlookHero O={O} status={t.status} />
+  <OutlookHero O={O} status={t.status} plain={plain} />
+  {plain && <OutlookExplorer cycle={cid} view={view} target={target} label={t.label} viewLabel={R.viewLabel(view)} reference={c.reference} />}
 
   <section>
     <h2 class="h3">All targets in this cycle</h2>
@@ -129,7 +133,8 @@ const selT = SEL?.targets[target];
         : '<p><strong>Smoothed</strong> (display only): values are smoothed over about 0.4° and interpolated, which softens the 1° model grid. Switch to Grid cells to see the values exactly as computed.</p>') : '') +
         '<p class="caveat">Reference period: CHIRPS ' + M.reference + '.</p>';
       if (location.search || S.kind !== 'forecast' || S.product !== 'tercile_outlook' || S.style !== 'smooth')
-        history.replaceState(null, '', location.pathname + '?' + new URLSearchParams({ kind: S.kind, product: S.product, style: S.style }) + location.hash);
+        { const keep = new URLSearchParams(location.search); keep.set('kind', S.kind); keep.set('product', S.product); keep.set('style', S.style);   // other parameters (e.g. area) kept
+          history.replaceState(null, '', location.pathname + '?' + keep + location.hash); }
     }
     document.addEventListener('click', (ev) => {
       const b = (ev.target as HTMLElement).closest('[data-k],[data-p],[data-style]') as HTMLElement | null;

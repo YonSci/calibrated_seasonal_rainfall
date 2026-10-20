@@ -1,7 +1,10 @@
 ---
 // The answer first: headline, probabilities and map side by side, then the three key figures (amount, signal, skill).
 // O: the outlook pieces from lib/outlook.js (element ids kept, so the text is checked against the current page).
-const { O, more = null, status = null } = Astro.props;       // more: [href, label]; status: the target's verification status
+const { O, more = null, status = null, plain = null, exploreHref = '#explore' } = Astro.props;  // more: [href, label]; status: the target's verification status;
+// plain: the plain-language summary (lib/summary.js)
+const CATS = ['below', 'near', 'above'];
+const pc = (x) => `${Math.round(100 * x)}%`;
 ---
 <section id="outlooks" class="hero">
   <div class="hero-text">
@@ -9,7 +12,25 @@ const { O, more = null, status = null } = Astro.props;       // more: [href, lab
     <h1 id="ol-title" set:html={O['ol-title']} />
     <p class="badges"><span class="research-inline" set:html={O['ol-publication']} />{status && <span class={`status ${status.code}`}>{status.text}</span>}</p>
     <p class="lead" id="ol-lead" set:html={O['ol-lead']} />
-    <div class="box"><h3>Average local probability</h3><div id="ol-prob" set:html={O['ol-prob']} /><p class="caveat" id="ol-prob-note" set:html={O['ol-prob-note']} /></div>
+    {plain && (
+      <div class="plain-summary">
+        <h2 class="plain-title">In plain words</h2>
+        <p>{plain.text}</p>
+        {plain.p && (
+          <>
+            <div class="probbar" role="img" aria-label={`Chances across the area: below normal ${pc(plain.p[0])}, near normal ${pc(plain.p[1])}, above normal ${pc(plain.p[2])}`}>
+              {CATS.map((c, k) => <span class={`pb-${c}`} style={`flex:${plain.p[k]}`}>{pc(plain.p[k])}</span>)}
+            </div>
+            <p class="tenths" aria-hidden="true">{CATS.map((c, k) => <span class={`t-${c}`}>{'●'.repeat(plain.tenths[k])}</span>)}</p>
+            <p class="caveat">Out of 10 seasons like this one, on average across the area: about {plain.tenths[0]} below normal, {plain.tenths[1]} near
+            normal, {plain.tenths[2]} above normal. Track record here: <span class={`tr tr-${plain.track.level}`}>{plain.track.word}</span>.</p>
+            <p class="caveat" set:html={O['ol-prob-note']} />
+          </>
+        )}
+        <p class="plain-links"><a href={exploreHref}>Find your area on the map →</a></p>
+      </div>
+    )}
+    {!plain && <div class="box"><h3>Average local probability</h3><div id="ol-prob" set:html={O['ol-prob']} /><p class="caveat" id="ol-prob-note" set:html={O['ol-prob-note']} /></div>}
     {more && <p><a class="button-link" href={more[0]}>{more[1]} →</a></p>}
   </div>
   <figure class="glance-map hero-map" id="ol-map" set:html={O['ol-map']} />
@@ -49,6 +70,10 @@ const { O, more = null, status = null } = Astro.props;       // more: [href, lab
   .hero-map{margin:0}
   .badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 6px}
   .badges .research-inline{margin:0}
+  .plain-summary{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 12px 12px 0;padding:10px 16px;margin:10px 0 14px}
+  .plain-summary .plain-title{font-size:1rem;margin:0 0 4px;color:var(--accent)}
+  .plain-summary p{margin:.3em 0}
+  .plain-links{font-weight:600}
   .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
   .tiles .box{margin:0}
   @media (max-width:860px){ .hero,.tiles{grid-template-columns:1fr} }
