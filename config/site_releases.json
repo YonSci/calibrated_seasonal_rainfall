@@ -1030,7 +1030,7 @@
   {
     "id": "2026-10-20.2",
     "date": "2026-10-20",
-    "commit": null,
+    "commit": "e4106d9",
     "title": "Interactive map, your area in plain words, method explorer",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -1050,6 +1050,24 @@
       {
         "type": "display",
         "text": "Home page: \"Find your area\" and two entry paths (the outlook, the science). Research overview: a method explorer with every method against the published approach for every target. New heading typeface."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-20.3",
+    "date": "2026-10-20",
+    "commit": null,
+    "title": "Outlook summaries in Amharic and Afaan Oromo",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "The plain-language outlook summaries and the area panel of the map are available in Amharic and Afaan Oromo (language switch on the summary, remembered in the browser). The translations are drafts, to be reviewed by native speakers; the English text is authoritative."
       }
     ]
   }
