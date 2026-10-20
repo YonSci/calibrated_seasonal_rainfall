@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-16T22:07:23.166611+00:00",
+ "created_utc": "2026-10-20T02:04:04.540820+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -591,25 +591,25 @@
        "label": "Principal component regression (PCR)"
       },
       "historical": {
-       "training_difference": -1.3089340745176288,
-       "years_better": 16,
+       "training_difference": -1.5737950477351497,
+       "years_better": 18,
        "years": 24,
-       "holm_p": 0.05904,
-       "test_difference": -0.7517057509202265,
-       "p_adjusted": 0.0246,
+       "holm_p": 0.00795,
+       "test_difference": -0.6664133706463914,
+       "p_adjusted": 0.00795,
        "correction": "benjamini_hochberg",
-       "test_years_better": 3,
+       "test_years_better": 5,
        "test_years": 9
       },
       "validation": {
        "seasons": [
         {
          "year": 2026,
-         "method": 18.72613508676848,
+         "method": 18.58411840180574,
          "reference": 15.45612349301999
         }
        ],
-       "mean_difference": 3.2700115937484906,
+       "mean_difference": 3.12799490878575,
        "required": 3
       },
       "alternatives": [
@@ -656,7 +656,7 @@
         "historical": null
        }
       ],
-      "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for Aug: CRPS (mm) difference -1.309 over the training years (Benjamini–Hochberg p 0.0246; 16 of 24 years better), -0.7517 over the test years. Independent validation: 1 of 3 season(s), mean difference +3.27. Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction); Gamma Quantile Mapping (amount correction)."
+      "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for Aug: CRPS (mm) difference -1.574 over the training years (Benjamini–Hochberg p 0.00795; 18 of 24 years better), -0.6664 over the test years. Independent validation: 1 of 3 season(s), mean difference +3.128. Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Power Transformation (amount correction); Gamma Quantile Mapping (amount correction)."
      }
     },
     "Sep": {
@@ -680,34 +680,24 @@
       "reference": "Mean-Variance Scaling ensemble (published)",
       "status": "candidate",
       "selected": {
-       "family": "distribution_phase2",
-       "family_label": "Distribution model, Phase 2",
-       "stage": "distribution model",
-       "method": "quantile_regression",
-       "label": "Regularized quantile regression"
+       "family": "distribution_neural",
+       "family_label": "Neural network (docs/54)",
+       "stage": "distribution model (neural network)",
+       "method": "drn_csg",
+       "label": "Distributional regression network (DRN), censored shifted gamma"
       },
       "historical": {
-       "training_difference": -1.0827405272293198,
-       "years_better": 18,
+       "training_difference": -1.0991795584563333,
+       "years_better": 17,
        "years": 24,
-       "holm_p": 0.023799999999999998,
-       "test_difference": -0.5431653039540865,
-       "p_adjusted": 0.01275,
+       "holm_p": 0.010875,
+       "test_difference": -1.2035375936288792,
+       "p_adjusted": 0.010875,
        "correction": "benjamini_hochberg",
-       "test_years_better": 4,
+       "test_years_better": 7,
        "test_years": 9
       },
-      "validation": {
-       "seasons": [
-        {
-         "year": 2026,
-         "method": 16.929083240596846,
-         "reference": 15.340703708133653
-        }
-       ],
-       "mean_difference": 1.5883795324631933,
-       "required": 3
-      },
+      "validation": null,
       "alternatives": [
        {
         "family": "bias_correction",
@@ -762,43 +752,25 @@
         }
        },
        {
-        "family": "mos",
-        "family_label": "Statistical downscaling (docs/53)",
-        "method": "cca",
-        "label": "Canonical correlation analysis (CCA)",
+        "family": "distribution_phase2",
+        "family_label": "Distribution model, Phase 2",
+        "method": "quantile_regression",
+        "label": "Regularized quantile regression",
         "status": "candidate",
         "historical": {
-         "training_difference": -0.8847065074118037,
-         "years_better": 17,
-         "years": 24,
-         "holm_p": 0.036449999999999996,
-         "test_difference": -0.9786195843590403,
-         "p_adjusted": 0.020249999999999997,
-         "correction": "benjamini_hochberg",
-         "test_years_better": 5,
-         "test_years": 9
-        }
-       },
-       {
-        "family": "mos",
-        "family_label": "Statistical downscaling (docs/53)",
-        "method": "pcr",
-        "label": "Principal component regression (PCR)",
-        "status": "candidate",
-        "historical": {
-         "training_difference": -0.9359395379679771,
+         "training_difference": -1.0827405272293198,
          "years_better": 18,
          "years": 24,
-         "holm_p": 0.0234,
-         "test_difference": -0.7307156732441906,
-         "p_adjusted": 0.020249999999999997,
+         "holm_p": 0.023799999999999998,
+         "test_difference": -0.5431653039540865,
+         "p_adjusted": 0.01275,
          "correction": "benjamini_hochberg",
-         "test_years_better": 6,
+         "test_years_better": 4,
          "test_years": 9
         }
        }
       ],
-      "why": "Regularized quantile regression (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.083 over the training years (Benjamini–Hochberg p 0.0127; 18 of 24 years better), -0.5432 over the test years. Independent validation: 1 of 3 season(s), mean difference +1.588. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Canonical correlation analysis (CCA) (statistical downscaling); Principal component regression (PCR) (statistical downscaling)."
+      "why": "Distributional regression network (DRN), censored shifted gamma (neural network (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.099 over the training years (Benjamini–Hochberg p 0.0109; 17 of 24 years better), -1.204 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Regularized quantile regression (distribution model)."
      }
     },
     "JJAS": {
@@ -829,29 +801,29 @@
        "label": "Principal component regression (PCR)"
       },
       "historical": {
-       "training_difference": -2.9036420584837117,
+       "training_difference": -3.8244361014507806,
        "years_better": 17,
        "years": 24,
-       "holm_p": 0.124145,
-       "test_difference": -3.639149743550623,
-       "p_adjusted": 0.0443375,
+       "holm_p": 0.046125,
+       "test_difference": -1.5969354980926462,
+       "p_adjusted": 0.025625000000000002,
        "correction": "benjamini_hochberg",
-       "test_years_better": 7,
+       "test_years_better": 6,
        "test_years": 9
       },
       "validation": {
        "seasons": [
         {
          "year": 2026,
-         "method": 59.735371766209276,
+         "method": 61.95509293813129,
          "reference": 47.20174897299629
         }
        ],
-       "mean_difference": 12.533622793212984,
+       "mean_difference": 14.753343965134995,
        "required": 3
       },
       "alternatives": [],
-      "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for JJAS: CRPS (mm) difference -2.904 over the training years (Benjamini–Hochberg p 0.0443; 17 of 24 years better), -3.639 over the test years. Independent validation: 1 of 3 season(s), mean difference +12.53."
+      "why": "Principal component regression (PCR) (statistical downscaling (docs/53)) is confirmed better than Mean-Variance Scaling ensemble (published) for JJAS: CRPS (mm) difference -3.824 over the training years (Benjamini–Hochberg p 0.0256; 17 of 24 years better), -1.597 over the test years. Independent validation: 1 of 3 season(s), mean difference +14.75."
      }
     }
    }

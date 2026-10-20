@@ -223,12 +223,26 @@
   "bytes": 3468013,
   "sha256": "0903cc72196ac9664c493f7f59cf103451c59356868d3c58abb21b397c4749ae"
  },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/0b6ee2991ccfe170-fmam2026_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/0b6ee2991ccfe170-fmam2026_bulletin.pdf",
+  "path": "downloads/fmam2026_bulletin.pdf",
+  "label": null,
+  "bytes": 328744,
+  "sha256": "0b6ee2991ccfe170a3bb17acb69e2d43b4d6844fb5148a0676593e3e64d9825c"
+ },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/0c5c528b495c72d2-jjas2026_package.zip": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/0c5c528b495c72d2-jjas2026_package.zip",
   "path": "downloads/jjas2026_package.zip",
   "label": null,
   "bytes": 31856243,
   "sha256": "0c5c528b495c72d2f607024905fbf53c431a4988d7a3aba1ca01d6b9375c9d7c"
+ },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/14351d4399cbadb6-ondj2026_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/14351d4399cbadb6-ondj2026_bulletin.pdf",
+  "path": "downloads/ondj2026_bulletin.pdf",
+  "label": null,
+  "bytes": 322363,
+  "sha256": "14351d4399cbadb655125e4a534e42e4f377c892ed908a7d38c466dbb8e39901"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/147177b969b35c8e-probcal.jan_fmam.amount_shadow.2026.shadow_emos_csg_2026_Mar.nc": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/147177b969b35c8e-probcal.jan_fmam.amount_shadow.2026.shadow_emos_csg_2026_Mar.nc",
@@ -300,20 +314,6 @@
   "bytes": 7144808,
   "sha256": "36ea62680583aa103bd7900e863a429d412f2b6248e7ed7fecef2a9ad1ba2650"
  },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/3c6aa834c2781393-jjas2026_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/3c6aa834c2781393-jjas2026_bulletin.pdf",
-  "path": "downloads/jjas2026_bulletin.pdf",
-  "label": null,
-  "bytes": 328378,
-  "sha256": "3c6aa834c2781393f4018819dce7e0a16153b6d7eec047d7e6d8c3fce43c2a2a"
- },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/40f445410ce719b7-fmam2026feb_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/40f445410ce719b7-fmam2026feb_bulletin.pdf",
-  "path": "downloads/fmam2026feb_bulletin.pdf",
-  "label": null,
-  "bytes": 340117,
-  "sha256": "40f445410ce719b78f51d0c96e8483a121a60d58683c4440a4dab9aa08e5a849"
- },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/439d70991060db70-bias.jan_fmam.validation_record.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/439d70991060db70-bias.jan_fmam.validation_record.json",
   "path": "downloads/bias/jan_fmam/validation_record.json",
@@ -341,13 +341,6 @@
   "label": "Shadow amounts and ranges, Jun 2026 (NetCDF; not a published forecast)",
   "bytes": 165897,
   "sha256": "584fa8a59e6f3f3e5253cfb7a1fe1bbe4d4bd7cf7c500a58a810700dae3673fb"
- },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5d11018b693d6670-ondj2026_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5d11018b693d6670-ondj2026_bulletin.pdf",
-  "path": "downloads/ondj2026_bulletin.pdf",
-  "label": null,
-  "bytes": 322364,
-  "sha256": "5d11018b693d66708dbac584abf9449890fee41dd398bec0b4c5ae4ae5d4f4cc"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5d5beb985336731c-probcal.sep_ondj.amount_shadow.2026.shadow_emos_csg_2026_ONDJ.nc": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/5d5beb985336731c-probcal.sep_ondj.amount_shadow.2026.shadow_emos_csg_2026_ONDJ.nc",
@@ -566,13 +559,6 @@
   "bytes": 3471816,
   "sha256": "be4f7930499900ac7d13fa16560a5727a34942317276174da2b16b5983d41c10"
  },
- "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c0956696e48c35b0-fmam2026_bulletin.pdf": {
-  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c0956696e48c35b0-fmam2026_bulletin.pdf",
-  "path": "downloads/fmam2026_bulletin.pdf",
-  "label": null,
-  "bytes": 328744,
-  "sha256": "c0956696e48c35b06efbfb858ac50fdfde604bb4216ad89b8ca379f529ec5f07"
- },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c7a70e02b8acb536-probcal.may_jjas.amount_shadow.2026.shadow_emos_csg_2026_Jul.nc": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/c7a70e02b8acb536-probcal.may_jjas.amount_shadow.2026.shadow_emos_csg_2026_Jul.nc",
   "path": "downloads/probcal/may_jjas/amount_shadow/2026/shadow_emos_csg_2026_Jul.nc",
@@ -593,6 +579,13 @@
   "label": "Shadow amounts and ranges, FMAM 2026 (NetCDF; not a published forecast)",
   "bytes": 165824,
   "sha256": "c80828e150d22ff138b95b52632bb4d98a46f81a62b325f9140cb009c5b18bd6"
+ },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/cf78021ccc815529-jjas2026_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/cf78021ccc815529-jjas2026_bulletin.pdf",
+  "path": "downloads/jjas2026_bulletin.pdf",
+  "label": null,
+  "bytes": 328378,
+  "sha256": "cf78021ccc815529878c694d702da52044058ba435067150b9fea7c493203e5e"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/cf93fc76c85f9f65-probcal.jan_fmam.phase2_binary.benchmark.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/cf93fc76c85f9f65-probcal.jan_fmam.phase2_binary.benchmark.json",
@@ -621,6 +614,13 @@
   "label": "Shadow amounts and ranges, May 2026 (NetCDF; not a published forecast)",
   "bytes": 165554,
   "sha256": "d629d0df0aaf64fc99d4921e9c1a28d002ea9c030fae0cb3a418c1d2475835ca"
+ },
+ "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/d7c8754f68ea91c0-fmam2026feb_bulletin.pdf": {
+  "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/d7c8754f68ea91c0-fmam2026feb_bulletin.pdf",
+  "path": "downloads/fmam2026feb_bulletin.pdf",
+  "label": null,
+  "bytes": 340116,
+  "sha256": "d7c8754f68ea91c03e5fe9f9b53631c7da5f41d600f52a3707ff299742a5106b"
  },
  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/d95a824da80d944c-bias.jan_fmam.ratio_limits.benchmark.json": {
   "url": "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/d95a824da80d944c-bias.jan_fmam.ratio_limits.benchmark.json",

@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-19 12:20 UTC",
- "code_commit": "17707ef",
- "release": "2026-10-19.0",
+ "built_utc": "2026-10-20 02:07 UTC",
+ "code_commit": "0885a72",
+ "release": "2026-10-20.0",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -977,7 +977,7 @@
   {
    "id": "2026-10-19.0",
    "date": "2026-10-19",
-   "commit": null,
+   "commit": "1c56990",
    "title": "How statistical downscaling is implemented",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -989,6 +989,28 @@
     {
      "type": "display",
      "text": "The statistical downscaling page explains how canonical correlation analysis and principal component regression are implemented (fields, EOFs, the regression and canonical steps, the choice of modes, the forecast distribution and the evaluation) and shows each comparison under the benchmark (Holm) and under the selection rule (Benjamini-Hochberg). docs/53 section 2 gives the full description with the function behind each step."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-20.0",
+   "date": "2026-10-20",
+   "commit": null,
+   "title": "A neural network benchmark; statistical downscaling version 2",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Neural network: a distributional regression network (a small network shared by every grid cell that predicts a censored shifted gamma rainfall distribution, a neural extension of EMOS) tested for the four cycles against the published pipeline, EMOS, a linear control and a version without the forecast. Its rainfall ranges are well calibrated (81% of observations inside the 10-90% range, against 67% for the published ensemble) and its amounts are better than the published ensemble when pooled over all targets, but it adds no clear gain over EMOS and little over a version that ignores the forecast; confirmed better for JJAS September amounts, where it becomes the selected candidate. Tercile probabilities are not improved. docs/54."
+    },
+    {
+     "type": "analysis",
+     "text": "Statistical downscaling version 2 fixes four limitations: the first 25 SEAS5 members in every year, SEAS5 sea-surface temperature over the tropical Indian and Pacific Oceans as a candidate predictor, a spread that grows for unusual forecasts, and a climatology blend of the probabilities. The probabilities now match the published ones on average (PCR) instead of falling below them; PCR stays confirmed for JJAS August and season amounts, September is no longer confirmed. docs/53."
     }
    ]
   }
