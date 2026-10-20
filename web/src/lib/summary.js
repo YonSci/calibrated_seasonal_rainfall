@@ -3,18 +3,29 @@
 import { read } from './data.js';
 import * as P from './plain.js';
 
-export function summaryFor(cycleId, view, targetId, label) {
-  let grid, d, areas;
+function cells(cycleId, targetId) {
   try {
-    grid = read(`cells/${cycleId}/grid.json`);
-    d = read(`cells/${cycleId}/${targetId}.json`);
-    areas = read('areas.json');
+    return [read(`cells/${cycleId}/grid.json`), read(`cells/${cycleId}/${targetId}.json`), read('areas.json')];
   } catch {
     return null;                                     // no cell data for this cycle (e.g. an older build)
   }
+}
+
+export function summaryFor(cycleId, view, targetId, label) {
+  const got = cells(cycleId, targetId);
+  if (!got) return null;
+  const [grid, d, areas] = got;
   const pos = grid.views[view] ?? grid.views.all_ethiopia;
   const r = P.regional(grid, d, areas, pos, label);
   const s = r.all;
   return { text: r.text, p: s.p, tenths: s.p ? P.tenths(s.p) : null, track: P.track(s.rpss), rpss: s.rpss, years: s.years, view, label,
            cycle: cycleId, target: targetId };
+}
+
+// The verification scorecard of a target and view (lib/plain.js scorecard), null before observations are in.
+export function scorecardFor(cycleId, view, targetId) {
+  const got = cells(cycleId, targetId);
+  if (!got) return null;
+  const [grid, d] = got;
+  return P.scorecard(grid, d, grid.views[view] ?? grid.views.all_ethiopia);
 }

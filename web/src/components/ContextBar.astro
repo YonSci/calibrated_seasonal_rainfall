@@ -41,5 +41,5 @@ if (section !== 'official') crumbs.push([tLabel, null]);
   .ctx-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
   .ctx-tabs a{padding:5px 12px;border-radius:999px;text-decoration:none;color:var(--ink2);border:1px solid var(--line);background:var(--bg)}
   .ctx-tabs a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
-  @media (max-width:860px){ .ctx-tabs{margin-left:0} .ctx-row select{max-width:100%} }
+  @media (max-width:860px){ .ctx-tabs{margin-left:0} .ctx-row label{display:flex;align-items:center;gap:6px;max-width:100%;min-width:0} .ctx-row select{max-width:100%;min-width:0;flex:1 1 auto} }
 </style>

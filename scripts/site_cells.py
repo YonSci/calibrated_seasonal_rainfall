@@ -4,7 +4,7 @@ Per cycle (run with the cycle selected, so the view domains are exactly those of
   cells/<cycle>/grid.json        the 0.25-degree grid, the cells of Ethiopia (row-major index lat * nlon + lon) and, per
                                  view, which of them are in the view's domain
   cells/<cycle>/<target>.json    per cell of Ethiopia (aligned with grid.cells): the published tercile probabilities
-                                 (below, near, above; null where not eligible), the corrected ensemble mean, its 10% and 90%
+                                 (below, near, above; null where not eligible) and the tercile limits, the corrected ensemble mean, its 10% and 90%
                                  quantiles and the reference-period mean (mm; null where amounts are not eligible), the
                                  cross-validated RPS of the published probabilities and of climatology over the training
                                  years and the test years (local_calibration/.../local_spatial_scores.nc), and, once
@@ -74,8 +74,12 @@ def export_cycle(out):
         normal = f.observed_training_mean.values.reshape(-1)[cells]
         for a in (q10, q90, mean, normal):
             a[~ae] = np.nan
+        t1 = f.q1.values.reshape(-1)[cells].astype(float)
+        t2 = f.q2.values.reshape(-1)[cells].astype(float)
+        t1[~pe] = np.nan
+        t2[~pe] = np.nan
         row = dict(target=t, pb=r(p[:, 0], 3), pn=r(p[:, 1], 3), pa=r(p[:, 2], 3), mean=r(mean, 1), q10=r(q10, 1), q90=r(q90, 1),
-                   normal=r(normal, 1))
+                   normal=r(normal, 1), t1=r(t1, 1), t2=r(t2, 1))      # t1, t2: the reference-period tercile limits (mm)
         tag = f'{CYCLE.tag}_{t}'
         for design, key in (('training', 'tr'), ('operational', 'op')):
             sp = ROOT / f'outputs/local_calibration/{tag}/{design}/local_spatial_scores.nc'

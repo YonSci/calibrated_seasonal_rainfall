@@ -1,0 +1,162 @@
+---
+// "How did we do?": a scorecard of the verified target (lib/plain.js scorecard) and a forecast-against-observed map with a
+// draggable divider (left: the forecast, right: what was observed), drawn from the per-cell data (lib/cellmap.js).
+import { asset } from '../lib/data.js';
+import { scorecardFor } from '../lib/summary.js';
+const { cycle, view, target, label, summary = null } = Astro.props;   // summary: the target's verification summary (or null)
+const sc = scorecardFor(cycle, view, target);
+const pc = (x) => `${Math.round(100 * x)}%`;
+const CATS = ['below', 'near', 'above'];
+const NAME = ['below normal', 'near normal', 'above normal'];
+const rpss = summary?.probability?.shared_blend?.rpss;
+const VERDICT = {
+  right: ['Mostly right', 'good'],
+  partly: ['Partly right', 'modest'],
+  missed: ['Mostly missed', 'low'],
+  nosignal: ['No clear signal', 'unknown'],
+};
+const main = sc ? sc.observed.indexOf(Math.max(...sc.observed)) : 0;
+---
+{sc && (
+  <section id="how-did-we-do" class="vc"
+           data-grid={asset(`data/cells/${cycle}/grid.json`)} data-cells={asset(`data/cells/${cycle}/${target}.json`)}
+           data-areas={asset('data/areas.json')} data-view={view}>
+    <h2>How did we do?</h2>
+    <div class="vc-cards">
+      <div class="box vc-verdict">
+        <p class="vc-word"><span class={`tr tr-${VERDICT[sc.verdict][1]}`}>{VERDICT[sc.verdict][0]}</span></p>
+        {sc.verdict === 'nosignal'
+          ? <p>The forecast favoured a category over only {pc(sc.leaned)} of the area, so there is little to check: most of the map stayed close to the normal chances.</p>
+          : <p>The forecast favoured a category (40% chance or more) over <strong>{pc(sc.leaned)}</strong> of the area. Rainfall fell in that
+             category across <strong>{pc(sc.hit)}</strong> of it (by chance alone about 33%){sc.opposite > 0.005 ? <>, and in the opposite outer category across {pc(sc.opposite)}</> : ''}.</p>}
+        <p class="caveat">One {label} is a single result: it shows what happened this time, not how reliable the forecasts are over many years.</p>
+      </div>
+      <div class="box">
+        <h3>What was observed</h3>
+        <div class="probbar" role="img" aria-label={`Observed: below normal over ${pc(sc.observed[0])} of the area, near normal ${pc(sc.observed[1])}, above normal ${pc(sc.observed[2])}`}>
+          {CATS.map((c, k) => <span class={`pb-${c}`} style={`flex:${sc.observed[k]}`}>{sc.observed[k] >= 0.07 ? pc(sc.observed[k]) : ''}</span>)}
+        </div>
+        <p class="caveat">Share of the area in each category (CHIRPS rainfall against the terciles of the reference period): mostly <strong>{NAME[main]}</strong>.</p>
+        {rpss != null && Number.isFinite(rpss) && <p class="vc-score">Probability score against climatology (RPSS): <strong class={rpss > 0 ? 'pos' : 'neg'}>{rpss >= 0 ? '+' : ''}{rpss.toFixed(2)}</strong>
+          <span class="caveat">{rpss > 0 ? 'better' : 'worse'} than always giving the normal chances</span></p>}
+      </div>
+    </div>
+
+    <h3>Forecast and observed, side by side</h3>
+    <p class="caveat">Drag the divider (or use the slider below the map) to compare the forecast on the left with what was observed on the right.</p>
+    <div class="seg" role="group" aria-label="Compare" id="vc-mode">
+      <button type="button" data-mode="category" aria-pressed="true">Category</button>
+      <button type="button" data-mode="anomaly" aria-pressed="false">Difference from normal</button>
+    </div>
+    <div class="vc-mapwrap">
+      <canvas id="vc-map" role="img" aria-describedby="vc-desc"></canvas>
+      <span class="vc-tag vc-left">Forecast</span><span class="vc-tag vc-right">Observed</span>
+      <div id="vc-tip" class="ex-tip" hidden></div>
+    </div>
+    <label class="vc-range">Divider position
+      <input id="vc-split" type="range" min="0" max="100" value="50" step="1" aria-controls="vc-map" />
+    </label>
+    <div id="vc-legend" class="ex-legend"></div>
+    <p id="vc-desc" class="caveat">Map: on the left the forecast's most likely category in each 0.25° cell (white where none reaches 40%), on the right
+      the category observed. Observed: {NAME.map((n, k) => `${n} ${pc(sc.observed[k])}`).join(', ')} of the area.</p>
+    <p id="vc-status" class="caveat" role="status">Loading the map…</p>
+  </section>
+)}
+
+<script>
+  import { RAMPS, DIV, DRY, OUT, tercileColor, observedCategory, observedColor, anomalyColor, createMap } from '../lib/cellmap.js';
+  const root = document.getElementById('how-did-we-do') as HTMLElement | null;
+  if (root) {
+    const $ = (id: string) => document.getElementById(id) as HTMLElement;
+    const canvas = $('vc-map') as HTMLCanvasElement, range = $('vc-split') as HTMLInputElement;
+    const S: any = { mode: 'category', split: 0.5, palette: 'standard' };
+    try { S.palette = localStorage.getItem('mapPalette') === 'cb' ? 'cb' : 'standard'; } catch { /* storage unavailable */ }
+    let G: any, D: any, M: any, inView: Set<number>;
+    const pc = (x: number) => `${Math.round(100 * x)}%`;
+    const NAME = ['below normal', 'near normal', 'above normal'];
+
+    const fc = (i: number) => {
+      if (!inView.has(i)) return OUT;
+      if (S.mode === 'anomaly') return anomalyColor(D.mean[i], D.normal[i]);
+      return D.pb[i] == null ? DRY : tercileColor([D.pb[i], D.pn[i], D.pa[i]], S.palette);
+    };
+    const ob = (i: number) => {
+      if (!inView.has(i)) return OUT;
+      if (S.mode === 'anomaly') return anomalyColor(D.obs[i], D.normal[i]);
+      return observedColor(observedCategory(D.obs[i], D.t1[i], D.t2[i]), S.palette);
+    };
+    function legend() {
+      const sw = (c: string) => `<i style="background:${c}"></i>`;
+      $('vc-legend').innerHTML = S.mode === 'anomaly'
+        ? `<span class="lg-row"><b>Difference from normal</b>${DIV.map(sw).join('')}</span><span class="lg-row caveat">−60% · −40% · −20% · ±5% · +20% · +40% · +60% (forecast: expected rainfall; observed: CHIRPS)</span>`
+        : ['Below normal', 'Near normal', 'Above normal'].map((n, k) => `<span class="lg-row"><b>${n}</b>${sw(RAMPS[S.palette][k][4])}</span>`).join('') +
+          `<span class="lg-row caveat">left: darker = more likely (white: no category reaches 40%); right: the category observed</span>`;
+    }
+    function draw() { if (M) { M.draw(fc, { split: S.split, colour2: ob }); legend(); } }
+    function setSplit(f: number) { S.split = Math.min(1, Math.max(0, f)); range.value = String(Math.round(100 * S.split)); draw(); }
+
+    async function start() {
+      try {
+        const [g, d, a] = await Promise.all([root!.dataset.grid, root!.dataset.cells, root!.dataset.areas].map((u) => fetch(u!).then((r) => { if (!r.ok) throw new Error(u); return r.json(); })));
+        G = g; D = d; M = createMap(canvas, G, a);
+      } catch { $('vc-status').textContent = 'The comparison map could not be loaded.'; return; }
+      inView = new Set(G.views[root!.dataset.view!] ?? G.views.all_ethiopia);
+      $('vc-status').textContent = '';
+      draw();
+    }
+
+    root.addEventListener('click', (ev) => {
+      const b = (ev.target as HTMLElement).closest('[data-mode]') as HTMLElement | null;
+      if (!b) return;
+      S.mode = b.dataset.mode;
+      root.querySelectorAll('[data-mode]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      draw();
+    });
+    range.addEventListener('input', () => setSplit(Number(range.value) / 100));
+    let dragging = false;
+    const at = (ev: PointerEvent) => { const r = canvas.getBoundingClientRect(); return (ev.clientX - r.left) / r.width; };
+    canvas.addEventListener('pointerdown', (ev) => {
+      if (!M) return;
+      if (Math.abs(at(ev) - S.split) * canvas.clientWidth < 28 || ev.pointerType !== 'touch') { dragging = true; canvas.setPointerCapture(ev.pointerId); setSplit(at(ev)); }
+    });
+    canvas.addEventListener('pointerup', () => { dragging = false; });
+    canvas.addEventListener('pointercancel', () => { dragging = false; });
+    canvas.addEventListener('pointermove', (ev) => {
+      if (dragging) { setSplit(at(ev)); return; }
+      if (!M || ev.pointerType !== 'mouse') return;
+      const i = M.cellAt(ev.clientX, ev.clientY), t = $('vc-tip');
+      if (i < 0 || !inView.has(i)) { t.hidden = true; return; }
+      const [la, lo] = M.latlon(i), p = [D.pb[i], D.pn[i], D.pa[i]], o = observedCategory(D.obs[i], D.t1[i], D.t2[i]);
+      const k = p[0] == null ? -1 : p.indexOf(Math.max(...p));
+      t.innerHTML = `<strong>${la.toFixed(2)}°N ${lo.toFixed(2)}°E</strong><br>` +
+        (k < 0 ? 'Dry season: no tercile forecast' : `Forecast: ${NAME[k]} most likely (${pc(p[k])})`) +
+        (D.obs[i] != null ? `<br>Observed: ${Math.round(D.obs[i])} mm${o >= 0 ? ', ' + NAME[o] : ''} (normal ${Math.round(D.normal[i])} mm)` : '');
+      const r = canvas.parentElement!.getBoundingClientRect();
+      t.style.left = Math.min(ev.clientX - r.left + 14, r.width - 230) + 'px';
+      t.style.top = ev.clientY - r.top + 14 + 'px';
+      t.hidden = false;
+    });
+    canvas.addEventListener('pointerleave', () => { $('vc-tip').hidden = true; });
+    window.addEventListener('resize', draw);
+    start();
+  }
+</script>
+<style is:global>
+  .vc .ex-tip{position:absolute;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.82rem;box-shadow:0 4px 14px rgba(0,0,0,.12);max-width:240px}
+  .vc .ex-legend{padding:6px 0;font-size:.8rem;max-width:760px}
+  .vc .lg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:2px 0}
+  .vc .lg-row b{min-width:9.5em;font-weight:600}
+  .vc .lg-row i{display:inline-block;width:22px;height:12px;border:1px solid rgba(0,0,0,.08)}
+  .vc-cards{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:12px}
+  .vc-cards .box{margin:0}
+  .vc-word{font-size:1.15rem;margin:0 0 .3em}
+  .vc-word .tr{font-size:1rem}
+  .vc-score{margin:.4em 0 0}
+  .vc-mapwrap{position:relative;max-width:760px;margin:8px 0 4px}
+  .vc-mapwrap canvas{width:100%;display:block;border-radius:10px;background:var(--surface);cursor:ew-resize}
+  .vc-tag{position:absolute;top:8px;font-size:.78rem;font-weight:700;background:rgba(255,255,255,.88);color:#111;border-radius:6px;padding:2px 8px;pointer-events:none}
+  .vc-left{left:8px}.vc-right{right:8px}
+  .vc-range{display:flex;align-items:center;gap:10px;max-width:760px;font-size:.85rem}
+  .vc-range input{flex:1}
+  @media (max-width:860px){ .vc-cards{grid-template-columns:1fr} }
+</style>

@@ -130,3 +130,29 @@ export function regional(grid, d, areas, viewPos, target, lang = 'en') {
   out.push(track(all.rpss, lang).text);
   return { text: out.join(' '), all };
 }
+
+// "How did we do?" for a verified target: where the forecast favoured a category (>= 40% and the largest), the share of
+// that area where the observed rainfall fell in it (by chance about 1 in 3) and the share where it fell in the opposite
+// outer category; observed categories against the reference terciles t1, t2. Shares are cos(latitude)-weighted.
+export function scorecard(grid, d, pos) {
+  if (!d.obs || !d.t1) return null;
+  const w = grid._w ?? (grid._w = weights(grid));
+  const seen = [0, 0, 0];
+  let all = 0, leaned = 0, hit = 0, opposite = 0, cells = 0;
+  for (const i of pos) {
+    const y = num(d.obs[i]), t1 = num(d.t1[i]), t2 = num(d.t2[i]);
+    const p = [num(d.pb[i]), num(d.pn[i]), num(d.pa[i])];
+    if (![y, t1, t2, ...p].every(Number.isFinite)) continue;
+    const o = y < t1 ? 0 : y > t2 ? 2 : 1;
+    seen[o] += w[i]; all += w[i]; cells++;
+    const k = p.indexOf(Math.max(...p));
+    if (p[k] < LEAN || p.filter((x) => x === p[k]).length > 1) continue;
+    leaned += w[i];
+    if (o === k) hit += w[i];
+    else if (k !== 1 && o === 2 - k) opposite += w[i];
+  }
+  if (!all) return null;
+  const r = { cells, observed: seen.map((x) => x / all), leaned: leaned / all, hit: leaned ? hit / leaned : null, opposite: leaned ? opposite / leaned : null };
+  r.verdict = r.leaned < 0.1 ? 'nosignal' : r.hit >= 0.5 ? 'right' : r.opposite >= 1 / 3 ? 'missed' : 'partly';
+  return r;
+}

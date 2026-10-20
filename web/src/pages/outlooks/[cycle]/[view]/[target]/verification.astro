@@ -2,6 +2,7 @@
 import Base from '../../../../../layouts/Base.astro';
 import ContextBar from '../../../../../components/ContextBar.astro';
 import TargetStrip from '../../../../../components/TargetStrip.astro';
+import VerifyCompare from '../../../../../components/VerifyCompare.astro';
 import { C, cycleOf, pagesFor, url } from '../../../../../lib/cycles.js';
 import { renderer } from '../../../../../lib/outlook.js';
 
@@ -24,6 +25,7 @@ const done = Boolean(t.verification[view]);
     {done
       ? <p class="caveat">The selected target comes first; the other verified targets of the cycle follow. Maps: <a href={url.target(c, view, target) + '?kind=verification&product=verification_comparison#maps'}>forecast and observed anomaly side by side</a>.</p>
       : <p class="notice">{t.label} has not been verified yet: {t.status.text}. The verified targets of this cycle are shown below.</p>}
+    {done && <VerifyCompare cycle={cid} view={view} target={target} label={t.label} summary={t.verification[view].summary} />}
     <div id="vf-body" set:html={R.verification()} />
   </section>
   <section>
