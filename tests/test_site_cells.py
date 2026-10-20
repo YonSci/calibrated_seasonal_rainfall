@@ -53,6 +53,7 @@ class Cells(unittest.TestCase):
         self.assertEqual(d['n_tr'], 24)
 
 
+@unittest.skipUnless((sc.ADMIN / 'eth_admin1.shp').is_file(), 'needs the OCHA boundaries in data/shapefiles/ (not in the repository)')
 class Areas(unittest.TestCase):
     def test_every_area_has_cells_and_parents(self):
         with tempfile.TemporaryDirectory() as tmp:

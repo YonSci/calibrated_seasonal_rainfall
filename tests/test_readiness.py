@@ -12,6 +12,8 @@ class Readiness(unittest.TestCase):
         ondj = dict(season=dict(name='ONDJ', start='10-01', end='01-31'))
         self.assertEqual(cr.season_year_months(ondj, 2027), [(2027, 10), (2027, 11), (2027, 12), (2028, 1)])
 
+    @unittest.skipUnless((cr.ROOT / 'data/processed').is_dir() and (cr.ROOT / 'data/raw/ecmwf_sst').is_dir(),
+                         'needs the local SEAS5 and CHIRPS archive (not in the repository)')
     def test_2027_cycles_have_no_defects(self):
         for c in ('config/cycles/jan_2027_fmam.json', 'config/cycles/feb_2027_fmam.json', 'config/cycles/may_2027.json',
                   'config/cycles/sep_2027_ondj.json'):
