@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPO = 'https://github.com/YonSci/calibrated_seasonal_rainfall'
 RAW = 'https://raw.githubusercontent.com/YonSci/calibrated_seasonal_rainfall'
 CAT = ['below normal', 'near normal', 'above normal']
-CAT_COLOURS = ['#eb6834', '#a9a7a0', '#1baf7a']
+CAT_COLOURS = ['#a6611a', '#8f8d86', '#1b7c94']    # brown / grey / teal-blue: distinguishable with colour-vision deficiencies
 RELEASES = ROOT / 'config/site_releases.json'
 CHANGE_TYPES = {
     'verification': 'New verification observations',

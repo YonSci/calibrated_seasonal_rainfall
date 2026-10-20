@@ -424,7 +424,7 @@ def compare(sources_dir, native_path, domain_mask, registry, out, minimum=0.40, 
 
 
 # ---------------------------------------------------------------------------------- figures
-COLOURS = {'below': '#eb6834', 'near': '#a9a7a0', 'above': '#1baf7a', 'weak': '#ffffff', 'unknown': '#eeeeee', 'noforecast': '#bdbdbd'}
+COLOURS = {'below': '#a6611a', 'near': '#8f8d86', 'above': '#1b7c94', 'weak': '#ffffff', 'unknown': '#eeeeee', 'noforecast': '#bdbdbd'}
 
 
 def _draft(fig, validated):

@@ -93,6 +93,11 @@ const menus = [
     .tenths{font-size:1.25rem;letter-spacing:2px;margin:2px 0;line-height:1}
     .tenths .t-below{color:var(--below)}.tenths .t-near{color:var(--near)}.tenths .t-above{color:var(--above)}
     .tr{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.85rem}
+    .ch-tip{position:fixed;z-index:60;pointer-events:none;max-width:300px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.82rem;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.14)}
+    .ch-tip[hidden]{display:none}
+    svg.chart .ch-pt{cursor:default;transition:opacity .1s}
+    svg.chart .ch-pt.ch-on{stroke:var(--ink);stroke-width:2;paint-order:stroke}
+    svg.chart:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
     .tr-low{background:var(--warn-bg);color:var(--warn)}.tr-modest{background:var(--plain-bg);color:var(--ink2)}
     .tr-fair{background:var(--info-bg);color:var(--info)}.tr-good{background:var(--good-bg);color:var(--good)}.tr-unknown{background:var(--plain-bg);color:var(--muted)}
     .button-link{display:inline-block;background:var(--accent);color:var(--surface);padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600}
@@ -180,6 +185,10 @@ const menus = [
       const open = m.classList.toggle('open');
       toggle.setAttribute('aria-expanded', String(open));
     });
+  </script>
+  <script>
+    import { enableChartTips } from '../lib/charttips.js';
+    enableChartTips();
   </script>
   <script>
     // Sortable tables: click a column header (numbers by value, text alphabetically; a third click restores the order).

@@ -32,7 +32,7 @@ const plain = summaryFor(cid, view, target, t.label);
 <Base title={`${t.label} outlook · ${c.option} · ${R.viewLabel(view)}`} section="outlook"
       description={`${t.label} rainfall outlook for Ethiopia (${c.init} initialization), ${R.viewLabel(view)}: tercile probabilities, amounts and maps.`}>
   <ContextBar slot="context" cycle={c} view={view} section="outlook" target={target} />
-  <OutlookHero O={O} status={t.status} plain={plain} />
+  <OutlookHero O={O} cycle={c} status={t.status} plain={plain} />
   {plain && <OutlookExplorer cycle={cid} view={view} target={target} label={t.label} viewLabel={R.viewLabel(view)} reference={c.reference} />}
 
   <section>

@@ -1,18 +1,30 @@
 ---
 // The answer first: headline, probabilities and map side by side, then the three key figures (amount, signal, skill).
 // O: the outlook pieces from lib/outlook.js (element ids kept, so the text is checked against the current page).
-const { O, more = null, status = null, plain = null, exploreHref = '#explore' } = Astro.props;  // more: [href, label]; status: the target's verification status;
-// plain: the plain-language summary (lib/summary.js)
-import { asset } from '../lib/data.js';
+const { O, more = null, status = null, plain = null, exploreHref = '#explore', cycle = null } = Astro.props;  // more: [href, label]; status: the target's
+// verification status; plain: the plain-language summary (lib/summary.js); cycle: the cycle (for the dates line)
+import { asset, SITE } from '../lib/data.js';
 import { LANGS, PUBLISHED } from '../lib/i18n.js';
 const CATS = ['below', 'near', 'above'];
 const pc = (x) => `${Math.round(100 * x)}%`;
+// Dates of this outlook: model initialization, issue or freeze of the forecast record, last verification run, page update
+const meta = Object.fromEntries(cycle?.meta ?? []);
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const day = (iso) => { const [y, m, d] = iso.split('-').map(Number); return `${d} ${MON[m - 1]} ${y}`; };
+const dates = !cycle ? [] : [
+  ['Model initialized', cycle.init_date ? day(cycle.init_date) : null, cycle.init_date],
+  cycle.publication?.issued && cycle.publication?.date ? ['Issued', day(cycle.publication.date.slice(0, 10)), cycle.publication.date.slice(0, 10)]
+    : ['Forecast frozen', (String(meta['Forecast record'] ?? '').match(/Frozen (\d{1,2} \w{3} \d{4})/) ?? [])[1] ?? null, null],
+  ['Verification last run', meta['Verification last run'] && meta['Verification last run'] !== 'Not run' ? meta['Verification last run'] : null, null],
+  ['Page updated', SITE.built_utc ? `${day(SITE.built_utc.slice(0, 10))} (release ${SITE.release})` : null, SITE.built_utc?.slice(0, 10)],
+].filter((x) => x[1]);
 ---
 <section id="outlooks" class="hero">
   <div class="hero-text">
     <p class="eyebrow" id="ol-eyebrow" set:html={O['ol-eyebrow']} />
     <h1 id="ol-title" set:html={O['ol-title']} />
     <p class="badges"><span class="research-inline" set:html={O['ol-publication']} />{status && <span class={`status ${status.code}`}>{status.text}</span>}</p>
+    {dates.length > 0 && <p class="ol-dates">{dates.map(([k, v, iso]) => <span><span class="caveat">{k}</span> {iso ? <time datetime={iso}>{v}</time> : v}</span>)}</p>}
     <p class="lead" id="ol-lead" set:html={O['ol-lead']} />
     {plain && (
       <div class="plain-summary" id="plain-summary" data-view={plain.view} data-label={plain.label}
@@ -110,6 +122,8 @@ const pc = (x) => `${Math.round(100 * x)}%`;
   .hero-map{margin:0}
   .badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 6px}
   .badges .research-inline{margin:0}
+  .ol-dates{display:flex;flex-wrap:wrap;gap:2px 16px;margin:0 0 6px;font-size:.85rem}
+  .ol-dates>span{white-space:nowrap}
   .plain-summary{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 12px 12px 0;padding:10px 16px;margin:10px 0 14px}
   .plain-summary .plain-title{font-size:1rem;margin:0 0 4px;color:var(--accent)}
   .plain-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px}

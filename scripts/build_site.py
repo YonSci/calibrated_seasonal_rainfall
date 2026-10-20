@@ -904,13 +904,13 @@ python scripts\\build_site.py</code></pre>
 
 CSS = r'''
 :root{--bg:#f7f7f5;--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#6b6a66;--line:#e1e0dc;--accent:#1f6f5c;--accent-soft:#e6f1ed;
---fc:#2a78d6;--obs:#3d3c39;--below:#eb6834;--near:#a9a7a0;--above:#1baf7a;--pos:#1f6f5c;--neg:#b03a24;
+--fc:#2a78d6;--obs:#3d3c39;--below:#a6611a;--near:#8f8d86;--above:#1b7c94;--pos:#1f6f5c;--neg:#b03a24;
 --good:#1f7a4a;--good-bg:#e5f3ea;--warn:#8a5a00;--warn-bg:#fdf1d8;--info:#2a5d9f;--info-bg:#e7eff9;--plain-bg:#efeeea;--code:#efeeea}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121211;--surface:#1b1b1a;--ink:#f1f0ec;--ink2:#c3c1bb;--muted:#a3a19b;--line:#33322f;
---accent:#6fc7ad;--accent-soft:#1d2b27;--fc:#5b9be6;--obs:#d9d7d0;--below:#f07d4f;--near:#8a8882;--above:#2cc58d;--pos:#7fd3b8;--neg:#f0907c;
+--accent:#6fc7ad;--accent-soft:#1d2b27;--fc:#5b9be6;--obs:#d9d7d0;--below:#d4955a;--near:#8a8882;--above:#4fb0c6;--pos:#7fd3b8;--neg:#f0907c;
 --good:#7fd3a0;--good-bg:#1c2c22;--warn:#f0c46b;--warn-bg:#2d2414;--info:#8fb8f0;--info-bg:#18243a;--plain-bg:#262624;--code:#262624}}
 :root[data-theme="dark"]{--bg:#121211;--surface:#1b1b1a;--ink:#f1f0ec;--ink2:#c3c1bb;--muted:#a3a19b;--line:#33322f;
---accent:#6fc7ad;--accent-soft:#1d2b27;--fc:#5b9be6;--obs:#d9d7d0;--below:#f07d4f;--near:#8a8882;--above:#2cc58d;--pos:#7fd3b8;--neg:#f0907c;
+--accent:#6fc7ad;--accent-soft:#1d2b27;--fc:#5b9be6;--obs:#d9d7d0;--below:#d4955a;--near:#8a8882;--above:#4fb0c6;--pos:#7fd3b8;--neg:#f0907c;
 --good:#7fd3a0;--good-bg:#1c2c22;--warn:#f0c46b;--warn-bg:#2d2414;--info:#8fb8f0;--info-bg:#18243a;--plain-bg:#262624;--code:#262624}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:140px}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif}

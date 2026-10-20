@@ -26,7 +26,7 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
 ---
 <Base title="Seasonal Rainfall Outlook Platform" section=""
       description="Seasonal Rainfall Outlook Platform: calibrated ECMWF SEAS5 seasonal rainfall outlooks for Ethiopia: the current outlook, maps, verification against CHIRPS and historical skill.">
-  <OutlookHero O={O} status={c.targets[0].status} plain={plain} exploreHref={explore + '#explore'} more={[url.target(c, view, target) + '#explore', `Explore the ${c.targets[0].label} map and find your area`]} />
+  <OutlookHero O={O} cycle={c} status={c.targets[0].status} plain={plain} exploreHref={explore + '#explore'} more={[url.target(c, view, target) + '#explore', `Explore the ${c.targets[0].label} map and find your area`]} />
 
   {AREAS.length > 0 && (
     <section class="find-area box" id="find-area">
