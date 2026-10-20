@@ -139,6 +139,15 @@ regression's (−1.08 mm), which becomes an alternative. A recommendation would 
 ablation result is a reason for caution. The results support the recommendation's order: a spatial CNN or a larger network is not
 justified by these data; more forecast information (predictors) and more independent seasons would come first.
 
+## 3b. Validation seasons (shadow forecasts)
+
+A DRN listed by the method selection gets its own amount shadow (`scripts/dist_shadow.py`, docs/48), like every distribution
+model: fitted on the cycle's reference years with the first 25 members (`members` in
+`config/probability_calibration/amount_shadow.json`) and the cell coordinates, made when the cycle is run and scored once
+CHIRPS is available. **2026, JJAS September (its first season):** CRPS skill +0.052 against +0.188 for the MVS ensemble —
+worse, as EMOS and quantile regression were that season; 1 of the 3 seasons needed. From 2027 the shadows are made before
+each season (docs/52).
+
 ## 4. Running
 
     python scripts/dist_benchmark.py --config config/probability_calibration/<cycle>_neural.json --workers 5

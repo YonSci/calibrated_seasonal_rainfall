@@ -42,5 +42,26 @@ class Selection(unittest.TestCase):
         self.assertIn('No method is confirmed better', ms.why(None, 'amounts', 'Sep', 'MVS ensemble', [], 'CRPS (mm)'))
 
 
+class MosValidation(unittest.TestCase):
+    def test_benchmark_year_and_shadow_seasons_one_per_year(self):
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            old, ms.ROOT = ms.ROOT, Path(tmp)
+            try:
+                for year, observed, crps in ((2026, True, 9.), (2027, True, 4.), (2028, False, None)):
+                    f = Path(tmp) / f'outputs/mos/may_jjas/shadow/{year}/pcr__Aug.json'
+                    f.parent.mkdir(parents=True)
+                    f.write_text(json.dumps(dict(forecast_year=year, observed=observed, scores=None if crps is None else dict(
+                        crps=dict(method=crps, mvs_ensemble=5.), rps=dict(method=.3, published=.4)))), encoding='utf-8')
+                mos = dict(validation=dict(Aug=dict(year=2026, crps=dict(pcr=6., mvs_ensemble=5.), rps=dict(pcr=.3, incumbent=.3))))
+                v = ms.mos_validation('may_jjas', mos, 'pcr', 'Aug', 'crps', 3)
+            finally:
+                ms.ROOT = old
+        self.assertEqual([s['year'] for s in v['seasons']], [2026, 2027])          # 2028 not yet observed
+        self.assertEqual(v['seasons'][1], dict(year=2027, method=4., reference=5.))
+        self.assertEqual(len(v['seasons']), 2)                                      # one record for 2026
+
+
 if __name__ == '__main__':
     unittest.main()

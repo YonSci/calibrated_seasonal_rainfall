@@ -200,6 +200,10 @@ def probability(store):
                         v = (g.get('validation') or {}).get(target)
                         if v and m in v[sc] and ref in v[sc]:
                             add_validation(r, v[sc][m], v[sc][ref])
+                        for f in sorted((ROOT / f'outputs/mos/{cy}/shadow').glob(f'*/{m}__{target}.json')):   # shadow seasons
+                            s = (read(f) or {}).get('scores') or {}
+                            if read(f).get('observed') and sc in s and (not v or int(read(f)['forecast_year']) != v.get('year')):
+                                add_validation(r, s[sc]['method'], s[sc]['published' if sc == 'rps' else 'mvs_ensemble'])
 
 
 def evidence(rows):

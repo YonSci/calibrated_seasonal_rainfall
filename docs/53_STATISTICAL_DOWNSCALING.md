@@ -175,6 +175,18 @@ leave-one-year-out over them) and forecasts the forecast year. Once its CHIRPS i
 the forecast is scored with the published probabilities (recomputed by the same code) and the MVS-corrected ensemble, on the
 same cells. These forecasts are never published.
 
+### 2.8b Shadow forecasts from 2027 (`scripts/mos_shadow.py`, `config/mos/shadow.json`)
+
+From the 2027 cycles on, every cycle run (`run_operational.py`, stage `mos_shadow`, before the season when the forecast is
+issued) also makes a CCA and a PCR forecast exactly as in 2.8, with the cycle's reference years. The SST of the forecast year
+is downloaded first if missing. The forecast is **frozen**: its arrays are saved (`forecast_<target>.npz`) with the time it was
+made and whether the target's observation already existed, and later runs reuse them while the forecast inputs are
+unchanged. The daily scoring (`watch_observations.py` runs the cycle's verification) scores them once CHIRPS is available:
+`outputs/mos/<cycle>/shadow/<year>/<method>__<target>.json`. These are the independent validation seasons of the method
+selection (docs/50), added to the benchmark's 2026 forecast year, one record per year. A target that cannot be forecast (for
+example SST not yet on the CDS) is recorded in `status.json` and retried at the next run; the shadow never fails a cycle run.
+Never published.
+
 ### 2.9 Tests and decisions (`tests_of`; `scripts/selection_tests.py`)
 
 - Per method, target and score: the per-year score differences from the reference, a one-sided paired sign-flip test over

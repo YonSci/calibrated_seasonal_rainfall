@@ -1,0 +1,12 @@
+{
+  "description": "Shadow statistical-downscaling forecasts (CCA and PCR, version 2; scripts/mos_shadow.py, docs/53). For every cycle from from_year on, both methods are fitted on the cycle's reference years and forecast the forecast year when the cycle is run (before its season); the forecast is frozen and scored once CHIRPS is available. These are the independent validation seasons the method selection needs (docs/50). Never published as a forecast. The forecast year of the 2026 cycles is scored inside the benchmark (outputs/mos/<cycle>/benchmark.json, validation).",
+  "since": "2026-10-20",
+  "from_year": 2027,
+  "cycles": [
+    {"initialization_month": 1, "season": "FMAM", "name": "jan_fmam", "mos_config": "config/mos/jan_fmam.json"},
+    {"initialization_month": 2, "season": "FMAM", "name": "feb_fmam", "mos_config": "config/mos/feb_fmam.json"},
+    {"initialization_month": 5, "season": "JJAS", "name": "may_jjas", "mos_config": "config/mos/may_jjas.json"},
+    {"initialization_month": 9, "season": "ONDJ", "name": "sep_ondj", "mos_config": "config/mos/sep_ondj.json"}
+  ],
+  "output_root": "outputs/mos/{name}/shadow"
+}

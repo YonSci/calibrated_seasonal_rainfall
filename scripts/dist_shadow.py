@@ -42,12 +42,12 @@ if ARGS is not None:
 import xarray as xr                                                     # noqa: E402
 from common import ROOT, load_config, save_json, save_netcdf            # noqa: E402
 
-CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/dist_benchmark.py', 'scripts/bias_methods.py',
+CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/neural_calibration.py', 'scripts/dist_benchmark.py', 'scripts/bias_methods.py',
         'scripts/bias_benchmark.py', 'scripts/bias_validation.py', 'scripts/run_calibration.py', 'scripts/calibration_core.py',
         'scripts/common.py', 'scripts/cycle.py']
 LEVELS = (.1, .5, .9)
 SHORT = {'emos_csg': 'EMOS', 'extended_logistic': 'extended logistic', 'quantile_regression': 'quantile regression', 'bjp': 'BJP',
-         'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF'}
+         'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF', 'drn_csg': 'DRN'}
 POSITION_COLOURS = ['#a6611a', '#d9d9d9', '#1a9641']                    # below the interval, inside, above
 
 
@@ -112,15 +112,20 @@ def run_target(cycle_path, scfg, entry, target):
     year = cycle['forecast_year']
     ref = list(range(cycle['reference_years'][0], cycle['reference_years'][1] + 1))
     tag, models, obs, _, lat, lon = load_inputs(target_config(project, target), ref + [year], ref)
+    members = (scfg.get('members') or {}).get(scfg['model'])          # as in the model's benchmark (the DRN: 25, docs/54)
+    if members:
+        models = {z: m[:members] for z, m in models.items()}
     area = cell_area(lat, lon)
     idx = np.flatnonzero(load_mask(bench['cells'], lat, lon))
+    glat, glon = np.meshgrid(lat, lon, indexing='ij')
+    coords = (glat.ravel()[idx], glon.ravel()[idx])                     # location predictors of the DRN
     area_e = area[idx]
     regions = {k: load_mask(v, lat, lon)[idx] for k, v in bench['regions'].items()}
     n = len(idx)
-    S, st = fold(models, obs, ref, idx, area_e)
+    S, st = fold(models, obs, ref, idx, area_e, coords=coords)
     mdl = dc.MODELS[scfg['model']]
     fit = mdl.fit(S, **mdl.defaults)
-    d = mdl.predict(dc.features(models[year][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv']), fit)
+    d = mdl.predict(dc.features(models[year][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords), fit)
     valid = st['valid']
     q = {u: np.where(valid, d.quantile(np.full(n, u)), np.nan) for u in LEVELS}
     p = np.where((valid & st['prob_ok'])[:, None], d.terciles(st['q1'], st['q2']), np.nan)

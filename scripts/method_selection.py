@@ -6,7 +6,7 @@ Brings the benchmarks together under one rule (config/method_selection_rule.json
   probability stage     outputs/probability_calibration/<cycle>/benchmark.json (Phase 1) and phase2_binary/
   distribution models   outputs/probability_calibration/<cycle>/distribution/ (Phase 2) and phase3/; their independent
                         seasons from amount_shadow/<year>/ (dist_shadow.py runs a shadow for every candidate model)
-  statistical downscaling  outputs/mos/<cycle>/benchmark.json (mos_benchmark.py: CCA, PCR; validation as Leung–Dirichlet)
+  statistical downscaling  outputs/mos/<cycle>/benchmark.json (mos_benchmark.py: CCA, PCR; validation: its forecast year and the shadow seasons of mos_shadow.py)
   Leung–Dirichlet       outputs/leung_dirichlet/<cycle>/benchmark.json (leung_dirichlet_benchmark.py; its validation season is the
                         cycle's forecast year once observed, scored by the same run)
 Products: the published tercile probabilities (RPS against MVS + climatology blend) and rainfall amounts (CRPS against the
@@ -113,6 +113,26 @@ def leung_dirichlet_validation(ld, method, target, score, minimum):
     return dict(seasons=seasons, mean_difference=float(seasons[0]['method'] - seasons[0]['reference']), required=minimum)
 
 
+def mos_validation(cycle, mos, method, target, score, minimum):
+    """Independent seasons of a statistical-downscaling method (docs/53): the benchmark's forecast year (2026) and every
+    scored shadow season (mos_shadow.py, from 2027), one record per year."""
+    seasons = {}
+    v = (mos.get('validation') or {}).get(target)
+    ref = 'incumbent' if score == 'rps' else 'mvs_ensemble'
+    if v and method in v[score] and ref in v[score]:
+        seasons[v['year']] = dict(year=v['year'], method=v[score][method], reference=v[score][ref])
+    for f in sorted((ROOT / f'outputs/mos/{cycle}/shadow').glob(f'*/{method}__{target}.json')):
+        r = json.loads(f.read_text(encoding='utf-8'))
+        s = (r.get('scores') or {}).get(score)
+        if r.get('observed') and s:
+            seasons[int(r['forecast_year'])] = dict(year=int(r['forecast_year']), method=s['method'],
+                                                    reference=s['published' if score == 'rps' else 'mvs_ensemble'])
+    if not seasons:
+        return None
+    seasons = [seasons[y] for y in sorted(seasons)]
+    return dict(seasons=seasons, mean_difference=float(np.mean([x['method'] - x['reference'] for x in seasons])), required=minimum)
+
+
 def status_of(c, minimum):
     v = c.get('validation')
     if c['family'] == 'bias_correction' and c.get('status') in ('recommended', 'not_supported', 'candidate'):
@@ -198,8 +218,8 @@ def main():
                         c['validation'] = shadow_validation(cy, c['method'], t, minimum)
                     if c['family'] == 'leung_dirichlet':
                         c['validation'] = leung_dirichlet_validation(ld, c['method'], t, score, minimum)
-                    if c['family'] == 'mos':                                # the forecast year, scored by the same run
-                        c['validation'] = leung_dirichlet_validation(mos, c['method'], t, score, minimum)
+                    if c['family'] == 'mos':                                # the benchmark's forecast year and the shadow seasons
+                        c['validation'] = mos_validation(cy, mos, c['method'], t, score, minimum)
                     c['status'] = status_of(c, minimum)
                 sel = select(cands)
                 ref = spec['reference']['label']

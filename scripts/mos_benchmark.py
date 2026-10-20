@@ -367,28 +367,31 @@ def predictors(s, tc, models, years, shape):
     return {f: X[f] for f in wanted}, widths
 
 
-def forecast_validation(mcfg, cfg, models, obs, lat, lon, idx, Xall, widths, mvs_params, area_all, primary):
-    """The forecast year, every method fitted on the cycle's reference years, scored once its CHIRPS exists (never published)."""
+def forecast_validation(mcfg, cfg, models, obs, lat, lon, idx, Xall, widths, mvs_params, area_all, primary, with_choices=False):
+    """The forecast year, every method fitted on the cycle's reference years, scored once its CHIRPS exists (never published).
+    with_choices: also return each method's chosen field, modes and blend weight (mos_shadow.py)."""
     cycle = read(cfg['cycle'])
     year = cycle['forecast_year']
     ref = [z for z in range(cycle['reference_years'][0], cycle['reference_years'][1] + 1) if z in obs]
     if year not in models or any(year not in v for v in Xall.values()) or not ref:
-        return None
+        return (None, None) if with_choices else None
     O = np.stack([obs[z][idx] for z in ref])
     q1, q2 = np.quantile(O, [1 / 3, 2 / 3], axis=0, method='linear')
     s = mcfg['settings']
     X = {f: np.array([Xall[f][z] for z in ref]) for f in Xall}
     cells = primary & (O.std(0) >= 1.0) & (q1 > 0) & ((q2 - q1) > 1e-6)
-    probs, ens = {}, {}
+    probs, ens, choices = {}, {}, {}
     for k in METHODS:
         m = MOS(k, s['max_x_modes'], s['max_y_modes'], s['max_cca_modes'], s.get('fields')).fit(
             X, np.sqrt(np.maximum(O, 0)), cells=cells, area=area_all[idx], widths=widths)
         probs[k], ens[k], _ = products(*m.predict({f: Xall[f][year] for f in Xall}), q1, q2, m.w)
+        choices[k] = dict(field=m.field, modes=list(m.combo), blend=m.w)
     rec = Records('mvs', mvs_params, models, obs, ref, cfg['smoothing_alpha'])
     fit = pc.fit(pc.INCUMBENT, [rec.get(frozenset((z,)), [z])[0] for z in ref], area_all)
     probs['incumbent_recomputed'] = pc.predict(fit, ldb.forecast_record('mvs', mvs_params, models, obs, ref, year, cfg['smoothing_alpha']))[idx]
     ens['mvs_ensemble'], _, _, _ = ldb.corrected('mvs', mvs_params, [models[z][:, idx] for z in ref], O, models[year][:, idx])
-    return dict(probs=probs, ens=ens, O=O, q1=q1, q2=q2, primary=primary, area=area_all[idx], year=year)
+    v = dict(probs=probs, ens=ens, O=O, q1=q1, q2=q2, primary=primary, area=area_all[idx], year=year)
+    return (v, choices) if with_choices else v
 
 
 def validate_target(cycle, target, v, lat, lon, idx):
