@@ -60,9 +60,9 @@ def read(path):
 
 
 def assets(site, rel):
-    """Figure files of a section, relative to the site root."""
+    """Figure files of a section, relative to the site root (not the WebP display copies of scripts/site_webp.py)."""
     d = site / rel
-    return sorted(f.relative_to(site).as_posix() for f in d.rglob('*') if f.is_file()) if d.is_dir() else []
+    return sorted(f.relative_to(site).as_posix() for f in d.rglob('*') if f.is_file() and f.suffix != '.webp') if d.is_dir() else []
 
 
 def bias_files(site):
