@@ -1,0 +1,128 @@
+---
+// The forecast year at a glance: for each season, when its outlooks are issued (diamonds), its months (coloured by status:
+// verified, under way, still to come) and the next year's planned cycle (outlined), with a marker for today. The window
+// runs from nine months before the build to nine months after; the today marker is moved to the reader's date in the browser.
+import { C, url, defaultTarget } from '../lib/cycles.js';
+import { SITE } from '../lib/data.js';
+
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const built = new Date((SITE.built_utc ?? new Date().toISOString()).slice(0, 10) + 'T00:00:00Z');
+const y0 = built.getUTCFullYear(), m0 = built.getUTCMonth() - 9;
+const start = Date.UTC(y0, m0, 1), months = 19, end = Date.UTC(y0, m0 + months, 1);
+const W = 1000, LEFT = 150, RIGHT = 12, TOP = 40, ROW = 40;
+const x = (t) => LEFT + ((t - start) / (end - start)) * (W - LEFT - RIGHT);
+const d = (s) => Date.parse(s + 'T00:00:00Z');
+const NAMES = { FMAM: 'Belg', JJAS: 'Kiremt', ONDJ: 'Deyr / Hagaya' };
+const seasons = [...new Set(C.cycles.map((c) => c.season))];
+const rows = seasons.map((season) => {
+  const cycles = C.cycles.filter((c) => c.season === season);
+  const latest = cycles[cycles.length - 1];
+  const months = latest.targets.filter((t) => t.kind === 'month').map((t) => ({
+    label: t.label, a: d(t.start), b: d(t.end) + 86400000, code: t.status.code, text: t.status.text,
+    href: t.status.code === 'published' ? url.verification(latest, latest.default_view, t.id) : url.target(latest, latest.default_view, t.id),
+  }));
+  const issues = cycles.map((c) => ({ t: d(c.init_date), label: `${c.init} ${c.init_date.slice(0, 4)}`, href: url.target(c, c.default_view, defaultTarget(c)), option: c.option }));
+  // next year's cycle: the same issue months and season one year on (config/cycles/*_<year+1>*.json)
+  const plus = (t) => { const u = new Date(t); return Date.UTC(u.getUTCFullYear() + 1, u.getUTCMonth(), u.getUTCDate()); };
+  const next = { issues: issues.map((i) => ({ t: plus(i.t), label: i.label.replace(/\d{4}$/, (y) => String(+y + 1)) })),
+                 a: plus(months[0].a), b: plus(months[months.length - 1].b), label: latest.label.replace(/(\d{4})(?:\/(\d{2}))?/, (_, y, yy) => String(+y + 1) + (yy ? '/' + String((+yy + 1) % 100).padStart(2, '0') : '')) };
+  return { season, name: NAMES[season] ?? '', cycles, months, issues, next };
+});
+const H = TOP + rows.length * ROW + 8;
+const ticks = Array.from({ length: months }, (_, k) => { const t = Date.UTC(y0, m0 + k, 1); const u = new Date(t); return { t, m: MON[u.getUTCMonth()], y: u.getUTCMonth() === 0 ? u.getUTCFullYear() : null }; });
+const today = built.getTime();
+const fmt = (t) => { const u = new Date(t); return `${u.getUTCDate()} ${MON[u.getUTCMonth()]} ${u.getUTCFullYear()}`; };
+const STATUS = { published: 'verified', ongoing: 'under way', not_started: 'to come', awaiting: 'awaiting observations' };
+const cls = (code) => (code === 'published' ? 'tl-done' : code === 'ongoing' ? 'tl-now' : code === 'not_started' ? 'tl-later' : 'tl-wait');
+const visible = (a, b) => b > start && a < end;
+---
+<section class="timeline" id="timeline" data-start={start} data-end={end} data-left={LEFT} data-w={W - LEFT - RIGHT}>
+  <h2 class="h3">The forecast year at a glance</h2>
+  <div class="tl-scroll">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="tl-desc" class="tl-svg">
+      {ticks.map((k) => (
+        <g>
+          <line class={k.y ? 'tl-grid tl-newyear' : 'tl-grid'} x1={x(k.t)} x2={x(k.t)} y1={k.y ? 2 : TOP - 6} y2={H - 8} />
+          <text class="tl-month" x={x(k.t) + (W - LEFT - RIGHT) / months / 2} y={TOP - 12} text-anchor="middle">{k.m}</text>
+          {k.y && <text class="tl-year" x={x(k.t) + 3} y={12}>{k.y}</text>}
+        </g>
+      ))}
+      {rows.map((r, i) => {
+        const y = TOP + i * ROW + 8;
+        return (
+          <g>
+            <text class="tl-name" x={8} y={y + 13}>{r.season}</text>
+            <text class="tl-sub" x={8} y={y + 26}>{r.name}</text>
+            {r.months.filter((m) => visible(m.a, m.b)).map((m) => (
+              <a href={m.href}>
+                <rect class={`tl-m ${cls(m.code)}`} x={Math.max(LEFT, x(m.a)) + 1} y={y} width={Math.max(0, Math.min(x(m.b), W - RIGHT) - Math.max(LEFT, x(m.a)) - 2)} height={22} rx={4}>
+                  <title>{m.label}: {m.text}</title>
+                </rect>
+              </a>
+            ))}
+            {visible(r.next.a, r.next.b) && (
+              <rect class="tl-next" x={Math.max(LEFT, x(r.next.a)) + 1} y={y} width={Math.max(0, Math.min(x(r.next.b), W - RIGHT) - Math.max(LEFT, x(r.next.a)) - 2)} height={22} rx={4}>
+                <title>{r.next.label}: planned</title>
+              </rect>
+            )}
+            {r.issues.filter((s) => visible(s.t, s.t + 1)).map((s) => (
+              <a href={s.href}><path class="tl-issue" d={`M${x(s.t)},${y + 2} l8,9 l-8,9 l-8,-9 z`}><title>{s.option}: issued {fmt(s.t)}</title></path></a>
+            ))}
+            {r.next.issues.filter((s) => visible(s.t, s.t + 1)).map((s) => (
+              <path class="tl-issue tl-planned" d={`M${x(s.t)},${y + 2} l8,9 l-8,9 l-8,-9 z`}><title>{r.next.label} outlook, {s.label} initialization: planned</title></path>
+            ))}
+          </g>
+        );
+      })}
+      <g id="tl-today" transform={`translate(${x(today)},0)`}>
+        <line class="tl-today" x1="0" x2="0" y1={TOP - 4} y2={H - 6} />
+        <text class="tl-today-label" x="4" y={H - 8}>today</text>
+      </g>
+    </svg>
+  </div>
+  <p class="tl-legend caveat">
+    <span><i class="tl-k tl-done"></i>verified</span><span><i class="tl-k tl-now"></i>under way</span><span><i class="tl-k tl-later"></i>to come</span>
+    <span><i class="tl-k tl-next"></i>next year, planned</span><span><svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true"><path class="tl-issue" d="M8,0 l8,8 l-8,8 l-8,-8 z" /></svg> outlook issued</span>
+  </p>
+  <div id="tl-desc" class="sr-only">
+    Timeline of the forecast cycles.
+    {rows.map((r) => `${r.season} (${r.name}): ${r.issues.map((s) => `${s.option} issued ${fmt(s.t)}`).join('; ')}; ${r.months.map((m) => `${m.label} ${STATUS[m.code] ?? m.text}`).join(', ')}; next: ${r.next.label}, planned.`).join(' ')}
+  </div>
+</section>
+<script>
+  // Move the today marker to the reader's date (the page may be read long after it was built).
+  const el = document.getElementById('timeline');
+  const g = document.getElementById('tl-today');
+  if (el && g) {
+    const s = Number(el.dataset.start), e = Number(el.dataset.end), now = Date.now();
+    if (now < s || now > e) g.style.display = 'none';
+    else g.setAttribute('transform', `translate(${Number(el.dataset.left) + ((now - s) / (e - s)) * Number(el.dataset.w)},0)`);
+  }
+</script>
+<style is:global>
+  .timeline{margin:18px 0}
+  .tl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tl-svg{display:block;width:100%;min-width:640px;height:auto;font-family:inherit}
+  .tl-grid{stroke:var(--line);stroke-width:1}
+  .tl-newyear{stroke:var(--muted)}
+  .tl-month{font-size:11px;fill:var(--muted)}
+  .tl-year{font-size:11px;font-weight:700;fill:var(--ink2)}
+  .tl-name{font-size:13px;font-weight:700;fill:var(--ink)}
+  .tl-sub{font-size:11px;fill:var(--muted)}
+  .tl-m{stroke:none}
+  .tl-done{fill:var(--accent);background:var(--accent)}
+  .tl-now{fill:var(--fc);background:var(--fc)}
+  .tl-later{fill:var(--accent-soft);stroke:var(--accent)!important;stroke-width:1;background:var(--accent-soft);border:1px solid var(--accent)}
+  .tl-wait{fill:var(--warn-bg);stroke:var(--warn)!important;background:var(--warn-bg)}
+  .tl-next{fill:none;stroke:var(--muted);stroke-dasharray:4 3;stroke-width:1.2;background:transparent;border:1px dashed var(--muted)}
+  .tl-issue{fill:var(--ink);stroke:var(--surface);stroke-width:1.5}
+  .tl-planned{fill:var(--surface);stroke:var(--ink2);stroke-dasharray:2 2}
+  .tl-today{stroke:var(--neg);stroke-width:2}
+  .tl-today-label{font-size:11px;font-weight:700;fill:var(--neg)}
+  .timeline a:hover .tl-m,.timeline a:focus .tl-m{opacity:.8}
+  .timeline a:focus-visible{outline:none}
+  .timeline a:focus-visible .tl-m,.timeline a:focus-visible .tl-issue{stroke:var(--ink)!important;stroke-width:2.5}
+  .tl-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0 0}
+  .tl-legend span{display:inline-flex;align-items:center;gap:6px}
+  .tl-k{display:inline-block;width:20px;height:11px;border-radius:3px}
+</style>

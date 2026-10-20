@@ -3,6 +3,9 @@
 // research pages. Everything comes from site_data/selection.json and method_summary.json (docs/50), so it follows each
 // newly scored season.
 import Base from '../../layouts/Base.astro';
+import InShort from '../../components/InShort.astro';
+import { overviewPoints, SUMMARY as EV } from '../../lib/evidence.js';
+import EvidenceCard from '../../components/EvidenceCard.astro';
 import { href } from '../../lib/data.js';
 import MethodExplorer from '../../components/MethodExplorer.astro';
 import { SELECTION, SUMMARY, STATUS_LABEL, ranked, validationText } from '../../lib/selection.js';
@@ -67,6 +70,7 @@ const PAGES = [
 ---
 <Base title="Research" section="research" description="Which bias-correction and probability-calibration methods are better than the published approach, and which to use in each season.">
   <h1>Research</h1>
+  <InShort points={overviewPoints()} />
 
   <section id="which-methods">
     <h2>Which methods are better</h2>
@@ -198,6 +202,22 @@ const PAGES = [
 
   {SUMMARY?.target_order && <MethodExplorer summary={SUMMARY} />}
 
+  {EV?.rows && (
+    <section id="method-cards">
+      <h2>Method cards</h2>
+      <p>One card per method: each square is a target (FMAM from January and February, JJAS, ONDJ; the months, then the season), coloured by the
+      skill gain over the published approach for 1993–2016 (brown worse, teal better; ✓ confirmed under the selection rule). Hover a square for its numbers.</p>
+      {Object.keys(EV.categories).map((cat) => (
+        <details class="mc-group" open={cat === 'Bias correction' ? undefined : true}>
+          <summary><strong>{cat}</strong> <span class="caveat">({EV.categories[cat]} method{EV.categories[cat] > 1 ? 's' : ''})</span></summary>
+          <div class="mc-grid">
+            {[...new Set(EV.rows.filter((r) => r.category === cat).map((r) => r.method))].map((m) => <EvidenceCard method={m} link={({ 'Statistical downscaling': 'research/downscaling/', 'Neural network': 'research/neural-network/', 'Two-stage calibration': 'research/leung-dirichlet/', 'Bias correction': 'bias-correction/', 'Probability calibration': 'probability-calibration/', 'Rainfall-distribution model': 'probability-calibration/' })[cat]} compact showCategory={false} />)}
+          </div>
+        </details>
+      ))}
+    </section>
+  )}
+
   <section id="pages">
     <h2>Research pages</h2>
     <ul class="cards">
@@ -212,4 +232,9 @@ const PAGES = [
     .cards a{display:block;height:100%;text-decoration:none;color:inherit}
     @media (max-width:640px){ .criteria{grid-template-columns:1fr} }
   </style>
+<style>
+  .mc-group{margin:8px 0}
+  .mc-group summary{cursor:pointer;padding:6px 0}
+  .mc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:10px;margin:6px 0 12px}
+</style>
 </Base>

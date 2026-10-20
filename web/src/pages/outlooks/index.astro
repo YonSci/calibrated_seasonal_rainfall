@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import SeasonTimeline from '../../components/SeasonTimeline.astro';
 import { C, url, defaultTarget } from '../../lib/cycles.js';
 import { signal } from '../../lib/outlook.js';
 
@@ -14,6 +15,7 @@ const cards = [...C.cycles].reverse().map((c) => {
   <h1>Seasonal rainfall outlooks</h1>
   <p>Calibrated ECMWF SEAS5 outlooks for Ethiopia, one per forecast cycle. Each cycle has its outlook and maps for every target and
   area, the verification against CHIRPS once a period is complete, and the historical performance of the method.</p>
+  <SeasonTimeline />
   <ul class="cards">
     {cards.map((k) => (
       <li><a class="box" href={k.href}>

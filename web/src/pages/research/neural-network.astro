@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import OnThisPage from '../../components/OnThisPage.astro';
 import Table from '../../components/Table.astro';
 import Figure from '../../components/Figure.astro';
+import InShort from '../../components/InShort.astro';
 import { read, names, href, link, esc, signed, num, years, cycleTitle, REPO } from '../../lib/data.js';
 
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
@@ -128,6 +129,7 @@ const chosen = (d) => {
 <Base title="Neural network (DRN)" section="research" description="A distributional regression network (neural EMOS with a censored shifted gamma) tested against the published pipeline and EMOS.">
   <OnThisPage>
     <h1>Neural network: distributional regression (DRN)</h1>
+    <InShort lead="A small neural network learns each cell's full rainfall distribution from the SEAS5 ensemble. It is a research comparison: the published forecasts do not use it." methods={['drn_csg']} />
     <p>A small neural network that turns the SEAS5 ensemble and the local rainfall climate of each grid cell into a full rainfall
     distribution: the censored shifted gamma of the EMOS model, with its parameters learned by a network instead of two linear formulas.
     From the distribution come rainfall amounts, 10–90% ranges and tercile probabilities. It is tested against the published pipeline and

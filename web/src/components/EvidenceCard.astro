@@ -1,0 +1,55 @@
+---
+// One method's evidence at a glance (lib/evidence.js): for each product a strip of the 20 targets coloured by the skill gain
+// over the published approach (1993–2016, cross-validated; ✓ confirmed under the selection rule), the counts and the selection.
+import { evidence, selectionLine } from '../lib/evidence.js';
+import { href } from '../lib/data.js';
+const { method, link = null, compact = false, showCategory = true } = Astro.props;
+const e = evidence(method);
+const COL = ['#8c510a', '#d8b365', '#f6e8c3', '#f5f5f5', '#c7eae5', '#5ab4ac', '#01665e'];
+const colour = (g) => {
+  if (g == null || !Number.isFinite(g)) return 'transparent';
+  const edges = [-0.05, -0.02, -0.005, 0.005, 0.02, 0.05];
+  let k = 0; while (k < edges.length && g >= edges[k]) k++;
+  return COL[k];
+};
+const pct = (g) => (g == null || !Number.isFinite(g) ? '—' : `${g >= 0 ? '+' : '−'}${Math.abs(100 * g).toFixed(1)}%`);
+const seasonOf = (key) => key.split(' ').slice(0, 2).join(' ');
+---
+{e && (
+  <article class={`box ecard${compact ? ' ecard-compact' : ''}`}>
+    <header>
+      <h3>{link ? <a href={href(link)}>{e.label}</a> : e.label}</h3>
+      {showCategory && <span class="caveat">{e.category}</span>}
+    </header>
+    {e.products.map((p) => (
+      <div class="ecard-row">
+        <p class="ecard-name">{p.name}</p>
+        <div class="ecard-strip" role="img" aria-label={`${e.label}, ${p.name}: better than the published approach for ${p.training} of ${p.targets} targets over 1993–2016; confirmed for ${p.confirmed.length ? p.confirmed.join(', ') : 'none'}`}>
+          {p.cells.map((c, i) => (
+            <i class={`${c.confirmed ? 'ok' : ''}${i > 0 && seasonOf(c.key) !== seasonOf(p.cells[i - 1].key) ? ' gap' : ''}`} style={`background:${colour(c.gain_training)}`}
+               title={`${c.key}: skill gain ${pct(c.gain_training)} (1993–2016), ${pct(c.gain_test)} (test years)${c.confirmed ? ' · confirmed' : ''}`}>{c.confirmed ? '✓' : ''}</i>
+          ))}
+        </div>
+        <p class="ecard-counts"><strong>{p.training}</strong>/{p.targets} better 1993–2016 · <strong>{p.test}</strong>/{p.testScored} test years
+          {p.validationScored > 0 && <> · <strong>{p.validation}</strong>/{p.validationScored} validation seasons</>} · <strong>{p.confirmed.length}</strong> confirmed</p>
+      </div>
+    ))}
+    <p class="caveat ecard-sel">{selectionLine(e)}</p>
+  </article>
+)}
+<style is:global>
+  .ecard{margin:0;padding:12px 14px}
+  .ecard header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;align-items:baseline}
+  .ecard h3{font-size:1rem;margin:0}
+  .ecard-row{margin-top:8px}
+  .ecard-name{margin:0 0 3px;font-size:.82rem;font-weight:600;color:var(--ink2)}
+  .ecard-strip{display:flex;gap:2px;flex-wrap:wrap}
+  .ecard-strip i{width:16px;height:16px;border-radius:3px;border:1px solid rgba(0,0,0,.1);font-style:normal;font-size:11px;line-height:15px;text-align:center;color:#0b0b0b;font-weight:700}
+  .ecard-strip i.ok{outline:2px solid var(--ink);outline-offset:-2px}
+  .ecard-strip i.gap{margin-left:6px}
+  .ecard-counts{margin:4px 0 0;font-size:.82rem;color:var(--ink2)}
+  .ecard-sel{margin:8px 0 0}
+  .ecard-compact .ecard-sel{font-size:.8rem}
+  .ecard-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:.8rem;color:var(--muted)}
+  .ecard-legend i{display:inline-block;width:16px;height:12px;border-radius:2px}
+</style>

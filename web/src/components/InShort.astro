@@ -1,0 +1,27 @@
+---
+// "In short": the page's answer in a few lines before the detail. lead: what the page is about (one sentence); methods: the
+// method keys whose evidence is summarised from the cross-method summary (lib/evidence.js); points: further sentences (HTML).
+import { evidence, verdictLine } from '../lib/evidence.js';
+const { lead = '', methods = [], points = [], cards = true } = Astro.props;
+import EvidenceCard from './EvidenceCard.astro';
+const ev = methods.map(evidence).filter(Boolean);
+const lines = [...ev.map((e) => verdictLine(e).replace(e.label, `<strong>${e.label}</strong>`)), ...points];
+---
+<aside class="inshort" aria-label="In short">
+  <h2 class="inshort-title">In short</h2>
+  {lead && <p set:html={lead} />}
+  {lines.length > 0 && <ul>{lines.map((l) => <li set:html={l} />)}</ul>}
+  {cards && ev.length > 0 && (
+    <div class="inshort-cards">{ev.map((e) => <EvidenceCard method={e.method} compact />)}</div>
+  )}
+  {cards && ev.length > 0 && <p class="ecard-legend" aria-hidden="true">Each square is one target (FMAM from January and February, JJAS, ONDJ; months then season):
+    <span>worse</span><i style="background:#8c510a"></i><i style="background:#d8b365"></i><i style="background:#f6e8c3"></i><i style="background:#f5f5f5"></i><i style="background:#c7eae5"></i><i style="background:#5ab4ac"></i><i style="background:#01665e"></i><span>better</span> · ✓ confirmed</p>}
+</aside>
+<style is:global>
+  .inshort{border:1px solid var(--line);border-left:5px solid var(--accent);background:var(--accent-soft);border-radius:0 12px 12px 0;padding:12px 18px;margin:12px 0 20px}
+  .inshort-title{font-size:1rem;margin:0 0 4px;color:var(--accent);text-transform:none}
+  .inshort p{margin:.3em 0}
+  .inshort ul{margin:.3em 0 .2em;padding-left:1.2em}
+  .inshort li{margin:.25em 0}
+  .inshort-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:10px;margin:10px 0 4px}
+</style>

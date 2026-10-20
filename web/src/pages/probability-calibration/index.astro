@@ -1,5 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
+import InShort from '../../components/InShort.astro';
+import { overviewPoints } from '../../lib/evidence.js';
 import Table from '../../components/Table.astro';
 import { read, names, href, esc, cycleTitle, REPO } from '../../lib/data.js';
 
@@ -16,6 +18,7 @@ const plan = {
 <Base title="Probability calibration" section="research"
       description="Can a different probability or rainfall-distribution method improve the tercile probabilities and rainfall ranges users receive?">
   <h1>Probability and rainfall-distribution calibration</h1>
+  <InShort points={overviewPoints((r) => r.category === 'Probability calibration' || r.category === 'Rainfall-distribution model', 'probability and distribution methods')} />
   <p>Can a different <em>probability</em> method improve the tercile probabilities users receive? The published pipeline is MVS-corrected
   members → smoothed member counts → climatology blend (the incumbent). <strong>Phase 1</strong> keeps the amount correction fixed
   (Pathway A) and replaces only the probability stage; <strong>Phase 2</strong> adds one-vs-rest binary calibrators and the first full

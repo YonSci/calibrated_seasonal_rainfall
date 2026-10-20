@@ -1,6 +1,8 @@
 ---
 // The approach the platform selects for each season, target and product, from the historical and validation evidence.
 import Base from '../../layouts/Base.astro';
+import InShort from '../../components/InShort.astro';
+import { overviewPoints } from '../../lib/evidence.js';
 import OnThisPage from '../../components/OnThisPage.astro';
 import { href, esc, cycleTitle, REPO } from '../../lib/data.js';
 import { C, url, defaultTarget } from '../../lib/cycles.js';
@@ -22,6 +24,7 @@ const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainf
 <Base title="Method selection" section="research" description="The bias-correction and probability-calibration approach the evidence supports for each season, target and product.">
   <OnThisPage>
     <h1>Method selection</h1>
+    <InShort lead="The rule turns the evidence of every benchmark into a choice per season, target and product: a method must be confirmed better over the historical years (Benjamini–Hochberg), do no harm over the test years and then hold up in independent validation seasons." points={overviewPoints()} />
     <p>For each season, target and product the platform selects the approach the evidence supports, from every benchmark together:
     the 13 rainfall-amount corrections (<a href={href('bias-correction/')}>bias correction</a>), the probability-stage methods and the
     rainfall-distribution models (<a href={href('probability-calibration/')}>probability calibration</a>). It uses the

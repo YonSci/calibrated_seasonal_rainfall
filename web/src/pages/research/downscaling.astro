@@ -2,6 +2,7 @@
 // Statistical downscaling by model output statistics (CCA, PCR; the CPT/PyCPT approach of ICPAC and IRI) against the published
 // pipeline (scripts/mos_benchmark.py, docs/53). Results from site_data/mos/<cycle>.json.
 import Base from '../../layouts/Base.astro';
+import InShort from '../../components/InShort.astro';
 import OnThisPage from '../../components/OnThisPage.astro';
 import Table from '../../components/Table.astro';
 import Figure from '../../components/Figure.astro';
@@ -72,6 +73,7 @@ const candidatesOf = (d) => ['rps', 'crps'].flatMap((sc) => Object.entries(bhDec
 <Base title="Statistical downscaling" section="research" description="Statistical downscaling by model output statistics (canonical correlation analysis and principal component regression, the CPT approach) tested against the published pipeline.">
   <OnThisPage>
     <h1>Statistical downscaling (MOS)</h1>
+    <InShort lead="CCA and PCR, the CPT / PyCPT approach, relate the large-scale SEAS5 rainfall and sea-surface temperature patterns to the observed CHIRPS pattern. A research comparison: the published forecasts do not use them." methods={['cca', 'pcr']} />
     <p>Model output statistics as in CPT / PyCPT, the tools ICPAC and IRI use for regional seasonal outlooks: the large-scale pattern of
     the SEAS5 forecast is related statistically to the observed CHIRPS pattern over the training years, and the relation is applied to
     the new forecast. Two methods, each tested against the published pipeline with the same data, cross-validation and tests as the

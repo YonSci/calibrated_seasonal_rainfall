@@ -2,6 +2,7 @@
 // Leung–Dirichlet calibration (process_calib.py; scripts/leung_dirichlet_benchmark.py, docs/51)
 // against the published pipeline. Display names come from site_data (scripts/leung_dirichlet.py).
 import Base from '../../layouts/Base.astro';
+import InShort from '../../components/InShort.astro';
 import OnThisPage from '../../components/OnThisPage.astro';
 import Table from '../../components/Table.astro';
 import Figure from '../../components/Figure.astro';
@@ -70,6 +71,7 @@ const mat = (A) => (A ? A.map((r) => r.map((v) => num(v, 2)).join(' ')).join(' /
 <Base title="Leung–Dirichlet calibration" section="research" description="The Leung–Dirichlet calibration (modified-Leung member-wise affine correction and identity-anchored Dirichlet recalibration) tested stage by stage against the published pipeline.">
   <OnThisPage>
     <h1>Leung–Dirichlet calibration</h1>
+    <InShort lead="A member-wise bias correction followed by a Dirichlet recalibration of the probabilities, from the ILRI code. A research comparison: the published forecasts do not use it." methods={['leung_dirichlet']} />
     <p>A two-stage calibration: a <strong>modified-Leung</strong> member-wise affine bias correction followed by an
     <strong>identity-anchored Dirichlet</strong> recalibration of the tercile probabilities. It comes from <code>process_calib.py</code> by
     Á. G. Muñoz and T. Demissie (ILRI), implemented here as separate

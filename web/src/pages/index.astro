@@ -3,6 +3,7 @@
 import Base from '../layouts/Base.astro';
 import OutlookHero from '../components/OutlookHero.astro';
 import TargetStrip from '../components/TargetStrip.astro';
+import SeasonTimeline from '../components/SeasonTimeline.astro';
 import { summaryFor } from '../lib/summary.js';
 import { SITE, href, read } from '../lib/data.js';
 import { C, cycleOf, url, defaultTarget, pagesFor } from '../lib/cycles.js';
@@ -44,6 +45,8 @@ const others = [...C.cycles].reverse().filter((x) => x.id !== c.id).map((x) => {
     <a class="box path" href={explore + '#explore'}><strong class="h-display">I need the outlook</strong><span>The current forecast, the map, your area, and how far to trust it.</span></a>
     <a class="box path" href={href('research/')}><strong class="h-display">I want the science</strong><span>How the forecasts are made and tested: {read('method_summary.json')?.methods ?? 30} methods, the evidence and the method selection.</span></a>
   </div>
+
+  <SeasonTimeline />
 
   <section>
     <h2 class="h3">{c.option}: every target</h2>

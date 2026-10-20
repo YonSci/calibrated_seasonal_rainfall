@@ -1,5 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
+import InShort from '../../components/InShort.astro';
+import { overviewPoints } from '../../lib/evidence.js';
 import { read, names, href, cycleTitle, REPO } from '../../lib/data.js';
 import { View, suggestion } from '../../lib/bias.js';
 
@@ -12,6 +14,7 @@ const info = cycles.map(({ name, D }) => {
 ---
 <Base title="Bias correction" section="research" description="Rainfall-amount bias-correction methods against the operational MVS, per cycle.">
   <h1>Bias correction</h1>
+  <InShort points={overviewPoints((r) => r.category === 'Bias correction', 'amount corrections (the MVS zero-guard variant, the 13th, is scored on the cycle pages only)')} />
   <p>The published forecasts correct each SEAS5 member's rainfall amount by mean–variance scaling (MVS) before the tercile probabilities
   are computed. This benchmark compares 13 other corrections with it, member by member, for every grid cell and target, in two steps: a
   <em>screening</em> of the amount correction alone, then a <em>confirmation</em> through the full probability pipeline that accounts for how a
