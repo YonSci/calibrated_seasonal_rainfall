@@ -14,7 +14,7 @@
     "Sep",
     "JJAS"
   ],
-  "project_config": "config/project.json",
+  "project_config": "config/project_2027.json",
   "forecast_root": "outputs/final_shared_blend",
   "verification_root": "outputs/verification_2027",
   "processed_root": "data/processed",

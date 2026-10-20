@@ -14,7 +14,7 @@
     "May",
     "FMAM"
   ],
-  "project_config": "config/fmam_feb/project.json",
+  "project_config": "config/fmam_feb/project_2027.json",
   "forecast_root": "outputs/final_shared_blend",
   "verification_root": "outputs/verification_2027_fmam_feb",
   "processed_root": "data/processed",

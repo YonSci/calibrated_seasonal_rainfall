@@ -103,3 +103,26 @@ Each has `member_policy`. The external comparison is switched off until the 2027
 Prerequisites before each run, as in docs/40 section 5:
 - 2026 CHIRPS added with `extend_observations.py`;
 - the new model year in `archive_years` of the project configuration.
+
+**Project configurations for 2027.** Each 2027 cycle has its own project configuration (`config/fmam/project_2027.json`,
+`config/fmam_feb/project_2027.json`, `config/project_2027.json`, `config/ondj/project_2027.json`): the 2026 one with
+`archive_years` to 2027 and `observation_years` to the end of the reference period (2026; ONDJ 2025). The 2026
+configurations stay as they were, so the 2026 cycles and the benchmarks that fingerprint them are unchanged.
+
+## 7. Readiness check
+
+    python scripts/check_readiness.py                 # every cycle of issue_cycles (config/observation_watch.json)
+
+Checks everything that can be checked before the initialization's SEAS5 exists, and says what to do and by when:
+configuration (project years against the cycle, member policy, masks), inputs (SEAS5 raw files and processed files of the
+reference years, the last reference year's CHIRPS with the command that adds it, SEAS5 SST), leakage (no forecast-year
+CHIRPS in the project), shadows (amount, bias-correction validation, statistical downscaling), the issue window (SEAS5 on the
+CDS from the 13th of the initialization month, the first target period, targets issued in season) and the tools (CDS
+credentials, GitHub CLI login, disk space, a clean working tree). Nothing is downloaded or changed; the result is in
+`outputs/readiness/readiness.json`.
+
+**State on 2026-10-20:** no defects. The 2026 FMAM (January and February) and JJAS observations were added to the training
+archive with `extend_observations.py` (checks passed: grids, missing-cell patterns, months summing to the season). Left:
+the ONDJ 2025 observations for the September 2027 cycle (`prepare_seasonal.py --years 2025` with the 2027 ONDJ project
+configuration, then the regrid and monthly steps; done when that cycle is prepared, since the regrid also rewrites the
+SEAS5 2025 files the ONDJ benchmarks fingerprint), and, for each cycle, the run and issue in its window.

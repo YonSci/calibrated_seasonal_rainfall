@@ -1,0 +1,25 @@
+{
+  "project": "Ethiopia ECMWF CHIRPS seasonal calibration - ONDJ (September initialization)",
+  "ecmwf_directory": "data/raw/ecmwf/et_sep_init",
+  "ecmwf_pattern": "ecmwf_{year}{month:02d}_d01.nc",
+  "ecmwf_variable": "tp",
+  "chirps_file": "data/raw/chirps/et/et_chirps3_monthly_r25.nc",
+  "chirps_variable": "monthly_total",
+  "initialization_month": 9,
+  "season": {
+    "name": "ONDJ",
+    "start": "10-01",
+    "end": "01-31"
+  },
+  "archive_years": [
+    1993,
+    2027
+  ],
+  "observation_years": [
+    1993,
+    2025
+  ],
+  "negative_increment_tolerance_mm": 0.2,
+  "provenance_note": "CDS SEAS5 system 51, total_precipitation, 1 September initialization, lead 24-3672 h (153 days), area N15 W33 S3 E48; 25 members 1993-2016, 51 from 2017. CHIRPS archive ends Dec 2025, so complete ONDJ observations exist for seasons 1993/94-2024/25. 2027 cycle: archive to 2027 (the forecast year), observations to 2025 (the end of the reference period; check_readiness.py).",
+  "chirps_temporal": "monthly"
+}

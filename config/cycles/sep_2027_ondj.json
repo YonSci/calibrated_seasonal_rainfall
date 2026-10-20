@@ -14,7 +14,7 @@
     "Jan",
     "ONDJ"
   ],
-  "project_config": "config/ondj/project.json",
+  "project_config": "config/ondj/project_2027.json",
   "forecast_root": "outputs/final_shared_blend",
   "verification_root": "outputs/verification_2027_ondj",
   "processed_root": "data/processed",
