@@ -116,8 +116,8 @@ downscaling version 2):
   closest: better in 25 of 33 years, p 0.004 before adjustment, Holm 0.13, BH 0.085 (across all 30 methods).
 - **Rainfall amounts, pooled:**
   - Holm: Variance Scaling, square-root MVS, gamma QM, quantile regression and the DRN are significantly better than the
-    MVS-corrected ensemble. The DRN has the largest pooled gain (+2.2% of the climatology score, 27 of 33 years), mostly from
-    its better-calibrated ranges (docs/54).
+    MVS-corrected ensemble. The largest pooled gains are quantile regression's (+2.4% of the climatology score, 28 of 33
+    years) and the DRN's (+2.2%, 27 of 33), both mostly from better-calibrated ranges (docs/54).
   - Benjamini–Hochberg: the same five, plus EMOS.
 - **Rainfall amounts, per target over 33 years:** square-root MVS is confirmed for 3 targets under Holm and 12 under BH;
   gamma QM for 2 and 8.
