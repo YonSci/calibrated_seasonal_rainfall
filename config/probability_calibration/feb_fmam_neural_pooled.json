@@ -1,0 +1,29 @@
+{
+  "description": "The DRN pooled over the four months of February-initialized FMAM (scripts/pooled_benchmark.py, docs/54 section 3d).",
+  "benchmark_config": "config/bias_correction/feb_fmam.json",
+  "reference_amount_method": "mvs",
+  "models": [
+    "drn_pooled"
+  ],
+  "decision_models": [
+    "drn_pooled"
+  ],
+  "comparisons": [
+    [
+      "drn_pooled",
+      "drn_csg"
+    ],
+    [
+      "drn_pooled",
+      "emos_csg"
+    ]
+  ],
+  "external_models": {
+    "drn_csg": "outputs/probability_calibration/{name}/neural/benchmark.json",
+    "emos_csg": "outputs/probability_calibration/{name}/neural/benchmark.json"
+  },
+  "members": 25,
+  "reliability": true,
+  "output_root": "outputs/probability_calibration/feb_fmam/neural_pooled",
+  "phase": 4
+}

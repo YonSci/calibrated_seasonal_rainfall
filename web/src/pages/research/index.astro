@@ -4,6 +4,7 @@
 // newly scored season.
 import Base from '../../layouts/Base.astro';
 import { href } from '../../lib/data.js';
+import MethodExplorer from '../../components/MethodExplorer.astro';
 import { SELECTION, SUMMARY, STATUS_LABEL, ranked, validationText } from '../../lib/selection.js';
 
 const MONTH = { jan: 'January', feb: 'February', may: 'May', sep: 'September' };
@@ -194,6 +195,8 @@ const PAGES = [
       score (+1% = 1% of the climatology score better). Years better: years where the pooled difference favours the method.</p>
     </section>
   )}
+
+  {SUMMARY?.target_order && <MethodExplorer summary={SUMMARY} />}
 
   <section id="pages">
     <h2>Research pages</h2>

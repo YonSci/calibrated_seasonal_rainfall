@@ -13,16 +13,17 @@ const pc = (x) => `${Math.round(100 * x)}%`;
     <p class="badges"><span class="research-inline" set:html={O['ol-publication']} />{status && <span class={`status ${status.code}`}>{status.text}</span>}</p>
     <p class="lead" id="ol-lead" set:html={O['ol-lead']} />
     {plain && (
-      <div class="plain-summary">
-        <h2 class="plain-title">In plain words</h2>
-        <p>{plain.text}</p>
+      <div class="plain-summary" id="plain-summary" data-view={plain.view} data-label={plain.label}>
+        <p class="notice small plain-draft" id="plain-draft" hidden></p>
+        <h2 class="plain-title" id="plain-title">In plain words</h2>
+        <p id="plain-text">{plain.text}</p>
         {plain.p && (
           <>
             <div class="probbar" role="img" aria-label={`Chances across the area: below normal ${pc(plain.p[0])}, near normal ${pc(plain.p[1])}, above normal ${pc(plain.p[2])}`}>
               {CATS.map((c, k) => <span class={`pb-${c}`} style={`flex:${plain.p[k]}`}>{pc(plain.p[k])}</span>)}
             </div>
             <p class="tenths" aria-hidden="true">{CATS.map((c, k) => <span class={`t-${c}`}>{'●'.repeat(plain.tenths[k])}</span>)}</p>
-            <p class="caveat">Out of 10 seasons like this one, on average across the area: about {plain.tenths[0]} below normal, {plain.tenths[1]} near
+            <p class="caveat" id="plain-tenths">Out of 10 seasons like this one, on average across the area: about {plain.tenths[0]} below normal, {plain.tenths[1]} near
             normal, {plain.tenths[2]} above normal. Track record here: <span class={`tr tr-${plain.track.level}`}>{plain.track.word}</span>.</p>
             <p class="caveat" set:html={O['ol-prob-note']} />
           </>

@@ -1,0 +1,46 @@
+{
+  "description": "Neural network, second stage (docs/54): SST indices and rainfall regions, a neural correction of EMOS and a forecast-only ablation, February-initialized FMAM.",
+  "benchmark_config": "config/bias_correction/feb_fmam.json",
+  "reference_amount_method": "mvs",
+  "models": [
+    "emos_csg",
+    "drn_sst",
+    "drn_emos_residual",
+    "drn_forecast_only"
+  ],
+  "decision_models": [
+    "drn_sst",
+    "drn_emos_residual"
+  ],
+  "comparisons": [
+    [
+      "drn_sst",
+      "drn_csg"
+    ],
+    [
+      "drn_emos_residual",
+      "emos_csg"
+    ],
+    [
+      "drn_emos_residual",
+      "drn_csg"
+    ],
+    [
+      "drn_csg",
+      "drn_forecast_only"
+    ]
+  ],
+  "extra_inputs": [
+    "nino34",
+    "dmi",
+    "regions"
+  ],
+  "members": 25,
+  "reliability": true,
+  "output_root": "outputs/probability_calibration/feb_fmam/neural_ext",
+  "phase": 4,
+  "external_models": {
+    "drn_csg": "outputs/probability_calibration/{name}/neural/benchmark.json"
+  },
+  "external_note": "The DRN is not refitted here: the comparisons read its per-year scores from the first benchmark (same folds, years and seeds)."
+}

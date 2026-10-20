@@ -2,6 +2,8 @@
 // (the page's summary) and in the browser (the interactive map and the area search). Area means are cos(latitude)-weighted,
 // as the published area summaries; probabilities are averaged over the cells where terciles are defined.
 
+import { t } from './i18n.js';
+
 export const CAT = ['below', 'near', 'above'];
 export const CAT_LABEL = { below: 'below normal', near: 'near normal', above: 'above normal' };
 export const LEAN = 0.40;                     // a category "is favoured" where its probability is at least 40% and the largest
@@ -73,36 +75,38 @@ export function tenths(p) {
 }
 
 // How the published approach has done here: words for the RPSS of past forecasts made the same way.
-export function track(rpss) {
-  if (rpss == null || !Number.isFinite(rpss)) return { level: 'unknown', word: 'not available', text: 'Its past performance here is not available.' };
-  if (rpss <= 0) return { level: 'low', word: 'no better than climatology', text: 'In past years, forecasts made this way were no better here than assuming normal chances (1 in 3 each): treat this outlook with caution.' };
-  if (rpss < 0.05) return { level: 'modest', word: 'slightly better than climatology', text: 'In past years, forecasts made this way were only slightly better here than assuming normal chances: a modest guide.' };
-  if (rpss < 0.15) return { level: 'fair', word: 'better than climatology', text: 'In past years, forecasts made this way were better here than assuming normal chances.' };
-  return { level: 'good', word: 'clearly better than climatology', text: 'In past years, forecasts made this way were clearly better here than assuming normal chances.' };
+export function track(rpss, lang = 'en') {
+  const lv = rpss == null || !Number.isFinite(rpss) ? 'unknown' : rpss <= 0 ? 'low' : rpss < 0.05 ? 'modest' : rpss < 0.15 ? 'fair' : 'good';
+  const K = lv[0].toUpperCase() + lv.slice(1);
+  return { level: lv, word: t(lang, `track${K}W`), text: t(lang, `track${K}`) };
 }
 
 const pc = (x) => `${Math.round(100 * x)}%`;
 const mm = (x) => `${Math.round(x)} mm`;
+const join = (names, lang) => (names.length > 1 ? names.slice(0, -1).join(', ') + ' ' + t(lang, 'and') + ' ' + names.at(-1) : names[0]);
 
-// One area in words (the map's area panel and the summary of the page's domain).
-export function describe(s, place, target) {
-  if (!s || !s.p) return `No tercile forecast for ${place}: the reference-period rainfall is too low for tercile categories (dry season).`;
+function amounts(s, lang, members) {
+  if (s.mean == null || s.normal == null) return '';
+  const a = s.anomaly;
+  return t(lang, 'expected', { mean: mm(s.mean) }) +
+    (a != null ? t(lang, 'anomaly', { pct: `${Math.abs(Math.round(100 * a))}%`, dir: t(lang, a >= 0 ? 'dirAbove' : 'dirBelow'), normal: mm(s.normal) }) : '') +
+    (members && s.q10 != null && s.q90 != null && s.cells <= 4 ? t(lang, 'members', { lo: mm(s.q10), hi: mm(s.q90) }) : '') +
+    (lang === 'am' ? '።' : '.');
+}
+
+// One area in words (the map's area panel).
+export function describe(s, place, target, lang = 'en') {
+  if (!s || !s.p) return t(lang, 'dry', { place });
   const f = s.favoured;
-  const parts = [];
-  parts.push(f
-    ? `For ${target}, ${CAT_LABEL[f]} rainfall is the most likely outcome in ${place}: a ${pc(s.p[CAT.indexOf(f)])} chance, against about 33% in a normal year.`
-    : `For ${target}, no outcome is clearly favoured in ${place}: the chances stay close to normal (about 1 in 3 each).`);
-  if (s.mean != null && s.normal != null) {
-    const a = s.anomaly;
-    parts.push(`Expected rainfall is about ${mm(s.mean)}` + (a != null ? `, ${Math.abs(Math.round(100 * a))}% ${a >= 0 ? 'above' : 'below'} the normal of ${mm(s.normal)}` : '') +
-      (s.q10 != null && s.q90 != null && s.cells <= 4 ? `; 8 in 10 of the forecast members give ${mm(s.q10)} to ${mm(s.q90)}` : '') + '.');
-  }
-  parts.push(track(s.rpss).text);
+  const parts = [f ? t(lang, 'favoured', { target, cat: t(lang, f), place, p: pc(s.p[CAT.indexOf(f)]) }) : t(lang, 'none', { target, place })];
+  const am = amounts(s, lang, true);
+  if (am) parts.push(am);
+  parts.push(track(s.rpss, lang).text);
   return parts.join(' ');
 }
 
 // The page summary: which regions favour which category, from the regions' area means within the view's domain.
-export function regional(grid, d, areas, viewPos, target) {
+export function regional(grid, d, areas, viewPos, target, lang = 'en') {
   const inView = new Set(viewPos);
   const groups = { below: [], near: [], above: [] };
   for (const a of areas.areas.filter((x) => x.level === 1)) {
@@ -116,13 +120,13 @@ export function regional(grid, d, areas, viewPos, target) {
   for (const k of ['above', 'below', 'near']) {
     const g = groups[k].sort((a, b) => b.p - a.p);
     if (!g.length) continue;
-    const names = g.map((x) => x.name);
     const range = g.length > 1 ? `${pc(Math.min(...g.map((x) => x.p)))}–${pc(Math.max(...g.map((x) => x.p)))}` : pc(g[0].p);
-    out.push(`${CAT_LABEL[k][0].toUpperCase() + CAT_LABEL[k].slice(1)} rainfall is favoured in ${names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names.at(-1) : names[0]} (${range} chance).`);
+    out.push(t(lang, 'regionalLine', { Cat: t(lang, k[0].toUpperCase() + k.slice(1)), cat: t(lang, k), names: join(g.map((x) => x.name), lang), range }));
   }
-  if (!out.length) out.push(`For ${target}, no region clearly favours one outcome: the chances stay close to normal (about 1 in 3 each).`);
-  else out.unshift(`For ${target}:`);
-  if (all.mean != null && all.anomaly != null) out.push(`Across the area, expected rainfall is about ${mm(all.mean)}, ${Math.abs(Math.round(100 * all.anomaly))}% ${all.anomaly >= 0 ? 'above' : 'below'} the normal of ${mm(all.normal)}.`);
-  out.push(track(all.rpss).text);
+  if (!out.length) out.push(t(lang, 'regionalNone', { target }));
+  else out.unshift(t(lang, 'regionalHead', { target }));
+  if (all.mean != null && all.anomaly != null)
+    out.push(t(lang, 'across', { mean: mm(all.mean), pct: `${Math.abs(Math.round(100 * all.anomaly))}%`, dir: t(lang, all.anomaly >= 0 ? 'dirAbove' : 'dirBelow'), normal: mm(all.normal) }));
+  out.push(track(all.rpss, lang).text);
   return { text: out.join(' '), all };
 }

@@ -15,5 +15,5 @@ export function summaryFor(cycleId, view, targetId, label) {
   const pos = grid.views[view] ?? grid.views.all_ethiopia;
   const r = P.regional(grid, d, areas, pos, label);
   const s = r.all;
-  return { text: r.text, p: s.p, tenths: s.p ? P.tenths(s.p) : null, track: P.track(s.rpss), rpss: s.rpss, years: s.years };
+  return { text: r.text, p: s.p, tenths: s.p ? P.tenths(s.p) : null, track: P.track(s.rpss), rpss: s.rpss, years: s.years, view, label };
 }

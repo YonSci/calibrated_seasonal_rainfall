@@ -148,6 +148,54 @@ CHIRPS is available. **2026, JJAS September (its first season):** CRPS skill +0.
 worse, as EMOS and quantile regression were that season; 1 of the 3 seasons needed. From 2027 the shadows are made before
 each season (docs/52).
 
+## 3c. Second stage: more information, a neural correction of EMOS, the mirror ablation
+
+A separate benchmark (`config/probability_calibration/<cycle>_neural_ext.json`, results in `.../neural_ext/`) with its own two
+candidates, so their test family is separate from the first stage's:
+
+| Model | Role | What it adds |
+| --- | --- | --- |
+| `drn_sst` — DRN + SST indices and regions | candidate | The DRN inputs plus the SEAS5 Niño 3.4 (5° S–5° N, 170°–120° W) and Indian Ocean Dipole (west 10° S–10° N, 50°–70° E minus east 10° S–0°, 90°–110° E) indices of the target months (first 25 members, cos-latitude weighted means; `scripts/sst_indices.py`), and the eight EMI homogeneous rainfall regions (Korecha & Sorteberg 2013, one-hot). The indices give the network large-scale information it did not have; they are known at issue time. The regions are a published regionalization: the project's own regime masks were not used because they are built from 1993–2025 CHIRPS, held-out years included. |
+| `drn_emos_residual` — neural correction of EMOS | candidate | For each seed, EMOS (maximum likelihood) is fitted on the seed's training years; the network's three outputs are **added** to EMOS's linear predictors of μ, σ and δ. The output layer starts at zero, so training starts exactly at EMOS, and early stopping keeps EMOS when no step improves the held-out CRPS; a penalty (0.01) on the mean squared correction keeps it small. It asks the cleanest question: is there any nonlinear signal beyond EMOS? |
+| `drn_forecast_only` — ablation | diagnostic | The network on the ensemble summaries only (no climatology, location or indices): the mirror of the no-forecast ablation. |
+| `emos_csg` | diagnostic | EMOS in the same folds. |
+
+The plain DRN is not refitted: the comparisons read its per-year scores from the first benchmark (same folds, years, members
+and seeds; `external_models`, with that file's SHA-256 and commit recorded). Comparisons: DRN + SST against the DRN (the value
+of the indices and regions), the neural correction against EMOS and against the DRN, the DRN against the forecast-only
+ablation (the value of the local context). Both candidates also have amount shadows when selected (`amount_shadow.json`:
+25 members; the SST indices and regions of the forecast year for `drn_sst`).
+
+Results: pending (the benchmark runs after the first stage has been rerun with the weight-decay search).
+
+## 3d. One network for the months of a cycle (`scripts/pooled_benchmark.py`)
+
+Each per-target DRN learns from about 18 training seasons. `drn_pooled` fits **one** network to the four months of a cycle
+(not the season, whose observations are the sum of the months'): the samples of every month (as `dist_benchmark.fold` makes
+them, each month with total weight 1) are pooled, with the month's position in the season as four one-hot inputs. Four times
+the samples per network — but from the same years, which are correlated across the months, so the gain in independent
+information is smaller than the factor four. Early stopping holds out whole calendar years for the four months at once
+(`year_index` of each row).
+
+The driver works per year rather than per target (one fit serves the four months): outer leave-one-year-out over 1993–2016,
+every month of the left-out year forecast and scored with the published references computed in the same folds, then one
+fit on all training years for the test years. Results have the same format as `dist_benchmark.py`; Holm across the four
+targets (the method selection: Benjamini–Hochberg); comparisons with the per-target DRN and EMOS read from the first stage.
+If the pooled DRN becomes a candidate, its shadow needs a pooled fit as well: not yet implemented (`dist_shadow.py` skips
+it with a message), so it could not collect validation seasons until then.
+
+Config: `config/probability_calibration/<cycle>_neural_pooled.json`; results `.../neural_pooled/`. Results: pending.
+
+## 3e. A separate tuning split (`tuning='separate'`)
+
+In the first stage the architecture and weight decay are chosen on the same held-out years that stop the training. This
+does not bias the reported scores (the outer left-out year is never seen) but can make the choice of configuration noisier.
+With `tuning='separate'` the configuration is chosen by three inner folds of the training years: each fold's years are
+scored by a network trained on the other years, early-stopped on a further 20% of them; then the three seeds of the chosen
+configuration are trained as usual. `drn_csg_tuned` is the DRN with this procedure, run as a **diagnostic** on JJAS
+(`config/probability_calibration/may_jjas_neural_tuning.json`, not a candidate): the comparison with the DRN shows whether
+the tuning procedure matters. Results: pending.
+
 ## 4. Running
 
     python scripts/dist_benchmark.py --config config/probability_calibration/<cycle>_neural.json --workers 5

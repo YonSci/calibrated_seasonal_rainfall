@@ -1,0 +1,122 @@
+---
+// Method explorer: every method against the published approach for every target, as a matrix (scripts/method_summary.py,
+// rows[].by_target). Filter by product, category and season, colour by the skill gain over 1993-2016 or the test years,
+// click a cell for its evidence and the benchmark page.
+import { href } from '../lib/data.js';
+const { summary } = Astro.props;
+const FAMILY_PAGE = {
+  'Bias correction': (c) => `bias-correction/${c}/confirmation/`,
+  'Probability stage (Phase 1)': (c) => `probability-calibration/${c}/phase-1/`,
+  'Probability stage (Phase 2)': (c) => `probability-calibration/${c}/phase-2/`,
+  'Distribution model (Phase 2)': (c) => `probability-calibration/${c}/phase-2/`,
+  'Distribution model (Phase 3)': (c) => `probability-calibration/${c}/phase-3/`,
+  'Two-stage calibration': () => 'research/leung-dirichlet/',
+  'Statistical downscaling (MOS)': () => 'research/downscaling/',
+  'Neural network (DRN)': () => 'research/neural-network/',
+};
+const data = {
+  order: summary.target_order,
+  categories: Object.keys(summary.categories),
+  rows: summary.rows.map((r) => ({ label: r.label, method: r.method, product: r.product, category: r.category, family: r.family,
+    confirmed: r.confirmed.length, by: r.by_target ?? {},
+    pages: Object.fromEntries(summary.target_order.map((o) => [o.cycle, href((FAMILY_PAGE[r.family] ?? (() => 'research/'))(o.cycle))])) })),
+};
+---
+<section id="method-explorer" class="mexp">
+  <h2>Method explorer</h2>
+  <p>Every method against the published approach for every target. The colour is the skill gain: how much lower (better, green) or higher (worse,
+  brown) the method's score is than the published approach's, as a share of the climatology score. ✓ marks a target where the method is
+  confirmed better under the selection rule. Click a cell for its evidence.</p>
+  <div class="mexp-controls">
+    <div class="seg" role="group" aria-label="Product" id="mx-product">
+      <button type="button" data-product="probabilities" aria-pressed="true">Tercile probabilities</button>
+      <button type="button" data-product="amounts" aria-pressed="false">Rainfall amounts</button>
+    </div>
+    <div class="seg" role="group" aria-label="Period" id="mx-period">
+      <button type="button" data-period="training" aria-pressed="true">1993–2016 (cross-validated)</button>
+      <button type="button" data-period="test" aria-pressed="false">2017 onward (test years)</button>
+    </div>
+    <label class="check"><input type="checkbox" id="mx-confirmed" /> Only methods confirmed somewhere</label>
+  </div>
+  <div class="mexp-cats" id="mx-cats" role="group" aria-label="Categories"></div>
+  <div class="table-wrap"><table class="mexp-table nosort" id="mx-table"></table></div>
+  <div class="mexp-legend" aria-hidden="true"><span>worse</span><i style="background:#8c510a"></i><i style="background:#d8b365"></i><i style="background:#f6e8c3"></i><i style="background:#f5f5f5"></i><i style="background:#c7eae5"></i><i style="background:#5ab4ac"></i><i style="background:#01665e"></i><span>better</span><span class="caveat">skill gain −5% … +5% of the climatology score</span></div>
+  <div id="mx-detail" class="box mexp-detail" aria-live="polite"><p class="caveat">Click a cell for its numbers.</p></div>
+  <script type="application/json" id="mx-data" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+</section>
+
+<script>
+  const D = JSON.parse(document.getElementById('mx-data')!.textContent || '{}');
+  const S: any = { product: 'probabilities', period: 'training', only: false, cats: new Set(D.categories) };
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
+  const COL = ['#8c510a', '#d8b365', '#f6e8c3', '#f5f5f5', '#c7eae5', '#5ab4ac', '#01665e'];
+  const colour = (g: number | null) => {
+    if (g == null || !Number.isFinite(g)) return 'transparent';
+    const edges = [-0.05, -0.02, -0.005, 0.005, 0.02, 0.05];
+    let k = 0; while (k < edges.length && g >= edges[k]) k++;
+    return COL[k];
+  };
+  const pct = (g: number | null) => (g == null ? '—' : `${g >= 0 ? '+' : '−'}${Math.abs(100 * g).toFixed(1)}%`);
+  function render() {
+    $('mx-cats').innerHTML = D.categories.map((c: string) => `<label class="chip"><input type="checkbox" data-cat="${esc(c)}"${S.cats.has(c) ? ' checked' : ''}> ${esc(c)}</label>`).join('');
+    const rows = D.rows.filter((r: any) => r.product === S.product && S.cats.has(r.category) && (!S.only || r.confirmed > 0));
+    const key = S.period === 'training' ? 'gain_training' : 'gain_test';
+    const mean = (r: any) => { const v = D.order.map((o: any) => r.by[o.key]?.[key]).filter((x: any) => x != null); return v.length ? v.reduce((a: number, b: number) => a + b, 0) / v.length : -1; };
+    rows.sort((a: any, b: any) => b.confirmed - a.confirmed || mean(b) - mean(a));
+    const seasons: string[] = [...new Set(D.order.map((o: any) => o.season))] as string[];
+    const head1 = '<tr><th rowspan="2" scope="col">Method</th>' + seasons.map((s) => `<th colspan="${D.order.filter((o: any) => o.season === s).length}" scope="colgroup">${esc(s)}</th>`).join('') + '<th rowspan="2" scope="col">Confirmed</th></tr>';
+    const head2 = '<tr>' + D.order.map((o: any) => `<th scope="col">${esc(o.target)}</th>`).join('') + '</tr>';
+    const body = rows.map((r: any, i: number) => '<tr><th scope="row"><span class="mx-name">' + esc(r.label) + '</span><span class="caveat">' + esc(r.category) + '</span></th>' +
+      D.order.map((o: any) => {
+        const c = r.by[o.key];
+        if (!c) return '<td class="mx-na">·</td>';
+        return `<td class="mx-cell" style="background:${colour(c[key])}" data-r="${D.rows.indexOf(r)}" data-k="${esc(o.key)}" tabindex="0" title="${esc(r.label)} · ${esc(o.key)}: ${pct(c[key])}${c.confirmed ? ' · confirmed better' : ''}">${c.confirmed ? '✓' : ''}</td>`;
+      }).join('') + `<td class="mx-count">${r.confirmed || '—'}</td></tr>`).join('');
+    $('mx-table').innerHTML = `<thead>${head1}${head2}</thead><tbody>${body || '<tr><td>No method matches the filters.</td></tr>'}</tbody>`;
+  }
+  function detail(ri: number, k: string) {
+    const r = D.rows[ri], c = r.by[k], o = D.order.find((x: any) => x.key === k);
+    $('mx-detail').innerHTML = `<h3>${esc(r.label)} · ${esc(k)}</h3><p class="caveat">${esc(r.category)} · ${S.product === 'probabilities' ? 'tercile probabilities (RPS)' : 'rainfall amounts (CRPS)'}</p>` +
+      `<dl class="mx-dl"><dt>Skill gain 1993–2016</dt><dd>${pct(c.gain_training)} of the climatology score; better in ${c.years_better} of ${c.years} years</dd>` +
+      `<dt>Skill gain 2017 onward</dt><dd>${pct(c.gain_test)}${c.test_years ? `; better in ${c.test_better} of ${c.test_years} years` : ''}</dd>` +
+      `<dt>Selection rule</dt><dd>${c.confirmed ? '<strong>confirmed better</strong>' : 'not confirmed'}${c.p_adjusted != null ? ` (adjusted p ${c.p_adjusted < 0.001 ? '< 0.001' : c.p_adjusted.toFixed(3)})` : ''}</dd></dl>` +
+      `<p><a href="${r.pages[o.cycle]}">The benchmark page →</a></p>`;
+  }
+  document.getElementById('method-explorer')!.addEventListener('click', (ev) => {
+    const el = ev.target as HTMLElement;
+    const b = el.closest('[data-product],[data-period]') as HTMLElement | null;
+    if (b?.dataset.product) { S.product = b.dataset.product; $('mx-product').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); render(); return; }
+    if (b?.dataset.period) { S.period = b.dataset.period; $('mx-period').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); render(); return; }
+    const cell = el.closest('.mx-cell') as HTMLElement | null;
+    if (cell) detail(Number(cell.dataset.r), cell.dataset.k!);
+  });
+  document.getElementById('method-explorer')!.addEventListener('keydown', (ev) => {
+    const cell = (ev.target as HTMLElement).closest('.mx-cell') as HTMLElement | null;
+    if (cell && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); detail(Number(cell.dataset.r), cell.dataset.k!); }
+  });
+  document.getElementById('method-explorer')!.addEventListener('change', (ev) => {
+    const el = ev.target as HTMLInputElement;
+    if (el.id === 'mx-confirmed') S.only = el.checked;
+    if (el.dataset.cat) { el.checked ? S.cats.add(el.dataset.cat) : S.cats.delete(el.dataset.cat); }
+    render();
+  });
+  render();
+</script>
+
+<style is:global>
+  .mexp-controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:8px 0}
+  .mexp-cats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+  .mexp-cats .chip{padding:3px 10px;border-radius:999px;border:1px solid var(--line);font-size:.85rem;cursor:pointer;background:var(--surface)}
+  .mexp-table{font-size:.82rem;border-collapse:collapse}
+  .mexp-table th[scope="row"]{text-align:left;min-width:15rem;font-weight:600}
+  .mexp-table th[scope="row"] .caveat{display:block;font-weight:400;font-size:.75rem}
+  .mexp-table td.mx-cell{width:30px;min-width:30px;height:30px;text-align:center;cursor:pointer;border:1px solid var(--surface);color:#0b0b0b;font-weight:700}
+  .mexp-table td.mx-cell:hover,.mexp-table td.mx-cell:focus{outline:2px solid var(--ink);outline-offset:-2px}
+  .mexp-table td.mx-na{color:var(--muted);text-align:center}
+  .mexp-table td.mx-count{text-align:center;font-weight:600}
+  .mexp-legend{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:.8rem;margin:8px 0}
+  .mexp-legend i{display:inline-block;width:26px;height:12px}
+  .mexp-detail{margin-top:10px}
+  .mx-dl dt{font-weight:600;margin-top:6px}.mx-dl dd{margin:0}
+</style>

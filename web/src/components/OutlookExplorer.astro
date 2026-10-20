@@ -47,6 +47,8 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
 
 <script>
   import * as P from '../lib/plain.js';
+  import { t, langFromQuery, REVIEWED } from '../lib/i18n.js';
+  const L = langFromQuery(location.search);          // drafts (am, om) only with ?lang=; English is authoritative
 
   const root = document.getElementById('explore') as HTMLElement;
   const ASKED = new URLSearchParams(location.search).get('area');      // read at once: other scripts may rewrite the query
@@ -185,23 +187,24 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     S.sel = { area, pos: P.positions(G, area.cells) };
     const s = P.stats(G, D, S.sel.pos);
     const parents = [area.zone, area.region].filter(Boolean);
-    const level = A.levels[String(area.level)];
+    const level = t(L, A.levels[String(area.level)]);
     const up = area.level === 3 ? A.areas.filter((x: any) => (x.level === 2 && x.name === area.zone && x.region === area.region) || (x.level === 1 && x.name === area.region))
       : area.level === 2 ? A.areas.filter((x: any) => x.level === 1 && x.name === area.region) : [];
     const t10 = s.p ? P.tenths(s.p) : null;
-    const tr = P.track(s.rpss);
+    const tr = P.track(s.rpss, L);
     const cats = ['below', 'near', 'above'];
-    $('ex-panel').innerHTML = `<h3>${esc(area.name)}</h3><p class="caveat">${esc(level)}${parents.length ? ' · ' + parents.map(esc).join(', ') : ''} · ${s.cells} grid cell${s.cells === 1 ? '' : 's'}</p>` +
+    $('ex-panel').innerHTML = (L !== 'en' && !REVIEWED[L] ? `<p class="notice small">${esc(t(L, 'draft'))}</p>` : '') +
+      `<h3>${esc(area.name)}</h3><p class="caveat">${esc(level)}${parents.length ? ' · ' + parents.map(esc).join(', ') : ''} · ${s.cells} ${t(L, s.cells === 1 ? 'gridCell' : 'gridCells')}</p>` +
       (s.p ? `<div class="probbar" role="img" aria-label="Chances: below ${pc(s.p[0])}, near ${pc(s.p[1])}, above ${pc(s.p[2])}">${cats.map((c, k) => `<span class="pb-${c}" style="flex:${s.p[k]}">${pc(s.p[k])}</span>`).join('')}</div>
         <p class="tenths" aria-hidden="true">${t10!.map((n: number, k: number) => `<span class="t-${cats[k]}">${'●'.repeat(n)}</span>`).join('')}</p>
-        <p class="caveat">Out of 10 seasons like this one: about ${t10![0]} below normal, ${t10![1]} near normal, ${t10![2]} above normal.</p>` : '') +
-      `<p>${esc(P.describe(s, area.name, root.dataset.label))}</p>` +
-      `<dl class="ex-facts">` + (s.mean != null ? `<dt>Expected rainfall</dt><dd>${mm(s.mean)} (normal ${mm(s.normal)}, ${root.dataset.reference})</dd>` : '') +
-      (s.observed != null ? `<dt>Observed</dt><dd>${mm(s.observed)} (CHIRPS)</dd>` : '') +
-      `<dt>Track record here</dt><dd><span class="tr tr-${tr.level}">${esc(tr.word)}</span>${s.rpss != null ? ` <span class="caveat">(skill score ${s.rpss >= 0 ? '+' : ''}${s.rpss.toFixed(2)}, ${s.years} past seasons)</span>` : ''}</dd></dl>` +
-      (area.level === 3 && s.cells === 1 ? '<p class="caveat">This woreda is smaller than one grid cell: the values are those of the cell at its centre.</p>' : '') +
-      (up.length ? `<p class="ex-up">${up.sort((a: any, b: any) => b.level - a.level).map((u: any) => `<button type="button" class="linkbtn" data-area="${u.id}">${esc(u.name)} (${esc(A.levels[String(u.level)].toLowerCase())})</button>`).join(' · ')}</p>` : '') +
-      `<p><button type="button" class="linkbtn" id="ex-csv">Download this area's cells (CSV)</button> · <button type="button" class="linkbtn" id="ex-share">Copy link</button></p>`;
+        <p class="caveat">${esc(t(L, 'tenths', { b: t10![0], n: t10![1], a: t10![2] }))}</p>` : '') +
+      `<p>${esc(P.describe(s, area.name, root.dataset.label, L))}</p>` +
+      `<dl class="ex-facts">` + (s.mean != null ? `<dt>${t(L, 'expectedRainfall')}</dt><dd>${mm(s.mean)} (${t(L, 'normal')} ${mm(s.normal)}, ${root.dataset.reference})</dd>` : '') +
+      (s.observed != null ? `<dt>${t(L, 'observed')}</dt><dd>${mm(s.observed)} (CHIRPS)</dd>` : '') +
+      `<dt>${t(L, 'trackHere')}</dt><dd><span class="tr tr-${tr.level}">${esc(tr.word)}</span>${s.rpss != null ? ` <span class="caveat">(${t(L, 'skillScore')} ${s.rpss >= 0 ? '+' : ''}${s.rpss.toFixed(2)}, ${s.years} ${t(L, 'pastSeasons')})</span>` : ''}</dd></dl>` +
+      (area.level === 3 && s.cells === 1 ? `<p class="caveat">${esc(t(L, 'smallWoreda'))}</p>` : '') +
+      (up.length ? `<p class="ex-up">${up.sort((a: any, b: any) => b.level - a.level).map((u: any) => `<button type="button" class="linkbtn" data-area="${u.id}">${esc(u.name)} (${esc(t(L, A.levels[String(u.level)]).toLowerCase())})</button>`).join(' · ')}</p>` : '') +
+      `<p><button type="button" class="linkbtn" id="ex-csv">${esc(t(L, 'csv'))}</button> · <button type="button" class="linkbtn" id="ex-share">${esc(t(L, 'copy'))}</button></p>`;
     if (push) {
       const q = new URLSearchParams(location.search); q.set('area', area.id);
       history.replaceState(null, '', location.pathname + '?' + q + location.hash);
@@ -240,6 +243,16 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     dl.innerHTML = A.areas.map((a: any) => `<option value="${esc(a.name)}${a.level > 1 ? ' — ' + esc(a.level === 3 ? a.zone + ', ' + a.region : a.region) : ''}">${esc(A.levels[String(a.level)])}</option>`).join('');
     $('ex-status').textContent = '';
     draw();
+    const hero = document.getElementById('plain-summary');           // a draft language: the page summary in that language too
+    if (L !== 'en' && hero && hero.dataset.view) {
+      const r = P.regional(G, D, A, G.views[hero.dataset.view] ?? G.views.all_ethiopia, hero.dataset.label, L);
+      $('plain-text').textContent = r.text;
+      $('plain-title').textContent = t(L, 'inPlainWords');
+      if (r.all.p) { const n = P.tenths(r.all.p); const el = document.getElementById('plain-tenths'); if (el) el.textContent = t(L, 'tenths', { b: n[0], n: n[1], a: n[2] }); }
+      if (!REVIEWED[L]) { const dr = $('plain-draft'); dr.textContent = t(L, 'draft'); dr.hidden = false; }
+      $('ex-panel').querySelector('h3')!.textContent = t(L, 'yourArea');
+      ($('ex-panel').querySelector('.caveat') as HTMLElement).textContent = t(L, 'clickHint');
+    }
     const first = ASKED && A.areas.find((a: any) => a.id === ASKED);
     if (first) select(first, false);
   }
@@ -258,7 +271,7 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     const up = el.closest('[data-area]') as HTMLElement | null;
     if (up) { const a = A.areas.find((x: any) => x.id === up.dataset.area); if (a) select(a); return; }
     if (el.id === 'ex-csv') { csv(); return; }
-    if (el.id === 'ex-share') { navigator.clipboard?.writeText(location.href); el.textContent = 'Link copied'; return; }
+    if (el.id === 'ex-share') { navigator.clipboard?.writeText(location.href); el.textContent = t(L, 'copied'); return; }
   });
   let drag: any = null, moved = false;
   canvas = $('ex-map') as HTMLCanvasElement;

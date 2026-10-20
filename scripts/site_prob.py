@@ -129,15 +129,16 @@ def export(out_dir):
 
 def export_neural(out_dir):
     """Neural distributional regression (docs/54): figures to assets/, results to downloads/."""
-    for folder in sorted((ROOT / 'outputs/probability_calibration').glob('*/neural/benchmark.json')):
-        name, src = folder.parent.parent.name, folder.parent
-        for f in sorted((src / 'figures').glob('*.png')):
-            d = out_dir / 'assets/neural' / name / f.name
+    for sub in ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning'):   # the DRN, its second stage, pooled, tuning
+        for folder in sorted((ROOT / 'outputs/probability_calibration').glob(f'*/{sub}/benchmark.json')):
+            name, src = folder.parent.parent.name, folder.parent
+            for f in sorted((src / 'figures').glob('*.png')):
+                d = out_dir / f'assets/{sub}' / name / f.name
+                d.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, d)
+            d = out_dir / f'downloads/{sub}' / name / 'benchmark.json'
             d.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(f, d)
-        d = out_dir / 'downloads/neural' / name / 'benchmark.json'
-        d.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(folder, d)
+            shutil.copy2(folder, d)
 
 
 def export_mos(out_dir):

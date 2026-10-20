@@ -60,7 +60,7 @@ def bh(pvalues):
 
 def add_series(r, cycle, target, mres, rres, sc):
     """The per-year scores of a method and its reference over both designs (training LOYO years, then test years)."""
-    years, m, ref, clim = [], [], [], []
+    years, m, ref, clim, n_train = [], [], [], [], 0
     for design in ('training', 'test'):
         a, b = (mres.get(design) or {}).get(REGION), (rres.get(design) or {}).get(REGION)
         if not a or not b or sc not in a['per_year']:
@@ -69,8 +69,9 @@ def add_series(r, cycle, target, mres, rres, sc):
         if ya != yb or len(ya) != len(a['per_year'][sc]):
             raise ValueError(f'year mismatch {cycle} {target} {design}')
         years += ya; m += a['per_year'][sc]; ref += b['per_year'][sc]; clim += a['per_year'][sc + '_clim']
+        n_train = len(ya) if design == 'training' else n_train
     if years:
-        r.setdefault('series', []).append(dict(cycle=cycle, target=target, years=years, m=m, ref=ref, clim=clim))
+        r.setdefault('series', []).append(dict(cycle=cycle, target=target, years=years, m=m, ref=ref, clim=clim, n_train=n_train))
 
 
 def read(p):
@@ -99,6 +100,10 @@ def add_test(r, cycle, target, t, decision):
     """One target's test record (paired_summary for training and test) and the rule's decision."""
     r['targets'] += 1
     r['seasons'].add(cycle)
+    r.setdefault('by_target', {})[f'{SEASON[cycle]} {target}'] = dict(
+        cycle=cycle, target=target, confirmed=bool(decision['confirmed']), p_adjusted=decision.get('p_adjusted'),
+        years_better=t['training']['years_better'], years=t['training']['years'],
+        test_better=t['test']['years_better'] if t.get('test') else None, test_years=t['test']['years'] if t.get('test') else None)
     if decision['confirmed']:
         r['confirmed'].append(f'{SEASON[cycle]} {target}')
     r['training_better'] += t['training']['mean_difference'] < 0
@@ -151,7 +156,8 @@ def probability(store):
                         add_test(r, cy, target, t, dec[(m, target)])
                         add_series(r, cy, target, d['targets'][target]['methods'][m], d['targets'][target]['methods'][d['incumbent']], 'rps')
         for rel, family in (('distribution/benchmark.json', 'Distribution model (Phase 2)'), ('phase3/benchmark.json', 'Distribution model (Phase 3)'),
-                            ('neural/benchmark.json', 'Neural network (DRN)')):          # neural: its decision model only (docs/54)
+                            ('neural/benchmark.json', 'Neural network (DRN)'),           # neural: its decision models only (docs/54)
+                            ('neural_ext/benchmark.json', 'Neural network (DRN)'), ('neural_pooled/benchmark.json', 'Neural network (DRN)')):
             d = read(f'{base}/{rel}')
             if not d:
                 continue
@@ -266,13 +272,26 @@ def main():
     bias(store)
     probability(store)
     evidence(list(store.values()))
+    order = []                                               # the targets in cycle and season order (the method explorer's columns)
+    for r in store.values():                                 # per target: skill gain against the published approach, share of climatology
+        for sr in r.get('series', []):
+            key = f"{SEASON[sr['cycle']]} {sr['target']}"
+            g = [(ref - m) / c for m, ref, c in zip(sr['m'], sr['ref'], sr['clim']) if c]
+            n = sr['n_train']
+            cell = r.setdefault('by_target', {}).setdefault(key, dict(cycle=sr['cycle'], target=sr['target']))
+            cell.update(gain_training=float(np.mean(g[:n])) if g[:n] else None, gain_test=float(np.mean(g[n:])) if g[n:] else None)
+            if (sr['cycle'], sr['target']) not in order:
+                order.append((sr['cycle'], sr['target']))
+    targets = {c: cfg.get('targets', []) for c in CYCLES for cfg in [read(f'config/bias_correction/{c}.json') or {}]}
+    order.sort(key=lambda ct: (CYCLES.index(ct[0]), targets[ct[0]].index(ct[1]) if ct[1] in targets[ct[0]] else 99))
     rows = [dict({k: v for k, v in r.items() if k != 'series'}, seasons=sorted(r['seasons']), category=CATEGORY[r['family']]) for r in store.values()]
     categories = {}                                          # methods per category, each counted once over both products
     for r in rows:
         categories.setdefault(r['category'], set()).add(r['method'])
     categories = {k: len(v) for k, v in sorted(categories.items(), key=lambda kv: list(CATEGORY.values()).index(kv[0]))}
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), region=REGION, protocol=__doc__.strip(),
-                categories=categories, methods=sum(categories.values()), multiple_testing=CORRECTION, rows=rows)
+                categories=categories, methods=sum(categories.values()), multiple_testing=CORRECTION,
+                target_order=[dict(key=f'{SEASON[c]} {t}', cycle=c, season=SEASON[c], target=t) for c, t in order], rows=rows)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / 'summary.json').write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
     md = ['# Methods against the published approach, all seasons', '',

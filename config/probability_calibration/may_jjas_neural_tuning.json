@@ -1,0 +1,22 @@
+{
+  "description": "Diagnostic of the tuning procedure (docs/54 section 3e): the DRN with its configuration chosen on a separate tuning split, May-initialized JJAS; not a candidate.",
+  "benchmark_config": "config/bias_correction/may_jjas.json",
+  "reference_amount_method": "mvs",
+  "models": [
+    "drn_csg_tuned"
+  ],
+  "decision_models": [],
+  "comparisons": [
+    [
+      "drn_csg_tuned",
+      "drn_csg"
+    ]
+  ],
+  "external_models": {
+    "drn_csg": "outputs/probability_calibration/{name}/neural/benchmark.json"
+  },
+  "members": 25,
+  "reliability": true,
+  "output_root": "outputs/probability_calibration/may_jjas/neural_tuning",
+  "phase": 4
+}

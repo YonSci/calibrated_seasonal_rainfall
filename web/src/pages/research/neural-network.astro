@@ -8,11 +8,16 @@ import Figure from '../../components/Figure.astro';
 import { read, names, href, link, esc, signed, num, years, cycleTitle, REPO } from '../../lib/data.js';
 
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
-const cycles = names('neural').map((n) => ({ name: n, d: read(`neural/${n}.json`) }))
+const EXT = names('neural_ext');                     // second stage: SST inputs, neural correction of EMOS, forecast-only ablation
+const POOLED = names('neural_pooled'), TUNING = names('neural_tuning');
+const maybe = (list, sub, n) => (list.includes(n) ? read(`${sub}/${n}.json`) : null);
+const cycles = names('neural').map((n) => ({ name: n, d: read(`neural/${n}.json`), x: maybe(EXT, 'neural_ext', n),
+  p: maybe(POOLED, 'neural_pooled', n), u: maybe(TUNING, 'neural_tuning', n) }))
   .map((x) => ({ ...x, title: cycleTitle(INIT[x.name.split('_')[0]], x.name.split('_')[1].toUpperCase()) }))
   .sort((a, b) => INIT[a.name.split('_')[0]] - INIT[b.name.split('_')[0]]);
 const SHORT = { incumbent: 'Published probabilities', mvs_ensemble: 'MVS ensemble (published amounts)', emos_csg: 'EMOS',
-  drn_csg: 'DRN', drn_linear_csg: 'Linear control', drn_climatology: 'No-forecast ablation' };
+  drn_csg: 'DRN', drn_linear_csg: 'Linear control', drn_climatology: 'No-forecast ablation', drn_forecast_only: 'Forecast-only ablation',
+  drn_sst: 'DRN + SST', drn_emos_residual: 'Neural EMOS correction', drn_pooled: 'Pooled DRN', drn_csg_tuned: 'DRN, separate tuning' };
 
 // The method selection's decision (docs/50): Benjamini–Hochberg across the decision model's targets, per score
 function bhDecisions(d, score) {
@@ -35,54 +40,89 @@ const confirmedList = (d, rule) => ['rps', 'crps'].flatMap((sc) => {
     .map(([t]) => `${t} (${sc === 'rps' ? 'probabilities' : 'amounts'})`));
 });
 
-function skillTable(d, score) {
+function skillTable(d, score, cand = 'drn_csg') {
   const reg = d.primary_region;
   const key = score === 'rps' ? 'rpss' : 'crpss';
   const ref = score === 'rps' ? 'incumbent' : 'mvs_ensemble';
   const ks = [ref, ...d.models];
   const bh = bhDecisions(d, score);
   const rows = Object.keys(d.targets).map((t) => {
-    const x = d.tests.drn_csg?.[score]?.[t];
+    const x = d.tests[cand]?.[score]?.[t];
     return [`<strong>${esc(t)}</strong>`, ...ks.map((k) => signed(d.targets[t].methods[k].training[reg][key])),
       ...ks.map((k) => signed(d.targets[t].methods[k].test[reg][key])),
-      x ? `${num(x.decision.holm_p_family, 3)} / ${num(bh[`drn_csg|${t}`].p, 3)}` : '—',
-      x ? (bh[`drn_csg|${t}`].confirmed ? '<strong>✓ candidate</strong>' : x.decision.no_harm ? 'not confirmed' : 'not confirmed; worse over the test years') : '—'];
+      x ? `${num(x.decision.holm_p_family, 3)} / ${num(bh[`${cand}|${t}`].p, 3)}` : '—',
+      x ? (bh[`${cand}|${t}`].confirmed ? '<strong>✓ candidate</strong>' : x.decision.no_harm ? 'not confirmed' : 'not confirmed; worse over the test years') : '—'];
   });
   const k1 = ks.map((k) => `${SHORT[k] ?? k} ${years(d.training_years)}`);
   const k2 = ks.map((k) => `${SHORT[k] ?? k} ${years(d.test_years)}`);
-  return { head: ['Target', ...k1, ...k2, 'DRN p (Holm / BH)', 'DRN (selection rule)'], rows,
+  return { head: ['Target', ...k1, ...k2, `${SHORT[cand]} p (Holm / BH)`, `${SHORT[cand]} (selection rule)`], rows,
     caption: `${key.toUpperCase()} against the observed climatology over ${d.regions[reg]}: leave-one-year-out ${years(d.training_years)}, then fitted on ${years(d.training_years)} and scored ${years(d.test_years)}.` };
 }
 function coverageTable(d) {
   const reg = d.primary_region;
   const ks = ['mvs_ensemble', ...d.models];
-  return { head: ['Target', ...ks.map((k) => SHORT[k] ?? k)],
-    rows: Object.keys(d.targets).map((t) => [`<strong>${esc(t)}</strong>`, ...ks.map((k) => {
-      const v = d.targets[t].methods[k].training[reg].coverage_80;
-      return v == null ? '—' : `${Math.round(v * 100)}%`;
+  const cell = (m) => {
+    const c = m.training[reg].coverage_80, w = m.training[reg].width_80;
+    return c == null ? '—' : `${Math.round(c * 100)}%` + (w == null ? '' : ` · ${Math.round(w)} mm`);
+  };
+  return { head: ['Target', ...ks.map((k) => SHORT[k] ?? k), 'Climatology width'],
+    rows: Object.keys(d.targets).map((t) => [`<strong>${esc(t)}</strong>`, ...ks.map((k) => cell(d.targets[t].methods[k])),
+      (() => { const w = d.targets[t].methods.mvs_ensemble.training[reg].width_80_clim; return w == null ? '—' : `${Math.round(w)} mm`; })()]),
+    caption: `Coverage of the 10–90% range (nominal 80%) · its mean width, ${years(d.training_years)}. Coverage alone can be bought with wide ranges: a calibrated range narrower than climatology's is the aim.` };
+}
+function brierTable(d) {
+  const reg = d.primary_region;
+  const ks = ['incumbent', ...d.models];
+  return { head: ['Target', ...ks.flatMap((k) => [`${SHORT[k] ?? k} below`, 'above'])],
+    rows: Object.keys(d.targets).map((t) => [`<strong>${esc(t)}</strong>`, ...ks.flatMap((k) => {
+      const m = d.targets[t].methods[k].training[reg];
+      return [m.bss_below, m.bss_above].map((v) => (v == null ? '—' : signed(v)));
     })]),
-    caption: `Share of observations inside the 10–90% range, ${years(d.training_years)} (nominal 80%).` };
+    caption: `Brier skill of the below- and above-normal probabilities against climatology, ${years(d.training_years)} (leave-one-year-out).` };
+}
+function domainTable(d, reg) {
+  const ks = [['incumbent', 'rpss'], ['drn_csg', 'rpss'], ['mvs_ensemble', 'crpss'], ['emos_csg', 'crpss'], ['drn_csg', 'crpss'], ['drn_climatology', 'crpss']];
+  return { head: ['Target', ...ks.map(([k, key]) => `${key.toUpperCase()} ${SHORT[k] ?? k}`)],
+    rows: Object.keys(d.targets).map((t) => [`<strong>${esc(t)}</strong>`, ...ks.map(([k, key]) => {
+      const v = d.targets[t].methods[k].training[reg]?.[key];
+      return v == null ? '—' : signed(v);
+    })]),
+    caption: `${d.regions[reg]}, ${years(d.training_years)} (leave-one-year-out). The tests and the method selection use ${d.regions[d.primary_region]}.` };
+}
+const ci = (x) => (x?.bootstrap_95 ? `${signed(x.bootstrap_95[0], 3)} to ${signed(x.bootstrap_95[1], 3)}` : '—');
+function testTable(d, score, cand = 'drn_csg') {
+  const bh = bhDecisions(d, score);
+  return { head: ['Target', `Δ${score.toUpperCase()} ${years(d.training_years)}`, '95% interval', 'Years better', 'p (one-sided)', 'Holm / BH',
+    `Δ${score.toUpperCase()} ${years(d.test_years)}`, 'Selection rule'],
+    rows: Object.entries(d.tests[cand]?.[score] ?? {}).map(([t, x]) => [`<strong>${esc(t)}</strong>`, signed(x.training.mean_difference, 3), ci(x.training),
+      `${x.training.years_better} of ${x.training.years}`, num(x.training.p_improvement, 3),
+      `${num(x.decision.holm_p_family, 3)} / ${num(bh[`${cand}|${t}`].p, 3)}`, signed(x.test.mean_difference, 3),
+      bh[`${cand}|${t}`].confirmed ? '<strong>✓ candidate</strong>' : '—']),
+    caption: `${SHORT[cand]} against the ${score === 'rps' ? 'published probabilities (RPS)' : 'MVS-corrected ensemble (CRPS, mm)'}: paired whole-year differences; negative favours the model; 95% interval: whole-year bootstrap.` };
 }
 function comparisonTable(d, score) {
   const rows = [];
   for (const [pair, s] of Object.entries(d.comparisons ?? {})) {
     const other = pair.split('|')[1];
     for (const [t, x] of Object.entries(s[score] ?? {})) {
-      rows.push([`<strong>${esc(t)}</strong>`, esc(SHORT[other] ?? other), signed(x.training.mean_difference, 4),
+      rows.push([`<strong>${esc(t)}</strong>`, esc(`${SHORT[pair.split('|')[0]]} against ${SHORT[other] ?? other}`), signed(x.training.mean_difference, 4), ci(x.training),
         `${x.training.years_better} of ${x.training.years}`, num(x.training.p_improvement, 3), signed(x.test.mean_difference, 4),
         `${x.test.years_better} of ${x.test.years}`]);
     }
   }
-  return { head: ['Target', 'DRN against', `Δ${score.toUpperCase()} ${years(d.training_years)}`, 'Years DRN better', 'p (one-sided)',
-    `Δ${score.toUpperCase()} ${years(d.test_years)}`, 'Years DRN better'], rows };
+  return { head: ['Target', 'Comparison', `Δ${score.toUpperCase()} ${years(d.training_years)}`, '95% interval', 'Years first better', 'p (one-sided)',
+    `Δ${score.toUpperCase()} ${years(d.test_years)}`, 'Years first better'], rows };
 }
 const chosen = (d) => {
   const n = new Map();
   for (const t of Object.values(d.targets)) {
-    const h = t.fitted?.drn_csg?.hidden;
-    if (h) n.set(h.join('–'), (n.get(h.join('–')) ?? 0) + 1);
+    const f = t.fitted?.drn_csg;
+    if (f?.hidden) {
+      const key = `${f.hidden.join('–')} units` + (f.decay != null ? `, decay ${f.decay}` : '');
+      n.set(key, (n.get(key) ?? 0) + 1);
+    }
   }
-  return [...n].map(([h, c]) => `${h} units (${c} target${c === 1 ? '' : 's'})`).join(', ') || '—';
+  return [...n].map(([h, c]) => `${h} (${c} target${c === 1 ? '' : 's'})`).join('; ') || '—';
 };
 ---
 <Base title="Neural network (DRN)" section="research" description="A distributional regression network (neural EMOS with a censored shifted gamma) tested against the published pipeline and EMOS.">
@@ -103,6 +143,7 @@ const chosen = (d) => {
       <li><strong>Linear control:</strong> the DRN's inputs and training, without a hidden layer: is a gain due to the network or to the extra inputs and the CRPS loss?</li>
       <li><strong>No-forecast ablation:</strong> the network with only the local climate and location: does the SEAS5 forecast add anything beyond the cell's normal rainfall?</li>
       <li><strong>References:</strong> the published probabilities (MVS and the climatology blend; RPS) and the MVS-corrected ensemble (CRPS). Every model uses the first 25 SEAS5 members in every year, the 2027 policy.</li>
+      <li><strong>Second stage</strong> (a separate benchmark, its own two candidates): the DRN with SEAS5 Niño 3.4 and Indian Ocean Dipole indices of the target months and the EMI rainfall regions (Korecha &amp; Sorteberg 2013), which gives the network large-scale information; a neural correction of EMOS, which starts exactly at EMOS and can only move away from it where held-out years improve; and a forecast-only ablation (no climate or location inputs).</li>
     </ul>
     <p class="caveat">Only the DRN is tested for adoption (5 targets per cycle and score). EMOS, the control and the ablation are diagnostic comparisons and do not enter the multiple-testing adjustment.</p>
 
@@ -117,8 +158,8 @@ const chosen = (d) => {
         weight per year, plus weight decay. The gradient is computed exactly through the network; the CRPS's own derivatives by finite
         differences.</li>
       <li><strong>Training inside each fold:</strong> Adam; about 20% of the training years held out to stop training when their CRPS stops
-        improving; three seeds with different held-out years; the architecture with the lower held-out CRPS is kept, and the forecast is the
-        mixture of its three seeds. Training uses every second cell in each direction; forecasts cover every cell.</li>
+        improving; three seeds with different held-out years; the architecture (32, or 32 and 16 units) and weight decay (10⁻⁴ or 10⁻³) with
+        the lowest held-out CRPS are kept, and the forecast is the mixture of the three seeds. Training uses every second cell in each direction; forecasts cover every cell.</li>
       <li><strong>Products:</strong> tercile probabilities from the distribution at the training-year terciles; amounts, median and 10–90%
         range from its quantiles.</li>
       <li><strong>Evaluation:</strong> outer leave-one-year-out over the training years, then fitted on all training years for the test years;
@@ -126,7 +167,7 @@ const chosen = (d) => {
     </ol>
 
     {cycles.length === 0 && <p class="notice">The benchmark has not been run yet.</p>}
-    {cycles.map(({ name, d, title }) => (
+    {cycles.map(({ name, d, x, p, u, title }) => (
       <section id={name}>
         <h2>{title}</h2>
         <p><strong>DRN confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(d, 'bh').join('; ') || 'none'}.
@@ -135,8 +176,20 @@ const chosen = (d) => {
         <Table {...skillTable(d, 'crps')} />
         <h3>Tercile probabilities (RPS skill)</h3>
         <Table {...skillTable(d, 'rps')} />
-        <h3>Ranges</h3>
+        <h3>The tests</h3>
+        <Table {...testTable(d, 'crps')} />
+        <Table {...testTable(d, 'rps')} />
+        <h3>Ranges: coverage and width</h3>
         <Table {...coverageTable(d)} />
+        <h3>Below- and above-normal probabilities</h3>
+        <Table {...brierTable(d)} />
+        {d.assets.includes(`assets/neural/${name}/reliability_training.png`) && <Figure src={`assets/neural/${name}/reliability_training.png`} caption="Reliability of the below- and above-normal probabilities, leave-one-year-out over the training years: observed frequency against forecast probability; on the diagonal = reliable." />}
+        {Object.keys(d.regions).filter((r) => r !== d.primary_region).map((r) => (
+          <>
+            <h3>{d.regions[r]}</h3>
+            <Table {...domainTable(d, r)} />
+          </>
+        ))}
         <h3>What the DRN adds (paired, no adjustment)</h3>
         <Table {...comparisonTable(d, 'crps')} />
         <Table {...comparisonTable(d, 'rps')} />
@@ -144,6 +197,43 @@ const chosen = (d) => {
         the value of the hidden layers; against the ablation: the value of the forecast itself.</p>
         {d.assets.includes(`assets/neural/${name}/distribution_summary.png`) && <Figure src={`assets/neural/${name}/distribution_summary.png`} caption="Skill of every model and target; * the DRN confirmed better than the reference (Holm, as run)." />}
         <p class="caveat">Download: {d.downloads.map((f) => <a href={link(f)}>benchmark.json</a>)} (with the fitted network weights).</p>
+        {x && (
+          <>
+            <h3 id={`${name}-second`}>Second stage: SST inputs, a neural correction of EMOS, the forecast-only ablation</h3>
+            <p><strong>Confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(x, 'bh').join('; ') || 'none'}.
+            In the benchmark as run (Holm): {confirmedList(x, 'holm').join('; ') || 'none'}. Candidates: the DRN with SST indices and rainfall regions, and the
+            neural correction of EMOS (two candidates per target and score).</p>
+            <Table {...testTable(x, 'crps', 'drn_sst')} />
+            <Table {...testTable(x, 'crps', 'drn_emos_residual')} />
+            <Table {...testTable(x, 'rps', 'drn_sst')} />
+            <Table {...testTable(x, 'rps', 'drn_emos_residual')} />
+            <Table {...comparisonTable(x, 'crps')} />
+            <Table {...comparisonTable(x, 'rps')} />
+            <Table {...coverageTable(x)} />
+            <p class="caveat">Download: {x.downloads.map((f) => <a href={link(f)}>benchmark.json</a>)}.</p>
+          </>
+        )}
+        {p && (
+          <>
+            <h3 id={`${name}-pooled`}>One network for the four months</h3>
+            <p><strong>Confirmed better under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(p, 'bh').join('; ') || 'none'}.
+            In the benchmark as run (Holm): {confirmedList(p, 'holm').join('; ') || 'none'}. One network fitted to the samples of the four
+            months together, with the month's position as an input; the season is not pooled.</p>
+            <Table {...testTable(p, 'crps', 'drn_pooled')} />
+            <Table {...testTable(p, 'rps', 'drn_pooled')} />
+            <Table {...comparisonTable(p, 'crps')} />
+            <Table {...coverageTable(p)} />
+          </>
+        )}
+        {u && (
+          <>
+            <h3 id={`${name}-tuning`}>A separate tuning split (diagnostic)</h3>
+            <p>The DRN with its architecture and weight decay chosen on three inner folds of years, apart from the years that stop the
+            training. Not a candidate: the comparison with the DRN shows whether the tuning procedure matters.</p>
+            <Table {...comparisonTable(u, 'crps')} />
+            <Table {...comparisonTable(u, 'rps')} />
+          </>
+        )}
       </section>
     ))}
     <p class="caveat">Code: <a href={`${REPO}/blob/main/scripts/neural_calibration.py`}><code>scripts/neural_calibration.py</code></a> · write-up: <a href={`${REPO}/blob/main/docs/54_NEURAL_DISTRIBUTIONAL_REGRESSION.md`}>docs/54</a>.</p>
