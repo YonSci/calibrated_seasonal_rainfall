@@ -1012,7 +1012,7 @@
   {
     "id": "2026-10-20.1",
     "date": "2026-10-20",
-    "commit": null,
+    "commit": "f57f7fc",
     "title": "Automatic validation of the new methods from 2027",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -1024,6 +1024,32 @@
       {
         "type": "method",
         "text": "Every candidate now collects independent validation seasons automatically: from 2027 statistical downscaling (CCA, PCR) is forecast when each cycle is run, before its season, frozen and scored once CHIRPS is available; the neural network runs in the amount shadow with the other distribution models. Its first season, JJAS 2026 September, was worse than the published amounts (as for EMOS and quantile regression that season). docs/50, docs/53, docs/54."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-20.2",
+    "date": "2026-10-20",
+    "commit": null,
+    "title": "Interactive map, your area in plain words, method explorer",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "display",
+        "text": "Every outlook now opens with a summary in plain words (which regions favour which outcome, the expected rainfall and how well forecasts made this way have done there), a probability bar and an \"out of 10 seasons\" row."
+      },
+      {
+        "type": "display",
+        "text": "Interactive map: every 0.25-degree cell with its chances, expected rainfall, difference from normal and track record; click the map or search any of the 15 regions, 107 zones and 1,148 woredas for its outlook in words, download its cells as CSV or share a link to it. A colour-blind friendly palette is available. Boundaries: OCHA COD-AB."
+      },
+      {
+        "type": "display",
+        "text": "Home page: \"Find your area\" and two entry paths (the outlook, the science). Research overview: a method explorer with every method against the published approach for every target. New heading typeface."
       }
     ]
   }
