@@ -1,9 +1,11 @@
 // Messages of the plain-language summaries and the area panel (lib/plain.js, components/OutlookExplorer.astro).
-// English is authoritative. Amharic (am) and Afaan Oromo (om) are DRAFTS written without a native-speaker review: they are
-// shown only with ?lang=am or ?lang=om, under a banner, and REVIEWED stays false until a native speaker has checked them
-// (then the language switch can be offered on the pages). Place names stay as in the OCHA boundaries (English).
+// English is authoritative. Amharic (am) and Afaan Oromo (om) are drafts not yet reviewed by a native speaker: published
+// by the project's decision (2026-10-20) with a short draft note, to be reviewed later (then set REVIEWED and the note goes).
+// The language is chosen with the switch on the outlook summaries (remembered in the browser) or ?lang=. Place names stay as
+// in the OCHA boundaries (English).
 
 export const REVIEWED = { en: true, am: false, om: false };
+export const PUBLISHED = { en: true, am: true, om: true };
 export const LANGS = { en: 'English', am: 'አማርኛ (Amharic)', om: 'Afaan Oromoo' };
 
 const M = {
@@ -34,7 +36,7 @@ const M = {
     smallWoreda: 'This woreda is smaller than one grid cell: the values are those of the cell at its centre.',
     csv: "Download this area's cells (CSV)", copy: 'Copy link', copied: 'Link copied',
     Region: 'Region', Zone: 'Zone', Woreda: 'Woreda',
-    draft: '',
+    draft: '', language: 'Language',
   },
   am: {
     below: 'ከመደበኛ በታች', near: 'መደበኛ አካባቢ', above: 'ከመደበኛ በላይ',
@@ -63,7 +65,7 @@ const M = {
     smallWoreda: 'ይህ ወረዳ ከአንድ የፍርግርግ ሕዋስ ያነሰ ነው፤ እሴቶቹ በመሃሉ ያለው ሕዋስ ናቸው።',
     csv: 'የዚህን አካባቢ ሕዋሳት ያውርዱ (CSV)', copy: 'ማስፈንጠሪያውን ይቅዱ', copied: 'ተቀድቷል',
     Region: 'ክልል', Zone: 'ዞን', Woreda: 'ወረዳ',
-    draft: 'ረቂቅ ትርጉም፦ በአፍ መፍቻ ተናጋሪ ገና አልተገመገመም። ትክክለኛው ጽሑፍ እንግሊዝኛው ነው። · Draft translation, not yet reviewed by a native speaker; the English text is authoritative.',
+    draft: 'ረቂቅ ትርጉም፤ ገና አልተገመገመም። · Draft translation, review pending; the English text is authoritative.', language: 'ቋንቋ',
   },
   om: {
     below: 'giddugaleessaa gadi', near: 'giddugaleessa', above: 'giddugaleessaa ol',
@@ -92,7 +94,7 @@ const M = {
     smallWoreda: 'Aanaan kun seelii kaartaa tokko irra xiqqaa dha: gatiiwwan kan seelii gidduu isaa ti.',
     csv: 'Seelota naannoo kanaa buusaa (CSV)', copy: 'Linkii garagalchaa', copied: 'Garagalfameera',
     Region: 'Naannoo', Zone: 'Godina', Woreda: 'Aanaa',
-    draft: 'Hiikkaa barruu: ammaaf dubbataa afaan dhalootaatiin hin sakatta’amne. Barruun Ingiliffaa isa sirrii dha. · Draft translation, not yet reviewed by a native speaker; the English text is authoritative.',
+    draft: 'Hiikkaa barruu; ammaaf hin sakatta’amne. · Draft translation, review pending; the English text is authoritative.', language: 'Afaan',
   },
 };
 
@@ -101,7 +103,20 @@ export function t(lang, key, vars = {}) {
   return s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? `{${k}}`));
 }
 
+// The language of this page view: ?lang=, else the choice remembered in this browser, else English.
 export function langFromQuery(search) {
   const l = new URLSearchParams(search).get('lang');
-  return l && M[l] ? l : 'en';
+  if (l && M[l] && PUBLISHED[l]) return l;
+  try {
+    const kept = localStorage.getItem('lang');
+    if (kept && M[kept] && PUBLISHED[kept]) return kept;
+  } catch { /* storage unavailable */ }
+  return 'en';
+}
+
+export function chooseLang(l) {
+  try { localStorage.setItem('lang', l); } catch { /* storage unavailable */ }
+  const q = new URLSearchParams(location.search);
+  if (l === 'en') q.delete('lang'); else q.set('lang', l);
+  location.search = q.toString() ? '?' + q : '';
 }

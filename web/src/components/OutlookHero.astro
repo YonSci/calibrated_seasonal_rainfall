@@ -3,6 +3,8 @@
 // O: the outlook pieces from lib/outlook.js (element ids kept, so the text is checked against the current page).
 const { O, more = null, status = null, plain = null, exploreHref = '#explore' } = Astro.props;  // more: [href, label]; status: the target's verification status;
 // plain: the plain-language summary (lib/summary.js)
+import { asset } from '../lib/data.js';
+import { LANGS, PUBLISHED } from '../lib/i18n.js';
 const CATS = ['below', 'near', 'above'];
 const pc = (x) => `${Math.round(100 * x)}%`;
 ---
@@ -13,9 +15,15 @@ const pc = (x) => `${Math.round(100 * x)}%`;
     <p class="badges"><span class="research-inline" set:html={O['ol-publication']} />{status && <span class={`status ${status.code}`}>{status.text}</span>}</p>
     <p class="lead" id="ol-lead" set:html={O['ol-lead']} />
     {plain && (
-      <div class="plain-summary" id="plain-summary" data-view={plain.view} data-label={plain.label}>
-        <p class="notice small plain-draft" id="plain-draft" hidden></p>
-        <h2 class="plain-title" id="plain-title">In plain words</h2>
+      <div class="plain-summary" id="plain-summary" data-view={plain.view} data-label={plain.label}
+           data-grid={asset(`data/cells/${plain.cycle}/grid.json`)} data-cells={asset(`data/cells/${plain.cycle}/${plain.target}.json`)} data-areas={asset('data/areas.json')}>
+        <div class="plain-head">
+          <h2 class="plain-title" id="plain-title">In plain words</h2>
+          <div class="seg lang-switch" role="group" aria-label="Language">
+            {Object.entries(LANGS).filter(([k]) => PUBLISHED[k]).map(([k, l]) => <button type="button" data-lang={k} aria-pressed={k === 'en' ? 'true' : 'false'}>{l.replace(' (Amharic)', '')}</button>)}
+          </div>
+        </div>
+        <p class="caveat plain-draft" id="plain-draft" hidden></p>
         <p id="plain-text">{plain.text}</p>
         {plain.p && (
           <>
@@ -42,6 +50,37 @@ const pc = (x) => `${Math.round(100 * x)}%`;
   <div class="box"><h3 id="ol-skill-title" set:html={O['ol-skill-title']} /><div id="ol-skill" set:html={O['ol-skill']} /></div>
 </div>
 <p class="caveat">Signal strength describes how far this forecast's probabilities depart from climatology. Historical skill describes how forecasts made the same way scored in past years. A strong signal is not a confidence rating.</p>
+<script>
+  // The plain-language summary in the chosen language (lib/i18n.js): recomputed from the cell data, as the map does.
+  import * as P from '../lib/plain.js';
+  import { t, langFromQuery, chooseLang, REVIEWED } from '../lib/i18n.js';
+  const box = document.getElementById('plain-summary') as HTMLElement | null;
+  if (box) {
+    const L = langFromQuery(location.search);
+    box.querySelectorAll<HTMLElement>('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === L)));
+    box.addEventListener('click', (ev) => {
+      const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-lang]');
+      if (b && b.dataset.lang && b.dataset.lang !== L) chooseLang(b.dataset.lang);
+    });
+    if (L !== 'en') {
+      Promise.all([box.dataset.grid, box.dataset.cells, box.dataset.areas].map((u) => fetch(u!).then((r) => r.json()))).then(([G, D, A]) => {
+        const r = P.regional(G, D, A, G.views[box.dataset.view!] ?? G.views.all_ethiopia, box.dataset.label, L);
+        document.getElementById('plain-text')!.textContent = r.text;
+        document.getElementById('plain-title')!.textContent = t(L, 'inPlainWords');
+        const el = document.getElementById('plain-tenths');
+        if (el && r.all.p) {
+          const n = P.tenths(r.all.p), tr = P.track(r.all.rpss, L);
+          el.innerHTML = '';
+          el.append(t(L, 'tenths', { b: n[0], n: n[1], a: n[2] }) + ' ' + t(L, 'trackHere') + ': ');
+          const chip = document.createElement('span');
+          chip.className = `tr tr-${tr.level}`; chip.textContent = tr.word;
+          el.append(chip);
+        }
+        if (!REVIEWED[L]) { const d = document.getElementById('plain-draft')!; d.textContent = t(L, 'draft'); d.hidden = false; }
+      }).catch(() => { /* keep the English summary */ });
+    }
+  }
+</script>
 <script>
   // Smoothed / Grid cells switch of the outlook map. Starts from ?style= (as the map viewer below) or the choice remembered
   // in this browser (shared with the viewer), else Smoothed; storage may be unavailable, which only drops the memory.
@@ -73,6 +112,9 @@ const pc = (x) => `${Math.round(100 * x)}%`;
   .badges .research-inline{margin:0}
   .plain-summary{border-left:4px solid var(--accent);background:var(--surface);border-radius:0 12px 12px 0;padding:10px 16px;margin:10px 0 14px}
   .plain-summary .plain-title{font-size:1rem;margin:0 0 4px;color:var(--accent)}
+  .plain-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px}
+  .lang-switch button{font-size:.8rem;padding:3px 9px}
+  .plain-draft{font-style:italic;margin:.2em 0}
   .plain-summary p{margin:.3em 0}
   .plain-links{font-weight:600}
   .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}

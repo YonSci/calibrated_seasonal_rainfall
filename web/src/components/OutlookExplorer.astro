@@ -193,7 +193,7 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     const t10 = s.p ? P.tenths(s.p) : null;
     const tr = P.track(s.rpss, L);
     const cats = ['below', 'near', 'above'];
-    $('ex-panel').innerHTML = (L !== 'en' && !REVIEWED[L] ? `<p class="notice small">${esc(t(L, 'draft'))}</p>` : '') +
+    $('ex-panel').innerHTML = (L !== 'en' && !REVIEWED[L] ? `<p class="caveat plain-draft">${esc(t(L, 'draft'))}</p>` : '') +
       `<h3>${esc(area.name)}</h3><p class="caveat">${esc(level)}${parents.length ? ' · ' + parents.map(esc).join(', ') : ''} · ${s.cells} ${t(L, s.cells === 1 ? 'gridCell' : 'gridCells')}</p>` +
       (s.p ? `<div class="probbar" role="img" aria-label="Chances: below ${pc(s.p[0])}, near ${pc(s.p[1])}, above ${pc(s.p[2])}">${cats.map((c, k) => `<span class="pb-${c}" style="flex:${s.p[k]}">${pc(s.p[k])}</span>`).join('')}</div>
         <p class="tenths" aria-hidden="true">${t10!.map((n: number, k: number) => `<span class="t-${cats[k]}">${'●'.repeat(n)}</span>`).join('')}</p>
@@ -243,13 +243,7 @@ const { cycle, view, target, label, viewLabel, reference } = Astro.props;
     dl.innerHTML = A.areas.map((a: any) => `<option value="${esc(a.name)}${a.level > 1 ? ' — ' + esc(a.level === 3 ? a.zone + ', ' + a.region : a.region) : ''}">${esc(A.levels[String(a.level)])}</option>`).join('');
     $('ex-status').textContent = '';
     draw();
-    const hero = document.getElementById('plain-summary');           // a draft language: the page summary in that language too
-    if (L !== 'en' && hero && hero.dataset.view) {
-      const r = P.regional(G, D, A, G.views[hero.dataset.view] ?? G.views.all_ethiopia, hero.dataset.label, L);
-      $('plain-text').textContent = r.text;
-      $('plain-title').textContent = t(L, 'inPlainWords');
-      if (r.all.p) { const n = P.tenths(r.all.p); const el = document.getElementById('plain-tenths'); if (el) el.textContent = t(L, 'tenths', { b: n[0], n: n[1], a: n[2] }); }
-      if (!REVIEWED[L]) { const dr = $('plain-draft'); dr.textContent = t(L, 'draft'); dr.hidden = false; }
+    if (L !== 'en') {                                               // the hero summary translates itself (OutlookHero)
       $('ex-panel').querySelector('h3')!.textContent = t(L, 'yourArea');
       ($('ex-panel').querySelector('.caveat') as HTMLElement).textContent = t(L, 'clickHint');
     }
