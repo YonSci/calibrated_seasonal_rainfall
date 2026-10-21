@@ -172,7 +172,7 @@ const SEARCH_TEXT = SEARCHED.length
   ? `Architecture (${UNITS.join(' or ')} units)` + (DECAYS.length > 1 ? ` × weight decay (${DECAYS.join(' or ')})` : `, weight decay ${DECAYS[0]}`) + ' chosen by held-out CRPS'
   : undefined;
 const created = shown.map((s) => s.a?.created_utc).filter(Boolean).sort();
-const commits = [...new Set(shown.map((s) => s.a?.commit).filter(Boolean))];
+const commits = [...new Set(shown.map((s) => s.a?.code_commit ?? s.a?.commit).filter(Boolean))];
 const PENDING = (ACC.status ?? []).filter((r) => r.family === 'neural' && r.pending);
 const NOT_RUN = ['neural_ext', 'neural_pooled', 'neural_tuning'].filter((f) => !(ACC.status ?? []).some((r) => r.family === f && (r.accepted || r.pending)));
 const FAMILY = { neural_ext: 'second stage (SST and regions, neural correction of EMOS)', neural_pooled: 'pooled network', neural_tuning: 'separate tuning split' };
@@ -291,7 +291,7 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
         <tr><th scope="row">Scientific status</th><td>Research comparison; the published forecasts do not use it.{SHADOW.length ? ` Selection candidate for ${SHADOW.join('; ')}: needs three independent validation seasons before it can be recommended.` : ' Not a selection candidate.'}</td></tr>
         <tr><th scope="row">Pending</th><td>{PENDING.length || NOT_RUN.length ? <>
           {PENDING.length > 0 && <>Newer runs not yet published ({PENDING.map((r) => `${CYCLE_NAME[r.cycle]} ${r.pending.created_utc.slice(0, 10)}`).join(', ')}); they are published together once all four cycles are complete. </>}
-          {NOT_RUN.length > 0 && <>Not yet run: {NOT_RUN.map((f) => FAMILY[f]).join(', ')}.</>}</> : 'nothing'}</td></tr>
+          {NOT_RUN.length > 0 && <>Still to come (running or queued): {NOT_RUN.map((f) => FAMILY[f]).join(', ')}.</>}</> : 'nothing'}</td></tr>
       </tbody>
     </table></div>
     <p class="caveat">Results are published only after a whole batch passes the completeness checks (five targets per cycle, years, members,

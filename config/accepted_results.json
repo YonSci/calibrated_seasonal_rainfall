@@ -61,7 +61,8 @@
      "[32]|0.0001",
      "[32]|0.001"
     ]
-   }
+   },
+   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
   },
   "neural/feb_fmam": {
    "experiment": "drn-stage1-v2",
@@ -117,7 +118,8 @@
      "[32]|0.0001",
      "[32]|0.001"
     ]
-   }
+   },
+   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
   },
   "neural/may_jjas": {
    "experiment": "drn-stage1-v2",
@@ -173,7 +175,8 @@
      "[32]|0.0001",
      "[32]|0.001"
     ]
-   }
+   },
+   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
   },
   "neural/sep_ondj": {
    "experiment": "drn-stage1-v2",
@@ -229,7 +232,8 @@
      "[32]|0.0001",
      "[32]|0.001"
     ]
-   }
+   },
+   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
   }
  }
 }

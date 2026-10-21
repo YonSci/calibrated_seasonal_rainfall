@@ -144,7 +144,7 @@ def _git_bytes(rev_path):
     return subprocess.run(['git', 'show', rev_path], cwd=ROOT, capture_output=True, check=True).stdout
 
 
-def accept(family, experiment, note='', from_release=False, rev='HEAD'):
+def accept(family, experiment, note='', from_release=False, rev='HEAD', code_commit=None):
     """Accept the whole batch of a family (every cycle) or nothing. from_release: the files the site published at `rev`
     (site_data download links and site/assets figures), for results whose outputs/ copy was overwritten by a rerun."""
     reg = load()
@@ -178,8 +178,10 @@ def accept(family, experiment, note='', from_release=False, rev='HEAD'):
             (a / 'benchmark.json').write_bytes(raw)
             for n, b in figs.items():
                 (a / 'figures' / n).write_bytes(b)
+            info = describe(d)
             reg['accepted'][f'{family}/{c}'] = dict(experiment=experiment, sha256=h, archive=a.relative_to(ROOT).as_posix(),
-                                                     accepted_utc=now, note=note, figures=sorted(figs), **describe(d))
+                                                     accepted_utc=now, note=note, figures=sorted(figs), **info,
+                                                     code_commit=code_commit or info['commit'])
     reg.setdefault('gated', list(GATED))
     save(reg)
     print(f'accepted {family}: {experiment} for {", ".join(c for c, *_ in staged)}')
@@ -195,6 +197,8 @@ def main():
     a.add_argument('--note', default='')
     a.add_argument('--from-release', action='store_true')
     a.add_argument('--rev', default='HEAD')
+    a.add_argument('--code-commit', help='the commit whose code produced the results, when the recorded commits are end-of-run HEADs '
+                   'and the benchmark code is verified identical between them')
     x = ap.parse_args()
     if x.cmd == 'status':
         for r in status():
@@ -203,7 +207,7 @@ def main():
                 f' INCOMPLETE: {"; ".join(r["pending"]["problems"])}' if r['pending']['problems'] else ' complete')
             print(f'{r["family"]:14} {r["cycle"]:9} accepted: {acc or "none"}' + (f' | {pen}' if pen else ''))
     else:
-        accept(x.family, x.experiment, x.note, x.from_release, x.rev)
+        accept(x.family, x.experiment, x.note, x.from_release, x.rev, x.code_commit)
 
 
 if __name__ == '__main__':

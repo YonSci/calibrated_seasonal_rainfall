@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-20T17:55:06.729350+00:00",
+ "created_utc": "2026-10-21T05:47:13.250882+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -813,14 +813,14 @@
         "label": "Distributional regression network (DRN), censored shifted gamma",
         "status": "candidate",
         "historical": {
-         "training_difference": -1.0991795584563333,
-         "years_better": 17,
+         "training_difference": -1.082497570514728,
+         "years_better": 18,
          "years": 24,
-         "holm_p": 0.010875,
-         "test_difference": -1.2035375936288792,
-         "p_adjusted": 0.010875,
+         "holm_p": 0.013875,
+         "test_difference": -1.2429175476630634,
+         "p_adjusted": 0.013875,
          "correction": "benjamini_hochberg",
-         "test_years_better": 7,
+         "test_years_better": 6,
          "test_years": 9
         }
        }
@@ -829,8 +829,8 @@
        "margin": 0.01,
        "level": 19.34218640484381,
        "tolerance": 0.1934218640484381,
-       "best": "drn_csg",
-       "best_gain": -1.0991795584563333,
+       "best": "quantile_regression",
+       "best_gain": -1.0827405272293198,
        "tied": [
         {
          "method": "emos_csg",
@@ -847,12 +847,12 @@
         {
          "method": "drn_csg",
          "family": "distribution_neural",
-         "gain": -1.0991795584563333,
+         "gain": -1.082497570514728,
          "simplicity": 5
         }
        ]
       },
-      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -0.9815 over the training years (Benjamini–Hochberg p 0.00788; 18 of 24 years better), -0.55 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.6701. Tied within 1% of the published score (0.193 CRPS (mm)) with quantile_regression, drn_csg: the simplest is selected (practical tie rule; the largest gain was drn_csg). Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Regularized quantile regression (distribution model); Distributional regression network (DRN), censored shifted gamma (distribution model (neural network))."
+      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -0.9815 over the training years (Benjamini–Hochberg p 0.00788; 18 of 24 years better), -0.55 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.6701. Tied within 1% of the published score (0.193 CRPS (mm)) with quantile_regression, drn_csg: the simplest is selected (practical tie rule; the largest gain was quantile_regression). Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Regularized quantile regression (distribution model); Distributional regression network (DRN), censored shifted gamma (distribution model (neural network))."
      }
     },
     "JJAS": {
