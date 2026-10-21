@@ -8,16 +8,18 @@
  ],
  "accepted": {
   "neural/jan_fmam": {
-   "experiment": "drn-stage1-v1",
-   "sha256": "3708b0469644edd693dc493e21a3fa79b3e1df46236c7f3e7728cd38570ff2bc",
-   "archive": "outputs/accepted/neural/jan_fmam/3708b0469644edd6",
-   "accepted_utc": "2026-10-20T15:42:09Z",
-   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "experiment": "drn-stage1-v2",
+   "sha256": "4500a96b18bf3dff984d6bdce34307bb27c5569cfd0af24b144e294a9b04728c",
+   "archive": "outputs/accepted/neural/jan_fmam/4500a96b18bf3dff",
+   "accepted_utc": "2026-10-21T05:39:33Z",
+   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
    "figures": [
-    "distribution_summary.png"
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T01:59:21.000315+00:00",
-   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "created_utc": "2026-10-20T20:31:12.725708+00:00",
+   "commit": "c6eec731f7782af0ccfcf4c8e482e57cdbb952e7",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/jan_fmam_neural.json",
    "training_years": [
@@ -46,28 +48,34 @@
     "emos_csg": [],
     "drn_csg": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ],
     "drn_linear_csg": [
      "[]|0.0"
     ],
     "drn_climatology": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ]
    }
   },
   "neural/feb_fmam": {
-   "experiment": "drn-stage1-v1",
-   "sha256": "8969e097f15a49ba4662aa29913f9411a001fb6a36742ad703b7e929a0474ebc",
-   "archive": "outputs/accepted/neural/feb_fmam/8969e097f15a49ba",
-   "accepted_utc": "2026-10-20T15:42:09Z",
-   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "experiment": "drn-stage1-v2",
+   "sha256": "82ce4038d2c3b3b4a8f7cfe62f54b743713646407d344330cd66d72f76b7c741",
+   "archive": "outputs/accepted/neural/feb_fmam/82ce4038d2c3b3b4",
+   "accepted_utc": "2026-10-21T05:39:33Z",
+   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
    "figures": [
-    "distribution_summary.png"
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T01:59:25.664380+00:00",
-   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "created_utc": "2026-10-20T19:48:32.936042+00:00",
+   "commit": "c6eec731f7782af0ccfcf4c8e482e57cdbb952e7",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/feb_fmam_neural.json",
    "training_years": [
@@ -96,28 +104,34 @@
     "emos_csg": [],
     "drn_csg": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ],
     "drn_linear_csg": [
      "[]|0.0"
     ],
     "drn_climatology": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ]
    }
   },
   "neural/may_jjas": {
-   "experiment": "drn-stage1-v1",
-   "sha256": "63a15f4cab256d67d53a58e3bd80a9e255d4d7195f7d5b876f963f1ef7803f1b",
-   "archive": "outputs/accepted/neural/may_jjas/63a15f4cab256d67",
-   "accepted_utc": "2026-10-20T15:42:09Z",
-   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "experiment": "drn-stage1-v2",
+   "sha256": "d05e990071ddd7330e2f7f4b8893816f2fcfe36fa15d00cdd091f96d80bc0dfd",
+   "archive": "outputs/accepted/neural/may_jjas/d05e990071ddd733",
+   "accepted_utc": "2026-10-21T05:39:33Z",
+   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
    "figures": [
-    "distribution_summary.png"
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T01:59:30.189431+00:00",
-   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "created_utc": "2026-10-20T13:56:52.926115+00:00",
+   "commit": "6e350daae1f4073742d3e693ca1e31a49dea86b7",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/may_jjas_neural.json",
    "training_years": [
@@ -146,28 +160,34 @@
     "emos_csg": [],
     "drn_csg": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ],
     "drn_linear_csg": [
      "[]|0.0"
     ],
     "drn_climatology": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ]
    }
   },
   "neural/sep_ondj": {
-   "experiment": "drn-stage1-v1",
-   "sha256": "ff49d86fa344f730ab45704f306c28668b741619adeaa5fa1272ab7c67ff6918",
-   "archive": "outputs/accepted/neural/sep_ondj/ff49d86fa344f730",
-   "accepted_utc": "2026-10-20T15:42:09Z",
-   "note": "first DRN benchmark: architectures 32 and 32-16, weight decay fixed at 1e-4; published in releases 2026-10-20.0 to .4",
+   "experiment": "drn-stage1-v2",
+   "sha256": "2492db0fe749c1c0939a626afffdc405fad1332e7382c3dd9ad7d3ea50bf77e1",
+   "archive": "outputs/accepted/neural/sep_ondj/2492db0fe749c1c0",
+   "accepted_utc": "2026-10-21T05:39:33Z",
+   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
    "figures": [
-    "distribution_summary.png"
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T01:59:34.615325+00:00",
-   "commit": "1ab365bc48c55172eed5924cc6dad47c586d6862",
+   "created_utc": "2026-10-20T12:36:27.909514+00:00",
+   "commit": "4b72f360b7cdd123fe265ba69f4bca434dbd7870",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/sep_ondj_neural.json",
    "training_years": [
@@ -196,14 +216,18 @@
     "emos_csg": [],
     "drn_csg": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ],
     "drn_linear_csg": [
      "[]|0.0"
     ],
     "drn_climatology": [
      "[32, 16]|0.0001",
-     "[32]|0.0001"
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
     ]
    }
   }
