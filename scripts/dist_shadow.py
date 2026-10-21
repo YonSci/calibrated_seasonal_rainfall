@@ -42,12 +42,14 @@ if ARGS is not None:
 import xarray as xr                                                     # noqa: E402
 from common import ROOT, load_config, save_json, save_netcdf            # noqa: E402
 
-CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/neural_calibration.py', 'scripts/dist_benchmark.py', 'scripts/bias_methods.py',
+CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/neural_calibration.py', 'scripts/sst_indices.py', 'scripts/dist_benchmark.py', 'scripts/bias_methods.py',
         'scripts/bias_benchmark.py', 'scripts/bias_validation.py', 'scripts/run_calibration.py', 'scripts/calibration_core.py',
         'scripts/common.py', 'scripts/cycle.py']
 LEVELS = (.1, .5, .9)
+NO_SHADOW = {'drn_pooled': 'pooled over the months of a cycle: no single-target shadow yet (docs/54, 3d)'}
 SHORT = {'emos_csg': 'EMOS', 'extended_logistic': 'extended logistic', 'quantile_regression': 'quantile regression', 'bjp': 'BJP',
-         'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF', 'drn_csg': 'DRN'}
+         'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF', 'drn_csg': 'DRN', 'drn_sst': 'DRN + SST',
+         'drn_emos_residual': 'neural EMOS correction'}
 POSITION_COLOURS = ['#a6611a', '#d9d9d9', '#1a9641']                    # below the interval, inside, above
 
 
@@ -122,10 +124,17 @@ def run_target(cycle_path, scfg, entry, target):
     area_e = area[idx]
     regions = {k: load_mask(v, lat, lon)[idx] for k, v in bench['regions'].items()}
     n = len(idx)
-    S, st = fold(models, obs, ref, idx, area_e, coords=coords)
+    names = (scfg.get('extra_inputs') or {}).get(scfg['model'])          # SST indices and regions of some neural models
+    extra = None
+    if names:
+        import sst_indices
+        extra = sst_indices.extra_inputs(names, target_config(project, target), ref + [year], lat, lon, idx)
+    S, st = fold(models, obs, ref, idx, area_e, coords=coords, extra=extra)
     mdl = dc.MODELS[scfg['model']]
     fit = mdl.fit(S, **mdl.defaults)
-    d = mdl.predict(dc.features(models[year][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords), fit)
+    F = dc.features(models[year][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords)
+    F.update({k: v[year] for k, v in (extra or {}).items()})
+    d = mdl.predict(F, fit)
     valid = st['valid']
     q = {u: np.where(valid, d.quantile(np.full(n, u)), np.nan) for u in LEVELS}
     p = np.where((valid & st['prob_ok'])[:, None], d.terciles(st['q1'], st['q2']), np.nan)
@@ -275,7 +284,9 @@ def main(args):
     prov = dict(commit=git('rev-parse', 'HEAD'),
                 uncommitted_changes=bool(git('status', '--porcelain', '--', *CODE, args.cycle, args.config, entry['benchmark_config'])))
     done = 0
-    for model, t in [(m, t) for m in models for t in targets]:
+    for model in [m for m in models if m in NO_SHADOW]:
+        print(f'{model}: {NO_SHADOW[model]}', flush=True)
+    for model, t in [(m, t) for m in models if m not in NO_SHADOW for t in targets]:
         label = dc.MODELS[model].name
         key = fingerprint(args.cycle, args.config, cycle, project, entry, t, model)
         f = folder / f'{model}__{t}.json'

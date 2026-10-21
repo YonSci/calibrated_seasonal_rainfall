@@ -45,13 +45,16 @@ class Distribution:
         return p
 
     def crps(self, y, points=400):
-        """CRPS (mm) by numerical integration of (F(x) - 1{x >= y})^2 on a grid from 0 beyond both y and the 99.9% quantile."""
-        top = np.maximum(np.nan_to_num(self.quantile(np.full(len(y), .999)), nan=0.), np.nan_to_num(y)) * 1.05 + 1e-6
-        u = np.linspace(0, 1, points)
-        x = u[:, None] * top[None, :]
-        F = np.stack([self.cdf(xi) for xi in x])
-        H = (x >= y[None, :]).astype(float)
-        out = np.trapz((F - H) ** 2, x, axis=0)
+        """CRPS (mm): integral of F(x)^2 from 0 to y plus (1 - F(x))^2 from y to beyond the 99.99% quantile, by the trapezoidal
+        rule on points / 2 nodes on each side of the observation (SCORING_VERSION 2; scripts/crps_precision.py: within 0.15%
+        of adaptive quadrature on dry, ordinary, wet and extreme cases, where a single uniform grid erred by up to 0.7%)."""
+        y0 = np.nan_to_num(np.asarray(y, float))
+        top = np.maximum(np.nan_to_num(self.quantile(np.full(len(y0), .9999)), nan=0.), y0) * 1.05 + 1e-6
+        n = max(2, points // 2)
+        u = np.linspace(0, 1, n)[:, None]
+        a, b = u * y0[None, :], y0[None, :] + u * (top - y0)[None, :]
+        Fa, Fb = np.stack([self.cdf(xi) for xi in a]), np.stack([self.cdf(xi) for xi in b])
+        out = np.trapz(Fa ** 2, a, axis=0) + np.trapz((1 - Fb) ** 2, b, axis=0)
         return np.where(self.valid & np.isfinite(y), out, np.nan)
 
 
@@ -68,6 +71,13 @@ class CSGamma(Distribution):
 
     def quantile(self, u):
         return self.scale * np.maximum(0, gammaincinv(self.k, np.clip(u, FLOOR, 1 - FLOOR)) * self.theta + self.delta)
+
+    def crps(self, y, points=400):
+        """The closed form of Scheuerer & Hamill (2015) (neural_calibration.crps_csg), in mm."""
+        from neural_calibration import crps_csg
+        sc = np.where(self.scale > 0, self.scale, 1)
+        out = sc * crps_csg(self.k, self.theta, self.delta, np.nan_to_num(np.asarray(y, float)) / sc)
+        return np.where(self.valid & np.isfinite(y), out, np.nan)
 
 
 class Logistic(Distribution):
@@ -505,6 +515,34 @@ MODELS = {m.key: m for m in [
           'rainfall distribution with a probability of zero (mixture of 3 seeds)',
           'log climatological mean, CHIRPS coefficient of variation, latitude, longitude (no SEAS5 input)',
           'as the DRN', ('Rasp & Lerch 2018',), defaults=dict(inputs='climatology')),
+    Model('drn_forecast_only', 'DRN on the ensemble only (no climatology or location; ablation)', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "m', ensemble median, s', md', ensemble 10% and 90% quantiles (relative); no local context",
+          'as the DRN', ('Rasp & Lerch 2018',), defaults=dict(inputs='forecast')),
+    Model('drn_sst', 'DRN with SST indices and rainfall regions', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "the DRN inputs, SEAS5 Nino 3.4 and Indian Ocean Dipole indices of the target months, EMI rainfall regions "
+          '(Korecha & Sorteberg 2013, one-hot)', 'as the DRN', ('Rasp & Lerch 2018', 'Korecha & Sorteberg 2013'),
+          defaults=dict(inputs='full_sst')),
+    Model('drn_regions', 'DRN with rainfall regions, no SST (control of drn_sst)', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)', 'the DRN inputs and the EMI rainfall regions (one-hot), no SST',
+          'as the DRN; separates the contribution of the SST indices from that of the regions', ('Rasp & Lerch 2018', 'Korecha & Sorteberg 2013'),
+          defaults=dict(inputs='full_regions')),
+    Model('drn_pooled', 'DRN pooled over the months of a cycle', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "the DRN inputs and the month's position in the season (one-hot)",
+          'one network for the four months (pooled_benchmark.py), otherwise as the DRN', ('Rasp & Lerch 2018',),
+          defaults=dict(inputs='pooled')),
+    Model('drn_csg_tuned', 'DRN with a separate tuning split (diagnostic)', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)', 'the DRN inputs',
+          'configuration chosen by 3 inner folds of years, apart from the early-stopping years', ('Rasp & Lerch 2018',),
+          defaults=dict(inputs='full', tuning='separate')),
+    Model('drn_emos_residual', 'Neural correction of EMOS (censored shifted gamma)', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          'the DRN inputs; EMOS (mean and mean absolute difference) as the base',
+          "EMOS by maximum likelihood, then a network added to its linear predictors, starting at zero, with a penalty on the "
+          'correction; CRPS, early stopping on held-out years', ('Scheuerer & Hamill 2015', 'Rasp & Lerch 2018'),
+          defaults=dict(inputs='full', residual='emos')),
 ]}
 
 

@@ -55,7 +55,7 @@ import prob_calibration as pc                                           # noqa: 
 import dist_calibration as dc                                           # noqa: E402
 from prob_benchmark import Records                                      # noqa: E402
 
-CODE = ['scripts/dist_benchmark.py', 'scripts/dist_calibration.py', 'scripts/neural_calibration.py', 'scripts/prob_calibration.py', 'scripts/prob_benchmark.py']
+CODE = ['scripts/dist_benchmark.py', 'scripts/dist_calibration.py', 'scripts/neural_calibration.py', 'scripts/sst_indices.py', 'scripts/prob_calibration.py', 'scripts/prob_benchmark.py']
 LEVELS = (.1, .5, .9)
 BINS = np.linspace(0, 1, 11)                         # reliability: forecast-probability bins of 0.1
 MIN_SHARE = .01                                      # reliability bins with fewer forecasts are not drawn
@@ -70,9 +70,10 @@ def pinball(q, y, tau):
     return np.where(r >= 0, tau * r, (tau - 1) * r)
 
 
-def fold(models, obs, T, idx, area_e, valid_min=1.0, coords=None):
+def fold(models, obs, T, idx, area_e, valid_min=1.0, coords=None, extra=None):
     """Training samples (relative units) and per-cell statistics from the training years T, on the national cells idx;
-    coords: (latitude, longitude) of those cells (location predictors of the DRN, docs/54)."""
+    coords: (latitude, longitude) of those cells (location predictors of the DRN, docs/54); extra: {input: {year: per-cell
+    array}} of further inputs (sst_indices.extra_inputs)."""
     lat_c, lon_c = coords if coords is not None else (None, None)
     O = np.stack([obs[z][idx] for z in T])
     mu_o = O.mean(0)
@@ -83,10 +84,11 @@ def fold(models, obs, T, idx, area_e, valid_min=1.0, coords=None):
     thr = np.quantile(O, dc.THRESHOLD_LEVELS, axis=0).T / np.where(valid, mu_o, 1)[:, None]
     cv = np.where(valid, O.std(0) / np.where(valid, mu_o, 1), 0.)
     M = max(models[z].shape[0] for z in T)
-    keys = ('m', 's', 'md', 'q10', 'q50', 'q90', 'logmu', 'cv', 'lat', 'lon')
+    keys = ('m', 's', 'md', 'q10', 'q50', 'q90', 'logmu', 'cv', 'lat', 'lon') + tuple(extra or {})
     S = {k: [] for k in ('y', 'w', 'thresholds', 'members') + keys}
     for z in T:
         F = dc.features(models[z][:, idx], mu_o, mu_m, valid, cv, lat_c, lon_c)
+        F.update({k: v[z] for k, v in (extra or {}).items()})
         w = np.where(valid, area_e, 0.)
         S['y'].append(np.where(valid, obs[z][idx] / np.where(valid, mu_o, 1), 0)[valid])
         for k in keys:
@@ -148,6 +150,11 @@ def run_target(config_path, target):
     idx = np.flatnonzero(bb.load_mask(cfg['cells'], lat, lon))
     glat, glon = np.meshgrid(lat, lon, indexing='ij')
     coords = (glat.ravel()[idx], glon.ravel()[idx])
+    extra = None
+    if pcfg.get('extra_inputs'):                             # SST indices and rainfall regions (docs/54)
+        import sst_indices
+        extra = sst_indices.extra_inputs(pcfg['extra_inputs'], bb.target_config(project, target), sorted(set(train + test)),
+                                         lat, lon, idx)
     area_e = area_all[idx]
     regions = {k: bb.load_mask(v, lat, lon)[idx] for k, v in cfg['regions'].items()}
     rec = Records(pcfg['reference_amount_method'], cfg['methods'].get(pcfg['reference_amount_method'], {}), models, obs, train,
@@ -159,7 +166,7 @@ def run_target(config_path, target):
     primary = regions[cfg['primary_region']]
 
     def evaluate(design, y, T, inner_records, outer_record, fitted=None):
-        S, st = fold(models, obs, T, idx, area_e, coords=coords)
+        S, st = fold(models, obs, T, idx, area_e, coords=coords, extra=extra)
         y_obs = obs[y][idx]
         lam_fit = pc.fit(pc.INCUMBENT, inner_records, area_all)               # incumbent: blend weight from inner years
         p_inc = pc.predict(lam_fit, outer_record)[idx]
@@ -175,6 +182,7 @@ def run_target(config_path, target):
         quant = {tau: np.quantile(e0, tau, axis=0) for tau in LEVELS}
         score_year(y, None, crps_ens, quant, st, y_obs, area_e, regions, store['mvs_ensemble'][design])
         F = dc.features(models[y][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords)
+        F.update({k: v[y] for k, v in (extra or {}).items()})
         for k in keys:
             m = dc.MODELS[k]
             model = (fitted or {}).get(k) or m.fit(S, **{**m.defaults, **pcfg.get('parameters', {}).get(k, {})})
@@ -199,25 +207,7 @@ def run_target(config_path, target):
     fitted = {}
     for y, r in zip(test, rec.get(frozenset(), test)):      # test years: fitted once on all training years
         evaluate('test', y, train, oof, r, fitted)
-    summary = {}
-    for k, dd in store.items():
-        summary[k] = {}
-        for design, regs in dd.items():
-            summary[k][design] = {}
-            for reg, d in regs.items():
-                m = lambda key: float(np.mean(d['per_year'][key]))
-                s = dict(years=d['years'], per_year=d['per_year'])
-                if 'rps' in d['per_year']:
-                    s.update(rps=m('rps'), rpss=1 - m('rps') / m('rps_clim'))
-                    if 'brier_below' in d['per_year']:                   # Brier skill of the outer categories
-                        s.update({f'bss_{c}': 1 - m(f'brier_{c}') / m(f'brier_{c}_clim') for c in ('below', 'above')},
-                                 brier_below=m('brier_below'), brier_above=m('brier_above'))
-                if 'crps' in d['per_year']:
-                    s.update(crps=m('crps'), crpss=1 - m('crps') / m('crps_clim'), coverage_80=m('coverage_80'),
-                             **{f'pinball_{int(t * 100)}': m(f'pinball_{int(t * 100)}') for t in LEVELS})
-                    if 'width_80' in d['per_year']:                      # sharpness of the 10-90% range
-                        s.update(width_80=m('width_80'), width_80_clim=m('width_80_clim'))
-                summary[k][design][reg] = s
+    summary = summarise(store)
     fitted = {k: {kk: vv for kk, vv in v.items() if not kk.startswith('_')} for k, v in fitted.items()}   # no forests
     rel = None if rel is None else {k: {d: {c: {q: v.tolist() for q, v in a.items()} for c, a in r.items()} for d, r in dd.items()}
                                     for k, dd in rel.items()}
@@ -241,6 +231,30 @@ def reliability_add(acc, p, y_cat, mask, area):
         np.add.at(a['o'], b, w * (y_cat[ok] == c))
 
 
+def summarise(store):
+    """Per method, design and region: the per-year scores and their means and skill scores."""
+    summary = {}
+    for k, dd in store.items():
+        summary[k] = {}
+        for design, regs in dd.items():
+            summary[k][design] = {}
+            for reg, d in regs.items():
+                m = lambda key: float(np.mean(d['per_year'][key]))
+                s = dict(years=d['years'], per_year=d['per_year'])
+                if 'rps' in d['per_year']:
+                    s.update(rps=m('rps'), rpss=1 - m('rps') / m('rps_clim'))
+                    if 'brier_below' in d['per_year']:                   # Brier skill of the outer categories
+                        s.update({f'bss_{c}': 1 - m(f'brier_{c}') / m(f'brier_{c}_clim') for c in ('below', 'above')},
+                                 brier_below=m('brier_below'), brier_above=m('brier_above'))
+                if 'crps' in d['per_year']:
+                    s.update(crps=m('crps'), crpss=1 - m('crps') / m('crps_clim'), coverage_80=m('coverage_80'),
+                             **{f'pinball_{int(t * 100)}': m(f'pinball_{int(t * 100)}') for t in LEVELS})
+                    if 'width_80' in d['per_year']:                      # sharpness of the 10-90% range
+                        s.update(width_80=m('width_80'), width_80_clim=m('width_80_clim'))
+                summary[k][design][reg] = s
+    return summary
+
+
 def tests_of(results, keys, region, targets):
     out = {}
     for score, ref in (('rps', 'incumbent'), ('crps', 'mvs_ensemble')):
@@ -256,13 +270,59 @@ def tests_of(results, keys, region, targets):
     return out
 
 
-def comparisons_of(results, pairs, region, targets):
-    """Diagnostic paired comparisons between models (no adjustment, no decision): {'model|other': {score: {target: summary}}}."""
+def provenance(cfg, project, targets, pcfg, dep, start, keys, config):
+    """The benchmark provenance (bias_benchmark.provenance) with the complete dependency set the checkpoints are keyed on:
+    the commit and code hashes at the start of the run (the code actually imported), the hash of every code and
+    configuration file, the resume keys, the SST files when used, and whether HEAD moved during the run."""
+    p = bb.provenance(cfg, project, targets, pcfg['benchmark_config'], dep, extra=CODE + [config])
+    end_commit = p['commit']
+    p.update(commit=start['commit'], commit_at_end=end_commit, commit_changed_during_run=end_commit != start['commit'],
+             uncommitted_changes=start['uncommitted_changes'] or p['uncommitted_changes'], started_utc=start['utc'],
+             code_sha256={**p.get('code_sha256', {}), **start['code_sha256']},
+             resume_keys_sha256=hashlib.sha256('|'.join(keys[t] for t in targets).encode()).hexdigest(),
+             experiment=dict(models=pcfg['models'], decision_models=pcfg.get('decision_models'), members=pcfg.get('members'),
+                             configs=pcfg.get('parameters'), extra_inputs=pcfg.get('extra_inputs'),
+                             training_years=cfg['training_years'], test_years=cfg['test_years']))
+    if pcfg.get('extra_inputs'):
+        import sst_indices
+        files = {}
+        for t in targets:
+            tc = bb.target_config(project, t)
+            yrs = list(range(cfg['training_years'][0], cfg['test_years'][1] + 1))
+            files.update({f.relative_to(ROOT).as_posix(): sha256(f) for f in sst_indices.sst_files(tc['initialization_month'], yrs) if f.is_file()})
+        files[sst_indices.REGION_FILE] = sha256(ROOT / sst_indices.REGION_FILE)
+        p['extra_input_files_sha256'] = files
+    return p
+
+
+def external_methods(pcfg, cfg, targets):
+    """Per-year scores of models from another benchmark run on the same folds (pcfg external_models: {model: benchmark.json
+    path, '{name}' the cycle}), for the diagnostic comparisons only; the years must match."""
+    out = {}
+    for k, path in (pcfg.get('external_models') or {}).items():
+        f = ROOT / path.format(name=Path(cfg['output_root']).name)
+        if not f.is_file():
+            raise FileNotFoundError(f'{f}: run that benchmark first (external model {k})')
+        other = json.loads(f.read_text(encoding='utf-8'))
+        if other.get('scoring_version', 1) != dc.SCORING_VERSION:
+            raise ValueError(f'{f}: scored with scoring version {other.get("scoring_version", 1)}, this run with {dc.SCORING_VERSION}; '
+                             'comparisons need the same CRPS rule')
+        for t in targets:
+            out.setdefault(t, {})[k] = other['targets'][t]['methods'][k]
+    return out
+
+
+def comparisons_of(results, pairs, region, targets, external=None):
+    """Diagnostic paired comparisons between models (no adjustment, no decision): {'model|other': {score: {target: summary}}}.
+    external: {target: {model: summary}} of models from another benchmark on the same folds (external_methods)."""
     out = {}
     for k, other in pairs:
         for score in ('rps', 'crps'):
             for t in targets:
-                a, b = results[t]['methods'][k], results[t]['methods'][other]
+                pool = {**(external or {}).get(t, {}), **results[t]['methods']}
+                a, b = pool[k], pool[other]
+                if a['training'][region]['years'] != b['training'][region]['years'] or a['test'][region]['years'] != b['test'][region]['years']:
+                    raise ValueError(f'{k} and {other} were scored on different years for {t}')
                 if score not in a['training'][region]['per_year'] or score not in b['training'][region]['per_year']:
                     continue
                 out.setdefault(f'{k}|{other}', {}).setdefault(score, {})[t] = {
@@ -284,6 +344,9 @@ def main(args):
     parts.mkdir(parents=True, exist_ok=True)
     dep = bb.dependencies(cfg, project, targets, pcfg['benchmark_config'])
     extra = hashlib.sha256(''.join(sha256(ROOT / f) for f in CODE + [args.config]).encode()).hexdigest()
+    # the code the workers import is the code at the start of the run: its commit, and whether those files were clean then
+    start = dict(commit=bb.git('rev-parse', 'HEAD'), uncommitted_changes=bool(bb.git('status', '--porcelain', '--', *CODE, args.config)),
+                 code_sha256={f: sha256(ROOT / f) for f in CODE + [args.config]}, utc=datetime.now(timezone.utc).isoformat())
     keys = {t: bb.dependency_key(dep, t) + '|' + extra for t in targets}
     results = {}
     for t in targets:
@@ -313,7 +376,8 @@ def main(args):
     results = {t: results[t] for t in targets}
     model_keys = pcfg['models']
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=pcfg, protocol=__doc__.strip(),
-                provenance=bb.provenance(cfg, project, targets, pcfg['benchmark_config'], dep, extra=CODE + [args.config]),
+                provenance=provenance(cfg, project, targets, pcfg, dep, start, keys, args.config),
+                scoring_version=dc.SCORING_VERSION,
                 phase=pcfg.get('phase', 2), pathway='B: rainfall-distribution models from the raw ensemble', models=model_keys,
                 registry={k: dict(name=dc.MODELS[k].name, estimates=dc.MODELS[k].estimates, predictors=dc.MODELS[k].predictors,
                                   fitting=dc.MODELS[k].fitting, references=dc.MODELS[k].references,
@@ -324,7 +388,13 @@ def main(args):
                 training_years=cfg['training_years'], test_years=cfg['test_years'], targets=results,
                 decision_models=pcfg.get('decision_models', model_keys),
                 tests=tests_of(results, pcfg.get('decision_models', model_keys), cfg['primary_region'], targets),
-                comparisons=comparisons_of(results, pcfg.get('comparisons', []), cfg['primary_region'], targets))
+                comparisons=comparisons_of(results, pcfg.get('comparisons', []), cfg['primary_region'], targets,
+                                           external_methods(pcfg, cfg, targets)),
+                external_models={k: dict(file=v.format(name=Path(cfg['output_root']).name),
+                                         sha256=sha256(ROOT / v.format(name=Path(cfg['output_root']).name)),
+                                         commit=json.loads((ROOT / v.format(name=Path(cfg['output_root']).name)).read_text(encoding='utf-8'))['provenance']['commit'],
+                                         scoring_version=json.loads((ROOT / v.format(name=Path(cfg['output_root']).name)).read_text(encoding='utf-8')).get('scoring_version', 1))
+                                 for k, v in (pcfg.get('external_models') or {}).items()})
     save_json(out_root / 'benchmark.json', data)
     if not args.no_figures:
         figure(out_root, data)
