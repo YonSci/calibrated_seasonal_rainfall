@@ -140,12 +140,38 @@ before their seasons (docs/52).
   better than the MVS ensemble (skill gain +2.2% of the climatology score, better in 27 of 33 years; Holm p 0.015,
   Benjamini–Hochberg 0.004); its probabilities are not (−1.2%).
 
+### 3.1 Rerun with the weight-decay search (`drn-stage1-v2`, accepted 2026-10-21)
+
+The table above is the first run (`drn-stage1-v1`: 32 or 32–16 units, weight decay fixed at 10⁻⁴). The rerun searches
+architecture × weight decay (10⁻⁴ or 10⁻³) inside every fold and adds Brier skill, range width and reliability; it ran the code
+of commit c221c2d in all four cycles (accepted as a batch, `scripts/accept_results.py`). Means over the 20 targets:
+
+| | DRN, first run | DRN, rerun | EMOS | Published |
+| --- | --- | --- | --- | --- |
+| Amounts, CRPSS 1993–2016 | +0.025 | +0.024 | +0.024 | +0.009 |
+| Amounts, CRPSS 2017+ | +0.016 | +0.016 | +0.024 | +0.011 |
+| Coverage of the 10–90% range, 1993–2016 | 81% | 81% (75–89%) | 80% | 67% |
+| Probabilities, RPSS 1993–2016 | +0.013 | +0.014 | −0.003 | +0.022 |
+| Probabilities, RPSS 2017+ | +0.013 | +0.017 | +0.008 | +0.028 |
+
+- The stronger weight decay was chosen for 13 of 20 targets and two hidden layers for 18 (network fitted on 1993–2016);
+  early stopping still ends training after a median of 35 steps (at most 630).
+- The conclusions do not change: amounts better than the published ensemble for 15 of 20 targets over 1993–2016 and 9 over the
+  test years; about equal to EMOS (lower CRPS for 10 of 20); better than the no-forecast ablation for only 11 of 20; tercile
+  probabilities better than the published ones for 6 of 20, none confirmed. **Confirmed only for JJAS September amounts**
+  (−1.08 mm over 1993–2016, 18 of 24 years better, Benjamini–Hochberg p 0.014).
+- Largest changes per target: FMAM-January February (CRPSS +0.065 to +0.082), ONDJ December (+0.031 to +0.021) and the ONDJ
+  season (+0.035 to +0.020): regularization trades a little in some targets for a little in others.
+- JJAS September: the rerun DRN (−1.0825 mm) and quantile regression (−1.0827 mm) are now practically identical; under the
+  practical tie rule (docs/50) EMOS (−0.98 mm, within 1% of the published CRPS) is the selected candidate, with the DRN and
+  quantile regression as confirmed alternatives. The second stage re-scores the three with the corrected CRPS (3f).
+
 **Reading.** The neural network does what a well-calibrated distribution model does: better amount ranges than the published
 ensemble, about as good as EMOS. It does not find additional, nonlinear forecast signal: with about two dozen seasons per
 fold, the year-to-year evidence is too thin for a network to learn more than EMOS's few coefficients. Where SEAS5 is skilful
-(February), the DRN uses it and does well, as EMOS does. In the method selection the DRN becomes a candidate for JJAS
-September amounts, and is selected there: its improvement over 1993–2016 (−1.10 mm) is slightly larger than quantile
-regression's (−1.08 mm), which becomes an alternative. A recommendation would need three shadow-forecast seasons, and the
+(February), the DRN uses it and does well, as EMOS does. In the method selection the DRN is confirmed for JJAS
+September amounts; its improvement over 1993–2016 (−1.10 mm in the first run, −1.08 mm in the rerun) is practically that of
+quantile regression (−1.08 mm), and under the practical tie rule EMOS is the selected candidate there. A recommendation would need three shadow-forecast seasons, and the
 ablation result is a reason for caution. The results support the recommendation's order: a spatial CNN or a larger network is not
 justified by these data; more forecast information (predictors) and more independent seasons would come first.
 
