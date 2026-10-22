@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-21T05:52:00.296757+00:00",
+ "created_utc": "2026-10-22T10:04:25.474355+00:00",
  "region": "ethiopia",
  "categories": {
   "Bias correction": 12,
@@ -7,9 +7,9 @@
   "Rainfall-distribution model": 6,
   "Two-stage calibration": 1,
   "Statistical downscaling": 2,
-  "Neural network": 1
+  "Neural network": 3
  },
- "methods": 30,
+ "methods": 32,
  "multiple_testing": "benjamini_hochberg",
  "target_order": [
   {
@@ -1453,9 +1453,9 @@
     "skill_gain": 0.0007177739731342118,
     "years_better": 19,
     "p": 0.033235,
-    "p_holm": 0.93058,
+    "p_holm": 0.99705,
     "better_holm": false,
-    "p_bh": 0.33235,
+    "p_bh": 0.3545066666666667,
     "better_bh": false
    },
    "category": "Bias correction"
@@ -1734,16 +1734,16 @@
       "mean_difference": -0.03333902317611782,
       "p": 0.001955,
       "years_better": 25,
-      "p_holm": 0.7898200000000001,
-      "p_bh": 0.026575781250000003
+      "p_holm": 0.86411,
+      "p_bh": 0.0273125
      },
      "FMAM (Jan) Mar": {
       "years": 33,
       "mean_difference": -0.07778714081184393,
       "p": 0.000565,
       "years_better": 25,
-      "p_holm": 0.23503999999999997,
-      "p_bh": 0.01228875
+      "p_holm": 0.257075,
+      "p_bh": 0.012779761904761903
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -1751,7 +1751,7 @@
       "p": 0.193165,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.7708878440366973
+      "p_bh": 0.728201388888889
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -1775,7 +1775,7 @@
       "p": 0.012675,
       "years_better": 26,
       "p_holm": 1.0,
-      "p_bh": 0.10828088235294117
+      "p_bh": 0.10579166666666667
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -1783,7 +1783,7 @@
       "p": 0.00784,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.07946337209302325
+      "p_bh": 0.07773177083333332
      },
      "FMAM (Feb) Apr": {
       "years": 33,
@@ -1791,7 +1791,7 @@
       "p": 0.332575,
       "years_better": 14,
       "p_holm": 1.0,
-      "p_bh": 1.0
+      "p_bh": 0.9632507621951221
      },
      "FMAM (Feb) May": {
       "years": 33,
@@ -1815,7 +1815,7 @@
       "p": 0.01038,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.09815869565217392
+      "p_bh": 0.0948173076923077
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -1838,8 +1838,8 @@
       "mean_difference": -0.03723147779987387,
       "p": 6.5e-05,
       "years_better": 28,
-      "p_holm": 0.027755,
-      "p_bh": 0.0031416666666666663
+      "p_holm": 0.030354999999999997,
+      "p_bh": 0.003430555555555555
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -1847,7 +1847,7 @@
       "p": 0.00302,
       "years_better": 28,
       "p_holm": 1.0,
-      "p_bh": 0.03649166666666667
+      "p_bh": 0.03678205128205129
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -1871,15 +1871,15 @@
       "p": 0.133855,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.5941522959183674
+      "p_bh": 0.5676886160714286
      },
      "ONDJ (Sep) Jan": {
       "years": 32,
       "mean_difference": -0.2656278608774616,
       "p": 0.000125,
       "years_better": 21,
-      "p_holm": 0.053,
-      "p_bh": 0.004194642857142857
+      "p_holm": 0.058,
+      "p_bh": 0.004580357142857143
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
@@ -2230,8 +2230,8 @@
       "mean_difference": -0.02849438804905288,
       "p": 0.000615,
       "years_better": 24,
-      "p_holm": 0.365925,
-      "p_bh": 0.365925
+      "p_holm": 0.390525,
+      "p_bh": 0.390525
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -2356,9 +2356,9 @@
     "skill_gain": 0.006301663919173117,
     "years_better": 25,
     "p": 0.00426,
-    "p_holm": 0.1278,
+    "p_holm": 0.13632,
     "better_holm": false,
-    "p_bh": 0.08505,
+    "p_bh": 0.09072,
     "better_bh": false
    },
    "category": "Bias correction"
@@ -2638,16 +2638,16 @@
       "mean_difference": -0.22996151174856697,
       "p": 0.0021,
       "years_better": 22,
-      "p_holm": 0.8462999999999999,
-      "p_bh": 0.027681818181818182
+      "p_holm": 0.9260999999999999,
+      "p_bh": 0.028499999999999998
      },
      "FMAM (Jan) Mar": {
       "years": 33,
       "mean_difference": -0.5148759935504869,
       "p": 0.00011,
       "years_better": 22,
-      "p_holm": 0.04686,
-      "p_bh": 0.004194642857142857
+      "p_holm": 0.05126,
+      "p_bh": 0.004580357142857143
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -2655,7 +2655,7 @@
       "p": 0.04026,
       "years_better": 24,
       "p_holm": 1.0,
-      "p_bh": 0.2779857142857142
+      "p_bh": 0.2693450704225352
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -2663,7 +2663,7 @@
       "p": 0.265805,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.8965383720930232
+      "p_bh": 0.8532989864864864
      },
      "FMAM (Jan) FMAM": {
       "years": 33,
@@ -2671,23 +2671,23 @@
       "p": 0.066295,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.35602870370370376
+      "p_bh": 0.3460453296703297
      },
      "FMAM (Feb) Feb": {
       "years": 33,
       "mean_difference": -0.16001872957259447,
       "p": 0.001345,
       "years_better": 26,
-      "p_holm": 0.547415,
-      "p_bh": 0.020175000000000002
+      "p_holm": 0.598525,
+      "p_bh": 0.020608870967741937
      },
      "FMAM (Feb) Mar": {
       "years": 33,
       "mean_difference": -0.3724979213342665,
       "p": 0.00074,
       "years_better": 23,
-      "p_holm": 0.30636,
-      "p_bh": 0.014631818181818183
+      "p_holm": 0.33448,
+      "p_bh": 0.014645833333333332
      },
      "FMAM (Feb) Apr": {
       "years": 33,
@@ -2695,7 +2695,7 @@
       "p": 0.05079,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.31562357142857145
+      "p_bh": 0.3038551829268293
      },
      "FMAM (Feb) May": {
       "years": 33,
@@ -2703,7 +2703,7 @@
       "p": 0.315645,
       "years_better": 13,
       "p_holm": 1.0,
-      "p_bh": 0.987809892086331
+      "p_bh": 0.93707109375
      },
      "FMAM (Feb) FMAM": {
       "years": 33,
@@ -2711,23 +2711,23 @@
       "p": 0.052005,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.31691562500000003
+      "p_bh": 0.3038551829268293
      },
      "JJAS (May) Jun": {
       "years": 33,
       "mean_difference": -0.13465451926437705,
       "p": 0.000215,
       "years_better": 26,
-      "p_holm": 0.090515,
-      "p_bh": 0.006235
+      "p_holm": 0.099115,
+      "p_bh": 0.0066796875
      },
      "JJAS (May) Jul": {
       "years": 33,
       "mean_difference": -0.0766503778208877,
       "p": 0.00117,
       "years_better": 23,
-      "p_holm": 0.4797,
-      "p_bh": 0.019172222222222226
+      "p_holm": 0.52416,
+      "p_bh": 0.01949137931034483
      },
      "JJAS (May) Aug": {
       "years": 33,
@@ -2742,16 +2742,16 @@
       "mean_difference": -0.05637587308241373,
       "p": 0.000135,
       "years_better": 24,
-      "p_holm": 0.057105,
-      "p_bh": 0.004194642857142857
+      "p_holm": 0.062505,
+      "p_bh": 0.004580357142857143
      },
      "JJAS (May) JJAS": {
       "years": 33,
       "mean_difference": -0.1291473035805358,
       "p": 0.000445,
       "years_better": 24,
-      "p_holm": 0.18556499999999998,
-      "p_bh": 0.010188157894736842
+      "p_holm": 0.20292,
+      "p_bh": 0.010568749999999998
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -2759,7 +2759,7 @@
       "p": 0.05691,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.3215045454545455
+      "p_bh": 0.3107155172413793
      },
      "ONDJ (Sep) Nov": {
       "years": 32,
@@ -2767,7 +2767,7 @@
       "p": 0.055435,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.3215045454545455
+      "p_bh": 0.3107155172413793
      },
      "ONDJ (Sep) Dec": {
       "years": 32,
@@ -2775,29 +2775,28 @@
       "p": 0.002605,
       "years_better": 24,
       "p_holm": 1.0,
-      "p_bh": 0.03237642857142857
+      "p_bh": 0.0325625
      },
      "ONDJ (Sep) Jan": {
       "years": 32,
       "mean_difference": -0.5315746938078482,
       "p": 5e-05,
       "years_better": 24,
-      "p_holm": 0.021400000000000002,
-      "p_bh": 0.0027187500000000002
+      "p_holm": 0.0234,
+      "p_bh": 0.00296875
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
       "mean_difference": -0.46587230698022764,
       "p": 0.00107,
       "years_better": 23,
-      "p_holm": 0.43977,
-      "p_bh": 0.018618
+      "p_holm": 0.48042999999999997,
+      "p_bh": 0.018824074074074073
      }
     },
     "confirmed_holm": [
      "JJAS (May) Aug",
-     "ONDJ (Sep) Jan",
-     "FMAM (Jan) Mar"
+     "ONDJ (Sep) Jan"
     ],
     "confirmed_bh": [
      "ONDJ (Sep) Dec",
@@ -3138,7 +3137,7 @@
       "p": 0.00433,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.9103500000000001
+      "p_bh": 0.7286625000000001
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -3265,7 +3264,7 @@
     "p": 0.0467,
     "p_holm": 1.0,
     "better_holm": false,
-    "p_bh": 0.35025,
+    "p_bh": 0.3736,
     "better_bh": false
    },
    "category": "Bias correction"
@@ -3551,7 +3550,7 @@
       "p": 0.004945,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.05515576923076923
+      "p_bh": 0.05592559523809524
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -3559,7 +3558,7 @@
       "p": 0.24716,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.8670532258064516
+      "p_bh": 0.820986013986014
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -3567,7 +3566,7 @@
       "p": 0.012695,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.10828088235294117
+      "p_bh": 0.10579166666666667
      },
      "FMAM (Jan) FMAM": {
       "years": 33,
@@ -3591,7 +3590,7 @@
       "p": 0.03994,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.2779857142857142
+      "p_bh": 0.2693450704225352
      },
      "FMAM (Feb) Apr": {
       "years": 33,
@@ -3599,7 +3598,7 @@
       "p": 0.30531,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.9694149635036498
+      "p_bh": 0.9237085987261148
      },
      "FMAM (Feb) May": {
       "years": 33,
@@ -3607,7 +3606,7 @@
       "p": 0.008065,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.07973352272727273
+      "p_bh": 0.07818112244897958
      },
      "FMAM (Feb) FMAM": {
       "years": 33,
@@ -3622,24 +3621,24 @@
       "mean_difference": -0.0965309818306892,
       "p": 0.00245,
       "years_better": 25,
-      "p_holm": 0.9849,
-      "p_bh": 0.03134558823529412
+      "p_holm": 1.0,
+      "p_bh": 0.03145270270270271
      },
      "JJAS (May) Jul": {
       "years": 33,
       "mean_difference": -0.11500343760335112,
       "p": 0.00012,
       "years_better": 27,
-      "p_holm": 0.051000000000000004,
-      "p_bh": 0.004194642857142857
+      "p_holm": 0.0558,
+      "p_bh": 0.004580357142857143
      },
      "JJAS (May) Aug": {
       "years": 33,
       "mean_difference": -0.09307178408727233,
       "p": 0.00024,
       "years_better": 25,
-      "p_holm": 0.1008,
-      "p_bh": 0.006525
+      "p_holm": 0.11016000000000001,
+      "p_bh": 0.006705882352941177
      },
      "JJAS (May) Sep": {
       "years": 33,
@@ -3647,7 +3646,7 @@
       "p": 0.077055,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.385275
+      "p_bh": 0.3773311855670103
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -3655,7 +3654,7 @@
       "p": 0.143255,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.6230308823529411
+      "p_bh": 0.5929652173913044
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -3687,7 +3686,7 @@
       "p": 0.050065,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.31562357142857145
+      "p_bh": 0.3038551829268293
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
@@ -3695,7 +3694,7 @@
       "p": 0.29642,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.9481080882352941
+      "p_bh": 0.9025608974358974
      }
     },
     "confirmed_bh": [
@@ -4455,7 +4454,7 @@
       "p": 0.237965,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.8611561983471074
+      "p_bh": 0.812725
      },
      "FMAM (Jan) FMAM": {
       "years": 33,
@@ -4495,7 +4494,7 @@
       "p": 0.07699,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.385275
+      "p_bh": 0.3773311855670103
      },
      "FMAM (Feb) FMAM": {
       "years": 33,
@@ -4519,7 +4518,7 @@
       "p": 0.27602,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.916554961832061
+      "p_bh": 0.8740633333333333
      },
      "JJAS (May) Aug": {
       "years": 33,
@@ -4551,7 +4550,7 @@
       "p": 0.25629,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.8918892
+      "p_bh": 0.8454010416666667
      },
      "ONDJ (Sep) Nov": {
       "years": 32,
@@ -5797,7 +5796,7 @@
       "p": 0.012415,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.937496875
+      "p_bh": 0.7813145833333334
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -6199,7 +6198,7 @@
       "p": 0.02575,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.193125
+      "p_bh": 0.18532196969696968
      },
      "FMAM (Jan) Mar": {
       "years": 33,
@@ -6207,7 +6206,7 @@
       "p": 0.01893,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.15249166666666664
+      "p_bh": 0.14740573770491802
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -6239,7 +6238,7 @@
       "p": 0.224925,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.845325
+      "p_bh": 0.7932148148148148
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -6247,7 +6246,7 @@
       "p": 0.183585,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.7533912735849057
+      "p_bh": 0.7089664634146342
      },
      "FMAM (Feb) Apr": {
       "years": 33,
@@ -6335,15 +6334,15 @@
       "p": 0.23954,
       "years_better": 17,
       "p_holm": 1.0,
-      "p_bh": 0.8611561983471074
+      "p_bh": 0.812725
      },
      "ONDJ (Sep) Jan": {
       "years": 32,
       "mean_difference": -0.4381654312024212,
       "p": 0.000995,
       "years_better": 20,
-      "p_holm": 0.40994,
-      "p_bh": 0.018034375000000002
+      "p_holm": 0.44775,
+      "p_bh": 0.018177884615384617
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
@@ -6368,7 +6367,7 @@
     "p": 0.03971,
     "p_holm": 0.63536,
     "better_holm": false,
-    "p_bh": 0.12480285714285715,
+    "p_bh": 0.10589333333333334,
     "better_bh": false
    },
    "category": "Bias correction"
@@ -6683,7 +6682,7 @@
       "p": 0.00459,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.9103500000000001
+      "p_bh": 0.7286625000000001
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -6808,9 +6807,9 @@
     "skill_gain": 0.0033124832369650936,
     "years_better": 21,
     "p": 0.00567,
-    "p_holm": 0.16443,
+    "p_holm": 0.17576999999999998,
     "better_holm": false,
-    "p_bh": 0.08505,
+    "p_bh": 0.09072,
     "better_bh": false
    },
    "category": "Bias correction"
@@ -7090,15 +7089,15 @@
       "p": 0.10969,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.5130661290322581
+      "p_bh": 0.49856904761904763
      },
      "FMAM (Jan) Mar": {
       "years": 33,
       "mean_difference": -0.48227489291503933,
       "p": 0.000425,
       "years_better": 21,
-      "p_holm": 0.17765,
-      "p_bh": 0.010188157894736842
+      "p_holm": 0.19422499999999998,
+      "p_bh": 0.010568749999999998
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -7106,7 +7105,7 @@
       "p": 0.046365,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.3055875
+      "p_bh": 0.29364500000000004
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -7122,7 +7121,7 @@
       "p": 0.23165,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.8586088983050847
+      "p_bh": 0.8075346715328467
      },
      "FMAM (Feb) Feb": {
       "years": 33,
@@ -7130,15 +7129,15 @@
       "p": 0.33519,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 1.0
+      "p_bh": 0.9649409090909091
      },
      "FMAM (Feb) Mar": {
       "years": 33,
       "mean_difference": -0.3368016898168219,
       "p": 0.00167,
       "years_better": 22,
-      "p_holm": 0.6780200000000001,
-      "p_bh": 0.024215
+      "p_holm": 0.74148,
+      "p_bh": 0.0247890625
      },
      "FMAM (Feb) Apr": {
       "years": 33,
@@ -7146,7 +7145,7 @@
       "p": 0.070895,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.3715581325301205
+      "p_bh": 0.3620981182795699
      },
      "FMAM (Feb) May": {
       "years": 33,
@@ -7162,15 +7161,15 @@
       "p": 0.14356,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.6230308823529411
+      "p_bh": 0.5929652173913044
      },
      "JJAS (May) Jun": {
       "years": 33,
       "mean_difference": -0.1395306672718134,
       "p": 0.000975,
       "years_better": 26,
-      "p_holm": 0.402675,
-      "p_bh": 0.018034375000000002
+      "p_holm": 0.439725,
+      "p_bh": 0.018177884615384617
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -7185,16 +7184,16 @@
       "mean_difference": -0.10630831396129711,
       "p": 2e-05,
       "years_better": 29,
-      "p_holm": 0.008620000000000001,
-      "p_bh": 0.0014500000000000001
+      "p_holm": 0.009420000000000001,
+      "p_bh": 0.0015833333333333335
      },
      "JJAS (May) Sep": {
       "years": 33,
       "mean_difference": -0.0781304910308718,
       "p": 0.000135,
       "years_better": 26,
-      "p_holm": 0.057105,
-      "p_bh": 0.004194642857142857
+      "p_holm": 0.062505,
+      "p_bh": 0.004580357142857143
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -7202,7 +7201,7 @@
       "p": 0.00467,
       "years_better": 24,
       "p_holm": 1.0,
-      "p_bh": 0.05345921052631579
+      "p_bh": 0.05410365853658536
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -7210,7 +7209,7 @@
       "p": 0.07558,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.385275
+      "p_bh": 0.3773311855670103
      },
      "ONDJ (Sep) Nov": {
       "years": 32,
@@ -7218,7 +7217,7 @@
       "p": 0.117365,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.540933947368421
+      "p_bh": 0.5195752314814815
      },
      "ONDJ (Sep) Dec": {
       "years": 32,
@@ -7233,16 +7232,16 @@
       "mean_difference": -0.4055262837581336,
       "p": 2e-05,
       "years_better": 26,
-      "p_holm": 0.008620000000000001,
-      "p_bh": 0.0014500000000000001
+      "p_holm": 0.009420000000000001,
+      "p_bh": 0.0015833333333333335
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
       "mean_difference": -0.5699816682077015,
       "p": 0.001275,
       "years_better": 24,
-      "p_holm": 0.5202,
-      "p_bh": 0.019808035714285716
+      "p_holm": 0.56865,
+      "p_bh": 0.020187500000000004
      }
     },
     "confirmed_holm": [
@@ -7266,9 +7265,9 @@
     "skill_gain": 0.009696525515951989,
     "years_better": 25,
     "p": 5e-05,
-    "p_holm": 0.00095,
+    "p_holm": 0.0010500000000000002,
     "better_holm": true,
-    "p_bh": 0.000275,
+    "p_bh": 0.00030000000000000003,
     "better_bh": true
    },
    "category": "Bias correction"
@@ -9013,7 +9012,7 @@
       "p": 0.21006,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.808638053097345
+      "p_bh": 0.767526923076923
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
@@ -12445,7 +12444,7 @@
       "p": 0.00718,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.937496875
+      "p_bh": 0.7813145833333334
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -12887,7 +12886,7 @@
       "p": 0.00872,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.937496875
+      "p_bh": 0.7813145833333334
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -14687,7 +14686,7 @@
       "p": 0.012605,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.937496875
+      "p_bh": 0.7813145833333334
      },
      "JJAS (May) Jun": {
       "years": 33,
@@ -15068,7 +15067,7 @@
       "p": 0.052455,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.31691562500000003
+      "p_bh": 0.3038551829268293
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -15076,7 +15075,7 @@
       "p": 0.042055,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.285842578125
+      "p_bh": 0.27744618055555553
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -15084,15 +15083,15 @@
       "p": 0.05639,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.3215045454545455
+      "p_bh": 0.3107155172413793
      },
      "FMAM (Jan) FMAM": {
       "years": 33,
       "mean_difference": -0.7245100263128245,
       "p": 4e-05,
       "years_better": 27,
-      "p_holm": 0.01716,
-      "p_bh": 0.002485714285714286
+      "p_holm": 0.018760000000000002,
+      "p_bh": 0.0027142857142857147
      },
      "FMAM (Feb) Feb": {
       "years": 33,
@@ -15108,7 +15107,7 @@
       "p": 0.268385,
       "years_better": 15,
       "p_holm": 1.0,
-      "p_bh": 0.8980575
+      "p_bh": 0.8555897651006711
      },
      "FMAM (Feb) Apr": {
       "years": 33,
@@ -15132,7 +15131,7 @@
       "p": 0.12804,
       "years_better": 14,
       "p_holm": 1.0,
-      "p_bh": 0.58018125
+      "p_bh": 0.5579724770642202
      },
      "JJAS (May) Jun": {
       "years": 33,
@@ -15140,7 +15139,7 @@
       "p": 0.02237,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.17376696428571428
+      "p_bh": 0.16602734375
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -15148,7 +15147,7 @@
       "p": 0.16314,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.6889893203883496
+      "p_bh": 0.6511890756302521
      },
      "JJAS (May) Aug": {
       "years": 33,
@@ -15156,15 +15155,15 @@
       "p": 0.192945,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.7708878440366973
+      "p_bh": 0.728201388888889
      },
      "JJAS (May) Sep": {
       "years": 33,
       "mean_difference": -0.8638120444459372,
       "p": 0.000355,
       "years_better": 23,
-      "p_holm": 0.14874500000000002,
-      "p_bh": 0.009083823529411766
+      "p_holm": 0.16259,
+      "p_bh": 0.009368055555555555
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -15172,7 +15171,7 @@
       "p": 0.034435,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.2538851694915254
+      "p_bh": 0.2441287313432836
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -15230,9 +15229,9 @@
     "skill_gain": 0.014742245684772845,
     "years_better": 25,
     "p": 0.0031,
-    "p_holm": 0.0527,
+    "p_holm": 0.055799999999999995,
     "better_holm": false,
-    "p_bh": 0.011366666666666666,
+    "p_bh": 0.010628571428571428,
     "better_bh": true
    },
    "category": "Rainfall-distribution model"
@@ -15965,7 +15964,7 @@
       "p": 0.202815,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.7948155405405405
+      "p_bh": 0.7526337890625
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -15981,7 +15980,7 @@
       "p": 0.055945,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.3215045454545455
+      "p_bh": 0.3107155172413793
      },
      "FMAM (Feb) Feb": {
       "years": 33,
@@ -16021,7 +16020,7 @@
       "p": 0.205595,
       "years_better": 13,
       "p_holm": 1.0,
-      "p_bh": 0.7985162946428571
+      "p_bh": 0.7570358527131783
      },
      "JJAS (May) Jun": {
       "years": 33,
@@ -16029,7 +16028,7 @@
       "p": 0.16542,
       "years_better": 14,
       "p_holm": 1.0,
-      "p_bh": 0.6919009615384616
+      "p_bh": 0.6519276859504133
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -16037,7 +16036,7 @@
       "p": 0.213365,
       "years_better": 17,
       "p_holm": 1.0,
-      "p_bh": 0.8141559210526315
+      "p_bh": 0.7736517175572519
      },
      "JJAS (May) Aug": {
       "years": 33,
@@ -16045,7 +16044,7 @@
       "p": 0.339275,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 1.0
+      "p_bh": 0.970817018072289
      },
      "JJAS (May) Sep": {
       "years": 33,
@@ -16053,7 +16052,7 @@
       "p": 0.01463,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.12238557692307693
+      "p_bh": 0.1198146551724138
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -16061,7 +16060,7 @@
       "p": 0.088795,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.43399803370786516
+      "p_bh": 0.42603661616161614
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -16093,7 +16092,7 @@
       "p": 0.32147,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.9977542553191489
+      "p_bh": 0.9482700617283949
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
@@ -16835,7 +16834,7 @@
       "p": 0.0254,
       "years_better": 26,
       "p_holm": 1.0,
-      "p_bh": 0.193125
+      "p_bh": 0.18532196969696968
      },
      "FMAM (Jan) Mar": {
       "years": 33,
@@ -16843,7 +16842,7 @@
       "p": 0.192245,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.7708878440366973
+      "p_bh": 0.728201388888889
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -16851,7 +16850,7 @@
       "p": 0.043965,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.2942273076923077
+      "p_bh": 0.2860736301369863
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -16859,7 +16858,7 @@
       "p": 0.060905,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.3353629746835443
+      "p_bh": 0.3250547752808989
      },
      "FMAM (Jan) FMAM": {
       "years": 33,
@@ -16867,7 +16866,7 @@
       "p": 0.008945,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.08646833333333333
+      "p_bh": 0.0849775
      },
      "FMAM (Feb) Feb": {
       "years": 33,
@@ -16875,7 +16874,7 @@
       "p": 0.14609,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.6230308823529411
+      "p_bh": 0.5931004273504273
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -16907,7 +16906,7 @@
       "p": 0.195505,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.7731334090909092
+      "p_bh": 0.7312194881889764
      },
      "JJAS (May) Jun": {
       "years": 33,
@@ -16915,7 +16914,7 @@
       "p": 0.04899,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.31562357142857145
+      "p_bh": 0.3038551829268293
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -16923,7 +16922,7 @@
       "p": 0.245755,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.8670532258064516
+      "p_bh": 0.820986013986014
      },
      "JJAS (May) Aug": {
       "years": 33,
@@ -16938,8 +16937,8 @@
       "mean_difference": -0.9355836481542563,
       "p": 0.00184,
       "years_better": 22,
-      "p_holm": 0.7452,
-      "p_bh": 0.025819354838709677
+      "p_holm": 0.8151200000000001,
+      "p_bh": 0.026484848484848486
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -16947,7 +16946,7 @@
       "p": 0.069325,
       "years_better": 17,
       "p_holm": 1.0,
-      "p_bh": 0.3677606707317073
+      "p_bh": 0.3579279891304348
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -16971,7 +16970,7 @@
       "p": 0.280305,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.9193381578947367
+      "p_bh": 0.8783906249999999
      },
      "ONDJ (Sep) Jan": {
       "years": 32,
@@ -17721,7 +17720,7 @@
       "p": 0.09822,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.47473000000000004
+      "p_bh": 0.466545
      },
      "FMAM (Jan) Mar": {
       "years": 33,
@@ -17865,7 +17864,7 @@
       "p": 0.133525,
       "years_better": 26,
       "p_holm": 1.0,
-      "p_bh": 0.5941522959183674
+      "p_bh": 0.5676886160714286
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
@@ -18235,7 +18234,7 @@
       "p": 0.010405,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.937496875
+      "p_bh": 0.7813145833333334
      },
      "JJAS (May) Jun": {
       "years": 33,
@@ -18605,7 +18604,7 @@
       "p": 0.06371,
       "years_better": 26,
       "p_holm": 1.0,
-      "p_bh": 0.346423125
+      "p_bh": 0.33624722222222225
      },
      "FMAM (Jan) Mar": {
       "years": 33,
@@ -18613,7 +18612,7 @@
       "p": 0.01257,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.10828088235294117
+      "p_bh": 0.10579166666666667
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -18637,7 +18636,7 @@
       "p": 0.007855,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.07946337209302325
+      "p_bh": 0.07773177083333332
      },
      "FMAM (Feb) Feb": {
       "years": 33,
@@ -18645,7 +18644,7 @@
       "p": 0.314015,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.987809892086331
+      "p_bh": 0.93707109375
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -18653,7 +18652,7 @@
       "p": 0.118135,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 0.540933947368421
+      "p_bh": 0.5195752314814815
      },
      "FMAM (Feb) Apr": {
       "years": 33,
@@ -18677,7 +18676,7 @@
       "p": 0.050565,
       "years_better": 14,
       "p_holm": 1.0,
-      "p_bh": 0.31562357142857145
+      "p_bh": 0.3038551829268293
      },
      "JJAS (May) Jun": {
       "years": 33,
@@ -18717,7 +18716,7 @@
       "p": 0.10245,
       "years_better": 17,
       "p_holm": 1.0,
-      "p_bh": 0.4897335164835165
+      "p_bh": 0.4818193069306931
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -18749,7 +18748,7 @@
       "p": 0.053515,
       "years_better": 29,
       "p_holm": 1.0,
-      "p_bh": 0.31889075342465756
+      "p_bh": 0.3062605421686747
      },
      "ONDJ (Sep) ONDJ": {
       "years": 32,
@@ -18772,7 +18771,7 @@
     "p": 0.1052,
     "p_holm": 1.0,
     "better_holm": false,
-    "p_bh": 0.2893,
+    "p_bh": 0.25248,
     "better_bh": false
    },
    "category": "Rainfall-distribution model"
@@ -19569,7 +19568,7 @@
       "p": 0.281085,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.9193381578947367
+      "p_bh": 0.8783906249999999
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -19593,7 +19592,7 @@
       "p": 0.35229,
       "years_better": 16,
       "p_holm": 1.0,
-      "p_bh": 1.0
+      "p_bh": 0.9960580357142857
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -19971,7 +19970,7 @@
       "p": 0.01454,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.9612555555555556
+      "p_bh": 0.7813145833333334
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -20383,7 +20382,7 @@
       "p": 0.23291,
       "years_better": 15,
       "p_holm": 1.0,
-      "p_bh": 0.8586088983050847
+      "p_bh": 0.8075346715328467
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -20399,7 +20398,7 @@
       "p": 0.058255,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.32488365384615386
+      "p_bh": 0.31444460227272725
      },
      "FMAM (Jan) FMAM": {
       "years": 33,
@@ -20407,7 +20406,7 @@
       "p": 0.26045,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.8965383720930232
+      "p_bh": 0.853198275862069
      },
      "FMAM (Feb) Feb": {
       "years": 33,
@@ -20415,7 +20414,7 @@
       "p": 0.012315,
       "years_better": 24,
       "p_holm": 1.0,
-      "p_bh": 0.10828088235294117
+      "p_bh": 0.10579166666666667
      },
      "FMAM (Feb) Mar": {
       "years": 33,
@@ -20447,7 +20446,7 @@
       "p": 0.346005,
       "years_better": 15,
       "p_holm": 1.0,
-      "p_bh": 1.0
+      "p_bh": 0.9841459580838323
      },
      "JJAS (May) Jun": {
       "years": 33,
@@ -20455,7 +20454,7 @@
       "p": 0.00627,
       "years_better": 24,
       "p_holm": 1.0,
-      "p_bh": 0.06818625
+      "p_bh": 0.06926162790697675
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -20463,7 +20462,7 @@
       "p": 0.080185,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.3963690340909091
+      "p_bh": 0.38865178571428577
      },
      "JJAS (May) Aug": {
       "years": 33,
@@ -20471,15 +20470,15 @@
       "p": 0.23823,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.8611561983471074
+      "p_bh": 0.812725
      },
      "JJAS (May) Sep": {
       "years": 33,
       "mean_difference": -1.1262484733733649,
       "p": 0.000735,
       "years_better": 24,
-      "p_holm": 0.305025,
-      "p_bh": 0.014631818181818183
+      "p_holm": 0.332955,
+      "p_bh": 0.014645833333333332
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -20487,7 +20486,7 @@
       "p": 0.020915,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.16541863636363635
+      "p_bh": 0.1602358870967742
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -20542,9 +20541,1788 @@
     "skill_gain": 0.02252518277115348,
     "years_better": 26,
     "p": 0.00035,
-    "p_holm": 0.0063,
+    "p_holm": 0.00665,
     "better_holm": true,
-    "p_bh": 0.0015400000000000001,
+    "p_bh": 0.0014,
+    "better_bh": true
+   },
+   "category": "Neural network"
+  },
+  {
+   "family": "Neural network (DRN)",
+   "method": "drn_sst",
+   "label": "DRN with SST indices and rainfall regions",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [],
+   "training_better": 7,
+   "test_better": 6,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ],
+   "by_target": {
+    "FMAM (Jan) Feb": {
+     "cycle": "jan_fmam",
+     "target": "Feb",
+     "confirmed": false,
+     "p_adjusted": 0.38285,
+     "years_better": 17,
+     "years": 24,
+     "test_better": 4,
+     "test_years": 9,
+     "gain_training": 0.08305886714145384,
+     "gain_test": -0.0059123444034329285
+    },
+    "FMAM (Jan) Mar": {
+     "cycle": "jan_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.9372277777777778,
+     "years_better": 9,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": -0.02570927691500444,
+     "gain_test": 0.006766354088346716
+    },
+    "FMAM (Jan) Apr": {
+     "cycle": "jan_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.9372277777777778,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": -0.015559486110121423,
+     "gain_test": -0.024016972509972697
+    },
+    "FMAM (Jan) May": {
+     "cycle": "jan_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.9372277777777778,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 4,
+     "test_years": 9,
+     "gain_training": -0.035457732242190135,
+     "gain_test": -0.06336892725416138
+    },
+    "FMAM (Jan) FMAM": {
+     "cycle": "jan_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.38285,
+     "years_better": 17,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": 0.03942150800671454,
+     "gain_test": -0.07380352660345837
+    },
+    "FMAM (Feb) Feb": {
+     "cycle": "feb_fmam",
+     "target": "Feb",
+     "confirmed": false,
+     "p_adjusted": 0.0252,
+     "years_better": 16,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.09043266941112942,
+     "gain_test": -0.031235000450185974
+    },
+    "FMAM (Feb) Mar": {
+     "cycle": "feb_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.99703,
+     "years_better": 8,
+     "years": 24,
+     "test_better": 1,
+     "test_years": 9,
+     "gain_training": -0.0693664540231788,
+     "gain_test": -0.026900898814779885
+    },
+    "FMAM (Feb) Apr": {
+     "cycle": "feb_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.99703,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": -0.02151229867356261,
+     "gain_test": -0.05632701199659981
+    },
+    "FMAM (Feb) May": {
+     "cycle": "feb_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.99703,
+     "years_better": 10,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": -0.023882340142894736,
+     "gain_test": 0.02845165548578245
+    },
+    "FMAM (Feb) FMAM": {
+     "cycle": "feb_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.965025,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": 0.015438544014672978,
+     "gain_test": -0.05133512153187819
+    },
+    "JJAS (May) Jun": {
+     "cycle": "may_jjas",
+     "target": "Jun",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 7,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": -0.04664450467570732,
+     "gain_test": -0.02078368105744497
+    },
+    "JJAS (May) Jul": {
+     "cycle": "may_jjas",
+     "target": "Jul",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 9,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": -0.016566127243333322,
+     "gain_test": 0.007618925942148098
+    },
+    "JJAS (May) Aug": {
+     "cycle": "may_jjas",
+     "target": "Aug",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": -0.008586888097151768,
+     "gain_test": -0.023149358837685024
+    },
+    "JJAS (May) Sep": {
+     "cycle": "may_jjas",
+     "target": "Sep",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": -0.013329312191907675,
+     "gain_test": -0.038192982562022464
+    },
+    "JJAS (May) JJAS": {
+     "cycle": "may_jjas",
+     "target": "JJAS",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": -0.046859462794053765,
+     "gain_test": -0.08349150382466114
+    },
+    "ONDJ (Sep) Oct": {
+     "cycle": "sep_ondj",
+     "target": "Oct",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 8,
+     "gain_training": 0.002005970286466282,
+     "gain_test": 0.04842756132563189
+    },
+    "ONDJ (Sep) Nov": {
+     "cycle": "sep_ondj",
+     "target": "Nov",
+     "confirmed": false,
+     "p_adjusted": 0.6836,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 7,
+     "test_years": 8,
+     "gain_training": 0.049266111641284145,
+     "gain_test": 0.14609079269083525
+    },
+    "ONDJ (Sep) Dec": {
+     "cycle": "sep_ondj",
+     "target": "Dec",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 9,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 8,
+     "gain_training": -0.021911133162812176,
+     "gain_test": -0.033465250127618126
+    },
+    "ONDJ (Sep) Jan": {
+     "cycle": "sep_ondj",
+     "target": "Jan",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 7,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 8,
+     "gain_training": -0.10267497787995401,
+     "gain_test": -0.07919895207859763
+    },
+    "ONDJ (Sep) ONDJ": {
+     "cycle": "sep_ondj",
+     "target": "ONDJ",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 8,
+     "gain_training": 0.017973207830984717,
+     "gain_test": 0.056327877698328366
+    }
+   },
+   "oos33": {
+    "targets": 20,
+    "better": 6,
+    "tests": {
+     "FMAM (Jan) Feb": {
+      "years": 33,
+      "mean_difference": -0.03499415084450614,
+      "p": 0.08496,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) Mar": {
+      "years": 33,
+      "mean_difference": 0.006828539395187136,
+      "p": 0.80363,
+      "years_better": 15,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) Apr": {
+      "years": 33,
+      "mean_difference": 0.007978127885562321,
+      "p": 0.83587,
+      "years_better": 14,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) May": {
+      "years": 33,
+      "mean_difference": 0.01945927818215032,
+      "p": 0.883535,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) FMAM": {
+      "years": 33,
+      "mean_difference": -0.005172579640702044,
+      "p": 0.328405,
+      "years_better": 19,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) Feb": {
+      "years": 33,
+      "mean_difference": -0.030446721770013493,
+      "p": 0.014765,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 0.7813145833333334
+     },
+     "FMAM (Feb) Mar": {
+      "years": 33,
+      "mean_difference": 0.02459374881366221,
+      "p": 0.999475,
+      "years_better": 9,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) Apr": {
+      "years": 33,
+      "mean_difference": 0.01446390174582981,
+      "p": 0.94543,
+      "years_better": 13,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) May": {
+      "years": 33,
+      "mean_difference": 0.004220114572696204,
+      "p": 0.68458,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) FMAM": {
+      "years": 33,
+      "mean_difference": 0.0023650612704554054,
+      "p": 0.56512,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Jun": {
+      "years": 33,
+      "mean_difference": 0.017856767182891278,
+      "p": 0.98738,
+      "years_better": 10,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Jul": {
+      "years": 33,
+      "mean_difference": 0.004337642521898474,
+      "p": 0.730165,
+      "years_better": 14,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Aug": {
+      "years": 33,
+      "mean_difference": 0.00560785927985984,
+      "p": 0.725815,
+      "years_better": 18,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Sep": {
+      "years": 33,
+      "mean_difference": 0.009104268993172059,
+      "p": 0.96001,
+      "years_better": 14,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) JJAS": {
+      "years": 33,
+      "mean_difference": 0.026561549227484473,
+      "p": 0.969745,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Oct": {
+      "years": 32,
+      "mean_difference": -0.006899582046355608,
+      "p": 0.32874,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Nov": {
+      "years": 32,
+      "mean_difference": -0.036212215986011834,
+      "p": 0.00802,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 0.7813145833333334
+     },
+     "ONDJ (Sep) Dec": {
+      "years": 32,
+      "mean_difference": 0.007430552442078775,
+      "p": 0.808945,
+      "years_better": 12,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Jan": {
+      "years": 32,
+      "mean_difference": 0.04601156966154099,
+      "p": 0.99978,
+      "years_better": 9,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) ONDJ": {
+      "years": 32,
+      "mean_difference": -0.015006333800477941,
+      "p": 0.207925,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     }
+    },
+    "confirmed_holm": [],
+    "confirmed_bh": []
+   },
+   "pooled": {
+    "years": 33,
+    "first": 1993,
+    "last": 2025,
+    "skill_gain": -0.010020281090538936,
+    "years_better": 12,
+    "p": 0.88357,
+    "p_holm": 1.0,
+    "better_holm": false,
+    "p_bh": 1.0,
+    "better_bh": false
+   },
+   "category": "Neural network"
+  },
+  {
+   "family": "Neural network (DRN)",
+   "method": "drn_sst",
+   "label": "DRN with SST indices and rainfall regions",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "JJAS (May) Sep"
+   ],
+   "training_better": 12,
+   "test_better": 10,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ],
+   "by_target": {
+    "FMAM (Jan) Feb": {
+     "cycle": "jan_fmam",
+     "target": "Feb",
+     "confirmed": false,
+     "p_adjusted": 0.31065,
+     "years_better": 17,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": -0.008610682822364551,
+     "gain_test": 0.03146493908814993
+    },
+    "FMAM (Jan) Mar": {
+     "cycle": "jan_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.31065,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.019007722331680053,
+     "gain_test": 0.016668751800197737
+    },
+    "FMAM (Jan) Apr": {
+     "cycle": "jan_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.41581666666666667,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": -0.0028264600550347574,
+     "gain_test": 0.008479455561123783
+    },
+    "FMAM (Jan) May": {
+     "cycle": "jan_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.754845,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": -0.02571783757247359,
+     "gain_test": -0.007391297897167811
+    },
+    "FMAM (Jan) FMAM": {
+     "cycle": "jan_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.26392499999999997,
+     "years_better": 17,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": 0.03286109241316477,
+     "gain_test": -0.03787447176022888
+    },
+    "FMAM (Feb) Feb": {
+     "cycle": "feb_fmam",
+     "target": "Feb",
+     "confirmed": false,
+     "p_adjusted": 0.052950000000000004,
+     "years_better": 19,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": 0.04846291266537222,
+     "gain_test": 0.04192302568980848
+    },
+    "FMAM (Feb) Mar": {
+     "cycle": "feb_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.654655,
+     "years_better": 10,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": -0.0253229749688946,
+     "gain_test": -0.013211735506867904
+    },
+    "FMAM (Feb) Apr": {
+     "cycle": "feb_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.654655,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": -0.010947734304908292,
+     "gain_test": -0.06067648540333846
+    },
+    "FMAM (Feb) May": {
+     "cycle": "feb_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.654655,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 8,
+     "test_years": 9,
+     "gain_training": -0.005179568401074745,
+     "gain_test": 0.041487191902608384
+    },
+    "FMAM (Feb) FMAM": {
+     "cycle": "feb_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.343375,
+     "years_better": 10,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": 0.05343571328622306,
+     "gain_test": -0.049644278112147354
+    },
+    "JJAS (May) Jun": {
+     "cycle": "may_jjas",
+     "target": "Jun",
+     "confirmed": false,
+     "p_adjusted": 0.12449375,
+     "years_better": 18,
+     "years": 24,
+     "test_better": 7,
+     "test_years": 9,
+     "gain_training": 0.08153148467315502,
+     "gain_test": 0.09530167920442324
+    },
+    "JJAS (May) Jul": {
+     "cycle": "may_jjas",
+     "target": "Jul",
+     "confirmed": false,
+     "p_adjusted": 0.12449375,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.044628651653716045,
+     "gain_test": 0.06592372252850208
+    },
+    "JJAS (May) Aug": {
+     "cycle": "may_jjas",
+     "target": "Aug",
+     "confirmed": false,
+     "p_adjusted": 0.050249999999999996,
+     "years_better": 17,
+     "years": 24,
+     "test_better": 4,
+     "test_years": 9,
+     "gain_training": 0.046593258460378734,
+     "gain_test": -0.02084933333409411
+    },
+    "JJAS (May) Sep": {
+     "cycle": "may_jjas",
+     "target": "Sep",
+     "confirmed": true,
+     "p_adjusted": 0.0201,
+     "years_better": 16,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.05464816366441694,
+     "gain_test": 0.019982717785580667
+    },
+    "JJAS (May) JJAS": {
+     "cycle": "may_jjas",
+     "target": "JJAS",
+     "confirmed": false,
+     "p_adjusted": 0.377285,
+     "years_better": 15,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.02796146559601559,
+     "gain_test": -0.05164358793820598
+    },
+    "ONDJ (Sep) Oct": {
+     "cycle": "sep_ondj",
+     "target": "Oct",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 8,
+     "gain_training": 0.024169175396310433,
+     "gain_test": 0.011690649400838027
+    },
+    "ONDJ (Sep) Nov": {
+     "cycle": "sep_ondj",
+     "target": "Nov",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 7,
+     "test_years": 8,
+     "gain_training": 0.036055236470221165,
+     "gain_test": 0.12191853020932468
+    },
+    "ONDJ (Sep) Dec": {
+     "cycle": "sep_ondj",
+     "target": "Dec",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 8,
+     "gain_training": -0.02181514239486627,
+     "gain_test": 0.049367666649291875
+    },
+    "ONDJ (Sep) Jan": {
+     "cycle": "sep_ondj",
+     "target": "Jan",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 15,
+     "years": 24,
+     "test_better": 4,
+     "test_years": 8,
+     "gain_training": -0.018743193252906697,
+     "gain_test": -0.0301110698776575
+    },
+    "ONDJ (Sep) ONDJ": {
+     "cycle": "sep_ondj",
+     "target": "ONDJ",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 7,
+     "test_years": 8,
+     "gain_training": -0.017175685209205996,
+     "gain_test": 0.062436088633764784
+    }
+   },
+   "oos33": {
+    "targets": 20,
+    "better": 12,
+    "tests": {
+     "FMAM (Jan) Feb": {
+      "years": 33,
+      "mean_difference": -0.2948462522959176,
+      "p": 0.16607,
+      "years_better": 23,
+      "p_holm": 1.0,
+      "p_bh": 0.6519276859504133
+     },
+     "FMAM (Jan) Mar": {
+      "years": 33,
+      "mean_difference": -0.3603028487567603,
+      "p": 0.22544,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 0.7932148148148148
+     },
+     "FMAM (Jan) Apr": {
+      "years": 33,
+      "mean_difference": 0.0323855432927355,
+      "p": 0.520975,
+      "years_better": 18,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) May": {
+      "years": 33,
+      "mean_difference": 0.7064416110238825,
+      "p": 0.78444,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) FMAM": {
+      "years": 33,
+      "mean_difference": -0.572265288853222,
+      "p": 0.30872,
+      "years_better": 19,
+      "p_holm": 1.0,
+      "p_bh": 0.9281139240506329
+     },
+     "FMAM (Feb) Feb": {
+      "years": 33,
+      "mean_difference": -0.30381219361145956,
+      "p": 0.00687,
+      "years_better": 25,
+      "p_holm": 1.0,
+      "p_bh": 0.07094021739130435
+     },
+     "FMAM (Feb) Mar": {
+      "years": 33,
+      "mean_difference": 0.33294575781355146,
+      "p": 0.677245,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) Apr": {
+      "years": 33,
+      "mean_difference": 0.6872763644759673,
+      "p": 0.78471,
+      "years_better": 13,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) May": {
+      "years": 33,
+      "mean_difference": -0.11901109344512073,
+      "p": 0.422585,
+      "years_better": 20,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) FMAM": {
+      "years": 33,
+      "mean_difference": -0.3214484498990396,
+      "p": 0.401725,
+      "years_better": 12,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Jun": {
+      "years": 33,
+      "mean_difference": -1.3312523789338913,
+      "p": 0.02137,
+      "years_better": 25,
+      "p_holm": 1.0,
+      "p_bh": 0.1611230158730159
+     },
+     "JJAS (May) Jul": {
+      "years": 33,
+      "mean_difference": -1.004284521836105,
+      "p": 0.05191,
+      "years_better": 19,
+      "p_holm": 1.0,
+      "p_bh": 0.3038551829268293
+     },
+     "JJAS (May) Aug": {
+      "years": 33,
+      "mean_difference": -0.3915739325975658,
+      "p": 0.22001,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 0.7917026515151515
+     },
+     "JJAS (May) Sep": {
+      "years": 33,
+      "mean_difference": -0.8831010348846182,
+      "p": 0.01012,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 0.09425490196078432
+     },
+     "JJAS (May) JJAS": {
+      "years": 33,
+      "mean_difference": 0.23838725249430806,
+      "p": 0.545925,
+      "years_better": 20,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Oct": {
+      "years": 32,
+      "mean_difference": -0.33479326489880934,
+      "p": 0.384855,
+      "years_better": 15,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Nov": {
+      "years": 32,
+      "mean_difference": -0.7501117748226824,
+      "p": 0.13758,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 0.5783230088495575
+     },
+     "ONDJ (Sep) Dec": {
+      "years": 32,
+      "mean_difference": 0.006743186484592767,
+      "p": 0.51794,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Jan": {
+      "years": 32,
+      "mean_difference": 0.39825286752095984,
+      "p": 0.72581,
+      "years_better": 19,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) ONDJ": {
+      "years": 32,
+      "mean_difference": 0.11747634728388645,
+      "p": 0.516925,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     }
+    },
+    "confirmed_holm": [],
+    "confirmed_bh": []
+   },
+   "pooled": {
+    "years": 33,
+    "first": 1993,
+    "last": 2025,
+    "skill_gain": 0.016184592155227894,
+    "years_better": 18,
+    "p": 0.029,
+    "p_holm": 0.49300000000000005,
+    "better_holm": false,
+    "p_bh": 0.08700000000000001,
+    "better_bh": false
+   },
+   "category": "Neural network"
+  },
+  {
+   "family": "Neural network (DRN)",
+   "method": "drn_emos_residual",
+   "label": "Neural correction of EMOS (censored shifted gamma)",
+   "product": "probabilities",
+   "targets": 20,
+   "confirmed": [
+    "FMAM (Feb) Feb"
+   ],
+   "training_better": 6,
+   "test_better": 9,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ],
+   "by_target": {
+    "FMAM (Jan) Feb": {
+     "cycle": "jan_fmam",
+     "target": "Feb",
+     "confirmed": false,
+     "p_adjusted": 0.4595666666666666,
+     "years_better": 15,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": 0.04329331203517644,
+     "gain_test": -0.029141426745175978
+    },
+    "FMAM (Jan) Mar": {
+     "cycle": "jan_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.99325,
+     "years_better": 6,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": -0.05143275137959463,
+     "gain_test": 0.024338330709402573
+    },
+    "FMAM (Jan) Apr": {
+     "cycle": "jan_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.9372277777777778,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": -0.0062337180013323145,
+     "gain_test": -0.00516188863603067
+    },
+    "FMAM (Jan) May": {
+     "cycle": "jan_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.6294500000000001,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.008514261488326999,
+     "gain_test": -0.10260922909993264
+    },
+    "FMAM (Jan) FMAM": {
+     "cycle": "jan_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.73832,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": 0.001979096728355907,
+     "gain_test": -0.0075895429076674676
+    },
+    "FMAM (Feb) Feb": {
+     "cycle": "feb_fmam",
+     "target": "Feb",
+     "confirmed": true,
+     "p_adjusted": 0.0252,
+     "years_better": 18,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.06062510312961349,
+     "gain_test": 0.0179766220482558
+    },
+    "FMAM (Feb) Mar": {
+     "cycle": "feb_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.99703,
+     "years_better": 8,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": -0.04132944728148614,
+     "gain_test": 0.012496658800195192
+    },
+    "FMAM (Feb) Apr": {
+     "cycle": "feb_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.99703,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": -0.01174590785420821,
+     "gain_test": 0.013501969939408172
+    },
+    "FMAM (Feb) May": {
+     "cycle": "feb_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.99703,
+     "years_better": 10,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": -0.021674642094253554,
+     "gain_test": -0.014373803561563116
+    },
+    "FMAM (Feb) FMAM": {
+     "cycle": "feb_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.55155,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": 0.005296214530841272,
+     "gain_test": 0.005503977395828542
+    },
+    "JJAS (May) Jun": {
+     "cycle": "may_jjas",
+     "target": "Jun",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 5,
+     "years": 24,
+     "test_better": 1,
+     "test_years": 9,
+     "gain_training": -0.032191446051148286,
+     "gain_test": -0.015555231031473882
+    },
+    "JJAS (May) Jul": {
+     "cycle": "may_jjas",
+     "target": "Jul",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 8,
+     "years": 24,
+     "test_better": 4,
+     "test_years": 9,
+     "gain_training": -0.016675216705382752,
+     "gain_test": -0.012024857710543409
+    },
+    "JJAS (May) Aug": {
+     "cycle": "may_jjas",
+     "target": "Aug",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 4,
+     "test_years": 9,
+     "gain_training": -0.008079242085823224,
+     "gain_test": 0.0021568498954982716
+    },
+    "JJAS (May) Sep": {
+     "cycle": "may_jjas",
+     "target": "Sep",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 9,
+     "gain_training": -0.012729356760681926,
+     "gain_test": -0.009801756619186239
+    },
+    "JJAS (May) JJAS": {
+     "cycle": "may_jjas",
+     "target": "JJAS",
+     "confirmed": false,
+     "p_adjusted": 0.997685,
+     "years_better": 9,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": -0.01450421200252474,
+     "gain_test": 0.0016493233064839912
+    },
+    "ONDJ (Sep) Oct": {
+     "cycle": "sep_ondj",
+     "target": "Oct",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 8,
+     "gain_training": -0.011324162249610819,
+     "gain_test": -0.01287773345132866
+    },
+    "ONDJ (Sep) Nov": {
+     "cycle": "sep_ondj",
+     "target": "Nov",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 10,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 8,
+     "gain_training": -0.0003371027444315705,
+     "gain_test": 0.04457333641061066
+    },
+    "ONDJ (Sep) Dec": {
+     "cycle": "sep_ondj",
+     "target": "Dec",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 7,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 8,
+     "gain_training": -0.061168206335605206,
+     "gain_test": -0.08055532764145094
+    },
+    "ONDJ (Sep) Jan": {
+     "cycle": "sep_ondj",
+     "target": "Jan",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 8,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 8,
+     "gain_training": -0.04566604377335929,
+     "gain_test": -0.06360783469431386
+    },
+    "ONDJ (Sep) ONDJ": {
+     "cycle": "sep_ondj",
+     "target": "ONDJ",
+     "confirmed": false,
+     "p_adjusted": 0.9981199999999999,
+     "years_better": 9,
+     "years": 24,
+     "test_better": 4,
+     "test_years": 8,
+     "gain_training": -0.029558130210098486,
+     "gain_test": 0.014796975830549565
+    }
+   },
+   "oos33": {
+    "targets": 20,
+    "better": 4,
+    "tests": {
+     "FMAM (Jan) Feb": {
+      "years": 33,
+      "mean_difference": -0.017836096488594466,
+      "p": 0.18916,
+      "years_better": 18,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) Mar": {
+      "years": 33,
+      "mean_difference": 0.013650458933922046,
+      "p": 0.967035,
+      "years_better": 12,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) Apr": {
+      "years": 33,
+      "mean_difference": 0.0028906742869872996,
+      "p": 0.81001,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) May": {
+      "years": 33,
+      "mean_difference": 0.008395581735469542,
+      "p": 0.615575,
+      "years_better": 18,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) FMAM": {
+      "years": 33,
+      "mean_difference": 7.817262792593944e-05,
+      "p": 0.509135,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) Feb": {
+      "years": 33,
+      "mean_difference": -0.025625844682747072,
+      "p": 0.00409,
+      "years_better": 23,
+      "p_holm": 1.0,
+      "p_bh": 0.7286625000000001
+     },
+     "FMAM (Feb) Mar": {
+      "years": 33,
+      "mean_difference": 0.010818045548371274,
+      "p": 0.94703,
+      "years_better": 13,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) Apr": {
+      "years": 33,
+      "mean_difference": 0.002580894173598947,
+      "p": 0.66695,
+      "years_better": 19,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) May": {
+      "years": 33,
+      "mean_difference": 0.008817652296046035,
+      "p": 0.928845,
+      "years_better": 12,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) FMAM": {
+      "years": 33,
+      "mean_difference": -0.0023780614445685303,
+      "p": 0.09916,
+      "years_better": 20,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Jun": {
+      "years": 33,
+      "mean_difference": 0.012391586784443773,
+      "p": 0.99932,
+      "years_better": 6,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Jul": {
+      "years": 33,
+      "mean_difference": 0.007004964089877133,
+      "p": 0.951515,
+      "years_better": 12,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Aug": {
+      "years": 33,
+      "mean_difference": 0.0022131391041394282,
+      "p": 0.78155,
+      "years_better": 15,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) Sep": {
+      "years": 33,
+      "mean_difference": 0.005317945887036623,
+      "p": 0.91507,
+      "years_better": 14,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "JJAS (May) JJAS": {
+      "years": 33,
+      "mean_difference": 0.0047051041086710755,
+      "p": 0.876705,
+      "years_better": 15,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Oct": {
+      "years": 32,
+      "mean_difference": 0.0069762986984365175,
+      "p": 0.87355,
+      "years_better": 15,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Nov": {
+      "years": 32,
+      "mean_difference": -0.006103359441473474,
+      "p": 0.204625,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Dec": {
+      "years": 32,
+      "mean_difference": 0.028933794584075405,
+      "p": 0.9978,
+      "years_better": 9,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Jan": {
+      "years": 32,
+      "mean_difference": 0.02251289067563808,
+      "p": 0.980675,
+      "years_better": 11,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) ONDJ": {
+      "years": 32,
+      "mean_difference": 0.008854090855945792,
+      "p": 0.935175,
+      "years_better": 13,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     }
+    },
+    "confirmed_holm": [],
+    "confirmed_bh": []
+   },
+   "pooled": {
+    "years": 33,
+    "first": 1993,
+    "last": 2025,
+    "skill_gain": -0.01162356967106111,
+    "years_better": 12,
+    "p": 0.996145,
+    "p_holm": 1.0,
+    "better_holm": false,
+    "p_bh": 1.0,
+    "better_bh": false
+   },
+   "category": "Neural network"
+  },
+  {
+   "family": "Neural network (DRN)",
+   "method": "drn_emos_residual",
+   "label": "Neural correction of EMOS (censored shifted gamma)",
+   "product": "amounts",
+   "targets": 20,
+   "confirmed": [
+    "FMAM (Feb) Feb",
+    "JJAS (May) Sep"
+   ],
+   "training_better": 17,
+   "test_better": 14,
+   "test_scored": 20,
+   "validation_better": 0,
+   "validation_scored": 0,
+   "seasons": [
+    "feb_fmam",
+    "jan_fmam",
+    "may_jjas",
+    "sep_ondj"
+   ],
+   "by_target": {
+    "FMAM (Jan) Feb": {
+     "cycle": "jan_fmam",
+     "target": "Feb",
+     "confirmed": false,
+     "p_adjusted": 0.41581666666666667,
+     "years_better": 17,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": -0.03141460414679911,
+     "gain_test": -0.007589681878398955
+    },
+    "FMAM (Jan) Mar": {
+     "cycle": "jan_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.31065,
+     "years_better": 12,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.01081599768120369,
+     "gain_test": 0.028636893496641044
+    },
+    "FMAM (Jan) Apr": {
+     "cycle": "jan_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.20610000000000003,
+     "years_better": 15,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.017907311340895894,
+     "gain_test": 0.024621219870603863
+    },
+    "FMAM (Jan) May": {
+     "cycle": "jan_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.20610000000000003,
+     "years_better": 15,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.01960019471505728,
+     "gain_test": -0.03245907887599284
+    },
+    "FMAM (Jan) FMAM": {
+     "cycle": "jan_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.0675,
+     "years_better": 16,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.012735616414990844,
+     "gain_test": 0.015341488934156901
+    },
+    "FMAM (Feb) Feb": {
+     "cycle": "feb_fmam",
+     "target": "Feb",
+     "confirmed": true,
+     "p_adjusted": 0.02935,
+     "years_better": 19,
+     "years": 24,
+     "test_better": 8,
+     "test_years": 9,
+     "gain_training": 0.05078353390878551,
+     "gain_test": 0.05269708512640973
+    },
+    "FMAM (Feb) Mar": {
+     "cycle": "feb_fmam",
+     "target": "Mar",
+     "confirmed": false,
+     "p_adjusted": 0.46409999999999996,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.01524602765398364,
+     "gain_test": 0.01594752953515993
+    },
+    "FMAM (Feb) Apr": {
+     "cycle": "feb_fmam",
+     "target": "Apr",
+     "confirmed": false,
+     "p_adjusted": 0.46409999999999996,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.013022039111997267,
+     "gain_test": 0.003694327347015393
+    },
+    "FMAM (Feb) May": {
+     "cycle": "feb_fmam",
+     "target": "May",
+     "confirmed": false,
+     "p_adjusted": 0.654655,
+     "years_better": 10,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.0013578196403060485,
+     "gain_test": 0.008753504840328892
+    },
+    "FMAM (Feb) FMAM": {
+     "cycle": "feb_fmam",
+     "target": "FMAM",
+     "confirmed": false,
+     "p_adjusted": 0.26599999999999996,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 2,
+     "test_years": 9,
+     "gain_training": 0.03961006844358219,
+     "gain_test": -0.01241644665106164
+    },
+    "JJAS (May) Jun": {
+     "cycle": "may_jjas",
+     "target": "Jun",
+     "confirmed": false,
+     "p_adjusted": 0.0752,
+     "years_better": 20,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.08726802473222728,
+     "gain_test": 0.09437312284468836
+    },
+    "JJAS (May) Jul": {
+     "cycle": "may_jjas",
+     "target": "Jul",
+     "confirmed": false,
+     "p_adjusted": 0.12655555555555556,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": 0.039196679132472025,
+     "gain_test": 0.06278141726753968
+    },
+    "JJAS (May) Aug": {
+     "cycle": "may_jjas",
+     "target": "Aug",
+     "confirmed": false,
+     "p_adjusted": 0.0752,
+     "years_better": 16,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.040351366447039995,
+     "gain_test": -0.003669031338597929
+    },
+    "JJAS (May) Sep": {
+     "cycle": "may_jjas",
+     "target": "Sep",
+     "confirmed": true,
+     "p_adjusted": 0.01805,
+     "years_better": 19,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 9,
+     "gain_training": 0.06265108523819794,
+     "gain_test": 0.04842165536421369
+    },
+    "JJAS (May) JJAS": {
+     "cycle": "may_jjas",
+     "target": "JJAS",
+     "confirmed": false,
+     "p_adjusted": 0.120475,
+     "years_better": 16,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 9,
+     "gain_training": 0.058109040764202924,
+     "gain_test": 0.06417932806042413
+    },
+    "ONDJ (Sep) Oct": {
+     "cycle": "sep_ondj",
+     "target": "Oct",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 14,
+     "years": 24,
+     "test_better": 3,
+     "test_years": 8,
+     "gain_training": 0.032870769302055104,
+     "gain_test": -0.019069011720688454
+    },
+    "ONDJ (Sep) Nov": {
+     "cycle": "sep_ondj",
+     "target": "Nov",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 11,
+     "years": 24,
+     "test_better": 8,
+     "test_years": 8,
+     "gain_training": -0.020855318151697416,
+     "gain_test": 0.052700969953244914
+    },
+    "ONDJ (Sep) Dec": {
+     "cycle": "sep_ondj",
+     "target": "Dec",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 6,
+     "test_years": 8,
+     "gain_training": -0.002631655941018142,
+     "gain_test": 0.07871109344354557
+    },
+    "ONDJ (Sep) Jan": {
+     "cycle": "sep_ondj",
+     "target": "Jan",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 18,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 8,
+     "gain_training": 0.06451979501696688,
+     "gain_test": -0.08822438982729068
+    },
+    "ONDJ (Sep) ONDJ": {
+     "cycle": "sep_ondj",
+     "target": "ONDJ",
+     "confirmed": false,
+     "p_adjusted": 0.89165,
+     "years_better": 13,
+     "years": 24,
+     "test_better": 5,
+     "test_years": 8,
+     "gain_training": -0.037846045322549635,
+     "gain_test": 0.041526474179583134
+    }
+   },
+   "oos33": {
+    "targets": 20,
+    "better": 16,
+    "tests": {
+     "FMAM (Jan) Feb": {
+      "years": 33,
+      "mean_difference": -0.10261109918795952,
+      "p": 0.361815,
+      "years_better": 22,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Jan) Mar": {
+      "years": 33,
+      "mean_difference": -0.416377183079363,
+      "p": 0.113025,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 0.5064799528301887
+     },
+     "FMAM (Jan) Apr": {
+      "years": 33,
+      "mean_difference": -0.4218077134681249,
+      "p": 0.1098,
+      "years_better": 20,
+      "p_holm": 1.0,
+      "p_bh": 0.49856904761904763
+     },
+     "FMAM (Jan) May": {
+      "years": 33,
+      "mean_difference": -0.18740754149344704,
+      "p": 0.33144,
+      "years_better": 20,
+      "p_holm": 1.0,
+      "p_bh": 0.9632507621951221
+     },
+     "FMAM (Jan) FMAM": {
+      "years": 33,
+      "mean_difference": -0.6603090453208524,
+      "p": 0.00242,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 0.03145270270270271
+     },
+     "FMAM (Feb) Feb": {
+      "years": 33,
+      "mean_difference": -0.3295138147503864,
+      "p": 0.000225,
+      "years_better": 27,
+      "p_holm": 0.1035,
+      "p_bh": 0.0066796875
+     },
+     "FMAM (Feb) Mar": {
+      "years": 33,
+      "mean_difference": -0.2942104749846229,
+      "p": 0.28786,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 0.8847104838709677
+     },
+     "FMAM (Feb) Apr": {
+      "years": 33,
+      "mean_difference": -0.3288834337528123,
+      "p": 0.15349,
+      "years_better": 18,
+      "p_holm": 1.0,
+      "p_bh": 0.6178622881355932
+     },
+     "FMAM (Feb) May": {
+      "years": 33,
+      "mean_difference": -0.06679989753718148,
+      "p": 0.430455,
+      "years_better": 15,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "FMAM (Feb) FMAM": {
+      "years": 33,
+      "mean_difference": -0.9174202563762291,
+      "p": 0.131935,
+      "years_better": 16,
+      "p_holm": 1.0,
+      "p_bh": 0.5676886160714286
+     },
+     "JJAS (May) Jun": {
+      "years": 33,
+      "mean_difference": -1.3802626428494889,
+      "p": 0.00667,
+      "years_better": 25,
+      "p_holm": 1.0,
+      "p_bh": 0.07040555555555555
+     },
+     "JJAS (May) Jul": {
+      "years": 33,
+      "mean_difference": -0.824105360793791,
+      "p": 0.046175,
+      "years_better": 20,
+      "p_holm": 1.0,
+      "p_bh": 0.29364500000000004
+     },
+     "JJAS (May) Aug": {
+      "years": 33,
+      "mean_difference": -0.45084113290335454,
+      "p": 0.11021,
+      "years_better": 21,
+      "p_holm": 1.0,
+      "p_bh": 0.49856904761904763
+     },
+     "JJAS (May) Sep": {
+      "years": 33,
+      "mean_difference": -1.0866866470625796,
+      "p": 0.000665,
+      "years_better": 24,
+      "p_holm": 0.30191,
+      "p_bh": 0.014357954545454547
+     },
+     "JJAS (May) JJAS": {
+      "years": 33,
+      "mean_difference": -2.385556263955394,
+      "p": 0.018585,
+      "years_better": 22,
+      "p_holm": 1.0,
+      "p_bh": 0.14740573770491802
+     },
+     "ONDJ (Sep) Oct": {
+      "years": 32,
+      "mean_difference": 0.13072008591701145,
+      "p": 0.56374,
+      "years_better": 17,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Nov": {
+      "years": 32,
+      "mean_difference": 0.454640430226358,
+      "p": 0.781275,
+      "years_better": 19,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Dec": {
+      "years": 32,
+      "mean_difference": -0.014598535858647399,
+      "p": 0.435265,
+      "years_better": 19,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) Jan": {
+      "years": 32,
+      "mean_difference": 0.09097609498618836,
+      "p": 0.54948,
+      "years_better": 23,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     },
+     "ONDJ (Sep) ONDJ": {
+      "years": 32,
+      "mean_difference": 2.314569413218596,
+      "p": 0.82421,
+      "years_better": 18,
+      "p_holm": 1.0,
+      "p_bh": 1.0
+     }
+    },
+    "confirmed_bh": [
+     "FMAM (Jan) FMAM",
+     "JJAS (May) Sep",
+     "FMAM (Feb) Feb"
+    ],
+    "confirmed_holm": []
+   },
+   "pooled": {
+    "years": 33,
+    "first": 1993,
+    "last": 2025,
+    "skill_gain": 0.023477442801898552,
+    "years_better": 28,
+    "p": 0.000295,
+    "p_holm": 0.005900000000000001,
+    "better_holm": true,
+    "p_bh": 0.0014,
     "better_bh": true
    },
    "category": "Neural network"
@@ -21101,7 +22879,7 @@
       "p": 0.004225,
       "years_better": 24,
       "p_holm": 1.0,
-      "p_bh": 0.049672297297297295
+      "p_bh": 0.050171875
      },
      "FMAM (Jan) Mar": {
       "years": 33,
@@ -21109,7 +22887,7 @@
       "p": 0.077025,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.385275
+      "p_bh": 0.3773311855670103
      },
      "FMAM (Jan) Apr": {
       "years": 33,
@@ -21117,7 +22895,7 @@
       "p": 0.288695,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.9302394444444444
+      "p_bh": 0.8847104838709677
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -21141,7 +22919,7 @@
       "p": 0.26587,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.8965383720930232
+      "p_bh": 0.8532989864864864
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -21189,7 +22967,7 @@
       "p": 0.22542,
       "years_better": 11,
       "p_holm": 1.0,
-      "p_bh": 0.845325
+      "p_bh": 0.7932148148148148
      },
      "ONDJ (Sep) Dec": {
       "years": 32,
@@ -21220,7 +22998,6 @@
      "ONDJ (Sep) Jan"
     ],
     "confirmed_bh": [
-     "FMAM (Jan) Feb",
      "ONDJ (Sep) Jan"
     ]
    },
@@ -22006,7 +23783,7 @@
       "p": 0.28567,
       "years_better": 19,
       "p_holm": 1.0,
-      "p_bh": 0.9273615671641791
+      "p_bh": 0.8847104838709677
      },
      "FMAM (Feb) May": {
       "years": 33,
@@ -22030,7 +23807,7 @@
       "p": 0.036955,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.26353155737704914
+      "p_bh": 0.25440036231884056
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -22046,7 +23823,7 @@
       "p": 0.035975,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.26081875
+      "p_bh": 0.251295955882353
      },
      "JJAS (May) Sep": {
       "years": 33,
@@ -22054,7 +23831,7 @@
       "p": 0.018785,
       "years_better": 21,
       "p_holm": 1.0,
-      "p_bh": 0.15249166666666664
+      "p_bh": 0.14740573770491802
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -22062,7 +23839,7 @@
       "p": 0.242005,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.8628866803278689
+      "p_bh": 0.8152650709219859
      },
      "ONDJ (Sep) Oct": {
       "years": 32,
@@ -22070,7 +23847,7 @@
       "p": 0.262705,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.8965383720930232
+      "p_bh": 0.8532989864864864
      },
      "ONDJ (Sep) Nov": {
       "years": 32,
@@ -22853,7 +24630,7 @@
       "p": 0.177755,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.7364135714285714
+      "p_bh": 0.6920788934426229
      },
      "FMAM (Jan) May": {
       "years": 33,
@@ -22893,7 +24670,7 @@
       "p": 0.32341,
       "years_better": 18,
       "p_holm": 1.0,
-      "p_bh": 0.9977542553191489
+      "p_bh": 0.9482700617283949
      },
      "FMAM (Feb) May": {
       "years": 33,
@@ -22917,7 +24694,7 @@
       "p": 0.106765,
       "years_better": 20,
       "p_holm": 1.0,
-      "p_bh": 0.5048127717391304
+      "p_bh": 0.49718995098039215
      },
      "JJAS (May) Jul": {
       "years": 33,
@@ -22925,15 +24702,15 @@
       "p": 0.144985,
       "years_better": 17,
       "p_holm": 1.0,
-      "p_bh": 0.6230308823529411
+      "p_bh": 0.5931004273504273
      },
      "JJAS (May) Aug": {
       "years": 33,
       "mean_difference": -1.3263273176200336,
       "p": 0.00119,
       "years_better": 23,
-      "p_holm": 0.48671000000000003,
-      "p_bh": 0.019172222222222226
+      "p_holm": 0.53193,
+      "p_bh": 0.01949137931034483
      },
      "JJAS (May) Sep": {
       "years": 33,
@@ -22941,7 +24718,7 @@
       "p": 0.01115,
       "years_better": 22,
       "p_holm": 1.0,
-      "p_bh": 0.1031968085106383
+      "p_bh": 0.09992924528301886
      },
      "JJAS (May) JJAS": {
       "years": 33,
@@ -22949,7 +24726,7 @@
       "p": 0.00658,
       "years_better": 23,
       "p_holm": 1.0,
-      "p_bh": 0.06981219512195122
+      "p_bh": 0.07040555555555555
      },
      "ONDJ (Sep) Oct": {
       "years": 32,

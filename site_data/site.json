@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-21 06:01 UTC",
- "code_commit": "5daab7d",
- "release": "2026-10-21.0",
+ "built_utc": "2026-10-22 10:06 UTC",
+ "code_commit": "81ad0fd",
+ "release": "2026-10-22.0",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -1157,7 +1157,7 @@
   {
    "id": "2026-10-21.0",
    "date": "2026-10-21",
-   "commit": null,
+   "commit": "97f5170",
    "title": "Neural network rerun with the weight-decay search",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -1169,6 +1169,24 @@
     {
      "type": "analysis",
      "text": "Neural network (DRN): the rerun that searches architecture × weight decay (10⁻⁴ or 10⁻³) inside every fold, with Brier skill, range width and reliability, replaces the first run for all four cycles (accepted as one batch, experiment drn-stage1-v2). The conclusions are unchanged: calibrated amount ranges (81% of observations in the 10–90% range), about equal to EMOS, probabilities below the published ones; confirmed only for JJAS September amounts, where EMOS remains the selected candidate under the tie rule. The stronger weight decay was chosen for 13 of 20 targets."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-22.0",
+   "date": "2026-10-22",
+   "commit": null,
+   "title": "Neural network, second stage: SST inputs and a neural correction of EMOS",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Neural network second stage for the four cycles (corrected CRPS): the DRN with SEAS5 SST indices and EMI rainfall regions, a regions-only control, a neural correction of EMOS, and the DRN, EMOS and quantile regression refitted on the same folds. The neural correction of EMOS is confirmed for FMAM-February February (probabilities and amounts) and JJAS September amounts, the SST network for JJAS September amounts; the SST indices add no consistent signal over 1993–2016. Method selection: a new candidate for FMAM-February February amounts (the neural correction of EMOS); JJAS September stays EMOS under the tie rule. A separate tuning split (JJAS, diagnostic) does not change the conclusions. The published forecasts are unchanged."
     }
    ]
   }

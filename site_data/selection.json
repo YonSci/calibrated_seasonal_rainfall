@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-21T05:47:13.250882+00:00",
+ "created_utc": "2026-10-22T09:59:33.472876+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -307,25 +307,55 @@
        "mean_difference": -0.006003919233384447,
        "required": 3
       },
-      "alternatives": [],
+      "alternatives": [
+       {
+        "family": "distribution_neural_ext",
+        "family_label": "Neural network, second stage (docs/54)",
+        "method": "drn_emos_residual",
+        "label": "Neural correction of EMOS (censored shifted gamma)",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.03073339634717595,
+         "years_better": 18,
+         "years": 24,
+         "holm_p": 0.045360000000000004,
+         "test_difference": -0.012005706910936732,
+         "p_adjusted": 0.0252,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 5,
+         "test_years": 9
+        }
+       }
+      ],
       "tie": null,
-      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Benjamini–Hochberg p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004."
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Benjamini–Hochberg p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004. Also confirmed (one change at a time): Neural correction of EMOS (censored shifted gamma) (distribution model (neural network))."
      },
      "amounts": {
       "product": "Rainfall amounts (and ranges)",
       "reference": "Mean-Variance Scaling ensemble (published)",
-      "status": "keep",
+      "status": "candidate",
       "selected": {
-       "family": "published",
-       "label": "Mean-Variance Scaling ensemble (published)",
-       "stage": null,
-       "method": null
+       "family": "distribution_neural_ext",
+       "family_label": "Neural network, second stage (docs/54)",
+       "stage": "distribution model (neural network)",
+       "method": "drn_emos_residual",
+       "label": "Neural correction of EMOS (censored shifted gamma)"
       },
-      "historical": null,
+      "historical": {
+       "training_difference": -0.3614544069140632,
+       "years_better": 19,
+       "years": 24,
+       "holm_p": 0.02935,
+       "test_difference": -0.24433890231391478,
+       "p_adjusted": 0.02935,
+       "correction": "benjamini_hochberg",
+       "test_years_better": 8,
+       "test_years": 9
+      },
       "validation": null,
       "alternatives": [],
       "tie": null,
-      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Feb on the historical evidence."
+      "why": "Neural correction of EMOS (censored shifted gamma) (neural network, second stage (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Feb: CRPS (mm) difference -0.3615 over the training years (Benjamini–Hochberg p 0.0294; 19 of 24 years better), -0.2443 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended."
      }
     },
     "Mar": {
@@ -823,14 +853,50 @@
          "test_years_better": 6,
          "test_years": 9
         }
+       },
+       {
+        "family": "distribution_neural_ext",
+        "family_label": "Neural network, second stage (docs/54)",
+        "method": "drn_sst",
+        "label": "DRN with SST indices and rainfall regions",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.998679634518135,
+         "years_better": 16,
+         "years": 24,
+         "holm_p": 0.036180000000000004,
+         "test_difference": -0.574891435861907,
+         "p_adjusted": 0.0201,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 5,
+         "test_years": 9
+        }
+       },
+       {
+        "family": "distribution_neural_ext",
+        "family_label": "Neural network, second stage (docs/54)",
+        "method": "drn_emos_residual",
+        "label": "Neural correction of EMOS (censored shifted gamma)",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -1.1203277073795668,
+         "years_better": 19,
+         "years": 24,
+         "holm_p": 0.01805,
+         "test_difference": -0.9969771528839468,
+         "p_adjusted": 0.01805,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 5,
+         "test_years": 9
+        }
        }
       ],
       "tie": {
        "margin": 0.01,
        "level": 19.34218640484381,
        "tolerance": 0.1934218640484381,
-       "best": "quantile_regression",
-       "best_gain": -1.0827405272293198,
+       "best": "drn_emos_residual",
+       "best_gain": -1.1203277073795668,
        "tied": [
         {
          "method": "emos_csg",
@@ -849,10 +915,22 @@
          "family": "distribution_neural",
          "gain": -1.082497570514728,
          "simplicity": 5
+        },
+        {
+         "method": "drn_sst",
+         "family": "distribution_neural_ext",
+         "gain": -0.998679634518135,
+         "simplicity": 5
+        },
+        {
+         "method": "drn_emos_residual",
+         "family": "distribution_neural_ext",
+         "gain": -1.1203277073795668,
+         "simplicity": 5
         }
        ]
       },
-      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -0.9815 over the training years (Benjamini–Hochberg p 0.00788; 18 of 24 years better), -0.55 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.6701. Tied within 1% of the published score (0.193 CRPS (mm)) with quantile_regression, drn_csg: the simplest is selected (practical tie rule; the largest gain was quantile_regression). Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Regularized quantile regression (distribution model); Distributional regression network (DRN), censored shifted gamma (distribution model (neural network))."
+      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -0.9815 over the training years (Benjamini–Hochberg p 0.00788; 18 of 24 years better), -0.55 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.6701. Tied within 1% of the published score (0.193 CRPS (mm)) with quantile_regression, drn_csg, drn_sst, drn_emos_residual: the simplest is selected (practical tie rule; the largest gain was drn_emos_residual). Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); Regularized quantile regression (distribution model); Distributional regression network (DRN), censored shifted gamma (distribution model (neural network)); DRN with SST indices and rainfall regions (distribution model (neural network)); Neural correction of EMOS (censored shifted gamma) (distribution model (neural network))."
      }
     },
     "JJAS": {

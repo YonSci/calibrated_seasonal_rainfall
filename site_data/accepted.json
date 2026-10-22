@@ -227,6 +227,354 @@
     ]
    },
    "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
+  },
+  "neural_ext/jan_fmam": {
+   "experiment": "drn-stage2-v1",
+   "sha256": "91b2a1a13315516a34d6b9496150b08144510daa19c524cf70f453c2a460cb9d",
+   "archive": "outputs/accepted/neural_ext/jan_fmam/91b2a1a13315516a",
+   "accepted_utc": "2026-10-22T09:59:19Z",
+   "note": "second stage: DRN with SST indices and EMI regions, regions-only control, neural correction of EMOS, forecast-only ablation, and the DRN, EMOS and quantile regression refitted on the same folds; CRPS scoring version 2. The folds were computed with the code of e4847a0; the final assembly of each cycle failed on a missing SCORING_VERSION constant and was completed from the checkpoints with the constant set (nothing refitted; code files unchanged, so the checkpoint keys matched)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-22T05:49:36.735396+00:00",
+   "commit": "97f5170ca2d920b6a25df3de0b40d7b7b0055913",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/jan_fmam_neural_ext.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "quantile_regression",
+    "drn_csg",
+    "drn_regions",
+    "drn_sst",
+    "drn_emos_residual",
+    "drn_forecast_only"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "quantile_regression": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_regions": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_sst": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_emos_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_forecast_only": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_ext/feb_fmam": {
+   "experiment": "drn-stage2-v1",
+   "sha256": "b71f0c6cef26640ac9b4d7422f22350696ab69454b0727d6962c25fec70ead48",
+   "archive": "outputs/accepted/neural_ext/feb_fmam/b71f0c6cef26640a",
+   "accepted_utc": "2026-10-22T09:59:19Z",
+   "note": "second stage: DRN with SST indices and EMI regions, regions-only control, neural correction of EMOS, forecast-only ablation, and the DRN, EMOS and quantile regression refitted on the same folds; CRPS scoring version 2. The folds were computed with the code of e4847a0; the final assembly of each cycle failed on a missing SCORING_VERSION constant and was completed from the checkpoints with the constant set (nothing refitted; code files unchanged, so the checkpoint keys matched)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-22T05:45:25.554582+00:00",
+   "commit": "97f5170ca2d920b6a25df3de0b40d7b7b0055913",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/feb_fmam_neural_ext.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "quantile_regression",
+    "drn_csg",
+    "drn_regions",
+    "drn_sst",
+    "drn_emos_residual",
+    "drn_forecast_only"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "quantile_regression": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_regions": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_sst": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_emos_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_forecast_only": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_ext/may_jjas": {
+   "experiment": "drn-stage2-v1",
+   "sha256": "9f774b55d5ae639c9d55ac7e993338fd94906917ab4d67dd416273468d8e6e0e",
+   "archive": "outputs/accepted/neural_ext/may_jjas/9f774b55d5ae639c",
+   "accepted_utc": "2026-10-22T09:59:19Z",
+   "note": "second stage: DRN with SST indices and EMI regions, regions-only control, neural correction of EMOS, forecast-only ablation, and the DRN, EMOS and quantile regression refitted on the same folds; CRPS scoring version 2. The folds were computed with the code of e4847a0; the final assembly of each cycle failed on a missing SCORING_VERSION constant and was completed from the checkpoints with the constant set (nothing refitted; code files unchanged, so the checkpoint keys matched)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-21T19:06:19.484834+00:00",
+   "commit": "97f5170ca2d920b6a25df3de0b40d7b7b0055913",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_neural_ext.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "quantile_regression",
+    "drn_csg",
+    "drn_regions",
+    "drn_sst",
+    "drn_emos_residual",
+    "drn_forecast_only"
+   ],
+   "targets": [
+    "Aug",
+    "JJAS",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "quantile_regression": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_regions": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_sst": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_emos_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_forecast_only": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_ext/sep_ondj": {
+   "experiment": "drn-stage2-v1",
+   "sha256": "ba502820c3dda44df2da3b0ec87a194a333a830bbc5a964b3f2f83376fda6608",
+   "archive": "outputs/accepted/neural_ext/sep_ondj/ba502820c3dda44d",
+   "accepted_utc": "2026-10-22T09:59:19Z",
+   "note": "second stage: DRN with SST indices and EMI regions, regions-only control, neural correction of EMOS, forecast-only ablation, and the DRN, EMOS and quantile regression refitted on the same folds; CRPS scoring version 2. The folds were computed with the code of e4847a0; the final assembly of each cycle failed on a missing SCORING_VERSION constant and was completed from the checkpoints with the constant set (nothing refitted; code files unchanged, so the checkpoint keys matched)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-21T18:40:45.016349+00:00",
+   "commit": "97f5170ca2d920b6a25df3de0b40d7b7b0055913",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/sep_ondj_neural_ext.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": 25,
+   "models": [
+    "emos_csg",
+    "quantile_regression",
+    "drn_csg",
+    "drn_regions",
+    "drn_sst",
+    "drn_emos_residual",
+    "drn_forecast_only"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "ONDJ",
+    "Oct"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "quantile_regression": [],
+    "drn_csg": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_regions": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_sst": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_emos_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_forecast_only": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_tuning/may_jjas": {
+   "experiment": "drn-tuning-v1",
+   "sha256": "701d6fcca35b3cc224bba9073f6e9da503b8d765a5bd4ad253a3875fc247ac08",
+   "archive": "outputs/accepted/neural_tuning/may_jjas/701d6fcca35b3cc2",
+   "accepted_utc": "2026-10-22T10:00:02Z",
+   "note": "separate tuning split (JJAS only, diagnostic): the configuration chosen by 3 inner folds of years with the input standardization refitted on each inner fitting subset; CRPS scoring version 2; assembly completed from the checkpoints (missing SCORING_VERSION constant)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-22T09:58:47.495503+00:00",
+   "commit": "97f5170ca2d920b6a25df3de0b40d7b7b0055913",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_neural_tuning.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_csg_tuned"
+   ],
+   "targets": [
+    "Aug",
+    "JJAS",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "drn_csg_tuned": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
   }
  },
  "status": [
@@ -273,25 +621,41 @@
   {
    "family": "neural_ext",
    "cycle": "jan_fmam",
-   "accepted": null,
+   "accepted": {
+    "experiment": "drn-stage2-v1",
+    "created_utc": "2026-10-22T05:49:36.735396+00:00",
+    "commit": "97f5170"
+   },
    "pending": null
   },
   {
    "family": "neural_ext",
    "cycle": "feb_fmam",
-   "accepted": null,
+   "accepted": {
+    "experiment": "drn-stage2-v1",
+    "created_utc": "2026-10-22T05:45:25.554582+00:00",
+    "commit": "97f5170"
+   },
    "pending": null
   },
   {
    "family": "neural_ext",
    "cycle": "may_jjas",
-   "accepted": null,
+   "accepted": {
+    "experiment": "drn-stage2-v1",
+    "created_utc": "2026-10-21T19:06:19.484834+00:00",
+    "commit": "97f5170"
+   },
    "pending": null
   },
   {
    "family": "neural_ext",
    "cycle": "sep_ondj",
-   "accepted": null,
+   "accepted": {
+    "experiment": "drn-stage2-v1",
+    "created_utc": "2026-10-21T18:40:45.016349+00:00",
+    "commit": "97f5170"
+   },
    "pending": null
   },
   {
@@ -333,7 +697,11 @@
   {
    "family": "neural_tuning",
    "cycle": "may_jjas",
-   "accepted": null,
+   "accepted": {
+    "experiment": "drn-tuning-v1",
+    "created_utc": "2026-10-22T09:58:47.495503+00:00",
+    "commit": "97f5170"
+   },
    "pending": null
   },
   {
