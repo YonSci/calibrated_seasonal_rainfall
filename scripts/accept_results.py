@@ -36,6 +36,7 @@ OUTPUTS = ROOT / 'outputs/probability_calibration'
 GATED = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning')
 CYCLES = ('jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj')
 TARGETS = 5
+TARGETS_OF = {'neural_pooled': 4}       # the pooled network serves the four months; the season is not pooled
 
 
 def sha256(p):
@@ -69,12 +70,12 @@ def describe(d):
                 members=cc.get('members'), models=d.get('models'), targets=sorted(d.get('targets', {})), searched=searched(d))
 
 
-def check(d, expect_models=None):
+def check(d, expect_models=None, targets=TARGETS):
     """Problems that keep a result from being accepted (empty: complete)."""
     bad = []
     info = describe(d)
-    if len(info['targets']) != TARGETS:
-        bad.append(f'{len(info["targets"])} targets, expected {TARGETS}')
+    if len(info['targets']) != targets:
+        bad.append(f'{len(info["targets"])} targets, expected {targets}')
     if info['training_years'] != [1993, 2016]:
         bad.append(f'training years {info["training_years"]}')
     if not info['test_years'] or info['test_years'][0] != 2017:
@@ -134,7 +135,8 @@ def status():
             pending = None
             if h and (not e or h != e['sha256']):
                 d = json.loads(cur.read_text(encoding='utf-8'))
-                pending = dict(created_utc=d.get('created_utc'), commit=(d.get('provenance') or {}).get('commit', '')[:7], problems=check(d))
+                pending = dict(created_utc=d.get('created_utc'), commit=(d.get('provenance') or {}).get('commit', '')[:7],
+                               problems=check(d, targets=TARGETS_OF.get(fam, TARGETS)))
             rows.append(dict(family=fam, cycle=c, accepted=e and dict(experiment=e['experiment'], created_utc=e['created_utc'],
                                                                       commit=(e['commit'] or '')[:7]), pending=pending))
     return rows
@@ -167,7 +169,7 @@ def accept(family, experiment, note='', from_release=False, rev='HEAD', code_com
                     raise SystemExit(f'{family}/{c}: no result in outputs/')
                 figs = {p.name: p.read_bytes() for p in sorted((f.parent / 'figures').glob('*.png'))}
             d = json.loads(f.read_text(encoding='utf-8'))
-            bad = check(d)
+            bad = check(d, targets=TARGETS_OF.get(family, TARGETS))
             if bad:
                 raise SystemExit(f'{family}/{c} is not complete, nothing accepted:\n  ' + '\n  '.join(bad))
             staged.append((c, f.read_bytes(), figs, d))

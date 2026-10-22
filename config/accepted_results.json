@@ -582,6 +582,178 @@
     ]
    },
    "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_pooled/jan_fmam": {
+   "experiment": "drn-pooled-v1",
+   "sha256": "c39e425c4ebe185a59ce03c7515f6579289ab378bd976a64e74360d26dc294fd",
+   "archive": "outputs/accepted/neural_pooled/jan_fmam/c39e425c4ebe185a",
+   "accepted_utc": "2026-10-22T15:53:15Z",
+   "note": "one network for the four months of a cycle (month position one-hot, whole years held out), against the published pipeline, with the per-target DRN and EMOS of the second stage as comparisons; CRPS scoring version 2. The JJAS run started 08:34 from the queue; the other three were restarted at 14:53 (the queue's loop had stopped) with the same, unchanged code; each assembly was completed from the checkpoints (missing SCORING_VERSION constant), nothing refitted",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-22T14:49:49.745790+00:00",
+   "commit": "0c1e62895bad4069c5052eb184628ef9e331c3f9",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/jan_fmam_neural_pooled.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_pooled/feb_fmam": {
+   "experiment": "drn-pooled-v1",
+   "sha256": "a274c7793d967b221fe77898e5c2801fa129b3e124b4447a7469b4d688a37bdc",
+   "archive": "outputs/accepted/neural_pooled/feb_fmam/a274c7793d967b22",
+   "accepted_utc": "2026-10-22T15:53:15Z",
+   "note": "one network for the four months of a cycle (month position one-hot, whole years held out), against the published pipeline, with the per-target DRN and EMOS of the second stage as comparisons; CRPS scoring version 2. The JJAS run started 08:34 from the queue; the other three were restarted at 14:53 (the queue's loop had stopped) with the same, unchanged code; each assembly was completed from the checkpoints (missing SCORING_VERSION constant), nothing refitted",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-22T15:52:39.917423+00:00",
+   "commit": "0c1e62895bad4069c5052eb184628ef9e331c3f9",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/feb_fmam_neural_pooled.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_pooled/may_jjas": {
+   "experiment": "drn-pooled-v1",
+   "sha256": "12e7b37fabbc732029f3de3f3ee78726d025b393445eb2400b1e1d4910419a26",
+   "archive": "outputs/accepted/neural_pooled/may_jjas/12e7b37fabbc7320",
+   "accepted_utc": "2026-10-22T15:53:15Z",
+   "note": "one network for the four months of a cycle (month position one-hot, whole years held out), against the published pipeline, with the per-target DRN and EMOS of the second stage as comparisons; CRPS scoring version 2. The JJAS run started 08:34 from the queue; the other three were restarted at 14:53 (the queue's loop had stopped) with the same, unchanged code; each assembly was completed from the checkpoints (missing SCORING_VERSION constant), nothing refitted",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-22T10:16:01.515426+00:00",
+   "commit": "0c1e62895bad4069c5052eb184628ef9e331c3f9",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_neural_pooled.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled"
+   ],
+   "targets": [
+    "Aug",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "neural_pooled/sep_ondj": {
+   "experiment": "drn-pooled-v1",
+   "sha256": "7251f7297010b6be95e323caed5f631474c65fcea6341f148cc04ae3bd8ffab0",
+   "archive": "outputs/accepted/neural_pooled/sep_ondj/7251f7297010b6be",
+   "accepted_utc": "2026-10-22T15:53:15Z",
+   "note": "one network for the four months of a cycle (month position one-hot, whole years held out), against the published pipeline, with the per-target DRN and EMOS of the second stage as comparisons; CRPS scoring version 2. The JJAS run started 08:34 from the queue; the other three were restarted at 14:53 (the queue's loop had stopped) with the same, unchanged code; each assembly was completed from the checkpoints (missing SCORING_VERSION constant), nothing refitted",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-22T14:52:04.637992+00:00",
+   "commit": "0c1e62895bad4069c5052eb184628ef9e331c3f9",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/sep_ondj_neural_pooled.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "Oct"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
   }
  }
 }

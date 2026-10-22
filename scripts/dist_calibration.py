@@ -20,6 +20,7 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.special import expit, gammainc, gammaincinv, gammaln
 
+SCORING_VERSION = 2                  # CRPS rule: 1 = one uniform 400-point grid; 2 = split at the observation, closed form for CSG
 FLOOR = 1e-6
 
 
