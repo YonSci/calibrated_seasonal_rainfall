@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-22 10:06 UTC",
- "code_commit": "81ad0fd",
- "release": "2026-10-22.0",
+ "built_utc": "2026-10-22 15:58 UTC",
+ "code_commit": "497f081",
+ "release": "2026-10-22.1",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -1175,7 +1175,7 @@
   {
    "id": "2026-10-22.0",
    "date": "2026-10-22",
-   "commit": null,
+   "commit": "0c1e628",
    "title": "Neural network, second stage: SST inputs and a neural correction of EMOS",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -1187,6 +1187,24 @@
     {
      "type": "analysis",
      "text": "Neural network second stage for the four cycles (corrected CRPS): the DRN with SEAS5 SST indices and EMI rainfall regions, a regions-only control, a neural correction of EMOS, and the DRN, EMOS and quantile regression refitted on the same folds. The neural correction of EMOS is confirmed for FMAM-February February (probabilities and amounts) and JJAS September amounts, the SST network for JJAS September amounts; the SST indices add no consistent signal over 1993–2016. Method selection: a new candidate for FMAM-February February amounts (the neural correction of EMOS); JJAS September stays EMOS under the tie rule. A separate tuning split (JJAS, diagnostic) does not change the conclusions. The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-22.1",
+   "date": "2026-10-22",
+   "commit": null,
+   "title": "Neural network pooled over the months of a cycle",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "One neural network for the four months of a cycle (pooled DRN, corrected CRPS): amounts CRPSS +0.035 over 1993–2016 and +0.029 over 2017+ against +0.007 and +0.000 for the published ensemble, probabilities on par with the published ones (RPSS +0.023 against +0.020), lower CRPS than the per-target network for 13 of 16 months. Confirmed for FMAM-January March, April and May and JJAS June and September amounts, where it becomes the selected candidate. It cannot be validated before a pooled shadow forecast exists. The published forecasts are unchanged."
     }
    ]
   }
