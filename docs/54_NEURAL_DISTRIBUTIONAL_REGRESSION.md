@@ -249,7 +249,36 @@ targets (the method selection: Benjamini–Hochberg); comparisons with the per-t
 If the pooled DRN becomes a candidate, its shadow needs a pooled fit as well: not yet implemented (`dist_shadow.py` skips
 it with a message), so it could not collect validation seasons until then.
 
-Config: `config/probability_calibration/<cycle>_neural_pooled.json`; results `.../neural_pooled/`. Results: pending.
+Config: `config/probability_calibration/<cycle>_neural_pooled.json`; results `.../neural_pooled/`. After the review (3f) the
+comparisons read the per-target DRN and EMOS of the second stage (same folds, same corrected CRPS).
+
+### Results (`drn-pooled-v1`, accepted 2026-10-22; 16 month targets, CRPS scoring version 2)
+
+| Mean over the 16 months | Pooled DRN | Published |
+| --- | --- | --- |
+| Amounts, CRPSS 1993–2016 | +0.035 | +0.007 (MVS ensemble) |
+| Amounts, CRPSS 2017+ | +0.029 | +0.000 |
+| Coverage of the 10–90% range, 1993–2016 (nominal 80%) | 81% | 65% |
+| Probabilities, RPSS 1993–2016 | +0.023 | +0.020 |
+| Probabilities, RPSS 2017+ | +0.023 | +0.022 |
+
+- **The strongest neural result.** Pooling the four months gives each network four times the samples from the same years;
+  the pooled DRN has a lower CRPS than the per-target DRN for 13 of 16 months and than EMOS for 14 of 16 (1993–2016).
+- **Confirmed better than the published amounts** (Benjamini–Hochberg, not worse over the test years) for FMAM-January
+  March, April and May and JJAS June and September. Its probabilities match the published ones on average (+0.023 against
+  +0.020 over 1993–2016) — the first neural model to do so — but none is confirmed.
+- Part of the amount gain is over a weak reference: the MVS ensemble's amounts are worse than climatology for many months
+  (JJAS June CRPSS −0.096); the pooled DRN is close to or above climatology everywhere except ONDJ January.
+- The stronger weight decay was chosen for FMAM and JJAS (32–16 units for FMAM-January and JJAS, 32 for FMAM-February), the
+  weaker for ONDJ (32 units).
+- **Method selection:** the pooled DRN is the selected candidate for FMAM-January March, April and May amounts (none before)
+  and JJAS June and September amounts (−1.73 and −1.29 mm over 1993–2016; for September EMOS is now more than 1% behind,
+  and of the tied neural candidates the pooled DRN has the larger gain).
+- **It cannot be validated yet:** its shadow forecast needs a pooled fit, not yet implemented (`dist_shadow.py` skips it). Until
+  that exists the pooled candidates cannot collect the three independent seasons a recommendation needs; it is the next step.
+- Production note: the JJAS run started from the queue (code of e4847a0); the other three cycles were restarted after the
+  queue's loop stopped, with the same unchanged code; each assembly was completed from the checkpoints (missing
+  `SCORING_VERSION` constant), nothing refitted.
 
 ## 3e. A separate tuning split (`tuning='separate'`)
 
