@@ -20,7 +20,7 @@ const cycles = names('neural').map((n) => ({ name: n, d: read(`neural/${n}.json`
   .sort((a, b) => INIT[a.name.split('_')[0]] - INIT[b.name.split('_')[0]]);
 const SHORT = { incumbent: 'Published probabilities', mvs_ensemble: 'MVS ensemble (published amounts)', emos_csg: 'EMOS',
   drn_csg: 'DRN', drn_linear_csg: 'Linear control', drn_climatology: 'No-forecast ablation', drn_forecast_only: 'Forecast-only ablation',
-  drn_sst: 'DRN + SST', drn_emos_residual: 'Neural EMOS correction', drn_pooled: 'Pooled DRN', drn_csg_tuned: 'DRN, separate tuning' };
+  drn_sst: 'DRN + SST', drn_regions: 'DRN + regions (no SST)', quantile_regression: 'Quantile regression', drn_emos_residual: 'Neural EMOS correction', drn_pooled: 'Pooled DRN', drn_csg_tuned: 'DRN, separate tuning' };
 
 // The method selection's decision (docs/50): Benjamini–Hochberg across the decision model's targets, per score
 function bhDecisions(d, score) {
@@ -336,10 +336,12 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
         <p class="caveat">Download: {d.downloads.map((f) => <a href={link(f)}>benchmark.json</a>)} (with the fitted network weights).</p>
         {x && (
           <>
-            <h3 id={`${name}-second`}>Second stage: SST inputs, a neural correction of EMOS, the forecast-only ablation</h3>
+            <h3 id={`${name}-second`}>Second stage: SST inputs, a neural correction of EMOS, controls</h3>
             <p><strong>Confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(x, 'bh').join('; ') || 'none'}.
             In the benchmark as run (Holm): {confirmedList(x, 'holm').join('; ') || 'none'}. Candidates: the DRN with SST indices and rainfall regions, and the
-            neural correction of EMOS (two candidates per target and score).</p>
+            neural correction of EMOS (two candidates per target and score). Controls in the same folds and with the same scoring rule
+            (corrected CRPS): the DRN with the regions but no SST (so DRN + SST against it is the value of the SST indices alone), the DRN,
+            EMOS and quantile regression refitted, and the forecast-only ablation.</p>
             <Table {...testTable(x, 'crps', 'drn_sst')} />
             <Table {...testTable(x, 'crps', 'drn_emos_residual')} />
             <Table {...testTable(x, 'rps', 'drn_sst')} />

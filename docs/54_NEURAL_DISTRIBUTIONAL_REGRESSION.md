@@ -196,13 +196,42 @@ candidates, so their test family is separate from the first stage's:
 | `drn_forecast_only` — ablation | diagnostic | The network on the ensemble summaries only (no climatology, location or indices): the mirror of the no-forecast ablation. |
 | `emos_csg` | diagnostic | EMOS in the same folds. |
 
-The plain DRN is not refitted: the comparisons read its per-year scores from the first benchmark (same folds, years, members
-and seeds; `external_models`, with that file's SHA-256 and commit recorded). Comparisons: DRN + SST against the DRN (the value
+After the review (3f) the second stage also refits the plain DRN, EMOS and quantile regression on the same folds, so that every
+comparison uses one scoring rule (CRPS scoring version 2), and adds a regions-only DRN (`drn_regions`), so that `drn_sst`
+against `drn_regions` is the value of the SST indices alone. Comparisons: DRN + SST against the DRN (the value
 of the indices and regions), the neural correction against EMOS and against the DRN, the DRN against the forecast-only
 ablation (the value of the local context). Both candidates also have amount shadows when selected (`amount_shadow.json`:
 25 members; the SST indices and regions of the forecast year for `drn_sst`).
 
-Results: pending (the benchmark runs after the first stage has been rerun with the weight-decay search).
+### Results (`drn-stage2-v1`, accepted 2026-10-22; CRPS scoring version 2)
+
+| Mean over the 20 targets | Published | EMOS | QR | DRN | DRN + regions | DRN + SST | Neural correction of EMOS | Forecast only |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Amounts, CRPSS 1993–2016 | +0.009 | +0.024 | +0.024 | +0.024 | +0.026 | +0.021 | +0.025 | +0.016 |
+| Amounts, CRPSS 2017+ | +0.011 | +0.024 | +0.025 | +0.015 | +0.012 | +0.022 | +0.025 | +0.012 |
+| Probabilities, RPSS 1993–2016 | +0.022 | −0.003 | −0.008 | +0.014 | +0.015 | +0.017 | +0.011 | −0.002 |
+| Probabilities, RPSS 2017+ | +0.028 | +0.008 | −0.006 | +0.017 | +0.010 | +0.015 | +0.019 | +0.003 |
+
+- **Confirmed better than the published approach** (Benjamini–Hochberg within this benchmark's two candidates × 5 targets,
+  per score, not worse over the test years): the **neural correction of EMOS** for FMAM-February February, both
+  **probabilities** and amounts, and for JJAS September amounts; **DRN + SST** for JJAS September amounts. The correction of
+  EMOS is the first neural model confirmed for tercile probabilities.
+- **The SST indices do not add a consistent signal:** DRN + SST has a lower CRPS than the regions-only DRN for only 9 of 20
+  targets over 1993–2016 (mean CRPSS +0.021 against +0.026), though it does better over the test years (+0.022 against
+  +0.012), notably in ONDJ (November and the season), where strong Indian Ocean years fall in 2017–2025.
+- **The neural correction of EMOS** is lower in CRPS than EMOS for 10 of 20 targets: small corrections, sometimes useful,
+  consistent with a penalized network that starts at EMOS.
+- **Local context matters:** the forecast-only ablation is clearly weaker (CRPSS +0.016), as the no-forecast ablation was.
+- **The corrected CRPS** changes the DRN's scores by a few hundredths of a percent (ONDJ: +0.02% to +0.06%); for JJAS
+  September the DRN (−1.0800 mm) and quantile regression (−1.0795 mm) remain practically identical.
+- **Method selection** (practical tie rule): FMAM-February February amounts now have a candidate, the neural correction of
+  EMOS (−0.36 mm over 1993–2016, −0.24 mm over the test years); for February probabilities square-root MVS keeps the larger
+  gain (−0.037 against −0.031 RPS); for JJAS September the correction has the largest gain (−1.12 mm), but EMOS (−0.98 mm) is
+  within 1% of the published CRPS, so the simplest, EMOS, stays selected. Each needs three validation seasons (shadow forecasts
+  from 2027).
+- Production note: the folds ran with the code of e4847a0; the final assembly of each cycle failed on a missing
+  `SCORING_VERSION` constant (the staging patch skipped it) and was completed from the checkpoints with the constant set,
+  nothing refitted (recorded in `config/accepted_results.json`).
 
 ## 3d. One network for the months of a cycle (`scripts/pooled_benchmark.py`)
 
@@ -230,7 +259,12 @@ With `tuning='separate'` the configuration is chosen by three inner folds of the
 scored by a network trained on the other years, early-stopped on a further 20% of them; then the three seeds of the chosen
 configuration are trained as usual. `drn_csg_tuned` is the DRN with this procedure, run as a **diagnostic** on JJAS
 (`config/probability_calibration/may_jjas_neural_tuning.json`, not a candidate): the comparison with the DRN shows whether
-the tuning procedure matters. Results: pending.
+the tuning procedure matters.
+
+Results (`drn-tuning-v1`, JJAS): the separately tuned DRN differs from the DRN by −0.03 to +0.12 mm in CRPS over 1993–2016
+(better for August and September, worse for June, July and the season), chose the stronger weight decay (10⁻³) for all five
+targets, and has the same pattern of skill (CRPSS −0.008 to +0.017). The tuning procedure does not change the conclusions;
+with fewer years for fitting, a separate tuning split costs about as much as it gains.
 
 ## 3f. Review follow-ups (20 October 2026)
 

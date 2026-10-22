@@ -144,13 +144,14 @@ def _git_bytes(rev_path):
     return subprocess.run(['git', 'show', rev_path], cwd=ROOT, capture_output=True, check=True).stdout
 
 
-def accept(family, experiment, note='', from_release=False, rev='HEAD', code_commit=None):
+def accept(family, experiment, note='', from_release=False, rev='HEAD', code_commit=None, cycles=None):
     """Accept the whole batch of a family (every cycle) or nothing. from_release: the files the site published at `rev`
     (site_data download links and site/assets figures), for results whose outputs/ copy was overwritten by a rerun."""
     reg = load()
     staged = []
+    cycles = cycles or CYCLES             # a diagnostic designed for fewer cycles (e.g. the JJAS tuning split) names them explicitly
     with tempfile.TemporaryDirectory() as tmp:
-        for c in CYCLES:
+        for c in cycles:
             if from_release:
                 meta = json.loads(_git_bytes(f'{rev}:site_data/{family}/{c}.json'))
                 url = (meta.get('downloads') or [None])[0]
@@ -197,6 +198,7 @@ def main():
     a.add_argument('--note', default='')
     a.add_argument('--from-release', action='store_true')
     a.add_argument('--rev', default='HEAD')
+    a.add_argument('--cycles', nargs='+', choices=CYCLES, help='only for an experiment designed for fewer cycles (default: all four)')
     a.add_argument('--code-commit', help='the commit whose code produced the results, when the recorded commits are end-of-run HEADs '
                    'and the benchmark code is verified identical between them')
     x = ap.parse_args()
@@ -207,7 +209,7 @@ def main():
                 f' INCOMPLETE: {"; ".join(r["pending"]["problems"])}' if r['pending']['problems'] else ' complete')
             print(f'{r["family"]:14} {r["cycle"]:9} accepted: {acc or "none"}' + (f' | {pen}' if pen else ''))
     else:
-        accept(x.family, x.experiment, x.note, x.from_release, x.rev, x.code_commit)
+        accept(x.family, x.experiment, x.note, x.from_release, x.rev, x.code_commit, x.cycles)
 
 
 if __name__ == '__main__':
