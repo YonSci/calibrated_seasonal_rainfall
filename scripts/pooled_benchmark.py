@@ -84,6 +84,7 @@ def context(config_path):
         glat, glon = np.meshgrid(lat, lon, indexing='ij')
         mvs = cfg['methods'].get(pcfg['reference_amount_method'], {})
         ctx['t'][t] = dict(tag=tag, models=models, obs=obs, area_all=area_all, idx=idx, area_e=area_all[idx],
+                           nbhd=db.neighbourhood_matrices(idx, len(lon)) if pcfg.get('neighbourhood') else None,
                            coords=(glat.ravel()[idx], glon.ravel()[idx]),
                            regions={k: bb.load_mask(v, lat, lon)[idx] for k, v in cfg['regions'].items()},
                            rec=Records(pcfg['reference_amount_method'], mvs, models, obs, train, cfg['smoothing_alpha']), mvs=mvs)
@@ -95,14 +96,16 @@ def onehot(i, n):
     return {f'target_{j + 1}': np.full(n, float(j == i)) for j in range(4)}
 
 
-def pooled_samples(ctx, T):
-    """The four months' training samples over the years T, pooled, with the month position and the row's year."""
+def pooled_samples(ctx, T, extra=None):
+    """The four months' training samples over the years T, pooled, with the month position and the row's year; extra:
+    {input: value} constant over the cycle (the all-cycles network's cycle one-hot)."""
     parts, stats = [], {}
     for i, t in enumerate(ctx['months']):
         c = ctx['t'][t]
-        S, st = db.fold(c['models'], c['obs'], T, c['idx'], c['area_e'], coords=c['coords'])
+        S, st = db.fold(c['models'], c['obs'], T, c['idx'], c['area_e'], coords=c['coords'], nbhd=c.get('nbhd'))
         n = len(S['y'])
         S.update(onehot(i, n), year_index=np.repeat(np.arange(len(T)), int(st['valid'].sum())))
+        S.update({k: np.full(n, float(v)) for k, v in (extra or {}).items()})
         parts.append(S)
         stats[t] = st
     keys = [k for k in parts[0] if k not in ('n_years', 'members', 'thresholds')]
@@ -114,19 +117,31 @@ def pooled_samples(ctx, T):
 def run_design(config_path, design, y):
     """One outer fold (design 'training', left-out year y) or the test design (y None): per month, its score records."""
     ctx = context(config_path)
-    pcfg, cfg, train, test = ctx['pcfg'], ctx['cfg'], ctx['train'], ctx['test']
+    pcfg, train = ctx['pcfg'], ctx['train']
     T = [z for z in train if z != y] if design == 'training' else train
-    scored = [y] if design == 'training' else test
     S, stats = pooled_samples(ctx, T)
     models = {}
     for k in pcfg['models']:
         m = dc.MODELS[k]
         models[k] = m.fit(S, **{**m.defaults, **pcfg.get('parameters', {}).get(k, {})})
+    out = score_cycle(ctx, models, stats, T, design, y)
+    fitted = {k: {kk: vv for kk, vv in v.items() if kk in ('hidden', 'decay', 'steps', 'validation_crps', 'tuning', 'training')}
+              for k, v in models.items()} if design == 'test' else None
+    return design, y, out, fitted
+
+
+def score_cycle(ctx, models, stats, T, design, y, extra=None):
+    """Score every month of a cycle for one fold: the references (published probabilities, MVS ensemble) and the fitted models,
+    with their predictions and fold statistics when the configuration saves predictions. extra: inputs constant over the cycle."""
+    pcfg, cfg, train, test = ctx['pcfg'], ctx['cfg'], ctx['train'], ctx['test']
+    scored = [y] if design == 'training' else test
+    save = bool(pcfg.get('save_predictions'))
     out = {}
     for i, t in enumerate(ctx['months']):
         c, st = ctx['t'][t], stats[t]
-        store = {k: {} for k in pcfg['models'] + ['incumbent', 'mvs_ensemble']}
-        rel = {k: {} for k in pcfg['models'] + ['incumbent']}
+        store = {k: {} for k in list(models) + ['incumbent', 'mvs_ensemble']}
+        rel = {k: {} for k in list(models) + ['incumbent']}
+        pred, cstat = {k: {} for k in models}, {}
         primary = c['regions'][cfg['primary_region']]
         if design == 'training':
             inner = [c['rec'].get(frozenset((y, z)), [y, z])[1] for z in T]
@@ -138,6 +153,8 @@ def run_design(config_path, design, y):
         O = np.stack([c['obs'][z][c['idx']] for z in T])
         for yy, outer_record in zip(scored, outer):
             y_obs = c['obs'][yy][c['idx']]
+            if save:
+                cstat[yy] = db.stats_record(st, y_obs)
             ycat = categories(y_obs, st['q1'], st['q2'])
             rmask = primary & st['prob_ok'] & st['valid'] & np.isfinite(y_obs)
             p_inc = pc.predict(lam_fit, outer_record)[c['idx']]
@@ -150,17 +167,21 @@ def run_design(config_path, design, y):
             db.score_year(yy, None, np.where(ok, bb.ensemble_crps(e0, np.nan_to_num(y_obs)), np.nan),
                           {tau: np.quantile(e0, tau, axis=0) for tau in LEVELS}, st, y_obs, c['area_e'], c['regions'], store['mvs_ensemble'])
             F = dc.features(c['models'][yy][:, c['idx']], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *c['coords'])
-            F.update(onehot(i, len(c['idx'])))
+            n = len(c['idx'])
+            F.update(onehot(i, n))
+            F.update({k: np.full(n, float(v)) for k, v in (extra or {}).items()})
+            if c.get('nbhd'):
+                F.update(db.add_neighbourhood(F, c['nbhd']))
             for k, model in models.items():
                 d = dc.MODELS[k].predict(F, model)
                 p = d.terciles(st['q1'], st['q2'])
-                db.score_year(yy, p, d.crps(np.nan_to_num(y_obs)), {tau: d.quantile(np.full(len(c['idx']), tau)) for tau in LEVELS},
+                db.score_year(yy, p, d.crps(np.nan_to_num(y_obs)), {tau: d.quantile(np.full(n, tau)) for tau in LEVELS},
                               st, y_obs, c['area_e'], c['regions'], store[k])
                 db.reliability_add(rel[k], p, ycat, rmask, c['area_e'])
-        out[t] = dict(store=store, reliability=rel)
-    fitted = {k: {kk: vv for kk, vv in v.items() if kk in ('hidden', 'decay', 'steps', 'validation_crps', 'tuning')}
-              for k, v in models.items()} if design == 'test' else None
-    return design, y, out, fitted
+                if save:
+                    pred[k][yy] = d
+        out[t] = dict(store=store, reliability=rel, **(dict(pred=pred, ctx=cstat) if save else {}))
+    return out
 
 
 def merge(parts, months, keys):
@@ -184,6 +205,14 @@ def merge(parts, months, keys):
         rel = {k: {d: {c: {q: v.tolist() for q, v in a.items()} for c, a in r.items()} for d, r in dd.items()} for k, dd in rel.items()}
         fitted = next((f for (design, _), (_, f) in parts.items() if design == 'test'), None)
         results[t] = dict(methods=db.summarise(store), reliability=rel, fitted=fitted or {})
+        if all('pred' in out[t] for out, _ in parts.values()):          # saved predictions: {model: {design: {year: d}}}
+            pred = {k: {'training': {}, 'test': {}} for k in keys if k not in ('incumbent', 'mvs_ensemble')}
+            ctx = {'training': {}, 'test': {}}
+            for (design, _), (out, _) in parts.items():
+                for k, by_year in out[t]['pred'].items():
+                    pred[k][design].update(by_year)
+                ctx[design].update(out[t]['ctx'])
+            results[t]['_saved'] = dict(predictions=pred, context=ctx, scoring_version=dc.SCORING_VERSION)
     return results
 
 
@@ -233,6 +262,12 @@ def main(args):
                 raise RuntimeError('Folds failed (completed folds are checkpointed): ' + '; '.join(failed))
     keys = pcfg['models'] + ['incumbent', 'mvs_ensemble']
     results = merge(parts, months, keys)
+    if pcfg.get('save_predictions'):                         # per month: <output_root>/predictions/<month>.pkl
+        ctx = context(args.config)
+        for t in months:
+            saved = results[t].pop('_saved')
+            saved.update(area_e=ctx['t'][t]['area_e'].astype(np.float32), regions=ctx['t'][t]['regions'])
+            db.save_predictions(out_root, t, saved)
     region = cfg['primary_region']
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=pcfg, protocol=__doc__.strip(),
                 provenance=db.provenance(cfg, project, months, pcfg, dep, start, {m: key for m in months}, args.config),

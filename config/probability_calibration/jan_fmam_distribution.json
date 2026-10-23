@@ -12,5 +12,7 @@
       "l2": 0.0001
     }
   },
+  "members": 25,
+  "save_predictions": true,
   "output_root": "outputs/probability_calibration/jan_fmam/distribution"
 }

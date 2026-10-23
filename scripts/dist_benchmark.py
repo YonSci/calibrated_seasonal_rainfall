@@ -70,7 +70,42 @@ def pinball(q, y, tau):
     return np.where(r >= 0, tau * r, (tau - 1) * r)
 
 
-def fold(models, obs, T, idx, area_e, valid_min=1.0, coords=None, extra=None):
+# Neighbourhood inputs (drn_pooled_nbhd): means of ensemble summaries over the national cells around each cell, from the
+# fold's own relative features (so no information from outside the fold); 3x3 and 5x5 windows on the 0.25-degree grid.
+NBHD = {'m_nb3': ('m', 1), 's_nb3': ('s', 1), 'q50_nb3': ('q50', 1), 'm_nb5': ('m', 2)}
+
+
+def neighbourhood_matrices(idx, nlon):
+    """{radius: sparse (n x n) matrix} with 1 where cell j (national) is within the radius of cell i, itself included."""
+    from scipy.sparse import csr_matrix
+    pos = {int(c): i for i, c in enumerate(idx)}
+    r, c = np.divmod(np.asarray(idx), nlon)
+    out = {}
+    for R in sorted({v[1] for v in NBHD.values()}):
+        rows, cols = [], []
+        for i, (ri, ci) in enumerate(zip(r, c)):
+            for dr in range(-R, R + 1):
+                for dc_ in range(-R, R + 1):
+                    j = pos.get(int((ri + dr) * nlon + ci + dc_)) if 0 <= ci + dc_ < nlon else None
+                    if j is not None:
+                        rows.append(i)
+                        cols.append(j)
+        out[R] = csr_matrix((np.ones(len(rows)), (rows, cols)), shape=(len(idx), len(idx)))
+    return out
+
+
+def add_neighbourhood(F, mats):
+    """The neighbourhood inputs of one year's features F (valid cells only; a cell without valid neighbours keeps its own value)."""
+    valid = np.asarray(F['valid'], bool).astype(float)
+    out = {}
+    for name, (src, R) in NBHD.items():
+        v = np.nan_to_num(np.asarray(F[src], float)) * valid
+        num, den = mats[R] @ v, mats[R] @ valid
+        out[name] = np.where(den > 0, num / np.where(den > 0, den, 1), np.asarray(F[src], float))
+    return out
+
+
+def fold(models, obs, T, idx, area_e, valid_min=1.0, coords=None, extra=None, nbhd=None):
     """Training samples (relative units) and per-cell statistics from the training years T, on the national cells idx;
     coords: (latitude, longitude) of those cells (location predictors of the DRN, docs/54); extra: {input: {year: per-cell
     array}} of further inputs (sst_indices.extra_inputs)."""
@@ -84,11 +119,13 @@ def fold(models, obs, T, idx, area_e, valid_min=1.0, coords=None, extra=None):
     thr = np.quantile(O, dc.THRESHOLD_LEVELS, axis=0).T / np.where(valid, mu_o, 1)[:, None]
     cv = np.where(valid, O.std(0) / np.where(valid, mu_o, 1), 0.)
     M = max(models[z].shape[0] for z in T)
-    keys = ('m', 's', 'md', 'q10', 'q50', 'q90', 'logmu', 'cv', 'lat', 'lon') + tuple(extra or {})
+    keys = ('m', 's', 'md', 'q10', 'q50', 'q90', 'logmu', 'cv', 'lat', 'lon') + tuple(extra or {}) + (tuple(NBHD) if nbhd else ())
     S = {k: [] for k in ('y', 'w', 'thresholds', 'members') + keys}
     for z in T:
         F = dc.features(models[z][:, idx], mu_o, mu_m, valid, cv, lat_c, lon_c)
         F.update({k: v[z] for k, v in (extra or {}).items()})
+        if nbhd:
+            F.update(add_neighbourhood(F, nbhd))
         w = np.where(valid, area_e, 0.)
         S['y'].append(np.where(valid, obs[z][idx] / np.where(valid, mu_o, 1), 0)[valid])
         for k in keys:
@@ -156,7 +193,11 @@ def run_target(config_path, target):
         extra = sst_indices.extra_inputs(pcfg['extra_inputs'], bb.target_config(project, target), sorted(set(train + test)),
                                          lat, lon, idx)
     area_e = area_all[idx]
+    nbhd = neighbourhood_matrices(idx, len(lon)) if pcfg.get('neighbourhood') else None
     regions = {k: bb.load_mask(v, lat, lon)[idx] for k, v in cfg['regions'].items()}
+    save = bool(pcfg.get('save_predictions'))                 # every fold's predicted distributions, for rescoring and stacking
+    preds = {k: {'training': {}, 'test': {}} for k in pcfg['models']} if save else None
+    context = {'training': {}, 'test': {}} if save else None
     rec = Records(pcfg['reference_amount_method'], cfg['methods'].get(pcfg['reference_amount_method'], {}), models, obs, train,
                   cfg['smoothing_alpha'])
     keys = pcfg['models']
@@ -166,8 +207,10 @@ def run_target(config_path, target):
     primary = regions[cfg['primary_region']]
 
     def evaluate(design, y, T, inner_records, outer_record, fitted=None):
-        S, st = fold(models, obs, T, idx, area_e, coords=coords, extra=extra)
+        S, st = fold(models, obs, T, idx, area_e, coords=coords, extra=extra, nbhd=nbhd)
         y_obs = obs[y][idx]
+        if save:
+            context[design][y] = stats_record(st, y_obs)
         lam_fit = pc.fit(pc.INCUMBENT, inner_records, area_all)               # incumbent: blend weight from inner years
         p_inc = pc.predict(lam_fit, outer_record)[idx]
         score_year(y, p_inc, None, None, st, y_obs, area_e, regions, store['incumbent'][design])
@@ -183,6 +226,8 @@ def run_target(config_path, target):
         score_year(y, None, crps_ens, quant, st, y_obs, area_e, regions, store['mvs_ensemble'][design])
         F = dc.features(models[y][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords)
         F.update({k: v[y] for k, v in (extra or {}).items()})
+        if nbhd:
+            F.update(add_neighbourhood(F, nbhd))
         for k in keys:
             m = dc.MODELS[k]
             model = (fitted or {}).get(k) or m.fit(S, **{**m.defaults, **pcfg.get('parameters', {}).get(k, {})})
@@ -196,6 +241,8 @@ def run_target(config_path, target):
             crps = d.crps(np.nan_to_num(y_obs))
             q = {tau: d.quantile(np.full(len(idx), tau)) for tau in LEVELS}
             score_year(y, p, crps, q, st, y_obs, area_e, regions, store[k][design])
+            if save:
+                preds[k][design][y] = d
             if rel is not None:
                 reliability_add(rel[k][design], p, categories(y_obs, st['q1'], st['q2']), rmask, area_e)
     for y in train:                                         # outer leave-one-year-out
@@ -211,9 +258,29 @@ def run_target(config_path, target):
     fitted = {k: {kk: vv for kk, vv in v.items() if not kk.startswith('_')} for k, v in fitted.items()}   # no forests
     rel = None if rel is None else {k: {d: {c: {q: v.tolist() for q, v in a.items()} for c, a in r.items()} for d, r in dd.items()}
                                     for k, dd in rel.items()}
+    saved = dict(predictions=preds, context=context, area_e=area_e.astype(np.float32), regions=regions,
+                 scoring_version=dc.SCORING_VERSION) if save else None
     return target, dict(tag=tag, methods=summary, fitted=fitted, **({'reliability': rel} if rel is not None else {}),
+                        **({'_saved': saved} if saved is not None else {}),
                         diagnostics={k: dict(mean_crossing_share=float(np.mean(v['crossings'])) if v['crossings'] else None,
                                              all_converged=bool(all(v['converged']))) for k, v in diag.items()})
+
+
+def stats_record(st, y_obs):
+    """What score_year needs from a fold besides the prediction (float32), and the observation of the scored year."""
+    f32 = lambda a: np.asarray(a, np.float32)
+    return dict(q1=f32(st['q1']), q2=f32(st['q2']), valid=np.asarray(st['valid'], bool), prob_ok=np.asarray(st['prob_ok'], bool),
+                O=f32(st['O']), p_clim=f32(st['p_clim']), y_obs=f32(y_obs))
+
+
+def save_predictions(out_root, target, saved):
+    """<output_root>/predictions/<target>.pkl: {predictions: {model: {design: {year: Distribution}}}, context: {design: {year:
+    stats}}, area_e, regions, scoring_version}. Rescoring (scripts/rescore.py) and stacking (scripts/stack_benchmark.py) read it."""
+    import pickle
+    f = out_root / 'predictions' / f'{target}.pkl'
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_bytes(pickle.dumps(saved, protocol=pickle.HIGHEST_PROTOCOL))
+    return f
 
 
 def reliability_add(acc, p, y_cat, mask, area):
@@ -374,6 +441,10 @@ def main(args):
             if failed:
                 raise RuntimeError('Targets failed (completed targets are checkpointed): ' + '; '.join(failed))
     results = {t: results[t] for t in targets}
+    for t in targets:                                        # saved predictions go to their own files, not into the JSON
+        saved = results[t].pop('_saved', None)
+        if saved is not None:
+            save_predictions(out_root, t, saved)
     model_keys = pcfg['models']
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=pcfg, protocol=__doc__.strip(),
                 provenance=provenance(cfg, project, targets, pcfg, dep, start, keys, args.config),

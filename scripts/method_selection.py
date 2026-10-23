@@ -36,11 +36,14 @@ FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'proba
                 'probability_phase2_binary': 'Probability stage, Phase 2 binary calibrators', 'distribution_phase2': 'Distribution model, Phase 2',
                 'distribution_phase3': 'Distribution model, Phase 3', 'leung_dirichlet': 'Two-stage calibration (docs/51)', 'mos': 'Statistical downscaling (docs/53)',
                 'distribution_neural': 'Neural network (docs/54)', 'distribution_neural_ext': 'Neural network, second stage (docs/54)',
-                'distribution_neural_pooled': 'Neural network, pooled over the months (docs/54)'}
+                'distribution_neural_pooled': 'Neural network, pooled over the months (docs/54)',
+                'distribution_neural_pooled2': 'Neural network, pooled, with EMOS or neighbourhood inputs (docs/54)',
+                'distribution_neural_all': 'Neural network, pooled over all cycles (docs/54)',
+                'distribution_stacking': 'Model combination: EMOS, quantile regression and the DRN (docs/54)'}
 # Simplicity order of the practical tie rule (rule 'tie_rule'): fewer and more interpretable parameters first
 SIMPLICITY = {'bias_correction': 1, 'probability_phase1': 1, 'probability_phase2_binary': 1, 'distribution_phase2': 2,
               'distribution_phase3': 4, 'leung_dirichlet': 4, 'mos': 4, 'distribution_neural': 5, 'distribution_neural_ext': 5,
-              'distribution_neural_pooled': 5}
+              'distribution_neural_pooled': 5, 'distribution_neural_pooled2': 5, 'distribution_neural_all': 5, 'distribution_stacking': 5}
 SIMPLER_METHOD = {'emos_csg': 2, 'quantile_regression': 3, 'extended_logistic': 3}     # within the Phase 2 distribution models
 
 
@@ -51,7 +54,8 @@ def simplicity(c):
 STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probability stage', 'probability_phase2_binary': 'probability stage',
          'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration', 'mos': 'statistical downscaling',
          'distribution_neural': 'distribution model (neural network)', 'distribution_neural_ext': 'distribution model (neural network)',
-         'distribution_neural_pooled': 'distribution model (neural network)'}
+         'distribution_neural_pooled': 'distribution model (neural network)', 'distribution_neural_pooled2': 'distribution model (neural network)',
+         'distribution_neural_all': 'distribution model (neural network)', 'distribution_stacking': 'distribution model (combination)'}
 
 
 def read(p):
@@ -223,10 +227,12 @@ def main():
     cycles = []
     for cy in CYCLES:
         base = f'outputs/probability_calibration/{cy}'
-        p1, p2b, d2, d3 = read(f'{base}/benchmark.json'), read(f'{base}/phase2_binary/benchmark.json'), read(f'{base}/distribution/benchmark.json'), read(f'{base}/phase3/benchmark.json')
+        p1, p2b = read(f'{base}/benchmark.json'), read(f'{base}/phase2_binary/benchmark.json')
+        d2, d3 = (accept_results.read_accepted(f, cy) for f in ('distribution', 'phase3'))   # accepted results only
         # neural network (docs/54), accepted results only (scripts/accept_results.py): its decision models; the second stage
         # (SST inputs, neural correction of EMOS); one network for the months of the cycle
         dn, dx, dp = (accept_results.read_accepted(f, cy) for f in ('neural', 'neural_ext', 'neural_pooled'))
+        dp2, dall, dst = (accept_results.read_accepted(f, cy) for f in ('neural_pooled2', 'neural_all', 'stacking'))
         ld = read(f'outputs/leung_dirichlet/{cy}/benchmark.json')
         mos = read(f'outputs/mos/{cy}/benchmark.json')
         rec = recs.get(cy)
@@ -247,7 +253,8 @@ def main():
                     if p2b:
                         cands += confirmed(p2b, 'probability_phase2_binary', t, 'rps', [m for m in p2b['methods'] if m != p2b['incumbent']], lambda k: p2b['registry'][k]['name'])
                 for fam, d in (('distribution_phase2', d2), ('distribution_phase3', d3), ('distribution_neural', dn),
-                               ('distribution_neural_ext', dx), ('distribution_neural_pooled', dp)):
+                               ('distribution_neural_ext', dx), ('distribution_neural_pooled', dp),
+                               ('distribution_neural_pooled2', dp2), ('distribution_neural_all', dall), ('distribution_stacking', dst)):
                     if d:
                         cands += confirmed(d, fam, t, score, d['models'], lambda k, d=d: d['registry'][k]['name'],
                                            reference='incumbent' if score == 'rps' else 'mvs_ensemble')

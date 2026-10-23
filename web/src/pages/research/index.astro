@@ -46,10 +46,10 @@ const findings = Object.fromEntries(PRODUCTS.map((p) => {
 const share = (a, b) => (b ? `${a} of ${b}` : '—');
 const PLURAL = { 'Bias correction': 'bias corrections', 'Probability calibration': 'probability calibrations',
   'Rainfall-distribution model': 'rainfall-distribution models', 'Two-stage calibration': 'two-stage calibrations',
-  'Statistical downscaling': 'statistical downscaling methods', 'Neural network': 'neural networks' };
+  'Statistical downscaling': 'statistical downscaling methods', 'Neural network': 'neural networks', 'Model combination': 'model combinations' };
 const SINGULAR = { 'Bias correction': 'bias correction', 'Probability calibration': 'probability calibration',
   'Rainfall-distribution model': 'rainfall-distribution model', 'Two-stage calibration': 'two-stage calibration',
-  'Statistical downscaling': 'statistical downscaling method', 'Neural network': 'neural network' };
+  'Statistical downscaling': 'statistical downscaling method', 'Neural network': 'neural network', 'Model combination': 'model combination' };
 // More statistical power (method_summary.py): pooled evidence over all targets and 1993-2025, Holm and Benjamini-Hochberg
 const pooledRows = (product) => (SUMMARY?.rows ?? []).filter((r) => r.product === product && r.pooled)
   .sort((a, b) => b.pooled.skill_gain - a.pooled.skill_gain);
@@ -211,7 +211,7 @@ const PAGES = [
         <details class="mc-group" open={cat === 'Bias correction' ? undefined : true}>
           <summary><strong>{cat}</strong> <span class="caveat">({EV.categories[cat]} method{EV.categories[cat] > 1 ? 's' : ''})</span></summary>
           <div class="mc-grid">
-            {[...new Set(EV.rows.filter((r) => r.category === cat).map((r) => r.method))].map((m) => <EvidenceCard method={m} link={({ 'Statistical downscaling': 'research/downscaling/', 'Neural network': 'research/neural-network/', 'Two-stage calibration': 'research/leung-dirichlet/', 'Bias correction': 'bias-correction/', 'Probability calibration': 'probability-calibration/', 'Rainfall-distribution model': 'probability-calibration/' })[cat]} compact showCategory={false} />)}
+            {[...new Set(EV.rows.filter((r) => r.category === cat).map((r) => r.method))].map((m) => <EvidenceCard method={m} link={({ 'Statistical downscaling': 'research/downscaling/', 'Neural network': 'research/neural-network/', 'Model combination': 'research/neural-network/', 'Two-stage calibration': 'research/leung-dirichlet/', 'Bias correction': 'bias-correction/', 'Probability calibration': 'probability-calibration/', 'Rainfall-distribution model': 'probability-calibration/' })[cat]} compact showCategory={false} />)}
           </div>
         </details>
       ))}

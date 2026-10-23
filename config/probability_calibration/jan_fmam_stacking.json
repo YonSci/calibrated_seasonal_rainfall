@@ -1,0 +1,37 @@
+{
+  "description": "Equal-weight linear pool of EMOS, quantile regression and the DRN, January-initialized FMAM (scripts/stack_benchmark.py, docs/54 section 3g).",
+  "benchmark_config": "config/bias_correction/jan_fmam.json",
+  "members": {
+    "months": [
+      [
+        "distribution",
+        "emos_csg"
+      ],
+      [
+        "distribution",
+        "quantile_regression"
+      ],
+      [
+        "neural_pooled2",
+        "drn_pooled"
+      ]
+    ],
+    "season": [
+      [
+        "distribution",
+        "emos_csg"
+      ],
+      [
+        "distribution",
+        "quantile_regression"
+      ],
+      [
+        "neural",
+        "drn_csg"
+      ]
+    ]
+  },
+  "output_root": "outputs/probability_calibration/jan_fmam/stacking",
+  "phase": 4,
+  "note": "The members are read from their accepted runs' saved predictions (scripts/predictions.py): Phase 2 for EMOS and quantile regression, the pooled network (refitted in neural_pooled2) for the months, the stage-1 DRN for the season."
+}

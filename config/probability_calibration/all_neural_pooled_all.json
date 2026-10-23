@@ -1,0 +1,35 @@
+{
+  "description": "One DRN for the 16 months of the four cycles, with the month position and the cycle as inputs (scripts/pooled_all_benchmark.py, docs/54 section 3g).",
+  "cycles": [
+    "config/probability_calibration/jan_fmam_neural_pooled.json",
+    "config/probability_calibration/feb_fmam_neural_pooled.json",
+    "config/probability_calibration/may_jjas_neural_pooled.json",
+    "config/probability_calibration/sep_ondj_neural_pooled.json"
+  ],
+  "models": [
+    "drn_pooled_all"
+  ],
+  "decision_models": [
+    "drn_pooled_all"
+  ],
+  "comparisons": [
+    [
+      "drn_pooled_all",
+      "drn_pooled"
+    ],
+    [
+      "drn_pooled_all",
+      "emos_csg"
+    ]
+  ],
+  "external_models": {
+    "drn_pooled": "outputs/probability_calibration/{name}/neural_pooled2/benchmark.json",
+    "emos_csg": "outputs/probability_calibration/{name}/neural_ext/benchmark.json"
+  },
+  "members": 25,
+  "save_predictions": true,
+  "output_root": "outputs/probability_calibration/all/neural_all",
+  "cycle_output": "outputs/probability_calibration/{name}/neural_all",
+  "phase": 4,
+  "external_note": "The pooled DRN of each cycle is read from neural_pooled2 (refitted with scoring version 2 and the same folds); EMOS from neural_ext. Run neural_pooled2 first."
+}

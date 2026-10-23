@@ -465,6 +465,30 @@ def _drn_predict(F, model):
     return neural_calibration.predict(F, model)
 
 
+class Pool(Distribution):
+    """Equal-weight linear pool of predictive distributions (stacking, docs/54 3g): F = mean of the members' CDFs; quantiles by
+    bisection; the CRPS by the split rule of Distribution.crps (scoring version 2)."""
+
+    def __init__(self, members, weights=None):
+        m0 = members[0]
+        super().__init__(m0.scale, np.logical_and.reduce([m.valid for m in members]))
+        self.members = list(members)
+        self.weights = np.full(len(members), 1 / len(members)) if weights is None else np.asarray(weights, float) / np.sum(weights)
+
+    def cdf(self, x):
+        return np.sum([w * np.clip(m.cdf(x), 0, 1) for w, m in zip(self.weights, self.members)], axis=0)
+
+    def quantile(self, u, iterations=60):
+        u = np.clip(np.asarray(u, float), FLOOR, 1 - FLOOR)
+        hi = np.max([np.nan_to_num(m.quantile(u), nan=0.) for m in self.members], axis=0) * 1.0001 + 1e-9
+        lo = np.zeros_like(hi)
+        for _ in range(iterations):
+            mid = (lo + hi) / 2
+            below = self.cdf(mid) < u
+            lo, hi = np.where(below, mid, lo), np.where(below, hi, mid)
+        return np.where(self.cdf(np.zeros_like(u)) >= u, 0., hi)
+
+
 @dataclass(frozen=True)
 class Model:
     key: str
@@ -534,6 +558,21 @@ MODELS = {m.key: m for m in [
           "the DRN inputs and the month's position in the season (one-hot)",
           'one network for the four months (pooled_benchmark.py), otherwise as the DRN', ('Rasp & Lerch 2018',),
           defaults=dict(inputs='pooled')),
+    Model('drn_pooled_residual', 'Neural correction of EMOS pooled over the months of a cycle', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "the pooled DRN inputs; each month's own EMOS (mean and mean absolute difference) as the base",
+          'one network for the four months (pooled_benchmark.py) added to the EMOS of each month, starting at zero, with a penalty on '
+          'the correction', ('Scheuerer & Hamill 2015', 'Rasp & Lerch 2018'), defaults=dict(inputs='pooled', residual='emos')),
+    Model('drn_pooled_nbhd', 'DRN pooled over the months, with neighbourhood inputs', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "the pooled DRN inputs and 3x3 / 5x5 neighbourhood means of the ensemble summaries",
+          'one network for the four months (pooled_benchmark.py), otherwise as the DRN', ('Rasp & Lerch 2018',),
+          defaults=dict(inputs='pooled_nbhd')),
+    Model('drn_pooled_all', 'DRN pooled over the months of all four cycles', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "the pooled DRN inputs and the cycle (one-hot)",
+          'one network for the 16 months of the four cycles (pooled_all_benchmark.py), otherwise as the DRN', ('Rasp & Lerch 2018',),
+          defaults=dict(inputs='pooled_all')),
     Model('drn_csg_tuned', 'DRN with a separate tuning split (diagnostic)', _drn_fit, _drn_predict,
           'rainfall distribution with a probability of zero (mixture of 3 seeds)', 'the DRN inputs',
           'configuration chosen by 3 inner folds of years, apart from the early-stopping years', ('Rasp & Lerch 2018',),

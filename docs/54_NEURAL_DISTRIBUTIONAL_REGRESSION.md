@@ -249,7 +249,9 @@ targets (the method selection: Benjamini–Hochberg); comparisons with the per-t
 Its shadow forecast (`dist_shadow.py`, since 2026-10-23) fits the pooled network once per cycle on the four months of the
 reference years, as the benchmark's final fit, and forecasts each month with its own position; the season total has no
 pooled shadow. The fingerprint covers the four months' inputs, and the fit stops if a cycle orders its months differently
-from the benchmark (the month inputs would change meaning).
+from the benchmark (the month inputs would change meaning). **Cost:** the pooled fit is the benchmark's final fit (four
+months' samples, three seeds, the configuration search), so the pooled shadow adds about one hour per cycle at each issue on
+the project laptop; it is made once per cycle and model, and reused for the four months.
 
 Config: `config/probability_calibration/<cycle>_neural_pooled.json`; results `.../neural_pooled/`. After the review (3f) the
 comparisons read the per-target DRN and EMOS of the second stage (same folds, same corrected CRPS).
@@ -339,8 +341,59 @@ December of its September initialization) and keeps the season total as its own 
 input standardization on each inner fitting subset; the relative units (division by the fold's training means) and the
 climatology inputs still come from all training years of the outer fold, so this experiment stays a diagnostic.
 
-**Still open.** Saving fold-level predictions so a future scoring change needs no refit; a shadow-forecast path for the pooled
+**Still open** (at the review). Saving fold-level predictions so a future scoring change needs no refit; a shadow-forecast path for the pooled
 network before it could be validated; the practical tie rule (a decision). Translations need review by fluent speakers.
+Since then: the pooled shadow (3d, 2026-10-23), the tie rule (a 1% margin, adopted 2026-10-20) and saved predictions (3g);
+the translations still await review.
+
+## 3g. Third stage: four new models, reruns on one scoring rule, saved predictions
+
+**Four new models** (each its own benchmark family, so a new family does not dilute the Benjamini–Hochberg adjustment of
+the earlier ones; every model uses the first 25 members and CRPS scoring version 2):
+
+- **`drn_pooled_residual`: the pooled network correcting EMOS.** As the neural correction of EMOS of the second stage (3c),
+  the best second-stage model for FMAM-February February, but on the pooled samples of the four months. The base is an
+  EMOS fitted *per month* inside each seed's fitting years (`neural_calibration.groups_of` reads the month from the one-hot
+  inputs), so each month keeps its own linear model and the network learns a shared correction. A zero correction is the
+  month's EMOS exactly.
+- **`drn_pooled_nbhd`: the pooled DRN with neighbourhood inputs.** Four more inputs: the means of the relative ensemble mean,
+  spread and median over the 3×3 cells around each cell, and of the mean over the 5×5 cells
+  (`dist_benchmark.neighbourhood_matrices` and `add_neighbourhood`; national cells with valid data only, no wrap-around at
+  the grid's edge). They come from the fold's own relative features, so no information from outside the fold enters. A cheap
+  step towards the patch CNN of section 5: spatial context without a convolutional network.
+- **`drn_pooled_all`: one network for the 16 months of the four cycles** (`scripts/pooled_all_benchmark.py`), with the
+  month's position and the cycle as one-hot inputs. The left-out year is removed from every cycle at once; each cycle's months
+  are scored with that cycle's references in the same fold, and the results are written per cycle
+  (`<cycle>/neural_all/benchmark.json`), so the selection treats them as one more family per cycle. Sixteen times the samples
+  of a per-target network, from the same years. It has no shadow until it is confirmed for a target (one fit would serve four
+  cycles issued months apart).
+- **Stacking: the equal-weight linear pool** F = (F_EMOS + F_QR + F_DRN) / 3 (`scripts/stack_benchmark.py`,
+  `dist_calibration.Pool`; Gneiting & Ranjan 2013). For the months the DRN is the pooled DRN, for the season the per-target
+  DRN. Nothing is fitted: the members' saved predictions (below) of the same folds are averaged and scored with the folds'
+  own statistics; the members must share the years and observations. Equal weights, because estimated weights would need
+  another inner split of very few years. A linear pool is never worse than the average of its members in CRPS (the score
+  is convex in F), but can be worse than the best member; its ranges are wider than the members'.
+
+The pooled DRN is refitted in the `neural_pooled2` run as the control of the first two (same folds, same scoring), and
+`drn_pooled_all` and stacking compare with that refit.
+
+**Reruns on scoring version 2 with 25 members.** The Phase 2 (EMOS, extended logistic, quantile regression) and Phase 3
+(BJP, BMA, quantile regression forests) results were produced with scoring version 1 and all available members (25 before
+2017, 51 after), and the stage-1 DRN with version 1. They are rerun with the first 25 members in every year (the 2027
+policy, as the neural runs) and scoring version 2, so every distribution model is compared under one rule; two documented
+changes: ensemble size and CRPS rule. Phase 2 and Phase 3 results enter the method selection, the summary and the site only
+when accepted (`accept_results.py`; `phase2-v1` and `phase3-v1` are the results until now).
+
+**Saved predictions.** With `"save_predictions": true`, `dist_benchmark.py`, `pooled_benchmark.py` and
+`pooled_all_benchmark.py` write `<output_root>/predictions/<target>.pkl`: every fold's predicted distribution per model and
+year, the fold's statistics needed to score it (tercile bounds, valid cells, climatology terms; float32) and the observation.
+`scripts/predictions.py` loads them (only if the benchmark next to them is the accepted one) and rescores them with the
+current rule (`python scripts/predictions.py rescore --family neural --cycle may_jjas`): a future scoring change needs no
+refit, and stacking needs no refit of its members.
+
+**Order of the runs** (about three to four days on the project laptop, two queues): Phase 2 → Phase 3 → stage-1 DRN (with
+saved predictions); `neural_pooled2` → `drn_pooled_all`; then stacking, which reads the accepted Phase 2, `neural_pooled2` and
+stage-1 predictions.
 
 ## 4. Running
 
@@ -350,11 +403,22 @@ About two hours per cycle with five workers (15 networks per fold: 6 for the DRN
 control). Checkpoints per target in `outputs/probability_calibration/<cycle>/neural/parts/`. JAX was tried first for the
 gradients: its incomplete gamma function made one step 0.7 s, against about 20 ms with SciPy and the derivatives above.
 
+    python scripts/pooled_benchmark.py --config config/probability_calibration/<cycle>_neural_pooled2.json --workers 5
+    python scripts/pooled_all_benchmark.py --config config/probability_calibration/all_neural_pooled_all.json --workers 5
+    python scripts/stack_benchmark.py --config config/probability_calibration/<cycle>_stacking.json
+    python scripts/accept_results.py accept <family> --experiment <name>          # then the selection and the site
+
+At each issue the shadow forecasts of the selected candidates (`dist_shadow.py`, run by `run_operational.py`) add about one
+hour per cycle for the pooled network (one fit, four months) and about 5–15 minutes per target for each per-target network.
+
 ## 5. Possible next steps
 
 Following the order recommended for this project: if the DRN improves on EMOS, test why (inputs, depth, a regularized
 correction of the EMOS parameters); then pool the monthly targets with the target month and lead as inputs; then add
 spatial context with a small patch CNN on the surrounding SEAS5 fields; then run the chosen network as a shadow forecast.
+Done so far: the inputs and the correction of EMOS (3c), pooling (3d, 3g), shadows (3b, 3d) and neighbourhood means as a
+first spatial context (3g). Next, depending on the third stage: the patch CNN if the neighbourhood inputs help; weights for the
+pool estimated over the cycles if equal weights help.
 
 ## References
 

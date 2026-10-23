@@ -1,0 +1,42 @@
+{
+  "description": "The pooled DRN of the four months with a neural correction of EMOS (EMOS fitted per month) and with neighbourhood inputs, September-initialized ONDJ (scripts/pooled_benchmark.py, docs/54 section 3g).",
+  "benchmark_config": "config/bias_correction/sep_ondj.json",
+  "reference_amount_method": "mvs",
+  "models": [
+    "drn_pooled",
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+  ],
+  "decision_models": [
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+  ],
+  "comparisons": [
+    [
+      "drn_pooled_residual",
+      "drn_pooled"
+    ],
+    [
+      "drn_pooled_nbhd",
+      "drn_pooled"
+    ],
+    [
+      "drn_pooled_residual",
+      "emos_csg"
+    ],
+    [
+      "drn_pooled_nbhd",
+      "emos_csg"
+    ]
+  ],
+  "external_models": {
+    "emos_csg": "outputs/probability_calibration/{name}/neural_ext/benchmark.json"
+  },
+  "members": 25,
+  "neighbourhood": true,
+  "save_predictions": true,
+  "reliability": true,
+  "output_root": "outputs/probability_calibration/sep_ondj/neural_pooled2",
+  "phase": 4,
+  "external_note": "EMOS is read from the second stage (neural_ext), which fits it on the same folds and scores it with the same rule (scoring version 2); the pooled DRN is refitted here as the control."
+}

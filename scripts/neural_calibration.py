@@ -41,6 +41,9 @@ INPUTS = {'full': ('m', 'q50', 's', 'md', 'q10', 'q90', 'logmu', 'cv', 'lat', 'l
                        *(f'region_{i}' for i in range(1, 9)))}
 INPUTS['full_regions'] = INPUTS['full'] + tuple(f'region_{i}' for i in range(1, 9))   # drn_regions: regions, no SST
 INPUTS['pooled'] = INPUTS['full'] + tuple(f'target_{i}' for i in range(1, 5))   # drn_pooled: position of the month
+NBHD = ('m_nb3', 's_nb3', 'q50_nb3', 'm_nb5')         # neighbourhood means of ensemble summaries (dist_benchmark.add_neighbourhood)
+INPUTS['pooled_nbhd'] = INPUTS['pooled'] + NBHD       # drn_pooled_nbhd: the pooled DRN with neighbourhood inputs
+INPUTS['pooled_all'] = INPUTS['pooled'] + tuple(f'cycle_{i}' for i in range(1, 5))   # drn_pooled_all: also the cycle
 OUT_PENALTY = 0.01                    # drn_emos_residual: penalty on the mean squared correction of EMOS's predictors
 TUNING_FOLDS = 3                      # tuning='separate': inner folds of years that choose the configuration
 SEEDS = (0, 1, 2)
@@ -202,11 +205,26 @@ def _thinned(S):
     return (np.round((lat - lat.min()) / 0.25) % THIN == 0) & (np.round((lon - lon.min()) / 0.25) % THIN == 0)
 
 
-def emos_base(theta, m, md):
-    """EMOS's linear predictors of mu, sigma and delta (dist_calibration.emos_fit) per row."""
-    th = np.asarray(theta, float)
+def emos_base(theta, m, md, group=None):
+    """EMOS's linear predictors of mu, sigma and delta (dist_calibration.emos_fit) per row. theta: one parameter vector, or
+    {group: vector} with each row's group (pooled samples: the month), so each month has its own EMOS."""
     m, md = np.nan_to_num(np.asarray(m, float)), np.nan_to_num(np.asarray(md, float))
+    if isinstance(theta, dict):
+        out = np.zeros((len(m), 3))
+        for g, th in theta.items():
+            r = np.asarray(group) == int(g)
+            out[r] = emos_base(th, m[r], md[r])
+        return out
+    th = np.asarray(theta, float)
     return np.column_stack([th[0] + th[1] * m, th[2] + th[3] * md, np.full(len(m), th[4])])
+
+
+def groups_of(D):
+    """The month group of each row of pooled samples or features (target_1..4 one-hot), or None."""
+    cols = [f'target_{i}' for i in range(1, 5)]
+    if not all(c in D for c in cols):
+        return None
+    return np.argmax(np.column_stack([np.asarray(D[c], float) for c in cols]), 1)
 
 
 def fit(S, inputs='full', configs=None, seeds=SEEDS, residual=None, out_penalty=OUT_PENALTY, tuning='early_stopping', **_):
@@ -255,8 +273,15 @@ def fit(S, inputs='full', configs=None, seeds=SEEDS, residual=None, out_penalty=
             if residual == 'emos':
                 from dist_calibration import emos_fit
                 tr = ~np.isin(year, held)
-                theta = emos_fit({k: np.asarray(S[k])[tr] for k in ('y', 'm', 'md', 'w')})['theta']
-                base = emos_base(theta, S['m'], S['md'])
+                grp = groups_of(S)
+                if grp is None:
+                    theta = emos_fit({k: np.asarray(S[k])[tr] for k in ('y', 'm', 'md', 'w')})['theta']
+                else:                                            # pooled samples: an EMOS per month (each month's own base)
+                    theta = {}
+                    for g in np.unique(grp):
+                        r = tr & (grp == g)
+                        theta[int(g)] = list(emos_fit({k: np.asarray(S[k])[r] for k in ('y', 'm', 'md', 'w')})['theta'])
+                base = emos_base(theta, S['m'], S['md'], grp)
             rep = {}
             p, s, steps = _train(X, y, w, rows & ~vrows, rows & vrows, hidden, decay, seed, base,
                                  out_penalty if residual else 0., report=rep)
@@ -270,7 +295,8 @@ def fit(S, inputs='full', configs=None, seeds=SEEDS, residual=None, out_penalty=
         configs = all_configs
     return dict(inputs=list(names), norm=norm, hidden=hidden, decay=decay, tuning=tuning,
                 members=[dict(params=[[W.tolist(), b.tolist()] for W, b in r['params']], steps=r['steps'], seed=r['seed'],
-                              **({'emos': list(r['emos'])} if r['emos'] is not None else {})) for r in runs[best]],
+                              **({'emos': (r['emos'] if isinstance(r['emos'], dict) else list(r['emos']))}
+                                 if r['emos'] is not None else {})) for r in runs[best]],
                 residual=residual,
                 validation_crps={f'{configs[c][0]}|{configs[c][1]}': v for c, v in score.items()},
                 steps=[r['steps'] for r in runs[best]],
@@ -312,7 +338,10 @@ def predict(F, model):
     X = np.nan_to_num(X)
     parts = []
     for m in model['members']:
-        base = emos_base(m['emos'], F['m'], F['md']) if m.get('emos') is not None else None
+        emos = m.get('emos')
+        if isinstance(emos, dict):                               # JSON keys are strings
+            emos = {int(g): th for g, th in emos.items()}
+        base = emos_base(emos, F['m'], F['md'], groups_of(F)) if emos is not None else None
         mu, sg, de = _forward([[np.asarray(W), np.asarray(b)] for W, b in m['params']], X, base=base)
         parts.append(((mu / sg) ** 2, sg ** 2 / mu, de))
     return CSGMixture(parts, F['scale'], F['valid'])

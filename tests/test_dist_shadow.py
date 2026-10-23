@@ -48,5 +48,25 @@ class PooledShadow(unittest.TestCase):
         self.assertGreaterEqual(checked, 4)
 
 
+class ThirdStageShadows(unittest.TestCase):
+    def test_new_candidates_have_a_shadow_path(self):
+        import dist_calibration as dc
+        scfg = read('config/probability_calibration/amount_shadow.json')
+        for m in ('drn_pooled_residual', 'drn_pooled_nbhd'):
+            self.assertIn(m, ds.POOLED)
+            self.assertEqual(scfg['members'].get(m), 25)
+        self.assertIn('drn_pooled_nbhd', ds.NEIGHBOURHOOD)
+        self.assertIn('drn_pooled_all', ds.NO_SHADOW)             # not until confirmed
+        self.assertEqual(scfg['members'].get('stack'), 25)
+
+    def test_stack_members_match_the_stacking_benchmark(self):
+        import dist_calibration as dc
+        st = read('config/probability_calibration/may_jjas_stacking.json')['members']
+        self.assertEqual(ds.STACK['months'], tuple(m for _, m in st['months']))
+        self.assertEqual(ds.STACK['season'], tuple(m for _, m in st['season']))
+        self.assertTrue(all(m in dc.MODELS for m in ds.STACK['months'] + ds.STACK['season']))
+        self.assertIn('drn_pooled', ds.POOLED)
+
+
 if __name__ == '__main__':
     unittest.main()

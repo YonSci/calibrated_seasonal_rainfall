@@ -71,6 +71,7 @@ SHADOW_CONFIG = 'config/probability_calibration/amount_shadow.json'
 
 
 def load_all():
+    import accept_results                                          # Phase 2/3 distribution models: accepted results only
     out = []
     for p in OUT.glob('*/benchmark.json'):
         d = json.loads(p.read_text(encoding='utf-8'))
@@ -78,8 +79,9 @@ def load_all():
         project = json.loads((ROOT / bench['project_config']).read_text(encoding='utf-8'))
         extra = {}
         for key, sub in (('binary', 'phase2_binary'), ('distribution', 'distribution'), ('phase3', 'phase3')):   # later phases, when run
-            f = p.parent / sub / 'benchmark.json'
-            extra[key] = json.loads(f.read_text(encoding='utf-8')) if f.is_file() else None
+            got = accept_results.resolve(sub, p.parent.name)
+            extra[key] = json.loads(got[0].read_text(encoding='utf-8')) if got else None
+            extra[f'{key}_files'] = got
         extra['shadow'] = {}                                   # amount/range shadow: {year: {target: record}}
         shadow_model = json.loads((ROOT / SHADOW_CONFIG).read_text(encoding='utf-8'))['model']   # the configured model (EMOS)
         for f in sorted(p.parent.glob(f'amount_shadow/*/{shadow_model}__*.json')):
@@ -96,9 +98,10 @@ def export(out_dir):
         dest = out_dir / 'assets/probcal' / b['name']
         if (b['folder'] / 'figures').is_dir():
             shutil.copytree(b['folder'] / 'figures', dest, dirs_exist_ok=True)
-        for sub in ('phase2_binary', 'distribution', 'phase3'):
-            if (b['folder'] / sub / 'figures').is_dir():
-                shutil.copytree(b['folder'] / sub / 'figures', dest / sub, dirs_exist_ok=True)
+        for key, sub in (('binary', 'phase2_binary'), ('distribution', 'distribution'), ('phase3', 'phase3')):
+            got = b[f'{key}_files']
+            if got and got[1].is_dir():
+                shutil.copytree(got[1], dest / sub, dirs_exist_ok=True)
         files = []
         for year, rows in b['shadow'].items():                 # shadow maps and NetCDF files
             for t, r in rows.items():
@@ -111,14 +114,14 @@ def export(out_dir):
                         if ext == 'nc':
                             files.append((f'downloads/probcal/{b["name"]}/amount_shadow/{year}/{src.name}',
                                           f'Shadow amounts and ranges, {t} {year} (NetCDF; not a published forecast)', d.stat().st_size))
-        for rel, label in (('benchmark.json', 'Phase 1: all scores, per-year values, tests and fitted parameters (JSON)'),
-                           ('phase2_binary/benchmark.json', 'Phase 2, binary calibrators (JSON)'),
-                           ('distribution/benchmark.json', 'Phase 2, rainfall-distribution models (JSON)'),
-                           ('phase3/benchmark.json', 'Phase 3, rainfall-distribution models (JSON)')):
-            if (b['folder'] / rel).is_file():
+        for rel, label, src in (('benchmark.json', 'Phase 1: all scores, per-year values, tests and fitted parameters (JSON)', b['folder'] / 'benchmark.json'),
+                                ('phase2_binary/benchmark.json', 'Phase 2, binary calibrators (JSON)', (b['binary_files'] or [None])[0]),
+                                ('distribution/benchmark.json', 'Phase 2, rainfall-distribution models (JSON)', (b['distribution_files'] or [None])[0]),
+                                ('phase3/benchmark.json', 'Phase 3, rainfall-distribution models (JSON)', (b['phase3_files'] or [None])[0])):
+            if src is not None and src.is_file():
                 d = out_dir / 'downloads/probcal' / b['name'] / rel
                 d.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(b['folder'] / rel, d)
+                shutil.copy2(src, d)
                 files.append((f'downloads/probcal/{b["name"]}/{rel}', label, d.stat().st_size))
         blocks.append((b['name'], block(b, files)))
     export_leung_dirichlet(out_dir)
@@ -127,10 +130,13 @@ def export(out_dir):
     return blocks
 
 
+NEURAL_FAMILIES = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'stacking')
+
+
 def export_neural(out_dir):
     """Neural distributional regression (docs/54): figures to assets/, results to downloads/."""
     import accept_results                                          # only accepted results (config/accepted_results.json)
-    for sub in ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning'):   # the DRN, its second stage, pooled, tuning
+    for sub in NEURAL_FAMILIES:                                    # the DRN, its second stage, pooled, tuning, new models
         for name in accept_results.CYCLES:
             got = accept_results.resolve(sub, name)
             if not got:

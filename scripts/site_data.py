@@ -228,7 +228,8 @@ def export(site, page_data, built, sha, release_id, releases, sections):
         sizes[f'mos/{name}.json'] = write(OUT / 'mos' / f'{name}.json', obj)
     for name, obj in leung_dirichlet_files(site).items():
         sizes[f'leung_dirichlet/{name}.json'] = write(OUT / 'leung_dirichlet' / f'{name}.json', obj)
-    for sub in ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning'):
+    import site_prob
+    for sub in site_prob.NEURAL_FAMILIES:
         for name, obj in neural_files(site, sub).items():
             sizes[f'{sub}/{name}.json'] = write(OUT / sub / f'{name}.json', obj)
     import accept_results                                          # accepted and pending experiments (the neural page's panel)

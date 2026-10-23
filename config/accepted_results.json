@@ -754,6 +754,334 @@
     ]
    },
    "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
+  },
+  "distribution/jan_fmam": {
+   "experiment": "phase2-v1",
+   "sha256": "b50420857edc41a7d8a787025cbb60f8d985e71e60c499dc9e78c5a987bdecea",
+   "archive": "outputs/accepted/distribution/jan_fmam/b50420857edc41a7",
+   "accepted_utc": "2026-10-23T17:07:43Z",
+   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T12:11:37.151891+00:00",
+   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/jan_fmam_distribution.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": null,
+   "models": [
+    "emos_csg",
+    "extended_logistic",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "extended_logistic": [],
+    "quantile_regression": []
+   },
+   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+  },
+  "distribution/feb_fmam": {
+   "experiment": "phase2-v1",
+   "sha256": "df083f0fab76060f3179521d0221ce357adaf7b1ec331ba94dccae6f1f49bb3f",
+   "archive": "outputs/accepted/distribution/feb_fmam/df083f0fab76060f",
+   "accepted_utc": "2026-10-23T17:07:43Z",
+   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T12:44:52.216106+00:00",
+   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/feb_fmam_distribution.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": null,
+   "models": [
+    "emos_csg",
+    "extended_logistic",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "extended_logistic": [],
+    "quantile_regression": []
+   },
+   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+  },
+  "distribution/may_jjas": {
+   "experiment": "phase2-v1",
+   "sha256": "8900f806db831dcd7bc148520496a501412b85274da87ce625c4a5f1ce9fd60c",
+   "archive": "outputs/accepted/distribution/may_jjas/8900f806db831dcd",
+   "accepted_utc": "2026-10-23T17:07:43Z",
+   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T13:13:52.259626+00:00",
+   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_distribution.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": null,
+   "models": [
+    "emos_csg",
+    "extended_logistic",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Aug",
+    "JJAS",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "extended_logistic": [],
+    "quantile_regression": []
+   },
+   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+  },
+  "distribution/sep_ondj": {
+   "experiment": "phase2-v1",
+   "sha256": "7510e973bdbacde6a3969aba62c1e62a6a4e93c0e109265a86c3063da10d5144",
+   "archive": "outputs/accepted/distribution/sep_ondj/7510e973bdbacde6",
+   "accepted_utc": "2026-10-23T17:07:43Z",
+   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T13:32:48.022634+00:00",
+   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/sep_ondj_distribution.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": null,
+   "models": [
+    "emos_csg",
+    "extended_logistic",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "ONDJ",
+    "Oct"
+   ],
+   "searched": {
+    "emos_csg": [],
+    "extended_logistic": [],
+    "quantile_regression": []
+   },
+   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+  },
+  "phase3/jan_fmam": {
+   "experiment": "phase3-v1",
+   "sha256": "b3e57118123cab412c517e7940239a1a21bb556320bebf976da2df08f26428fd",
+   "archive": "outputs/accepted/phase3/jan_fmam/b3e57118123cab41",
+   "accepted_utc": "2026-10-23T17:07:44Z",
+   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T21:22:37.883044+00:00",
+   "commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/jan_fmam_phase3.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": null,
+   "models": [
+    "bjp",
+    "bma_precipitation",
+    "quantile_regression_forest"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "bjp": [],
+    "bma_precipitation": [],
+    "quantile_regression_forest": []
+   },
+   "code_commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4"
+  },
+  "phase3/feb_fmam": {
+   "experiment": "phase3-v1",
+   "sha256": "22cd980f59e83172a2cea1740680ece21d87e1538cc927113137f980bfbe48d8",
+   "archive": "outputs/accepted/phase3/feb_fmam/22cd980f59e83172",
+   "accepted_utc": "2026-10-23T17:07:44Z",
+   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T21:25:35.967732+00:00",
+   "commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/feb_fmam_phase3.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": null,
+   "models": [
+    "bjp",
+    "bma_precipitation",
+    "quantile_regression_forest"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "bjp": [],
+    "bma_precipitation": [],
+    "quantile_regression_forest": []
+   },
+   "code_commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4"
+  },
+  "phase3/may_jjas": {
+   "experiment": "phase3-v1",
+   "sha256": "c7bff898bf815dc1b9b1e9fed8ddca9c6c4c612db634d96fa642ebb26fd1554f",
+   "archive": "outputs/accepted/phase3/may_jjas/c7bff898bf815dc1",
+   "accepted_utc": "2026-10-23T17:07:44Z",
+   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T23:51:32.503356+00:00",
+   "commit": "03feb0fde820911e3efd9610b1cbc015161efcb0",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_phase3.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": null,
+   "models": [
+    "bjp",
+    "bma_precipitation",
+    "quantile_regression_forest"
+   ],
+   "targets": [
+    "Aug",
+    "JJAS",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "bjp": [],
+    "bma_precipitation": [],
+    "quantile_regression_forest": []
+   },
+   "code_commit": "03feb0fde820911e3efd9610b1cbc015161efcb0"
+  },
+  "phase3/sep_ondj": {
+   "experiment": "phase3-v1",
+   "sha256": "f266f25dfc54e36cad27d76f6eb118cec0fbed36ab020f800bdbb2d6fb7fdd3e",
+   "archive": "outputs/accepted/phase3/sep_ondj/f266f25dfc54e36c",
+   "accepted_utc": "2026-10-23T17:07:44Z",
+   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-13T23:42:29.686757+00:00",
+   "commit": "03feb0fde820911e3efd9610b1cbc015161efcb0",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/sep_ondj_phase3.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": null,
+   "models": [
+    "bjp",
+    "bma_precipitation",
+    "quantile_regression_forest"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "ONDJ",
+    "Oct"
+   ],
+   "searched": {
+    "bjp": [],
+    "bma_precipitation": [],
+    "quantile_regression_forest": []
+   },
+   "code_commit": "03feb0fde820911e3efd9610b1cbc015161efcb0"
   }
  }
 }

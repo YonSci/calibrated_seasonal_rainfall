@@ -33,10 +33,15 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / 'config/accepted_results.json'
 ARCHIVE = ROOT / 'outputs/accepted'
 OUTPUTS = ROOT / 'outputs/probability_calibration'
-GATED = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning')
+GATED = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'stacking', 'distribution', 'phase3')
 CYCLES = ('jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj')
 TARGETS = 5
-TARGETS_OF = {'neural_pooled': 4}       # the pooled network serves the four months; the season is not pooled
+TARGETS_OF = {'neural_pooled': 4, 'neural_pooled2': 4, 'neural_all': 4}   # pooled networks serve the four months, not the season
+
+
+def gated(reg):
+    """The gated families: those of this code and any recorded in the registry (the gate only widens)."""
+    return tuple(dict.fromkeys([*GATED, *reg.get('gated', [])]))
 
 
 def sha256(p):
@@ -70,7 +75,7 @@ def describe(d):
                 members=cc.get('members'), models=d.get('models'), targets=sorted(d.get('targets', {})), searched=searched(d))
 
 
-def check(d, expect_models=None, targets=TARGETS):
+def check(d, expect_models=None, targets=TARGETS, family=''):
     """Problems that keep a result from being accepted (empty: complete)."""
     bad = []
     info = describe(d)
@@ -80,7 +85,9 @@ def check(d, expect_models=None, targets=TARGETS):
         bad.append(f'training years {info["training_years"]}')
     if not info['test_years'] or info['test_years'][0] != 2017:
         bad.append(f'test years {info["test_years"]}')
-    if info['members'] != 25:
+    # 25 members (the 2027 policy) for every neural and combined result; the earlier distribution benchmarks (Phases 2 and 3)
+    # used all members and are accepted as they were run
+    if (family.startswith('neural') or family == 'stacking' or info['members'] is not None) and info['members'] != 25             and not (family == 'stacking' and d.get('scoring_version') == 2):
         bad.append(f'members {info["members"]}, expected 25')
     if info['uncommitted_changes'] is not False:
         bad.append('provenance does not show a clean commit')
@@ -90,8 +97,9 @@ def check(d, expect_models=None, targets=TARGETS):
             r = (x.get('methods') or {}).get(m)
             if not r or not r.get('training') or not r.get('test'):
                 bad.append(f'{t}: no training and test scores for {m}')
+    fits = any(t.get('fitted') for t in d.get('targets', {}).values())          # stacking fits nothing itself
     for m in models:
-        if m.startswith('drn') and not info['searched'].get(m):
+        if fits and m.startswith('drn') and not info['searched'].get(m):
             bad.append(f'{m}: no record of the configurations evaluated')
     return bad
 
@@ -101,7 +109,7 @@ def resolve(family, cycle):
     publish what is in outputs/ (the earlier behaviour)."""
     reg = load()
     src = OUTPUTS / cycle / family
-    if family not in reg.get('gated', GATED):
+    if family not in gated(reg):
         return (src / 'benchmark.json', src / 'figures') if (src / 'benchmark.json').is_file() else None
     e = reg['accepted'].get(f'{family}/{cycle}')
     if not e:
@@ -127,7 +135,7 @@ def read_accepted(family, cycle):
 def status():
     """Per family and cycle: accepted experiment, and whether outputs/ holds a different (pending) run."""
     reg, rows = load(), []
-    for fam in reg.get('gated', GATED):
+    for fam in gated(reg):
         for c in CYCLES:
             e = reg['accepted'].get(f'{fam}/{c}')
             cur = OUTPUTS / c / fam / 'benchmark.json'
@@ -136,7 +144,7 @@ def status():
             if h and (not e or h != e['sha256']):
                 d = json.loads(cur.read_text(encoding='utf-8'))
                 pending = dict(created_utc=d.get('created_utc'), commit=(d.get('provenance') or {}).get('commit', '')[:7],
-                               problems=check(d, targets=TARGETS_OF.get(fam, TARGETS)))
+                               problems=check(d, targets=TARGETS_OF.get(fam, TARGETS), family=fam))
             rows.append(dict(family=fam, cycle=c, accepted=e and dict(experiment=e['experiment'], created_utc=e['created_utc'],
                                                                       commit=(e['commit'] or '')[:7]), pending=pending))
     return rows
@@ -169,7 +177,7 @@ def accept(family, experiment, note='', from_release=False, rev='HEAD', code_com
                     raise SystemExit(f'{family}/{c}: no result in outputs/')
                 figs = {p.name: p.read_bytes() for p in sorted((f.parent / 'figures').glob('*.png'))}
             d = json.loads(f.read_text(encoding='utf-8'))
-            bad = check(d, targets=TARGETS_OF.get(family, TARGETS))
+            bad = check(d, targets=TARGETS_OF.get(family, TARGETS), family=family)
             if bad:
                 raise SystemExit(f'{family}/{c} is not complete, nothing accepted:\n  ' + '\n  '.join(bad))
             staged.append((c, f.read_bytes(), figs, d))

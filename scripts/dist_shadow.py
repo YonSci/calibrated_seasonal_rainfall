@@ -53,12 +53,17 @@ CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/neural
         'scripts/bias_benchmark.py', 'scripts/bias_validation.py', 'scripts/run_calibration.py', 'scripts/calibration_core.py',
         'scripts/common.py', 'scripts/cycle.py']
 LEVELS = (.1, .5, .9)
-NO_SHADOW = {}                                          # models without a shadow (none since the pooled DRN has one)
-POOLED = {'drn_pooled'}                                 # one fit for the months of a cycle (pooled_fit)
+NO_SHADOW = {'drn_pooled_all': 'no shadow until confirmed: one network would serve four cycles issued months apart (docs/54, 3g)'}
+POOLED = {'drn_pooled', 'drn_pooled_residual', 'drn_pooled_nbhd'}    # one fit for the months of a cycle (pooled_fit)
+NEIGHBOURHOOD = {'drn_pooled_nbhd'}                     # with neighbourhood inputs (dist_benchmark.add_neighbourhood)
+# Stacking: the equal-weight pool of three members, each fitted as in its own shadow (stack_benchmark.py, docs/54 3g)
+STACK = dict(name='Equal-weight pool of EMOS, quantile regression and the DRN',
+             months=('emos_csg', 'quantile_regression', 'drn_pooled'), season=('emos_csg', 'quantile_regression', 'drn_csg'))
 _POOLED_FITS = {}
 SHORT = {'emos_csg': 'EMOS', 'extended_logistic': 'extended logistic', 'quantile_regression': 'quantile regression', 'bjp': 'BJP',
          'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF', 'drn_csg': 'DRN', 'drn_sst': 'DRN + SST',
-         'drn_emos_residual': 'neural EMOS correction', 'drn_pooled': 'pooled DRN'}
+         'drn_emos_residual': 'neural EMOS correction', 'drn_pooled': 'pooled DRN', 'drn_pooled_residual': 'pooled neural EMOS correction',
+         'drn_pooled_nbhd': 'pooled DRN + neighbourhood', 'stack': 'pool of EMOS, QR and the DRN'}
 POSITION_COLOURS = ['#a6611a', '#d9d9d9', '#1a9641']                    # below the interval, inside, above
 
 
@@ -97,7 +102,8 @@ def fingerprint(cycle_path, config_path, cycle, project, entry, target, model):
     h = hashlib.sha256(json.dumps(dict(target=target, entry=entry, model=model), sort_keys=True).encode())
     for f in files:
         h.update(f.encode() + sha256(ROOT / f).encode())
-    for t in (months_of(cycle, project) if model in POOLED else [target]):     # the pooled fit uses every month
+    pooled = model in POOLED or (model == 'stack' and target != project['season']['name'])
+    for t in (months_of(cycle, project) if pooled else [target]):     # the pooled fit uses every month
         tc = target_config(project, t)
         folder = ROOT / cycle.get('processed_root', 'data/processed') / f"init{tc['initialization_month']:02d}_{tc['season']['name']}"
         for f in [folder / f'ecmwf_{y}_common.nc' for y in ref + [year]] + [folder / f'chirps_{y}_common.nc' for y in ref]:
@@ -124,7 +130,7 @@ def pooled_fit(cycle_path, scfg, entry, model):
         return _POOLED_FITS[key]
     from bias_benchmark import load_mask, target_config
     from run_calibration import load_inputs, cell_area
-    from dist_benchmark import fold
+    from dist_benchmark import fold, neighbourhood_matrices
     import dist_calibration as dc
     cycle, bench = read(cycle_path), read(entry['benchmark_config'])
     project = load_config(cycle['project_config'])
@@ -140,7 +146,8 @@ def pooled_fit(cycle_path, scfg, entry, model):
             models = {z: m[:members] for z, m in models.items()}
         idx = np.flatnonzero(load_mask(bench['cells'], lat, lon))
         glat, glon = np.meshgrid(lat, lon, indexing='ij')
-        S, st = fold(models, obs, ref, idx, cell_area(lat, lon)[idx], coords=(glat.ravel()[idx], glon.ravel()[idx]))
+        nbhd = neighbourhood_matrices(idx, len(lon)) if model in NEIGHBOURHOOD else None
+        S, st = fold(models, obs, ref, idx, cell_area(lat, lon)[idx], coords=(glat.ravel()[idx], glon.ravel()[idx]), nbhd=nbhd)
         S.update(onehot(i, len(S['y'])), year_index=np.repeat(np.arange(len(ref)), int(st['valid'].sum())))
         parts.append(S)
     keys = [k for k in parts[0] if k not in ('n_years', 'members', 'thresholds')]
@@ -161,10 +168,11 @@ def run_target(cycle_path, scfg, entry, target):
     from bias_methods import correct
     from bias_validation import observation_path
     from run_calibration import load_inputs, cell_area
-    from dist_benchmark import fold, score_year
+    from dist_benchmark import fold, score_year, neighbourhood_matrices, add_neighbourhood
     import dist_calibration as dc
     cycle, bench = read(cycle_path), read(entry['benchmark_config'])
     project = load_config(cycle['project_config'])
+    season = project['season']['name']
     year = cycle['forecast_year']
     ref = list(range(cycle['reference_years'][0], cycle['reference_years'][1] + 1))
     tag, models, obs, _, lat, lon = load_inputs(target_config(project, target), ref + [year], ref)
@@ -184,15 +192,26 @@ def run_target(cycle_path, scfg, entry, target):
         import sst_indices
         extra = sst_indices.extra_inputs(names, target_config(project, target), ref + [year], lat, lon, idx)
     S, st = fold(models, obs, ref, idx, area_e, coords=coords, extra=extra)
-    mdl = dc.MODELS[scfg['model']]
     F = dc.features(models[year][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords)
     F.update({k: v[year] for k, v in (extra or {}).items()})
-    if scfg['model'] in POOLED:                              # one fit for the cycle's months; this month's position
-        fit = pooled_fit(cycle_path, scfg, entry, scfg['model'])
+    if target != season:                                     # pooled models: this month's position
         F.update(onehot(months_of(cycle, project).index(target), n))
-    else:
+
+    def one(key):                                            # one model's fit and distribution for this target
+        mdl = dc.MODELS[key]
+        if key in POOLED:                                    # one fit for the cycle's months
+            fit = pooled_fit(cycle_path, scfg, entry, key)
+            G = dict(F, **add_neighbourhood(F, neighbourhood_matrices(idx, len(lon)))) if key in NEIGHBOURHOOD else F
+            return fit, mdl.predict(G, fit)
         fit = mdl.fit(S, **mdl.defaults)
-    d = mdl.predict(F, fit)
+        return fit, mdl.predict(F, fit)
+
+    if scfg['model'] == 'stack':                             # the pool of the members of this target
+        got = {k: one(k) for k in STACK['season' if target == season else 'months']}
+        fit = {k: f for k, (f, _) in got.items()}
+        d = dc.Pool([dd for _, dd in got.values()])
+    else:
+        fit, d = one(scfg['model'])
     valid = st['valid']
     q = {u: np.where(valid, d.quantile(np.full(n, u)), np.nan) for u in LEVELS}
     p = np.where((valid & st['prob_ok'])[:, None], d.terciles(st['q1'], st['q2']), np.nan)
@@ -348,7 +367,7 @@ def main(args):
         print(f'{model}: {NO_SHADOW[model]}', flush=True)
     season = project['season']['name']
     for model, t in [(m, t) for m in models if m not in NO_SHADOW for t in targets if not (m in POOLED and t == season)]:
-        label = dc.MODELS[model].name
+        label = STACK['name'] if model == 'stack' else dc.MODELS[model].name
         key = fingerprint(args.cycle, args.config, cycle, project, entry, t, model)
         f = folder / f'{model}__{t}.json'
         if not args.no_resume and f.is_file() and json.loads(f.read_text(encoding='utf-8')).get('key') == key \

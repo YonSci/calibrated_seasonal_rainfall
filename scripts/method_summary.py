@@ -45,7 +45,8 @@ LD_METHOD = dict(probabilities='ld_full', amounts='leung_affine')
 CATEGORY = {'Bias correction': 'Bias correction', 'Probability stage (Phase 1)': 'Probability calibration',
             'Probability stage (Phase 2)': 'Probability calibration', 'Distribution model (Phase 2)': 'Rainfall-distribution model',
             'Distribution model (Phase 3)': 'Rainfall-distribution model', 'Two-stage calibration': 'Two-stage calibration',
-            'Statistical downscaling (MOS)': 'Statistical downscaling', 'Neural network (DRN)': 'Neural network'}
+            'Statistical downscaling (MOS)': 'Statistical downscaling', 'Neural network (DRN)': 'Neural network',
+            'Model combination': 'Model combination'}
 ALPHA = 0.05
 
 
@@ -158,7 +159,9 @@ def probability(store):
                         add_series(r, cy, target, d['targets'][target]['methods'][m], d['targets'][target]['methods'][d['incumbent']], 'rps')
         for rel, family in (('distribution/benchmark.json', 'Distribution model (Phase 2)'), ('phase3/benchmark.json', 'Distribution model (Phase 3)'),
                             ('neural/benchmark.json', 'Neural network (DRN)'),           # neural: its decision models only (docs/54)
-                            ('neural_ext/benchmark.json', 'Neural network (DRN)'), ('neural_pooled/benchmark.json', 'Neural network (DRN)')):
+                            ('neural_ext/benchmark.json', 'Neural network (DRN)'), ('neural_pooled/benchmark.json', 'Neural network (DRN)'),
+                            ('neural_pooled2/benchmark.json', 'Neural network (DRN)'), ('neural_all/benchmark.json', 'Neural network (DRN)'),
+                            ('stacking/benchmark.json', 'Model combination')):
             fam = rel.split('/')[0]
             d = accept_results.read_accepted(fam, cy) if fam in accept_results.GATED else read(f'{base}/{rel}')   # neural: accepted only
             if not d:

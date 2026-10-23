@@ -15,6 +15,8 @@
       "seed": 0
     }
   },
+  "members": 25,
+  "save_predictions": true,
   "output_root": "outputs/probability_calibration/sep_ondj/phase3",
   "phase": 3
 }

@@ -136,12 +136,16 @@ class Distributions(unittest.TestCase):
         S = dict(y=y, m=m, s=members.std(1), md=np.full(n, .35), w=np.full(n, 1 / n), thresholds=thr, members=members,
                  q10=q10, q50=q50, q90=q90, logmu=np.zeros(n), cv=np.full(n, .3), lat=np.zeros(n), lon=np.zeros(n), n_years=24,
                  nino34=np.zeros(n), dmi=np.zeros(n), **{f'region_{i}': np.zeros(n) for i in range(1, 9)},
-                 **{f'target_{i}': np.full(n, float(i == 1)) for i in range(1, 5)})
+                 **{f'target_{i}': np.full(n, float(i == 1)) for i in range(1, 5)},
+                 **{f'cycle_{i}': np.full(n, float(i == 1)) for i in range(1, 5)})
+        S.update(m_nb3=S['m'], s_nb3=S['s'], q50_nb3=S['q50'], m_nb5=S['m'])         # neighbourhood inputs: the cell's own values
         fm = np.array([.5, 1., 2.])[None, :] * np.ones((8, 1))
         F = dict(m=fm.mean(0), s=np.full(3, .3), md=np.full(3, .35), q10=.8 * fm[0], q50=fm[0], q90=1.2 * fm[0], members=fm,
                  logmu=np.zeros(3), cv=np.full(3, .3), lat=np.zeros(3), lon=np.zeros(3), scale=np.ones(3), valid=np.ones(3, bool),
                  nino34=np.zeros(3), dmi=np.zeros(3), **{f'region_{i}': np.zeros(3) for i in range(1, 9)},
-                 **{f'target_{i}': np.full(3, float(i == 1)) for i in range(1, 5)})
+                 **{f'target_{i}': np.full(3, float(i == 1)) for i in range(1, 5)},
+                 **{f'cycle_{i}': np.full(3, float(i == 1)) for i in range(1, 5)})
+        F.update(m_nb3=F['m'], s_nb3=F['s'], q50_nb3=F['q50'], m_nb5=F['m'])
         for key, mdl in dc.MODELS.items():
             if key == 'drn_climatology':                                           # the ablation ignores the forecast by design
                 continue

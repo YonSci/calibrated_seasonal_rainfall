@@ -13,14 +13,18 @@ import { read, names, href, link, esc, signed, num, years, cycleTitle, REPO } fr
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
 const EXT = names('neural_ext');                     // second stage: SST inputs, neural correction of EMOS, forecast-only ablation
 const POOLED = names('neural_pooled'), TUNING = names('neural_tuning');
+const POOLED2 = names('neural_pooled2'), ALL = names('neural_all'), STACK = names('stacking');   // third stage (docs/54, 3g)
 const maybe = (list, sub, n) => (list.includes(n) ? read(`${sub}/${n}.json`) : null);
 const cycles = names('neural').map((n) => ({ name: n, d: read(`neural/${n}.json`), x: maybe(EXT, 'neural_ext', n),
-  p: maybe(POOLED, 'neural_pooled', n), u: maybe(TUNING, 'neural_tuning', n) }))
+  p: maybe(POOLED, 'neural_pooled', n), u: maybe(TUNING, 'neural_tuning', n), p2: maybe(POOLED2, 'neural_pooled2', n),
+  all: maybe(ALL, 'neural_all', n), st: maybe(STACK, 'stacking', n) }))
   .map((x) => ({ ...x, title: cycleTitle(INIT[x.name.split('_')[0]], x.name.split('_')[1].toUpperCase()) }))
   .sort((a, b) => INIT[a.name.split('_')[0]] - INIT[b.name.split('_')[0]]);
 const SHORT = { incumbent: 'Published probabilities', mvs_ensemble: 'MVS ensemble (published amounts)', emos_csg: 'EMOS',
   drn_csg: 'DRN', drn_linear_csg: 'Linear control', drn_climatology: 'No-forecast ablation', drn_forecast_only: 'Forecast-only ablation',
-  drn_sst: 'DRN + SST', drn_regions: 'DRN + regions (no SST)', quantile_regression: 'Quantile regression', drn_emos_residual: 'Neural EMOS correction', drn_pooled: 'Pooled DRN', drn_csg_tuned: 'DRN, separate tuning' };
+  drn_sst: 'DRN + SST', drn_regions: 'DRN + regions (no SST)', quantile_regression: 'Quantile regression', drn_emos_residual: 'Neural EMOS correction', drn_pooled: 'Pooled DRN', drn_csg_tuned: 'DRN, separate tuning',
+  drn_pooled_residual: 'Pooled neural EMOS correction', drn_pooled_nbhd: 'Pooled DRN + neighbourhood', drn_pooled_all: 'DRN pooled over all cycles',
+  stack: 'Combination (EMOS + QR + DRN)' };
 
 // The method selection's decision (docs/50): Benjamini–Hochberg across the decision model's targets, per score
 function bhDecisions(d, score) {
@@ -108,7 +112,7 @@ function comparisonTable(d, score) {
   for (const [pair, s] of Object.entries(d.comparisons ?? {})) {
     const other = pair.split('|')[1];
     for (const [t, x] of Object.entries(s[score] ?? {})) {
-      rows.push([`<strong>${esc(t)}</strong>`, esc(`${SHORT[pair.split('|')[0]]} against ${SHORT[other] ?? other}`), signed(x.training.mean_difference, 4), ci(x.training),
+      rows.push([`<strong>${esc(t)}</strong>`, `<span data-cmp="${esc(other)}">${esc(`${SHORT[pair.split('|')[0]] ?? pair.split('|')[0]} against ${SHORT[other] ?? other}`)}</span>`, signed(x.training.mean_difference, 4), ci(x.training),
         `${x.training.years_better} of ${x.training.years}`, num(x.training.p_improvement, 3), signed(x.test.mean_difference, 4),
         `${x.test.years_better} of ${x.test.years}`]);
     }
@@ -174,8 +178,12 @@ const SEARCH_TEXT = SEARCHED.length
 const created = shown.map((s) => s.a?.created_utc).filter(Boolean).sort();
 const commits = [...new Set(shown.map((s) => s.a?.code_commit ?? s.a?.commit).filter(Boolean))];
 const PENDING = (ACC.status ?? []).filter((r) => r.family === 'neural' && r.pending);
-const NOT_RUN = ['neural_ext', 'neural_pooled', 'neural_tuning'].filter((f) => !(ACC.status ?? []).some((r) => r.family === f && (r.accepted || r.pending)));
-const FAMILY = { neural_ext: 'second stage (SST and regions, neural correction of EMOS)', neural_pooled: 'pooled network', neural_tuning: 'separate tuning split' };
+const NOT_RUN = ['neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'stacking'].filter((f) => !(ACC.status ?? []).some((r) => r.family === f && (r.accepted || r.pending)));
+const FAMILY = { neural_ext: 'second stage (SST and regions, neural correction of EMOS)', neural_pooled: 'pooled network', neural_tuning: 'separate tuning split',
+  neural_pooled2: 'pooled neural EMOS correction and neighbourhood inputs', neural_all: 'one network for all four cycles', stacking: 'model combination' };
+// Selectors (product, comparator): the comparators present in any cycle's comparisons
+const COMPARATORS = [...new Set(cycles.flatMap((c) => [c.d, c.x, c.p, c.u, c.p2, c.all, c.st].filter(Boolean)
+  .flatMap((d) => Object.keys(d.comparisons ?? {}).map((k) => k.split('|')[1]))))];
 const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.product === 'amounts' ? 'amounts' : 'probabilities'}`);
 ---
 <Base title="Neural network (DRN)" section="research" description="A distributional regression network (neural EMOS with a censored shifted gamma) tested against the published pipeline and EMOS.">
@@ -303,19 +311,36 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
         {cycles.map(({ name }) => <button type="button" data-cyc={name} aria-pressed="false">{CYCLE_NAME[name] ?? name}</button>)}
       </div>
     )}
+    {cycles.length > 0 && (
+      <div class="pick-row">
+        <div class="seg prod-pick" role="group" aria-label="Product">
+          <button type="button" data-prod-pick="all" aria-pressed="true">Both products</button>
+          <button type="button" data-prod-pick="crps" aria-pressed="false">Rainfall amounts</button>
+          <button type="button" data-prod-pick="rps" aria-pressed="false">Tercile probabilities</button>
+        </div>
+        {COMPARATORS.length > 1 && (
+          <label class="cmp-pick">Comparisons against
+            <select>
+              <option value="all">every model</option>
+              {COMPARATORS.map((k) => <option value={k}>{SHORT[k] ?? k}</option>)}
+            </select>
+          </label>
+        )}
+      </div>
+    )}
     {cycles.length === 0 && <p class="notice">The benchmark has not been run yet.</p>}
-    {cycles.map(({ name, d, x, p, u, title }) => (
+    {cycles.map(({ name, d, x, p, u, p2, all, st, title }) => (
       <section id={name} class="cyc-sec">
         <h2>{title}</h2>
         <p><strong>DRN confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(d, 'bh').join('; ') || 'none'}.
         In the benchmark as run (Holm): {confirmedList(d, 'holm').join('; ') || 'none'}. Architecture chosen (fit on all training years): {chosen(d)}.</p>
-        <h3>Rainfall amounts (CRPS skill)</h3>
-        <Table {...skillTable(d, 'crps')} />
-        <h3>Tercile probabilities (RPS skill)</h3>
-        <Table {...skillTable(d, 'rps')} />
+        <div data-prod="crps"><h3>Rainfall amounts (CRPS skill)</h3>
+        <Table {...skillTable(d, 'crps')} /></div>
+        <div data-prod="rps"><h3>Tercile probabilities (RPS skill)</h3>
+        <Table {...skillTable(d, 'rps')} /></div>
         <h3>The tests</h3>
-        <Table {...testTable(d, 'crps')} />
-        <Table {...testTable(d, 'rps')} />
+        <div data-prod="crps"><Table {...testTable(d, 'crps')} /></div>
+        <div data-prod="rps"><Table {...testTable(d, 'rps')} /></div>
         <h3>Ranges: coverage and width</h3>
         <Table {...coverageTable(d)} />
         <h3>Below- and above-normal probabilities</h3>
@@ -328,8 +353,8 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
           </>
         ))}
         <h3>What the DRN adds (paired, no adjustment)</h3>
-        <Table {...comparisonTable(d, 'crps')} />
-        <Table {...comparisonTable(d, 'rps')} />
+        <div data-prod="crps"><Table {...comparisonTable(d, 'crps')} /></div>
+        <div data-prod="rps"><Table {...comparisonTable(d, 'rps')} /></div>
         <p class="caveat">Negative Δ favours the DRN. Against EMOS: the value of the network over the linear model; against the linear control:
         the value of the hidden layers; against the ablation: the value of the forecast itself.</p>
         {d.assets.includes(`assets/neural/${name}/distribution_summary.png`) && <Figure src={`assets/neural/${name}/distribution_summary.png`} caption="Skill of every model and target; * the DRN confirmed better than the reference (Holm, as run)." />}
@@ -342,12 +367,12 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
             neural correction of EMOS (two candidates per target and score). Controls in the same folds and with the same scoring rule
             (corrected CRPS): the DRN with the regions but no SST (so DRN + SST against it is the value of the SST indices alone), the DRN,
             EMOS and quantile regression refitted, and the forecast-only ablation.</p>
-            <Table {...testTable(x, 'crps', 'drn_sst')} />
-            <Table {...testTable(x, 'crps', 'drn_emos_residual')} />
-            <Table {...testTable(x, 'rps', 'drn_sst')} />
-            <Table {...testTable(x, 'rps', 'drn_emos_residual')} />
-            <Table {...comparisonTable(x, 'crps')} />
-            <Table {...comparisonTable(x, 'rps')} />
+            <div data-prod="crps"><Table {...testTable(x, 'crps', 'drn_sst')} /></div>
+            <div data-prod="crps"><Table {...testTable(x, 'crps', 'drn_emos_residual')} /></div>
+            <div data-prod="rps"><Table {...testTable(x, 'rps', 'drn_sst')} /></div>
+            <div data-prod="rps"><Table {...testTable(x, 'rps', 'drn_emos_residual')} /></div>
+            <div data-prod="crps"><Table {...comparisonTable(x, 'crps')} /></div>
+            <div data-prod="rps"><Table {...comparisonTable(x, 'rps')} /></div>
             <Table {...coverageTable(x)} />
             <p class="caveat">Download: {x.downloads.map((f) => <a href={link(f)}>benchmark.json</a>)}.</p>
           </>
@@ -358,9 +383,9 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
             <p><strong>Confirmed better under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(p, 'bh').join('; ') || 'none'}.
             In the benchmark as run (Holm): {confirmedList(p, 'holm').join('; ') || 'none'}. One network fitted to the samples of the four
             months together, with the month's position as an input; the season is not pooled.</p>
-            <Table {...testTable(p, 'crps', 'drn_pooled')} />
-            <Table {...testTable(p, 'rps', 'drn_pooled')} />
-            <Table {...comparisonTable(p, 'crps')} />
+            <div data-prod="crps"><Table {...testTable(p, 'crps', 'drn_pooled')} /></div>
+            <div data-prod="rps"><Table {...testTable(p, 'rps', 'drn_pooled')} /></div>
+            <div data-prod="crps"><Table {...comparisonTable(p, 'crps')} /></div>
             <Table {...coverageTable(p)} />
           </>
         )}
@@ -369,8 +394,49 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
             <h3 id={`${name}-tuning`}>A separate tuning split (diagnostic)</h3>
             <p>The DRN with its architecture and weight decay chosen on three inner folds of years, apart from the years that stop the
             training. Not a candidate: the comparison with the DRN shows whether the tuning procedure matters.</p>
-            <Table {...comparisonTable(u, 'crps')} />
-            <Table {...comparisonTable(u, 'rps')} />
+            <div data-prod="crps"><Table {...comparisonTable(u, 'crps')} /></div>
+            <div data-prod="rps"><Table {...comparisonTable(u, 'rps')} /></div>
+          </>
+        )}
+        {p2 && (
+          <>
+            <h3 id={`${name}-pooled2`}>Pooled network: neural correction of EMOS and neighbourhood inputs</h3>
+            <p><strong>Confirmed better under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(p2, 'bh').join('; ') || 'none'}.
+            In the benchmark as run (Holm): {confirmedList(p2, 'holm').join('; ') || 'none'}. Two candidates on the pooled network of the four months:
+            the network correcting an EMOS model fitted for each month, and the network with the means of the ensemble mean, spread and median over
+            the 3×3 and 5×5 cells around each cell. The pooled DRN is refitted in the same folds as the control.</p>
+            <div data-prod="crps"><Table {...testTable(p2, 'crps', 'drn_pooled_residual')} /></div>
+            <div data-prod="crps"><Table {...testTable(p2, 'crps', 'drn_pooled_nbhd')} /></div>
+            <div data-prod="rps"><Table {...testTable(p2, 'rps', 'drn_pooled_residual')} /></div>
+            <div data-prod="rps"><Table {...testTable(p2, 'rps', 'drn_pooled_nbhd')} /></div>
+            <div data-prod="crps"><Table {...comparisonTable(p2, 'crps')} /></div>
+            <div data-prod="rps"><Table {...comparisonTable(p2, 'rps')} /></div>
+            <Table {...coverageTable(p2)} />
+          </>
+        )}
+        {all && (
+          <>
+            <h3 id={`${name}-all`}>One network for the months of all four cycles</h3>
+            <p><strong>Confirmed better under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(all, 'bh').join('; ') || 'none'}.
+            In the benchmark as run (Holm): {confirmedList(all, 'holm').join('; ') || 'none'}. One network fitted to the 16 months of the four
+            cycles together, with the month's position and the cycle as inputs; scored here for this cycle's months.</p>
+            <div data-prod="crps"><Table {...testTable(all, 'crps', 'drn_pooled_all')} /></div>
+            <div data-prod="rps"><Table {...testTable(all, 'rps', 'drn_pooled_all')} /></div>
+            <div data-prod="crps"><Table {...comparisonTable(all, 'crps')} /></div>
+            <div data-prod="rps"><Table {...comparisonTable(all, 'rps')} /></div>
+          </>
+        )}
+        {st && (
+          <>
+            <h3 id={`${name}-stack`}>Combination of EMOS, quantile regression and the DRN</h3>
+            <p><strong>Confirmed better under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(st, 'bh').join('; ') || 'none'}.
+            In the benchmark as run (Holm): {confirmedList(st, 'holm').join('; ') || 'none'}. The equal-weight average of the three models'
+            distributions (a linear pool), from their saved predictions in the same folds: the pooled DRN for the months, the DRN for the season.
+            Nothing is fitted.</p>
+            <div data-prod="crps"><Table {...testTable(st, 'crps', 'stack')} /></div>
+            <div data-prod="rps"><Table {...testTable(st, 'rps', 'stack')} /></div>
+            <div data-prod="crps"><Table {...comparisonTable(st, 'crps')} /></div>
+            <div data-prod="rps"><Table {...comparisonTable(st, 'rps')} /></div>
           </>
         )}
       </section>
@@ -394,8 +460,28 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
     const h = location.hash.slice(1);
     if (h && document.getElementById(h)?.classList.contains('cyc-sec')) show(h);
   }
+  // Product selector: amounts (CRPS) or probabilities (RPS) tables only
+  const prod = document.querySelector('.prod-pick');
+  prod?.addEventListener('click', (ev) => {
+    const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-prod-pick]');
+    if (!b) return;
+    const v = b.dataset.prodPick!;
+    document.querySelectorAll<HTMLElement>('[data-prod]').forEach((el) => { el.hidden = v !== 'all' && el.dataset.prod !== v; });
+    prod.querySelectorAll<HTMLElement>('[data-prod-pick]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  });
+  // Comparator selector: the rows of the comparison tables against one model
+  document.querySelector<HTMLSelectElement>('.cmp-pick select')?.addEventListener('change', (ev) => {
+    const v = (ev.target as HTMLSelectElement).value;
+    document.querySelectorAll<HTMLElement>('[data-cmp]').forEach((el) => {
+      const tr = el.closest('tr');
+      if (tr) tr.hidden = v !== 'all' && el.dataset.cmp !== v;
+    });
+  });
 </script>
 <style is:global>
+  .pick-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:4px 0}
+  .prod-pick{flex-wrap:wrap}
+  .cmp-pick select{margin-left:6px}
   .cycle-pick{flex-wrap:wrap;margin:10px 0 4px;position:sticky;top:120px;z-index:5;background:var(--bg);padding:4px 0}
   .exp-panel td code{margin-right:6px}
   .drn-fig{margin:10px 0 4px;overflow-x:auto}
