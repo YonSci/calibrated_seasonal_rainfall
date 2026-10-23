@@ -40,7 +40,8 @@
   "members": {
     "drn_csg": 25,
     "drn_sst": 25,
-    "drn_emos_residual": 25
+    "drn_emos_residual": 25,
+    "drn_pooled": 25
   },
   "extra_inputs": {
     "drn_sst": ["nino34", "dmi", "regions"]

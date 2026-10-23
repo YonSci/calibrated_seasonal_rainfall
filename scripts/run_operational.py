@@ -56,7 +56,7 @@ EXTERNAL_SCRIPTS = ["external_forecasts.py", "compare_external_forecasts.py", "i
                     "verify_external_forecasts.py", "verify2026_math.py"]
 BIAS_SCRIPTS = ["bias_validation.py", "bias_methods.py", "bias_confirmation.py", "bias_benchmark.py", "calibration_core.py",
                 "compare_calibration.py", "local_blend.py", "run_calibration.py"]
-AMOUNT_SCRIPTS = ["dist_shadow.py", "dist_calibration.py", "neural_calibration.py", "dist_benchmark.py", "bias_methods.py", "bias_benchmark.py",
+AMOUNT_SCRIPTS = ["dist_shadow.py", "dist_calibration.py", "neural_calibration.py", "sst_indices.py", "dist_benchmark.py", "bias_methods.py", "bias_benchmark.py",
                   "bias_validation.py", "run_calibration.py", "calibration_core.py"]
 MOS_SCRIPTS = ["mos_shadow.py", "mos_benchmark.py", "download_seas5_sst.py", "leung_dirichlet_benchmark.py", "prob_calibration.py",
                "prob_benchmark.py", "bias_methods.py", "run_calibration.py"]
@@ -438,7 +438,9 @@ def amount_stages(runner,cfg,config_path):
     vr = path(cfg["verification_root"])
     targets = list(cfg["targets"])
     outputs = [folder/f"{scfg['model']}__{t}.json" for t in targets]+[folder/f"shadow_{scfg['model']}_{YEAR}_{t}{ext}" for t in targets for ext in (".nc",".png")]
+    sel = ROOT/"outputs/method_selection/selection.json"            # its candidates get their own shadows (dist_shadow.py)
     inputs = [*[ROOT/"scripts"/f for f in AMOUNT_SCRIPTS],config_path,spath,path(entry["benchmark_config"]),path(cfg["project_config"]),
+              *([sel] if sel.is_file() else []),
               *[path(cfg["processed_root"])/f"{TAG}_{t}" for t in targets],
               *[vr/f"observations/{t}" for t in targets if (vr/f"observations/{t}").is_dir()]]
     runner.stage("amount_shadow",inputs,outputs,

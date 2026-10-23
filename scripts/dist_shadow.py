@@ -13,6 +13,12 @@ Once CHIRPS has been prepared for a target (the cycle's verification observation
 Results: <output_root>/<year>/<model>__<target>.json (reused while its dependency fingerprint — code, configurations, masks,
 model and observation inputs — is unchanged), shadow_<model>_<year>_<target>.nc and .png.
 
+The DRN pooled over the months of a cycle (drn_pooled, docs/54 3d) is fitted once per cycle and run, as in the final fit of its
+benchmark (scripts/pooled_benchmark.py): on the samples of the four months over the reference years together, with the month's
+position as an input and whole years held out for early stopping; each month is then forecast with its own position. It has
+no season shadow (the season total is not pooled). Its fingerprint covers the inputs of all four months, so a change in any
+month refits it.
+
   python scripts/dist_shadow.py --cycle config/cycles/feb_2026_fmam.json
 """
 import argparse
@@ -30,6 +36,7 @@ def parse():
     p.add_argument('--cycle', default='config/operational.json', help='operational cycle file (one forecast year)')
     p.add_argument('--config', default='config/probability_calibration/amount_shadow.json')
     p.add_argument('--targets', nargs='+')
+    p.add_argument('--models', nargs='+', help='only these models (default: the configured model and the selection candidates)')
     p.add_argument('--no-resume', action='store_true')
     return p.parse_args()
 
@@ -46,10 +53,12 @@ CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/neural
         'scripts/bias_benchmark.py', 'scripts/bias_validation.py', 'scripts/run_calibration.py', 'scripts/calibration_core.py',
         'scripts/common.py', 'scripts/cycle.py']
 LEVELS = (.1, .5, .9)
-NO_SHADOW = {'drn_pooled': 'pooled over the months of a cycle: no single-target shadow yet (docs/54, 3d)'}
+NO_SHADOW = {}                                          # models without a shadow (none since the pooled DRN has one)
+POOLED = {'drn_pooled'}                                 # one fit for the months of a cycle (pooled_fit)
+_POOLED_FITS = {}
 SHORT = {'emos_csg': 'EMOS', 'extended_logistic': 'extended logistic', 'quantile_regression': 'quantile regression', 'bjp': 'BJP',
          'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF', 'drn_csg': 'DRN', 'drn_sst': 'DRN + SST',
-         'drn_emos_residual': 'neural EMOS correction'}
+         'drn_emos_residual': 'neural EMOS correction', 'drn_pooled': 'pooled DRN'}
 POSITION_COLOURS = ['#a6611a', '#d9d9d9', '#1a9641']                    # below the interval, inside, above
 
 
@@ -88,13 +97,58 @@ def fingerprint(cycle_path, config_path, cycle, project, entry, target, model):
     h = hashlib.sha256(json.dumps(dict(target=target, entry=entry, model=model), sort_keys=True).encode())
     for f in files:
         h.update(f.encode() + sha256(ROOT / f).encode())
-    tc = target_config(project, target)
-    folder = ROOT / cycle.get('processed_root', 'data/processed') / f"init{tc['initialization_month']:02d}_{tc['season']['name']}"
-    for f in [folder / f'ecmwf_{y}_common.nc' for y in ref + [year]] + [folder / f'chirps_{y}_common.nc' for y in ref]:
-        h.update(f.name.encode() + sha256(f).encode())
+    for t in (months_of(cycle, project) if model in POOLED else [target]):     # the pooled fit uses every month
+        tc = target_config(project, t)
+        folder = ROOT / cycle.get('processed_root', 'data/processed') / f"init{tc['initialization_month']:02d}_{tc['season']['name']}"
+        for f in [folder / f'ecmwf_{y}_common.nc' for y in ref + [year]] + [folder / f'chirps_{y}_common.nc' for y in ref]:
+            h.update(f.name.encode() + sha256(f).encode())
     o = observation_path(cycle, target, year)
     h.update((sha256(o) if o.is_file() else 'not observed').encode())
     return h.hexdigest()
+
+
+def months_of(cycle, project):
+    """The month targets of a cycle (its targets without the season), in the order of the pooled network's month inputs."""
+    return [t for t in cycle['targets'] if t != project['season']['name']]
+
+
+def onehot(i, n):
+    return {f'target_{j + 1}': np.full(n, float(j == i)) for j in range(4)}
+
+
+def pooled_fit(cycle_path, scfg, entry, model):
+    """The pooled DRN of a cycle, fitted once on the four months' samples over the reference years (as the final fit of
+    pooled_benchmark.py: month position one-hot, the row's year for early stopping), cached for the months of this run."""
+    key = (cycle_path, entry['name'], model)
+    if key in _POOLED_FITS:
+        return _POOLED_FITS[key]
+    from bias_benchmark import load_mask, target_config
+    from run_calibration import load_inputs, cell_area
+    from dist_benchmark import fold
+    import dist_calibration as dc
+    cycle, bench = read(cycle_path), read(entry['benchmark_config'])
+    project = load_config(cycle['project_config'])
+    ref = list(range(cycle['reference_years'][0], cycle['reference_years'][1] + 1))
+    bench_months = [t for t in bench['targets'] if t != project['season']['name']]
+    if months_of(cycle, project) != bench_months:                    # the month inputs must mean what they meant in the benchmark
+        raise ValueError(f'{cycle_path}: months {months_of(cycle, project)} differ from the benchmark order {bench_months}')
+    members = (scfg.get('members') or {}).get(model)
+    parts = []
+    for i, t in enumerate(months_of(cycle, project)):
+        _, models, obs, _, lat, lon = load_inputs(target_config(project, t), ref, ref)
+        if members:
+            models = {z: m[:members] for z, m in models.items()}
+        idx = np.flatnonzero(load_mask(bench['cells'], lat, lon))
+        glat, glon = np.meshgrid(lat, lon, indexing='ij')
+        S, st = fold(models, obs, ref, idx, cell_area(lat, lon)[idx], coords=(glat.ravel()[idx], glon.ravel()[idx]))
+        S.update(onehot(i, len(S['y'])), year_index=np.repeat(np.arange(len(ref)), int(st['valid'].sum())))
+        parts.append(S)
+    keys = [k for k in parts[0] if k not in ('n_years', 'members', 'thresholds')]
+    pooled = {k: np.concatenate([np.asarray(S[k]) for S in parts]) for k in keys}
+    pooled['n_years'] = len(ref)
+    mdl = dc.MODELS[model]
+    _POOLED_FITS[key] = mdl.fit(pooled, **mdl.defaults)
+    return _POOLED_FITS[key]
 
 
 def weighted_mean(v, area, mask):
@@ -131,9 +185,13 @@ def run_target(cycle_path, scfg, entry, target):
         extra = sst_indices.extra_inputs(names, target_config(project, target), ref + [year], lat, lon, idx)
     S, st = fold(models, obs, ref, idx, area_e, coords=coords, extra=extra)
     mdl = dc.MODELS[scfg['model']]
-    fit = mdl.fit(S, **mdl.defaults)
     F = dc.features(models[year][:, idx], st['mu_o'], st['mu_m'], st['valid'], st['cv'], *coords)
     F.update({k: v[year] for k, v in (extra or {}).items()})
+    if scfg['model'] in POOLED:                              # one fit for the cycle's months; this month's position
+        fit = pooled_fit(cycle_path, scfg, entry, scfg['model'])
+        F.update(onehot(months_of(cycle, project).index(target), n))
+    else:
+        fit = mdl.fit(S, **mdl.defaults)
     d = mdl.predict(F, fit)
     valid = st['valid']
     q = {u: np.where(valid, d.quantile(np.full(n, u)), np.nan) for u in LEVELS}
@@ -280,13 +338,16 @@ def main(args):
     folder = folder_of(scfg, entry, year)
     folder.mkdir(parents=True, exist_ok=True)
     models = [scfg['model']] + ([m for m in selection_models(entry) if m != scfg['model']] if scfg.get('models_from_selection') else [])
+    if args.models:
+        models = [m for m in models if m in args.models]
     targets = args.targets or cycle['targets']
     prov = dict(commit=git('rev-parse', 'HEAD'),
                 uncommitted_changes=bool(git('status', '--porcelain', '--', *CODE, args.cycle, args.config, entry['benchmark_config'])))
     done = 0
     for model in [m for m in models if m in NO_SHADOW]:
         print(f'{model}: {NO_SHADOW[model]}', flush=True)
-    for model, t in [(m, t) for m in models if m not in NO_SHADOW for t in targets]:
+    season = project['season']['name']
+    for model, t in [(m, t) for m in models if m not in NO_SHADOW for t in targets if not (m in POOLED and t == season)]:
         label = dc.MODELS[model].name
         key = fingerprint(args.cycle, args.config, cycle, project, entry, t, model)
         f = folder / f'{model}__{t}.json'

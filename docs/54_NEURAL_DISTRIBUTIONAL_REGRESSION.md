@@ -246,8 +246,10 @@ The driver works per year rather than per target (one fit serves the four months
 every month of the left-out year forecast and scored with the published references computed in the same folds, then one
 fit on all training years for the test years. Results have the same format as `dist_benchmark.py`; Holm across the four
 targets (the method selection: Benjamini–Hochberg); comparisons with the per-target DRN and EMOS read from the first stage.
-If the pooled DRN becomes a candidate, its shadow needs a pooled fit as well: not yet implemented (`dist_shadow.py` skips
-it with a message), so it could not collect validation seasons until then.
+Its shadow forecast (`dist_shadow.py`, since 2026-10-23) fits the pooled network once per cycle on the four months of the
+reference years, as the benchmark's final fit, and forecasts each month with its own position; the season total has no
+pooled shadow. The fingerprint covers the four months' inputs, and the fit stops if a cycle orders its months differently
+from the benchmark (the month inputs would change meaning).
 
 Config: `config/probability_calibration/<cycle>_neural_pooled.json`; results `.../neural_pooled/`. After the review (3f) the
 comparisons read the per-target DRN and EMOS of the second stage (same folds, same corrected CRPS).
@@ -274,8 +276,9 @@ comparisons read the per-target DRN and EMOS of the second stage (same folds, sa
 - **Method selection:** the pooled DRN is the selected candidate for FMAM-January March, April and May amounts (none before)
   and JJAS June and September amounts (−1.73 and −1.29 mm over 1993–2016; for September EMOS is now more than 1% behind,
   and of the tied neural candidates the pooled DRN has the larger gain).
-- **It cannot be validated yet:** its shadow forecast needs a pooled fit, not yet implemented (`dist_shadow.py` skips it). Until
-  that exists the pooled candidates cannot collect the three independent seasons a recommendation needs; it is the next step.
+- **Validation:** its shadow forecast exists since 2026-10-23 (above), so the pooled candidates collect independent seasons like
+  the others, from 2027 frozen before each season (the 2026 shadows are retrospective reconstructions). The first, JJAS June
+  2026, was a dry month that the MVS ensemble fitted better (CRPSS +0.12 against +0.33): one season, three are needed.
 - Production note: the JJAS run started from the queue (code of e4847a0); the other three cycles were restarted after the
   queue's loop stopped, with the same unchanged code; each assembly was completed from the checkpoints (missing
   `SCORING_VERSION` constant), nothing refitted.
