@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-22T15:54:06.597002+00:00",
+ "created_utc": "2026-10-23T09:30:04.751342+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -150,10 +150,20 @@
        "test_years_better": 6,
        "test_years": 9
       },
-      "validation": null,
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 39.03324271353676,
+         "reference": 40.93580108140928
+        }
+       ],
+       "mean_difference": -1.9025583678725226,
+       "required": 3
+      },
       "alternatives": [],
       "tie": null,
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Mar: CRPS (mm) difference -0.6644 over the training years (Benjamini–Hochberg p 0.0354; 15 of 24 years better), -0.4931 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Mar: CRPS (mm) difference -0.6644 over the training years (Benjamini–Hochberg p 0.0354; 15 of 24 years better), -0.4931 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.903."
      }
     },
     "Apr": {
@@ -195,10 +205,20 @@
        "test_years_better": 6,
        "test_years": 9
       },
-      "validation": null,
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 24.193135733983045,
+         "reference": 24.323479006866688
+        }
+       ],
+       "mean_difference": -0.13034327288364267,
+       "required": 3
+      },
       "alternatives": [],
       "tie": null,
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Apr: CRPS (mm) difference -0.6419 over the training years (Benjamini–Hochberg p 0.0354; 16 of 24 years better), -0.7869 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Apr: CRPS (mm) difference -0.6419 over the training years (Benjamini–Hochberg p 0.0354; 16 of 24 years better), -0.7869 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.1303."
      }
     },
     "May": {
@@ -240,10 +260,20 @@
        "test_years_better": 6,
        "test_years": 9
       },
-      "validation": null,
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 17.926616561703987,
+         "reference": 17.57931990283072
+        }
+       ],
+       "mean_difference": 0.3472966588732689,
+       "required": 3
+      },
       "alternatives": [],
       "tie": null,
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for May: CRPS (mm) difference -0.5414 over the training years (Benjamini–Hochberg p 0.0354; 13 of 24 years better), -0.7503 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for May: CRPS (mm) difference -0.5414 over the training years (Benjamini–Hochberg p 0.0354; 13 of 24 years better), -0.7503 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.3473."
      }
     },
     "FMAM": {
@@ -571,7 +601,17 @@
        "test_years_better": 5,
        "test_years": 9
       },
-      "validation": null,
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 20.720078552896723,
+         "reference": 15.738262077191724
+        }
+       ],
+       "mean_difference": 4.981816475704999,
+       "required": 3
+      },
       "alternatives": [
        {
         "family": "bias_correction",
@@ -601,7 +641,7 @@
        }
       ],
       "tie": null,
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jun: CRPS (mm) difference -1.727 over the training years (Benjamini–Hochberg p 0.0299; 20 of 24 years better), -1.685 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Square-root-space Mean-Variance Scaling (amount correction)."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jun: CRPS (mm) difference -1.727 over the training years (Benjamini–Hochberg p 0.0299; 20 of 24 years better), -1.685 over the test years. Independent validation: 1 of 3 season(s), mean difference +4.982. Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Square-root-space Mean-Variance Scaling (amount correction)."
      }
     },
     "Jul": {
@@ -813,7 +853,17 @@
        "test_years_better": 5,
        "test_years": 9
       },
-      "validation": null,
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 16.817417070045554,
+         "reference": 15.226470747388095
+        }
+       ],
+       "mean_difference": 1.5909463226574587,
+       "required": 3
+      },
       "alternatives": [
        {
         "family": "bias_correction",
@@ -961,7 +1011,7 @@
         }
        ]
       },
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.292 over the training years (Benjamini–Hochberg p 0.00174; 20 of 24 years better), -1.12 over the test years. No independent validation season yet: a shadow forecast is needed before it can be recommended. Tied within 1% of the published score (0.193 CRPS (mm)) with drn_emos_residual: the simplest is selected (practical tie rule; the largest gain was drn_pooled). Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Regularized quantile regression (distribution model); Distributional regression network (DRN), censored shifted gamma (distribution model (neural network)); DRN with SST indices and rainfall regions (distribution model (neural network)); Neural correction of EMOS (censored shifted gamma) (distribution model (neural network))."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Sep: CRPS (mm) difference -1.292 over the training years (Benjamini–Hochberg p 0.00174; 20 of 24 years better), -1.12 over the test years. Independent validation: 1 of 3 season(s), mean difference +1.591. Tied within 1% of the published score (0.193 CRPS (mm)) with drn_emos_residual: the simplest is selected (practical tie rule; the largest gain was drn_pooled). Also confirmed (one change at a time): Gamma Quantile Mapping (amount correction); Variance Scaling (unbounded) (amount correction); Square-root-space Mean-Variance Scaling (amount correction); EMOS, censored shifted gamma (distribution model); Regularized quantile regression (distribution model); Distributional regression network (DRN), censored shifted gamma (distribution model (neural network)); DRN with SST indices and rainfall regions (distribution model (neural network)); Neural correction of EMOS (censored shifted gamma) (distribution model (neural network))."
      }
     },
     "JJAS": {
