@@ -113,8 +113,14 @@ def main(args):
                 tests=db.tests_of(results, ['stack'], region, targets), comparisons=comparisons,
                 config_members=scfg['members'])
     save_json(out_root / 'benchmark.json', data)
-    if not args.no_figures:
-        db.figure(out_root, data)
+    if not args.no_figures:                                  # one row per member role: the DRN is pooled for the months only
+        roles = [[m for _, m in scfg['members'][part]] for part in ('months', 'season')]
+        view = {t: dict(results[t], methods={**results[t]['methods'],
+                                             **{f'member_{i + 1}': results[t]['methods'][m]
+                                                for i, m in enumerate(roles[1 if t == season else 0])}}) for t in targets}
+        reg = {f'member_{i + 1}': dict(name=a if a == b else 'DRN (pooled over the months; per target for the season)')
+               for i, (a, b) in enumerate(zip(*[[data['registry'][m]['name'] for m in r] for r in roles]))}
+        db.figure(out_root, dict(data, targets=view, models=['stack'] + list(reg), registry={**data['registry'], **reg}))
     print('Saved:', out_root)
 
 
