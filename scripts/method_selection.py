@@ -43,7 +43,10 @@ FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'proba
 # Simplicity order of the practical tie rule (rule 'tie_rule'): fewer and more interpretable parameters first
 SIMPLICITY = {'bias_correction': 1, 'probability_phase1': 1, 'probability_phase2_binary': 1, 'distribution_phase2': 2,
               'distribution_phase3': 4, 'leung_dirichlet': 4, 'mos': 4, 'distribution_neural': 5, 'distribution_neural_ext': 5,
-              'distribution_neural_pooled': 5, 'distribution_neural_pooled2': 5, 'distribution_neural_all': 5, 'distribution_stacking': 5}
+              'distribution_neural_pooled': 5,
+              # extensions of a network (the pooled DRN plus an EMOS base, neighbourhood inputs or the other cycles) and the
+              # combination of models, which contains a network: one step more complex than the network they extend
+              'distribution_neural_pooled2': 6, 'distribution_neural_all': 6, 'distribution_stacking': 6}
 SIMPLER_METHOD = {'emos_csg': 2, 'quantile_regression': 3, 'extended_logistic': 3}     # within the Phase 2 distribution models
 
 

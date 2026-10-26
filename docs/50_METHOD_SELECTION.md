@@ -27,7 +27,10 @@ supports, from all benchmarks together, by a rule fixed in advance (`config/meth
    published approach's own training-period score (MVS-ensemble CRPS for amounts, published RPS for probabilities, All
    Ethiopia) of the largest improvement are tied, and the simplest is selected: amount corrections and probability-stage
    calibrations, then EMOS, then quantile and extended logistic regression, then the Phase 3 models, Leung–Dirichlet and
-   statistical downscaling, then the neural networks. The tie is recorded in `selection.json`. 1% is above the largest error of
+   statistical downscaling, then the neural networks, and last what extends a network: the pooled network with an EMOS
+   base or neighbourhood inputs, the network over all cycles, and the combination of models (docs/54, 3g; it contains a
+   network), so an extension never displaces the network it extends on a negligible difference. The tie is recorded in
+   `selection.json`. 1% is above the largest error of
    the earlier numerical CRPS (0.7%, `scripts/crps_precision.py`) and well below the typical confirmed improvements (3–8%). It
    was decided before the second stage re-scores the close JJAS September comparison with the corrected CRPS (docs/54, 3f).
    **One change at a time:** each family was tested against the published approach, not combined with another family, so the
