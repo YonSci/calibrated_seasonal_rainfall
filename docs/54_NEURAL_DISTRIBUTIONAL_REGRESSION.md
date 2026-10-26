@@ -382,7 +382,14 @@ The pooled DRN is refitted in the `neural_pooled2` run as the control of the fir
 2017, 51 after), and the stage-1 DRN with version 1. They are rerun with the first 25 members in every year (the 2027
 policy, as the neural runs) and scoring version 2, so every distribution model is compared under one rule; two documented
 changes: ensemble size and CRPS rule. Phase 2 and Phase 3 results enter the method selection, the summary and the site only
-when accepted (`accept_results.py`; `phase2-v1` and `phase3-v1` are the results until now).
+when accepted (`accept_results.py`; `phase2-v1` and `phase3-v1` were the results until 2026-10-25).
+
+*Result (`phase2-v2`, `phase3-v2`, accepted 2026-10-25, commit 77b8e17).* Over 1993–2016 the scores are practically
+unchanged (within 0.001 skill; those years already had 25 members), except one ONDJ target for BMA, whose CRPSS falls by
+0.038: the new scoring rule corrects the integration of its heavy upper tail. Over 2017–2025 scores move by up to ±0.05,
+for the models and the references alike, because those years drop from 51 to 25 members. Every confirmation is the same as
+before (EMOS for FMAM-January FMAM amounts; EMOS and quantile regression for JJAS September amounts), and the method
+selection is unchanged.
 
 **Saved predictions.** With `"save_predictions": true`, `dist_benchmark.py`, `pooled_benchmark.py` and
 `pooled_all_benchmark.py` write `<output_root>/predictions/<target>.pkl`: every fold's predicted distribution per model and

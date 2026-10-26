@@ -4,7 +4,8 @@ as inputs (one-hot), against the published pipeline of each cycle.
 
 Same design as scripts/pooled_benchmark.py, whose sample building and per-month scoring it reuses: outer leave-one-year-out
 over the training years (the left-out year is removed from every cycle at once; ONDJ years are season years, as everywhere),
-then one fit on all training years for the test years. Each fold fits one network on the samples of all 16 months; every
+then one fit on all training years for the test years (each cycle scores its own test years: ONDJ's end in 2024, the
+season year of the last complete January). Each fold fits one network on the samples of all 16 months; every
 month of every cycle is then forecast and scored with that cycle's published references computed in the same fold. The
 results are written per cycle (<cycle>/neural_all/benchmark.json, the same format as the pooled benchmark), so the method
 selection, the summary and the site treat them as one more family per cycle (tests: the cycle's four months).
@@ -64,8 +65,8 @@ def contexts(config_path):
         ctx['pcfg'] = dict(ctx['pcfg'], models=acfg['models'], save_predictions=bool(acfg.get('save_predictions')))
         ctx['name'] = Path(ctx['cfg']['output_root']).name
         ctxs.append(ctx)
-    if any(c['train'] != ctxs[0]['train'] or c['test'] != ctxs[0]['test'] for c in ctxs):
-        raise ValueError('the cycles must share the training and test years')
+    if any(c['train'] != ctxs[0]['train'] for c in ctxs):        # one network per fold: the same years for every cycle
+        raise ValueError('the cycles must share the training years')   # test years may differ (ONDJ: season years to 2024)
     _ALL[config_path] = (acfg, ctxs)
     return _ALL[config_path]
 

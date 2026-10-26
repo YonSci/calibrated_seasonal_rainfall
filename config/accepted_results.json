@@ -8,18 +8,18 @@
  ],
  "accepted": {
   "neural/jan_fmam": {
-   "experiment": "drn-stage1-v2",
-   "sha256": "4500a96b18bf3dff984d6bdce34307bb27c5569cfd0af24b144e294a9b04728c",
-   "archive": "outputs/accepted/neural/jan_fmam/4500a96b18bf3dff",
-   "accepted_utc": "2026-10-21T05:39:33Z",
-   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
+   "experiment": "drn-stage1-v3",
+   "sha256": "63d948524b936a64e0c76a8d1cb90f13910d2a9e840dec16e2ce58df81ce8b38",
+   "archive": "outputs/accepted/neural/jan_fmam/63d948524b936a64",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "drn-stage1-v2 rerun at 77b8e17 with CRPS scoring version 2 and saved per-fold predictions; identical fits, scores within 0.001",
    "figures": [
     "distribution_summary.png",
     "reliability_test.png",
     "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T20:31:12.725708+00:00",
-   "commit": "c6eec731f7782af0ccfcf4c8e482e57cdbb952e7",
+   "created_utc": "2026-10-25T22:30:51.227051+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/jan_fmam_neural.json",
    "training_years": [
@@ -62,21 +62,21 @@
      "[32]|0.001"
     ]
    },
-   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "neural/feb_fmam": {
-   "experiment": "drn-stage1-v2",
-   "sha256": "82ce4038d2c3b3b4a8f7cfe62f54b743713646407d344330cd66d72f76b7c741",
-   "archive": "outputs/accepted/neural/feb_fmam/82ce4038d2c3b3b4",
-   "accepted_utc": "2026-10-21T05:39:33Z",
-   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
+   "experiment": "drn-stage1-v3",
+   "sha256": "448d0c6f22bce16de6c00759b356c25742c1d6ea1f4aaa9e6860c7353623741f",
+   "archive": "outputs/accepted/neural/feb_fmam/448d0c6f22bce16d",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "drn-stage1-v2 rerun at 77b8e17 with CRPS scoring version 2 and saved per-fold predictions; identical fits, scores within 0.001",
    "figures": [
     "distribution_summary.png",
     "reliability_test.png",
     "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T19:48:32.936042+00:00",
-   "commit": "c6eec731f7782af0ccfcf4c8e482e57cdbb952e7",
+   "created_utc": "2026-10-26T01:39:31.323436+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/feb_fmam_neural.json",
    "training_years": [
@@ -119,21 +119,21 @@
      "[32]|0.001"
     ]
    },
-   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "neural/may_jjas": {
-   "experiment": "drn-stage1-v2",
-   "sha256": "d05e990071ddd7330e2f7f4b8893816f2fcfe36fa15d00cdd091f96d80bc0dfd",
-   "archive": "outputs/accepted/neural/may_jjas/d05e990071ddd733",
-   "accepted_utc": "2026-10-21T05:39:33Z",
-   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
+   "experiment": "drn-stage1-v3",
+   "sha256": "00da969132f63b9b8b830259a3fa8af1cc57135b9ab1b5d08ceeaeba1638f3e7",
+   "archive": "outputs/accepted/neural/may_jjas/00da969132f63b9b",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "drn-stage1-v2 rerun at 77b8e17 with CRPS scoring version 2 and saved per-fold predictions; identical fits, scores within 0.001",
    "figures": [
     "distribution_summary.png",
     "reliability_test.png",
     "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T13:56:52.926115+00:00",
-   "commit": "6e350daae1f4073742d3e693ca1e31a49dea86b7",
+   "created_utc": "2026-10-25T10:16:18.026558+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/may_jjas_neural.json",
    "training_years": [
@@ -176,21 +176,21 @@
      "[32]|0.001"
     ]
    },
-   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "neural/sep_ondj": {
-   "experiment": "drn-stage1-v2",
-   "sha256": "2492db0fe749c1c0939a626afffdc405fad1332e7382c3dd9ad7d3ea50bf77e1",
-   "archive": "outputs/accepted/neural/sep_ondj/2492db0fe749c1c0",
-   "accepted_utc": "2026-10-21T05:39:33Z",
-   "note": "rerun with the architecture x weight-decay search (32 or 32-16 units x 1e-4 or 1e-3) and Brier skill, range width and reliability; the benchmark code is that of c221c2d in every cycle (the commits recorded are the HEAD at the end of each run; the code files are identical between them); CRPS scoring version 1",
+   "experiment": "drn-stage1-v3",
+   "sha256": "86021fc7e0635bb76dd4f2724247b69d49f6edce723ad41b1a5c94c39650624c",
+   "archive": "outputs/accepted/neural/sep_ondj/86021fc7e0635bb7",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "drn-stage1-v2 rerun at 77b8e17 with CRPS scoring version 2 and saved per-fold predictions; identical fits, scores within 0.001",
    "figures": [
     "distribution_summary.png",
     "reliability_test.png",
     "reliability_training.png"
    ],
-   "created_utc": "2026-10-20T12:36:27.909514+00:00",
-   "commit": "4b72f360b7cdd123fe265ba69f4bca434dbd7870",
+   "created_utc": "2026-10-25T18:53:59.919036+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/sep_ondj_neural.json",
    "training_years": [
@@ -233,7 +233,7 @@
      "[32]|0.001"
     ]
    },
-   "code_commit": "c221c2d2751172c4377ca9abd66ad9aa771cd13c"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "neural_ext/jan_fmam": {
    "experiment": "drn-stage2-v1",
@@ -756,16 +756,16 @@
    "code_commit": "e4847a087794aa45f3f050366656e38b8206b06c"
   },
   "distribution/jan_fmam": {
-   "experiment": "phase2-v1",
-   "sha256": "b50420857edc41a7d8a787025cbb60f8d985e71e60c499dc9e78c5a987bdecea",
-   "archive": "outputs/accepted/distribution/jan_fmam/b50420857edc41a7",
-   "accepted_utc": "2026-10-23T17:07:43Z",
-   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "experiment": "phase2-v2",
+   "sha256": "77c4c43bbf2fcb3c140835c166688bf0b48a135d73b7c7b705fa935a19a75d37",
+   "archive": "outputs/accepted/distribution/jan_fmam/77c4c43bbf2fcb3c",
+   "accepted_utc": "2026-10-25T14:54:40Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T12:11:37.151891+00:00",
-   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "created_utc": "2026-10-23T19:32:43.872364+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/jan_fmam_distribution.json",
    "training_years": [
@@ -776,7 +776,7 @@
     2017,
     2025
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "emos_csg",
     "extended_logistic",
@@ -794,19 +794,19 @@
     "extended_logistic": [],
     "quantile_regression": []
    },
-   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "distribution/feb_fmam": {
-   "experiment": "phase2-v1",
-   "sha256": "df083f0fab76060f3179521d0221ce357adaf7b1ec331ba94dccae6f1f49bb3f",
-   "archive": "outputs/accepted/distribution/feb_fmam/df083f0fab76060f",
-   "accepted_utc": "2026-10-23T17:07:43Z",
-   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "experiment": "phase2-v2",
+   "sha256": "10105e8563c925b37ac0541b71184ba680b009f7199cfb84d3309de818ad3080",
+   "archive": "outputs/accepted/distribution/feb_fmam/10105e8563c925b3",
+   "accepted_utc": "2026-10-25T14:54:40Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T12:44:52.216106+00:00",
-   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "created_utc": "2026-10-23T19:47:32.434164+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/feb_fmam_distribution.json",
    "training_years": [
@@ -817,7 +817,7 @@
     2017,
     2025
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "emos_csg",
     "extended_logistic",
@@ -835,19 +835,19 @@
     "extended_logistic": [],
     "quantile_regression": []
    },
-   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "distribution/may_jjas": {
-   "experiment": "phase2-v1",
-   "sha256": "8900f806db831dcd7bc148520496a501412b85274da87ce625c4a5f1ce9fd60c",
-   "archive": "outputs/accepted/distribution/may_jjas/8900f806db831dcd",
-   "accepted_utc": "2026-10-23T17:07:43Z",
-   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "experiment": "phase2-v2",
+   "sha256": "01f53ee0d46b1fc8e2b4652a0487682b88eb238e8aeef00393177004747215ae",
+   "archive": "outputs/accepted/distribution/may_jjas/01f53ee0d46b1fc8",
+   "accepted_utc": "2026-10-25T14:54:40Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T13:13:52.259626+00:00",
-   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "created_utc": "2026-10-23T19:03:44.248084+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/may_jjas_distribution.json",
    "training_years": [
@@ -858,7 +858,7 @@
     2017,
     2025
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "emos_csg",
     "extended_logistic",
@@ -876,19 +876,19 @@
     "extended_logistic": [],
     "quantile_regression": []
    },
-   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "distribution/sep_ondj": {
-   "experiment": "phase2-v1",
-   "sha256": "7510e973bdbacde6a3969aba62c1e62a6a4e93c0e109265a86c3063da10d5144",
-   "archive": "outputs/accepted/distribution/sep_ondj/7510e973bdbacde6",
-   "accepted_utc": "2026-10-23T17:07:43Z",
-   "note": "Phase 2 rainfall-distribution models (EMOS, extended logistic, quantile regression) as run on 13 October 2026: all members (25 to 2016, 51 from 2017), CRPS scoring version 1; published since then",
+   "experiment": "phase2-v2",
+   "sha256": "d48bb8b1029d824740366c9953e644779b60733fa048bf4d99045032812a65a5",
+   "archive": "outputs/accepted/distribution/sep_ondj/d48bb8b1029d8247",
+   "accepted_utc": "2026-10-25T14:54:40Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T13:32:48.022634+00:00",
-   "commit": "6d8236d4a4451887bffc84aaee53f54723a9d820",
+   "created_utc": "2026-10-23T19:18:59.737718+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/sep_ondj_distribution.json",
    "training_years": [
@@ -899,7 +899,7 @@
     2017,
     2024
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "emos_csg",
     "extended_logistic",
@@ -917,19 +917,19 @@
     "extended_logistic": [],
     "quantile_regression": []
    },
-   "code_commit": "6d8236d4a4451887bffc84aaee53f54723a9d820"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "phase3/jan_fmam": {
-   "experiment": "phase3-v1",
-   "sha256": "b3e57118123cab412c517e7940239a1a21bb556320bebf976da2df08f26428fd",
-   "archive": "outputs/accepted/phase3/jan_fmam/b3e57118123cab41",
-   "accepted_utc": "2026-10-23T17:07:44Z",
-   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "experiment": "phase3-v2",
+   "sha256": "9cac7fa55ba24fc761481462042448b02b4aaee57ad506f2932f55b2dd0a1a2c",
+   "archive": "outputs/accepted/phase3/jan_fmam/9cac7fa55ba24fc7",
+   "accepted_utc": "2026-10-25T14:54:41Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T21:22:37.883044+00:00",
-   "commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4",
+   "created_utc": "2026-10-25T00:25:03.795676+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/jan_fmam_phase3.json",
    "training_years": [
@@ -940,7 +940,7 @@
     2017,
     2025
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "bjp",
     "bma_precipitation",
@@ -958,19 +958,19 @@
     "bma_precipitation": [],
     "quantile_regression_forest": []
    },
-   "code_commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "phase3/feb_fmam": {
-   "experiment": "phase3-v1",
-   "sha256": "22cd980f59e83172a2cea1740680ece21d87e1538cc927113137f980bfbe48d8",
-   "archive": "outputs/accepted/phase3/feb_fmam/22cd980f59e83172",
-   "accepted_utc": "2026-10-23T17:07:44Z",
-   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "experiment": "phase3-v2",
+   "sha256": "d0a911430924a9e9d84d717f4da3c6df5d92e5b890bfddf1c35fe2b0c0e28396",
+   "archive": "outputs/accepted/phase3/feb_fmam/d0a911430924a9e9",
+   "accepted_utc": "2026-10-25T14:54:41Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T21:25:35.967732+00:00",
-   "commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4",
+   "created_utc": "2026-10-25T01:55:40.636563+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/feb_fmam_phase3.json",
    "training_years": [
@@ -981,7 +981,7 @@
     2017,
     2025
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "bjp",
     "bma_precipitation",
@@ -999,19 +999,19 @@
     "bma_precipitation": [],
     "quantile_regression_forest": []
    },
-   "code_commit": "583cc4cb1f28653e5d6f5193d0c218756cbea5a4"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "phase3/may_jjas": {
-   "experiment": "phase3-v1",
-   "sha256": "c7bff898bf815dc1b9b1e9fed8ddca9c6c4c612db634d96fa642ebb26fd1554f",
-   "archive": "outputs/accepted/phase3/may_jjas/c7bff898bf815dc1",
-   "accepted_utc": "2026-10-23T17:07:44Z",
-   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "experiment": "phase3-v2",
+   "sha256": "15e506d50adf3f7a10cd1c84ce391ad48e4df7ef99a063c3e02d6a607a78e22c",
+   "archive": "outputs/accepted/phase3/may_jjas/15e506d50adf3f7a",
+   "accepted_utc": "2026-10-25T14:54:41Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T23:51:32.503356+00:00",
-   "commit": "03feb0fde820911e3efd9610b1cbc015161efcb0",
+   "created_utc": "2026-10-23T21:47:55.641342+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/may_jjas_phase3.json",
    "training_years": [
@@ -1022,7 +1022,7 @@
     2017,
     2025
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "bjp",
     "bma_precipitation",
@@ -1040,19 +1040,19 @@
     "bma_precipitation": [],
     "quantile_regression_forest": []
    },
-   "code_commit": "03feb0fde820911e3efd9610b1cbc015161efcb0"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   },
   "phase3/sep_ondj": {
-   "experiment": "phase3-v1",
-   "sha256": "f266f25dfc54e36cad27d76f6eb118cec0fbed36ab020f800bdbb2d6fb7fdd3e",
-   "archive": "outputs/accepted/phase3/sep_ondj/f266f25dfc54e36c",
-   "accepted_utc": "2026-10-23T17:07:44Z",
-   "note": "Phase 3 rainfall-distribution models (BJP, BMA, quantile regression forest) as run on 13 October 2026: all members, CRPS scoring version 1; published since then",
+   "experiment": "phase3-v2",
+   "sha256": "4003d6b576a045eec9635364ed784ef45666d51db5633ee868c89913b266452c",
+   "archive": "outputs/accepted/phase3/sep_ondj/4003d6b576a045ee",
+   "accepted_utc": "2026-10-25T14:54:41Z",
+   "note": "rerun with the first 25 SEAS5 members in every year (2027 policy) and CRPS scoring version 2; saved per-fold predictions (docs/54 3g)",
    "figures": [
     "distribution_summary.png"
    ],
-   "created_utc": "2026-10-13T23:42:29.686757+00:00",
-   "commit": "03feb0fde820911e3efd9610b1cbc015161efcb0",
+   "created_utc": "2026-10-24T22:43:15.300746+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
    "uncommitted_changes": false,
    "config": "config/probability_calibration/sep_ondj_phase3.json",
    "training_years": [
@@ -1063,7 +1063,7 @@
     2017,
     2024
    ],
-   "members": null,
+   "members": 25,
    "models": [
     "bjp",
     "bma_precipitation",
@@ -1081,7 +1081,235 @@
     "bma_precipitation": [],
     "quantile_regression_forest": []
    },
-   "code_commit": "03feb0fde820911e3efd9610b1cbc015161efcb0"
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
+  },
+  "neural_pooled2/jan_fmam": {
+   "experiment": "drn-pooled2-v1",
+   "sha256": "0f48ba4b2485bc28bb49279c9e29364308cf5a63cffd896f4a3f4d712e23c97d",
+   "archive": "outputs/accepted/neural_pooled2/jan_fmam/0f48ba4b2485bc28",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "pooled DRN refit, pooled neural correction of EMOS (EMOS per month) and pooled DRN with 3x3/5x5 neighbourhood inputs; 25 members, scoring v2, saved predictions (docs/54 3g)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-25T11:17:44.837330+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/jan_fmam_neural_pooled2.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled",
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_nbhd": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
+  },
+  "neural_pooled2/feb_fmam": {
+   "experiment": "drn-pooled2-v1",
+   "sha256": "bfc4c3a5d2519690508509e78e7d1e23019712e856bb5374d5d1447e753575b6",
+   "archive": "outputs/accepted/neural_pooled2/feb_fmam/bfc4c3a5d2519690",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "pooled DRN refit, pooled neural correction of EMOS (EMOS per month) and pooled DRN with 3x3/5x5 neighbourhood inputs; 25 members, scoring v2, saved predictions (docs/54 3g)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-25T18:53:04.771152+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/feb_fmam_neural_pooled2.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled",
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_nbhd": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
+  },
+  "neural_pooled2/may_jjas": {
+   "experiment": "drn-pooled2-v1",
+   "sha256": "45f4f89abeb9ccb6a5cb6f44ebf013610347328f349c994f85feb2e384faa43a",
+   "archive": "outputs/accepted/neural_pooled2/may_jjas/45f4f89abeb9ccb6",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "pooled DRN refit, pooled neural correction of EMOS (EMOS per month) and pooled DRN with 3x3/5x5 neighbourhood inputs; 25 members, scoring v2, saved predictions (docs/54 3g)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-25T02:20:42.719692+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_neural_pooled2.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled",
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+   ],
+   "targets": [
+    "Aug",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_nbhd": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
+  },
+  "neural_pooled2/sep_ondj": {
+   "experiment": "drn-pooled2-v1",
+   "sha256": "f70ce1dd5b62825074a018142123e0631b1d9a2c8c7ce20f92bb5003a96efbcb",
+   "archive": "outputs/accepted/neural_pooled2/sep_ondj/f70ce1dd5b628250",
+   "accepted_utc": "2026-10-26T17:04:03Z",
+   "note": "pooled DRN refit, pooled neural correction of EMOS (EMOS per month) and pooled DRN with 3x3/5x5 neighbourhood inputs; 25 members, scoring v2, saved predictions (docs/54 3g)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-25T06:53:25.674393+00:00",
+   "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/sep_ondj_neural_pooled2.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled",
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "Oct"
+   ],
+   "searched": {
+    "drn_pooled": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_residual": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ],
+    "drn_pooled_nbhd": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
   }
  }
 }
