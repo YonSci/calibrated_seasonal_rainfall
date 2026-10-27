@@ -111,14 +111,16 @@ def confirmed(data, family, target, score, keys, names, reference=None):
     return out
 
 
-def shadow_validation(cycle, model, target, minimum):
-    """Independent seasons of a distribution model's amount shadow (dist_shadow.py): its CRPS and the MVS ensemble's per scored year."""
+def shadow_validation(cycle, model, target, minimum, score='crps'):
+    """Independent seasons of a distribution model's shadow (dist_shadow.py) per scored year: amounts, its CRPS and the MVS
+    ensemble's; probabilities, the RPS of its tercile probabilities and of the published probabilities."""
+    ref = 'mvs_ensemble' if score == 'crps' else 'published'
     seasons = []
     for f in sorted((ROOT / f'outputs/probability_calibration/{cycle}/amount_shadow').glob(f'*/{model}__{target}.json')):
         r = json.loads(f.read_text(encoding='utf-8'))
         s = (r.get('scores') or {}).get(r.get('primary_region', 'ethiopia'), {})
-        if r.get('observed') and 'crps' in s.get('shadow', {}) and 'crps' in s.get('mvs_ensemble', {}):
-            seasons.append(dict(year=int(f.parent.name), method=s['shadow']['crps'], reference=s['mvs_ensemble']['crps']))
+        if r.get('observed') and score in s.get('shadow', {}) and score in s.get(ref, {}):
+            seasons.append(dict(year=int(f.parent.name), method=s['shadow'][score], reference=s[ref][score]))
     if not seasons:
         return None
     return dict(seasons=seasons, mean_difference=float(np.mean([x['method'] - x['reference'] for x in seasons])), required=minimum)
@@ -270,8 +272,8 @@ def main():
                     cands += confirmed(mos, 'mos', t, score, [k for k in mos['methods'] if score in mos['tests'].get(k, {})],
                                        lambda k: mos['labels'][k], reference='incumbent' if score == 'rps' else 'mvs_ensemble')
                 for c in cands:
-                    if c['family'].startswith('distribution') and product == 'amounts':
-                        c['validation'] = shadow_validation(cy, c['method'], t, minimum)
+                    if c['family'].startswith('distribution'):          # amounts and, since drn-all-v1, probabilities
+                        c['validation'] = shadow_validation(cy, c['method'], t, minimum, score)
                     if c['family'] == 'leung_dirichlet':
                         c['validation'] = leung_dirichlet_validation(ld, c['method'], t, score, minimum)
                     if c['family'] == 'mos':                                # the benchmark's forecast year and the shadow seasons

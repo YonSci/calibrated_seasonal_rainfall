@@ -77,5 +77,25 @@ class MosValidation(unittest.TestCase):
         self.assertEqual(len(v['seasons']), 2)                                      # one record for 2026
 
 
+class ShadowValidation(unittest.TestCase):
+    def test_amounts_against_the_mvs_ensemble_probabilities_against_the_published(self):
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            old, ms.ROOT = ms.ROOT, Path(tmp)
+            try:
+                f = Path(tmp) / 'outputs/probability_calibration/feb_fmam/amount_shadow/2026/drn_pooled_all__May.json'
+                f.parent.mkdir(parents=True)
+                f.write_text(json.dumps(dict(observed=True, primary_region='ethiopia', scores=dict(ethiopia=dict(
+                    shadow=dict(crps=19., rps=.43), mvs_ensemble=dict(crps=20.), published=dict(rps=.40))))), encoding='utf-8')
+                a = ms.shadow_validation('feb_fmam', 'drn_pooled_all', 'May', 3)
+                p = ms.shadow_validation('feb_fmam', 'drn_pooled_all', 'May', 3, 'rps')
+            finally:
+                ms.ROOT = old
+        self.assertEqual(a['seasons'], [dict(year=2026, method=19., reference=20.)])
+        self.assertEqual(p['seasons'], [dict(year=2026, method=.43, reference=.40)])
+        self.assertGreater(p['mean_difference'], 0)                                 # worse than the published probabilities
+
+
 if __name__ == '__main__':
     unittest.main()

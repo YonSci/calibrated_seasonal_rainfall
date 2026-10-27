@@ -460,6 +460,15 @@ forecasting each month of the issuing cycle with its month and cycle inputs. A f
 not wait for the other cycles' forecasts; cycles with the same reference years share one fit (kept on disk under its input
 key), about an hour on the project laptop.
 
+*First validation seasons (2026, retrospective shadows made 2026-10-27; three are needed).* FMAM-January February
+amounts: CRPS 6.50 mm against 6.62 mm for the MVS ensemble (better; it was also better in March and April as an alternative,
+worse in May). FMAM-February April and May probabilities: RPS 0.533 and 0.426 against 0.507 and 0.398 for the published
+probabilities (worse in both). As alternatives the extensions and stacking were better than the published amounts for
+FMAM-January March and April and worse for May, and all were well behind for JJAS, whose dry 2026 season suited the MVS
+ensemble (June CRPSS +0.13 to +0.22 against +0.33). ONDJ 2026/27 is not yet observed. Distribution-model candidates for
+probabilities are validated by the RPS of their shadow's tercile probabilities against the published ones
+(`method_selection.shadow_validation`, docs/50).
+
 *Production note:* all 25 folds ran from commit 24d45ee; the run's final assembly stopped on a missing per-cycle setting
 (the cycle's `benchmark_config`, needed only for the provenance record). The four result files were assembled from the
 run's own checkpoints by a wrapper that supplied it, with the code of the run unchanged (the checkpoint keys matched;

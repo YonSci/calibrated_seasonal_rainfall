@@ -39,7 +39,8 @@ supports, from all benchmarks together, by a rule fixed in advance (`config/meth
 3. **Validation (status).** Every candidate is scored on the independent seasons after the benchmark: every amount correction
    by the bias-correction validation runs (`bias_validation.py --methods all`, run by the daily scoring), every
    distribution-model candidate by its own shadow forecast (`dist_shadow.py` runs, besides EMOS, every distribution model the
-   selection lists, the neural network included), the statistical-downscaling methods by their benchmark's forecast year
+   selection lists, the neural network included; amounts by its CRPS against the MVS ensemble's, tercile probabilities by
+   the RPS of its probabilities against the published ones), the statistical-downscaling methods by their benchmark's forecast year
    (2026) and, from 2027, their own frozen shadow forecasts (`mos_shadow.py`, made when the cycle is run). From 2027 every
    shadow is made when the cycle is run, before its season (docs/52), and scored by the daily scoring once CHIRPS is
    available. After at least three seasons a candidate is **recommended** if its mean score over them is not worse
