@@ -151,7 +151,7 @@ def main(args):
                 db.save_predictions(out_root, t, saved)
         region = cfg['primary_region']
         ext = {k: v for k, v in (acfg.get('external_models') or {}).items()}
-        pcfg = dict(acfg, external_models=ext)
+        pcfg = dict(acfg, benchmark_config=ctx['pcfg']['benchmark_config'], external_models=ext)   # the cycle's benchmark
         data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=acfg, protocol=__doc__.strip(),
                     provenance=db.provenance(cfg, project, months, pcfg, deps[name], start, {m: key for m in months}, args.config),
                     scoring_version=dc.SCORING_VERSION, phase=acfg.get('phase', 4),

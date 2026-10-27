@@ -86,14 +86,16 @@ def check(d, expect_models=None, targets=TARGETS, family=''):
     if not info['test_years'] or info['test_years'][0] != 2017:
         bad.append(f'test years {info["test_years"]}')
     # 25 members (the 2027 policy) for every neural and combined result; the earlier distribution benchmarks (Phases 2 and 3)
-    # used all members and are accepted as they were run
-    if (family.startswith('neural') or family == 'stacking' or info['members'] is not None) and info['members'] != 25             and not (family == 'stacking' and d.get('scoring_version') == 2):
+    # used all members and are accepted as they were run; stacking combines accepted 25-member results (its members' check)
+    if (family.startswith('neural') or info['members'] is not None) and family != 'stacking' and info['members'] != 25:
         bad.append(f'members {info["members"]}, expected 25')
     if info['uncommitted_changes'] is not False:
         bad.append('provenance does not show a clean commit')
     models = expect_models or (d.get('config_contents', {}).get('models') or info['models'] or [])
+    used = (d.get('provenance') or {}).get('member_predictions') if family == 'stacking' else None
     for t, x in d.get('targets', {}).items():
-        for m in models:
+        # stacking: the pool and the members it combined for this target (the months and the season use different DRNs)
+        for m in (['stack'] + [k.split('/')[-1] for k in used.get(t, {})] if used else models):
             r = (x.get('methods') or {}).get(m)
             if not r or not r.get('training') or not r.get('test'):
                 bad.append(f'{t}: no training and test scores for {m}')

@@ -365,8 +365,8 @@ the earlier ones; every model uses the first 25 members and CRPS scoring version
   month's position and the cycle as one-hot inputs. The left-out year is removed from every cycle at once; each cycle's months
   are scored with that cycle's references in the same fold, and the results are written per cycle
   (`<cycle>/neural_all/benchmark.json`), so the selection treats them as one more family per cycle. Sixteen times the samples
-  of a per-target network, from the same years. It has no shadow until it is confirmed for a target (one fit would serve four
-  cycles issued months apart).
+  of a per-target network, from the same years. Planned without a shadow until confirmed for a target; it was confirmed
+  (below) and now has one.
 - **Stacking: the equal-weight linear pool** F = (F_EMOS + F_QR + F_DRN) / 3 (`scripts/stack_benchmark.py`,
   `dist_calibration.Pool`; Gneiting & Ranjan 2013). For the months the DRN is the pooled DRN, for the season the per-target
   DRN. Nothing is fitted: the members' saved predictions (below) of the same folds are averaged and scored with the folds'
@@ -402,6 +402,69 @@ refit, and stacking needs no refit of its members.
 saved predictions); `neural_pooled2` → `drn_pooled_all`; then stacking, which reads the accepted Phase 2, `neural_pooled2` and
 stage-1 predictions.
 
+### Results of the four new models (CRPS scoring version 2, 25 members)
+
+| Mean over the 16 months | Pooled DRN (refit) | Correcting EMOS | Neighbourhood | All cycles | Stacking | EMOS | Published |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Amounts, CRPSS 1993–2016 | +0.035 | +0.030 | +0.033 | +0.036 | +0.032 | +0.022 | +0.007 (MVS ensemble) |
+| Amounts, CRPSS 2017+ | +0.029 | +0.025 | +0.031 | +0.026 | +0.026 | +0.014 | +0.000 |
+| Coverage of the 10–90% range, 1993–2016 | 81% | 80% | 81% | 80% | 81% | 80% | 65% |
+| Probabilities, RPSS 1993–2016 | +0.023 | +0.012 | +0.021 | +0.019 | +0.009 | −0.010 | +0.020 |
+| Probabilities, RPSS 2017+ | +0.023 | +0.016 | +0.024 | +0.026 | +0.012 | −0.004 | +0.022 |
+| Lower CRPS than the pooled DRN, 1993–2016 | – | 4 of 16 | 6 of 16 | 9 of 16 | 5 of 16 | – | – |
+
+**The pooled DRN is reproduced** (`drn-pooled2-v1`, accepted 2026-10-25): its refit in the same run gives the scores of
+`drn-pooled-v1` to the third decimal, so the comparisons below are between models fitted on the same folds.
+
+**`drn_pooled_residual` (the pooled network correcting EMOS): no gain.** It is behind the pooled DRN for 12 of 16 months
+(−0.17 to +0.51 mm; worst for FMAM-February March to May), and its probabilities are weaker (RPSS +0.012). The per-month EMOS
+base, which helped the per-target network for FMAM-February February (3c), is a constraint once the network has four times
+the samples: the pooled network learns the monthly differences itself.
+
+**`drn_pooled_nbhd` (neighbourhood inputs): no consistent gain.** It is within ±0.13 mm of the pooled DRN for 15 of 16 months
+(better for 6), with one clear loss (ONDJ October, +0.46 mm), and nearly the same probabilities (+0.021 against +0.023). The
+3×3 and 5×5 means of the ensemble statistics add little to what each cell's own statistics carry; over 2017–2025 it is
+slightly ahead (+0.031 against +0.029), within the year-to-year noise. This does not support moving to the patch CNN of section 5
+for now.
+
+Both extensions are confirmed better than the published amounts (Holm) only for JJAS September, where the pooled DRN is too;
+under the selection's Benjamini–Hochberg rule they are tied alternatives for FMAM-January March to May and JJAS June and
+September amounts, and the tie rule keeps the pooled DRN (an extension ranks one step more complex, `method_selection.py`).
+
+**Stacking (`stack-v1`, accepted 2026-10-27): between its members, below the best.** Over the 16 months the pool's amounts
+(CRPSS +0.032) are better than EMOS and quantile regression in every cycle but slightly behind the pooled DRN (lower CRPS in 5
+of 16 months), and its probabilities are clearly weaker (RPSS +0.009 against +0.023): averaging three distributions widens
+the ranges (mean 10–90% width 88.8 mm against 86.7 mm) and flattens the tercile probabilities towards climatology. For the
+season totals the pool is the best of its members for JJAS (CRPS 46.14 mm against 46.20 mm for the DRN and 46.34 mm for EMOS)
+and within 0.4 mm of the best member (EMOS) for the other three. Confirmations: JJAS June and September amounts (Holm), where
+the pooled DRN is confirmed and better; none for FMAM or ONDJ. Equal weights do not beat the best single model, so estimated
+weights (section 5) would have to learn mostly "use the pooled DRN"; with 24 training years this is not pursued.
+
+**`drn_pooled_all` (one network for the four cycles, `drn-all-v1`, accepted 2026-10-27): the first real change since
+pooling.** On average it matches the pooled DRN (CRPSS +0.036 against +0.035 over 1993–2016; +0.026 against +0.029 over
+2017+), but the average hides a clear split. It is better than the pooled DRN for **every month of FMAM-January and ONDJ**
+(−0.07 to −0.49 mm; ONDJ October −0.49 mm and January −0.27 mm, the pooled DRN's weakest month) and for FMAM-February March and
+April, and **worse for every JJAS month** (+0.21 to +0.46 mm): the rainy-season months of the other cycles help the short-rains
+and belg months more than they help the kiremt months, which already have the most rain and the strongest signal. Holm
+confirms its amounts for FMAM-January February to May, JJAS June and September and ONDJ January, and its tercile
+probabilities for FMAM-February May (RPSS +0.025 against +0.008 for the published probabilities over 1993–2016, 18 of 24
+years better; +0.028 against +0.020 over 2017+).
+
+*Method selection:* it becomes the selected candidate for FMAM-January February amounts (none before) and FMAM-February April
+and May probabilities (both kept the published method before; under Benjamini–Hochberg April is confirmed as well), and a
+tied alternative for FMAM-January March to May, JJAS June and September and ONDJ January amounts (the pooled DRN, or for ONDJ
+January square-root MVS, stays selected as the simpler candidate). Being a candidate it now has its own shadow forecast
+(`dist_shadow.py`, `all_cycles_fit`): fitted like the benchmark's final fit on the 16 months of the four cycles, each cycle
+over those of the forecast cycle's reference years it has observations for (ONDJ's observations end a year earlier), and
+forecasting each month of the issuing cycle with its month and cycle inputs. A fit reads only reference years, so it does
+not wait for the other cycles' forecasts; cycles with the same reference years share one fit (kept on disk under its input
+key), about an hour on the project laptop.
+
+*Production note:* all 25 folds ran from commit 24d45ee; the run's final assembly stopped on a missing per-cycle setting
+(the cycle's `benchmark_config`, needed only for the provenance record). The four result files were assembled from the
+run's own checkpoints by a wrapper that supplied it, with the code of the run unchanged (the checkpoint keys matched;
+nothing was refitted); the assembly is fixed in `pooled_all_benchmark.py`.
+
 ## 4. Running
 
     python scripts/dist_benchmark.py --config config/probability_calibration/<cycle>_neural.json --workers 5
@@ -416,7 +479,9 @@ gradients: its incomplete gamma function made one step 0.7 s, against about 20 m
     python scripts/accept_results.py accept <family> --experiment <name>          # then the selection and the site
 
 At each issue the shadow forecasts of the selected candidates (`dist_shadow.py`, run by `run_operational.py`) add about one
-hour per cycle for the pooled network (one fit, four months) and about 5–15 minutes per target for each per-target network.
+hour per cycle for the pooled network (one fit, four months), about one hour for the all-cycles network whenever its
+reference years change (one fit shared by the cycles with the same reference years), and about 5–15 minutes per target for
+each per-target network.
 
 ## 5. Possible next steps
 
@@ -424,8 +489,10 @@ Following the order recommended for this project: if the DRN improves on EMOS, t
 correction of the EMOS parameters); then pool the monthly targets with the target month and lead as inputs; then add
 spatial context with a small patch CNN on the surrounding SEAS5 fields; then run the chosen network as a shadow forecast.
 Done so far: the inputs and the correction of EMOS (3c), pooling (3d, 3g), shadows (3b, 3d) and neighbourhood means as a
-first spatial context (3g). Next, depending on the third stage: the patch CNN if the neighbourhood inputs help; weights for the
-pool estimated over the cycles if equal weights help.
+first spatial context (3g). The third stage settles two of the open questions: neighbourhood inputs do not help, so the
+patch CNN is not a priority; equal-weight stacking does not beat its best member, so estimated weights are not pursued. Pooling
+further does help where the cycles share a rainfall regime: next, a network for the FMAM and ONDJ cycles without JJAS (or
+with JJAS down-weighted), against the all-cycles network on the same folds, and the validation seasons of the new shadow.
 
 ## References
 

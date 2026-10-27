@@ -56,8 +56,18 @@ class ThirdStageShadows(unittest.TestCase):
             self.assertIn(m, ds.POOLED)
             self.assertEqual(scfg['members'].get(m), 25)
         self.assertIn('drn_pooled_nbhd', ds.NEIGHBOURHOOD)
-        self.assertIn('drn_pooled_all', ds.NO_SHADOW)             # not until confirmed
+        self.assertIn('drn_pooled_all', ds.ALL_CYCLES)            # confirmed in drn-all-v1: its own shadow
+        self.assertNotIn('drn_pooled_all', ds.NO_SHADOW)
+        self.assertEqual(scfg['members'].get('drn_pooled_all'), 25)
         self.assertEqual(scfg['members'].get('stack'), 25)
+
+    def test_all_cycles_inputs_match_the_benchmark(self):
+        import pooled_all_benchmark as pa
+        for i in range(4):                                       # the cycle inputs mean what they meant in the benchmark
+            self.assertEqual({k: v[0] for k, v in ds.cycle_onehot(i, 1).items()}, pa.cycle_onehot(i))
+        self.assertEqual(ds.ALL_CONFIG, 'config/probability_calibration/all_neural_pooled_all.json')
+        names = [Path(read(read(p)['benchmark_config'])['output_root']).name for p in read(ds.ALL_CONFIG)['cycles']]
+        self.assertEqual(names, ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj'])
 
     def test_stack_members_match_the_stacking_benchmark(self):
         import dist_calibration as dc

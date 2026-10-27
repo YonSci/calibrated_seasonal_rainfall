@@ -1310,6 +1310,450 @@
     ]
    },
    "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
+  },
+  "stacking/jan_fmam": {
+   "experiment": "stack-v1",
+   "sha256": "f552bfb6f28f2dd6154726d6ff70138de8756d42471a84be4c1e3b9afa5a893a",
+   "archive": "outputs/accepted/stacking/jan_fmam/f552bfb6f28f2dd6",
+   "accepted_utc": "2026-10-27T06:37:21Z",
+   "note": "equal-weight linear pool of EMOS, quantile regression and the DRN (pooled over the months; per target for the season); 25 members, scoring v2",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-26T19:08:51.555581+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/jan_fmam_stacking.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": {
+    "months": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural_pooled2",
+      "drn_pooled"
+     ]
+    ],
+    "season": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural",
+      "drn_csg"
+     ]
+    ]
+   },
+   "models": [
+    "stack",
+    "drn_csg",
+    "drn_pooled",
+    "emos_csg",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {},
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "stacking/feb_fmam": {
+   "experiment": "stack-v1",
+   "sha256": "720dae8d53dad39c4c80fd25ed63c07ba8e651453fb681885489133579225061",
+   "archive": "outputs/accepted/stacking/feb_fmam/720dae8d53dad39c",
+   "accepted_utc": "2026-10-27T06:37:21Z",
+   "note": "equal-weight linear pool of EMOS, quantile regression and the DRN (pooled over the months; per target for the season); 25 members, scoring v2",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-26T19:28:32.735712+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/feb_fmam_stacking.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": {
+    "months": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural_pooled2",
+      "drn_pooled"
+     ]
+    ],
+    "season": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural",
+      "drn_csg"
+     ]
+    ]
+   },
+   "models": [
+    "stack",
+    "drn_csg",
+    "drn_pooled",
+    "emos_csg",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Apr",
+    "FMAM",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {},
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "stacking/may_jjas": {
+   "experiment": "stack-v1",
+   "sha256": "d43fa19446618e58938d73ab5864cdb66d1d074e1ce85f3a2b131e2491607f2e",
+   "archive": "outputs/accepted/stacking/may_jjas/d43fa19446618e58",
+   "accepted_utc": "2026-10-27T06:37:21Z",
+   "note": "equal-weight linear pool of EMOS, quantile regression and the DRN (pooled over the months; per target for the season); 25 members, scoring v2",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-26T18:34:41.422389+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/may_jjas_stacking.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": {
+    "months": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural_pooled2",
+      "drn_pooled"
+     ]
+    ],
+    "season": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural",
+      "drn_csg"
+     ]
+    ]
+   },
+   "models": [
+    "stack",
+    "drn_csg",
+    "drn_pooled",
+    "emos_csg",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Aug",
+    "JJAS",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {},
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "stacking/sep_ondj": {
+   "experiment": "stack-v1",
+   "sha256": "646465938d0afecbcbf5a1af80ae31dece4503b986ec23a4e6b566597d66dd8b",
+   "archive": "outputs/accepted/stacking/sep_ondj/646465938d0afecb",
+   "accepted_utc": "2026-10-27T06:37:21Z",
+   "note": "equal-weight linear pool of EMOS, quantile regression and the DRN (pooled over the months; per target for the season); 25 members, scoring v2",
+   "figures": [
+    "distribution_summary.png"
+   ],
+   "created_utc": "2026-10-26T18:53:53.244584+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/sep_ondj_stacking.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": {
+    "months": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural_pooled2",
+      "drn_pooled"
+     ]
+    ],
+    "season": [
+     [
+      "distribution",
+      "emos_csg"
+     ],
+     [
+      "distribution",
+      "quantile_regression"
+     ],
+     [
+      "neural",
+      "drn_csg"
+     ]
+    ]
+   },
+   "models": [
+    "stack",
+    "drn_csg",
+    "drn_pooled",
+    "emos_csg",
+    "quantile_regression"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "ONDJ",
+    "Oct"
+   ],
+   "searched": {},
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "neural_all/jan_fmam": {
+   "experiment": "drn-all-v1",
+   "sha256": "557d02440e5b2d6f3c2a06100132408e4d18ddd5b2e0b313969f82f263aafe7f",
+   "archive": "outputs/accepted/neural_all/jan_fmam/557d02440e5b2d6f",
+   "accepted_utc": "2026-10-27T07:10:59Z",
+   "note": "one DRN for the 16 months of the four cycles (month position and cycle one-hot); 25 members, scoring v2; assembled from the run's checkpoints by a wrapper supplying the cycle benchmark_config (no fold refitted)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-27T07:08:14.675698+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/all_neural_pooled_all.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled_all"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_pooled_all": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "neural_all/feb_fmam": {
+   "experiment": "drn-all-v1",
+   "sha256": "c62c27fcf28114a020f0ad4b7dba2511e9fa95d2e49ae90944a37ea46d2cc8f4",
+   "archive": "outputs/accepted/neural_all/feb_fmam/c62c27fcf28114a0",
+   "accepted_utc": "2026-10-27T07:10:59Z",
+   "note": "one DRN for the 16 months of the four cycles (month position and cycle one-hot); 25 members, scoring v2; assembled from the run's checkpoints by a wrapper supplying the cycle benchmark_config (no fold refitted)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-27T07:08:22.175613+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/all_neural_pooled_all.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled_all"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_pooled_all": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "neural_all/may_jjas": {
+   "experiment": "drn-all-v1",
+   "sha256": "3b39bee083302ee89cf725c9924f16ae438c08ca516da480cbc44f941fb28632",
+   "archive": "outputs/accepted/neural_all/may_jjas/3b39bee083302ee8",
+   "accepted_utc": "2026-10-27T07:10:59Z",
+   "note": "one DRN for the 16 months of the four cycles (month position and cycle one-hot); 25 members, scoring v2; assembled from the run's checkpoints by a wrapper supplying the cycle benchmark_config (no fold refitted)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-27T07:08:29.448255+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/all_neural_pooled_all.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled_all"
+   ],
+   "targets": [
+    "Aug",
+    "Jul",
+    "Jun",
+    "Sep"
+   ],
+   "searched": {
+    "drn_pooled_all": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "neural_all/sep_ondj": {
+   "experiment": "drn-all-v1",
+   "sha256": "cce3aa1d5ab84ebd249d3b5e37e674b266724e514f2a79335848f96e514a3966",
+   "archive": "outputs/accepted/neural_all/sep_ondj/cce3aa1d5ab84ebd",
+   "accepted_utc": "2026-10-27T07:10:59Z",
+   "note": "one DRN for the 16 months of the four cycles (month position and cycle one-hot); 25 members, scoring v2; assembled from the run's checkpoints by a wrapper supplying the cycle benchmark_config (no fold refitted)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-27T07:08:37.175311+00:00",
+   "commit": "24d45ee2b43a7390c9174a5563daae3459f0c768",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/all_neural_pooled_all.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": 25,
+   "models": [
+    "drn_pooled_all"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "Oct"
+   ],
+   "searched": {
+    "drn_pooled_all": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
   }
  }
 }
