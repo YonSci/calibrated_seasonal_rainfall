@@ -10,6 +10,10 @@ month of every cycle is then forecast and scored with that cycle's published ref
 results are written per cycle (<cycle>/neural_all/benchmark.json, the same format as the pooled benchmark), so the method
 selection, the summary and the site treat them as one more family per cycle (tests: the cycle's four months).
 
+The configuration names the cycles, so the same design runs on fewer of them: all_neural_fmam_ondj.json fits one network
+for the 12 months of the two FMAM cycles and ONDJ, leaving out JJAS, where the four-cycle network was worse than the pooled
+DRN of the cycle (docs/54, 3h). The cycle inputs are one-hot over the configured cycles, in their order.
+
   python scripts/pooled_all_benchmark.py --config config/probability_calibration/all_neural_pooled_all.json --workers 6
 """
 import argparse
@@ -71,8 +75,8 @@ def contexts(config_path):
     return _ALL[config_path]
 
 
-def cycle_onehot(ci):
-    return {f'cycle_{j + 1}': float(j == ci) for j in range(4)}
+def cycle_onehot(ci, n=4):
+    return {f'cycle_{j + 1}': float(j == ci) for j in range(n)}
 
 
 def run_design(config_path, design, y):
@@ -82,7 +86,7 @@ def run_design(config_path, design, y):
     T = [z for z in train if z != y] if design == 'training' else train
     parts, stats = [], []
     for ci, ctx in enumerate(ctxs):
-        S, st = pb.pooled_samples(ctx, T, extra=cycle_onehot(ci))
+        S, st = pb.pooled_samples(ctx, T, extra=cycle_onehot(ci, len(ctxs)))
         parts.append(S)
         stats.append(st)
     keys = [k for k in parts[0] if k != 'n_years' and all(k in S for S in parts)]
@@ -92,7 +96,7 @@ def run_design(config_path, design, y):
     for k in acfg['models']:
         m = dc.MODELS[k]
         models[k] = m.fit(S, **{**m.defaults, **acfg.get('parameters', {}).get(k, {})})
-    out = {ctx['name']: pb.score_cycle(ctx, models, stats[ci], T, design, y, extra=cycle_onehot(ci)) for ci, ctx in enumerate(ctxs)}
+    out = {ctx['name']: pb.score_cycle(ctx, models, stats[ci], T, design, y, extra=cycle_onehot(ci, len(ctxs))) for ci, ctx in enumerate(ctxs)}
     fitted = {k: {kk: vv for kk, vv in v.items() if kk in ('hidden', 'decay', 'steps', 'validation_crps', 'training')}
               for k, v in models.items()} if design == 'test' else None
     return design, y, out, fitted
@@ -155,7 +159,7 @@ def main(args):
         data = dict(created_utc=datetime.now(timezone.utc).isoformat(), config=args.config, config_contents=acfg, protocol=__doc__.strip(),
                     provenance=db.provenance(cfg, project, months, pcfg, deps[name], start, {m: key for m in months}, args.config),
                     scoring_version=dc.SCORING_VERSION, phase=acfg.get('phase', 4),
-                    pathway='B: rainfall-distribution models from the raw ensemble, pooled over the months of all four cycles',
+                    pathway=acfg.get('pathway', 'B: rainfall-distribution models from the raw ensemble, pooled over the months of all four cycles'),
                     models=acfg['models'], decision_models=acfg.get('decision_models', acfg['models']),
                     registry={k: dict(name=dc.MODELS[k].name, estimates=dc.MODELS[k].estimates, predictors=dc.MODELS[k].predictors,
                                       fitting=dc.MODELS[k].fitting, references=dc.MODELS[k].references,

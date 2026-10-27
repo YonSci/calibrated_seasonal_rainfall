@@ -44,6 +44,7 @@ INPUTS['pooled'] = INPUTS['full'] + tuple(f'target_{i}' for i in range(1, 5))   
 NBHD = ('m_nb3', 's_nb3', 'q50_nb3', 'm_nb5')         # neighbourhood means of ensemble summaries (dist_benchmark.add_neighbourhood)
 INPUTS['pooled_nbhd'] = INPUTS['pooled'] + NBHD       # drn_pooled_nbhd: the pooled DRN with neighbourhood inputs
 INPUTS['pooled_all'] = INPUTS['pooled'] + tuple(f'cycle_{i}' for i in range(1, 5))   # drn_pooled_all: also the cycle
+INPUTS['fmam_ondj'] = INPUTS['pooled'] + tuple(f'cycle_{i}' for i in range(1, 4))    # drn_fmam_ondj: the cycle, JJAS left out
 OUT_PENALTY = 0.01                    # drn_emos_residual: penalty on the mean squared correction of EMOS's predictors
 TUNING_FOLDS = 3                      # tuning='separate': inner folds of years that choose the configuration
 SEEDS = (0, 1, 2)

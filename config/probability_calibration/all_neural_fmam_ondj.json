@@ -1,0 +1,40 @@
+{
+  "description": "One DRN for the 12 months of the two FMAM cycles and ONDJ, without JJAS, with the month position and the cycle as inputs (scripts/pooled_all_benchmark.py, docs/54 section 3h).",
+  "cycles": [
+    "config/probability_calibration/jan_fmam_neural_pooled.json",
+    "config/probability_calibration/feb_fmam_neural_pooled.json",
+    "config/probability_calibration/sep_ondj_neural_pooled.json"
+  ],
+  "models": [
+    "drn_fmam_ondj"
+  ],
+  "decision_models": [
+    "drn_fmam_ondj"
+  ],
+  "comparisons": [
+    [
+      "drn_fmam_ondj",
+      "drn_pooled_all"
+    ],
+    [
+      "drn_fmam_ondj",
+      "drn_pooled"
+    ],
+    [
+      "drn_fmam_ondj",
+      "emos_csg"
+    ]
+  ],
+  "external_models": {
+    "drn_pooled_all": "outputs/probability_calibration/{name}/neural_all/benchmark.json",
+    "drn_pooled": "outputs/probability_calibration/{name}/neural_pooled2/benchmark.json",
+    "emos_csg": "outputs/probability_calibration/{name}/neural_ext/benchmark.json"
+  },
+  "members": 25,
+  "save_predictions": true,
+  "output_root": "outputs/probability_calibration/fmam_ondj/neural_fmam_ondj",
+  "cycle_output": "outputs/probability_calibration/{name}/neural_fmam_ondj",
+  "phase": 4,
+  "pathway": "B: rainfall-distribution models from the raw ensemble, pooled over the months of the FMAM and ONDJ cycles (JJAS left out)",
+  "external_note": "The four-cycle network is read from neural_all (drn-all-v1), the pooled DRN from neural_pooled2 and EMOS from neural_ext, all with scoring version 2 and the same folds."
+}

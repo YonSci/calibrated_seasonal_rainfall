@@ -33,10 +33,10 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / 'config/accepted_results.json'
 ARCHIVE = ROOT / 'outputs/accepted'
 OUTPUTS = ROOT / 'outputs/probability_calibration'
-GATED = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'stacking', 'distribution', 'phase3')
+GATED = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'neural_fmam_ondj', 'stacking', 'distribution', 'phase3')
 CYCLES = ('jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj')
 TARGETS = 5
-TARGETS_OF = {'neural_pooled': 4, 'neural_pooled2': 4, 'neural_all': 4}   # pooled networks serve the four months, not the season
+TARGETS_OF = {'neural_pooled': 4, 'neural_pooled2': 4, 'neural_all': 4, 'neural_fmam_ondj': 4}   # pooled networks serve the four months, not the season
 
 
 def gated(reg):

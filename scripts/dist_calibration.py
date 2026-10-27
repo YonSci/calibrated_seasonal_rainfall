@@ -573,6 +573,11 @@ MODELS = {m.key: m for m in [
           "the pooled DRN inputs and the cycle (one-hot)",
           'one network for the 16 months of the four cycles (pooled_all_benchmark.py), otherwise as the DRN', ('Rasp & Lerch 2018',),
           defaults=dict(inputs='pooled_all')),
+    Model('drn_fmam_ondj', 'DRN pooled over the months of the FMAM and ONDJ cycles', _drn_fit, _drn_predict,
+          'rainfall distribution with a probability of zero (mixture of 3 seeds)',
+          "the pooled DRN inputs and the cycle (one-hot)",
+          'one network for the 12 months of the two FMAM cycles and ONDJ, without JJAS (pooled_all_benchmark.py), otherwise as '
+          'the DRN', ('Rasp & Lerch 2018',), defaults=dict(inputs='fmam_ondj')),
     Model('drn_csg_tuned', 'DRN with a separate tuning split (diagnostic)', _drn_fit, _drn_predict,
           'rainfall distribution with a probability of zero (mixture of 3 seeds)', 'the DRN inputs',
           'configuration chosen by 3 inner folds of years, apart from the early-stopping years', ('Rasp & Lerch 2018',),

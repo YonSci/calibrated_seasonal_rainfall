@@ -184,8 +184,19 @@ class NewRunConfigurations(unittest.TestCase):
         self.assertEqual(a['models'], ['drn_pooled_all'])
         self.assertIn('{name}', a['cycle_output'])
         self.assertEqual(nc.INPUTS['pooled_all'][-4:], tuple(f'cycle_{i}' for i in range(1, 5)))
-        for fam in ('neural_pooled2', 'neural_all'):
+        for fam in ('neural_pooled2', 'neural_all', 'neural_fmam_ondj'):
             self.assertEqual(ar.TARGETS_OF[fam], 4)
+
+    def test_fmam_ondj_network(self):
+        import pooled_all_benchmark as pa
+        a = read('config/probability_calibration/all_neural_fmam_ondj.json')
+        self.assertEqual([Path(p).name.split('_neural')[0] for p in a['cycles']], ['jan_fmam', 'feb_fmam', 'sep_ondj'])   # no JJAS
+        self.assertEqual(a['models'], ['drn_fmam_ondj'])
+        self.assertIn('neural_fmam_ondj', ar.GATED)
+        self.assertEqual(nc.INPUTS['fmam_ondj'], nc.INPUTS['pooled'] + ('cycle_1', 'cycle_2', 'cycle_3'))
+        self.assertEqual(dc.MODELS['drn_fmam_ondj'].defaults['inputs'], 'fmam_ondj')
+        self.assertEqual(pa.cycle_onehot(2, 3), dict(cycle_1=0., cycle_2=0., cycle_3=1.))
+        self.assertEqual(pa.cycle_onehot(1), pa.cycle_onehot(1, 4))     # the four-cycle network keeps its inputs
 
 
 if __name__ == '__main__':
