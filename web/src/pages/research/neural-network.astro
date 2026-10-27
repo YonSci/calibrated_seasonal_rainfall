@@ -14,16 +14,17 @@ const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
 const EXT = names('neural_ext');                     // second stage: SST inputs, neural correction of EMOS, forecast-only ablation
 const POOLED = names('neural_pooled'), TUNING = names('neural_tuning');
 const POOLED2 = names('neural_pooled2'), ALL = names('neural_all'), STACK = names('stacking');   // third stage (docs/54, 3g)
+const FO = names('neural_fmam_ondj');                // FMAM and ONDJ without JJAS (docs/54, 3h)
 const maybe = (list, sub, n) => (list.includes(n) ? read(`${sub}/${n}.json`) : null);
 const cycles = names('neural').map((n) => ({ name: n, d: read(`neural/${n}.json`), x: maybe(EXT, 'neural_ext', n),
   p: maybe(POOLED, 'neural_pooled', n), u: maybe(TUNING, 'neural_tuning', n), p2: maybe(POOLED2, 'neural_pooled2', n),
-  all: maybe(ALL, 'neural_all', n), st: maybe(STACK, 'stacking', n) }))
+  all: maybe(ALL, 'neural_all', n), fo: maybe(FO, 'neural_fmam_ondj', n), st: maybe(STACK, 'stacking', n) }))
   .map((x) => ({ ...x, title: cycleTitle(INIT[x.name.split('_')[0]], x.name.split('_')[1].toUpperCase()) }))
   .sort((a, b) => INIT[a.name.split('_')[0]] - INIT[b.name.split('_')[0]]);
 const SHORT = { incumbent: 'Published probabilities', mvs_ensemble: 'MVS ensemble (published amounts)', emos_csg: 'EMOS',
   drn_csg: 'DRN', drn_linear_csg: 'Linear control', drn_climatology: 'No-forecast ablation', drn_forecast_only: 'Forecast-only ablation',
   drn_sst: 'DRN + SST', drn_regions: 'DRN + regions (no SST)', quantile_regression: 'Quantile regression', drn_emos_residual: 'Neural EMOS correction', drn_pooled: 'Pooled DRN', drn_csg_tuned: 'DRN, separate tuning',
-  drn_pooled_residual: 'Pooled neural EMOS correction', drn_pooled_nbhd: 'Pooled DRN + neighbourhood', drn_pooled_all: 'DRN pooled over all cycles',
+  drn_pooled_residual: 'Pooled neural EMOS correction', drn_pooled_nbhd: 'Pooled DRN + neighbourhood', drn_pooled_all: 'DRN pooled over all cycles', drn_fmam_ondj: 'DRN pooled over FMAM and ONDJ',
   stack: 'Combination (EMOS + QR + DRN)' };
 
 // The method selection's decision (docs/50): Benjamini–Hochberg across the decision model's targets, per score
@@ -178,11 +179,12 @@ const SEARCH_TEXT = SEARCHED.length
 const created = shown.map((s) => s.a?.created_utc).filter(Boolean).sort();
 const commits = [...new Set(shown.map((s) => s.a?.code_commit ?? s.a?.commit).filter(Boolean))];
 const PENDING = (ACC.status ?? []).filter((r) => r.family === 'neural' && r.pending);
-const NOT_RUN = ['neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'stacking'].filter((f) => !(ACC.status ?? []).some((r) => r.family === f && (r.accepted || r.pending)));
+const NOT_RUN = ['neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'neural_fmam_ondj', 'stacking'].filter((f) => !(ACC.status ?? []).some((r) => r.family === f && (r.accepted || r.pending)));
 const FAMILY = { neural_ext: 'second stage (SST and regions, neural correction of EMOS)', neural_pooled: 'pooled network', neural_tuning: 'separate tuning split',
-  neural_pooled2: 'pooled neural EMOS correction and neighbourhood inputs', neural_all: 'one network for all four cycles', stacking: 'model combination' };
+  neural_pooled2: 'pooled neural EMOS correction and neighbourhood inputs', neural_all: 'one network for all four cycles',
+  neural_fmam_ondj: 'one network for the FMAM and ONDJ cycles', stacking: 'model combination' };
 // Selectors (product, comparator): the comparators present in any cycle's comparisons
-const COMPARATORS = [...new Set(cycles.flatMap((c) => [c.d, c.x, c.p, c.u, c.p2, c.all, c.st].filter(Boolean)
+const COMPARATORS = [...new Set(cycles.flatMap((c) => [c.d, c.x, c.p, c.u, c.p2, c.all, c.fo, c.st].filter(Boolean)
   .flatMap((d) => Object.keys(d.comparisons ?? {}).map((k) => k.split('|')[1]))))];
 const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.product === 'amounts' ? 'amounts' : 'probabilities'}`);
 ---
@@ -329,7 +331,7 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
       </div>
     )}
     {cycles.length === 0 && <p class="notice">The benchmark has not been run yet.</p>}
-    {cycles.map(({ name, d, x, p, u, p2, all, st, title }) => (
+    {cycles.map(({ name, d, x, p, u, p2, all, fo, st, title }) => (
       <section id={name} class="cyc-sec">
         <h2>{title}</h2>
         <p><strong>DRN confirmed better than the published approach under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(d, 'bh').join('; ') || 'none'}.
@@ -424,6 +426,19 @@ const SHADOW = candidates('drn_csg').map((c) => `${c.season} ${c.target} ${c.pro
             <div data-prod="rps"><Table {...testTable(all, 'rps', 'drn_pooled_all')} /></div>
             <div data-prod="crps"><Table {...comparisonTable(all, 'crps')} /></div>
             <div data-prod="rps"><Table {...comparisonTable(all, 'rps')} /></div>
+          </>
+        )}
+        {fo && (
+          <>
+            <h3 id={`${name}-fmam-ondj`}>One network for the FMAM and ONDJ cycles, without JJAS</h3>
+            <p><strong>Confirmed better under the selection rule (Benjamini–Hochberg):</strong> {confirmedList(fo, 'bh').join('; ') || 'none'}.
+            In the benchmark as run (Holm): {confirmedList(fo, 'holm').join('; ') || 'none'}. The network for all cycles without JJAS, where it was
+            worse than the pooled DRN: one network fitted to the 12 months of the two FMAM cycles and ONDJ, with the month's position and the
+            cycle as inputs; compared with the four-cycle network, the pooled DRN and EMOS in the same folds.</p>
+            <div data-prod="crps"><Table {...testTable(fo, 'crps', 'drn_fmam_ondj')} /></div>
+            <div data-prod="rps"><Table {...testTable(fo, 'rps', 'drn_fmam_ondj')} /></div>
+            <div data-prod="crps"><Table {...comparisonTable(fo, 'crps')} /></div>
+            <div data-prod="rps"><Table {...comparisonTable(fo, 'rps')} /></div>
           </>
         )}
         {st && (
