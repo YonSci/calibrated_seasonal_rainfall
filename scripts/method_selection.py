@@ -39,6 +39,7 @@ FAMILY_LABEL = {'bias_correction': 'Bias correction (amount correction)', 'proba
                 'distribution_neural_pooled': 'Neural network, pooled over the months (docs/54)',
                 'distribution_neural_pooled2': 'Neural network, pooled, with EMOS or neighbourhood inputs (docs/54)',
                 'distribution_neural_all': 'Neural network, pooled over all cycles (docs/54)',
+                'distribution_neural_fmam_ondj': 'Neural network, pooled over the FMAM and ONDJ cycles (docs/54)',
                 'distribution_stacking': 'Model combination: EMOS, quantile regression and the DRN (docs/54)'}
 # Simplicity order of the practical tie rule (rule 'tie_rule'): fewer and more interpretable parameters first
 SIMPLICITY = {'bias_correction': 1, 'probability_phase1': 1, 'probability_phase2_binary': 1, 'distribution_phase2': 2,
@@ -46,7 +47,8 @@ SIMPLICITY = {'bias_correction': 1, 'probability_phase1': 1, 'probability_phase2
               'distribution_neural_pooled': 5,
               # extensions of a network (the pooled DRN plus an EMOS base, neighbourhood inputs or the other cycles) and the
               # combination of models, which contains a network: one step more complex than the network they extend
-              'distribution_neural_pooled2': 6, 'distribution_neural_all': 6, 'distribution_stacking': 6}
+              'distribution_neural_pooled2': 6, 'distribution_neural_all': 6, 'distribution_neural_fmam_ondj': 6,
+              'distribution_stacking': 6}
 SIMPLER_METHOD = {'emos_csg': 2, 'quantile_regression': 3, 'extended_logistic': 3}     # within the Phase 2 distribution models
 
 
@@ -58,7 +60,8 @@ STAGE = {'bias_correction': 'amount correction', 'probability_phase1': 'probabil
          'distribution_phase2': 'distribution model', 'distribution_phase3': 'distribution model', 'leung_dirichlet': 'Leung–Dirichlet calibration', 'mos': 'statistical downscaling',
          'distribution_neural': 'distribution model (neural network)', 'distribution_neural_ext': 'distribution model (neural network)',
          'distribution_neural_pooled': 'distribution model (neural network)', 'distribution_neural_pooled2': 'distribution model (neural network)',
-         'distribution_neural_all': 'distribution model (neural network)', 'distribution_stacking': 'distribution model (combination)'}
+         'distribution_neural_all': 'distribution model (neural network)', 'distribution_neural_fmam_ondj': 'distribution model (neural network)',
+         'distribution_stacking': 'distribution model (combination)'}
 
 
 def read(p):
@@ -238,6 +241,7 @@ def main():
         # (SST inputs, neural correction of EMOS); one network for the months of the cycle
         dn, dx, dp = (accept_results.read_accepted(f, cy) for f in ('neural', 'neural_ext', 'neural_pooled'))
         dp2, dall, dst = (accept_results.read_accepted(f, cy) for f in ('neural_pooled2', 'neural_all', 'stacking'))
+        dfo = accept_results.read_accepted('neural_fmam_ondj', cy)          # none for JJAS, left out by design
         ld = read(f'outputs/leung_dirichlet/{cy}/benchmark.json')
         mos = read(f'outputs/mos/{cy}/benchmark.json')
         rec = recs.get(cy)
@@ -259,7 +263,8 @@ def main():
                         cands += confirmed(p2b, 'probability_phase2_binary', t, 'rps', [m for m in p2b['methods'] if m != p2b['incumbent']], lambda k: p2b['registry'][k]['name'])
                 for fam, d in (('distribution_phase2', d2), ('distribution_phase3', d3), ('distribution_neural', dn),
                                ('distribution_neural_ext', dx), ('distribution_neural_pooled', dp),
-                               ('distribution_neural_pooled2', dp2), ('distribution_neural_all', dall), ('distribution_stacking', dst)):
+                               ('distribution_neural_pooled2', dp2), ('distribution_neural_all', dall),
+                               ('distribution_neural_fmam_ondj', dfo), ('distribution_stacking', dst)):
                     if d:
                         cands += confirmed(d, fam, t, score, d['models'], lambda k, d=d: d['registry'][k]['name'],
                                            reference='incumbent' if score == 'rps' else 'mvs_ensemble')

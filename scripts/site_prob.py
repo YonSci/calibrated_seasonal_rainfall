@@ -130,7 +130,7 @@ def export(out_dir):
     return blocks
 
 
-NEURAL_FAMILIES = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'stacking')
+NEURAL_FAMILIES = ('neural', 'neural_ext', 'neural_pooled', 'neural_tuning', 'neural_pooled2', 'neural_all', 'neural_fmam_ondj', 'stacking')
 
 
 def export_neural(out_dir):

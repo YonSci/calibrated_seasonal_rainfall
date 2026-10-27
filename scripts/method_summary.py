@@ -161,6 +161,7 @@ def probability(store):
                             ('neural/benchmark.json', 'Neural network (DRN)'),           # neural: its decision models only (docs/54)
                             ('neural_ext/benchmark.json', 'Neural network (DRN)'), ('neural_pooled/benchmark.json', 'Neural network (DRN)'),
                             ('neural_pooled2/benchmark.json', 'Neural network (DRN)'), ('neural_all/benchmark.json', 'Neural network (DRN)'),
+                            ('neural_fmam_ondj/benchmark.json', 'Neural network (DRN)'),
                             ('stacking/benchmark.json', 'Model combination')):
             fam = rel.split('/')[0]
             d = accept_results.read_accepted(fam, cy) if fam in accept_results.GATED else read(f'{base}/{rel}')   # neural: accepted only
