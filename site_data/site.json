@@ -1,8 +1,8 @@
 {
  "schema_version": 1,
- "built_utc": "2026-10-23 09:34 UTC",
- "code_commit": "6285cf2",
- "release": "2026-10-23.0",
+ "built_utc": "2026-10-27 09:53 UTC",
+ "code_commit": "b4e5b00",
+ "release": "2026-10-27.0",
  "releases": [
   {
    "id": "2026-10-08.0",
@@ -1211,7 +1211,7 @@
   {
    "id": "2026-10-23.0",
    "date": "2026-10-23",
-   "commit": null,
+   "commit": "b7abdcf",
    "title": "Shadow forecasts for the pooled neural network",
    "cycles": [
     "FMAM 2026 (January initialization)",
@@ -1223,6 +1223,32 @@
     {
      "type": "analysis",
      "text": "The neural network pooled over the months of a cycle now has its own shadow forecast (one fit per cycle on the four months, each month forecast with its position; never published as a forecast), so its five candidate targets collect validation seasons like the others. First (retrospective) 2026 seasons: better than the published amounts for FMAM-January March and April, worse for May and for JJAS June and September, where the dry 2026 season suited the published ensemble. Each candidate has 1 of the 3 seasons needed. The published forecasts are unchanged."
+    }
+   ]
+  },
+  {
+   "id": "2026-10-27.0",
+   "date": "2026-10-27",
+   "commit": null,
+   "title": "Third-stage neural models: one network for all cycles, stacking",
+   "cycles": [
+    "FMAM 2026 (January initialization)",
+    "FMAM 2026 (February initialization)",
+    "JJAS 2026",
+    "ONDJ 2026/27"
+   ],
+   "changes": [
+    {
+     "type": "analysis",
+     "text": "Four new rainfall-distribution models, all with 25 members and the corrected CRPS, against a refit of the pooled neural network on the same folds. The pooled network correcting EMOS and the pooled network with neighbourhood inputs do not improve on it (lower CRPS for 4 and 6 of 16 months). The equal-weight pool of EMOS, quantile regression and the neural network sits between its members: amounts slightly behind the pooled network, probabilities flattened towards climatology (RPSS +0.009 against +0.023); confirmed only for JJAS June and September amounts."
+    },
+    {
+     "type": "analysis",
+     "text": "One neural network for the 16 months of all four cycles: better than the pooled network for every FMAM-January and ONDJ month and worse for every JJAS month; confirmed for seven amount targets and for FMAM-February May probabilities (RPSS +0.025 against +0.008 for the published probabilities over 1993–2016). It becomes the selected candidate for FMAM-January February amounts and FMAM-February April and May probabilities, the first rainfall-distribution model selected for probabilities, and has its own shadow forecast. First (retrospective) 2026 seasons: better than the published amounts for FMAM-January February, worse than the published probabilities for FMAM-February April and May; each candidate has 1 of the 3 seasons needed."
+    },
+    {
+     "type": "method",
+     "text": "Phase 2, Phase 3 and the first-stage neural network rerun with the first 25 members and the corrected CRPS, so every rainfall-distribution model is compared under one rule: the same confirmations and the same selection. Fold-level predictions are now saved, so a future scoring change needs no refit. The neural network page has product and comparison selectors. The published forecasts are unchanged."
     }
    ]
   }

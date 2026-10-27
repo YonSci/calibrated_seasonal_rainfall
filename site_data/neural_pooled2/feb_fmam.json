@@ -1,0 +1,4362 @@
+{
+ "created_utc": "2026-10-25T18:53:04.771152+00:00",
+ "config": "config/probability_calibration/feb_fmam_neural_pooled2.json",
+ "config_contents": {
+  "description": "The pooled DRN of the four months with a neural correction of EMOS (EMOS fitted per month) and with neighbourhood inputs, February-initialized FMAM (scripts/pooled_benchmark.py, docs/54 section 3g).",
+  "benchmark_config": "config/bias_correction/feb_fmam.json",
+  "reference_amount_method": "mvs",
+  "models": [
+   "drn_pooled",
+   "drn_pooled_residual",
+   "drn_pooled_nbhd"
+  ],
+  "decision_models": [
+   "drn_pooled_residual",
+   "drn_pooled_nbhd"
+  ],
+  "comparisons": [
+   [
+    "drn_pooled_residual",
+    "drn_pooled"
+   ],
+   [
+    "drn_pooled_nbhd",
+    "drn_pooled"
+   ],
+   [
+    "drn_pooled_residual",
+    "emos_csg"
+   ],
+   [
+    "drn_pooled_nbhd",
+    "emos_csg"
+   ]
+  ],
+  "external_models": {
+   "emos_csg": "outputs/probability_calibration/{name}/neural_ext/benchmark.json"
+  },
+  "members": 25,
+  "neighbourhood": true,
+  "save_predictions": true,
+  "reliability": true,
+  "output_root": "outputs/probability_calibration/feb_fmam/neural_pooled2",
+  "phase": 4,
+  "external_note": "EMOS is read from the second stage (neural_ext), which fits it on the same folds and scores it with the same rule (scoring version 2); the pooled DRN is refitted here as the control."
+ },
+ "provenance": {
+  "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
+  "uncommitted_changes": false,
+  "uncommitted_check": "code and configuration files this result depends on",
+  "code_sha256": {
+   "scripts/bias_methods.py": "915b7a2eb2a287738b7f11a9e14fbd41b800f69bfafdab9a9d1c63a3d25d4eee",
+   "scripts/bias_benchmark.py": "bd5d0cce44fa15275cc64fbaa1d9317aaefb43626b0f3a0b9c6a719c3b4fa24f",
+   "scripts/bias_confirmation.py": "bbc95e4cb64256b101b5c0b30e2f351c5cd2b36893d4dfb0505c63577243f558",
+   "scripts/significance.py": "3143761d5d201e4e62df9ad923757b952a3ea768b060c8a722afcd9b3d6a9963",
+   "scripts/calibration_core.py": "f0635cc563e6d6aedb62799847b83fbb0f5cc12ee9f8c48ad48dda15a054fb62",
+   "scripts/compare_calibration.py": "9aa137c9a02672ffacc2541cfd23cdab9b3294bf7cc77580a11e21208560866a",
+   "scripts/local_blend.py": "ada5c571fb7762d2c333f83ad119d35f0784b82aa2cc35449a44cdf00c53c17d",
+   "scripts/run_calibration.py": "1f34e8fc92fdd15983f1633de67fcb6a35882911b6b7072ca865df99d907afd0",
+   "scripts/run_monthly.py": "dc13dfb54b78773afb6d0c25ebac8769552e5c071f5d2aed9ba2a01400e44f79",
+   "scripts/cycle.py": "baa437880fd0887560f6670393b8c9b0dd7effdb9358d648050c7a1ce48fef77",
+   "scripts/common.py": "72b83f5c530017e317ea43af3a0e430e6d03f361bc032de374a0f942435cb0a1",
+   "scripts/pooled_benchmark.py": "8a84923eb9a8ed7fdfe4085f8347a385f559012d7fe80fb7a47ca66fad36f2fa",
+   "scripts/dist_benchmark.py": "f7fcdc1d29f25fec164f23711b96ef69577f7795b165603e21c546caad9c45a4",
+   "scripts/dist_calibration.py": "d23f2a58eadd24c9f308c3ba5af659395361d94372cbc3bc3e0b05b01c2972e3",
+   "scripts/neural_calibration.py": "791aca3b9ce4101bc2c05b3dac424c0104e13b9e97913e58d92bc983a71296ce",
+   "scripts/sst_indices.py": "06690450fa40d3ee6aab169134c64d26def3a6d193b8acd7ba38b068e150b25c",
+   "scripts/prob_calibration.py": "c7247773dfc2631dbf7dbcd4832a49e29a1b92c908c13e92ed3a7563ce7871b7",
+   "scripts/prob_benchmark.py": "29f8c204a124788c8444e081c60bfd798f5eb18e96742534b8c3c74c360e5ea5",
+   "config/probability_calibration/feb_fmam_neural_pooled2.json": "be62d6cd5a4e410435858c502143d97ea1c2318be9f313e20e71d0d493fa9ef7"
+  },
+  "config": {
+   "path": "config/bias_correction/feb_fmam.json",
+   "sha256": "5e74d282f6e0f984a3bb2d0527f665d535894be91f139628db7e8deb7d5374c9"
+  },
+  "project_config": {
+   "path": "config/fmam_feb/project.json",
+   "sha256": "9999e9e5e03f95998e3d22396d2d2e5bf2f8c79decfc571c715caf2878daa4a1"
+  },
+  "cycle_config": {
+   "path": "config/cycles/feb_2026_fmam.json",
+   "sha256": "120955984a14d292912b9a8d48f83af060290d40d6b54ed9d627b36280c0652b"
+  },
+  "masks": {
+   "cells": {
+    "path": "data/masks/ethiopia_common.nc",
+    "sha256": "57ad8861c598abb9f175012920e5d0ef058e5b643cd6e4987cad3da6ac0b9e16"
+   },
+   "ethiopia": {
+    "path": "data/masks/ethiopia_common.nc",
+    "sha256": "57ad8861c598abb9f175012920e5d0ef058e5b643cd6e4987cad3da6ac0b9e16"
+   },
+   "fmam_domain": {
+    "path": "data/masks/fmam_coverage_chirps_v3_1993_2025_v1.nc",
+    "sha256": "c386d127f7041ed6b383c5f46b9537e3740bfee6b85f383e3a8b0792cac58fbb"
+   }
+  },
+  "inputs": {
+   "Feb": {
+    "folder": "data/processed/init02_Feb",
+    "files": 67,
+    "sha256": "aa05fc058f64121f726ee7f06608768bafb243ef9702ccd6c154217f2a9a13d5"
+   },
+   "Mar": {
+    "folder": "data/processed/init02_Mar",
+    "files": 67,
+    "sha256": "41b2c07eb813ed00ca81d1c21d2a620cd1cdbc2d2725e806669bd035f1a8f7cf"
+   },
+   "Apr": {
+    "folder": "data/processed/init02_Apr",
+    "files": 67,
+    "sha256": "7c29ca912e693cabdd2d1626e106f967dd554116d18f98a18faa33f957dfb15e"
+   },
+   "May": {
+    "folder": "data/processed/init02_May",
+    "files": 67,
+    "sha256": "c590b53da737506d77661bb04aa6caf2a91d62a0ab9b88d8a2ecbb7c49b925c0"
+   }
+  },
+  "scoring_version": 3,
+  "dependency_sha256": "23349ef26f1a35eec3235d00a1458a2afb6df388bac5dc87b4840dfa9184973e",
+  "python": "3.11.9",
+  "numpy": "1.26.4",
+  "commit_at_end": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
+  "commit_changed_during_run": false,
+  "started_utc": "2026-10-25T11:18:05.640145+00:00",
+  "resume_keys_sha256": "d63eac5fa062a773796a8b666fec7e3c4c7d87b8b4d7428e2b36f853fd481a29",
+  "experiment": {
+   "models": [
+    "drn_pooled",
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+   ],
+   "decision_models": [
+    "drn_pooled_residual",
+    "drn_pooled_nbhd"
+   ],
+   "members": 25,
+   "configs": null,
+   "extra_inputs": null,
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ]
+  }
+ },
+ "scoring_version": 2,
+ "phase": 4,
+ "pathway": "B: rainfall-distribution models from the raw ensemble, pooled over the months",
+ "models": [
+  "drn_pooled",
+  "drn_pooled_residual",
+  "drn_pooled_nbhd"
+ ],
+ "decision_models": [
+  "drn_pooled_residual",
+  "drn_pooled_nbhd"
+ ],
+ "registry": {
+  "drn_pooled": {
+   "name": "DRN pooled over the months of a cycle",
+   "estimates": "rainfall distribution with a probability of zero (mixture of 3 seeds)",
+   "predictors": "the DRN inputs and the month's position in the season (one-hot)",
+   "fitting": "one network for the four months (pooled_benchmark.py), otherwise as the DRN",
+   "references": [
+    "Rasp & Lerch 2018"
+   ],
+   "outputs": "CDF, quantiles, tercile probabilities"
+  },
+  "drn_pooled_residual": {
+   "name": "Neural correction of EMOS pooled over the months of a cycle",
+   "estimates": "rainfall distribution with a probability of zero (mixture of 3 seeds)",
+   "predictors": "the pooled DRN inputs; each month's own EMOS (mean and mean absolute difference) as the base",
+   "fitting": "one network for the four months (pooled_benchmark.py) added to the EMOS of each month, starting at zero, with a penalty on the correction",
+   "references": [
+    "Scheuerer & Hamill 2015",
+    "Rasp & Lerch 2018"
+   ],
+   "outputs": "CDF, quantiles, tercile probabilities"
+  },
+  "drn_pooled_nbhd": {
+   "name": "DRN pooled over the months, with neighbourhood inputs",
+   "estimates": "rainfall distribution with a probability of zero (mixture of 3 seeds)",
+   "predictors": "the pooled DRN inputs and 3x3 / 5x5 neighbourhood means of the ensemble summaries",
+   "fitting": "one network for the four months (pooled_benchmark.py), otherwise as the DRN",
+   "references": [
+    "Rasp & Lerch 2018"
+   ],
+   "outputs": "CDF, quantiles, tercile probabilities"
+  }
+ },
+ "references": {
+  "incumbent": "MVS -> smoothed counts -> climatology blend (published probabilities)",
+  "mvs_ensemble": "MVS-corrected ensemble (empirical distribution)"
+ },
+ "regions": {
+  "ethiopia": "All Ethiopia",
+  "fmam_domain": "FMAM rainfall contribution domain"
+ },
+ "primary_region": "ethiopia",
+ "training_years": [
+  1993,
+  2016
+ ],
+ "test_years": [
+  2017,
+  2025
+ ],
+ "targets": {
+  "Feb": {
+   "methods": {
+    "drn_pooled": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.3713875092849633,
+       "rpss": 0.18029051610738767,
+       "bss_below": 0.11606853032255082,
+       "bss_above": 0.24473585255846597,
+       "brier_below": 0.20058994621902493,
+       "brier_above": 0.17079756306593832,
+       "crps": 5.8593841502169,
+       "crpss": 0.27047612570380386,
+       "coverage_80": 0.8420697181764419,
+       "pinball_10": 1.3345101383018012,
+       "pinball_50": 3.9358750716313846,
+       "pinball_90": 2.729372412379735,
+       "width_80": 23.680126654566838,
+       "width_80_clim": 30.515815325279068
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.3600084202921498,
+       "rpss": 0.205496371950173,
+       "bss_below": 0.12426512367961662,
+       "bss_above": 0.2869708639189492,
+       "brier_below": 0.19870473030291755,
+       "brier_above": 0.16130368998923217,
+       "crps": 6.788282685567743,
+       "crpss": 0.28402173758602556,
+       "coverage_80": 0.840502432791145,
+       "pinball_10": 1.5622504076645904,
+       "pinball_50": 4.570581172981499,
+       "pinball_90": 3.1263792748356756,
+       "width_80": 27.446012731737657,
+       "width_80_clim": 36.05064593357397
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.40366408061658177,
+       "rpss": 0.06017059916982603,
+       "bss_below": 0.01672666182325,
+       "bss_above": 0.08635770980200408,
+       "brier_below": 0.1588290703190825,
+       "brier_above": 0.24483501029749918,
+       "crps": 8.38999416600278,
+       "crpss": -0.0060683208058209814,
+       "coverage_80": 0.7580358462326652,
+       "pinball_10": 1.5568775356563944,
+       "pinball_50": 5.348500248123674,
+       "pinball_90": 4.826458547972781,
+       "width_80": 20.130542438385998,
+       "width_80_clim": 30.575038666658074
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.41449880754583096,
+       "rpss": 0.017892122684381118,
+       "bss_below": -0.01483834464606737,
+       "bss_above": 0.038967108494443514,
+       "brier_below": 0.16776523010029976,
+       "brier_above": 0.24673357744553126,
+       "crps": 9.643051764201608,
+       "crpss": -0.022553057057235426,
+       "coverage_80": 0.7586613491676899,
+       "pinball_10": 1.771676741351894,
+       "pinball_50": 6.136894847354529,
+       "pinball_90": 5.5875882370080605,
+       "width_80": 23.08060770256447,
+       "width_80_clim": 36.084968108006656
+      }
+     }
+    },
+    "drn_pooled_residual": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.3740858854121805,
+       "rpss": 0.17433478402892344,
+       "bss_below": 0.116815879741902,
+       "bss_above": 0.23205372706337635,
+       "brier_below": 0.20042035074134704,
+       "brier_above": 0.17366553467083354,
+       "crps": 5.865993782385665,
+       "crpss": 0.2696531920398194,
+       "coverage_80": 0.8413612155417874,
+       "pinball_10": 1.3254054019462456,
+       "pinball_50": 3.92050431659257,
+       "pinball_90": 2.7892060256133884,
+       "width_80": 24.171400886230032,
+       "width_80_clim": 30.515815325279068
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.36379228475419323,
+       "rpss": 0.19714575048220095,
+       "bss_below": 0.12517673077582514,
+       "bss_above": 0.26933027851675506,
+       "brier_below": 0.19849788614597882,
+       "brier_above": 0.1652943986082144,
+       "crps": 6.788792626317289,
+       "crpss": 0.2839679527764196,
+       "coverage_80": 0.8396794200152503,
+       "pinball_10": 1.5517442781779327,
+       "pinball_50": 4.544133134062663,
+       "pinball_90": 3.1981612817940057,
+       "width_80": 28.039261348174506,
+       "width_80_clim": 36.05064593357397
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.3930463240674835,
+       "rpss": 0.08489135153515237,
+       "bss_below": 0.04305851594672039,
+       "bss_above": 0.11010732321084815,
+       "brier_below": 0.15457566107078177,
+       "brier_above": 0.2384706629967018,
+       "crps": 8.28193069610145,
+       "crpss": 0.006889880541281701,
+       "coverage_80": 0.7580017422189924,
+       "pinball_10": 1.5364715249792344,
+       "pinball_50": 5.304291857282779,
+       "pinball_90": 4.716753075393731,
+       "width_80": 20.228943535729783,
+       "width_80_clim": 30.575038666658074
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4044284385260714,
+       "rpss": 0.04175271905217037,
+       "bss_below": 0.007151339723503902,
+       "bss_above": 0.06403237583182952,
+       "brier_below": 0.1641300654678669,
+       "brier_above": 0.2402983730582045,
+       "crps": 9.516157014819695,
+       "crpss": -0.009097087196460851,
+       "coverage_80": 0.7563234452430241,
+       "pinball_10": 1.7492167952280429,
+       "pinball_50": 6.087875049275859,
+       "pinball_90": 5.448581054519447,
+       "width_80": 23.224574699169157,
+       "width_80_clim": 36.084968108006656
+      }
+     }
+    },
+    "drn_pooled_nbhd": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.3697329667109212,
+       "rpss": 0.18394234662279074,
+       "bss_below": 0.1171824993250421,
+       "bss_above": 0.2509343707395819,
+       "brier_below": 0.2003371540174067,
+       "brier_above": 0.16939581269351453,
+       "crps": 5.822595068785909,
+       "crpss": 0.2750565581399228,
+       "coverage_80": 0.8436218919502402,
+       "pinball_10": 1.326069891921817,
+       "pinball_50": 3.908592964047255,
+       "pinball_90": 2.711318438934885,
+       "width_80": 23.496831720664698,
+       "width_80_clim": 30.515815325279068
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.3580456620617161,
+       "rpss": 0.20982798878790898,
+       "bss_below": 0.12506229762174392,
+       "bss_above": 0.2948475073990582,
+       "brier_below": 0.1985238510922591,
+       "brier_above": 0.15952181096945706,
+       "crps": 6.742489318743966,
+       "crpss": 0.2888516860026229,
+       "coverage_80": 0.8402559440477942,
+       "pinball_10": 1.5524555001103995,
+       "pinball_50": 4.538166319791955,
+       "pinball_90": 3.1017133062520323,
+       "width_80": 27.136099010145017,
+       "width_80_clim": 36.05064593357397
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.3980223821722368,
+       "rpss": 0.07330586268030315,
+       "bss_below": 0.02334968525190051,
+       "bss_above": 0.10341841750336112,
+       "brier_below": 0.15775924709391032,
+       "brier_above": 0.24026313507832653,
+       "crps": 8.26681893248196,
+       "crpss": 0.008701975561642983,
+       "coverage_80": 0.7700565922365175,
+       "pinball_10": 1.5616056672759133,
+       "pinball_50": 5.312879162806523,
+       "pinball_90": 4.6714811768757265,
+       "width_80": 20.73586107159507,
+       "width_80_clim": 30.575038666658074
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.40973971513985374,
+       "rpss": 0.029168251965564607,
+       "bss_below": -0.010951387286931125,
+       "bss_above": 0.05500108897992051,
+       "brier_below": 0.1671226683571554,
+       "brier_above": 0.24261704678269835,
+       "crps": 9.512871292976817,
+       "crpss": -0.008748667941101518,
+       "coverage_80": 0.7676318323374197,
+       "pinball_10": 1.7773850649398923,
+       "pinball_50": 6.10308247968099,
+       "pinball_90": 5.4197072697804884,
+       "width_80": 23.7257347711561,
+       "width_80_clim": 36.084968108006656
+      }
+     }
+    },
+    "incumbent": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.39081610383121457,
+       "rpss": 0.13740861294664697,
+       "bss_below": 0.0732312905519048,
+       "bss_above": 0.2018091294220392,
+       "brier_below": 0.2103109708872618,
+       "brier_above": 0.1805051332279067
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.3850290285124463,
+       "rpss": 0.15027831901989164,
+       "bss_below": 0.07596255762463,
+       "bss_above": 0.22481661457260305,
+       "brier_below": 0.20966460939466178,
+       "brier_above": 0.1753644194331645
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.40979802845773333,
+       "rpss": 0.04588925782415221,
+       "bss_below": 0.024188904115084564,
+       "bss_above": 0.058969796100522,
+       "brier_below": 0.15762368727889395,
+       "brier_above": 0.2521743379589587
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.40362908857164137,
+       "rpss": 0.04364668803998417,
+       "bss_below": 0.03656030687699241,
+       "bss_above": 0.04820958228045569,
+       "brier_below": 0.15926840235911055,
+       "brier_above": 0.24436068402864017
+      }
+     }
+    },
+    "mvs_ensemble": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 6.0236771857019535,
+       "crpss": 0.2500207862527283,
+       "coverage_80": 0.5540532247069336,
+       "pinball_10": 1.580550455575871,
+       "pinball_50": 3.9353006313550516,
+       "pinball_90": 2.80220019017937,
+       "width_80": 18.878648346719945,
+       "width_80_clim": 30.515815325279068
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 6.914036933716914,
+       "crpss": 0.27075810195805683,
+       "coverage_80": 0.5283176360116456,
+       "pinball_10": 1.838978040744543,
+       "pinball_50": 4.520084762036158,
+       "pinball_90": 3.197026748185207,
+       "width_80": 21.77189231869271,
+       "width_80_clim": 36.05064593357397
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 8.549211525074448,
+       "crpss": -0.025160532065448882,
+       "coverage_80": 0.5205806340222683,
+       "pinball_10": 1.5424439887476864,
+       "pinball_50": 5.527064178400992,
+       "pinball_90": 4.827798362531967,
+       "width_80": 18.380161357888895,
+       "width_80_clim": 30.575038666658074
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 9.821846120318842,
+       "crpss": -0.04151248192633905,
+       "coverage_80": 0.47968973440466517,
+       "pinball_10": 1.7601046332799244,
+       "pinball_50": 6.306027301909806,
+       "pinball_90": 5.637971519823981,
+       "width_80": 21.005708618463924,
+       "width_80_clim": 36.084968108006656
+      }
+     }
+    }
+   },
+   "fitted": {
+    "drn_pooled": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      60,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646549554160858,
+      "[32]|0.001": 0.36457643871128315,
+      "[32, 16]|0.0001": 0.3657896088984968,
+      "[32, 16]|0.001": 0.3647232245683136
+     }
+    },
+    "drn_pooled_residual": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.0001,
+     "steps": [
+      20,
+      40,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3697957239006692,
+      "[32]|0.001": 0.3699675998831364,
+      "[32, 16]|0.0001": 0.3708328491422042,
+      "[32, 16]|0.001": 0.370456331127724
+     }
+    },
+    "drn_pooled_nbhd": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      70,
+      30
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646018510917892,
+      "[32]|0.001": 0.36366082089418145,
+      "[32, 16]|0.0001": 0.3679665812800453,
+      "[32, 16]|0.001": 0.3659598045473264
+     }
+    }
+   }
+  },
+  "Mar": {
+   "methods": {
+    "drn_pooled": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.45082913120076956,
+       "rpss": 0.004939129950627952,
+       "bss_below": 0.023975938686979226,
+       "bss_above": -0.014144967095908845,
+       "brier_below": 0.22137636499882687,
+       "brier_above": 0.2294527662019427,
+       "crps": 20.188731290638223,
+       "crpss": 0.004777517890815486,
+       "coverage_80": 0.8150865279719604,
+       "pinball_10": 4.257469054907383,
+       "pinball_50": 13.812408576971611,
+       "pinball_90": 9.194002696134444,
+       "width_80": 88.78714554183551,
+       "width_80_clim": 82.24315244026174
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.45317003531242533,
+       "rpss": -0.0004176892046956482,
+       "bss_below": 0.02476810848718758,
+       "bss_above": -0.025625351168153676,
+       "brier_below": 0.22097650965073234,
+       "brier_above": 0.23219352566169293,
+       "crps": 23.172956337499873,
+       "crpss": 0.001666211687396335,
+       "coverage_80": 0.8059319661140494,
+       "pinball_10": 4.895612118327336,
+       "pinball_50": 15.864724371515324,
+       "pinball_90": 10.50974903382013,
+       "width_80": 101.20763301080149,
+       "width_80_clim": 94.46001080430774
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4241572784598657,
+       "rpss": 0.057097185799354966,
+       "bss_below": 0.038354736760272456,
+       "bss_above": 0.07306434896378988,
+       "brier_below": 0.19899991475823986,
+       "brier_above": 0.22515736370162584,
+       "crps": 22.295111629888968,
+       "crpss": 0.06093017669771594,
+       "coverage_80": 0.8132792252488542,
+       "pinball_10": 4.823378058319525,
+       "pinball_50": 15.520609970780766,
+       "pinball_90": 9.54059680467431,
+       "width_80": 89.73146326091653,
+       "width_80_clim": 82.67591020011095
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.41884277387233154,
+       "rpss": 0.07603022236810619,
+       "bss_below": 0.05122674335988264,
+       "bss_above": 0.09536666780626546,
+       "brier_below": 0.18840861292975541,
+       "brier_above": 0.2304341609425761,
+       "crps": 26.460780673747415,
+       "crpss": 0.06569180404700192,
+       "coverage_80": 0.7851452002504901,
+       "pinball_10": 5.720344060445969,
+       "pinball_50": 18.46085643814824,
+       "pinball_90": 11.2606134280825,
+       "width_80": 102.0553373116483,
+       "width_80_clim": 94.97285539666018
+      }
+     }
+    },
+    "drn_pooled_residual": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4560014197372458,
+       "rpss": -0.006477039890802283,
+       "bss_below": 0.010658857463760163,
+       "bss_above": -0.023655503604077532,
+       "brier_below": 0.22439687151136548,
+       "brier_above": 0.2316045482258804,
+       "crps": 20.410738111205053,
+       "crpss": -0.006166516968479696,
+       "coverage_80": 0.8085330197528103,
+       "pinball_10": 4.274089110603326,
+       "pinball_50": 14.061268244020425,
+       "pinball_90": 9.19942550269573,
+       "width_80": 92.0367741758821,
+       "width_80_clim": 82.24315244026174
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4580864285561332,
+       "rpss": -0.01127111371388878,
+       "bss_below": 0.013567252264619745,
+       "bss_above": -0.03613104235187237,
+       "brier_below": 0.22351449690761258,
+       "brier_above": 0.23457193164852064,
+       "crps": 23.446574753002867,
+       "crpss": -0.010121775366251473,
+       "coverage_80": 0.8060575801082384,
+       "pinball_10": 4.922238969118247,
+       "pinball_50": 16.167351332296377,
+       "pinball_90": 10.525325289161827,
+       "width_80": 105.56364471220233,
+       "width_80_clim": 94.46001080430774
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4255239182473366,
+       "rpss": 0.05405914173635118,
+       "bss_below": 0.03607306438707303,
+       "bss_above": 0.06938193285746974,
+       "brier_below": 0.19947207702548095,
+       "brier_above": 0.22605184122185562,
+       "crps": 22.623814737295834,
+       "crpss": 0.04708520592045973,
+       "coverage_80": 0.8136487490399897,
+       "pinball_10": 4.875494104118819,
+       "pinball_50": 15.615610646455385,
+       "pinball_90": 9.98963485262734,
+       "width_80": 92.47426476769212,
+       "width_80_clim": 82.67591020011095
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4183467298583494,
+       "rpss": 0.07712449856405756,
+       "bss_below": 0.056894971228743874,
+       "bss_above": 0.09289515522997716,
+       "brier_below": 0.18728300895318062,
+       "brier_above": 0.2310637209051688,
+       "crps": 26.880700954237852,
+       "crpss": 0.050864767590804494,
+       "coverage_80": 0.7904300464050596,
+       "pinball_10": 5.798382669980553,
+       "pinball_50": 18.564139524731466,
+       "pinball_90": 11.842827723711139,
+       "width_80": 105.73992538993156,
+       "width_80_clim": 94.97285539666018
+      }
+     }
+    },
+    "drn_pooled_nbhd": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4522021229596511,
+       "rpss": 0.001908690523334422,
+       "bss_below": 0.022596060886860614,
+       "bss_above": -0.018830068221523444,
+       "brier_below": 0.2216893412292713,
+       "brier_above": 0.2305127817303799,
+       "crps": 20.276916631861713,
+       "crpss": 0.0004303386196353731,
+       "coverage_80": 0.8153053239185496,
+       "pinball_10": 4.216915398817643,
+       "pinball_50": 13.828504737306554,
+       "pinball_90": 9.365873631499143,
+       "width_80": 89.53020686166089,
+       "width_80_clim": 82.24315244026174
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4551118389253357,
+       "rpss": -0.004704412800570434,
+       "bss_below": 0.02204256517850589,
+       "bss_above": -0.03147461034161947,
+       "brier_below": 0.22159408691876045,
+       "brier_above": 0.2335177520065752,
+       "crps": 23.28333511298489,
+       "crpss": -0.0030891099674819067,
+       "coverage_80": 0.805705482167873,
+       "pinball_10": 4.845481891245222,
+       "pinball_50": 15.88450180942741,
+       "pinball_90": 10.724318364171415,
+       "width_80": 102.03273096055807,
+       "width_80_clim": 94.46001080430774
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.42379749591765503,
+       "rpss": 0.05789698339514904,
+       "bss_below": 0.03745298572187217,
+       "bss_above": 0.07531373858556467,
+       "brier_below": 0.19918652034621964,
+       "brier_above": 0.22461097557143533,
+       "crps": 22.212710825128188,
+       "crpss": 0.06440089756474832,
+       "coverage_80": 0.8190405398416253,
+       "pinball_10": 4.844090220301775,
+       "pinball_50": 15.496084888361143,
+       "pinball_90": 9.398172093099335,
+       "width_80": 90.98473140260157,
+       "width_80_clim": 82.67591020011095
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.41802395141873616,
+       "rpss": 0.07783654981975074,
+       "bss_below": 0.050656212071970796,
+       "bss_above": 0.09902596109856487,
+       "brier_below": 0.18852190976631378,
+       "brier_above": 0.22950204165242238,
+       "crps": 26.34682185891095,
+       "crpss": 0.06971559518210002,
+       "coverage_80": 0.7918847333724417,
+       "pinball_10": 5.74513663833313,
+       "pinball_50": 18.426222633391887,
+       "pinball_90": 11.070488081866154,
+       "width_80": 103.42416348121805,
+       "width_80_clim": 94.97285539666018
+      }
+     }
+    },
+    "incumbent": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4480528056512643,
+       "rpss": 0.01106697911927601,
+       "bss_below": 0.016065683964475053,
+       "bss_above": 0.006055856739411891,
+       "brier_below": 0.22317052510828872,
+       "brier_above": 0.22488228066095972
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44789436236830454,
+       "rpss": 0.011228880789982632,
+       "bss_below": 0.019694088073286875,
+       "bss_above": 0.002756324019218215,
+       "brier_below": 0.22212622525244533,
+       "brier_above": 0.22576813726968892
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4393862483687782,
+       "rpss": 0.023243143174811798,
+       "bss_below": 0.006430269616546913,
+       "bss_above": 0.03756646158935961,
+       "brier_below": 0.20560626585583777,
+       "brier_above": 0.23377998030858135
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4372508071920298,
+       "rpss": 0.03542198578378242,
+       "bss_below": 0.01969038640599441,
+       "bss_above": 0.0476861342175845,
+       "brier_below": 0.1946711432329188,
+       "brier_above": 0.24257966051659466
+      }
+     }
+    },
+    "mvs_ensemble": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 20.967556179979297,
+       "crpss": -0.03361538695991473,
+       "coverage_80": 0.5857963799949245,
+       "pinball_10": 5.029877887462738,
+       "pinball_50": 13.849445815506364,
+       "pinball_90": 9.706017651808976,
+       "width_80": 70.16207001547629,
+       "width_80_clim": 82.24315244026174
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 24.044365926334724,
+       "crpss": -0.03587572397773964,
+       "coverage_80": 0.599031781381742,
+       "pinball_10": 5.781459114116708,
+       "pinball_50": 15.899399540483856,
+       "pinball_90": 11.0867002794581,
+       "width_80": 80.49353949825652,
+       "width_80_clim": 94.46001080430774
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 22.748631420935492,
+       "crpss": 0.04182792876498065,
+       "coverage_80": 0.6089096441739567,
+       "pinball_10": 5.174331129140925,
+       "pinball_50": 15.652351374547655,
+       "pinball_90": 9.590449131056847,
+       "width_80": 71.11286469244806,
+       "width_80_clim": 82.67591020011095
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 26.87889353715528,
+       "crpss": 0.050928585987342845,
+       "coverage_80": 0.6180695014541384,
+       "pinball_10": 6.08883474874752,
+       "pinball_50": 18.542272056450646,
+       "pinball_90": 11.28512961622127,
+       "width_80": 81.41231776335518,
+       "width_80_clim": 94.97285539666018
+      }
+     }
+    }
+   },
+   "fitted": {
+    "drn_pooled": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      60,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646549554160858,
+      "[32]|0.001": 0.36457643871128315,
+      "[32, 16]|0.0001": 0.3657896088984968,
+      "[32, 16]|0.001": 0.3647232245683136
+     }
+    },
+    "drn_pooled_residual": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.0001,
+     "steps": [
+      20,
+      40,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3697957239006692,
+      "[32]|0.001": 0.3699675998831364,
+      "[32, 16]|0.0001": 0.3708328491422042,
+      "[32, 16]|0.001": 0.370456331127724
+     }
+    },
+    "drn_pooled_nbhd": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      70,
+      30
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646018510917892,
+      "[32]|0.001": 0.36366082089418145,
+      "[32, 16]|0.0001": 0.3679665812800453,
+      "[32, 16]|0.001": 0.3659598045473264
+     }
+    }
+   }
+  },
+  "Apr": {
+   "methods": {
+    "drn_pooled": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44347764829810554,
+       "rpss": 0.021615321650757413,
+       "bss_below": 0.019706617810805738,
+       "bss_above": 0.023525464700742904,
+       "brier_below": 0.2222551381494525,
+       "brier_above": 0.22122251014865305,
+       "crps": 27.968570546526422,
+       "crpss": 0.023871211859217922,
+       "coverage_80": 0.760038953638127,
+       "pinball_10": 7.428871638955684,
+       "pinball_50": 19.720623735759133,
+       "pinball_90": 10.022048446932365,
+       "width_80": 126.53125906405599,
+       "width_80_clim": 116.19136406608656
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44293149381208424,
+       "rpss": 0.022998301864522785,
+       "bss_below": 0.0223025750386876,
+       "bss_above": 0.023694376160860564,
+       "brier_below": 0.221678783018087,
+       "brier_above": 0.2212527107939972,
+       "crps": 31.280854754977828,
+       "crpss": 0.023417189708702657,
+       "coverage_80": 0.772106726289637,
+       "pinball_10": 8.555173660052944,
+       "pinball_50": 22.034358663395835,
+       "pinball_90": 10.985002627945207,
+       "width_80": 143.8498891102834,
+       "width_80_clim": 129.94351508814464
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.43858190883402953,
+       "rpss": 0.029591685094604636,
+       "bss_below": 0.030751457268777704,
+       "bss_above": 0.028627562459820677,
+       "brier_below": 0.19885230821160357,
+       "brier_above": 0.23972960062242596,
+       "crps": 29.87581499014921,
+       "crpss": 0.02595706071421211,
+       "coverage_80": 0.7772837792796511,
+       "pinball_10": 7.2280070358180275,
+       "pinball_50": 20.95601547223194,
+       "pinball_90": 11.791677715796313,
+       "width_80": 121.02901392827685,
+       "width_80_clim": 116.70315284478777
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.44224204277274937,
+       "rpss": 0.03066931531402539,
+       "bss_below": 0.033405005991667736,
+       "bss_above": 0.02839911354941349,
+       "brier_below": 0.199993348158469,
+       "brier_above": 0.24224869461428028,
+       "crps": 34.70004627116399,
+       "crpss": 0.023566222480286725,
+       "coverage_80": 0.7523873060952639,
+       "pinball_10": 8.383414277254035,
+       "pinball_50": 24.243056522764352,
+       "pinball_90": 13.86666791385474,
+       "width_80": 136.6940569126811,
+       "width_80_clim": 130.5080501284331
+      }
+     }
+    },
+    "drn_pooled_residual": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.45219313038534487,
+       "rpss": 0.0023875337987520062,
+       "bss_below": -0.0035735571038642,
+       "bss_above": 0.008353119511751883,
+       "brier_below": 0.22753329118589194,
+       "brier_above": 0.2246598391994529,
+       "crps": 28.421151514001366,
+       "crpss": 0.00807572061013917,
+       "coverage_80": 0.7495947638434585,
+       "pinball_10": 7.657504261047762,
+       "pinball_50": 20.069156473545238,
+       "pinball_90": 10.04010872192934,
+       "width_80": 122.06967254767072,
+       "width_80_clim": 116.19136406608656
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4522578461800013,
+       "rpss": 0.0024265831491890877,
+       "bss_below": -0.0025025379686192117,
+       "bss_above": 0.007358166043842096,
+       "brier_below": 0.22730298445679234,
+       "brier_above": 0.2249548617232089,
+       "crps": 31.79193798312654,
+       "crpss": 0.007461260781958967,
+       "coverage_80": 0.7548400844279811,
+       "pinball_10": 8.832535644677847,
+       "pinball_50": 22.429666825527107,
+       "pinball_90": 10.984274491012863,
+       "width_80": 138.20282284629465,
+       "width_80_clim": 129.94351508814464
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4377976357025246,
+       "rpss": 0.03132697137212703,
+       "bss_below": 0.031779699247955095,
+       "bss_above": 0.030950617117210255,
+       "brier_below": 0.19864135273223466,
+       "brier_above": 0.23915628297029004,
+       "crps": 29.89716092878014,
+       "crpss": 0.025261117831557933,
+       "coverage_80": 0.787443263913458,
+       "pinball_10": 7.207105074386494,
+       "pinball_50": 20.913246063615933,
+       "pinball_90": 11.984160060282065,
+       "width_80": 119.68615369632701,
+       "width_80_clim": 116.70315284478777
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.440945745746941,
+       "rpss": 0.03351061117026055,
+       "bss_below": 0.03705336399105397,
+       "bss_above": 0.03057067217383791,
+       "brier_below": 0.19923848460537708,
+       "brier_above": 0.24170726114156396,
+       "crps": 34.70271339767505,
+       "crpss": 0.023491171502142083,
+       "coverage_80": 0.7559555479807519,
+       "pinball_10": 8.309500171335507,
+       "pinball_50": 24.182168309298884,
+       "pinball_90": 14.108412415966988,
+       "width_80": 134.14045659673562,
+       "width_80_clim": 130.5080501284331
+      }
+     }
+    },
+    "drn_pooled_nbhd": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44435344383335545,
+       "rpss": 0.01968317256422847,
+       "bss_below": 0.01599242351625585,
+       "bss_above": 0.02337670452851892,
+       "brier_below": 0.22309723173189167,
+       "brier_above": 0.22125621210146376,
+       "crps": 28.023235136493046,
+       "crpss": 0.021963367485492435,
+       "coverage_80": 0.7547717920972256,
+       "pinball_10": 7.50194290869602,
+       "pinball_50": 19.762820854022063,
+       "pinball_90": 9.980554399209582,
+       "width_80": 125.29347578108741,
+       "width_80_clim": 116.19136406608656
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4441107683395094,
+       "rpss": 0.02039710228409497,
+       "bss_below": 0.01779188901564821,
+       "bss_above": 0.023003616687885087,
+       "brier_below": 0.22270151598498997,
+       "brier_above": 0.22140925235451947,
+       "crps": 31.35168086684095,
+       "crpss": 0.021206010893191296,
+       "coverage_80": 0.7679487341714272,
+       "pinball_10": 8.64344048348197,
+       "pinball_50": 22.091253620908038,
+       "pinball_90": 10.933624092876217,
+       "width_80": 142.63661403657014,
+       "width_80_clim": 129.94351508814464
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4385128697746209,
+       "rpss": 0.02974444122967068,
+       "bss_below": 0.032037795040589345,
+       "bss_above": 0.027837968244792566,
+       "brier_below": 0.19858840145932338,
+       "brier_above": 0.2399244683152975,
+       "crps": 29.86900109181481,
+       "crpss": 0.026179214639178494,
+       "coverage_80": 0.777835368936525,
+       "pinball_10": 7.242010399219349,
+       "pinball_50": 20.937151541560993,
+       "pinball_90": 11.803674957076058,
+       "width_80": 120.68483193166941,
+       "width_80_clim": 116.70315284478777
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4417374932214445,
+       "rpss": 0.031775215058332695,
+       "bss_below": 0.03629876604412352,
+       "bss_above": 0.028021364700109297,
+       "brier_below": 0.1993946147021142,
+       "brier_above": 0.2423428785193303,
+       "crps": 34.68602226382638,
+       "crpss": 0.02396084773103191,
+       "coverage_80": 0.7549853842114516,
+       "pinball_10": 8.398565373785965,
+       "pinball_50": 24.208831908711016,
+       "pinball_90": 13.900391563805984,
+       "width_80": 136.58782105486242,
+       "width_80_clim": 130.5080501284331
+      }
+     }
+    },
+    "incumbent": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4489923618552592,
+       "rpss": 0.009448955948878512,
+       "bss_below": 0.0013018338731570767,
+       "bss_above": 0.017602219940792363,
+       "brier_below": 0.22642792751128404,
+       "brier_above": 0.22256443461944278
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44817966807682313,
+       "rpss": 0.011422075652583685,
+       "bss_below": 0.004230831657753731,
+       "bss_above": 0.018616910547852084,
+       "brier_below": 0.22577629005597155,
+       "brier_above": 0.22240337817049335
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.44248918158044387,
+       "rpss": 0.020946435745848202,
+       "bss_below": 0.02845065118161927,
+       "bss_above": 0.014708161862087787,
+       "brier_below": 0.19932434462023157,
+       "brier_above": 0.24316483536580424
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.44403314214927214,
+       "rpss": 0.026743484169387655,
+       "bss_below": 0.03840805228142874,
+       "bss_above": 0.0170636974444921,
+       "brier_below": 0.1989581928093482,
+       "brier_above": 0.24507494744362715
+      }
+     }
+    },
+    "mvs_ensemble": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 28.667852152111553,
+       "crpss": -0.0005343581392005525,
+       "coverage_80": 0.6812262553995887,
+       "pinball_10": 7.94199480607449,
+       "pinball_50": 20.012344961245272,
+       "pinball_90": 10.272515212579316,
+       "width_80": 105.93376781795519,
+       "width_80_clim": 116.19136406608656
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 31.986299968789478,
+       "crpss": 0.0013933136091822673,
+       "coverage_80": 0.687071419177122,
+       "pinball_10": 9.102945405639518,
+       "pinball_50": 22.269912478410106,
+       "pinball_90": 11.288120192230693,
+       "width_80": 118.53187278015314,
+       "width_80_clim": 129.94351508814464
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 30.38445576431805,
+       "crpss": 0.009373815876359881,
+       "coverage_80": 0.7325479747379083,
+       "pinball_10": 7.3863995806537,
+       "pinball_50": 20.654135470593058,
+       "pinball_90": 13.381026635350722,
+       "width_80": 108.88374013906065,
+       "width_80_clim": 116.70315284478777
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 35.124118540734486,
+       "crpss": 0.011633140752318583,
+       "coverage_80": 0.7033316011797309,
+       "pinball_10": 8.562175794124226,
+       "pinball_50": 23.697568736345602,
+       "pinball_90": 15.855902908009378,
+       "width_80": 120.42102236497087,
+       "width_80_clim": 130.5080501284331
+      }
+     }
+    }
+   },
+   "fitted": {
+    "drn_pooled": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      60,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646549554160858,
+      "[32]|0.001": 0.36457643871128315,
+      "[32, 16]|0.0001": 0.3657896088984968,
+      "[32, 16]|0.001": 0.3647232245683136
+     }
+    },
+    "drn_pooled_residual": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.0001,
+     "steps": [
+      20,
+      40,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3697957239006692,
+      "[32]|0.001": 0.3699675998831364,
+      "[32, 16]|0.0001": 0.3708328491422042,
+      "[32, 16]|0.001": 0.370456331127724
+     }
+    },
+    "drn_pooled_nbhd": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      70,
+      30
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646018510917892,
+      "[32]|0.001": 0.36366082089418145,
+      "[32, 16]|0.0001": 0.3679665812800453,
+      "[32, 16]|0.001": 0.3659598045473264
+     }
+    }
+   }
+  },
+  "May": {
+   "methods": {
+    "drn_pooled": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4417222585191369,
+       "rpss": 0.025031582185000345,
+       "bss_below": 0.02560363501974605,
+       "bss_above": 0.024459983376279193,
+       "brier_below": 0.2206439115192179,
+       "brier_above": 0.2210783469999189,
+       "crps": 28.65688328244782,
+       "crpss": 0.0248391288711175,
+       "coverage_80": 0.7745366073747851,
+       "pinball_10": 7.786425652254535,
+       "pinball_50": 20.186140255161863,
+       "pinball_90": 10.166575114018608,
+       "width_80": 131.46732763181592,
+       "width_80_clim": 118.63768674168125
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44194669779343654,
+       "rpss": 0.02514487271240462,
+       "bss_below": 0.023778604737823228,
+       "bss_above": 0.02650957733217918,
+       "brier_below": 0.221156370722518,
+       "brier_above": 0.22079032707091853,
+       "crps": 27.919127732632134,
+       "crpss": 0.027481737232281644,
+       "coverage_80": 0.7776071886154089,
+       "pinball_10": 7.485320044215676,
+       "pinball_50": 19.656506745896777,
+       "pinball_90": 10.022880957656836,
+       "width_80": 129.6987989919646,
+       "width_80_clim": 115.68852208873984
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.41961032724082803,
+       "rpss": 0.018413698708577897,
+       "bss_below": 0.03411627931778494,
+       "bss_above": 0.0047044406511588255,
+       "brier_below": 0.19245726165684768,
+       "brier_above": 0.2271530655839803,
+       "crps": 25.07856356713927,
+       "crpss": 0.018476565299522463,
+       "coverage_80": 0.8335742605416381,
+       "pinball_10": 7.054781847870116,
+       "pinball_50": 17.004902433825958,
+       "pinball_90": 9.57728346246275,
+       "width_80": 131.33483068709467,
+       "width_80_clim": 119.17851371564237
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4259335576094531,
+       "rpss": -0.0032067037211842564,
+       "bss_below": 0.005492160384888423,
+       "bss_above": -0.010251664197800103,
+       "brier_below": 0.1889417623569598,
+       "brier_above": 0.23699179525249325,
+       "crps": 24.877506771683713,
+       "crpss": -0.0038136107137423103,
+       "coverage_80": 0.8396064294346183,
+       "pinball_10": 7.059387358384496,
+       "pinball_50": 16.951350514441955,
+       "pinball_90": 9.353926495918092,
+       "width_80": 129.58123049664368,
+       "width_80_clim": 116.2223171433394
+      }
+     }
+    },
+    "drn_pooled_residual": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.45285945506780806,
+       "rpss": 0.00044958594520205786,
+       "bss_below": -0.0012003244405476288,
+       "bss_above": 0.002098186832586557,
+       "brier_below": 0.22671344407503935,
+       "brier_above": 0.22614601099276865,
+       "crps": 29.16218540418576,
+       "crpss": 0.00764427720631522,
+       "coverage_80": 0.7671294597195732,
+       "pinball_10": 7.966733059981093,
+       "pinball_50": 20.535463937631146,
+       "pinball_90": 10.329476946014308,
+       "width_80": 128.6503320239859,
+       "width_80_clim": 118.63768674168125
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.452731335753864,
+       "rpss": 0.0013558962042532485,
+       "bss_below": -0.002133625608719658,
+       "bss_above": 0.004841425125054921,
+       "brier_below": 0.22702661168279556,
+       "brier_above": 0.22570472407106845,
+       "crps": 28.400297058404515,
+       "crpss": 0.01072097159237484,
+       "coverage_80": 0.7717148214720364,
+       "pinball_10": 7.674029381313986,
+       "pinball_50": 19.99068272645723,
+       "pinball_90": 10.158760948666052,
+       "width_80": 126.98843822044843,
+       "width_80_clim": 115.68852208873984
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.42481700513975246,
+       "rpss": 0.006233818069253716,
+       "bss_below": 0.014263306488749405,
+       "bss_above": -0.0007763881861042599,
+       "brier_below": 0.19641306783165852,
+       "brier_above": 0.228403937308094,
+       "crps": 25.186898672411335,
+       "crpss": 0.014236551937488962,
+       "coverage_80": 0.8346600319656151,
+       "pinball_10": 7.099041899268425,
+       "pinball_50": 17.17439785415946,
+       "pinball_90": 9.372883322079353,
+       "width_80": 129.81627309832123,
+       "width_80_clim": 119.17851371564237
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4301295728808387,
+       "rpss": -0.013089631642609456,
+       "bss_below": -0.011097846629764652,
+       "bss_above": -0.014702721181922174,
+       "brier_below": 0.19209361801661554,
+       "brier_above": 0.23803595486422313,
+       "crps": 24.978339954003552,
+       "crpss": -0.007882254800674948,
+       "coverage_80": 0.8394750780801243,
+       "pinball_10": 7.081645097980531,
+       "pinball_50": 17.09748827095069,
+       "pinball_90": 9.205342341169116,
+       "width_80": 128.08423122877704,
+       "width_80_clim": 116.2223171433394
+      }
+     }
+    },
+    "drn_pooled_nbhd": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44207734380041463,
+       "rpss": 0.024247838716791592,
+       "bss_below": 0.02596896514014546,
+       "bss_above": 0.02252807831444059,
+       "brier_below": 0.22056118556737966,
+       "brier_above": 0.22151615823303494,
+       "crps": 28.70076977608132,
+       "crpss": 0.0233457218267914,
+       "coverage_80": 0.7743901367417165,
+       "pinball_10": 7.792208585625926,
+       "pinball_50": 20.187246574155864,
+       "pinball_90": 10.232488888805145,
+       "width_80": 132.038607389413,
+       "width_80_clim": 118.63768674168125
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44218083046557766,
+       "rpss": 0.024628418042549782,
+       "bss_below": 0.02370859661349689,
+       "bss_above": 0.025547186964130053,
+       "brier_below": 0.22117223059075308,
+       "brier_above": 0.22100859987482466,
+       "crps": 27.95734970232641,
+       "crpss": 0.02615033591048488,
+       "coverage_80": 0.7788896253849916,
+       "pinball_10": 7.50382380508086,
+       "pinball_50": 19.658057035060455,
+       "pinball_90": 10.058077185268466,
+       "width_80": 130.6201415524196,
+       "width_80_clim": 115.68852208873984
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4206171397556924,
+       "rpss": 0.01605848171699875,
+       "bss_below": 0.02977495485453452,
+       "bss_above": 0.004083209972819524,
+       "brier_below": 0.19332229271624984,
+       "brier_above": 0.22729484703944255,
+       "crps": 25.1853731025607,
+       "crpss": 0.014296259605978912,
+       "coverage_80": 0.8383236997027353,
+       "pinball_10": 7.124350262836243,
+       "pinball_50": 17.040378057153546,
+       "pinball_90": 9.649385974362215,
+       "width_80": 133.3911126713738,
+       "width_80_clim": 119.17851371564237
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.42799034592934054,
+       "rpss": -0.008051083305237627,
+       "bss_below": -0.0030988462950269913,
+       "bss_above": -0.012061757984408006,
+       "brier_below": 0.1905739264062164,
+       "brier_above": 0.23741641952312412,
+       "crps": 25.050084706499415,
+       "crpss": -0.010777173480170932,
+       "coverage_80": 0.8460737242913893,
+       "pinball_10": 7.151521666620809,
+       "pinball_50": 17.02564420646539,
+       "pinball_90": 9.451113446683447,
+       "width_80": 132.34271047099,
+       "width_80_clim": 116.2223171433394
+      }
+     }
+    },
+    "incumbent": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.44958254581701634,
+       "rpss": 0.007682372987173891,
+       "bss_below": 0.0035230618206441022,
+       "bss_above": 0.01183838257212344,
+       "brier_below": 0.2256438727406814,
+       "brier_above": 0.22393867317283478
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "rps": 0.4500753978303175,
+       "rpss": 0.007214418771463338,
+       "bss_below": 0.0017093851487394174,
+       "bss_above": 0.012713152364392633,
+       "brier_below": 0.22615600352373244,
+       "brier_above": 0.22391939450714374
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4189145496707768,
+       "rpss": 0.0200413176854487,
+       "bss_below": 0.035118802074836974,
+       "bss_above": 0.006877808302312327,
+       "brier_below": 0.1922575038801718,
+       "brier_above": 0.22665704495979147
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "rps": 0.4214772766068908,
+       "rpss": 0.00728923137377957,
+       "bss_below": 0.021176566029168842,
+       "bss_above": -0.0039577170940963136,
+       "brier_below": 0.18596195754707648,
+       "brier_above": 0.23551531778040177
+      }
+     }
+    },
+    "mvs_ensemble": {
+     "training": {
+      "ethiopia": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 29.521194398306253,
+       "crpss": -0.004572387111261733,
+       "coverage_80": 0.6697308932378055,
+       "pinball_10": 8.600839437041783,
+       "pinball_50": 20.417144237400333,
+       "pinball_90": 10.634559763707996,
+       "width_80": 109.15254937008376,
+       "width_80_clim": 118.63768674168125
+      },
+      "fmam_domain": {
+       "years": [
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+       ],
+       "crps": 28.73380998266235,
+       "crpss": -0.0008964189226845498,
+       "coverage_80": 0.6729384708756182,
+       "pinball_10": 8.34819016723225,
+       "pinball_50": 19.899129304674688,
+       "pinball_90": 10.409691019187916,
+       "width_80": 106.20886531750016,
+       "width_80_clim": 115.68852208873984
+      }
+     },
+     "test": {
+      "ethiopia": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 25.5175330846002,
+       "crpss": 0.0012962005886973937,
+       "coverage_80": 0.7634042860520055,
+       "pinball_10": 6.782488597933258,
+       "pinball_50": 17.273805290032353,
+       "pinball_90": 9.55164433014121,
+       "width_80": 110.9543054112932,
+       "width_80_clim": 119.17851371564237
+      },
+      "fmam_domain": {
+       "years": [
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+       ],
+       "crps": 25.490424972813134,
+       "crpss": -0.028545013188856938,
+       "coverage_80": 0.7706350069315283,
+       "pinball_10": 6.61085929337811,
+       "pinball_50": 17.363323726549016,
+       "pinball_90": 9.42849647788198,
+       "width_80": 108.98962983719966,
+       "width_80_clim": 116.2223171433394
+      }
+     }
+    }
+   },
+   "fitted": {
+    "drn_pooled": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      60,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646549554160858,
+      "[32]|0.001": 0.36457643871128315,
+      "[32, 16]|0.0001": 0.3657896088984968,
+      "[32, 16]|0.001": 0.3647232245683136
+     }
+    },
+    "drn_pooled_residual": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.0001,
+     "steps": [
+      20,
+      40,
+      40
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3697957239006692,
+      "[32]|0.001": 0.3699675998831364,
+      "[32, 16]|0.0001": 0.3708328491422042,
+      "[32, 16]|0.001": 0.370456331127724
+     }
+    },
+    "drn_pooled_nbhd": {
+     "hidden": [
+      32
+     ],
+     "decay": 0.001,
+     "steps": [
+      80,
+      70,
+      30
+     ],
+     "validation_crps": {
+      "[32]|0.0001": 0.3646018510917892,
+      "[32]|0.001": 0.36366082089418145,
+      "[32, 16]|0.0001": 0.3679665812800453,
+      "[32, 16]|0.001": 0.3659598045473264
+     }
+    }
+   }
+  }
+ },
+ "tests": {
+  "drn_pooled_residual": {
+   "rps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.016730218419033997,
+      "bootstrap_95": [
+       -0.03687103872736611,
+       0.002246338460947885
+      ],
+      "p_improvement": 0.05317,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.016751704390249804,
+      "bootstrap_95": [
+       -0.037704244566274955,
+       0.006883195747757011
+      ],
+      "p_improvement": 0.1015625,
+      "years_better": 7,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 0.37219,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": 0.007948614085981498,
+      "bootstrap_95": [
+       -0.00541503030627561,
+       0.021967932830365126
+      ],
+      "p_improvement": 0.85462,
+      "years_better": 10,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.01386233012144168,
+      "bootstrap_95": [
+       -0.029329318604710594,
+       0.0009419041315872816
+      ],
+      "p_improvement": 0.072265625,
+      "years_better": 6,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 1.0,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": 0.003200768530085628,
+      "bootstrap_95": [
+       -0.008691305637145695,
+       0.017457584563638193
+      ],
+      "p_improvement": 0.658315,
+      "years_better": 14,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.004691545877919213,
+      "bootstrap_95": [
+       -0.01802128926492483,
+       0.006805109825966455
+      ],
+      "p_improvement": 0.2734375,
+      "years_better": 5,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 1.0,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": 0.0032769092507917547,
+      "bootstrap_95": [
+       -0.008835007120529854,
+       0.016203689626848258
+      ],
+      "p_improvement": 0.690215,
+      "years_better": 10,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.005902455468975671,
+      "bootstrap_95": [
+       -0.009374442576541357,
+       0.019015674041545038
+      ],
+      "p_improvement": 0.775390625,
+      "years_better": 3,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 1.0,
+      "no_harm": false,
+      "confirmed": false
+     }
+    }
+   },
+   "crps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.15768340331628952,
+      "bootstrap_95": [
+       -0.34427825669329765,
+       0.025813498122181002
+      ],
+      "p_improvement": 0.060655,
+      "years_better": 14,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.2672808289729996,
+      "bootstrap_95": [
+       -0.6080910407119581,
+       0.06503055149209862
+      ],
+      "p_improvement": 0.08984375,
+      "years_better": 6,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.31170000000000003,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": -0.5568180687742456,
+      "bootstrap_95": [
+       -1.5967821141716605,
+       0.44337570451848035
+      ],
+      "p_improvement": 0.15762,
+      "years_better": 12,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.12481668363965465,
+      "bootstrap_95": [
+       -1.2691278595902,
+       1.2013600996269334
+      ],
+      "p_improvement": 0.423828125,
+      "years_better": 5,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.47286000000000006,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": -0.24670063811018972,
+      "bootstrap_95": [
+       -0.9154656021342173,
+       0.4387303364189294
+      ],
+      "p_improvement": 0.24671,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.4872948355379197,
+      "bootstrap_95": [
+       -1.9774516010335268,
+       0.7879475113241424
+      ],
+      "p_improvement": 0.3125,
+      "years_better": 6,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.47286000000000006,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": -0.3590089941204955,
+      "bootstrap_95": [
+       -1.2604923955253189,
+       0.5577138506873589
+      ],
+      "p_improvement": 0.226955,
+      "years_better": 13,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.33063441218886186,
+      "bootstrap_95": [
+       -1.1060267693661983,
+       0.48323772948306937
+      ],
+      "p_improvement": 0.2265625,
+      "years_better": 6,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.47286000000000006,
+      "no_harm": true,
+      "confirmed": false
+     }
+    }
+   }
+  },
+  "drn_pooled_nbhd": {
+   "rps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.021083137120293364,
+      "bootstrap_95": [
+       -0.040603347575058076,
+       -0.0026579258393608193
+      ],
+      "p_improvement": 0.01838,
+      "years_better": 14,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.011775646285496606,
+      "bootstrap_95": [
+       -0.032149649935554546,
+       0.011381406443540873
+      ],
+      "p_improvement": 0.1640625,
+      "years_better": 7,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 0.14704,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": 0.004149317308386813,
+      "bootstrap_95": [
+       -0.007895251903034299,
+       0.016600980318203402
+      ],
+      "p_improvement": 0.735085,
+      "years_better": 11,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.01558875245112327,
+      "bootstrap_95": [
+       -0.030161609084208583,
+       -0.0015601646800060388
+      ],
+      "p_improvement": 0.04296875,
+      "years_better": 6,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 1.0,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": -0.0046389180219037875,
+      "bootstrap_95": [
+       -0.012117817040369025,
+       0.0023144370093764357
+      ],
+      "p_improvement": 0.116355,
+      "years_better": 14,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.003976311805822894,
+      "bootstrap_95": [
+       -0.014310526976701916,
+       0.0038454960726522513
+      ],
+      "p_improvement": 0.287109375,
+      "years_better": 5,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 0.61629,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": -0.0075052020166016834,
+      "bootstrap_95": [
+       -0.018370974963051005,
+       0.003708739592165994
+      ],
+      "p_improvement": 0.102715,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.0017025900849155908,
+      "bootstrap_95": [
+       -0.016068819447986642,
+       0.017773035650507526
+      ],
+      "p_improvement": 0.630859375,
+      "years_better": 4,
+      "years": 9
+     },
+     "decision": {
+      "reference": "incumbent",
+      "holm_p_family": 0.61629,
+      "no_harm": false,
+      "confirmed": false
+     }
+    }
+   },
+   "crps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.20108211691604425,
+      "bootstrap_95": [
+       -0.40307015729212287,
+       -0.0024967985169710013
+      ],
+      "p_improvement": 0.03304,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.2823925925924861,
+      "bootstrap_95": [
+       -0.5434876940725863,
+       -0.036751429401516524
+      ],
+      "p_improvement": 0.037109375,
+      "years_better": 6,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.26432,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": -0.6906395481175807,
+      "bootstrap_95": [
+       -1.4884973728148698,
+       0.07088788255108462
+      ],
+      "p_improvement": 0.05195,
+      "years_better": 14,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.5359205958073002,
+      "bootstrap_95": [
+       -1.2934514289129384,
+       0.25989352410868716
+      ],
+      "p_improvement": 0.119140625,
+      "years_better": 7,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.31170000000000003,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": -0.6446170156185058,
+      "bootstrap_95": [
+       -1.4790293541565087,
+       0.1730724144925094
+      ],
+      "p_improvement": 0.0808,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.5154546725032448,
+      "bootstrap_95": [
+       -1.9861846961395067,
+       0.6276888291469184
+      ],
+      "p_improvement": 0.326171875,
+      "years_better": 5,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.3232,
+      "no_harm": true,
+      "confirmed": false
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": -0.8204246222249382,
+      "bootstrap_95": [
+       -1.7216328542300308,
+       0.02463826402146628
+      ],
+      "p_improvement": 0.03953,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.33215998203949737,
+      "bootstrap_95": [
+       -1.120807646972077,
+       0.39565495816955976
+      ],
+      "p_improvement": 0.21484375,
+      "years_better": 6,
+      "years": 9
+     },
+     "decision": {
+      "reference": "mvs_ensemble",
+      "holm_p_family": 0.27671,
+      "no_harm": true,
+      "confirmed": false
+     }
+    }
+   }
+  }
+ },
+ "comparisons": {
+  "drn_pooled_residual|drn_pooled": {
+   "rps": {
+    "Feb": {
+     "training": {
+      "mean_difference": 0.002698376127217314,
+      "bootstrap_95": [
+       -0.003795542832718932,
+       0.009415730591564416
+      ],
+      "p_improvement": 0.77476,
+      "years_better": 11,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.010617756549098177,
+      "bootstrap_95": [
+       -0.016382958091088785,
+       -0.005507204485497987
+      ],
+      "p_improvement": 0.00390625,
+      "years_better": 8,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": 0.005172288536476294,
+      "bootstrap_95": [
+       -0.0035151879119468955,
+       0.01396294146471261
+      ],
+      "p_improvement": 0.86452,
+      "years_better": 10,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.0013666397874708075,
+      "bootstrap_95": [
+       -0.003450453937438358,
+       0.00626604650125376
+      ],
+      "p_improvement": 0.69921875,
+      "years_better": 5,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": 0.008715482087239367,
+      "bootstrap_95": [
+       -8.232555359890648e-05,
+       0.021556333729974623
+      ],
+      "p_improvement": 0.945205,
+      "years_better": 11,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.0007842731315048646,
+      "bootstrap_95": [
+       -0.004238939843371413,
+       0.002134379830912407
+      ],
+      "p_improvement": 0.353515625,
+      "years_better": 4,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": 0.011137196548671187,
+      "bootstrap_95": [
+       0.003389294034391118,
+       0.02153651140992779
+      ],
+      "p_improvement": 0.99897,
+      "years_better": 6,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.0052066778989245015,
+      "bootstrap_95": [
+       -0.0011781788767622568,
+       0.011728803511670494
+      ],
+      "p_improvement": 0.912109375,
+      "years_better": 3,
+      "years": 9
+     }
+    }
+   },
+   "crps": {
+    "Feb": {
+     "training": {
+      "mean_difference": 0.006609632168764886,
+      "bootstrap_95": [
+       -0.06474839734538365,
+       0.08338679848405885
+      ],
+      "p_improvement": 0.566995,
+      "years_better": 12,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.10806346990133098,
+      "bootstrap_95": [
+       -0.16830813340195805,
+       -0.056355024388240145
+      ],
+      "p_improvement": 0.001953125,
+      "years_better": 9,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": 0.22200682056682752,
+      "bootstrap_95": [
+       -0.06358842273331916,
+       0.49799894947404955
+      ],
+      "p_improvement": 0.92489,
+      "years_better": 8,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.32870310740686787,
+      "bootstrap_95": [
+       0.013992043650644256,
+       0.7174983479562569
+      ],
+      "p_improvement": 0.9609375,
+      "years_better": 2,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": 0.45258096747494464,
+      "bootstrap_95": [
+       -0.016520105602838453,
+       1.1507303032558491
+      ],
+      "p_improvement": 0.937695,
+      "years_better": 11,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.021345938630926833,
+      "bootstrap_95": [
+       -0.20121310610572035,
+       0.25509158784920044
+      ],
+      "p_improvement": 0.560546875,
+      "years_better": 3,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": 0.5053021217379418,
+      "bootstrap_95": [
+       0.18056503394588552,
+       0.9265361384016241
+      ],
+      "p_improvement": 0.99912,
+      "years_better": 6,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.10833510527206514,
+      "bootstrap_95": [
+       -0.14126347073194756,
+       0.32355445659734344
+      ],
+      "p_improvement": 0.798828125,
+      "years_better": 3,
+      "years": 9
+     }
+    }
+   }
+  },
+  "drn_pooled_nbhd|drn_pooled": {
+   "rps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.001654542574042056,
+      "bootstrap_95": [
+       -0.004271454391581238,
+       0.0012622383884876372
+      ],
+      "p_improvement": 0.13145,
+      "years_better": 16,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.005641698444344978,
+      "bootstrap_95": [
+       -0.008893655564478915,
+       -0.0025498187584240954
+      ],
+      "p_improvement": 0.0078125,
+      "years_better": 7,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": 0.0013729917588816097,
+      "bootstrap_95": [
+       -0.0025605853886103984,
+       0.004927045808682392
+      ],
+      "p_improvement": 0.751735,
+      "years_better": 9,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.0003597825422107823,
+      "bootstrap_95": [
+       -0.003298754120087018,
+       0.0019377461465269247
+      ],
+      "p_improvement": 0.423828125,
+      "years_better": 4,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": 0.0008757955352499519,
+      "bootstrap_95": [
+       -0.0023131189965678654,
+       0.00490383410845399
+      ],
+      "p_improvement": 0.657415,
+      "years_better": 12,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -6.903905940854511e-05,
+      "bootstrap_95": [
+       -0.003969470895279028,
+       0.0039037100968551336
+      ],
+      "p_improvement": 0.494140625,
+      "years_better": 4,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": 0.00035508528127774913,
+      "bootstrap_95": [
+       -0.002191889180091065,
+       0.0031897405402315218
+      ],
+      "p_improvement": 0.59614,
+      "years_better": 17,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.0010068125148644217,
+      "bootstrap_95": [
+       -0.00048606958199185586,
+       0.0026541528087389125
+      ],
+      "p_improvement": 0.853515625,
+      "years_better": 2,
+      "years": 9
+     }
+    }
+   },
+   "crps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.03678908143098982,
+      "bootstrap_95": [
+       -0.07717038059307707,
+       0.004677341731155216
+      ],
+      "p_improvement": 0.047305,
+      "years_better": 16,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.12317523352081745,
+      "bootstrap_95": [
+       -0.22298832453451042,
+       -0.036463762044956945
+      ],
+      "p_improvement": 0.013671875,
+      "years_better": 7,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": 0.08818534122349238,
+      "bootstrap_95": [
+       -0.011820745922232338,
+       0.19764157251740616
+      ],
+      "p_improvement": 0.939315,
+      "years_better": 11,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.08240080476077773,
+      "bootstrap_95": [
+       -0.29547623876928325,
+       0.057687251197513195
+      ],
+      "p_improvement": 0.314453125,
+      "years_better": 5,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": 0.05466458996662856,
+      "bootstrap_95": [
+       -0.1277772478913195,
+       0.2864941304304279
+      ],
+      "p_improvement": 0.671405,
+      "years_better": 12,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.0068138983343983585,
+      "bootstrap_95": [
+       -0.21839598681351388,
+       0.21170606931358826
+      ],
+      "p_improvement": 0.478515625,
+      "years_better": 4,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": 0.04388649363349906,
+      "bootstrap_95": [
+       -0.08929654079672975,
+       0.19464911803369125
+      ],
+      "p_improvement": 0.71898,
+      "years_better": 14,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.10680953542142962,
+      "bootstrap_95": [
+       0.03430583445991319,
+       0.1804243463511217
+      ],
+      "p_improvement": 0.990234375,
+      "years_better": 2,
+      "years": 9
+     }
+    }
+   }
+  },
+  "drn_pooled_residual|emos_csg": {
+   "rps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.032205212972504706,
+      "bootstrap_95": [
+       -0.047562272678768884,
+       -0.018571898991864632
+      ],
+      "p_improvement": 3e-05,
+      "years_better": 21,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.031797970982824005,
+      "bootstrap_95": [
+       -0.04524056693467136,
+       -0.02101876010572184
+      ],
+      "p_improvement": 0.001953125,
+      "years_better": 9,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": -0.016485714873968587,
+      "bootstrap_95": [
+       -0.03222722831245414,
+       -0.0008203761974122264
+      ],
+      "p_improvement": 0.031895,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.013930052825824706,
+      "bootstrap_95": [
+       -0.045295519207583367,
+       0.015873804607739708
+      ],
+      "p_improvement": 0.2109375,
+      "years_better": 4,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": -0.0024138802089009107,
+      "bootstrap_95": [
+       -0.014207324201039097,
+       0.010051282645990733
+      ],
+      "p_improvement": 0.35411,
+      "years_better": 13,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.009433139757156928,
+      "bootstrap_95": [
+       -0.03082086760636663,
+       0.012510202017238327
+      ],
+      "p_improvement": 0.2109375,
+      "years_better": 5,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": -0.003966892813042189,
+      "bootstrap_95": [
+       -0.015203991928742092,
+       0.006118133386207443
+      ],
+      "p_improvement": 0.247535,
+      "years_better": 13,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.009995503292701503,
+      "bootstrap_95": [
+       -0.0003968641632024915,
+       0.0205071953373437
+      ],
+      "p_improvement": 0.935546875,
+      "years_better": 1,
+      "years": 9
+     }
+    }
+   },
+   "crps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.17832429477125777,
+      "bootstrap_95": [
+       -0.28228651384638676,
+       -0.05653013227197971
+      ],
+      "p_improvement": 0.002685,
+      "years_better": 20,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.005268025844756978,
+      "bootstrap_95": [
+       -0.15123870122289032,
+       0.1929888332489582
+      ],
+      "p_improvement": 0.521484375,
+      "years_better": 6,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": -0.14706166043069926,
+      "bootstrap_95": [
+       -0.5750886860498818,
+       0.28104132124931347
+      ],
+      "p_improvement": 0.25916,
+      "years_better": 13,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.10938790180796253,
+      "bootstrap_95": [
+       -0.897910393849952,
+       0.720042713377158
+      ],
+      "p_improvement": 0.400390625,
+      "years_better": 5,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": -0.13684607358080866,
+      "bootstrap_95": [
+       -0.7968230432083292,
+       0.5557682387873447
+      ],
+      "p_improvement": 0.35264,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.44698310747217385,
+      "bootstrap_95": [
+       -1.3899533501213066,
+       0.46742687025729285
+      ],
+      "p_improvement": 0.19140625,
+      "years_better": 5,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": -0.32827781956171337,
+      "bootstrap_95": [
+       -0.7914414178840986,
+       0.09942054995018249
+      ],
+      "p_improvement": 0.089385,
+      "years_better": 14,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.07495609165473975,
+      "bootstrap_95": [
+       -0.2882237980953726,
+       0.4824313135949065
+      ],
+      "p_improvement": 0.63671875,
+      "years_better": 5,
+      "years": 9
+     }
+    }
+   }
+  },
+  "drn_pooled_nbhd|emos_csg": {
+   "rps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.036558131673764066,
+      "bootstrap_95": [
+       -0.053954486922254685,
+       -0.019982418845645125
+      ],
+      "p_improvement": 0.0001,
+      "years_better": 20,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.026821912878070803,
+      "bootstrap_95": [
+       -0.04285274239262361,
+       -0.012569328216019669
+      ],
+      "p_improvement": 0.00390625,
+      "years_better": 8,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": -0.02028501165156327,
+      "bootstrap_95": [
+       -0.040446849585178864,
+       0.0006950241465786427
+      ],
+      "p_improvement": 0.040065,
+      "years_better": 16,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.015656475155506295,
+      "bootstrap_95": [
+       -0.04993208008487987,
+       0.01692055375412405
+      ],
+      "p_improvement": 0.197265625,
+      "years_better": 4,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": -0.010253566760890327,
+      "bootstrap_95": [
+       -0.022357679656492623,
+       0.0013757528616796914
+      ],
+      "p_improvement": 0.05422,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.008717905685060609,
+      "bootstrap_95": [
+       -0.024587514585849096,
+       0.007082212323361679
+      ],
+      "p_improvement": 0.1640625,
+      "years_better": 5,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": -0.014749004080435626,
+      "bootstrap_95": [
+       -0.0312965799175235,
+       -0.0025075299916977813
+      ],
+      "p_improvement": 0.00933,
+      "years_better": 16,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.005795637908641423,
+      "bootstrap_95": [
+       -0.005464448911337625,
+       0.014522845209561677
+      ],
+      "p_improvement": 0.845703125,
+      "years_better": 1,
+      "years": 9
+     }
+    }
+   },
+   "crps": {
+    "Feb": {
+     "training": {
+      "mean_difference": -0.22172300837101247,
+      "bootstrap_95": [
+       -0.33655629402369036,
+       -0.11267584660542594
+      ],
+      "p_improvement": 0.000475,
+      "years_better": 20,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.009843737774729503,
+      "bootstrap_95": [
+       -0.254233712361153,
+       0.26261973509218856
+      ],
+      "p_improvement": 0.48046875,
+      "years_better": 6,
+      "years": 9
+     }
+    },
+    "Mar": {
+     "training": {
+      "mean_difference": -0.2808831397740344,
+      "bootstrap_95": [
+       -0.6843978205408278,
+       0.130059060433473
+      ],
+      "p_improvement": 0.09892,
+      "years_better": 15,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.5204918139756081,
+      "bootstrap_95": [
+       -1.0938906032812703,
+       0.12593098746057946
+      ],
+      "p_improvement": 0.068359375,
+      "years_better": 7,
+      "years": 9
+     }
+    },
+    "Apr": {
+     "training": {
+      "mean_difference": -0.5347624510891248,
+      "bootstrap_95": [
+       -1.1870936554368008,
+       0.11906811404130677
+      ],
+      "p_improvement": 0.06593,
+      "years_better": 16,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": -0.47514294443749905,
+      "bootstrap_95": [
+       -1.1920934774495606,
+       0.22206991991378025
+      ],
+      "p_improvement": 0.12109375,
+      "years_better": 5,
+      "years": 9
+     }
+    },
+    "May": {
+     "training": {
+      "mean_difference": -0.789693447666156,
+      "bootstrap_95": [
+       -1.4164217870746076,
+       -0.3125606970892724
+      ],
+      "p_improvement": 0.00037,
+      "years_better": 19,
+      "years": 24
+     },
+     "test": {
+      "mean_difference": 0.07343052180410423,
+      "bootstrap_95": [
+       -0.37675238553843954,
+       0.48089752780504635
+      ],
+      "p_improvement": 0.61328125,
+      "years_better": 4,
+      "years": 9
+     }
+    }
+   }
+  }
+ },
+ "external_models": {
+  "emos_csg": {
+   "file": "outputs/probability_calibration/feb_fmam/neural_ext/benchmark.json",
+   "sha256": "b71f0c6cef26640ac9b4d7422f22350696ab69454b0727d6962c25fec70ead48",
+   "scoring_version": 2
+  }
+ },
+ "accepted": {
+  "experiment": "drn-pooled2-v1",
+  "sha256": "bfc4c3a5d2519690508509e78e7d1e23019712e856bb5374d5d1447e753575b6",
+  "archive": "outputs/accepted/neural_pooled2/feb_fmam/bfc4c3a5d2519690",
+  "accepted_utc": "2026-10-26T17:04:03Z",
+  "note": "pooled DRN refit, pooled neural correction of EMOS (EMOS per month) and pooled DRN with 3x3/5x5 neighbourhood inputs; 25 members, scoring v2, saved predictions (docs/54 3g)",
+  "figures": [
+   "distribution_summary.png",
+   "reliability_test.png",
+   "reliability_training.png"
+  ],
+  "created_utc": "2026-10-25T18:53:04.771152+00:00",
+  "commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06",
+  "uncommitted_changes": false,
+  "config": "config/probability_calibration/feb_fmam_neural_pooled2.json",
+  "training_years": [
+   1993,
+   2016
+  ],
+  "test_years": [
+   2017,
+   2025
+  ],
+  "members": 25,
+  "models": [
+   "drn_pooled",
+   "drn_pooled_residual",
+   "drn_pooled_nbhd"
+  ],
+  "targets": [
+   "Apr",
+   "Feb",
+   "Mar",
+   "May"
+  ],
+  "searched": {
+   "drn_pooled": [
+    "[32, 16]|0.0001",
+    "[32, 16]|0.001",
+    "[32]|0.0001",
+    "[32]|0.001"
+   ],
+   "drn_pooled_residual": [
+    "[32, 16]|0.0001",
+    "[32, 16]|0.001",
+    "[32]|0.0001",
+    "[32]|0.001"
+   ],
+   "drn_pooled_nbhd": [
+    "[32, 16]|0.0001",
+    "[32, 16]|0.001",
+    "[32]|0.0001",
+    "[32]|0.001"
+   ]
+  },
+  "code_commit": "77b8e173b10df9c91e8f1c5157efb35d020eba06"
+ },
+ "assets": [
+  "assets/neural_pooled2/feb_fmam/distribution_summary.png",
+  "assets/neural_pooled2/feb_fmam/reliability_test.png",
+  "assets/neural_pooled2/feb_fmam/reliability_training.png"
+ ],
+ "downloads": [
+  "https://github.com/YonSci/calibrated_seasonal_rainfall/releases/download/site-files/bfc4c3a5d2519690-neural_pooled2.feb_fmam.benchmark.json"
+ ]
+}
