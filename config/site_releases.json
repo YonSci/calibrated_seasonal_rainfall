@@ -1224,7 +1224,7 @@
   {
     "id": "2026-10-27.0",
     "date": "2026-10-27",
-    "commit": null,
+    "commit": "298d0b0",
     "title": "Third-stage neural models: one network for all cycles, stacking",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -1244,6 +1244,23 @@
       {
         "type": "method",
         "text": "Phase 2, Phase 3 and the first-stage neural network rerun with the first 25 members and the corrected CRPS, so every rainfall-distribution model is compared under one rule: the same confirmations and the same selection. Fold-level predictions are now saved, so a future scoring change needs no refit. The neural network page has product and comparison selectors. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-28.0",
+    "date": "2026-10-28",
+    "commit": null,
+    "title": "One neural network for the FMAM and ONDJ cycles",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "One neural network for the 12 months of the two FMAM cycles and ONDJ, leaving out JJAS, where the network over all four cycles was worse than the pooled network. Leaving JJAS out changes little: against the four-cycle network it is within 0.2 mm per month (lower CRPS for 4 of 12 months) with the same average skill, so JJAS was not holding the other cycles back; it keeps the gain over the pooled network (9 of 12 months). It becomes the selected candidate for FMAM-January February amounts and FMAM-February March and May amounts, and has its own shadow forecast. First (retrospective) 2026 season: better than the published amounts for all three; each has 1 of the 3 seasons needed. The published forecasts are unchanged."
       }
     ]
   }
