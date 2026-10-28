@@ -1250,7 +1250,7 @@
   {
     "id": "2026-10-28.0",
     "date": "2026-10-28",
-    "commit": null,
+    "commit": "33b997a",
     "title": "One neural network for the FMAM and ONDJ cycles",
     "cycles": [
       "FMAM 2026 (January initialization)",
@@ -1261,6 +1261,24 @@
       {
         "type": "analysis",
         "text": "One neural network for the 12 months of the two FMAM cycles and ONDJ, leaving out JJAS, where the network over all four cycles was worse than the pooled network. Leaving JJAS out changes little: against the four-cycle network it is within 0.2 mm per month (lower CRPS for 4 of 12 months) with the same average skill, so JJAS was not holding the other cycles back; it keeps the gain over the pooled network (9 of 12 months). It becomes the selected candidate for FMAM-January February amounts and FMAM-February March and May amounts, and has its own shadow forecast. First (retrospective) 2026 season: better than the published amounts for all three; each has 1 of the 3 seasons needed. The published forecasts are unchanged."
+      }
+    ]
+  },
+  {
+    "id": "2026-10-28.1",
+    "date": "2026-10-28",
+    "commit": null,
+    "title": "Ranking of the methods by season",
+    "cycles": [
+      "FMAM 2026 (January initialization)",
+      "FMAM 2026 (February initialization)",
+      "JJAS 2026",
+      "ONDJ 2026/27"
+    ],
+    "changes": [
+      {
+        "type": "analysis",
+        "text": "The method-selection page ranks, for each season and for tercile probabilities and rainfall amounts, every method by its skill gain over the published approach, averaged over the season's four months and 1993-2025, with the published approach listed at its rank. For rainfall amounts the neural networks rank first in every season (3 to 7 percentage points of skill) and the published approach ranks 17th to 21st; for tercile probabilities no method gains 2 points or more, and in JJAS the published approach is in practice the best. The ranking is information: the selection is still made per month with the selection rule, and the published forecasts are unchanged."
       }
     ]
   }
