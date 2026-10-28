@@ -1747,6 +1747,135 @@
     ]
    },
    "code_commit": "24d45ee2b43a7390c9174a5563daae3459f0c768"
+  },
+  "neural_fmam_ondj/jan_fmam": {
+   "experiment": "drn-fmam-ondj-v1",
+   "sha256": "bc8507cf95f813b134f756e9a6c76993fd40261a9df202ef7228414ec45936ef",
+   "archive": "outputs/accepted/neural_fmam_ondj/jan_fmam/bc8507cf95f813b1",
+   "accepted_utc": "2026-10-28T01:04:46Z",
+   "note": "one DRN for the 12 months of the FMAM cycles and ONDJ, without JJAS (docs/54 3h)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-28T01:03:49.072322+00:00",
+   "commit": "782bc9e6654851e52439d58fccfa230b3437812c",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/all_neural_fmam_ondj.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_fmam_ondj"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_fmam_ondj": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "782bc9e6654851e52439d58fccfa230b3437812c"
+  },
+  "neural_fmam_ondj/feb_fmam": {
+   "experiment": "drn-fmam-ondj-v1",
+   "sha256": "e8e8106188e1859c532c450a937b60df6a4d0e16d3a45ac831609d543f6cbdf0",
+   "archive": "outputs/accepted/neural_fmam_ondj/feb_fmam/e8e8106188e1859c",
+   "accepted_utc": "2026-10-28T01:04:46Z",
+   "note": "one DRN for the 12 months of the FMAM cycles and ONDJ, without JJAS (docs/54 3h)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-28T01:03:55.124935+00:00",
+   "commit": "782bc9e6654851e52439d58fccfa230b3437812c",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/all_neural_fmam_ondj.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2025
+   ],
+   "members": 25,
+   "models": [
+    "drn_fmam_ondj"
+   ],
+   "targets": [
+    "Apr",
+    "Feb",
+    "Mar",
+    "May"
+   ],
+   "searched": {
+    "drn_fmam_ondj": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "782bc9e6654851e52439d58fccfa230b3437812c"
+  },
+  "neural_fmam_ondj/sep_ondj": {
+   "experiment": "drn-fmam-ondj-v1",
+   "sha256": "c5b31ae2b504950fab0b46e7e9c44243d37705a2523c3a87ab0fb373d550c816",
+   "archive": "outputs/accepted/neural_fmam_ondj/sep_ondj/c5b31ae2b504950f",
+   "accepted_utc": "2026-10-28T01:04:46Z",
+   "note": "one DRN for the 12 months of the FMAM cycles and ONDJ, without JJAS (docs/54 3h)",
+   "figures": [
+    "distribution_summary.png",
+    "reliability_test.png",
+    "reliability_training.png"
+   ],
+   "created_utc": "2026-10-28T01:03:59.480636+00:00",
+   "commit": "782bc9e6654851e52439d58fccfa230b3437812c",
+   "uncommitted_changes": false,
+   "config": "config/probability_calibration/all_neural_fmam_ondj.json",
+   "training_years": [
+    1993,
+    2016
+   ],
+   "test_years": [
+    2017,
+    2024
+   ],
+   "members": 25,
+   "models": [
+    "drn_fmam_ondj"
+   ],
+   "targets": [
+    "Dec",
+    "Jan",
+    "Nov",
+    "Oct"
+   ],
+   "searched": {
+    "drn_fmam_ondj": [
+     "[32, 16]|0.0001",
+     "[32, 16]|0.001",
+     "[32]|0.0001",
+     "[32]|0.001"
+    ]
+   },
+   "code_commit": "782bc9e6654851e52439d58fccfa230b3437812c"
   }
  },
  "status": [
@@ -1975,6 +2104,42 @@
     "experiment": "drn-all-v1",
     "created_utc": "2026-10-27T07:08:37.175311+00:00",
     "commit": "24d45ee"
+   },
+   "pending": null
+  },
+  {
+   "family": "neural_fmam_ondj",
+   "cycle": "jan_fmam",
+   "accepted": {
+    "experiment": "drn-fmam-ondj-v1",
+    "created_utc": "2026-10-28T01:03:49.072322+00:00",
+    "commit": "782bc9e"
+   },
+   "pending": null
+  },
+  {
+   "family": "neural_fmam_ondj",
+   "cycle": "feb_fmam",
+   "accepted": {
+    "experiment": "drn-fmam-ondj-v1",
+    "created_utc": "2026-10-28T01:03:55.124935+00:00",
+    "commit": "782bc9e"
+   },
+   "pending": null
+  },
+  {
+   "family": "neural_fmam_ondj",
+   "cycle": "may_jjas",
+   "accepted": null,
+   "pending": null
+  },
+  {
+   "family": "neural_fmam_ondj",
+   "cycle": "sep_ondj",
+   "accepted": {
+    "experiment": "drn-fmam-ondj-v1",
+    "created_utc": "2026-10-28T01:03:59.480636+00:00",
+    "commit": "782bc9e"
    },
    "pending": null
   },

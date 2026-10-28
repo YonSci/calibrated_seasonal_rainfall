@@ -43589,6 +43589,7 @@
    "drn_pooled_residual": 25,
    "drn_pooled_nbhd": 25,
    "drn_pooled_all": 25,
+   "drn_fmam_ondj": 25,
    "stack": 25
   },
   "extra_inputs": {

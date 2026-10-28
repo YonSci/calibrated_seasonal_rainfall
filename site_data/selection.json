@@ -1,5 +1,5 @@
 {
- "created_utc": "2026-10-27T09:49:35.471188+00:00",
+ "created_utc": "2026-10-28T01:58:13.363276+00:00",
  "rule": "config/method_selection_rule.json",
  "rule_contents": {
   "description": "How the platform selects the approach for each season (cycle), target and product from the historical and validation evidence (scripts/method_selection.py, docs/50). Fixed before further validation seasons are scored. A selection is the approach the evidence supports; the published forecast changes only by an explicit decision.",
@@ -99,19 +99,19 @@
       "reference": "Mean-Variance Scaling ensemble (published)",
       "status": "candidate",
       "selected": {
-       "family": "distribution_neural_all",
-       "family_label": "Neural network, pooled over all cycles (docs/54)",
+       "family": "distribution_neural_fmam_ondj",
+       "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
        "stage": "distribution model (neural network)",
-       "method": "drn_pooled_all",
-       "label": "DRN pooled over the months of all four cycles"
+       "method": "drn_fmam_ondj",
+       "label": "DRN pooled over the months of the FMAM and ONDJ cycles"
       },
       "historical": {
-       "training_difference": -0.14078132399199025,
-       "years_better": 15,
+       "training_difference": -0.24667284978864448,
+       "years_better": 19,
        "years": 24,
-       "holm_p": 0.04465,
-       "test_difference": -0.3823191743015513,
-       "p_adjusted": 0.02706,
+       "holm_p": 0.00336,
+       "test_difference": -0.3011045535146005,
+       "p_adjusted": 0.00235,
        "correction": "benjamini_hochberg",
        "test_years_better": 7,
        "test_years": 9
@@ -120,16 +120,35 @@
        "seasons": [
         {
          "year": 2026,
-         "method": 6.49655772198199,
+         "method": 6.575549418489726,
          "reference": 6.616459615749269
         }
        ],
-       "mean_difference": -0.11990189376727933,
+       "mean_difference": -0.040910197259543146,
        "required": 3
       },
-      "alternatives": [],
+      "alternatives": [
+       {
+        "family": "distribution_neural_all",
+        "family_label": "Neural network, pooled over all cycles (docs/54)",
+        "method": "drn_pooled_all",
+        "label": "DRN pooled over the months of all four cycles",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.14078132399199025,
+         "years_better": 15,
+         "years": 24,
+         "holm_p": 0.04465,
+         "test_difference": -0.3823191743015513,
+         "p_adjusted": 0.02706,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 7,
+         "test_years": 9
+        }
+       }
+      ],
       "tie": null,
-      "why": "DRN pooled over the months of all four cycles (neural network, pooled over all cycles (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Feb: CRPS (mm) difference -0.1408 over the training years (Benjamini–Hochberg p 0.0271; 15 of 24 years better), -0.3823 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.1199."
+      "why": "DRN pooled over the months of the FMAM and ONDJ cycles (neural network, pooled over the FMAM and ONDJ cycles (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Feb: CRPS (mm) difference -0.2467 over the training years (Benjamini–Hochberg p 0.00235; 19 of 24 years better), -0.3011 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.04091. Also confirmed (one change at a time): DRN pooled over the months of all four cycles (distribution model (neural network))."
      }
     },
     "Mar": {
@@ -218,6 +237,24 @@
          "test_years_better": 5,
          "test_years": 9
         }
+       },
+       {
+        "family": "distribution_neural_fmam_ondj",
+        "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+        "method": "drn_fmam_ondj",
+        "label": "DRN pooled over the months of the FMAM and ONDJ cycles",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.7459737134771496,
+         "years_better": 18,
+         "years": 24,
+         "holm_p": 0.0035250000000000004,
+         "test_difference": -0.39388045167349894,
+         "p_adjusted": 0.00235,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 7,
+         "test_years": 9
+        }
        }
       ],
       "tie": {
@@ -244,10 +281,16 @@
          "family": "distribution_neural_all",
          "gain": -0.8754272811550662,
          "simplicity": 6
+        },
+        {
+         "method": "drn_fmam_ondj",
+         "family": "distribution_neural_fmam_ondj",
+         "gain": -0.7459737134771496,
+         "simplicity": 6
         }
        ]
       },
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Mar: CRPS (mm) difference -0.6644 over the training years (Benjamini–Hochberg p 0.0354; 15 of 24 years better), -0.4931 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.903. Tied within 1% of the published score (0.212 CRPS (mm)) with drn_pooled_nbhd, drn_pooled_all: the simplest is selected (practical tie rule; the largest gain was drn_pooled_all). Also confirmed (one change at a time): DRN pooled over the months, with neighbourhood inputs (distribution model (neural network)); DRN pooled over the months of all four cycles (distribution model (neural network))."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Mar: CRPS (mm) difference -0.6644 over the training years (Benjamini–Hochberg p 0.0354; 15 of 24 years better), -0.4931 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.903. Tied within 1% of the published score (0.212 CRPS (mm)) with drn_pooled_nbhd, drn_pooled_all, drn_fmam_ondj: the simplest is selected (practical tie rule; the largest gain was drn_pooled_all). Also confirmed (one change at a time): DRN pooled over the months, with neighbourhood inputs (distribution model (neural network)); DRN pooled over the months of all four cycles (distribution model (neural network)); DRN pooled over the months of the FMAM and ONDJ cycles (distribution model (neural network))."
      }
     },
     "Apr": {
@@ -338,6 +381,24 @@
         }
        },
        {
+        "family": "distribution_neural_fmam_ondj",
+        "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+        "method": "drn_fmam_ondj",
+        "label": "DRN pooled over the months of the FMAM and ONDJ cycles",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.5873549752592077,
+         "years_better": 17,
+         "years": 24,
+         "holm_p": 0.00461,
+         "test_difference": -0.7460745501407027,
+         "p_adjusted": 0.0030733333333333337,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 6,
+         "test_years": 9
+        }
+       },
+       {
         "family": "distribution_stacking",
         "family_label": "Model combination: EMOS, quantile regression and the DRN (docs/54)",
         "method": "stack",
@@ -382,6 +443,12 @@
          "simplicity": 6
         },
         {
+         "method": "drn_fmam_ondj",
+         "family": "distribution_neural_fmam_ondj",
+         "gain": -0.5873549752592077,
+         "simplicity": 6
+        },
+        {
          "method": "stack",
          "family": "distribution_stacking",
          "gain": -0.6665120324962456,
@@ -389,7 +456,7 @@
         }
        ]
       },
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Apr: CRPS (mm) difference -0.6419 over the training years (Benjamini–Hochberg p 0.0354; 16 of 24 years better), -0.7869 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.1303. Tied within 1% of the published score (0.291 CRPS (mm)) with drn_pooled_nbhd, drn_pooled_all, stack: the simplest is selected (practical tie rule; the largest gain was drn_pooled_all). Also confirmed (one change at a time): DRN pooled over the months, with neighbourhood inputs (distribution model (neural network)); DRN pooled over the months of all four cycles (distribution model (neural network)); Equal-weight pool of EMOS, quantile regression and the DRN (distribution model (combination))."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Apr: CRPS (mm) difference -0.6419 over the training years (Benjamini–Hochberg p 0.0354; 16 of 24 years better), -0.7869 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.1303. Tied within 1% of the published score (0.291 CRPS (mm)) with drn_pooled_nbhd, drn_pooled_all, drn_fmam_ondj, stack: the simplest is selected (practical tie rule; the largest gain was drn_pooled_all). Also confirmed (one change at a time): DRN pooled over the months, with neighbourhood inputs (distribution model (neural network)); DRN pooled over the months of all four cycles (distribution model (neural network)); DRN pooled over the months of the FMAM and ONDJ cycles (distribution model (neural network)); Equal-weight pool of EMOS, quantile regression and the DRN (distribution model (combination))."
      }
     },
     "May": {
@@ -498,6 +565,24 @@
         }
        },
        {
+        "family": "distribution_neural_fmam_ondj",
+        "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+        "method": "drn_fmam_ondj",
+        "label": "DRN pooled over the months of the FMAM and ONDJ cycles",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.5740354703030462,
+         "years_better": 14,
+         "years": 24,
+         "holm_p": 0.03407,
+         "test_difference": -0.7915959317849798,
+         "p_adjusted": 0.03407,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 5,
+         "test_years": 9
+        }
+       },
+       {
         "family": "distribution_stacking",
         "family_label": "Model combination: EMOS, quantile regression and the DRN (docs/54)",
         "method": "stack",
@@ -546,10 +631,16 @@
          "family": "distribution_neural_all",
          "gain": -0.6146934267165028,
          "simplicity": 6
+        },
+        {
+         "method": "drn_fmam_ondj",
+         "family": "distribution_neural_fmam_ondj",
+         "gain": -0.5740354703030462,
+         "simplicity": 6
         }
        ]
       },
-      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for May: CRPS (mm) difference -0.5414 over the training years (Benjamini–Hochberg p 0.0354; 13 of 24 years better), -0.7503 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.3473. Tied within 1% of the published score (0.292 CRPS (mm)) with drn_pooled_residual, drn_pooled_nbhd, drn_pooled_all: the simplest is selected (practical tie rule; the largest gain was drn_pooled_residual). Also confirmed (one change at a time): Neural correction of EMOS pooled over the months of a cycle (distribution model (neural network)); DRN pooled over the months, with neighbourhood inputs (distribution model (neural network)); DRN pooled over the months of all four cycles (distribution model (neural network)); Equal-weight pool of EMOS, quantile regression and the DRN (distribution model (combination))."
+      "why": "DRN pooled over the months of a cycle (neural network, pooled over the months (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for May: CRPS (mm) difference -0.5414 over the training years (Benjamini–Hochberg p 0.0354; 13 of 24 years better), -0.7503 over the test years. Independent validation: 1 of 3 season(s), mean difference +0.3473. Tied within 1% of the published score (0.292 CRPS (mm)) with drn_pooled_residual, drn_pooled_nbhd, drn_pooled_all, drn_fmam_ondj: the simplest is selected (practical tie rule; the largest gain was drn_pooled_residual). Also confirmed (one change at a time): Neural correction of EMOS pooled over the months of a cycle (distribution model (neural network)); DRN pooled over the months, with neighbourhood inputs (distribution model (neural network)); DRN pooled over the months of all four cycles (distribution model (neural network)); DRN pooled over the months of the FMAM and ONDJ cycles (distribution model (neural network)); Equal-weight pool of EMOS, quantile regression and the DRN (distribution model (combination))."
      }
     },
     "FMAM": {
@@ -643,7 +734,7 @@
         }
        ]
       },
-      "why": "EMOS, censored shifted gamma (distribution model, phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM: CRPS (mm) difference -0.7184 over the training years (Benjamini–Hochberg p 0.0125; 19 of 24 years better), -1.086 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.762. Tied within 1% of the published score (0.488 CRPS (mm)) with stack: the simplest is selected (practical tie rule; the largest gain was emos_csg). Also confirmed (one change at a time): Equal-weight pool of EMOS, quantile regression and the DRN (distribution model (combination))."
+      "why": "EMOS, censored shifted gamma (distribution model, Phase 2) is confirmed better than Mean-Variance Scaling ensemble (published) for FMAM: CRPS (mm) difference -0.7184 over the training years (Benjamini–Hochberg p 0.0125; 19 of 24 years better), -1.086 over the test years. Independent validation: 1 of 3 season(s), mean difference -1.762. Tied within 1% of the published score (0.488 CRPS (mm)) with stack: the simplest is selected (practical tie rule; the largest gain was emos_csg). Also confirmed (one change at a time): Equal-weight pool of EMOS, quantile regression and the DRN (distribution model (combination))."
      }
     }
    }
@@ -703,10 +794,28 @@
          "test_years_better": 5,
          "test_years": 9
         }
+       },
+       {
+        "family": "distribution_neural_fmam_ondj",
+        "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+        "method": "drn_fmam_ondj",
+        "label": "DRN pooled over the months of the FMAM and ONDJ cycles",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.02126373673237289,
+         "years_better": 14,
+         "years": 24,
+         "holm_p": 0.03628,
+         "test_difference": -0.0006448557409279175,
+         "p_adjusted": 0.03628,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 5,
+         "test_years": 9
+        }
        }
       ],
       "tie": null,
-      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Benjamini–Hochberg p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004. Also confirmed (one change at a time): Neural correction of EMOS (censored shifted gamma) (distribution model (neural network))."
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling + climatology blend (published) for Feb: RPS difference -0.03669 over the training years (Benjamini–Hochberg p 0.0264; 18 of 24 years better), -0.006635 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.006004. Also confirmed (one change at a time): Neural correction of EMOS (censored shifted gamma) (distribution model (neural network)); DRN pooled over the months of the FMAM and ONDJ cycles (distribution model (neural network))."
      },
      "amounts": {
       "product": "Rainfall amounts (and ranges)",
@@ -741,9 +850,28 @@
        "mean_difference": -0.22106114851592729,
        "required": 3
       },
-      "alternatives": [],
+      "alternatives": [
+       {
+        "family": "distribution_neural_fmam_ondj",
+        "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+        "method": "drn_fmam_ondj",
+        "label": "DRN pooled over the months of the FMAM and ONDJ cycles",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.2004263063177655,
+         "years_better": 17,
+         "years": 24,
+         "holm_p": 0.09700500000000001,
+         "test_difference": -0.3692115873155814,
+         "p_adjusted": 0.04873333333333333,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 7,
+         "test_years": 9
+        }
+       }
+      ],
       "tie": null,
-      "why": "Neural correction of EMOS (censored shifted gamma) (neural network, second stage (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Feb: CRPS (mm) difference -0.3615 over the training years (Benjamini–Hochberg p 0.0294; 19 of 24 years better), -0.2443 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.2211."
+      "why": "Neural correction of EMOS (censored shifted gamma) (neural network, second stage (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Feb: CRPS (mm) difference -0.3615 over the training years (Benjamini–Hochberg p 0.0294; 19 of 24 years better), -0.2443 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.2211. Also confirmed (one change at a time): DRN pooled over the months of the FMAM and ONDJ cycles (distribution model (neural network))."
      }
     },
     "Mar": {
@@ -766,18 +894,39 @@
      "amounts": {
       "product": "Rainfall amounts (and ranges)",
       "reference": "Mean-Variance Scaling ensemble (published)",
-      "status": "keep",
+      "status": "candidate",
       "selected": {
-       "family": "published",
-       "label": "Mean-Variance Scaling ensemble (published)",
-       "stage": null,
-       "method": null
+       "family": "distribution_neural_fmam_ondj",
+       "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+       "stage": "distribution model (neural network)",
+       "method": "drn_fmam_ondj",
+       "label": "DRN pooled over the months of the FMAM and ONDJ cycles"
       },
-      "historical": null,
-      "validation": null,
+      "historical": {
+       "training_difference": -0.8097294502656779,
+       "years_better": 17,
+       "years": 24,
+       "holm_p": 0.04624,
+       "test_difference": -0.5070904807179942,
+       "p_adjusted": 0.04624,
+       "correction": "benjamini_hochberg",
+       "test_years_better": 6,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 41.20041349794902,
+         "reference": 42.07859090975313
+        }
+       ],
+       "mean_difference": -0.8781774118041099,
+       "required": 3
+      },
       "alternatives": [],
       "tie": null,
-      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for Mar on the historical evidence."
+      "why": "DRN pooled over the months of the FMAM and ONDJ cycles (neural network, pooled over the FMAM and ONDJ cycles (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for Mar: CRPS (mm) difference -0.8097 over the training years (Benjamini–Hochberg p 0.0462; 17 of 24 years better), -0.5071 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.8782."
      }
     },
     "Apr": {
@@ -876,18 +1025,39 @@
      "amounts": {
       "product": "Rainfall amounts (and ranges)",
       "reference": "Mean-Variance Scaling ensemble (published)",
-      "status": "keep",
+      "status": "candidate",
       "selected": {
-       "family": "published",
-       "label": "Mean-Variance Scaling ensemble (published)",
-       "stage": null,
-       "method": null
+       "family": "distribution_neural_fmam_ondj",
+       "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+       "stage": "distribution model (neural network)",
+       "method": "drn_fmam_ondj",
+       "label": "DRN pooled over the months of the FMAM and ONDJ cycles"
       },
-      "historical": null,
-      "validation": null,
+      "historical": {
+       "training_difference": -0.7748600265618055,
+       "years_better": 14,
+       "years": 24,
+       "holm_p": 0.09700500000000001,
+       "test_difference": -0.4752665666786362,
+       "p_adjusted": 0.04873333333333333,
+       "correction": "benjamini_hochberg",
+       "test_years_better": 6,
+       "test_years": 9
+      },
+      "validation": {
+       "seasons": [
+        {
+         "year": 2026,
+         "method": 19.99508187175253,
+         "reference": 20.576577707001086
+        }
+       ],
+       "mean_difference": -0.5814958352485569,
+       "required": 3
+      },
       "alternatives": [],
       "tie": null,
-      "why": "No method is confirmed better than Mean-Variance Scaling ensemble (published) for May on the historical evidence."
+      "why": "DRN pooled over the months of the FMAM and ONDJ cycles (neural network, pooled over the FMAM and ONDJ cycles (docs/54)) is confirmed better than Mean-Variance Scaling ensemble (published) for May: CRPS (mm) difference -0.7749 over the training years (Benjamini–Hochberg p 0.0487; 14 of 24 years better), -0.4753 over the test years. Independent validation: 1 of 3 season(s), mean difference -0.5815."
      }
     },
     "FMAM": {
@@ -1805,6 +1975,24 @@
         }
        },
        {
+        "family": "distribution_neural_fmam_ondj",
+        "family_label": "Neural network, pooled over the FMAM and ONDJ cycles (docs/54)",
+        "method": "drn_fmam_ondj",
+        "label": "DRN pooled over the months of the FMAM and ONDJ cycles",
+        "status": "candidate",
+        "historical": {
+         "training_difference": -0.43614575479710954,
+         "years_better": 18,
+         "years": 24,
+         "holm_p": 0.02778,
+         "test_difference": -0.7395345462054701,
+         "p_adjusted": 0.02778,
+         "correction": "benjamini_hochberg",
+         "test_years_better": 7,
+         "test_years": 8
+        }
+       },
+       {
         "family": "leung_dirichlet",
         "family_label": "Two-stage calibration (docs/51)",
         "method": "leung_affine",
@@ -1841,10 +2029,16 @@
          "family": "distribution_neural_all",
          "gain": -0.4556966040975647,
          "simplicity": 6
+        },
+        {
+         "method": "drn_fmam_ondj",
+         "family": "distribution_neural_fmam_ondj",
+         "gain": -0.43614575479710954,
+         "simplicity": 6
         }
        ]
       },
-      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Benjamini–Hochberg p 0.0106; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Tied within 1% of the published score (0.0842 CRPS (mm)) with drn_pooled_all: the simplest is selected (practical tie rule; the largest gain was sqrt_mvs). Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Gamma Quantile Mapping (amount correction); DRN pooled over the months of all four cycles (distribution model (neural network)); Leung–Dirichlet calibration (Leung–Dirichlet calibration)."
+      "why": "Square-root-space Mean-Variance Scaling (bias correction (amount correction)) is confirmed better than Mean-Variance Scaling ensemble (published) for Jan: CRPS (mm) difference -0.4787 over the training years (Benjamini–Hochberg p 0.0106; 18 of 24 years better), -0.6902 over the test years. Independent validation: 0 of 3 seasons scored so far. Tied within 1% of the published score (0.0842 CRPS (mm)) with drn_pooled_all, drn_fmam_ondj: the simplest is selected (practical tie rule; the largest gain was sqrt_mvs). Also confirmed (one change at a time): Variance Scaling (unbounded) (amount correction); Gamma Quantile Mapping (amount correction); DRN pooled over the months of all four cycles (distribution model (neural network)); DRN pooled over the months of the FMAM and ONDJ cycles (distribution model (neural network)); Leung–Dirichlet calibration (Leung–Dirichlet calibration)."
      }
     },
     "ONDJ": {
