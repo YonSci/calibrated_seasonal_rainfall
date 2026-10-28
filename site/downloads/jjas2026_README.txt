@@ -3,7 +3,7 @@ JJAS 2026 — May initialization - forecast and evidence package
 ============================================================
 
 Research reconstruction: produced after the initialization date with the published method; not an official EMI or ICPAC forecast
-Built 2026-10-28 02:24 UTC (site release 2026-10-28.0) from https://github.com/YonSci/calibrated_seasonal_rainfall
+Built 2026-10-28 07:48 UTC (site release 2026-10-28.1) from https://github.com/YonSci/calibrated_seasonal_rainfall
 
 What this forecast is
 ---------------------
@@ -20,7 +20,7 @@ Reference period: CHIRPS v3.0 JJAS 1993–2025 (33 seasons)
 Observations processed through: September 2026 (Jun, Jul, Aug, Sep)
 CHIRPS archive: Official CHIRPS v3.0 monthly listing checked 28 Oct 2026: monthly files through Sep 2026
 Verification last run: 16 Oct 2026
-Method / version: Shared climatology blend (λ = 0.59 for JJAS) · code 5ce1dda
+Method / version: Shared climatology blend (λ = 0.59 for JJAS) · code a280f92
 Rainfall domain: Fixed 1993-2025 descriptive domain: cleaned GitHub-refined R1/R2; JJAS climatological rainfall >=120 mm and >=20% of annual rainfall. The same domain is used for Jun, Jul, Aug, Sep and JJAS. No onset gate.
 
 Contents
