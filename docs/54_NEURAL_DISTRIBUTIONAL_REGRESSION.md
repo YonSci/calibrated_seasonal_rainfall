@@ -474,6 +474,47 @@ probabilities are validated by the RPS of their shadow's tercile probabilities a
 run's own checkpoints by a wrapper that supplied it, with the code of the run unchanged (the checkpoint keys matched;
 nothing was refitted); the assembly is fixed in `pooled_all_benchmark.py`.
 
+## 3h. One network for the FMAM and ONDJ cycles, without JJAS (`drn-fmam-ondj-v1`, accepted 2026-10-28)
+
+**Question.** The all-cycles network (3g) is better than the pooled DRN for every FMAM-January and ONDJ month and worse for
+every JJAS month. Does JJAS hold the other cycles back, so that a network without it does better for FMAM and ONDJ?
+
+**Design.** `drn_fmam_ondj`: the design of `pooled_all_benchmark.py` on the 12 months of the two FMAM cycles and ONDJ
+(`config/probability_calibration/all_neural_fmam_ondj.json`), with the month's position and the cycle (one-hot over the three
+cycles) as inputs; the same leave-one-year-out folds, 25 members and CRPS scoring version 2. It is compared in the same
+folds with the four-cycle network, the pooled DRN of each cycle and EMOS. There is no JJAS result by design; the family
+(`neural_fmam_ondj`) is accepted for the three cycles. All 25 folds ran from commit 782bc9e (3.5 hours with six workers).
+
+| Mean over the 12 months | FMAM + ONDJ | All cycles | Pooled DRN (refit) | EMOS | Published |
+| --- | --- | --- | --- | --- | --- |
+| Amounts, CRPSS 1993–2016 | +0.050 | +0.048 | +0.042 | +0.031 | +0.025 (MVS ensemble) |
+| Amounts, CRPSS 2017+ | +0.035 | +0.036 | +0.034 | +0.019 | +0.010 |
+| Coverage of the 10–90% range, 1993–2016 | 80% | 80% | 81% | 80% | 64% |
+| Probabilities, RPSS 1993–2016 | +0.030 | +0.029 | +0.029 | −0.007 | +0.024 |
+| Probabilities, RPSS 2017+ | +0.033 | +0.033 | +0.027 | −0.007 | +0.023 |
+| Lower CRPS than this model, 1993–2016 (2017+) | – | 4 of 12 (6) | 9 of 12 (6) | – | – |
+
+**Answer: no.** Leaving JJAS out changes little. Against the four-cycle network the differences are within ±0.18 mm per
+month, better for 4 of 12 months (February of both FMAM cycles, ONDJ November and December) and worse for 8, with the same
+average skill and the same probabilities. So the kiremt months do not hold the network back for the other cycles; its
+weakness for JJAS is JJAS's own (the pooled DRN of the JJAS cycle is simply better there). Against the pooled DRN it keeps the
+gain of the four-cycle network: better for 9 of 12 months, most for ONDJ (−0.13 to −0.46 mm).
+
+Holm confirms its amounts for FMAM-January February to May, FMAM-February March and ONDJ January, and its probabilities for
+FMAM-February February.
+
+*Method selection:* under Benjamini–Hochberg its amounts are confirmed for three targets where it has the largest gain among
+tied networks of the same complexity, so it becomes the selected candidate there: FMAM-January February (replacing the
+four-cycle network, now an alternative), FMAM-February March and May (no candidate before). Elsewhere it is a tied
+alternative. As a candidate it has a shadow forecast through the same all-cycles path (`dist_shadow.ALL_CYCLES` now maps
+each network to its benchmark configuration). With two networks this close, the validation seasons will decide; neither is
+recommended before three seasons.
+
+*First validation season (2026, retrospective shadows made 2026-10-28).* Better than the MVS ensemble for all three
+candidate targets: FMAM-January February CRPS 6.58 mm against 6.62 mm, FMAM-February March 41.20 mm against 42.08 mm and May
+20.00 mm against 20.58 mm. The four-cycle network's shadows of the same months are within 1.3 mm of it (better for
+FMAM-February May, worse for March). ONDJ 2026/27 is not yet observed. Each candidate has 1 of the 3 seasons needed.
+
 ## 4. Running
 
     python scripts/dist_benchmark.py --config config/probability_calibration/<cycle>_neural.json --workers 5
@@ -484,6 +525,7 @@ gradients: its incomplete gamma function made one step 0.7 s, against about 20 m
 
     python scripts/pooled_benchmark.py --config config/probability_calibration/<cycle>_neural_pooled2.json --workers 5
     python scripts/pooled_all_benchmark.py --config config/probability_calibration/all_neural_pooled_all.json --workers 5
+    python scripts/pooled_all_benchmark.py --config config/probability_calibration/all_neural_fmam_ondj.json --workers 6
     python scripts/stack_benchmark.py --config config/probability_calibration/<cycle>_stacking.json
     python scripts/accept_results.py accept <family> --experiment <name>          # then the selection and the site
 
@@ -500,8 +542,8 @@ spatial context with a small patch CNN on the surrounding SEAS5 fields; then run
 Done so far: the inputs and the correction of EMOS (3c), pooling (3d, 3g), shadows (3b, 3d) and neighbourhood means as a
 first spatial context (3g). The third stage settles two of the open questions: neighbourhood inputs do not help, so the
 patch CNN is not a priority; equal-weight stacking does not beat its best member, so estimated weights are not pursued. Pooling
-further does help where the cycles share a rainfall regime: next, a network for the FMAM and ONDJ cycles without JJAS (or
-with JJAS down-weighted), against the all-cycles network on the same folds, and the validation seasons of the new shadow.
+over cycles helps FMAM and ONDJ, and leaving JJAS out does not add to it (3h), so down-weighting JJAS is not pursued. What
+remains is validation: the shadow seasons of the two networks (2026 retrospective, then the 2027 issues).
 
 ## References
 

@@ -206,7 +206,7 @@ def why(sel, product, target, ref_label, cands, unit):
         base = f'No method is confirmed better than {ref_label} for {target} on the historical evidence'
         return base + (f'; {len(rejected)} confirmed method(s) were worse over the validation seasons.' if rejected else '.')
     h, v = sel.get('historical') or {}, sel.get('validation')
-    txt = (f"{sel['label']} ({FAMILY_LABEL[sel['family']].lower()}) is confirmed better than {ref_label} for {target}: {unit} difference "
+    txt = (f"{sel['label']} ({FAMILY_LABEL[sel['family']][:1].lower() + FAMILY_LABEL[sel['family']][1:]}) is confirmed better than {ref_label} for {target}: {unit} difference "
            f"{h.get('training_difference', float('nan')):+.4g} over the training years ({CORR_NAME.get(h.get('correction', 'holm'), 'Holm')} p {h.get('p_adjusted', h.get('holm_p', float('nan'))):.3g}; "
            f"{h.get('years_better', '?')} of {h.get('years', '?')} years better), {h.get('test_difference', float('nan')):+.4g} over the test years.")
     if v and v.get('seasons') and v.get('mean_difference') is not None:
