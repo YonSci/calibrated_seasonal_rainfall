@@ -6,7 +6,7 @@ import { overviewPoints } from '../../lib/evidence.js';
 import OnThisPage from '../../components/OnThisPage.astro';
 import { href, esc, cycleTitle, REPO } from '../../lib/data.js';
 import { C, url, defaultTarget } from '../../lib/cycles.js';
-import { SELECTION, STATUS_LABEL, SUMMARY, ranked, validationText as val, selectionFor, fmt } from '../../lib/selection.js';
+import { SELECTION, STATUS_LABEL, SUMMARY, RANKING, ranked, validationText as val, selectionFor, fmt } from '../../lib/selection.js';
 
 const rule = SELECTION?.rule_contents;
 const INIT = { jan: 1, feb: 2, may: 5, sep: 9 };
@@ -20,6 +20,10 @@ const seasons = (SELECTION?.cycles ?? []).map((s) => {
 const total = seasons.reduce((a, x) => a + x.changes, 0);
 const recommended = (SELECTION?.cycles ?? []).flatMap((s) => Object.values(s.targets).flatMap((p) => Object.values(p))).filter((e) => e.status === 'recommended').length;
 const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainfall amounts']];
+// Ranking by season: one column per season, one row per rank
+const RANK_SEASONS = Object.keys(RANKING ?? {}).map((name) => { const [m, season] = name.split('_'); return { name, title: cycleTitle(INIT[m], season.toUpperCase()) }; });
+const rankRows = (p) => [...Array(Math.max(0, ...RANK_SEASONS.map((x) => RANKING[x.name][p].length))).keys()];
+const pts = (x) => `${x >= 0 ? '+' : '−'}${Math.abs(100 * x).toFixed(1)}`;
 ---
 <Base title="Method selection" section="research" description="The bias-correction and probability-calibration approach the evidence supports for each season, target and product.">
   <OnThisPage>
@@ -63,6 +67,31 @@ const PRODUCTS = [['probabilities', 'Tercile probabilities'], ['amounts', 'Rainf
           </>
         ))}
         <p class="caveat">Code: <code>scripts/method_summary.py</code>, refreshed after each newly scored season.</p>
+      </section>
+    )}
+
+    {RANKING && (
+      <section id="ranking">
+        <h2>Ranking by season</h2>
+        <p>Every method scored for all four months of a season, ranked by its <strong>skill gain</strong> over the published approach:
+        the difference in score as a share of the climatology score, in percentage points (CRPSS for rainfall amounts, RPSS for
+        tercile probabilities), averaged over the four months and over 1993–2025, each year scored by a model that did not see it.
+        The published approach is listed at its rank (0). Methods above it are better on average, but only the months marked
+        <strong>confirmed</strong> pass the selection rule's test. The selection is made per month and season total, with the 1% tie
+        rule (the simpler method wins), so the top-ranked method is not always the one selected. The season total is not ranked:
+        the neural networks forecast the months only.</p>
+        {PRODUCTS.map(([p, title]) => (
+          <>
+            <h3>{title}</h3>
+            <div class="table-wrap"><table class="compact nosort">
+              <thead><tr><th scope="col">Rank</th>{RANK_SEASONS.map((x) => <th scope="col">{x.title}</th>)}</tr></thead>
+              <tbody>{rankRows(p).map((i) => (
+                <tr><td>{i + 1}</td>{RANK_SEASONS.map((x) => { const e = RANKING[x.name][p][i]; return (
+                  <td>{e && (e.method === 'published' ? <strong>{e.label} (0)</strong>
+                    : <>{e.label} <span class="caveat">{pts(e.gain)}{e.confirmed.length > 0 && <> · <strong>confirmed {e.confirmed.join(', ')}</strong></>}</span></>)}</td>); })}</tr>))}</tbody>
+            </table></div>
+          </>
+        ))}
       </section>
     )}
 

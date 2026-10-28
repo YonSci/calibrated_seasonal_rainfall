@@ -113,6 +113,39 @@ downscaling version 2):
   power transformation for 2; quantile regression, the Leung–Dirichlet calibration and the DRN for one each. Square-root
   MVS and gamma QM are better on average for all 20 targets over 1993–2016.
 
+## Ranking by season (2026-10-28)
+
+`scripts/method_summary.py` also ranks, for each season and product, every method scored for all four months of the
+season by its **skill gain** over the published approach. The skill gain is the score difference as a share of the
+climatology score (percentage points of CRPSS for amounts, RPSS for probabilities). It is averaged over the four months
+and over 1993–2025, each year scored by a model that did not see it (the 33 years of "More statistical power").
+
+- **Published approach:** listed at its rank, with a gain of 0.
+- **Season total:** shown but not ranked, because the neural networks forecast the months only.
+- **Where to find it:** `ranking` in `outputs/method_selection/summary.json`, the tables in `summary.md`, and on the site
+  under *Research › Method selection › Ranking by season*.
+
+The ranking is information, not the selection. The selection is made per month and season total, needs Benjamini–Hochberg
+confirmation, and applies the 1% tie rule. So the top-ranked method is not always the one selected; for example, the pooled
+DRN is selected for FMAM (Jan) March–May although the all-cycles network ranks above it.
+
+As of 2026-10-28 (38 methods), the published approach ranks as follows. The methods above it are better on average, and
+the number in brackets is how many of the four months are confirmed:
+
+| Season | Rainfall amounts: published rank | Top three | Tercile probabilities: published rank | Top three |
+| --- | --- | --- | --- | --- |
+| FMAM (Jan) | 17 of 31 | all-cycles DRN (4), FMAM+ONDJ DRN (4), pooled DRN (3) | 17 of 39 | PCR, FMAM+ONDJ DRN, all-cycles DRN (none confirmed) |
+| FMAM (Feb) | 17 of 30 | all-cycles DRN, FMAM+ONDJ DRN (3), pooled DRN with neighbourhood inputs | 15 of 38 | square-root MVS (1), FMAM+ONDJ DRN (1), pooled DRN with neighbourhood inputs |
+| JJAS (May) | 19 of 30 | pooled DRN with neighbourhood inputs (2), pooled DRN (2), pooled neural EMOS correction (2) | 6 of 38 | PCR, Variance Scaling, square-root MVS (gains ≤ 0.4, none confirmed) |
+| ONDJ (Sep) | 21 of 31 | all-cycles DRN (1), FMAM+ONDJ DRN (1), square-root MVS (1) | 10 of 39 | square-root MVS, Linear Scaling, Local Intensity Scaling (none confirmed) |
+
+**Rainfall amounts:** the neural networks lead in every season, with gains of 3–7 points.
+
+**Tercile probabilities:**
+- No method gains 2 points or more; the largest gain is square-root MVS in FMAM (Feb), +1.7.
+- In JJAS and ONDJ every neural network ranks below the published approach.
+- In JJAS the published approach is in practice the best.
+
 ## More statistical power (2026-10-17)
 
 `scripts/method_summary.py` also reads the same out-of-sample scores three further ways (no refitting):

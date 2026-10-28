@@ -19,6 +19,9 @@ Further evidence from the same out-of-sample scores, no refitting (docs/50, sect
                 the pooled tests and for the 33-year target tests. The selection rule (docs/50) uses Benjamini-Hochberg within
                 each benchmark family (decided 2026-10-17); these are sensitivity analyses.
 
+Ranking by season: every method scored for all four months of a season, ranked by its skill gain over the published
+approach averaged over the months and over 1993-2025 (the 33-year scores above, as a share of the climatology score).
+
   python scripts/method_summary.py      ->  outputs/method_selection/summary.json and summary.md
 """
 import json
@@ -259,6 +262,51 @@ def evidence(rows):
             r['oos33']['tests'] = {k: v for k, v in r['oos33']['tests'].items()}
 
 
+REFERENCE = dict(probabilities='Published: MVS + climatology blend', amounts='Published: MVS-corrected ensemble')
+
+
+def ranking(rows, order):
+    """Per season and product: every method scored for all the season's months, ranked by its skill gain over the published
+    approach averaged over the months, 1993-2025 out of sample (share of the climatology score); the published approach at 0.
+    The season total is reported but not ranked (the neural networks forecast the months only)."""
+    out = {}
+    for cy in CYCLES:
+        total = cy.split('_')[1].upper()
+        months = [t for c, t in order if c == cy and t != total]
+        out[cy] = {}
+        for product in PRODUCTS:
+            entries = [dict(method='published', label=REFERENCE[product], category='Published', gain=0.0,
+                            months={m: 0.0 for m in months}, season=0.0, confirmed=[])]
+            for r in (r for r in rows if r['product'] == product):
+                cells = [(r.get('by_target') or {}).get(f'{SEASON[cy]} {m}') or {} for m in months]
+                if not months or any(c.get('gain_all') is None for c in cells):
+                    continue
+                s = (r.get('by_target') or {}).get(f'{SEASON[cy]} {total}') or {}
+                entries.append(dict(method=r['method'], label=r['label'], category=r['category'],
+                                    gain=float(np.mean([c['gain_all'] for c in cells])),
+                                    months={m: c['gain_all'] for m, c in zip(months, cells)}, season=s.get('gain_all'),
+                                    confirmed=[m for m, c in zip(months, cells) if c.get('confirmed')] + ([total] if s.get('confirmed') else [])))
+            entries.sort(key=lambda e: (-e['gain'], e['method'] != 'published'))
+            out[cy][product] = [dict(rank=i, **e) for i, e in enumerate(entries, 1)]
+    return out
+
+
+def ranking_tables(rank):
+    pct = lambda x: '—' if x is None else f'{100 * x:+.2f}'
+    md = []
+    for product, title in (('probabilities', 'Tercile probabilities'), ('amounts', 'Rainfall amounts')):
+        md += [f'### {title}', '']
+        for cy in CYCLES:
+            md += [f'#### {SEASON[cy]}', '', '| Rank | Method | Category | Skill gain, months | Season total | Confirmed better |',
+                   '| --- | --- | --- | --- | --- | --- |']
+            for e in rank[cy][product]:
+                label = f"**{e['label']}**" if e['method'] == 'published' else e['label']
+                md.append(f"| {e['rank']} | {label} | {e['category']} | {pct(e['gain'])} | {pct(e['season'])} | "
+                          f"{', '.join(e['confirmed']) or '—'} |")
+            md.append('')
+    return '\n'.join(md)
+
+
 def table(rows, product):
     rows = sorted([r for r in rows if r['product'] == product],
                   key=lambda r: (-len(r['confirmed']), -r['training_better'] / max(r['targets'], 1), -r['test_better'] / max(r['test_scored'], 1)))
@@ -285,7 +333,8 @@ def main():
             g = [(ref - m) / c for m, ref, c in zip(sr['m'], sr['ref'], sr['clim']) if c]
             n = sr['n_train']
             cell = r.setdefault('by_target', {}).setdefault(key, dict(cycle=sr['cycle'], target=sr['target']))
-            cell.update(gain_training=float(np.mean(g[:n])) if g[:n] else None, gain_test=float(np.mean(g[n:])) if g[n:] else None)
+            cell.update(gain_training=float(np.mean(g[:n])) if g[:n] else None, gain_test=float(np.mean(g[n:])) if g[n:] else None,
+                        gain_all=float(np.mean(g)) if g else None)
             if (sr['cycle'], sr['target']) not in order:
                 order.append((sr['cycle'], sr['target']))
     targets = {c: cfg.get('targets', []) for c in CYCLES for cfg in [read(f'config/bias_correction/{c}.json') or {}]}
@@ -297,7 +346,8 @@ def main():
     categories = {k: len(v) for k, v in sorted(categories.items(), key=lambda kv: list(CATEGORY.values()).index(kv[0]))}
     data = dict(created_utc=datetime.now(timezone.utc).isoformat(), region=REGION, protocol=__doc__.strip(),
                 categories=categories, methods=sum(categories.values()), multiple_testing=CORRECTION,
-                target_order=[dict(key=f'{SEASON[c]} {t}', cycle=c, season=SEASON[c], target=t) for c, t in order], rows=rows)
+                target_order=[dict(key=f'{SEASON[c]} {t}', cycle=c, season=SEASON[c], target=t) for c, t in order], rows=rows,
+                ranking=ranking(rows, order))
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / 'summary.json').write_text(json.dumps(data, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
     md = ['# Methods against the published approach, all seasons', '',
@@ -305,7 +355,14 @@ def main():
           '(5 per season: the months and the season). Validation: targets of the independent seasons scored after the benchmark '
           '(2026 so far: FMAM from January and February, JJAS from May; ONDJ not yet observed).', '',
           f'{data["methods"]} methods: ' + ', '.join(f'{k.lower()} {n}' for k, n in categories.items()) + '.', '',
-          '## Tercile probabilities', '', table(rows, 'probabilities'), '', '## Rainfall amounts', '', table(rows, 'amounts'), '']
+          '## Tercile probabilities', '', table(rows, 'probabilities'), '', '## Rainfall amounts', '', table(rows, 'amounts'), '',
+          '## Ranking by season', '',
+          'Every method scored for all four months of a season, ranked by its skill gain over the published approach: the '
+          'difference in score as a share of the climatology score (percentage points of CRPSS or RPSS), averaged over the '
+          'months and over 1993-2025, each year scored by a model that did not see it. The season total is shown but not '
+          'ranked (the neural networks forecast the months only). Confirmed better: the months (and season) where the selection '
+          'rule confirms it. The selection itself is per target, with the 1% tie rule (docs/50).', '',
+          ranking_tables(data['ranking'])]
     (OUT / 'summary.md').write_text('\n'.join(md), encoding='utf-8')
     print('\n'.join(md))
 

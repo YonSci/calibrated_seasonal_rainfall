@@ -23,6 +23,9 @@ export const SUMMARY = SUM;
 export const ranked = (product) => (SUM?.rows ?? []).filter((r) => r.product === product).sort((a, b) =>
   b.confirmed.length - a.confirmed.length || b.training_better / b.targets - a.training_better / a.targets
   || b.test_better / Math.max(b.test_scored, 1) - a.test_better / Math.max(a.test_scored, 1));
+// Ranking by season (method_summary.py): per cycle and product, every method by its skill gain over the published approach,
+// averaged over the season's months and 1993-2025; the published approach is in the list at 0.
+export const RANKING = SUM?.ranking ?? null;
 
 // Validation progress of a selection entry ('1 of 3'), as on the method-selection page.
 export const validationText = (e) => (e.validation && e.validation.seasons ? `${e.validation.seasons.length} of ${e.validation.required}` : e.status === 'keep' ? '—' : '0 of 3');
