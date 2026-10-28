@@ -63,11 +63,16 @@ class ThirdStageShadows(unittest.TestCase):
 
     def test_all_cycles_inputs_match_the_benchmark(self):
         import pooled_all_benchmark as pa
-        for i in range(4):                                       # the cycle inputs mean what they meant in the benchmark
-            self.assertEqual({k: v[0] for k, v in ds.cycle_onehot(i, 1).items()}, pa.cycle_onehot(i))
-        self.assertEqual(ds.ALL_CONFIG, 'config/probability_calibration/all_neural_pooled_all.json')
-        names = [Path(read(read(p)['benchmark_config'])['output_root']).name for p in read(ds.ALL_CONFIG)['cycles']]
-        self.assertEqual(names, ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj'])
+        for k in (3, 4):
+            for i in range(k):                                   # the cycle inputs mean what they meant in the benchmark
+                self.assertEqual({c: v[0] for c, v in ds.cycle_onehot(i, 1, k).items()}, pa.cycle_onehot(i, k))
+        for model, cycles in (('drn_pooled_all', ['jan_fmam', 'feb_fmam', 'may_jjas', 'sep_ondj']),
+                              ('drn_fmam_ondj', ['jan_fmam', 'feb_fmam', 'sep_ondj'])):
+            a = read(ds.ALL_CYCLES[model])
+            self.assertEqual(a['models'], [model])
+            names = [Path(read(read(p)['benchmark_config'])['output_root']).name for p in a['cycles']]
+            self.assertEqual(names, cycles)
+            self.assertEqual(read('config/probability_calibration/amount_shadow.json')['members'].get(model), 25)
 
     def test_stack_members_match_the_stacking_benchmark(self):
         import dist_calibration as dc

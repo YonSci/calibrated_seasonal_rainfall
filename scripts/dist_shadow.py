@@ -22,7 +22,8 @@ month refits it.
 The DRN pooled over all four cycles (drn_pooled_all, docs/54 3g) is fitted as the final fit of scripts/pooled_all_benchmark.py:
 the 16 months of the four cycles, each cycle over those of the forecast cycle's reference years it has observations for, with
 the month and the cycle as inputs; each month of this cycle is forecast with its position and the cycle's input. Cycles with
-the same plan share one fit, kept under its input key in outputs/probability_calibration/all/amount_shadow/fits/.
+the same plan share one fit, kept under its input key in outputs/probability_calibration/all/amount_shadow/fits/. The DRN pooled
+over the FMAM and ONDJ cycles (drn_fmam_ondj, docs/54 3h) is the same with the 12 months of its three cycles (no JJAS shadow).
 
   python scripts/dist_shadow.py --cycle config/cycles/feb_2026_fmam.json
 """
@@ -60,8 +61,10 @@ CODE = ['scripts/dist_shadow.py', 'scripts/dist_calibration.py', 'scripts/neural
         'scripts/common.py', 'scripts/cycle.py']
 LEVELS = (.1, .5, .9)
 NO_SHADOW = {}                                          # models without a shadow path: {model: reason}
-ALL_CYCLES = {'drn_pooled_all'}                         # one fit for the 16 months of the four cycles (all_cycles_fit)
-ALL_CONFIG = 'config/probability_calibration/all_neural_pooled_all.json'   # the cycles in the order of the cycle inputs
+# one fit for the months of several cycles (all_cycles_fit): the benchmark configuration, which lists the cycles in the order
+# of the cycle inputs
+ALL_CYCLES = {'drn_pooled_all': 'config/probability_calibration/all_neural_pooled_all.json',
+              'drn_fmam_ondj': 'config/probability_calibration/all_neural_fmam_ondj.json'}
 ALL_FITS = 'outputs/probability_calibration/all/amount_shadow/fits'       # kept on disk: one fit serves several cycles
 POOLED = {'drn_pooled', 'drn_pooled_residual', 'drn_pooled_nbhd'}    # one fit for the months of a cycle (pooled_fit)
 NEIGHBOURHOOD = {'drn_pooled_nbhd'}                     # with neighbourhood inputs (dist_benchmark.add_neighbourhood)
@@ -72,7 +75,8 @@ _POOLED_FITS = {}
 SHORT = {'emos_csg': 'EMOS', 'extended_logistic': 'extended logistic', 'quantile_regression': 'quantile regression', 'bjp': 'BJP',
          'bma_precipitation': 'BMA', 'quantile_regression_forest': 'QRF', 'drn_csg': 'DRN', 'drn_sst': 'DRN + SST',
          'drn_emos_residual': 'neural EMOS correction', 'drn_pooled': 'pooled DRN', 'drn_pooled_residual': 'pooled neural EMOS correction',
-         'drn_pooled_nbhd': 'pooled DRN + neighbourhood', 'drn_pooled_all': 'DRN pooled over all cycles', 'stack': 'pool of EMOS, QR and the DRN'}
+         'drn_pooled_nbhd': 'pooled DRN + neighbourhood', 'drn_pooled_all': 'DRN pooled over all cycles',
+         'drn_fmam_ondj': 'DRN pooled over FMAM and ONDJ', 'stack': 'pool of EMOS, QR and the DRN'}
 POSITION_COLOURS = ['#a6611a', '#d9d9d9', '#1a9641']                    # below the interval, inside, above
 
 
@@ -133,8 +137,8 @@ def onehot(i, n):
     return {f'target_{j + 1}': np.full(n, float(j == i)) for j in range(4)}
 
 
-def cycle_onehot(i, n):
-    return {f'cycle_{j + 1}': np.full(n, float(j == i)) for j in range(4)}
+def cycle_onehot(i, n, k=4):
+    return {f'cycle_{j + 1}': np.full(n, float(j == i)) for j in range(k)}
 
 
 def pooled_fit(cycle_path, scfg, entry, model):
@@ -174,7 +178,7 @@ def pooled_fit(cycle_path, scfg, entry, model):
 
 
 def all_cycles_plan(cycle_path, scfg, model):
-    """The samples of the all-cycles network: the four cycles in the order of its benchmark (pooled_all_benchmark.py, the
+    """The samples of an all-cycles network: its cycles in the order of its benchmark (pooled_all_benchmark.py, the
     cycle inputs), each with its months and those of the forecast cycle's reference years it has observations for (ONDJ's
     observations end a year before FMAM's: its season ends in January), and a key over everything the fit reads."""
     from bias_benchmark import target_config, sha256
@@ -182,10 +186,10 @@ def all_cycles_plan(cycle_path, scfg, model):
     ref = list(range(cycle['reference_years'][0], cycle['reference_years'][1] + 1))
     root = ROOT / cycle.get('processed_root', 'data/processed')
     h = hashlib.sha256(json.dumps(dict(model=model, members=(scfg.get('members') or {}).get(model), reference=ref), sort_keys=True).encode())
-    for f in [*CODE, ALL_CONFIG]:
+    for f in [*CODE, ALL_CYCLES[model]]:
         h.update(f.encode() + sha256(ROOT / f).encode())
     plan = []
-    for p in read(ALL_CONFIG)['cycles']:
+    for p in read(ALL_CYCLES[model])['cycles']:
         bpath = read(p)['benchmark_config']
         bench = read(bpath)
         project = load_config(bench['project_config'])
@@ -203,7 +207,7 @@ def all_cycles_plan(cycle_path, scfg, model):
 
 
 def all_cycles_fit(cycle_path, scfg, model):
-    """The all-cycles DRN (docs/54 3g), fitted as the final fit of its benchmark: the samples of the 16 months of the four
+    """An all-cycles DRN (docs/54 3g, 3h), fitted as the final fit of its benchmark: the samples of the months of its
     cycles over their reference years, with the month position and the cycle as inputs and whole years held out for early
     stopping. Cycles with the same plan (the same reference years) share one fit, kept on disk under its key."""
     plan, key = all_cycles_plan(cycle_path, scfg, model)
@@ -230,7 +234,7 @@ def all_cycles_fit(cycle_path, scfg, model):
             glat, glon = np.meshgrid(lat, lon, indexing='ij')
             S, st = fold(models, obs, c['years'], idx, cell_area(lat, lon)[idx], coords=(glat.ravel()[idx], glon.ravel()[idx]))
             n = len(S['y'])
-            S.update(onehot(i, n), **cycle_onehot(ci, n),
+            S.update(onehot(i, n), **cycle_onehot(ci, n, len(plan)),
                      year_index=np.repeat([years.index(y) for y in c['years']], int(st['valid'].sum())))
             parts.append(S)
     keys = [k for k in parts[0] if k not in ('n_years', 'members', 'thresholds') and all(k in S for S in parts)]
@@ -286,12 +290,14 @@ def run_target(cycle_path, scfg, entry, target):
 
     def one(key):                                            # one model's fit and distribution for this target
         mdl = dc.MODELS[key]
-        if key in ALL_CYCLES:                                # one fit for the 16 months of the four cycles
+        if key in ALL_CYCLES:                                # one fit for the months of several cycles
             fit, plan = all_cycles_fit(cycle_path, scfg, key)
+            if entry['name'] not in [c['name'] for c in plan]:
+                raise ValueError(f"{key} is not fitted for {entry['name']} (cycles: {', '.join(c['name'] for c in plan)})")
             ci = [c['name'] for c in plan].index(entry['name'])
             if plan[ci]['months'] != months_of(cycle, project):     # the month inputs must mean what they meant in the benchmark
                 raise ValueError(f"{cycle_path}: months {months_of(cycle, project)} differ from the benchmark order {plan[ci]['months']}")
-            return dict(fit, years={c['name']: c['years'] for c in plan}), mdl.predict(dict(F, **cycle_onehot(ci, n)), fit)
+            return dict(fit, years={c['name']: c['years'] for c in plan}), mdl.predict(dict(F, **cycle_onehot(ci, n, len(plan))), fit)
         if key in POOLED:                                    # one fit for the cycle's months
             fit = pooled_fit(cycle_path, scfg, entry, key)
             G = dict(F, **add_neighbourhood(F, neighbourhood_matrices(idx, len(lon)))) if key in NEIGHBOURHOOD else F
